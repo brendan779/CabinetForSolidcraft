@@ -2,6 +2,7 @@ import AppKit
 import Foundation
 import Observation
 import SwiftUI
+import UniformTypeIdentifiers
 
 /// One cabinet in the project. `json` is the Rust core's cabinet JSON, the single source of truth;
 /// the computed properties read and write it.
@@ -197,15 +198,32 @@ final class ProjectModel {
     let port: UInt16 = 7878
 
     private var builds: [String: BuildSummary] = [:]
+    /// The window's undo manager. Every edit registers its reverse here, which is also how the
+    /// document knows it has changes to save.
+    @ObservationIgnored weak var undoManager: UndoManager?
+    /// The cabinets as of the last registered edit: what undo goes back to.
+    @ObservationIgnored private var committed: [CabinetDoc] = []
+    /// Receives the job's file contents after every edit.
+    @ObservationIgnored var onEdit: (@MainActor (Data) -> Void)?
 
+    /// A new job: the cabinets of the job the app kept before it had documents, once, or a short
+    /// sample run.
     init() {
-        load()
-        if cabinets.isEmpty {
-            add(kind: "base")
-            add(kind: "drawer_bank")
-            add(kind: "base")
-            selection = cabinets.first?.id
+        if let saved = Self.takeLegacyJob() {
+            cabinets = saved.cabinets.filter { (try? CabinetStudio.build(cabinetJson: $0.json)) != nil }
         }
+        if cabinets.isEmpty {
+            for kind in ["base", "drawer_bank", "base"] { add(kind: kind) }
+        }
+        selection = cabinets.first?.id
+        committed = cabinets
+    }
+
+    init(saved: Saved) {
+        jobName = saved.jobName
+        cabinets = saved.cabinets.filter { (try? CabinetStudio.build(cabinetJson: $0.json)) != nil }
+        selection = cabinets.first?.id
+        committed = cabinets
     }
 
     var selected: CabinetDoc? {
@@ -453,29 +471,47 @@ final class ProjectModel {
 
     // MARK: Persistence
 
-    private var saveURL: URL {
-        let dir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
-            .appendingPathComponent("CabinetStudio", isDirectory: true)
-        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
-        return dir.appendingPathComponent("project.json")
-    }
-
-    private struct Saved: Codable {
+    struct Saved: Codable, Sendable {
         var jobName: String
         var cabinets: [CabinetDoc]
     }
 
+    /// Registers the edit since the last one with the undo manager, which marks the document
+    /// edited; the system saves it.
     func save() {
-        let data = try? JSONEncoder().encode(Saved(jobName: jobName, cabinets: cabinets))
-        try? data?.write(to: saveURL, options: .atomic)
+        guard cabinets != committed else { return }
+        let before = committed
+        committed = cabinets
+        undoManager?.registerUndo(withTarget: self) { model in
+            MainActor.assumeIsolated { model.restore(before) }
+        }
+        if let data = try? encoded() { onEdit?(data) }
     }
 
-    private func load() {
-        guard let data = try? Data(contentsOf: saveURL),
-              let saved = try? JSONDecoder().decode(Saved.self, from: data) else { return }
-        jobName = saved.jobName
-        cabinets = saved.cabinets.filter { (try? CabinetStudio.build(cabinetJson: $0.json)) != nil }
-        selection = cabinets.first?.id
+    private func restore(_ cabs: [CabinetDoc]) {
+        withAnimation(.snappy) {
+            cabinets = cabs
+            if !cabs.contains(where: { $0.id == selection }) { selection = cabs.first?.id }
+        }
+        changed()
+    }
+
+    func encoded() throws -> Data {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+        return try encoder.encode(Saved(jobName: jobName, cabinets: cabinets))
+    }
+
+    /// The single job file the app kept in Application Support before jobs were documents. It is
+    /// read into the first new job and then renamed, so it is imported once.
+    private static func takeLegacyJob() -> Saved? {
+        let dir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+            .appendingPathComponent("CabinetStudio", isDirectory: true)
+        let url = dir.appendingPathComponent("project.json")
+        guard let data = try? Data(contentsOf: url),
+              let saved = try? JSONDecoder().decode(Saved.self, from: data) else { return nil }
+        try? FileManager.default.moveItem(at: url, to: dir.appendingPathComponent("project-imported.json"))
+        return saved
     }
 
     /// The bundled board catalog.

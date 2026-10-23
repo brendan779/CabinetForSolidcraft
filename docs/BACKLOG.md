@@ -140,8 +140,8 @@ committed: they are the brands' copyright. `preview_colour` is an approximation.
 | id | status | size | task | done when |
 |---|---|---|---|---|
 | UI-1 | done (initial) | M | Split view: sidebar, RealityKit viewport, inspector with visual pickers, cut list table, sheet viewer, board library | app runs |
-| UI-2 | todo | M | Document-based app (`.cabinetjob` files, autosave, versions, recent jobs) replacing the single Application Support file | File > New/Open/Save work |
-| UI-3 | todo | M | Undo/redo for every edit (UndoManager) | ⌘Z reverts a picker change |
+| UI-2 | done (SHA) | M | Document-based app (`.cabinetjob` files, autosave, versions, recent jobs) replacing the single Application Support file | File > New/Open/Save work |
+| UI-3 | done (SHA) | M | Undo/redo for every edit (UndoManager) | ⌘Z reverts a picker change |
 | UI-4 | todo | M | Viewport: selection outline/glow, hover highlight, part tooltip, exploded slider, section view, door open animation | each item visible in a screenshot |
 | UI-5 | todo | M | Viewport materials from board preview colours; woodgrain procedural texture for grained decors | oak fronts look like oak |
 | UI-6 | todo | S | Status dot visible in the SolidCraft toolbar menu (currently hidden by the menu label) | screenshot |
@@ -214,3 +214,4 @@ Agents append one line per session: date, items touched, outcome.
 - 2026-10-23 (night) — BLUM-8 done: `opening` standard option (handles / TIP-ON / SERVO-DRIVE) with drawn picker tiles; TIP-ON unit per door (2 over 1200 mm) and per drawer, SERVO-DRIVE unit per drawer + power supply per cabinet, doors under SERVO-DRIVE fall back to TIP-ON with a warning. Generic item ids until Blum articles are catalogued. Owner: TIP-ON doors assume no-spring hinges; the hinge row does not change yet.
 - 2026-10-24 (night) — BACKLOG rows from the first night now carry commit SHAs instead of the branch name.
 - 2026-10-24 (night) — BLUM-10 done: `cabinet_core::standins` draws a hinge (cup in its bore, arm, plate on its two holes) and per drawer a runner + box side on each inside face, from the parts and machining around them (proportions drawn, not Blum data). Emitted at Manufacturing/Exact as one grey body each (`B01.Hinge1`, `D01.Runner1L`); tested never to enter a panel across kinds × overlays, and headless (bounds match). Sample run still ~7 s headless. Picture: docs/images/blum10-stand-ins.png.
+- 2026-10-24 (night) — UI-2 + UI-3 done: DocumentGroup over `.cabinetjob` files (exported UTType, JSON: job name + cabinets), so File › New/Open/Save/Open Recent, autosave and Browse All Versions come from the system; the old Application Support project.json is imported into the first new job, then renamed. Every edit registers its reverse with the window's UndoManager (⌘Z/⇧⌘Z), which is also what marks the job edited. Menu commands follow the key window. Not seen on screen here (no Screen Recording): owner to try New, Save, ⌘Z on a picker.
