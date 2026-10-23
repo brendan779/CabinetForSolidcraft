@@ -52,9 +52,9 @@ Priorities: **P0** blocks most other work · **P1** MVP · **P2** commercial par
 | CORE-5 | needs-human (built 4bc5e17. Question: should a sink cabinet drop its bottom front rail, its back rail, or both? Today it drops only the back top rail, where the bowl sits) | M | Sink cabinet (no bottom rail, back cut-out option, waterproof base liner option) | builds; liner appears in BOM |
 | CORE-6 | done (ed3f43a) | M | Fillers, end panels and scribes as parts of a run | a run with an end panel each side builds |
 | CORE-7 | done (43ead80) | M | Runs: shared construction standard per project, per-cabinet overrides only | project JSON stores one standard + overrides |
-| CORE-8 | needs-human (owner is collecting the documents; needs the runner deductions as catalog data with a source: BLUM-1 schema first, then BLUM-6) | M | Drawer boxes for wood drawers on runners (sides, front, back, bottom) from Blum MOVENTO/TANDEM rules: inside width = opening − 42, length = NL − 10 (verify against Blum TD) | parts + cut list for a 3-drawer bank |
+| CORE-8 | todo (unblocked by BLUM-6: wood drawer box parts from its rules) | M | Drawer boxes for wood drawers on runners (sides, front, back, bottom) from Blum MOVENTO/TANDEM rules: inside width = opening − 42, length = NL − 10 (verify against Blum TD) | parts + cut list for a 3-drawer bank |
 | CORE-9 | done (6b515ee) | S | Material per part: carcass board, front board, back board from the catalog; thickness follows the board | changing the front board changes door thickness |
-| CORE-10 | needs-human (owner is collecting the documents; cranked-hinge and plate offsets are Blum data: BLUM-2, the owner's TD sheets) | M | Half-overlay and inset hinge geometry (cranked hinges, plate offsets) | test per overlay type |
+| CORE-10 | todo (unblocked: half-overlay and inset geometry from the hinge planning pages) | M | Half-overlay and inset hinge geometry (cranked hinges, plate offsets) | test per overlay type |
 | CORE-11 | done (e3e3ad1) | S | Unit display: metric with optional imperial display in the app | toggle in preferences |
 | CORE-12 | done (cee783c) | M | Collision checker as a module: every bore/slot vs every other op and vs panel edges, with warnings | test suite over all kinds × standards with zero clashes |
 
@@ -79,17 +79,27 @@ Priorities: **P0** blocks most other work · **P1** MVP · **P2** commercial par
 | id | status | size | task | done when |
 |---|---|---|---|---|
 | BLUM-1 | done (56a5858) | M | Hardware catalog schema (`catalog/hardware/*.json`): article, family, variant, parameters, drilling pattern, source, verified | schema + loader + tests |
-| BLUM-2 | needs-human (Blum TD sheets) | M | CLIP top BLUMOTION 110° data: cup Ø35, depth, boring distance range, plate drilling (cruciform/wing, 0/3/9 mm), overlay tables | rows verified against the Blum document; build.rs constants replaced by catalog data |
-| BLUM-3 | needs-human (owner is collecting the documents; Blum's hinge/plate selection tables: BLUM-2) | M | Hinge selection rule: overlay + door thickness → hinge + plate article | unit test table |
-| BLUM-4 | needs-human (owner is collecting the documents; LEGRABOX dimensions from Blum's documents: BLUM-2-style owner data) | M | LEGRABOX: nominal lengths, side heights (N/M/K/C/F), front fixing drilling, bottom/back cut sizes | drawer bank with LEGRABOX gives bottom and back parts in cut list |
-| BLUM-5 | needs-human (owner is collecting the documents; MERIVOBOX/TANDEMBOX data from Blum's documents; and BLUM-4's model first) | M | MERIVOBOX and TANDEMBOX as alternatives | picker shows 3 box systems |
-| BLUM-6 | todo | M | MOVENTO/TANDEM runners for wood drawers (see CORE-8) | — |
+| BLUM-2 | todo (unblocked: catalogue printed pp. 72–149 hinges, 150–157 plates, 157–161 accessories; part numbers per boss and spring, TB table by FA × MD, cup, INSERTA pattern, gap F, protrusion; replace the VERIFY constants in build.rs) | M | CLIP top BLUMOTION 110° data: cup Ø35, depth, boring distance range, plate drilling (cruciform/wing, 0/3/9 mm), overlay tables | rows verified against the Blum document; build.rs constants replaced by catalog data |
+| BLUM-3 | todo (unblocked: overlay + door thickness + angle → hinge + plate part numbers, tested table) | M | Hinge selection rule: overlay + door thickness → hinge + plate article | unit test table |
+| BLUM-4 | todo (unblocked: LEGRABOX printed 196–249; start with drawer N/M/K and inner drawer M/K) | M | LEGRABOX: nominal lengths, side heights (N/M/K/C/F), front fixing drilling, bottom/back cut sizes | drawer bank with LEGRABOX gives bottom and back parts in cut list |
+| BLUM-5 | todo (unblocked: MERIVOBOX 250–289, TANDEMBOX antaro 290–335, plus 336, METABOX 338) | M | MERIVOBOX and TANDEMBOX as alternatives | picker shows 3 box systems |
+| BLUM-6 | todo (unblocked: MOVENTO 410–429, TANDEM 430–461; inside width/length rules, part numbers by length and load, System 32 drilling) | M | MOVENTO/TANDEM runners for wood drawers (see CORE-8) | — |
 | BLUM-7 | split → BLUM-7a, BLUM-7b | L | AVENTOS lift systems (HK top, HK-S, HK-XS, HF, HS, HL): power factor = f(front height, weight) → article | split |
-| BLUM-7a | todo | M | Lift-system model: a wall cabinet front opening upward (`opening: lift`), front height and weight from the board catalog (density × area), power factor computed per Blum's formula, and the AVENTOS family chosen by front height; picker drawing per family | test: front weight and power factor for a 600 × 360 front |
-| BLUM-7b | needs-human (owner is collecting the documents; AVENTOS power-factor ranges and drilling per family from Blum's documents: owner data) | M | AVENTOS HK top, HK-S, HK-XS, HF, HS, HL catalog rows (articles by power-factor range, drilling) | hardware rows with sources; BLUM-7a picks articles from them |
+| BLUM-7a | todo (unblocked: AVENTOS printed 11–69; HF top (bi-fold) first, then HK top, HKi, HS, HL, HK-S, HK-XS) | M | Lift-system model: a wall cabinet front opening upward (`opening: lift`), front height and weight from the board catalog (density × area), power factor computed per Blum's formula, and the AVENTOS family chosen by front height; picker drawing per family | test: front weight and power factor for a 600 × 360 front |
+| BLUM-7b | todo (unblocked: power-factor tables → lift part numbers and drilling, one sub-row per family) | M | AVENTOS HK top, HK-S, HK-XS, HF, HS, HL catalog rows (articles by power-factor range, drilling) | hardware rows with sources; BLUM-7a picks articles from them |
 | BLUM-8 | done (05f6929) | S | TIP-ON / SERVO-DRIVE options for handleless fronts | option + BOM |
-| BLUM-9 | 👤 needs-human | M | Import the owner's Blum STEP files from `vendor-cad/blum/` as linked components (`component.insert_design` after STEP → .solidcraft conversion) in place of stand-ins | a hinge renders with the real Blum model |
+| BLUM-9 | 👤 needs-human (until STEP files exist in vendor-cad/blum/; see BLUM-CAD-1) | M | Import the owner's Blum STEP files from `vendor-cad/blum/` as linked components (`component.insert_design` after STEP → .solidcraft conversion) in place of stand-ins | a hinge renders with the real Blum model |
 | BLUM-10 | done (fbb3804) | M | Parametric stand-in models (hinge cup + arm, plate, runner, box side) emitted as bodies | visible in Manufacturing detail |
+
+| BLUM-11 | todo | S | Facts-only `docs/blum/webcodes.csv` (code, product, printed pages); no catalogue text beyond product names | committed |
+| BLUM-12 | todo | M | BLUMOTION for doors (printed 176–189) and TIP-ON for doors (190–193); TIP-ON doors use unsprung hinges (finishes BLUM-8's hinge row) | option + BOM rows with part numbers |
+| BLUM-13 | todo | M | SERVO-DRIVE, TIP-ON BLUMOTION and TIP-ON for box systems and runners (printed 362–408, 462–531) | options + BOM rows |
+| BLUM-14 | todo | S | Wall hanging bracket (598), cabinet connectors (599), EXPANDO T (596) for CORE-3's hangers | part numbers + drilling |
+| BLUM-15 | todo | S | General information and System 32 definitions (710–731) as the reference for our constants; record any constant in code that disagrees | list in docs/blum/ |
+| BLUM-16 | todo | M | Later: REVEGO (534–540), AMBIA-LINE / ORGA-LINE (542–569), SPACE STEP (586), CABLOXX (594) | — |
+| BLUM-CAD-1 | needs-human (prep is agent work) | S | `docs/blum/cad-shopping-list.md`: short prioritised list of configurations the app uses (default hinges + plates, LEGRABOX N/M/K, MOVENTO/TANDEM common lengths, AVENTOS HF top): web code, configurator choices, expected part numbers, file name `vendor-cad/blum/<part-no>.step`, for the owner to download from E-SERVICES | list committed; owner downloads |
+
+All Blum rows: source = Blum Catalogue and technical manual 2024/2025 in `vendor-cad/blum/catalogue/` (local only; PDF page = printed + 4; web codes in its webcodes.csv); records get `source.url` "Blum Catalogue and technical manual 2024/2025, p.<printed>, web code <code>", `document_date` "2024/2025", `verified: false`. Never commit catalogue text, pages or drawings. BLUM-10's stand-in dimensions should move to this data.
 
 ### Hardware: Häfele and lighting
 
@@ -246,3 +256,4 @@ Agents append one line per session: date, items touched, outcome.
 - 2026-10-24 (night) — DATA-7 done: on top of unique ids and resolving tapes, `Catalog::validate` now refuses any board or tape whose source lacks a URL, document date or retrieval date; check.sh (and CI) load the repository catalog through it.
 - 2026-10-24 (night) — PLG-3 checked: SolidCraft still has no plugin runtime (#1221 open, draft #4980 open, #4330 open; v0.20.0 latest). FEASIBILITY_PLAN updated.
 - 2026-10-24 (night) — Owner's answers to PR #1 recorded: CORE-4b unblocked (bi-fold doors; hinge article split to CORE-4d), supplier-number rows stay needs-human, JOIN-2 accepted, CORE-5 question restated, JOIN-8 (Domino) and JOIN-9 (dowels) added. Not built: the run hit its usage limit.
+- 2026-10-24 (night) — Blum catalogue arrived (owner-supplied, local only): BLUM-2/3/4/5/6/7a/7b, CORE-8 and CORE-10 unblocked; BLUM-11..16 and BLUM-CAD-1 added. Order for the next run: BLUM-11, BLUM-2, BLUM-3, CORE-10, BLUM-4, BLUM-6/CORE-8, BLUM-7 HF top, BLUM-CAD-1. Not started: usage limit.
