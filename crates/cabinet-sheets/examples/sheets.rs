@@ -44,8 +44,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         &rows,
     );
     std::fs::write(format!("{out}/hardware.pdf"), bom)?;
+    let labels = cabinet_sheets::labels::labels_pdf(
+        std::slice::from_ref(&list),
+        |_| "Polytec Classic White Texture 16 MR MDF".into(),
+        "Sample job",
+    );
+    std::fs::write(format!("{out}/labels.pdf"), labels)?;
     println!(
-        "{} sheets, sample.pdf and hardware.pdf in {out}",
+        "{} sheets, sample.pdf, hardware.pdf and labels.pdf in {out}",
         list.parts.len()
     );
     Ok(())

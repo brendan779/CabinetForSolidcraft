@@ -531,21 +531,26 @@ pub fn cut_sheet_svg(items: JobItems, part_name: String, job: String) -> Result<
     Ok(cabinet_sheets::part_sheet(&list, part, &board, &job))
 }
 
+/// A 62 mm label per part, each with a QR code of the part's name.
+#[uniffi::export]
+pub fn part_labels_pdf(items: JobItems, job: String) -> Result<Vec<u8>, CoreError> {
+    let lists: Vec<PartList> = job_lists(&items)?.into_iter().map(|(l, _)| l).collect();
+    Ok(cabinet_sheets::labels::labels_pdf(&lists, board_name, &job))
+}
+
+fn board_name(p: &cabinet_core::Part) -> String {
+    if p.board.is_empty() {
+        "Generic".to_string()
+    } else {
+        p.board.clone()
+    }
+}
+
 /// Every part's cut sheet in one PDF, after a cover and an index.
 #[uniffi::export]
 pub fn cut_sheets_pdf(items: JobItems, job: String) -> Result<Vec<u8>, CoreError> {
     let lists: Vec<PartList> = job_lists(&items)?.into_iter().map(|(l, _)| l).collect();
-    Ok(cabinet_sheets::pdf::job_pdf(
-        &lists,
-        |p| {
-            if p.board.is_empty() {
-                "Generic".to_string()
-            } else {
-                p.board.clone()
-            }
-        },
-        &job,
-    ))
+    Ok(cabinet_sheets::pdf::job_pdf(&lists, board_name, &job))
 }
 
 /// One line of the hardware bill.

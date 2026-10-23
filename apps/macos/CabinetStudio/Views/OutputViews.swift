@@ -161,7 +161,7 @@ struct DataDocument: FileDocument {
 struct CutSheetsView: View {
     @Environment(ProjectModel.self) private var project
     @State private var part: String?
-    @State private var pdf: DataDocument?
+    @State private var pdf: (doc: DataDocument, name: String)?
 
     var body: some View {
         HSplitView {
@@ -187,10 +187,20 @@ struct CutSheetsView: View {
             .frame(minWidth: 500, maxWidth: .infinity, maxHeight: .infinity)
         }
         .toolbar {
-            ToolbarItem {
+            ToolbarItemGroup {
+                Button("Labels…", systemImage: "qrcode") {
+                    do {
+                        pdf = (DataDocument(data: try partLabelsPdf(items: project.jobItems, job: project.jobName)),
+                               "\(project.jobName) labels")
+                    } catch {
+                        project.lastError = "Could not make the labels: \(error)"
+                    }
+                }
+                .help("A 62 × 40 mm label per part with a QR code of its name, for a 62 mm label printer")
                 Button("Export PDF…", systemImage: "doc.richtext") {
                     do {
-                        pdf = DataDocument(data: try cutSheetsPdf(items: project.jobItems, job: project.jobName))
+                        pdf = (DataDocument(data: try cutSheetsPdf(items: project.jobItems, job: project.jobName)),
+                               "\(project.jobName) cut sheets")
                     } catch {
                         project.lastError = "Could not make the PDF: \(error)"
                     }
@@ -199,8 +209,8 @@ struct CutSheetsView: View {
             }
         }
         .fileExporter(isPresented: Binding(get: { pdf != nil }, set: { if !$0 { pdf = nil } }),
-                      document: pdf, contentType: .pdf,
-                      defaultFilename: "\(project.jobName) cut sheets") { result in
+                      document: pdf?.doc, contentType: .pdf,
+                      defaultFilename: pdf?.name ?? "") { result in
             if case .success(let url) = result { project.status = "Saved \(url.lastPathComponent)" }
         }
     }

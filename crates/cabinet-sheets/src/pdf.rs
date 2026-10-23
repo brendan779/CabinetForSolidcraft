@@ -209,7 +209,12 @@ const PT: f64 = 72.0 / 25.4;
 /// The SVG's drawing as a PDF content stream, in the SVG's own millimetre coordinates (the stream
 /// starts by scaling to millimetres and flipping y to point down).
 pub fn svg_to_ops(svg: &str) -> String {
-    let mut ops = format!("{PT:.6} 0 0 {:.6} 0 {:.3} cm\n", -PT, PAGE_H * PT);
+    page_ops(svg, PAGE_H)
+}
+
+/// As [`svg_to_ops`] for a page `height` mm tall.
+pub(crate) fn page_ops(svg: &str, height: f64) -> String {
+    let mut ops = format!("{PT:.6} 0 0 {:.6} 0 {:.3} cm\n", -PT, height * PT);
     for line in svg.lines() {
         let line = line.trim();
         let Some(tag) = line
@@ -463,6 +468,7 @@ fn win_ansi(s: &str) -> Vec<u8> {
             '●' | '•' => 0x95,
             '▬' | '—' => 0x97,
             '–' => 0x96,
+            '…' => 0x85,
             '″' => b'"',
             '′' => b'\'',
             c if (c as u32) >= 0xa0 && (c as u32) <= 0xff => c as u32 as u8,
@@ -504,6 +510,7 @@ fn helvetica_width(b: u8) -> f64 {
     ];
     match b {
         32..=126 => ASCII[(b - 32) as usize] as f64,
+        0x85 => 1000.0,
         0x95 => 350.0,
         0x96 => 556.0,
         0x97 => 1000.0,
@@ -517,6 +524,11 @@ fn helvetica_width(b: u8) -> f64 {
 
 /// A PDF file of A4 landscape pages, one content stream each, with Helvetica as `/F1`.
 fn write_pdf(pages: &[String]) -> Vec<u8> {
+    write_pdf_sized(pages, PAGE_W, PAGE_H)
+}
+
+/// A PDF file of `width` × `height` mm pages.
+pub(crate) fn write_pdf_sized(pages: &[String], width: f64, height: f64) -> Vec<u8> {
     let n = pages.len();
     // Objects: 1 catalog, 2 page tree, 3 font, then per page its page object and its content.
     let mut objects: Vec<String> = vec![
@@ -533,8 +545,8 @@ fn write_pdf(pages: &[String]) -> Vec<u8> {
     for (i, content) in pages.iter().enumerate() {
         objects.push(format!(
             "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 {:.2} {:.2}] /Resources << /Font << /F1 3 0 R >> >> /Contents {} 0 R >>",
-            PAGE_W * PT,
-            PAGE_H * PT,
+            width * PT,
+            height * PT,
             5 + 2 * i
         ));
         objects.push(format!(
