@@ -3,7 +3,7 @@
 
 use cabinet_core::cutlist::{cut_list, to_csv};
 use cabinet_core::model::BoardSlot;
-use cabinet_core::{Cabinet, CabinetKind, build_cabinet};
+use cabinet_core::{Cabinet, CabinetKind, ConstructionStandard, Project, build_cabinet};
 use solidcraft_bridge::boxes::{cuboid, selected_bodies};
 use solidcraft_bridge::{Client, Detail, find_existing, replace_cabinet};
 
@@ -139,6 +139,52 @@ pub fn assign_board(
         .ok_or_else(|| invalid(format!("no board {board_id} in the catalog")))?;
     cab.standard.set_board(slot, &board.id, board.thickness);
     serde_json::to_string(&cab).map_err(invalid)
+}
+
+/// A job as the app holds it: the project standard and every cabinet with its standard resolved.
+#[derive(uniffi::Record)]
+pub struct ProjectRecord {
+    pub name: String,
+    pub standard_json: String,
+    pub cabinets_json: Vec<String>,
+    /// Ids of cabinets kept where they were drawn in SolidCraft.
+    pub placed: Vec<String>,
+}
+
+/// The job file: `standard_json` once, each cabinet with only the fields it overrides.
+#[uniffi::export]
+pub fn project_json(
+    name: String,
+    standard_json: String,
+    cabinets_json: Vec<String>,
+    placed: Vec<String>,
+) -> Result<String, CoreError> {
+    let standard: ConstructionStandard = serde_json::from_str(&standard_json).map_err(invalid)?;
+    let cabinets = cabinets_json
+        .iter()
+        .map(|c| parse(c))
+        .collect::<Result<Vec<_>, _>>()?;
+    let mut p = Project::new(name, standard, &cabinets).map_err(invalid)?;
+    p.placed = placed;
+    serde_json::to_string_pretty(&p).map_err(invalid)
+}
+
+/// Reads a job file written by [`project_json`].
+#[uniffi::export]
+pub fn open_project(json: String) -> Result<ProjectRecord, CoreError> {
+    let p: Project = serde_json::from_str(&json).map_err(invalid)?;
+    let cabinets_json = p
+        .resolved()
+        .map_err(invalid)?
+        .iter()
+        .map(|c| serde_json::to_string(c).map_err(invalid))
+        .collect::<Result<_, _>>()?;
+    Ok(ProjectRecord {
+        name: p.name,
+        standard_json: serde_json::to_string(&p.standard).map_err(invalid)?,
+        cabinets_json,
+        placed: p.placed,
+    })
 }
 
 #[uniffi::export]
@@ -535,5 +581,35 @@ mod tests {
         assert_eq!(next_id(CabinetKind::Base, &taken), "B03");
         assert_eq!(next_id(CabinetKind::Tall, &taken), "T02");
         assert_eq!(next_id(CabinetKind::Wall, &taken), "W01");
+    }
+
+    #[test]
+    fn a_job_file_round_trips_its_cabinets_standard_and_placed_ids() {
+        let base = new_cabinet("B01".into(), "base".into()).unwrap();
+        let wall = set_standard_option(
+            new_cabinet("W01".into(), "wall".into()).unwrap(),
+            "back".into(),
+            "applied".into(),
+        )
+        .unwrap();
+        let standard = serde_json::to_string(&parse(&base).unwrap().standard).unwrap();
+        let file = project_json(
+            "Kitchen".into(),
+            standard.clone(),
+            vec![base.clone(), wall.clone()],
+            vec!["W01".into()],
+        )
+        .unwrap();
+        let v: serde_json::Value = serde_json::from_str(&file).unwrap();
+        assert_eq!(
+            v["cabinets"][1]["overrides"],
+            serde_json::json!({ "back": "applied" })
+        );
+        let p = open_project(file).unwrap();
+        assert_eq!(p.name, "Kitchen");
+        assert_eq!(p.standard_json, standard);
+        assert_eq!(p.placed, vec!["W01".to_string()]);
+        let cabs: Vec<Cabinet> = p.cabinets_json.iter().map(|c| parse(c).unwrap()).collect();
+        assert_eq!(cabs, vec![parse(&base).unwrap(), parse(&wall).unwrap()]);
     }
 }

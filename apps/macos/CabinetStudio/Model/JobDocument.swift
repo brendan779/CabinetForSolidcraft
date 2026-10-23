@@ -15,7 +15,7 @@ final class JobDocument: ReferenceFileDocument, Sendable {
     static var writableContentTypes: [UTType] { [.cabinetJob] }
 
     /// What the file held when it was opened; `nil` for a new job.
-    let opened: ProjectModel.Saved?
+    let opened: JobContents?
     private let latest = Mutex<Data?>(nil)
 
     init() {
@@ -26,7 +26,7 @@ final class JobDocument: ReferenceFileDocument, Sendable {
         guard let data = configuration.file.regularFileContents else {
             throw CocoaError(.fileReadCorruptFile)
         }
-        opened = try JSONDecoder().decode(ProjectModel.Saved.self, from: data)
+        opened = try JobContents(data: data)
         latest.withLock { $0 = data }
     }
 
@@ -54,7 +54,7 @@ struct JobWindow: View {
     init(document: JobDocument, fileURL: URL?) {
         self.document = document
         self.fileURL = fileURL
-        _project = State(initialValue: document.opened.map(ProjectModel.init(saved:)) ?? ProjectModel())
+        _project = State(initialValue: document.opened.map(ProjectModel.init(contents:)) ?? ProjectModel())
     }
 
     var body: some View {

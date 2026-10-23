@@ -13,6 +13,10 @@ pub struct Project {
     pub name: String,
     pub standard: ConstructionStandard,
     pub cabinets: Vec<StoredCabinet>,
+    /// Cabinets made from boxes drawn in SolidCraft: they stay where they were drawn instead of
+    /// joining the run.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub placed: Vec<String>,
 }
 
 /// A cabinet as the project stores it: everything but the standard, plus the standard's fields
@@ -53,6 +57,7 @@ impl Project {
             name: name.into(),
             standard,
             cabinets,
+            placed: Vec::new(),
         })
     }
 

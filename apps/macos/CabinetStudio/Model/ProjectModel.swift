@@ -27,6 +27,17 @@ struct CabinetDoc: Identifiable, Hashable, Codable {
 
     var kind: String { object["kind"] as? String ?? "base" }
 
+    /// The cabinet's construction standard as JSON values, field by field.
+    var standard: [String: Any] {
+        get { object["standard"] as? [String: Any] ?? [:] }
+        set { update { $0["standard"] = newValue } }
+    }
+
+    /// The cabinet's `id` field, read from its JSON.
+    static func id(of json: String) -> String? {
+        ((try? JSONSerialization.jsonObject(with: Data(json.utf8))) as? [String: Any])?["id"] as? String
+    }
+
     func number(_ key: String) -> Double { (object[key] as? NSNumber)?.doubleValue ?? 0 }
 
     mutating func setNumber(_ key: String, _ value: Double) { update { $0[key] = value } }
@@ -195,6 +206,11 @@ final class ProjectModel {
     var isSending = false
     var lastError: String?
     var jobName = "Untitled job"
+    /// The job's construction standard (JSON): every cabinet follows it except in the fields it
+    /// overrides.
+    var standardJson: String
+    /// Picker changes go to the selected cabinet only, as an override, instead of the whole job.
+    var onlyThisCabinet = false
     let port: UInt16 = 7878
 
     private var builds: [String: BuildSummary] = [:]
@@ -202,28 +218,31 @@ final class ProjectModel {
     /// document knows it has changes to save.
     @ObservationIgnored weak var undoManager: UndoManager?
     /// The cabinets as of the last registered edit: what undo goes back to.
-    @ObservationIgnored private var committed: [CabinetDoc] = []
+    @ObservationIgnored private var committed = Committed(cabinets: [], standardJson: "")
     /// Receives the job's file contents after every edit.
     @ObservationIgnored var onEdit: (@MainActor (Data) -> Void)?
 
     /// A new job: the cabinets of the job the app kept before it had documents, once, or a short
     /// sample run.
     init() {
-        if let saved = Self.takeLegacyJob() {
-            cabinets = saved.cabinets.filter { (try? CabinetStudio.build(cabinetJson: $0.json)) != nil }
+        let legacy = Self.takeLegacyJob()
+        standardJson = legacy?.standardJson ?? JobContents.defaultStandard
+        if let legacy {
+            cabinets = legacy.cabinets.filter { (try? CabinetStudio.build(cabinetJson: $0.json)) != nil }
         }
         if cabinets.isEmpty {
             for kind in ["base", "drawer_bank", "base"] { add(kind: kind) }
         }
         selection = cabinets.first?.id
-        committed = cabinets
+        committed = Committed(cabinets: cabinets, standardJson: standardJson)
     }
 
-    init(saved: Saved) {
-        jobName = saved.jobName
-        cabinets = saved.cabinets.filter { (try? CabinetStudio.build(cabinetJson: $0.json)) != nil }
+    init(contents: JobContents) {
+        jobName = contents.name
+        standardJson = contents.standardJson
+        cabinets = contents.cabinets.filter { (try? CabinetStudio.build(cabinetJson: $0.json)) != nil }
         selection = cabinets.first?.id
-        committed = cabinets
+        committed = Committed(cabinets: cabinets, standardJson: standardJson)
     }
 
     var selected: CabinetDoc? {
@@ -263,7 +282,9 @@ final class ProjectModel {
         while cabinets.contains(where: { $0.id == String(format: "%@%02d", prefix, n) }) { n += 1 }
         let id = String(format: "%@%02d", prefix, n)
         guard let json = try? newCabinet(id: id, kind: kind) else { return }
-        cabinets.append(CabinetDoc(id: id, json: json))
+        var cab = CabinetDoc(id: id, json: json)
+        cab.standard = projectStandard
+        cabinets.append(cab)
         selection = id
         changed()
     }
@@ -284,10 +305,70 @@ final class ProjectModel {
     }
 
     func setOption(_ field: String, _ choice: String) {
-        guard var cab = selected,
+        guard let cab = selected,
               let json = try? setStandardOption(cabinetJson: cab.json, field: field, choice: choice) else { return }
-        cab.json = json
-        selected = cab
+        var edited = cab
+        edited.json = json
+        applyStandard(from: cab, to: edited)
+    }
+
+    // MARK: Project standard
+
+    var projectStandard: [String: Any] {
+        get { (try? JSONSerialization.jsonObject(with: Data(standardJson.utf8))) as? [String: Any] ?? [:] }
+        set {
+            if let data = try? JSONSerialization.data(withJSONObject: newValue, options: [.sortedKeys]),
+               let s = String(data: data, encoding: .utf8) {
+                standardJson = s
+            }
+        }
+    }
+
+    private static func same(_ a: Any?, _ b: Any?) -> Bool {
+        switch (a, b) {
+        case (nil, nil): true
+        case let (a as NSObject, b as NSObject): a.isEqual(b)
+        default: false
+        }
+    }
+
+    /// The standard fields in which `cab` differs from the job.
+    func overrides(of cab: CabinetDoc) -> Set<String> {
+        let job = projectStandard, own = cab.standard
+        return Set(own.keys.filter { !Self.same(own[$0], job[$0]) })
+    }
+
+    /// Puts the selected cabinet's `fields` back to the job's values.
+    func resetToProject(_ fields: [String]) {
+        guard let cab = selected else { return }
+        let job = projectStandard
+        var c = cab
+        var standard = c.standard
+        for f in fields { standard[f] = job[f] }
+        c.standard = standard
+        withAnimation(.snappy) { selected = c }
+    }
+
+    /// Takes the standard fields that changed between `old` and `new` (one cabinet, before and after
+    /// an edit) to the whole job: the job's standard and every cabinet that does not override them.
+    /// With `onlyThisCabinet` the edit stays on that cabinet as an override.
+    private func applyStandard(from old: CabinetDoc, to new: CabinetDoc) {
+        guard !onlyThisCabinet else {
+            selected = new
+            return
+        }
+        let before = old.standard, after = new.standard
+        let fields = after.keys.filter { !Self.same(before[$0], after[$0]) }
+        var job = projectStandard
+        for i in cabinets.indices where cabinets[i].id != new.id {
+            var standard = cabinets[i].standard
+            for f in fields where Self.same(standard[f], job[f]) { standard[f] = after[f] }
+            cabinets[i].standard = standard
+        }
+        for f in fields { job[f] = after[f] }
+        projectStandard = job
+        if let i = cabinets.firstIndex(where: { $0.id == new.id }) { cabinets[i] = new }
+        changed()
     }
 
     /// Lays the cabinets out side by side in list order and saves. Cabinets drawn in SolidCraft
@@ -339,8 +420,9 @@ final class ProjectModel {
         }
         guard let dir = Bundle.main.url(forResource: "catalog", withExtension: nil) else { return }
         do {
+            let old = cab
             cab.json = try CabinetStudio.assignBoard(cabinetJson: cab.json, slot: slot, boardId: board.id, catalogDir: dir.path)
-            withAnimation(.snappy) { selected = cab }
+            withAnimation(.snappy) { applyStandard(from: old, to: cab) }
             lastError = nil
             status = "\(cab.id) \(slot): \(board.decor) \(board.finish), \(Int(board.thickness)) mm"
         } catch {
@@ -471,47 +553,50 @@ final class ProjectModel {
 
     // MARK: Persistence
 
-    struct Saved: Codable, Sendable {
-        var jobName: String
+    /// What undo goes back to.
+    private struct Committed: Equatable {
         var cabinets: [CabinetDoc]
+        var standardJson: String
     }
 
     /// Registers the edit since the last one with the undo manager, which marks the document
     /// edited; the system saves it.
     func save() {
-        guard cabinets != committed else { return }
+        let now = Committed(cabinets: cabinets, standardJson: standardJson)
+        guard now != committed else { return }
         let before = committed
-        committed = cabinets
+        committed = now
         undoManager?.registerUndo(withTarget: self) { model in
             MainActor.assumeIsolated { model.restore(before) }
         }
         if let data = try? encoded() { onEdit?(data) }
     }
 
-    private func restore(_ cabs: [CabinetDoc]) {
+    private func restore(_ state: Committed) {
         withAnimation(.snappy) {
-            cabinets = cabs
-            if !cabs.contains(where: { $0.id == selection }) { selection = cabs.first?.id }
+            cabinets = state.cabinets
+            standardJson = state.standardJson
+            if !cabinets.contains(where: { $0.id == selection }) { selection = cabinets.first?.id }
         }
         changed()
     }
 
+    /// The job file: the core's project JSON.
     func encoded() throws -> Data {
-        let encoder = JSONEncoder()
-        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
-        return try encoder.encode(Saved(jobName: jobName, cabinets: cabinets))
+        let text = try projectJson(name: jobName, standardJson: standardJson, cabinetsJson: cabinets.map(\.json),
+                                   placed: cabinets.filter { $0.placed == true }.map(\.id))
+        return Data(text.utf8)
     }
 
     /// The single job file the app kept in Application Support before jobs were documents. It is
     /// read into the first new job and then renamed, so it is imported once.
-    private static func takeLegacyJob() -> Saved? {
+    private static func takeLegacyJob() -> JobContents? {
         let dir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
             .appendingPathComponent("CabinetStudio", isDirectory: true)
         let url = dir.appendingPathComponent("project.json")
-        guard let data = try? Data(contentsOf: url),
-              let saved = try? JSONDecoder().decode(Saved.self, from: data) else { return nil }
+        guard let data = try? Data(contentsOf: url), let job = try? JobContents(data: data) else { return nil }
         try? FileManager.default.moveItem(at: url, to: dir.appendingPathComponent("project-imported.json"))
-        return saved
+        return job
     }
 
     /// The bundled board catalog.
@@ -519,6 +604,50 @@ final class ProjectModel {
         guard let dir = Bundle.main.url(forResource: "catalog", withExtension: nil) else { return [] }
         return (try? loadBoards(catalogDir: dir.path)) ?? []
     }()
+}
+
+/// A job as read from its file.
+struct JobContents: Sendable {
+    var name: String
+    var standardJson: String
+    var cabinets: [CabinetDoc]
+
+    /// The core's default standard, for jobs that predate the job standard.
+    static var defaultStandard: String {
+        guard let json = try? newCabinet(id: "X01", kind: "base"),
+              let o = (try? JSONSerialization.jsonObject(with: Data(json.utf8))) as? [String: Any],
+              let s = o["standard"],
+              let data = try? JSONSerialization.data(withJSONObject: s, options: [.sortedKeys])
+        else { return "{}" }
+        return String(decoding: data, as: UTF8.self)
+    }
+
+    /// Before jobs had one standard, a file listed each cabinet's full JSON.
+    private struct Legacy: Codable {
+        var jobName: String
+        var cabinets: [CabinetDoc]
+    }
+
+    init(data: Data) throws {
+        if let p = try? openProject(json: String(decoding: data, as: UTF8.self)) {
+            name = p.name
+            standardJson = p.standardJson
+            cabinets = p.cabinetsJson.compactMap { json in
+                CabinetDoc.id(of: json).map { CabinetDoc(id: $0, json: json, placed: p.placed.contains($0) ? true : nil) }
+            }
+            return
+        }
+        let legacy = try JSONDecoder().decode(Legacy.self, from: data)
+        name = legacy.jobName
+        cabinets = legacy.cabinets
+        // The first cabinet's standard becomes the job's; the others keep theirs as overrides.
+        if let first = legacy.cabinets.first,
+           let data = try? JSONSerialization.data(withJSONObject: first.standard, options: [.sortedKeys]) {
+            standardJson = String(decoding: data, as: UTF8.self)
+        } else {
+            standardJson = Self.defaultStandard
+        }
+    }
 }
 
 extension CabinetDoc {

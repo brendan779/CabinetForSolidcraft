@@ -16,8 +16,12 @@ struct InspectorView: View {
                         SinkSection(cab: cab)
                     }
                     FrontsSection(cab: cab)
+                    ConstructionScope(cab: cab)
+                    let overrides = project.overrides(of: cab)
                     ForEach(optionGroups(), id: \.field) { group in
-                        VisualPicker(group: group, selected: project.option(group.field, of: cab)) { choice in
+                        VisualPicker(group: group, selected: project.option(group.field, of: cab),
+                                     overridden: overrides.contains(group.field),
+                                     onReset: { project.resetToProject([group.field]) }) { choice in
                             withAnimation(.snappy) { project.setOption(group.field, choice) }
                         }
                     }
@@ -45,6 +49,69 @@ struct InspectorView: View {
                 Image(systemName: "exclamationmark.triangle.fill")
                     .foregroundStyle(.orange)
                     .help(err)
+            }
+        }
+    }
+}
+
+/// Whether construction choices change the whole job or only this cabinet, drawn as a run of
+/// cabinets with all of them or just one lit.
+struct ConstructionScope: View {
+    @Environment(ProjectModel.self) private var project
+    let cab: CabinetDoc
+
+    var body: some View {
+        @Bindable var project = project
+        let overrides = project.overrides(of: cab)
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                SectionTitle("Construction")
+                Spacer()
+                if !overrides.isEmpty {
+                    Button("Match job", systemImage: "arrow.uturn.backward") {
+                        project.resetToProject(Array(overrides))
+                    }
+                    .buttonStyle(.borderless)
+                    .font(.caption)
+                    .help("\(cab.id) differs from the job in \(overrides.count) choices. Click to follow the job's standard again.")
+                }
+            }
+            HStack(spacing: 8) {
+                ForEach([false, true], id: \.self) { only in
+                    Button {
+                        withAnimation(.snappy) { project.onlyThisCabinet = only }
+                    } label: {
+                        VStack(spacing: 6) {
+                            RunThumbnail(lit: only ? .one : .all).frame(width: 64, height: 30)
+                            Text(only ? "Only \(cab.id)" : "Whole job").font(.caption)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 8)
+                    }
+                    .buttonStyle(TileStyle(selected: project.onlyThisCabinet == only))
+                    .help(only ? "Choices below change only \(cab.id); the rest of the job keeps the job's standard."
+                               : "Choices below change every cabinet in the job, except where a cabinet has its own choice.")
+                    .accessibilityLabel(only ? "Change only \(cab.id)" : "Change the whole job")
+                }
+            }
+        }
+    }
+}
+
+/// Four cabinets in a row, all or only the second one highlighted.
+struct RunThumbnail: View {
+    enum Lit { case all, one }
+    let lit: Lit
+
+    var body: some View {
+        Canvas { ctx, size in
+            let n = 4, gap: CGFloat = 3
+            let w = (size.width - gap * CGFloat(n - 1)) / CGFloat(n)
+            for i in 0..<n {
+                let r = CGRect(x: CGFloat(i) * (w + gap), y: 0, width: w, height: size.height)
+                let on = lit == .all || i == 1
+                ctx.fill(Path(roundedRect: r, cornerRadius: 2), with: .color(on ? .accentColor.opacity(0.35) : .primary.opacity(0.06)))
+                ctx.stroke(Path(roundedRect: r, cornerRadius: 2), with: .color(on ? .accentColor : .primary.opacity(0.3)), lineWidth: 1)
             }
         }
     }
