@@ -10,8 +10,12 @@ use serde_json::{Value, json};
 pub enum Detail {
     /// Plain panels. Fast; for layout and presentation.
     Design,
-    /// Panels with every bore, groove and biscuit slot cut. For checking and export.
+    /// Panels with every bore, groove and biscuit slot cut. For checking and export. Slots are
+    /// their bounding boxes, which SolidCraft cuts quickly.
     Manufacturing,
+    /// As Manufacturing, with each biscuit slot the lens the 100 mm cutter leaves. Its sloping
+    /// faces make SolidCraft's later cuts in those panels slow: about 3 × the time (docs/perf.md).
+    Exact,
 }
 
 fn arr(v: Vec3) -> Value {
@@ -52,17 +56,20 @@ pub fn emit_cabinet(list: &PartList, detail: Detail, spec: Option<&Value>) -> Ve
             }
         }));
     }
-    if detail == Detail::Manufacturing {
+    if detail != Detail::Design {
         for op in &list.operations {
             match op {
-                Operation::BiscuitSlot { parts, bounds, .. } => {
-                    cmds.push(cut_box(bounds.min, bounds.size, parts.as_slice()))
-                }
                 Operation::Groove { part, bounds } => {
                     cmds.push(cut_box(bounds.min, bounds.size, std::slice::from_ref(part)))
                 }
-                Operation::Bore { .. } => {}
+                Operation::BiscuitSlot { parts, bounds, .. } if detail == Detail::Manufacturing => {
+                    cmds.push(cut_box(bounds.min, bounds.size, parts.as_slice()))
+                }
+                _ => {}
             }
+        }
+        if detail == Detail::Exact {
+            cmds.extend(slot_batches(&list.cabinet, &list.operations));
         }
         cmds.extend(bore_batches(&list.operations));
     }
@@ -256,6 +263,188 @@ fn bore_batches(ops: &[Operation]) -> Vec<Value> {
     cmds
 }
 
+/// Every biscuit slot as the lens a plunged cutter leaves: an arc into each of the two panels,
+/// meeting at the slot's ends on the joint. Slots in one plane share one sketch and one extrude,
+/// as bores do (PERF-1).
+fn slot_batches(cabinet: &str, ops: &[Operation]) -> Vec<Value> {
+    let mut planes: Vec<SlotPlane> = Vec::new();
+    for op in ops {
+        let Operation::BiscuitSlot {
+            parts,
+            bounds,
+            along,
+        } = op
+        else {
+            continue;
+        };
+        // Across the joint the slot is two plunge depths; across the biscuit, its thickness.
+        let [a, b] = along.others();
+        let (normal, thick) = if bounds.size.get(a) >= bounds.size.get(b) {
+            (a, b)
+        } else {
+            (b, a)
+        };
+        let at = (bounds.min.get(thick) * 1000.0).round() as i64;
+        let i = match planes.iter().position(|p| p.axis == thick && p.at == at) {
+            Some(i) => i,
+            None => {
+                planes.push(SlotPlane {
+                    axis: thick,
+                    at,
+                    thickness: bounds.size.get(thick),
+                    lenses: Vec::new(),
+                    parts: Vec::new(),
+                });
+                planes.len() - 1
+            }
+        };
+        let plane = &mut planes[i];
+        let c = bounds.center();
+        let (half, depth) = (bounds.size.get(*along) / 2.0, bounds.size.get(normal) / 2.0);
+        plane.lenses.push([
+            c.with(*along, c.get(*along) - half),
+            c.with(*along, c.get(*along) + half),
+            c.with(normal, c.get(normal) - depth),
+            c.with(normal, c.get(normal) + depth),
+        ]);
+        for p in parts {
+            if !plane.parts.contains(p) {
+                plane.parts.push(p.clone());
+            }
+        }
+    }
+    let mut cmds = Vec::new();
+    for (n, plane) in planes.iter().enumerate() {
+        let sketch = format!("{cabinet}.Biscuits{}", n + 1);
+        let [u, v] = sketch_axes(plane.axis);
+        let uv = |p: Vec3| json!([round(p.get(u)), round(p.get(v))]);
+        cmds.push(json!({
+            "command": "sketch.create",
+            "params": {
+                "plane": {
+                    "origin": arr(Vec3::default().with(plane.axis, plane.at as f64 / 1000.0)),
+                    "x_dir": arr(Vec3::default().with(u, 1.0)),
+                    "y_dir": arr(Vec3::default().with(v, 1.0)),
+                },
+                "name": sketch,
+            }
+        }));
+        for lens in &plane.lenses {
+            let points: Vec<Value> = lens_outline(lens).into_iter().map(uv).collect();
+            cmds.push(json!({
+                "command": "sketch.line",
+                "params": { "points": points, "closed": true, "infer": false }
+            }));
+        }
+        cmds.push(json!({ "command": "sketch.finish", "params": {} }));
+        cmds.push(json!({
+            "command": "solid.extrude",
+            "params": {
+                "sketch": sketch,
+                "profiles": "all",
+                "distance": round(plane.thickness),
+                "direction": "positive",
+                "operation": "cut",
+                "targets": plane.parts,
+            }
+        }));
+    }
+    cmds
+}
+
+/// Chords per side of a slot's lens (even, so one vertex is the apex). SolidCraft cuts true arcs
+/// far more slowly (and less robustly) than flat faces, and every face a slot adds makes later
+/// cuts in that panel slower, so the arc is a few chords that keep its area (see `lens_outline`).
+const LENS_CHORDS: usize = 4;
+
+/// The lens as a closed polygon: out along the arc into one panel, back along the other.
+fn lens_outline([start, end, into_a, into_b]: &[Vec3; 4]) -> Vec<Vec3> {
+    let mid = Vec3::new(
+        (start.x + end.x) / 2.0,
+        (start.y + end.y) / 2.0,
+        (start.z + end.z) / 2.0,
+    );
+    let mut out = vec![*start];
+    for apex in [into_a, into_b] {
+        // The circle through start, apex and end: centre on the line from the apex through the
+        // chord's middle.
+        let half = dist(start, &mid);
+        let sag = dist(apex, &mid);
+        let r = (half * half + sag * sag) / (2.0 * sag);
+        let dir = |p: &Vec3, q: &Vec3| {
+            let l = dist(p, q);
+            Vec3::new((q.x - p.x) / l, (q.y - p.y) / l, (q.z - p.z) / l)
+        };
+        let down = dir(apex, &mid);
+        let centre = Vec3::new(
+            apex.x + down.x * r,
+            apex.y + down.y * r,
+            apex.z + down.z * r,
+        );
+        let (a, b) = if out.len() == 1 {
+            (start, end)
+        } else {
+            (end, start)
+        };
+        let (ua, ub) = (dir(&centre, a), dir(&centre, b));
+        let span = (ua.x * ub.x + ua.y * ub.y + ua.z * ub.z)
+            .clamp(-1.0, 1.0)
+            .acos();
+        let up = dir(&centre, apex);
+        let along = dir(a, b);
+        // The arc sampled at LENS_CHORDS + 1 points from a to b: (along the chord, height).
+        let pts: Vec<(f64, f64)> = (0..=LENS_CHORDS)
+            .map(|i| {
+                let t = span * i as f64 / LENS_CHORDS as f64 - span / 2.0;
+                (r * t.sin(), r * t.cos() - (r - sag))
+            })
+            .collect();
+        // The chords cut corners off the arc. Lifting the vertices between the ends and the apex
+        // by a common factor makes up the area exactly, while the slot stays as deep as the
+        // cutter plunges (the apex does not move).
+        let segment = r * r * (span / 2.0) - (r - sag) * half;
+        let polygon: f64 = pts
+            .windows(2)
+            .map(|w| (w[1].0 - w[0].0) * (w[0].1 + w[1].1) / 2.0)
+            .sum();
+        let lift: f64 = (1..LENS_CHORDS)
+            .filter(|&i| i != LENS_CHORDS / 2)
+            .map(|i| pts[i].1 * (pts[i + 1].0 - pts[i - 1].0) / 2.0)
+            .sum();
+        let factor = 1.0 + (segment - polygon) / lift;
+        for (i, &(x, h)) in pts.iter().enumerate().skip(1) {
+            let h = if i == LENS_CHORDS / 2 || i == LENS_CHORDS {
+                h
+            } else {
+                h * factor
+            };
+            out.push(Vec3::new(
+                mid.x + up.x * h + along.x * x,
+                mid.y + up.y * h + along.y * x,
+                mid.z + up.z * h + along.z * x,
+            ));
+        }
+    }
+    // The walk ends back on start; the polyline closes itself.
+    out.pop();
+    out
+}
+
+fn dist(a: &Vec3, b: &Vec3) -> f64 {
+    ((a.x - b.x).powi(2) + (a.y - b.y).powi(2) + (a.z - b.z).powi(2)).sqrt()
+}
+
+/// Biscuit slots that one sketch and extrude can cut: the same plane across their thickness.
+struct SlotPlane {
+    axis: Axis,
+    /// Where the slots start along `axis`, in micrometres.
+    at: i64,
+    thickness: f64,
+    /// Each slot's two ends on the joint and its deepest point in each panel.
+    lenses: Vec<[Vec3; 4]>,
+    parts: Vec<String>,
+}
+
 /// In-plane axes of a sketch whose normal is `axis`, ordered so that x × y = +axis: an extrude
 /// in the "positive" direction then runs along +axis.
 fn sketch_axes(axis: Axis) -> [Axis; 2] {
@@ -324,6 +513,66 @@ mod tests {
             boxes(Detail::Manufacturing) - boxes(Detail::Design),
             box_ops
         );
+        let grooves = list
+            .operations
+            .iter()
+            .filter(|o| matches!(o, Operation::Groove { .. }))
+            .count();
+        assert_eq!(boxes(Detail::Exact) - boxes(Detail::Design), grooves);
+    }
+
+    #[test]
+    fn exact_detail_cuts_every_biscuit_slot_as_a_lens_batched_per_plane() {
+        let list = build_cabinet(&Cabinet::new("B01", CabinetKind::Base)).unwrap();
+        let cmds = emit_cabinet(&list, Detail::Exact, None);
+        let slots = list
+            .operations
+            .iter()
+            .filter(|o| matches!(o, Operation::BiscuitSlot { .. }))
+            .count();
+        assert!(slots > 0);
+        assert_eq!(count(&cmds, "sketch.line"), slots);
+        let sketches = cmds
+            .iter()
+            .filter(|c| c["command"] == "sketch.create")
+            .filter(|c| c["params"]["name"].as_str().unwrap().contains("Biscuits"))
+            .count();
+        assert!(sketches < slots, "slots share sketches");
+    }
+
+    #[test]
+    fn a_lens_outline_has_the_area_of_the_cutter_circle_segments() {
+        // A #20 slot along X across a joint at y = 0: 12.5 mm deep into each panel.
+        let (r, d) = (50.0_f64, 12.5);
+        let half = (r * r - (r - d) * (r - d)).sqrt();
+        let lens = [
+            Vec3::new(-half, 0.0, 0.0),
+            Vec3::new(half, 0.0, 0.0),
+            Vec3::new(0.0, -d, 0.0),
+            Vec3::new(0.0, d, 0.0),
+        ];
+        let pts = lens_outline(&lens);
+        assert_eq!(pts.len(), 2 * LENS_CHORDS);
+        assert_eq!(pts[0], lens[0]);
+        assert!(pts.iter().all(|p| p.z == 0.0), "flat in the slot's plane");
+        // Shoelace area against two circular segments.
+        let area: f64 = (0..pts.len())
+            .map(|i| {
+                let (p, q) = (pts[i], pts[(i + 1) % pts.len()]);
+                p.x * q.y - q.x * p.y
+            })
+            .sum::<f64>()
+            .abs()
+            / 2.0;
+        let segment = r * r * ((r - d) / r).acos() - (r - d) * half;
+        assert!(
+            (area - 2.0 * segment).abs() < 1e-9 * area,
+            "{area} vs {}",
+            2.0 * segment
+        );
+        // No deeper than the cutter plunges.
+        let deepest = pts.iter().map(|p| p.y.abs()).fold(0.0, f64::max);
+        assert!((deepest - d).abs() < 1e-9, "{deepest}");
     }
 
     #[test]

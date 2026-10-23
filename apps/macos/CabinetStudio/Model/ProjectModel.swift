@@ -145,7 +145,11 @@ enum ConnectionState: Equatable {
 enum DetailLevel: String, CaseIterable, Identifiable {
     case design = "Design"
     case manufacturing = "Manufacturing"
+    case exact = "Exact"
     var id: String { rawValue }
+
+    /// The core's name for the level.
+    var core: String { rawValue.lowercased() }
 }
 
 enum Workspace: String, CaseIterable, Identifiable {
@@ -279,10 +283,10 @@ final class ProjectModel {
         lastError = nil
         status = "Building \(cabinets.count) cabinets in SolidCraft…"
         let jsons = cabinets.map(\.json)
-        let mfg = detail == .manufacturing
+        let level = detail.core
         let port = self.port
         let result = await Task.detached { () -> Result<String, Error> in
-            Result { try sendToSolidcraft(cabinetsJson: jsons, manufacturing: mfg, port: port) }
+            Result { try sendToSolidcraft(cabinetsJson: jsons, detail: level, port: port) }
         }.value
         isSending = false
         switch result {

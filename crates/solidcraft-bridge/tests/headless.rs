@@ -231,3 +231,47 @@ fn an_integrated_toe_kick_notch_is_cut_out_of_both_sides() {
         assert_eq!(body["bbox"]["min"][2], 0.0, "{side}");
     }
 }
+
+#[test]
+fn biscuit_slots_remove_the_volume_of_a_plunged_100_mm_cutter() {
+    let Some(cli) = cli() else {
+        eprintln!("SOLIDCRAFT_CLI not set: skipped");
+        return;
+    };
+    use cabinet_core::part::Operation;
+    let cab = Cabinet::new("B01", CabinetKind::Base);
+    let mut list = build_cabinet(&cab).unwrap();
+    list.operations
+        .retain(|o| matches!(o, Operation::BiscuitSlot { .. }));
+    let slots = list.operations.len();
+    assert!(slots > 4);
+    let r = run(
+        &cli,
+        "biscuits",
+        &emit_cabinet(&list, Detail::Exact, None),
+        &["eval"],
+    );
+    let removed: f64 = list
+        .parts
+        .iter()
+        .map(|p| {
+            let body = r["bodies"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .find(|b| b["name"] == p.name.as_str())
+                .unwrap();
+            p.bounds.volume() - body["volume_mm3"].as_f64().unwrap()
+        })
+        .sum();
+    // Each slot is a circular segment of the 100 mm cutter in each panel, as thick as a biscuit.
+    let b = cab.standard.biscuit;
+    let (radius, d) = (50.0_f64, b.slot_depth());
+    let segment = radius * radius * ((radius - d) / radius).acos()
+        - (radius - d) * (2.0 * radius * d - d * d).sqrt();
+    let expected = slots as f64 * 2.0 * segment * b.thickness();
+    assert!(
+        (removed - expected).abs() < 0.01 * expected,
+        "removed {removed:.0} mm³, expected {expected:.0} mm³"
+    );
+}

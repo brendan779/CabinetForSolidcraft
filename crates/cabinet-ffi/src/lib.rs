@@ -321,18 +321,19 @@ pub fn solidcraft_reachable(port: u16) -> bool {
 #[uniffi::export]
 pub fn send_to_solidcraft(
     cabinets_json: Vec<String>,
-    manufacturing: bool,
+    detail: String,
     port: u16,
 ) -> Result<String, CoreError> {
     let sc = |e: solidcraft_bridge::Error| CoreError::SolidCraft {
         message: e.to_string(),
     };
-    let mut client = Client::connect(port).map_err(sc)?;
-    let detail = if manufacturing {
-        Detail::Manufacturing
-    } else {
-        Detail::Design
+    let detail = match detail.as_str() {
+        "design" => Detail::Design,
+        "manufacturing" => Detail::Manufacturing,
+        "exact" => Detail::Exact,
+        other => return Err(invalid(format!("unknown detail level {other}"))),
     };
+    let mut client = Client::connect(port).map_err(sc)?;
     let mut report = Vec::new();
     for j in &cabinets_json {
         let cab = parse(j)?;

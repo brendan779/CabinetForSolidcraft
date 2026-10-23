@@ -61,6 +61,7 @@ struct SolidCraftButton: View {
             Picker("Detail", selection: $project.detail) {
                 Text("Design: plain panels").tag(DetailLevel.design)
                 Text("Manufacturing: every bore, groove and slot").tag(DetailLevel.manufacturing)
+                Text("Exact: true biscuit slot shape (about 3× slower)").tag(DetailLevel.exact)
             }
             .pickerStyle(.inline)
             Divider()

@@ -69,3 +69,21 @@ These are headless CLI times. The 121 s the owner saw for the tall cabinet was i
 over the control socket, which also redraws; the connected run has not been re-timed yet.
 
 ![Sample run at Manufacturing detail](images/perf1-manufacturing.png)
+
+## JOIN-2: true biscuit slot shape (Exact detail)
+
+A plunged 100 mm cutter leaves a lens: a circular segment into each panel. Drawn as true arcs,
+SolidCraft 0.20 needs ~9 s for one slot extrude in a tall cabinet's sides and its kernel logs
+`tolerance must be no less than 1e-6` panics (recovered). Drawn as 4 chords per side with the
+in-between vertices lifted so the polygon keeps the segment's exact area (the apex stays at the
+plunge depth), the volume matches the analytic lens (headless test, ±1 %), but every later cut in
+those panels slows down: the sloping faces cost more than the box slots' flat ones, in either
+order (bores first or slots first) and whether one extrude cuts all three panels or one each.
+
+| sample run | base s | drawer bank s | tall s | total s |
+|---|---:|---:|---:|---:|
+| Manufacturing (box slots) | 1.35 | 0.37 | 3.85 | 5.57 |
+| Exact (lens slots) | 6.56 | 1.67 | 12.20 | 20.43 |
+
+So Manufacturing keeps box slots (PERF-1's < 10 s), and the lens shape is the opt-in `Exact`
+level (app: SolidCraft menu › Detail; `emit_base --exact`).
