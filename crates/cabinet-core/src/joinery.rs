@@ -190,6 +190,28 @@ impl ButtJoint<'_> {
         ops
     }
 
+    /// Chipboard screws alone, at most `spacing` apart, piloted `pilot_depth` into the end part:
+    /// for a thin back screwed onto the carcass's rear edges, which takes no biscuits.
+    pub fn screws_every(&self, spacing: f64, pilot_depth: f64) -> Vec<Operation> {
+        let (lo, hi) = self.range();
+        let length = hi - lo;
+        if length <= 0.0 {
+            return Vec::new();
+        }
+        fixing_positions(length, END_SETBACK.min(length / 4.0), spacing, 20.0)
+            .into_iter()
+            .flat_map(|p| {
+                self.screw(
+                    lo + p,
+                    SCREW_CLEARANCE,
+                    SCREW_HEAD,
+                    SCREW_PILOT,
+                    pilot_depth,
+                )
+            })
+            .collect()
+    }
+
     fn biscuit_slot(&self, std: &ConstructionStandard, at: f64) -> Operation {
         let size = std.biscuit;
         let depth = size.slot_depth();

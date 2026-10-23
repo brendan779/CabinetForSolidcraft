@@ -66,8 +66,8 @@ Priorities: **P0** blocks most other work · **P1** MVP · **P2** commercial par
 | JOIN-3 | done (night/2026-10-23) | S | Biscuit bodies as solids (lens shape) in Manufacturing detail, coloured | visible in SolidCraft |
 | JOIN-4 | blocked (needs verified Häfele Minifix 15 drilling data in the catalog: owner-supplied, like HAF-4) | M | Cam-lock (Häfele Minifix 15) bores: Ø15 cam, Ø8/Ø5 bolt, from verified Häfele data | cut sheet shows cam bores |
 | JOIN-5 | done (night/2026-10-23) | S | Screw countersinks and cover caps; "hide screws on visible end panels" rule | end panels have no through screws |
-| JOIN-6 | todo | M | Lamello Clamex P-14 / Tenso P-14 P-System slots | option in picker; slots on sheets |
-| JOIN-7 | todo | S | Back panel fixing (screws at 150 mm centres for applied backs; none for grooved) | ops present per back style |
+| JOIN-6 | blocked (needs Lamello P-System slot data from Lamello's documents, added to the hardware catalog after BLUM-1) | M | Lamello Clamex P-14 / Tenso P-14 P-System slots | option in picker; slots on sheets |
+| JOIN-7 | done (night/2026-10-23) | S | Back panel fixing (screws at 150 mm centres for applied backs; none for grooved) | ops present per back style |
 
 ### Hardware: Blum
 
@@ -206,3 +206,4 @@ Agents append one line per session: date, items touched, outcome.
 - 2026-10-23 (night) — JOIN-2 done as a new `Exact` detail level: biscuit slots as area-exact 4-chord lenses (volume within 1 % of the analytic lens in a headless test). Manufacturing keeps box slots: lens slots make the tall cabinet 12.2 s instead of 3.9 s (docs/perf.md). Owner: is that trade right?
 - 2026-10-23 (night) — JOIN-3 done: at Manufacturing and Exact detail every slot gets a named lens-shaped biscuit body (`B01.Biscuit3`, beech colour), true arcs (no boolean, so no slowdown: tall still 3.8 s). Headless test: one per slot, volume within 1 %. Picture: docs/images/join3-biscuits.png. Slot operations now record their biscuit size.
 - 2026-10-23 (night) — JOIN-5 done: every screw clearance hole gets a 90° countersink (Ø8 chipboard, Ø10 confirmat; in the part list for sheets/CNC, not cut in SolidCraft) and a cover cap in the hardware list; `exposed.left/right` sides get no through screws (biscuits + glue, blind dowels where biscuits do not fit); inspector "Seen ends" chips. JOIN-4 blocked on Häfele data.
+- 2026-10-23 (night) — JOIN-7 done: applied backs are screwed to the sides, bottom, top/back rail at ≤150 mm centres (countersunk, capped); grooved backs get none. The clash sweep caught 35 mm pilots reaching the rear shelf-pin row, so back screws pilot 15 mm (4 × 20 through a 6 mm back). JOIN-6 blocked on Lamello data.

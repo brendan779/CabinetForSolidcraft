@@ -23,6 +23,11 @@ const MIN_BLIND_DOOR: f64 = 250.0;
 /// valves sit low, under about 400 mm.
 const SINK_CUTOUT_HEIGHT: f64 = 400.0;
 const SINK_CUTOUT_SIDE_MARGIN: f64 = 50.0;
+/// Screw centres along each edge an applied back is screwed to.
+const BACK_SCREW_SPACING: f64 = 150.0;
+/// Pilot for a 4 × 20 screw through a 6 mm back: short enough to stay clear of the shelf-pin row
+/// 37 mm in from the rear.
+const BACK_SCREW_PILOT_DEPTH: f64 = 15.0;
 /// Clearance each side of an adjustable shelf.
 const SHELF_SIDE_CLEARANCE: f64 = 1.0;
 /// 32 mm system: shelf-pin and hinge-plate rows sit 37 mm in from the front and back.
@@ -530,6 +535,39 @@ impl<'a> Builder<'a> {
         if s.back == BackStyle::Structural {
             self.joint(PartRole::LeftSide, PartRole::Back, px, Axis::Z);
             self.joint(PartRole::RightSide, PartRole::Back, nx, Axis::Z);
+        }
+        if s.back == BackStyle::Applied {
+            self.back_screws();
+        }
+    }
+
+    /// An applied back is screwed onto every rear edge it covers; a grooved back needs none.
+    fn back_screws(&mut self) {
+        let Some(back) = self.part(PartRole::Back) else {
+            return;
+        };
+        // From the back towards the carcass in front of it.
+        let forward = Dir::new(Axis::Y, false);
+        for (role, along) in [
+            (PartRole::LeftSide, Axis::Z),
+            (PartRole::RightSide, Axis::Z),
+            (PartRole::Bottom, Axis::X),
+            (PartRole::Top, Axis::X),
+            (PartRole::BackRail, Axis::X),
+        ] {
+            let Some(edge) = self.part(role) else {
+                continue;
+            };
+            let joint = ButtJoint {
+                face_part: &back,
+                end_part: &edge,
+                normal: forward,
+                along,
+                limit: None,
+                hidden: false,
+            };
+            let ops = joint.screws_every(BACK_SCREW_SPACING, BACK_SCREW_PILOT_DEPTH);
+            self.list.operations.extend(ops);
         }
     }
 
@@ -1446,6 +1484,60 @@ mod tests {
         // Its joints are still biscuited.
         assert!(list.operations.iter().any(|o| matches!(o,
             Operation::BiscuitSlot { parts, .. } if parts[0] == "B01.LeftSide")));
+    }
+
+    #[test]
+    fn an_applied_back_is_screwed_to_every_rear_edge_at_150_centres() {
+        let mut cab = Cabinet::new("B01", CabinetKind::Base);
+        cab.standard.back = BackStyle::Applied;
+        let list = build_cabinet(&cab).unwrap();
+        let back = list.part("B01.Back").unwrap();
+        for (edge, along) in [
+            ("B01.LeftSide", Axis::Z),
+            ("B01.RightSide", Axis::Z),
+            ("B01.Bottom", Axis::X),
+            ("B01.BackRail", Axis::X),
+        ] {
+            let edge_part = list.part(edge).unwrap();
+            // Pilots into this edge, and the matching holes through the back.
+            let mut at: Vec<f64> = list
+                .operations
+                .iter()
+                .filter_map(|o| match o {
+                    Operation::Bore {
+                        part,
+                        at,
+                        purpose: BorePurpose::ScrewPilot,
+                        ..
+                    } if part == edge && at.y == back.bounds.min.y => Some(at.get(along)),
+                    _ => None,
+                })
+                .collect();
+            at.sort_by(f64::total_cmp);
+            assert!(at.len() >= 2, "{edge}: {at:?}");
+            assert!(
+                at.windows(2)
+                    .all(|w| w[1] - w[0] <= BACK_SCREW_SPACING + 1e-9),
+                "{edge}: {at:?}"
+            );
+            assert!(
+                at.iter().all(|p| *p > edge_part.bounds.min.get(along)
+                    && *p < edge_part.bounds.max().get(along))
+            );
+        }
+        let through_back = list
+            .operations
+            .iter()
+            .filter(|o| matches!(o, Operation::Bore { part, purpose: BorePurpose::Screw, .. } if *part == back.name))
+            .count();
+        assert!(through_back >= 8);
+    }
+
+    #[test]
+    fn a_grooved_back_has_no_fixings() {
+        let list = build_cabinet(&Cabinet::new("B01", CabinetKind::Base)).unwrap();
+        assert!(!list.operations.iter().any(|o| matches!(o,
+            Operation::Bore { part, .. } if part == "B01.Back")));
     }
 
     #[test]
