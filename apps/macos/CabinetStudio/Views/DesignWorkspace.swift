@@ -3,25 +3,104 @@ import SwiftUI
 
 struct DesignWorkspace: View {
     @Environment(ProjectModel.self) private var project
-    @State private var showFronts = true
+    @State private var look = ViewportLook()
+    @State private var hovered: HoveredPart?
 
     var body: some View {
         ZStack(alignment: .topLeading) {
-            CabinetViewport(showFronts: showFronts)
+            CabinetViewport(look: look, hovered: $hovered)
             VStack(alignment: .leading, spacing: 8) {
-                Toggle(isOn: $showFronts) {
-                    Label("Fronts", systemImage: "door.left.hand.closed")
-                }
-                .toggleStyle(.button)
+                ViewportControls(look: $look)
                 if let cab = project.selected, let b = project.build(cab) {
                     BuildBadge(summary: b)
                 }
             }
             .padding(14)
+            if let hovered {
+                PartTooltip(part: hovered.panel)
+                    .position(x: hovered.at.x + 90, y: hovered.at.y + 34)
+                    .allowsHitTesting(false)
+                    .transition(.opacity)
+            }
         }
+        .animation(.snappy(duration: 0.15), value: hovered?.panel.name)
         .background(
             LinearGradient(colors: [Color(white: 0.20), Color(white: 0.11)], startPoint: .top, endPoint: .bottom)
         )
+    }
+}
+
+/// How the viewport shows the job: fronts on and open, exploded, cut in section.
+struct ViewportLook: Equatable {
+    var showFronts = true
+    var open = false
+    /// 0 assembled, 1 every panel pulled 250 mm away from its cabinet's centre.
+    var explode = 0.0
+    /// A vertical cut across the run at the selected cabinet's middle: what is left of it is cut
+    /// away.
+    var section = false
+}
+
+struct HoveredPart: Equatable {
+    var panel: PanelBox
+    var at: CGPoint
+
+    static func == (a: Self, b: Self) -> Bool { a.panel.name == b.panel.name && a.at == b.at }
+}
+
+struct ViewportControls: View {
+    @Binding var look: ViewportLook
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(spacing: 6) {
+                Toggle(isOn: $look.showFronts.animation(.snappy)) {
+                    Label("Fronts", systemImage: "door.left.hand.closed")
+                }
+                .help("Show doors and drawer fronts")
+                Toggle(isOn: $look.open) {
+                    Label("Open", systemImage: "door.left.hand.open")
+                }
+                .disabled(!look.showFronts)
+                .help("Swing the doors open and pull the drawers out")
+                Toggle(isOn: $look.section) {
+                    Label("Section", systemImage: "square.split.diagonal")
+                }
+                .help("Cut the run through the middle of the selected cabinet")
+            }
+            .toggleStyle(.button)
+            .labelStyle(.iconOnly)
+            HStack(spacing: 6) {
+                Image(systemName: "arrow.up.left.and.arrow.down.right")
+                    .foregroundStyle(.secondary)
+                    .help("Explode: pull the panels apart")
+                Slider(value: $look.explode, in: 0...1)
+                    .frame(width: 110)
+                    .accessibilityLabel("Explode")
+            }
+        }
+        .controlSize(.small)
+        .padding(8)
+        .glassBackground()
+    }
+}
+
+/// The part under the pointer: its name and finished size.
+struct PartTooltip: View {
+    @AppStorage(LengthUnit.key) private var unit: LengthUnit = .millimetres
+    let part: PanelBox
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(part.name).font(.callout.weight(.semibold)).monospaced()
+            Text(part.role).font(.caption).foregroundStyle(.secondary)
+            Text([part.width, part.height, part.depth].map { unit.format($0, suffix: false) }.joined(separator: " × "))
+                .font(.caption.monospacedDigit())
+        }
+        .padding(.horizontal, 10)
+        .padding(.vertical, 6)
+        .glassBackground()
+        .fixedSize()
     }
 }
 
@@ -60,83 +139,246 @@ extension View {
 
 struct CabinetViewport: View {
     @Environment(ProjectModel.self) private var project
-    let showFronts: Bool
+    let look: ViewportLook
+    @Binding var hovered: HoveredPart?
+    @State private var scene = ViewportScene()
 
     var body: some View {
-        RealityView { content in
-            let root = Entity()
-            root.name = "root"
-            content.add(root)
+        GeometryReader { geo in
+            RealityView { content in
+                content.add(scene.root)
 
-            let sun = DirectionalLight()
-            sun.light.intensity = 3200
-            sun.shadow = DirectionalLightComponent.Shadow(maximumDistance: 6, depthBias: 2)
-            sun.look(at: .zero, from: [1.2, 3.0, 2.5], relativeTo: nil)
-            content.add(sun)
+                let sun = DirectionalLight()
+                sun.light.intensity = 3200
+                sun.shadow = DirectionalLightComponent.Shadow(maximumDistance: 6, depthBias: 2)
+                sun.look(at: .zero, from: [1.2, 3.0, 2.5], relativeTo: nil)
+                content.add(sun)
 
-            let fill = DirectionalLight()
-            fill.light.intensity = 900
-            fill.look(at: .zero, from: [-2.5, 1.5, 1.0], relativeTo: nil)
-            content.add(fill)
+                let fill = DirectionalLight()
+                fill.light.intensity = 900
+                fill.look(at: .zero, from: [-2.5, 1.5, 1.0], relativeTo: nil)
+                content.add(fill)
 
-            // A three-quarter view from front left, far enough back to see a short run.
-            let camera = PerspectiveCamera()
-            camera.camera.fieldOfViewInDegrees = 35
-            camera.look(at: [0, 0.55, -0.3], from: [-2.3, 2.1, 4.3], relativeTo: nil)
-            content.add(camera)
+                // A three-quarter view from front left, far enough back to see a short run.
+                scene.camera.camera.fieldOfViewInDegrees = 35
+                scene.camera.look(at: [0, 0.55, -0.3], from: [-2.3, 2.1, 4.3], relativeTo: nil)
+                content.add(scene.camera)
 
-            let floor = ModelEntity(
-                mesh: .generatePlane(width: 12, depth: 12),
-                materials: [SimpleMaterial(color: NSColor(white: 0.32, alpha: 1), roughness: 0.9, isMetallic: false)]
+                let floor = ModelEntity(
+                    mesh: .generatePlane(width: 12, depth: 12),
+                    materials: [SimpleMaterial(color: NSColor(white: 0.32, alpha: 1), roughness: 0.9, isMetallic: false)]
+                )
+                floor.position.y = -0.0005
+                content.add(floor)
+            } update: { _ in
+                scene.update(project: project, look: look, hovered: hovered?.panel.name)
+            }
+            .realityViewCameraControls(.orbit)
+            .gesture(
+                SpatialTapGesture().targetedToAnyEntity().onEnded { value in
+                    if let id = scene.cabinet(of: value.entity, in: project) {
+                        withAnimation(.snappy) { project.selection = id }
+                    }
+                }
             )
-            floor.position.y = -0.0005
-            content.add(floor)
-        } update: { content in
-            guard let root = content.entities.first(where: { $0.name == "root" }) else { return }
-            root.children.removeAll()
-            var minX = Float.greatestFiniteMagnitude, maxX = -Float.greatestFiniteMagnitude
-            for cab in project.cabinets {
-                guard let b = project.build(cab) else { continue }
-                let selected = cab.id == project.selection
-                for p in b.panels where showFronts || !p.isFront {
-                    let e = panelEntity(p, selected: selected)
-                    e.name = cab.id
-                    root.addChild(e)
-                    minX = min(minX, Float(p.x) / 1000)
-                    maxX = max(maxX, Float(p.x + p.width) / 1000)
+            .onContinuousHover { phase in
+                switch phase {
+                case .active(let point):
+                    if let name = scene.part(at: point, size: geo.size),
+                       let panel = scene.panels[name] {
+                        hovered = HoveredPart(panel: panel, at: point)
+                    } else {
+                        hovered = nil
+                    }
+                case .ended:
+                    hovered = nil
                 }
             }
-            // Keep the run centred on the origin the camera orbits.
-            if minX < maxX { root.position.x = -(minX + maxX) / 2 }
         }
-        .realityViewCameraControls(.orbit)
-        .gesture(
-            SpatialTapGesture().targetedToAnyEntity().onEnded { value in
-                var e: Entity? = value.entity
-                while let cur = e, !project.cabinets.contains(where: { $0.id == cur.name }) { e = cur.parent }
-                if let id = e?.name { project.selection = id }
+    }
+}
+
+/// The viewport's entities, kept across updates so a change moves panels instead of rebuilding
+/// them (doors swing, explode slides). One entity per panel, named after the part.
+@MainActor
+final class ViewportScene {
+    let root = Entity()
+    let camera = PerspectiveCamera()
+    /// The panels shown, by part name, as last built.
+    private(set) var panels: [String: PanelBox] = [:]
+    private var sizes: [String: SIMD3<Float>] = [:]
+    private var wasOpen = false
+
+    func update(project: ProjectModel, look: ViewportLook, hovered: String?) {
+        var seen = Set<String>()
+        var minX = Float.greatestFiniteMagnitude, maxX = -Float.greatestFiniteMagnitude
+        let sectionX = project.selected.flatMap { cab in
+            project.build(cab).map { b in b.panels.map { $0.x + $0.width / 2 }.reduce(0, +) / Double(max(b.panels.count, 1)) }
+        }
+        let animate = look.open != wasOpen
+        wasOpen = look.open
+        for cab in project.cabinets {
+            guard let b = project.build(cab) else { continue }
+            let selected = cab.id == project.selection
+            let centre = Self.centre(of: b.panels)
+            for p in b.panels {
+                guard look.showFronts || !p.isFront else { continue }
+                var box = p
+                if look.section, let cut = sectionX {
+                    if p.x + p.width <= cut { continue }
+                    if p.x < cut {
+                        box.width -= cut - p.x
+                        box.x = cut
+                    }
+                }
+                seen.insert(p.name)
+                panels[p.name] = p
+                let e = entity(for: box)
+                e.model?.materials = [Self.material(box, selected: selected, hovered: p.name == hovered)]
+                let target = Self.transform(box, centre: centre, look: look)
+                if animate && p.isFront {
+                    e.move(to: target, relativeTo: root, duration: 0.45, timingFunction: .easeInOut)
+                } else {
+                    e.transform = target
+                }
+                minX = min(minX, Float(p.x) / 1000)
+                maxX = max(maxX, Float(p.x + p.width) / 1000)
             }
-        )
+        }
+        for e in root.children where !seen.contains(e.name) {
+            e.removeFromParent()
+            panels[e.name] = nil
+            sizes[e.name] = nil
+        }
+        // Keep the run centred on the origin the camera orbits.
+        if minX < maxX { root.position.x = -(minX + maxX) / 2 }
     }
 
-    private func panelEntity(_ p: PanelBox, selected: Bool) -> ModelEntity {
-        // Cabinet frame (mm, Z up, Y to the back) → RealityKit (m, Y up, Z to the viewer).
+    /// The panel's entity, made or remade when its size changes. Its mesh is centred on its hinge
+    /// edge for doors (so it swings about it) and on its middle otherwise.
+    private func entity(for p: PanelBox) -> ModelEntity {
         let size = SIMD3<Float>(Float(p.width), Float(p.height), Float(p.depth)) / 1000
-        let centre = SIMD3<Float>(
-            Float(p.x + p.width / 2),
-            Float(p.z + p.height / 2),
-            -Float(p.y + p.depth / 2)
-        ) / 1000
+        if let e = root.findEntity(named: p.name) as? ModelEntity, sizes[p.name] == size {
+            return e
+        }
+        root.findEntity(named: p.name)?.removeFromParent()
+        // The geometry sits off the entity's origin so the origin is the pivot.
+        let offset = Self.mid(p) - Self.pivot(p)
+        let e = ModelEntity(mesh: Self.offsetMesh(size: size, by: offset), materials: [])
+        e.name = p.name
+        e.components.set(InputTargetComponent())
+        e.collision = CollisionComponent(shapes: [ShapeResource.generateBox(size: size).offsetBy(translation: offset)])
+        root.addChild(e)
+        sizes[p.name] = size
+        return e
+    }
+
+    private static func offsetMesh(size: SIMD3<Float>, by offset: SIMD3<Float>) -> MeshResource {
+        var desc = MeshDescriptor()
+        let h = size / 2
+        let corners: [SIMD3<Float>] = (0..<8).map { i in
+            SIMD3(i & 1 == 0 ? -h.x : h.x, i & 2 == 0 ? -h.y : h.y, i & 4 == 0 ? -h.z : h.z) + offset
+        }
+        // Each face as its own four vertices so it shades flat.
+        let faces: [([Int], SIMD3<Float>)] = [
+            ([0, 2, 6, 4], [-1, 0, 0]), ([1, 5, 7, 3], [1, 0, 0]),
+            ([0, 4, 5, 1], [0, -1, 0]), ([2, 3, 7, 6], [0, 1, 0]),
+            ([0, 1, 3, 2], [0, 0, -1]), ([4, 6, 7, 5], [0, 0, 1]),
+        ]
+        var positions: [SIMD3<Float>] = [], normals: [SIMD3<Float>] = [], uvs: [SIMD2<Float>] = []
+        var indices: [UInt32] = []
+        for (quad, n) in faces {
+            let base = UInt32(positions.count)
+            for (k, i) in quad.enumerated() {
+                positions.append(corners[i])
+                normals.append(n)
+                uvs.append([k == 1 || k == 2 ? 1 : 0, k >= 2 ? 1 : 0])
+            }
+            // Counter-clockwise seen from outside, so the faces point out.
+            indices += [base, base + 2, base + 1, base, base + 3, base + 2]
+        }
+        desc.positions = MeshBuffers.Positions(positions)
+        desc.normals = MeshBuffers.Normals(normals)
+        desc.textureCoordinates = MeshBuffers.TextureCoordinates(uvs)
+        desc.primitives = .triangles(indices)
+        return (try? MeshResource.generate(from: [desc])) ?? .generateBox(size: size)
+    }
+
+    /// Cabinet frame (mm, Z up, Y to the back) → RealityKit (m, Y up, Z to the viewer).
+    private static func point(_ x: Double, _ y: Double, _ z: Double) -> SIMD3<Float> {
+        SIMD3<Float>(Float(x), Float(z), -Float(y)) / 1000
+    }
+
+    private static func mid(_ p: PanelBox) -> SIMD3<Float> {
+        point(p.x + p.width / 2, p.y + p.depth / 2, p.z + p.height / 2)
+    }
+
+    /// A door turns about its hinged edge at the front face; everything else about its middle.
+    private static func pivot(_ p: PanelBox) -> SIMD3<Float> {
+        switch p.hinged {
+        case "left": point(p.x, p.y, p.z + p.height / 2)
+        case "right": point(p.x + p.width, p.y, p.z + p.height / 2)
+        default: mid(p)
+        }
+    }
+
+    private static func centre(of panels: [PanelBox]) -> SIMD3<Float> {
+        guard !panels.isEmpty else { return .zero }
+        return panels.map(mid).reduce(.zero, +) / Float(panels.count)
+    }
+
+    private static func transform(_ p: PanelBox, centre: SIMD3<Float>, look: ViewportLook) -> Transform {
+        var t = Transform(translation: pivot(p))
+        // Exploded: away from the cabinet's centre, as far as 250 mm.
+        let away = mid(p) - centre
+        let len = simd_length(away)
+        if len > 0.0001 { t.translation += away / len * Float(look.explode) * 0.25 }
+        if look.open {
+            switch (p.role, p.hinged) {
+            case ("Door", "left"): t.rotation = simd_quatf(angle: -.pi * 0.55, axis: [0, 1, 0])
+            case ("Door", "right"): t.rotation = simd_quatf(angle: .pi * 0.55, axis: [0, 1, 0])
+            case ("Drawer front", _): t.translation.z += 0.35
+            default: break
+            }
+        }
+        return t
+    }
+
+    private static func material(_ p: PanelBox, selected: Bool, hovered: Bool) -> PhysicallyBasedMaterial {
         let colour: NSColor = p.isFront
             ? NSColor(calibratedRed: 0.78, green: 0.65, blue: 0.48, alpha: 1)
             : NSColor(calibratedWhite: p.role == "Back" ? 0.78 : 0.93, alpha: 1)
-        var material = PhysicallyBasedMaterial()
-        material.baseColor = .init(tint: selected ? colour : colour.blended(withFraction: 0.35, of: .gray) ?? colour)
-        material.roughness = 0.65
-        let e = ModelEntity(mesh: .generateBox(size: size, cornerRadius: 0.0006), materials: [material])
-        e.position = centre
-        e.components.set(InputTargetComponent())
-        e.collision = CollisionComponent(shapes: [.generateBox(size: size)])
-        return e
+        var m = PhysicallyBasedMaterial()
+        m.baseColor = .init(tint: selected ? colour : colour.blended(withFraction: 0.35, of: .gray) ?? colour)
+        m.roughness = 0.65
+        // The selected cabinet glows faintly in the accent colour; the panel under the pointer more.
+        if selected || hovered {
+            m.emissiveColor = .init(color: .controlAccentColor)
+            m.emissiveIntensity = hovered ? 0.6 : 0.12
+        }
+        return m
+    }
+
+    /// The cabinet an entity in the viewport belongs to: its part names start with the id.
+    func cabinet(of entity: Entity, in project: ProjectModel) -> String? {
+        project.cabinets.first { entity.name.hasPrefix($0.id + ".") }?.id
+    }
+
+    /// The part under a point of the view, by a ray from the camera through it.
+    func part(at point: CGPoint, size: CGSize) -> String? {
+        guard size.width > 0, size.height > 0, let scene = root.scene else { return nil }
+        let fov = camera.camera.fieldOfViewInDegrees * .pi / 180
+        let t = tan(fov / 2)
+        let aspect = Float(size.width / size.height)
+        let local = SIMD3<Float>(
+            (2 * Float(point.x / size.width) - 1) * t * aspect,
+            (1 - 2 * Float(point.y / size.height)) * t,
+            -1
+        )
+        let m = camera.transformMatrix(relativeTo: nil)
+        let origin = SIMD3<Float>(m.columns.3.x, m.columns.3.y, m.columns.3.z)
+        let dir = simd_normalize(simd_make_float3(m * SIMD4<Float>(local, 0)))
+        let hit = scene.raycast(origin: origin, direction: dir, length: 50, query: .nearest).first
+        return hit.map(\.entity.name).flatMap { panels[$0] != nil ? $0 : nil }
     }
 }

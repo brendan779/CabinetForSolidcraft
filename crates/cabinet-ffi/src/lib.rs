@@ -43,6 +43,8 @@ pub struct PanelBox {
     pub depth: f64,
     pub height: f64,
     pub is_front: bool,
+    /// A door's hinged edge, `left` or `right`; empty for other parts.
+    pub hinged: String,
 }
 
 #[derive(uniffi::Record)]
@@ -356,6 +358,19 @@ fn summary(list: PartList) -> BuildSummary {
             depth: p.bounds.size.y,
             height: p.bounds.size.z,
             is_front: p.role.is_front(),
+            hinged: list
+                .hardware
+                .iter()
+                .find(|h| h.part == p.name && h.item.starts_with("blum.clip-top"))
+                .map(|h| {
+                    if h.at.x < p.bounds.center().x {
+                        "left"
+                    } else {
+                        "right"
+                    }
+                })
+                .unwrap_or_default()
+                .to_string(),
         })
         .collect();
     let biscuits = list
