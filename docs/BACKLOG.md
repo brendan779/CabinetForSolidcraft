@@ -25,7 +25,7 @@ Priorities: **P0** blocks most other work · **P1** MVP · **P2** commercial par
 |---|---|---|---|---|
 | INF-1 | done (initial) | M | Cargo workspace, crates, SwiftUI app shell, build-core.sh, check.sh | `scripts/check.sh` green |
 | INF-2 | done (e4e904d) | S | GitHub Actions CI on `macos-latest`: `scripts/check.sh` | CI badge green on main |
-| INF-3 | todo | S | Move the Swift app to Swift 6 language mode with strict concurrency | builds with `SWIFT_VERSION = 6`, no warnings |
+| INF-3 | done (night/2026-10-23) | S | Move the Swift app to Swift 6 language mode with strict concurrency | builds with `SWIFT_VERSION = 6`, no warnings |
 | INF-4 | done (night/2026-10-23) | M | Snapshot tests for SVG cut sheets (insta crate) and a golden part list per cabinet kind | `cargo insta test` passes; goldens committed |
 | INF-5 | done (night/2026-10-23) | S | `cargo deny` licence/advisory check in check.sh | added and green |
 | PERF-1 | done (night/2026-10-23) | M | **Batch machining per panel.** Emit all bores on one face of a panel as one sketch (circles) + one extrude cut instead of one `solid.cylinder` cut each. Tall cabinet at Manufacturing detail currently takes ~121 s for 293 commands | Tall cabinet at Manufacturing detail builds in < 10 s against SolidCraft 0.20; timing recorded in docs/perf.md |
@@ -180,3 +180,4 @@ Agents append one line per session: date, items touched, outcome.
 - 2026-10-23 (night) — DATA-1 done: tools/parse_polytec.py reads the DECORATIVE board tables (9-32 mm) from word positions; 459 boards, 717 tapes; 263/263 decorative 16/18 mm rows with board codes parsed and cross-checked against `pdftotext -layout`. DATA-10 added for the rest of the guide.
 - 2026-10-23 (night) — INF-4 done: insta golden part list per cabinet kind and SVG snapshots of every base cabinet sheet; `cargo insta test --check` passes.
 - 2026-10-23 (night) — INF-5 done: `cargo deny check` (licences, advisories, sources) in check.sh and CI; uniffi is MPL-2.0 and its basic-toml advisory is ignored with a reason.
+- 2026-10-23 (night) — INF-3 done: Swift 6 language mode with complete strict concurrency, zero warnings (Xcode 26.6). App launched and quit cleanly; no screenshot (this Mac has not granted Screen Recording).

@@ -53,15 +53,9 @@ struct SizeSection: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             SectionTitle("Size")
-            dimension("Width", value: cab.width, presets: [300, 400, 450, 500, 600, 800, 900, 1000, 1200]) { v in
-                var c = cab; c.width = v; project.selected = c
-            }
-            dimension("Height", value: cab.height, presets: heightPresets) { v in
-                var c = cab; c.height = v; project.selected = c
-            }
-            dimension("Depth", value: cab.depth, presets: [300, 330, 350, 450, 560, 580, 600]) { v in
-                var c = cab; c.depth = v; project.selected = c
-            }
+            dimension("Width", \.width, presets: [300, 400, 450, 500, 600, 800, 900, 1000, 1200])
+            dimension("Height", \.height, presets: heightPresets)
+            dimension("Depth", \.depth, presets: [300, 330, 350, 450, 560, 580, 600])
             HStack {
                 Text("Shelves").foregroundStyle(.secondary)
                 Spacer()
@@ -81,12 +75,20 @@ struct SizeSection: View {
         }
     }
 
-    private func dimension(_ title: String, value: Double, presets: [Double], set: @escaping (Double) -> Void) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
+    // A key path rather than a setter closure: Swift 6.3 crashes converting a @MainActor setter
+    // closure for Binding.
+    private func dimension(_ title: String, _ size: WritableKeyPath<CabinetDoc, Double> & Sendable, presets: [Double]) -> some View {
+        let value = cab[keyPath: size]
+        let set = { (v: Double) in
+            var c = cab; c[keyPath: size] = v; project.selected = c
+        }
+        return VStack(alignment: .leading, spacing: 6) {
             HStack {
                 Text(title).foregroundStyle(.secondary)
                 Spacer()
-                Stepper(value: Binding(get: { value }, set: set), in: 100...3000, step: 1) {
+                Stepper(value: Binding(get: { value }, set: { v in
+                    var c = cab; c[keyPath: size] = v; project.selected = c
+                }), in: 100...3000, step: 1) {
                     Text("\(Int(value)) mm").monospacedDigit().fontWeight(.medium)
                 }
             }
