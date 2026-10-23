@@ -6,19 +6,25 @@ import WebKit
 struct CutListView: View {
     @State private var showing = "Parts"
 
+    // Workspace controls live in the view, not the window toolbar: the toolbar is already full,
+    // and adding items to it made AppKit's title bar layout unsatisfiable and crash.
     var body: some View {
-        Group {
-            if showing == "Parts" { PartsListView() } else { HardwareListView() }
-        }
-        .toolbar {
-            ToolbarItem(placement: .navigation) {
+        VStack(spacing: 0) {
+            HStack {
                 Picker("Show", selection: $showing) {
                     Text("Parts").tag("Parts")
                     Text("Hardware").tag("Hardware")
                 }
                 .pickerStyle(.segmented)
+                .labelsHidden()
+                .fixedSize()
                 .help("Parts to cut, or hardware to order")
+                Spacer()
             }
+            .padding(.horizontal, 10)
+            .padding(.vertical, 6)
+            .background(.bar)
+            if showing == "Parts" { PartsListView() } else { HardwareListView() }
         }
     }
 }
@@ -164,7 +170,9 @@ struct CutSheetsView: View {
     @State private var pdf: (doc: DataDocument, name: String)?
 
     var body: some View {
-        HSplitView {
+        // A plain HStack, not HSplitView: a nested NSSplitView beside the inspector sent AppKit into
+        // an endless constraint-update loop in full screen, which crashed the app.
+        HStack(spacing: 0) {
             List(selection: $part) {
                 ForEach(project.cabinets) { cab in
                     Section(cab.id) {
@@ -175,19 +183,34 @@ struct CutSheetsView: View {
                     }
                 }
             }
-            .frame(minWidth: 200, maxWidth: 280)
-            Group {
-                if let part, let svg = try? cutSheetSvg(items: project.jobItems, partName: part, job: project.jobName) {
-                    SVGView(svg: svg)
-                } else {
-                    ContentUnavailableView("Pick a part", systemImage: "doc.richtext",
-                                           description: Text("Every part gets a dimensioned sheet with its bores, slots and edge tape."))
+            .frame(width: 220)
+            Divider()
+            VStack(spacing: 0) {
+                actions
+                Group {
+                    if let part, let svg = try? cutSheetSvg(items: project.jobItems, partName: part, job: project.jobName) {
+                        SVGView(svg: svg)
+                    } else {
+                        ContentUnavailableView("Pick a part", systemImage: "doc.richtext",
+                                               description: Text("Every part gets a dimensioned sheet with its bores, slots and edge tape."))
+                    }
                 }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
-            .frame(minWidth: 500, maxWidth: .infinity, maxHeight: .infinity)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
-        .toolbar {
-            ToolbarItemGroup {
+        .fileExporter(isPresented: Binding(get: { pdf != nil }, set: { if !$0 { pdf = nil } }),
+                      document: pdf?.doc, contentType: .pdf,
+                      defaultFilename: pdf?.name ?? "") { result in
+            if case .success(let url) = result { project.status = "Saved \(url.lastPathComponent)" }
+        }
+    }
+
+    /// Export buttons in a bar over the sheet (above the status bar's reach). They used to be window toolbar items, which crashed
+    /// the app: the toolbar had no room left and its layout became unsatisfiable.
+    private var actions: some View {
+        HStack {
+            Spacer()
                 Button("Labels…", systemImage: "qrcode") {
                     do {
                         pdf = (DataDocument(data: try partLabelsPdf(items: project.jobItems, job: project.jobName)),
@@ -206,13 +229,10 @@ struct CutSheetsView: View {
                     }
                 }
                 .help("Every part's sheet in one PDF, after a cover and an index")
-            }
         }
-        .fileExporter(isPresented: Binding(get: { pdf != nil }, set: { if !$0 { pdf = nil } }),
-                      document: pdf?.doc, contentType: .pdf,
-                      defaultFilename: pdf?.name ?? "") { result in
-            if case .success(let url) = result { project.status = "Saved \(url.lastPathComponent)" }
-        }
+        .padding(.horizontal, 10)
+        .padding(.vertical, 6)
+        .background(.bar)
     }
 }
 

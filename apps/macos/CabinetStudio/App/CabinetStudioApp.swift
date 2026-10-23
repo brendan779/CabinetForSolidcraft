@@ -2,6 +2,13 @@ import SwiftUI
 
 @main
 struct CabinetStudioApp: App {
+    init() {
+        // Job windows must not merge into tabs: with a tab bar, AppKit lays the full-screen title
+        // bar out at zero width, its constraints become unsatisfiable and the app crashes when the
+        // toolbar changes (switching to Cut Sheets did it).
+        NSWindow.allowsAutomaticWindowTabbing = false
+    }
+
     var body: some Scene {
         DocumentGroup(newDocument: { JobDocument() }) { file in
             JobWindow(document: file.document, fileURL: file.fileURL)
