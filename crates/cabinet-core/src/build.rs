@@ -186,9 +186,13 @@ impl<'a> Builder<'a> {
         let (Some(face), Some(end)) = (self.part(face), self.part(end)) else {
             return;
         };
+        self.joint_parts(&face, &end, normal, along);
+    }
+
+    fn joint_parts(&mut self, face: &Part, end: &Part, normal: Dir, along: Axis) {
         let joint = ButtJoint {
-            face_part: &face,
-            end_part: &end,
+            face_part: face,
+            end_part: end,
             normal,
             along,
         };
@@ -460,15 +464,25 @@ impl<'a> Builder<'a> {
         let (w, t) = (cab.width, s.carcass_thickness);
         let (z0, z1) = self.opening_z;
         let y1 = self.interior_back - 2.0;
+        let mut fixed_z = Vec::new();
         if n > 0 {
             let step = (z1 - z0) / (n + 1) as f64;
             for i in 1..=n {
                 // Snap to the 32 mm grid so a shelf rests on real pin holes.
                 let raw = z0 + step * i as f64;
                 let z = z0 + ((raw - z0) / SYSTEM32_PITCH).round() * SYSTEM32_PITCH;
-                self.add(
-                    PartRole::Shelf,
-                    Some(i),
+                let fixed = cab.fixed_shelves.contains(&(i as u32));
+                // A fixed shelf fills the width and reaches the back, like a bottom.
+                let bounds = if fixed {
+                    aabb(
+                        t,
+                        s.shelf_front_setback,
+                        z,
+                        w - t,
+                        self.interior_back,
+                        z + t,
+                    )
+                } else {
                     aabb(
                         t + SHELF_SIDE_CLEARANCE,
                         s.shelf_front_setback,
@@ -476,18 +490,36 @@ impl<'a> Builder<'a> {
                         w - t - SHELF_SIDE_CLEARANCE,
                         y1,
                         z + t,
-                    ),
+                    )
+                };
+                self.add(
+                    PartRole::Shelf,
+                    Some(i),
+                    bounds,
                     Axis::Z,
                     Axis::X,
                     EdgeBanding::front_only(),
                 );
+                if fixed {
+                    fixed_z.push(z + t / 2.0);
+                    let shelf = self.list.parts.last().cloned().unwrap();
+                    let (left, right) = (
+                        self.part(PartRole::LeftSide).unwrap(),
+                        self.part(PartRole::RightSide).unwrap(),
+                    );
+                    self.joint_parts(&left, &shelf, Dir::new(Axis::X, true), Axis::Y);
+                    self.joint_parts(&right, &shelf, Dir::new(Axis::X, false), Axis::Y);
+                }
             }
-            self.shelf_pin_rows();
+            if fixed_z.len() < n {
+                self.shelf_pin_rows(&fixed_z);
+            }
         }
     }
 
-    /// Shelf-pin holes on the inside of both sides: a front and a back row on the 32 mm grid.
-    fn shelf_pin_rows(&mut self) {
+    /// Shelf-pin holes on the inside of both sides: a front and a back row on the 32 mm grid,
+    /// left out within a pitch of a fixed shelf (centres in `fixed_z`), where its fixings are.
+    fn shelf_pin_rows(&mut self, fixed_z: &[f64]) {
         let cab = self.cab;
         let t = cab.standard.carcass_thickness;
         let (z0, z1) = self.opening_z;
@@ -498,6 +530,10 @@ impl<'a> Builder<'a> {
         let mut z = first;
         let mut skipped = 0;
         while z <= z1 - 2.0 * SYSTEM32_PITCH {
+            if fixed_z.iter().any(|f| (z - f).abs() < SYSTEM32_PITCH) {
+                z += SYSTEM32_PITCH;
+                continue;
+            }
             for y in rows {
                 for (part, x, positive) in [(&left, t, false), (&right, cab.width - t, true)] {
                     let at = Vec3::new(x, y, z);
@@ -854,6 +890,115 @@ mod tests {
             slots - 2,
             "one screw between each pair of biscuits per side"
         );
+    }
+
+    #[test]
+    fn a_fixed_shelf_is_joined_to_both_sides_like_a_bottom() {
+        let mut cab = Cabinet::new("T01", CabinetKind::Tall);
+        cab.fixed_shelves = vec![2];
+        let list = build_cabinet(&cab).unwrap();
+        let shelf = list.part("T01.Shelf2").unwrap();
+        let t = cab.standard.carcass_thickness;
+        assert_eq!(shelf.bounds.size.x, cab.width - 2.0 * t, "fills the width");
+        for side in ["T01.LeftSide", "T01.RightSide"] {
+            let slots = list
+                .operations
+                .iter()
+                .filter(|o| {
+                    matches!(o, Operation::BiscuitSlot { parts, .. }
+                    if parts.contains(&side.to_string()) && parts.contains(&shelf.name))
+                })
+                .count();
+            assert!(slots >= 2, "{side}: {slots} biscuits");
+        }
+        let screws = list
+            .operations
+            .iter()
+            .filter(|o| {
+                matches!(o, Operation::Bore { part, purpose: BorePurpose::ScrewPilot, .. }
+                if *part == shelf.name)
+            })
+            .count();
+        assert!(screws >= 2, "{screws} screws");
+    }
+
+    #[test]
+    fn adjustable_shelves_have_no_joints_and_keep_their_clearance() {
+        let list = build_cabinet(&Cabinet::new("T01", CabinetKind::Tall)).unwrap();
+        let shelf = list.part("T01.Shelf2").unwrap();
+        assert!(!list.operations.iter().any(|o| match o {
+            Operation::BiscuitSlot { parts, .. } => parts.contains(&shelf.name),
+            Operation::Bore { part, .. } => *part == shelf.name,
+            Operation::Groove { part, .. } => *part == shelf.name,
+        }));
+        assert_eq!(shelf.bounds.min.x, 16.0 + SHELF_SIDE_CLEARANCE);
+    }
+
+    #[test]
+    fn no_shelf_pins_beside_a_fixed_shelf_and_none_at_all_when_every_shelf_is_fixed() {
+        let mut cab = Cabinet::new("T01", CabinetKind::Tall);
+        cab.fixed_shelves = vec![2];
+        let list = build_cabinet(&cab).unwrap();
+        let shelf = list.part("T01.Shelf2").unwrap();
+        let mid = shelf.bounds.center().z;
+        assert!(list.operations.iter().any(|o| matches!(
+            o,
+            Operation::Bore {
+                purpose: BorePurpose::ShelfPin,
+                ..
+            }
+        )));
+        assert!(!list.operations.iter().any(|o| matches!(o,
+            Operation::Bore { purpose: BorePurpose::ShelfPin, at, .. } if (at.z - mid).abs() < SYSTEM32_PITCH)));
+
+        cab.fixed_shelves = vec![1, 2, 3, 4];
+        let list = build_cabinet(&cab).unwrap();
+        assert!(!list.operations.iter().any(|o| matches!(
+            o,
+            Operation::Bore {
+                purpose: BorePurpose::ShelfPin,
+                ..
+            }
+        )));
+    }
+
+    #[test]
+    fn fixed_shelf_fixings_stay_clear_of_other_bores_in_the_sides() {
+        for kind in [CabinetKind::Base, CabinetKind::Wall, CabinetKind::Tall] {
+            let mut cab = Cabinet::new("C01", kind);
+            cab.adjustable_shelves = 3;
+            cab.fixed_shelves = vec![1, 2, 3];
+            let list = build_cabinet(&cab).unwrap();
+            let side_bores: Vec<_> = list
+                .operations
+                .iter()
+                .filter_map(|o| match o {
+                    Operation::Bore {
+                        part,
+                        at,
+                        diameter,
+                        direction,
+                        ..
+                    } if part.ends_with("Side") && direction.axis == Axis::X => {
+                        Some((part, at, diameter))
+                    }
+                    _ => None,
+                })
+                .collect();
+            for (i, a) in side_bores.iter().enumerate() {
+                for b in &side_bores[i + 1..] {
+                    if a.0 != b.0 {
+                        continue;
+                    }
+                    let gap = ((a.1.y - b.1.y).powi(2) + (a.1.z - b.1.z).powi(2)).sqrt();
+                    assert!(
+                        gap >= (a.2 + b.2) / 2.0,
+                        "{kind:?}: bores {gap:.1} apart at {:?}",
+                        a.1
+                    );
+                }
+            }
+        }
     }
 
     #[test]

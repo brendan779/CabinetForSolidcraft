@@ -44,7 +44,17 @@ struct CabinetDoc: Identifiable, Hashable, Codable {
     }
     var shelves: Int {
         get { Int(number("adjustable_shelves")) }
-        set { setNumber("adjustable_shelves", Double(max(0, newValue))) }
+        set {
+            let n = max(0, newValue)
+            setNumber("adjustable_shelves", Double(n))
+            fixedShelves = fixedShelves.filter { $0 <= n }
+        }
+    }
+
+    /// Shelves (numbered from 1 at the bottom) fixed between the sides instead of on pins.
+    var fixedShelves: [Int] {
+        get { (object["fixed_shelves"] as? [NSNumber])?.map(\.intValue) ?? [] }
+        set { update { $0["fixed_shelves"] = newValue.isEmpty ? nil : newValue.sorted() } }
     }
 
     /// X offset of the cabinet in the run.

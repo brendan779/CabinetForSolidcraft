@@ -29,9 +29,13 @@ pub struct Cabinet {
     pub standard: ConstructionStandard,
     #[serde(default)]
     pub fronts: FrontLayout,
-    /// Adjustable shelves inside the main opening.
+    /// Shelves inside the main opening (the name is historical: fixed ones count too).
     #[serde(default)]
     pub adjustable_shelves: u32,
+    /// Which shelves, numbered from 1 at the bottom, are fixed: full width, biscuited and screwed
+    /// between the sides like a bottom. The rest sit on shelf pins.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub fixed_shelves: Vec<u32>,
 }
 
 impl Cabinet {
@@ -48,6 +52,7 @@ impl Cabinet {
             standard: ConstructionStandard::default(),
             fronts: kind.default_fronts_for(w),
             adjustable_shelves: kind.default_shelves(),
+            fixed_shelves: Vec::new(),
         }
     }
 

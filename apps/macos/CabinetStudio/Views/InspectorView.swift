@@ -64,6 +64,28 @@ struct SizeSection: View {
                 }), in: 0...8)
                 .monospacedDigit()
             }
+            if cab.shelves > 0 {
+                HStack(spacing: 6) {
+                    Text("Fixed").foregroundStyle(.secondary)
+                    Spacer()
+                    ForEach(1...cab.shelves, id: \.self) { i in
+                        let fixed = cab.fixedShelves.contains(i)
+                        Button {
+                            withAnimation(.snappy) {
+                                var c = cab
+                                c.fixedShelves = fixed ? c.fixedShelves.filter { $0 != i } : c.fixedShelves + [i]
+                                project.selected = c
+                            }
+                        } label: {
+                            Image(systemName: fixed ? "lock.fill" : "\(i).circle")
+                        }
+                        .buttonStyle(ChipStyle(selected: fixed))
+                        .help(fixed ? "Shelf \(i) is fixed: biscuited and screwed between the sides. Click to put it on pins."
+                                    : "Shelf \(i) sits on shelf pins. Click to fix it between the sides.")
+                        .accessibilityLabel("Shelf \(i) \(fixed ? "fixed" : "on pins")")
+                    }
+                }
+            }
         }
     }
 
