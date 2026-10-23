@@ -229,7 +229,8 @@ final class ProjectModel {
     var standardJson: String
     /// Picker changes go to the selected cabinet only, as an override, instead of the whole job.
     var onlyThisCabinet = false
-    let port: UInt16 = 7878
+    /// SolidCraft's control port, from Settings.
+    var port: UInt16 { Preferences.port }
 
     /// The last job build, by the items and placements it was built from.
     @ObservationIgnored private var jobBuild: (key: [String], items: [ItemBuild])?
@@ -506,7 +507,7 @@ final class ProjectModel {
             lastError = "Select a cabinet to use this board for."
             return
         }
-        guard let dir = Bundle.main.url(forResource: "catalog", withExtension: nil) else { return }
+        guard let dir = Preferences.catalogDir else { return }
         do {
             let old = cab
             cab.json = try CabinetStudio.assignBoard(cabinetJson: cab.json, slot: slot, boardId: board.id, catalogDir: dir.path)
@@ -693,7 +694,7 @@ final class ProjectModel {
 
     /// The bundled board catalog.
     @ObservationIgnored private(set) lazy var boards: [BoardRecord] = {
-        guard let dir = Bundle.main.url(forResource: "catalog", withExtension: nil) else { return [] }
+        guard let dir = Preferences.catalogDir else { return [] }
         return (try? loadBoards(catalogDir: dir.path)) ?? []
     }()
 }

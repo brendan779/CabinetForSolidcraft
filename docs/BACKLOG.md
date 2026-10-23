@@ -150,8 +150,8 @@ committed: they are the brands' copyright. `preview_colour` is an approximation.
 | UI-9 | needs-human (built in 9fd31d0; try the keys) | S | Keyboard: ⌘1–4 workspaces, arrows to step through cabinets, ⌫ delete | works |
 | UI-10 | todo | M | Onboarding: first launch connects to SolidCraft, explains Design vs Manufacturing detail | first-run sheet |
 | UI-11 | done (bae6fe6) | S | App icon and accent colour | icon in Dock |
-| UI-12 | todo | M | Preferences: SolidCraft port, default standard, units, catalog folder, vendor-cad folder | Settings scene |
-| UI-13 | needs-human (built in SHA; save a standard, start a new job, apply it) | M | Construction standard editor: save/load named standards ("My shop") as visual presets | standards menu |
+| UI-12 | needs-human (built in SHA; open Settings (⌘,) and change each) | M | Preferences: SolidCraft port, default standard, units, catalog folder, vendor-cad folder | Settings scene |
+| UI-13 | needs-human (built in 6ac857e; save a standard, start a new job, apply it) | M | Construction standard editor: save/load named standards ("My shop") as visual presets | standards menu |
 | UI-14 | todo | S | Accessibility pass: VoiceOver labels on every drawn tile, Dynamic Type sizes | Accessibility Inspector clean |
 | UI-15 | todo | M | UI tests (XCUITest) for add cabinet, change option, export CSV | tests pass in check.sh |
 | UI-16 | needs-human (built in 8bfa5ee; not seen on screen here: add an end panel each side and look at the viewport and cut list) | M | Run items in the app: add filler and end panel to the sidebar list (drawn tiles, width/scribe chips), lay out and send the project through `cabinet_core::build_run` (FFI) instead of the Swift layout loop | a run with an end panel each side shows in the viewport, cut list and SolidCraft |
@@ -223,3 +223,4 @@ Agents append one line per session: date, items touched, outcome.
 - 2026-10-24 (night) — UI-9 built: View menu ⌘1–4 for the workspaces and ⌘[ / ⌘] for previous/next cabinet; in the viewport (after a click) the arrows step and ⌫ deletes; Edit › Delete Cabinet is ⌘⌫ (a bare ⌫ menu shortcut would eat text-field deletes); the sidebar list keeps its own arrows and ⌫.
 - 2026-10-24 (night) — UI-11 done: asset catalog with an AppIcon (a two-door oak cabinet on a blue tile, drawn by tools/make_app_icon.swift at every macOS size; AppIcon.icns lands in the bundle) and an oak AccentColor (#c67c3c, lighter in dark mode).
 - 2026-10-24 (night) — UI-13 built: saved standards ("My shop") are JSON files in Application Support/CabinetStudio/Standards, shown under Construction as tiles drawn with their top joint and back; a click makes one the job's standard (cabinets keep their overrides), Save… names the job's standard, the context menu updates or deletes. New jobs can start from one (UI-12).
+- 2026-10-24 (night) — UI-12 built: Settings has General (units, SolidCraft control port with a stepper and Default), Jobs (the saved standard new jobs start from) and Folders (catalog folder in place of the bundled one, supplier CAD folder for BLUM-9). The model reads the port and catalog from there.
