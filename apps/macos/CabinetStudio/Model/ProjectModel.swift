@@ -339,6 +339,24 @@ final class ProjectModel {
         changed()
     }
 
+    /// Selects the item `step` places after (or before) the selected one, stopping at the ends.
+    func selectNeighbour(_ step: Int) {
+        guard !cabinets.isEmpty else { return }
+        let i = cabinets.firstIndex { $0.id == selection } ?? (step > 0 ? -1 : cabinets.count)
+        let j = min(max(i + step, 0), cabinets.count - 1)
+        withAnimation(.snappy) { selection = cabinets[j].id }
+    }
+
+    /// Deletes the selected item and selects its neighbour.
+    func deleteSelection() {
+        guard let id = selection, let i = cabinets.firstIndex(where: { $0.id == id }) else { return }
+        withAnimation(.snappy) {
+            cabinets.remove(at: i)
+            selection = cabinets.isEmpty ? nil : cabinets[min(i, cabinets.count - 1)].id
+        }
+        changed()
+    }
+
     func remove(_ id: CabinetDoc.ID) {
         cabinets.removeAll { $0.id == id }
         if selection == id { selection = cabinets.first?.id }

@@ -27,6 +27,25 @@ struct JobCommands: Commands {
             }
             .disabled(project == nil)
         }
+        CommandGroup(after: .pasteboard) {
+            Button("Delete Cabinet") { project?.deleteSelection() }
+                .keyboardShortcut(.delete, modifiers: .command)
+                .disabled(project?.selection == nil)
+        }
+        CommandGroup(before: .sidebar) {
+            ForEach(Array(Workspace.allCases.enumerated()), id: \.element) { i, w in
+                Button(w.rawValue) { project?.workspace = w }
+                    .keyboardShortcut(KeyEquivalent(Character("\(i + 1)")), modifiers: .command)
+                    .disabled(project == nil)
+            }
+            Button("Previous Cabinet") { project?.selectNeighbour(-1) }
+                .keyboardShortcut("[", modifiers: .command)
+                .disabled(project == nil)
+            Button("Next Cabinet") { project?.selectNeighbour(1) }
+                .keyboardShortcut("]", modifiers: .command)
+                .disabled(project == nil)
+            Divider()
+        }
         CommandMenu("SolidCraft") {
             Button("Build in SolidCraft") { Task { await project?.sendToSolidCraft() } }
                 .keyboardShortcut("b", modifiers: [.command, .shift])

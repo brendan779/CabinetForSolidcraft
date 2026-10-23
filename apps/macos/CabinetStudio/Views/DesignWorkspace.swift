@@ -24,6 +24,18 @@ struct DesignWorkspace: View {
             }
         }
         .animation(.snappy(duration: 0.15), value: hovered?.panel.name)
+        // Arrows step through the cabinets and ⌫ deletes, while the viewport has focus (it takes
+        // it on a click).
+        .focusable()
+        .focusEffectDisabled()
+        .onKeyPress(keys: [.leftArrow, .upArrow, .rightArrow, .downArrow]) { press in
+            project.selectNeighbour(press.key == .leftArrow || press.key == .upArrow ? -1 : 1)
+            return .handled
+        }
+        .onKeyPress(keys: [.delete, .deleteForward]) { _ in
+            project.deleteSelection()
+            return .handled
+        }
         .background(
             LinearGradient(colors: [Color(white: 0.20), Color(white: 0.11)], startPoint: .top, endPoint: .bottom)
         )
