@@ -1,15 +1,17 @@
 //! Cut sheets: one A4-landscape SVG per part, showing the part's main face with every operation
 //! dimensioned from the reference corner (bottom-left as drawn), edge tape marked and a title
-//! block. PDF output and multi-part sheets are BACKLOG items.
+//! block. [`pdf::job_pdf`] puts every sheet of a job in one PDF.
 
 use std::fmt::Write;
+
+pub mod pdf;
 
 use cabinet_core::geom::{Axis, Vec3};
 use cabinet_core::part::{BorePurpose, Operation, Part, PartList};
 
 /// A4 landscape in mm; the SVG uses mm units.
-const PAGE_W: f64 = 297.0;
-const PAGE_H: f64 = 210.0;
+pub(crate) const PAGE_W: f64 = 297.0;
+pub(crate) const PAGE_H: f64 = 210.0;
 const MARGIN: f64 = 12.0;
 const TITLE_H: f64 = 30.0;
 
@@ -146,14 +148,14 @@ fn rect(part: &Part, min: Vec3, size: Vec3, label: &'static str) -> Feature {
     }
 }
 
-fn esc(s: &str) -> String {
+pub(crate) fn esc(s: &str) -> String {
     s.replace('&', "&amp;")
         .replace('<', "&lt;")
         .replace('>', "&gt;")
         .replace('"', "&quot;")
 }
 
-fn fmt(v: f64) -> String {
+pub(crate) fn fmt(v: f64) -> String {
     let r = (v * 10.0).round() / 10.0;
     if r.fract() == 0.0 {
         format!("{r:.0}")

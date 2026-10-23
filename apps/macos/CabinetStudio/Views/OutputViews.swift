@@ -62,9 +62,23 @@ struct TextDocument: FileDocument {
     }
 }
 
+/// Bytes to save through a file exporter, typed by the exporter's content type.
+struct DataDocument: FileDocument {
+    static var readableContentTypes: [UTType] { [.data] }
+    var data: Data
+    init(data: Data) { self.data = data }
+    init(configuration: ReadConfiguration) throws {
+        data = configuration.file.regularFileContents ?? Data()
+    }
+    func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper {
+        FileWrapper(regularFileWithContents: data)
+    }
+}
+
 struct CutSheetsView: View {
     @Environment(ProjectModel.self) private var project
     @State private var part: String?
+    @State private var pdf: DataDocument?
 
     var body: some View {
         HSplitView {
@@ -88,6 +102,23 @@ struct CutSheetsView: View {
                 }
             }
             .frame(minWidth: 500, maxWidth: .infinity, maxHeight: .infinity)
+        }
+        .toolbar {
+            ToolbarItem {
+                Button("Export PDF…", systemImage: "doc.richtext") {
+                    do {
+                        pdf = DataDocument(data: try cutSheetsPdf(items: project.jobItems, job: project.jobName))
+                    } catch {
+                        project.lastError = "Could not make the PDF: \(error)"
+                    }
+                }
+                .help("Every part's sheet in one PDF, after a cover and an index")
+            }
+        }
+        .fileExporter(isPresented: Binding(get: { pdf != nil }, set: { if !$0 { pdf = nil } }),
+                      document: pdf, contentType: .pdf,
+                      defaultFilename: "\(project.jobName) cut sheets") { result in
+            if case .success(let url) = result { project.status = "Saved \(url.lastPathComponent)" }
         }
     }
 }

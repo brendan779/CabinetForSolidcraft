@@ -531,6 +531,23 @@ pub fn cut_sheet_svg(items: JobItems, part_name: String, job: String) -> Result<
     Ok(cabinet_sheets::part_sheet(&list, part, &board, &job))
 }
 
+/// Every part's cut sheet in one PDF, after a cover and an index.
+#[uniffi::export]
+pub fn cut_sheets_pdf(items: JobItems, job: String) -> Result<Vec<u8>, CoreError> {
+    let lists: Vec<PartList> = job_lists(&items)?.into_iter().map(|(l, _)| l).collect();
+    Ok(cabinet_sheets::pdf::job_pdf(
+        &lists,
+        |p| {
+            if p.board.is_empty() {
+                "Generic".to_string()
+            } else {
+                p.board.clone()
+            }
+        },
+        &job,
+    ))
+}
+
 /// Whether a SolidCraft app answers on `port`.
 #[uniffi::export]
 pub fn solidcraft_reachable(port: u16) -> bool {
