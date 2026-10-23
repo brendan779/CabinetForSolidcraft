@@ -381,6 +381,73 @@ def essentials_table(words, title, legend_y, finishes, source, problems):
     return list(boards.values())
 
 
+def lining_table(words, title, legend_y, source, problems):
+    """The MDF Primed Panels (Surround by Laminex) table: profile, thickness and substrate as
+    merged cells, nested in that order, then sheet size, colour and product code on each line."""
+    hx = {}
+    for w in words:
+        if w.y0 < 105 and w.text in ("FACE", "THICKNESS", "SUBSTRATE", "SHEET", "COLOUR", "PROD"):
+            hx.setdefault(w.text, w.x0)
+    if len(hx) < 6:
+        problems.append(f"{title}: table header not found ({hx})")
+        return []
+    top = max(w.y1 for w in words if w.y0 < 105 and w.text in hx) + 0.5
+    body = [w for w in words if top <= w.y0 < legend_y - 2 and w.text.strip()]
+    rows = []
+    for w in body:
+        if not (PROD.match(w.text) and abs(w.x0 - hx["PROD"]) < 12):
+            continue
+        y = (w.y0 + w.y1) / 2
+        same = sorted((v for v in body if abs((v.y0 + v.y1) / 2 - y) < 3), key=lambda v: v.x0)
+        sheet = re.findall(r"(\d{3,4}) × (\d{3,4})", " ".join(
+            v.text for v in same if hx["SHEET"] - 5 <= v.x0 < hx["COLOUR"] - 3))
+        colour = " ".join(v.text for v in same if hx["COLOUR"] - 3 <= v.x0 < hx["PROD"] - 5)
+        if not sheet:
+            problems.append(f"{title}: product {w.text} has no sheet size")
+            continue
+        rows.append((y, {"prod": w.text, "sheet": sheet[0], "colour": colour}))
+    rows.sort(key=lambda r: r[0])
+    columns = [
+        ("substrate", hx["SUBSTRATE"] - 3, hx["SHEET"] - 5, lambda w: w.text.isalnum()),
+        ("thickness", hx["THICKNESS"] - 3, hx["SUBSTRATE"] - 3, lambda w: THICKNESS.match(w.text)),
+        ("profile", hx["FACE"] - 3, hx["THICKNESS"] - 3, lambda w: re.match(r"^[A-Za-z0-9.]+$", w.text)),
+    ]
+    cuts = None
+    for name, x0, x1, accept in columns:
+        assigned = spans(labels_in(body, x0, x1, accept), rows, cuts)
+        for label, members in assigned:
+            for _, r in members:
+                r[name] = label[1]
+        cuts = run_ends(assigned)
+    boards = {}
+    for _, r in rows:
+        if not all(k in r for k in ("substrate", "thickness", "profile")):
+            problems.append(f"{title}: product {r['prod']} is missing a label: {r}")
+            continue
+        sub, emission = substrate(r["substrate"])
+        if sub is None:
+            problems.append(f"{title}: product {r['prod']}: unknown substrate {r['substrate']!r}")
+            continue
+        profile = " ".join(p if p == "VJ" else p.capitalize() for p in r["profile"].split())
+        rid = f"laminex.primed-panels.{slug(profile)}.{r['thickness']}.{slug(r['substrate'])}"
+        b = boards.setdefault(rid, {
+            "id": rid, "brand": "Laminex", "range": "MDF Primed Panels (Surround by Laminex)",
+            "decor": r["colour"] or "Primed", "finish": profile, "kind": "lining", "substrate": sub,
+            "thickness": float(r["thickness"]), "sheets": [], "grained": False,
+            # The profile is machined into one face.
+            "double_sided": False, "emission": emission, "edge_tapes": [], "preview_colour": "",
+            "item_codes": {}, "source": source,
+        })
+        length, width = r["sheet"]
+        size = f"{length}x{width}"
+        if {"length": float(length), "width": float(width)} not in b["sheets"]:
+            b["sheets"].append({"length": float(length), "width": float(width)})
+        if b["item_codes"].get(size, r["prod"]) != r["prod"]:
+            problems.append(f"{rid}: two products for {size}: {b['item_codes'][size]}, {r['prod']}")
+        b["item_codes"][size] = r["prod"]
+    return list(boards.values())
+
+
 def parse(pages, sources):
     """Boards and edgings per brand: `sources` maps a brand to its source record."""
     finishes = {}
@@ -399,6 +466,12 @@ def parse(pages, sources):
         essentials = next((t for t in ESSENTIALS if top.endswith(t)), None)
         page_finishes = {**finishes, **legend(lines)}
         legend_y = min((w.y0 for w in words if w.text == "LEGEND:"), default=10_000)
+        if top.endswith("MDF Primed Panels") and n < formica:
+            mid = max(w.x1 for w in words) / 2
+            for half in ([w for w in words if w.cx < mid], [w for w in words if w.cx >= mid]):
+                if any(PROD.match(w.text) for w in half):
+                    boards += lining_table(half, "MDF Primed Panels", legend_y, sources["Laminex"], problems)
+            continue
         if essentials and n >= formica:
             # Up to four tables a page, each starting at its TYPE column.
             starts = sorted(w.x0 for w in words if w.text == "TYPE" and w.y0 < 150)

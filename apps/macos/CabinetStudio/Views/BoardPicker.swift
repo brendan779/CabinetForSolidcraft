@@ -43,6 +43,7 @@ struct BoardPicker<Accessory: View>: View {
     @State private var range = ""
     @State private var finishes: Set<String> = []
     @State private var grain = Grain.all
+    @State private var linings = false
     @State private var search = ""
 
     enum Grain: String, CaseIterable, Identifiable {
@@ -50,7 +51,9 @@ struct BoardPicker<Accessory: View>: View {
         var id: String { rawValue }
     }
 
-    private var brands: [String] { Array(Set(boards.map(\.brand))).sorted() }
+    private var brands: [String] {
+        Array(Set(boards.filter { ($0.kind == "lining") == linings }.map(\.brand))).sorted()
+    }
     private var ranges: [String] {
         Array(Set(boards.filter { brand.isEmpty || $0.brand == brand }.map(\.range))).sorted()
     }
@@ -62,7 +65,8 @@ struct BoardPicker<Accessory: View>: View {
 
     private var groups: [DecorGroup] {
         let shown = boards.filter { b in
-            (brand.isEmpty || b.brand == brand)
+            (b.kind == "lining") == linings
+                && (brand.isEmpty || b.brand == brand)
                 && (range.isEmpty || b.range == range)
                 && (finishes.isEmpty || finishes.contains(b.finish))
                 && (grain == .all || b.grained == (grain == .wood))
@@ -102,6 +106,15 @@ struct BoardPicker<Accessory: View>: View {
     private var filters: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(spacing: 8) {
+                if boards.contains(where: { $0.kind == "lining" }) {
+                    Picker("Kind", selection: $linings) {
+                        Text("Boards").tag(false)
+                        Text("Linings").tag(true)
+                    }
+                    .pickerStyle(.segmented)
+                    .fixedSize()
+                    .help("Panel boards for cabinets, or wall and ceiling linings")
+                }
                 Picker("Brand", selection: $brand) {
                     Text("All brands").tag("")
                     ForEach(brands, id: \.self) { Text($0).tag($0) }

@@ -88,6 +88,8 @@ pub struct BoardRecord {
     pub preview_colour: String,
     pub grained: bool,
     pub verified: bool,
+    /// `melamine`, `lining`, `raw`... as the catalog names it.
+    pub kind: String,
 }
 
 /// A job's items in the sidebar's order: cabinets (cabinet JSON) and the fillers and end panels
@@ -895,6 +897,10 @@ pub fn load_boards(catalog_dir: String) -> Result<Vec<BoardRecord>, CoreError> {
                 .and_then(|v| v.as_str().map(String::from))
                 .unwrap_or_default(),
             verified: b.source.verified,
+            kind: serde_json::to_value(b.kind)
+                .ok()
+                .and_then(|v| v.as_str().map(String::from))
+                .unwrap_or_default(),
             id: b.id,
             brand: b.brand,
             range: b.range,

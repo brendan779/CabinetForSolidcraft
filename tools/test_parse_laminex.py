@@ -2,7 +2,7 @@
 
 import unittest
 
-from parse_laminex import essentials_table, labels_in, spans, table
+from parse_laminex import essentials_table, labels_in, lining_table, spans, table
 from parse_polytec import Word
 
 SOURCE = {"url": "u", "document_date": "2025-09", "retrieved": "2026-10-23", "verified": False}
@@ -104,6 +104,26 @@ class ParseLaminex(unittest.TestCase):
         self.assertEqual(b["id"], "trade-essentials.raw-mdf.raw-no-finish.4.75.mdf-std-e0")
         self.assertEqual((b["kind"], b["substrate"], b["thickness"]), ("raw", "mdf", 4.75))
         self.assertEqual(b["item_codes"], {"3050x1200": "994289", "3600x1200": "994340"})
+
+
+    def test_a_lining_profile_holds_its_thickness_and_both_substrates(self):
+        hx = {"FACE": 57, "THICKNESS": 102, "SUBSTRATE": 141, "SHEET": 184, "COLOUR": 226, "PROD": 308}
+        words = [word(x, 93, k) for k, x in hx.items()]
+        for y, prod, length in ((110, "998398", "2400"), (121, "998400", "3000"),
+                                (132, "994347", "2400"), (143, "994348", "3000")):
+            words += [word(184, y, length), word(198, y, "×", 3), word(202, y, "1200"),
+                      word(229, y, "Primed"), word(307, y, prod)]
+        words += [word(142, 115.5, "MDF"), word(154, 115.5, "FR"), word(142, 137.5, "MDF"),
+                  word(154, 137.5, "MR"), word(164, 137.5, "E0"), word(57, 126.5, "SCALLOP"),
+                  word(82, 126.5, "22.5"), word(115, 126.5, "12")]
+        problems = []
+        boards = lining_table(words, "MDF Primed Panels", 10_000, SOURCE, problems)
+        self.assertEqual(problems, [])
+        self.assertEqual(sorted(b["id"] for b in boards), [
+            "laminex.primed-panels.scallop-22-5.12.mdf-fr",
+            "laminex.primed-panels.scallop-22-5.12.mdf-mr-e0",
+        ])
+        self.assertTrue(all(b["kind"] == "lining" and b["finish"] == "Scallop 22.5" for b in boards))
 
 
 if __name__ == "__main__":

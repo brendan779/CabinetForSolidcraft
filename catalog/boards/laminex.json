@@ -28470,6 +28470,1001 @@
         "retrieved": "2026-10-23",
         "verified": false
       }
+    },
+    {
+      "id": "laminex.primed-panels.batten-100.12.mdf-fr",
+      "brand": "Laminex",
+      "range": "MDF Primed Panels (Surround by Laminex)",
+      "decor": "Primed Ready To Paint",
+      "finish": "Batten 100",
+      "kind": "lining",
+      "substrate": "mdf",
+      "thickness": 12.0,
+      "sheets": [
+        {
+          "length": 2400.0,
+          "width": 1200.0
+        },
+        {
+          "length": 3000.0,
+          "width": 1200.0
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "emission": "",
+      "edge_tapes": [],
+      "preview_colour": "",
+      "item_codes": {
+        "2400x1200": "998386",
+        "3000x1200": "998387"
+      },
+      "source": {
+        "url": "https://www.laminex.com.au/documents/Laminex-National-Availability-Guide-Master",
+        "document_date": "2025-09",
+        "retrieved": "2026-10-23",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.primed-panels.batten-100.12.mdf-mr-e0",
+      "brand": "Laminex",
+      "range": "MDF Primed Panels (Surround by Laminex)",
+      "decor": "Primed Ready To Paint",
+      "finish": "Batten 100",
+      "kind": "lining",
+      "substrate": "moisture_resistant_mdf",
+      "thickness": 12.0,
+      "sheets": [
+        {
+          "length": 900.0,
+          "width": 1200.0
+        },
+        {
+          "length": 2400.0,
+          "width": 1200.0
+        },
+        {
+          "length": 3000.0,
+          "width": 1200.0
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "emission": "E0",
+      "edge_tapes": [],
+      "preview_colour": "",
+      "item_codes": {
+        "900x1200": "995839",
+        "2400x1200": "995840",
+        "3000x1200": "995841"
+      },
+      "source": {
+        "url": "https://www.laminex.com.au/documents/Laminex-National-Availability-Guide-Master",
+        "document_date": "2025-09",
+        "retrieved": "2026-10-23",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.primed-panels.batten-25.12.mdf-fr",
+      "brand": "Laminex",
+      "range": "MDF Primed Panels (Surround by Laminex)",
+      "decor": "Primed Ready To Paint",
+      "finish": "Batten 25",
+      "kind": "lining",
+      "substrate": "mdf",
+      "thickness": 12.0,
+      "sheets": [
+        {
+          "length": 2400.0,
+          "width": 1200.0
+        },
+        {
+          "length": 3000.0,
+          "width": 1200.0
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "emission": "",
+      "edge_tapes": [],
+      "preview_colour": "",
+      "item_codes": {
+        "2400x1200": "998388",
+        "3000x1200": "998389"
+      },
+      "source": {
+        "url": "https://www.laminex.com.au/documents/Laminex-National-Availability-Guide-Master",
+        "document_date": "2025-09",
+        "retrieved": "2026-10-23",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.primed-panels.batten-25.12.mdf-mr-e0",
+      "brand": "Laminex",
+      "range": "MDF Primed Panels (Surround by Laminex)",
+      "decor": "Primed Ready To Paint",
+      "finish": "Batten 25",
+      "kind": "lining",
+      "substrate": "moisture_resistant_mdf",
+      "thickness": 12.0,
+      "sheets": [
+        {
+          "length": 900.0,
+          "width": 1200.0
+        },
+        {
+          "length": 2400.0,
+          "width": 1200.0
+        },
+        {
+          "length": 3000.0,
+          "width": 1200.0
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "emission": "E0",
+      "edge_tapes": [],
+      "preview_colour": "",
+      "item_codes": {
+        "900x1200": "995842",
+        "2400x1200": "995843",
+        "3000x1200": "995844"
+      },
+      "source": {
+        "url": "https://www.laminex.com.au/documents/Laminex-National-Availability-Guide-Master",
+        "document_date": "2025-09",
+        "retrieved": "2026-10-23",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.primed-panels.batten-300.12.mdf-fr",
+      "brand": "Laminex",
+      "range": "MDF Primed Panels (Surround by Laminex)",
+      "decor": "Primed Ready To Paint",
+      "finish": "Batten 300",
+      "kind": "lining",
+      "substrate": "mdf",
+      "thickness": 12.0,
+      "sheets": [
+        {
+          "length": 2400.0,
+          "width": 1200.0
+        },
+        {
+          "length": 3000.0,
+          "width": 1200.0
+        },
+        {
+          "length": 3600.0,
+          "width": 1200.0
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "emission": "",
+      "edge_tapes": [],
+      "preview_colour": "",
+      "item_codes": {
+        "2400x1200": "402450",
+        "3000x1200": "402463",
+        "3600x1200": "402469"
+      },
+      "source": {
+        "url": "https://www.laminex.com.au/documents/Laminex-National-Availability-Guide-Master",
+        "document_date": "2025-09",
+        "retrieved": "2026-10-23",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.primed-panels.batten-300.12.mdf-mr-e0",
+      "brand": "Laminex",
+      "range": "MDF Primed Panels (Surround by Laminex)",
+      "decor": "Primed Ready To Paint",
+      "finish": "Batten 300",
+      "kind": "lining",
+      "substrate": "moisture_resistant_mdf",
+      "thickness": 12.0,
+      "sheets": [
+        {
+          "length": 2400.0,
+          "width": 1200.0
+        },
+        {
+          "length": 3000.0,
+          "width": 1200.0
+        },
+        {
+          "length": 3600.0,
+          "width": 1200.0
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "emission": "E0",
+      "edge_tapes": [],
+      "preview_colour": "",
+      "item_codes": {
+        "2400x1200": "402445",
+        "3000x1200": "402458",
+        "3600x1200": "402467"
+      },
+      "source": {
+        "url": "https://www.laminex.com.au/documents/Laminex-National-Availability-Guide-Master",
+        "document_date": "2025-09",
+        "retrieved": "2026-10-23",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.primed-panels.batten-75.12.mdf-fr",
+      "brand": "Laminex",
+      "range": "MDF Primed Panels (Surround by Laminex)",
+      "decor": "Primed Ready To Paint",
+      "finish": "Batten 75",
+      "kind": "lining",
+      "substrate": "mdf",
+      "thickness": 12.0,
+      "sheets": [
+        {
+          "length": 2400.0,
+          "width": 1200.0
+        },
+        {
+          "length": 3000.0,
+          "width": 1200.0
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "emission": "",
+      "edge_tapes": [],
+      "preview_colour": "",
+      "item_codes": {
+        "2400x1200": "402449",
+        "3000x1200": "402462"
+      },
+      "source": {
+        "url": "https://www.laminex.com.au/documents/Laminex-National-Availability-Guide-Master",
+        "document_date": "2025-09",
+        "retrieved": "2026-10-23",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.primed-panels.batten-75.12.mdf-mr-e0",
+      "brand": "Laminex",
+      "range": "MDF Primed Panels (Surround by Laminex)",
+      "decor": "Primed Ready To Paint",
+      "finish": "Batten 75",
+      "kind": "lining",
+      "substrate": "moisture_resistant_mdf",
+      "thickness": 12.0,
+      "sheets": [
+        {
+          "length": 2400.0,
+          "width": 1200.0
+        },
+        {
+          "length": 3000.0,
+          "width": 1200.0
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "emission": "E0",
+      "edge_tapes": [],
+      "preview_colour": "",
+      "item_codes": {
+        "2400x1200": "402444",
+        "3000x1200": "402457"
+      },
+      "source": {
+        "url": "https://www.laminex.com.au/documents/Laminex-National-Availability-Guide-Master",
+        "document_date": "2025-09",
+        "retrieved": "2026-10-23",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.primed-panels.classic-vj-100.9.mdf-fr",
+      "brand": "Laminex",
+      "range": "MDF Primed Panels (Surround by Laminex)",
+      "decor": "Primed Ready To Paint",
+      "finish": "Classic VJ 100",
+      "kind": "lining",
+      "substrate": "mdf",
+      "thickness": 9.0,
+      "sheets": [
+        {
+          "length": 2400.0,
+          "width": 1200.0
+        },
+        {
+          "length": 3000.0,
+          "width": 1200.0
+        },
+        {
+          "length": 3600.0,
+          "width": 1200.0
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "emission": "",
+      "edge_tapes": [],
+      "preview_colour": "",
+      "item_codes": {
+        "2400x1200": "998398",
+        "3000x1200": "998400",
+        "3600x1200": "998401"
+      },
+      "source": {
+        "url": "https://www.laminex.com.au/documents/Laminex-National-Availability-Guide-Master",
+        "document_date": "2025-09",
+        "retrieved": "2026-10-23",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.primed-panels.classic-vj-100.9.mdf-mr-e0",
+      "brand": "Laminex",
+      "range": "MDF Primed Panels (Surround by Laminex)",
+      "decor": "Primed Ready To Paint",
+      "finish": "Classic VJ 100",
+      "kind": "lining",
+      "substrate": "moisture_resistant_mdf",
+      "thickness": 9.0,
+      "sheets": [
+        {
+          "length": 900.0,
+          "width": 1200.0
+        },
+        {
+          "length": 2400.0,
+          "width": 1200.0
+        },
+        {
+          "length": 2700.0,
+          "width": 1200.0
+        },
+        {
+          "length": 3000.0,
+          "width": 1200.0
+        },
+        {
+          "length": 3600.0,
+          "width": 1200.0
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "emission": "E0",
+      "edge_tapes": [],
+      "preview_colour": "",
+      "item_codes": {
+        "900x1200": "994347",
+        "2400x1200": "994348",
+        "2700x1200": "994349",
+        "3000x1200": "994350",
+        "3600x1200": "994374"
+      },
+      "source": {
+        "url": "https://www.laminex.com.au/documents/Laminex-National-Availability-Guide-Master",
+        "document_date": "2025-09",
+        "retrieved": "2026-10-23",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.primed-panels.classic-vj-200.12.mdf-fr",
+      "brand": "Laminex",
+      "range": "MDF Primed Panels (Surround by Laminex)",
+      "decor": "Primed Ready To Paint",
+      "finish": "Classic VJ 200",
+      "kind": "lining",
+      "substrate": "mdf",
+      "thickness": 12.0,
+      "sheets": [
+        {
+          "length": 2400.0,
+          "width": 1200.0
+        },
+        {
+          "length": 3000.0,
+          "width": 1200.0
+        },
+        {
+          "length": 3600.0,
+          "width": 1200.0
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "emission": "",
+      "edge_tapes": [],
+      "preview_colour": "",
+      "item_codes": {
+        "2400x1200": "402451",
+        "3000x1200": "402464",
+        "3600x1200": "402470"
+      },
+      "source": {
+        "url": "https://www.laminex.com.au/documents/Laminex-National-Availability-Guide-Master",
+        "document_date": "2025-09",
+        "retrieved": "2026-10-23",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.primed-panels.classic-vj-200.12.mdf-mr-e0",
+      "brand": "Laminex",
+      "range": "MDF Primed Panels (Surround by Laminex)",
+      "decor": "Primed Ready To Paint",
+      "finish": "Classic VJ 200",
+      "kind": "lining",
+      "substrate": "moisture_resistant_mdf",
+      "thickness": 12.0,
+      "sheets": [
+        {
+          "length": 2400.0,
+          "width": 1200.0
+        },
+        {
+          "length": 3000.0,
+          "width": 1200.0
+        },
+        {
+          "length": 3600.0,
+          "width": 1200.0
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "emission": "E0",
+      "edge_tapes": [],
+      "preview_colour": "",
+      "item_codes": {
+        "2400x1200": "402446",
+        "3000x1200": "402459",
+        "3600x1200": "402468"
+      },
+      "source": {
+        "url": "https://www.laminex.com.au/documents/Laminex-National-Availability-Guide-Master",
+        "document_date": "2025-09",
+        "retrieved": "2026-10-23",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.primed-panels.demi-round-20.12.mdf-fr",
+      "brand": "Laminex",
+      "range": "MDF Primed Panels (Surround by Laminex)",
+      "decor": "Primed Ready To Paint",
+      "finish": "Demi Round 20",
+      "kind": "lining",
+      "substrate": "mdf",
+      "thickness": 12.0,
+      "sheets": [
+        {
+          "length": 2400.0,
+          "width": 1200.0
+        },
+        {
+          "length": 3000.0,
+          "width": 1200.0
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "emission": "",
+      "edge_tapes": [],
+      "preview_colour": "",
+      "item_codes": {
+        "2400x1200": "998392",
+        "3000x1200": "998393"
+      },
+      "source": {
+        "url": "https://www.laminex.com.au/documents/Laminex-National-Availability-Guide-Master",
+        "document_date": "2025-09",
+        "retrieved": "2026-10-23",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.primed-panels.demi-round-20.12.mdf-mr-e0",
+      "brand": "Laminex",
+      "range": "MDF Primed Panels (Surround by Laminex)",
+      "decor": "Primed Ready To Paint",
+      "finish": "Demi Round 20",
+      "kind": "lining",
+      "substrate": "moisture_resistant_mdf",
+      "thickness": 12.0,
+      "sheets": [
+        {
+          "length": 900.0,
+          "width": 1200.0
+        },
+        {
+          "length": 2400.0,
+          "width": 1200.0
+        },
+        {
+          "length": 3000.0,
+          "width": 1200.0
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "emission": "E0",
+      "edge_tapes": [],
+      "preview_colour": "",
+      "item_codes": {
+        "900x1200": "995848",
+        "2400x1200": "995849",
+        "3000x1200": "995850"
+      },
+      "source": {
+        "url": "https://www.laminex.com.au/documents/Laminex-National-Availability-Guide-Master",
+        "document_date": "2025-09",
+        "retrieved": "2026-10-23",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.primed-panels.demi-round-40.12.mdf-fr",
+      "brand": "Laminex",
+      "range": "MDF Primed Panels (Surround by Laminex)",
+      "decor": "Primed Ready To Paint",
+      "finish": "Demi Round 40",
+      "kind": "lining",
+      "substrate": "mdf",
+      "thickness": 12.0,
+      "sheets": [
+        {
+          "length": 2400.0,
+          "width": 1200.0
+        },
+        {
+          "length": 3000.0,
+          "width": 1200.0
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "emission": "",
+      "edge_tapes": [],
+      "preview_colour": "",
+      "item_codes": {
+        "2400x1200": "998390",
+        "3000x1200": "998391"
+      },
+      "source": {
+        "url": "https://www.laminex.com.au/documents/Laminex-National-Availability-Guide-Master",
+        "document_date": "2025-09",
+        "retrieved": "2026-10-23",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.primed-panels.demi-round-40.12.mdf-mr-e0",
+      "brand": "Laminex",
+      "range": "MDF Primed Panels (Surround by Laminex)",
+      "decor": "Primed Ready To Paint",
+      "finish": "Demi Round 40",
+      "kind": "lining",
+      "substrate": "moisture_resistant_mdf",
+      "thickness": 12.0,
+      "sheets": [
+        {
+          "length": 900.0,
+          "width": 1200.0
+        },
+        {
+          "length": 2400.0,
+          "width": 1200.0
+        },
+        {
+          "length": 3000.0,
+          "width": 1200.0
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "emission": "E0",
+      "edge_tapes": [],
+      "preview_colour": "",
+      "item_codes": {
+        "900x1200": "995845",
+        "2400x1200": "995846",
+        "3000x1200": "995847"
+      },
+      "source": {
+        "url": "https://www.laminex.com.au/documents/Laminex-National-Availability-Guide-Master",
+        "document_date": "2025-09",
+        "retrieved": "2026-10-23",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.primed-panels.french-stripe-30.12.mdf-fr",
+      "brand": "Laminex",
+      "range": "MDF Primed Panels (Surround by Laminex)",
+      "decor": "Primed Ready To Paint",
+      "finish": "French Stripe 30",
+      "kind": "lining",
+      "substrate": "mdf",
+      "thickness": 12.0,
+      "sheets": [
+        {
+          "length": 2400.0,
+          "width": 1200.0
+        },
+        {
+          "length": 3000.0,
+          "width": 1200.0
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "emission": "",
+      "edge_tapes": [],
+      "preview_colour": "",
+      "item_codes": {
+        "2400x1200": "402453",
+        "3000x1200": "402466"
+      },
+      "source": {
+        "url": "https://www.laminex.com.au/documents/Laminex-National-Availability-Guide-Master",
+        "document_date": "2025-09",
+        "retrieved": "2026-10-23",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.primed-panels.french-stripe-30.12.mdf-mr-e0",
+      "brand": "Laminex",
+      "range": "MDF Primed Panels (Surround by Laminex)",
+      "decor": "Primed Ready To Paint",
+      "finish": "French Stripe 30",
+      "kind": "lining",
+      "substrate": "moisture_resistant_mdf",
+      "thickness": 12.0,
+      "sheets": [
+        {
+          "length": 2400.0,
+          "width": 1200.0
+        },
+        {
+          "length": 3000.0,
+          "width": 1200.0
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "emission": "E0",
+      "edge_tapes": [],
+      "preview_colour": "",
+      "item_codes": {
+        "2400x1200": "402448",
+        "3000x1200": "402461"
+      },
+      "source": {
+        "url": "https://www.laminex.com.au/documents/Laminex-National-Availability-Guide-Master",
+        "document_date": "2025-09",
+        "retrieved": "2026-10-23",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.primed-panels.heritage-150.9.mdf-fr",
+      "brand": "Laminex",
+      "range": "MDF Primed Panels (Surround by Laminex)",
+      "decor": "Primed Ready To Paint",
+      "finish": "Heritage 150",
+      "kind": "lining",
+      "substrate": "mdf",
+      "thickness": 9.0,
+      "sheets": [
+        {
+          "length": 2400.0,
+          "width": 1200.0
+        },
+        {
+          "length": 3000.0,
+          "width": 1200.0
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "emission": "",
+      "edge_tapes": [],
+      "preview_colour": "",
+      "item_codes": {
+        "2400x1200": "998402",
+        "3000x1200": "998404"
+      },
+      "source": {
+        "url": "https://www.laminex.com.au/documents/Laminex-National-Availability-Guide-Master",
+        "document_date": "2025-09",
+        "retrieved": "2026-10-23",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.primed-panels.heritage-150.9.mdf-mr-e0",
+      "brand": "Laminex",
+      "range": "MDF Primed Panels (Surround by Laminex)",
+      "decor": "Primed Ready To Paint",
+      "finish": "Heritage 150",
+      "kind": "lining",
+      "substrate": "moisture_resistant_mdf",
+      "thickness": 9.0,
+      "sheets": [
+        {
+          "length": 900.0,
+          "width": 1200.0
+        },
+        {
+          "length": 2400.0,
+          "width": 1200.0
+        },
+        {
+          "length": 3000.0,
+          "width": 1200.0
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "emission": "E0",
+      "edge_tapes": [],
+      "preview_colour": "",
+      "item_codes": {
+        "900x1200": "994351",
+        "2400x1200": "994352",
+        "3000x1200": "994354"
+      },
+      "source": {
+        "url": "https://www.laminex.com.au/documents/Laminex-National-Availability-Guide-Master",
+        "document_date": "2025-09",
+        "retrieved": "2026-10-23",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.primed-panels.scallop-135.12.mdf-fr",
+      "brand": "Laminex",
+      "range": "MDF Primed Panels (Surround by Laminex)",
+      "decor": "Primed Ready To Paint",
+      "finish": "Scallop 135",
+      "kind": "lining",
+      "substrate": "mdf",
+      "thickness": 12.0,
+      "sheets": [
+        {
+          "length": 2400.0,
+          "width": 1200.0
+        },
+        {
+          "length": 3000.0,
+          "width": 1200.0
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "emission": "",
+      "edge_tapes": [],
+      "preview_colour": "",
+      "item_codes": {
+        "2400x1200": "402452",
+        "3000x1200": "402465"
+      },
+      "source": {
+        "url": "https://www.laminex.com.au/documents/Laminex-National-Availability-Guide-Master",
+        "document_date": "2025-09",
+        "retrieved": "2026-10-23",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.primed-panels.scallop-135.12.mdf-mr-e0",
+      "brand": "Laminex",
+      "range": "MDF Primed Panels (Surround by Laminex)",
+      "decor": "Primed Ready To Paint",
+      "finish": "Scallop 135",
+      "kind": "lining",
+      "substrate": "moisture_resistant_mdf",
+      "thickness": 12.0,
+      "sheets": [
+        {
+          "length": 2400.0,
+          "width": 1200.0
+        },
+        {
+          "length": 3000.0,
+          "width": 1200.0
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "emission": "E0",
+      "edge_tapes": [],
+      "preview_colour": "",
+      "item_codes": {
+        "2400x1200": "402447",
+        "3000x1200": "402460"
+      },
+      "source": {
+        "url": "https://www.laminex.com.au/documents/Laminex-National-Availability-Guide-Master",
+        "document_date": "2025-09",
+        "retrieved": "2026-10-23",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.primed-panels.scallop-22-5.12.mdf-fr",
+      "brand": "Laminex",
+      "range": "MDF Primed Panels (Surround by Laminex)",
+      "decor": "Primed Ready To Paint",
+      "finish": "Scallop 22.5",
+      "kind": "lining",
+      "substrate": "mdf",
+      "thickness": 12.0,
+      "sheets": [
+        {
+          "length": 2400.0,
+          "width": 1200.0
+        },
+        {
+          "length": 3000.0,
+          "width": 1200.0
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "emission": "",
+      "edge_tapes": [],
+      "preview_colour": "",
+      "item_codes": {
+        "2400x1200": "998396",
+        "3000x1200": "998397"
+      },
+      "source": {
+        "url": "https://www.laminex.com.au/documents/Laminex-National-Availability-Guide-Master",
+        "document_date": "2025-09",
+        "retrieved": "2026-10-23",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.primed-panels.scallop-22-5.12.mdf-mr-e0",
+      "brand": "Laminex",
+      "range": "MDF Primed Panels (Surround by Laminex)",
+      "decor": "Primed Ready To Paint",
+      "finish": "Scallop 22.5",
+      "kind": "lining",
+      "substrate": "moisture_resistant_mdf",
+      "thickness": 12.0,
+      "sheets": [
+        {
+          "length": 900.0,
+          "width": 1200.0
+        },
+        {
+          "length": 2400.0,
+          "width": 1200.0
+        },
+        {
+          "length": 3000.0,
+          "width": 1200.0
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "emission": "E0",
+      "edge_tapes": [],
+      "preview_colour": "",
+      "item_codes": {
+        "900x1200": "995854",
+        "2400x1200": "995855",
+        "3000x1200": "995856"
+      },
+      "source": {
+        "url": "https://www.laminex.com.au/documents/Laminex-National-Availability-Guide-Master",
+        "document_date": "2025-09",
+        "retrieved": "2026-10-23",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.primed-panels.scallop-45.12.mdf-fr",
+      "brand": "Laminex",
+      "range": "MDF Primed Panels (Surround by Laminex)",
+      "decor": "Primed Ready To Paint",
+      "finish": "Scallop 45",
+      "kind": "lining",
+      "substrate": "mdf",
+      "thickness": 12.0,
+      "sheets": [
+        {
+          "length": 2400.0,
+          "width": 1200.0
+        },
+        {
+          "length": 2700.0,
+          "width": 1200.0
+        },
+        {
+          "length": 3000.0,
+          "width": 1200.0
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "emission": "",
+      "edge_tapes": [],
+      "preview_colour": "",
+      "item_codes": {
+        "2400x1200": "998394",
+        "2700x1200": "402456",
+        "3000x1200": "998395"
+      },
+      "source": {
+        "url": "https://www.laminex.com.au/documents/Laminex-National-Availability-Guide-Master",
+        "document_date": "2025-09",
+        "retrieved": "2026-10-23",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.primed-panels.scallop-45.12.mdf-mr-e0",
+      "brand": "Laminex",
+      "range": "MDF Primed Panels (Surround by Laminex)",
+      "decor": "Primed Ready To Paint",
+      "finish": "Scallop 45",
+      "kind": "lining",
+      "substrate": "moisture_resistant_mdf",
+      "thickness": 12.0,
+      "sheets": [
+        {
+          "length": 900.0,
+          "width": 1200.0
+        },
+        {
+          "length": 2400.0,
+          "width": 1200.0
+        },
+        {
+          "length": 2700.0,
+          "width": 1200.0
+        },
+        {
+          "length": 3000.0,
+          "width": 1200.0
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "emission": "E0",
+      "edge_tapes": [],
+      "preview_colour": "",
+      "item_codes": {
+        "900x1200": "995851",
+        "2400x1200": "995852",
+        "2700x1200": "402455",
+        "3000x1200": "995853"
+      },
+      "source": {
+        "url": "https://www.laminex.com.au/documents/Laminex-National-Availability-Guide-Master",
+        "document_date": "2025-09",
+        "retrieved": "2026-10-23",
+        "verified": false
+      }
     }
   ],
   "edge_tapes": [
