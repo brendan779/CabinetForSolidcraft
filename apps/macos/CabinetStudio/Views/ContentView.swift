@@ -64,6 +64,9 @@ struct SolidCraftButton: View {
             }
             .pickerStyle(.inline)
             Divider()
+            Button("Make Cabinets from Selected Boxes", systemImage: "cube.transparent") {
+                Task { await project.makeCabinetsFromSelection() }
+            }
             Button("Check Connection") { Task { await project.checkConnection() } }
         } label: {
             HStack(spacing: 6) {

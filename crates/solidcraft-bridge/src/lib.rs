@@ -5,6 +5,7 @@
 //! commands that build it. Both are deliberately thin: when SolidCraft's WASM plugin runtime ships,
 //! the same command lists go through `engine.run` instead of the socket.
 
+pub mod boxes;
 pub mod client;
 pub mod emit;
 

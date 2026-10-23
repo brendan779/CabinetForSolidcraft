@@ -92,3 +92,63 @@ fn resending_a_moved_cabinet_keeps_it_where_the_user_moved_it() {
     assert_eq!(before.len(), list.parts.len());
     assert_eq!(after, before);
 }
+
+#[test]
+fn three_drawn_boxes_become_three_cabinets_in_place() {
+    let Some(cli) = cli() else {
+        eprintln!("SOLIDCRAFT_CLI not set: skipped");
+        return;
+    };
+    use cabinet_core::part::PartRole;
+    use solidcraft_bridge::boxes::cuboid;
+    // A base and a tall cabinet on the floor and a wall cabinet above the base.
+    let drawn = [
+        ("Box1", [0.0, 0.0, 0.0], [600.0, 580.0, 870.0]),
+        ("Box2", [600.0, 0.0, 0.0], [600.0, 580.0, 2100.0]),
+        ("Box3", [0.0, 250.0, 1450.0], [600.0, 330.0, 720.0]),
+    ];
+    let mut script: Vec<Value> = drawn
+        .iter()
+        .map(|(name, min, size)| {
+            json!({ "command": "solid.box", "params": {
+                "length": size[0], "width": size[1], "height": size[2], "corner": min,
+                "operation": "new", "body_name": name, "name": name } })
+        })
+        .collect();
+    for (name, ..) in &drawn {
+        script.push(json!({ "command": "model.faces", "params": { "body": name } }));
+    }
+    let results = run(&cli, "boxes", &script, &["run", "--results"]);
+    let results = results.as_array().unwrap();
+    let mut built = Vec::new();
+    let mut kinds = Vec::new();
+    for (i, (_, min, size)) in drawn.iter().enumerate() {
+        let b = cuboid(&results[drawn.len() + i]).unwrap();
+        assert_eq!(b.min.to_array(), *min);
+        assert_eq!(b.size.to_array(), *size);
+        let cab = Cabinet::from_box(format!("C{i:02}"), b);
+        kinds.push(cab.kind);
+        let list = build_cabinet(&cab).unwrap();
+        built.extend(emit_cabinet(&list, Detail::Design, None));
+        // Every carcass part lies inside the drawn box; fronts hang in front of it.
+        for p in &list.parts {
+            if matches!(p.role, PartRole::Door | PartRole::DrawerFront) {
+                continue;
+            }
+            for k in 0..3 {
+                let (lo, hi) = (p.bounds.min.to_array()[k], p.bounds.max().to_array()[k]);
+                assert!(
+                    lo >= min[k] - 1e-6 && hi <= min[k] + size[k] + 1e-6,
+                    "{}",
+                    p.name
+                );
+            }
+        }
+    }
+    assert_eq!(
+        kinds,
+        [CabinetKind::Base, CabinetKind::Tall, CabinetKind::Wall]
+    );
+    let after = bounds(&cli, "cabinets", &built);
+    assert!(after.len() > 20);
+}

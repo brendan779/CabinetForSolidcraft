@@ -3,6 +3,7 @@
 
 use cabinet_core::cutlist::{cut_list, to_csv};
 use cabinet_core::{Cabinet, CabinetKind, build_cabinet};
+use solidcraft_bridge::boxes::{cuboid, selected_bodies};
 use solidcraft_bridge::{Client, Detail, find_existing, replace_cabinet};
 
 uniffi::setup_scaffolding!();
@@ -333,6 +334,90 @@ pub fn send_to_solidcraft(
     Ok(report.join("\n"))
 }
 
+/// A cabinet made from a box drawn in SolidCraft.
+#[derive(uniffi::Record)]
+pub struct DrawnCabinet {
+    pub id: String,
+    pub json: String,
+    /// The box body it was made from.
+    pub source: String,
+}
+
+#[derive(uniffi::Record)]
+pub struct BoxImport {
+    pub cabinets: Vec<DrawnCabinet>,
+    /// Selected bodies that were not made into cabinets, with the reason.
+    pub skipped: Vec<String>,
+}
+
+/// Turns each box selected in SolidCraft into a cabinet of its size and position. Ids follow the
+/// kind's letter and skip `taken_ids`. Blocking: call it off the main thread.
+#[uniffi::export]
+pub fn cabinets_from_selection(port: u16, taken_ids: Vec<String>) -> Result<BoxImport, CoreError> {
+    let sc = |e: solidcraft_bridge::Error| CoreError::SolidCraft {
+        message: e.to_string(),
+    };
+    let mut client = Client::connect(port).map_err(sc)?;
+    let bodies = selected_bodies(&client.inspect().map_err(sc)?);
+    let mut taken = taken_ids;
+    let mut out = BoxImport {
+        cabinets: Vec::new(),
+        skipped: Vec::new(),
+    };
+    for body in bodies {
+        let bounds = match cuboid(&client.faces(&body).map_err(sc)?) {
+            Ok(b) => b,
+            Err(why) => {
+                out.skipped.push(format!("{body} {why}"));
+                continue;
+            }
+        };
+        let kind = CabinetKind::for_box(&bounds);
+        let id = next_id(kind, &taken);
+        let cab = Cabinet::from_box(id.clone(), bounds);
+        if let Err(e) = build_cabinet(&cab) {
+            out.skipped.push(format!("{body}: {e}"));
+            continue;
+        }
+        taken.push(id.clone());
+        out.cabinets.push(DrawnCabinet {
+            id,
+            json: serde_json::to_string(&cab).map_err(invalid)?,
+            source: body,
+        });
+    }
+    Ok(out)
+}
+
+/// `B01`, `B02`... for base cabinets, the first one not taken. Same scheme as the app's Add menu.
+fn next_id(kind: CabinetKind, taken: &[String]) -> String {
+    let letter = serde_json::to_value(kind)
+        .ok()
+        .and_then(|v| v.as_str().and_then(|s| s.chars().next()))
+        .unwrap_or('C')
+        .to_ascii_uppercase();
+    (1..)
+        .map(|n| format!("{letter}{n:02}"))
+        .find(|id| !taken.contains(id))
+        .unwrap()
+}
+
+/// Hides bodies in SolidCraft (the boxes cabinets were made from). Blocking.
+#[uniffi::export]
+pub fn hide_bodies(port: u16, bodies: Vec<String>) -> Result<(), CoreError> {
+    let sc = |e: solidcraft_bridge::Error| CoreError::SolidCraft {
+        message: e.to_string(),
+    };
+    let mut client = Client::connect(port).map_err(sc)?;
+    client
+        .execute(
+            "browser.visibility",
+            serde_json::json!({ "visible": false, "items": bodies }),
+        )
+        .map_err(sc)?;
+    Ok(())
+}
+
 #[uniffi::export]
 pub fn load_boards(catalog_dir: String) -> Result<Vec<BoardRecord>, CoreError> {
     let cat =
@@ -361,4 +446,17 @@ pub fn load_boards(catalog_dir: String) -> Result<Vec<BoardRecord>, CoreError> {
             grained: b.grained,
         })
         .collect())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn drawn_cabinets_take_the_next_free_id_of_their_kind() {
+        let taken = vec!["B01".to_string(), "B02".to_string(), "T01".to_string()];
+        assert_eq!(next_id(CabinetKind::Base, &taken), "B03");
+        assert_eq!(next_id(CabinetKind::Tall, &taken), "T02");
+        assert_eq!(next_id(CabinetKind::Wall, &taken), "W01");
+    }
 }

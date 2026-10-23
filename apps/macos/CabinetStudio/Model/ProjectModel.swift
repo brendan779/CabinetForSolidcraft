@@ -7,6 +7,8 @@ import SwiftUI
 struct CabinetDoc: Identifiable, Hashable, Codable {
     var id: String
     var json: String
+    /// Made from a box drawn in SolidCraft: it keeps the box's position instead of joining the run.
+    var placed: Bool?
 
     private var object: [String: Any] {
         (try? JSONSerialization.jsonObject(with: Data(json.utf8))) as? [String: Any] ?? [:]
@@ -193,10 +195,11 @@ final class ProjectModel {
         selected = cab
     }
 
-    /// Lays the cabinets out side by side in list order and saves.
+    /// Lays the cabinets out side by side in list order and saves. Cabinets drawn in SolidCraft
+    /// stay where they were drawn.
     func changed() {
         var x = 0.0
-        for i in cabinets.indices {
+        for i in cabinets.indices where cabinets[i].placed != true {
             cabinets[i].originX = x
             x += cabinets[i].width
         }
@@ -231,6 +234,47 @@ final class ProjectModel {
             status = "SolidCraft did not build the cabinets"
             await checkConnection()
         }
+    }
+
+    /// Turns the boxes selected in SolidCraft into cabinets in place, builds them and hides the
+    /// boxes.
+    func makeCabinetsFromSelection() async {
+        isSending = true
+        lastError = nil
+        status = "Reading the selection in SolidCraft…"
+        let port = self.port
+        let taken = cabinets.map(\.id)
+        let result = await Task.detached { () -> Result<BoxImport, Error> in
+            Result { try cabinetsFromSelection(port: port, takenIds: taken) }
+        }.value
+        isSending = false
+        let made: BoxImport
+        switch result {
+        case .success(let r): made = r
+        case .failure(let e):
+            lastError = "\(e)"
+            status = "Could not read the selection in SolidCraft"
+            await checkConnection()
+            return
+        }
+        guard !made.cabinets.isEmpty else {
+            lastError = made.skipped.first.map { "Not a box: \($0)" } ?? "Select one or more boxes in SolidCraft first."
+            return
+        }
+        withAnimation(.snappy) {
+            for c in made.cabinets {
+                cabinets.append(CabinetDoc(id: c.id, json: c.json, placed: true))
+            }
+            selection = made.cabinets.last?.id
+        }
+        changed()
+        await sendToSolidCraft()
+        guard lastError == nil else { return }
+        let sources = made.cabinets.map(\.source)
+        _ = await Task.detached { try? hideBodies(port: port, bodies: sources) }.value
+        var note = "Made \(made.cabinets.count) cabinets from boxes"
+        if !made.skipped.isEmpty { note += " · skipped \(made.skipped.joined(separator: ", "))" }
+        status = note
     }
 
     // MARK: Persistence

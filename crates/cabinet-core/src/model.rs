@@ -2,7 +2,14 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::geom::Vec3;
+use crate::geom::{Aabb, Vec3};
+
+/// A drawn box at least this tall (mm) is a tall cabinet: base cabinets stop near 900, pantries
+/// and oven towers start near 1800.
+const TALL_FROM_HEIGHT: f64 = 1500.0;
+/// A drawn box whose underside is at least this high (mm) hangs on the wall: wall cabinets sit
+/// about 1350-1450 off the floor, above a 900 benchtop and splashback.
+const WALL_FROM_ELEVATION: f64 = 1000.0;
 
 /// A cabinet: an envelope (the box the user drew), a kind and a construction standard.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -44,6 +51,19 @@ impl Cabinet {
         }
     }
 
+    /// A cabinet filling a box the user drew in the design: the box is the envelope, its front is
+    /// the box's −Y face, and its size picks the kind (see [`CabinetKind::for_box`]).
+    pub fn from_box(id: impl Into<String>, bounds: Aabb) -> Self {
+        let kind = CabinetKind::for_box(&bounds);
+        let mut cab = Self::new(id, kind);
+        cab.width = bounds.size.x;
+        cab.depth = bounds.size.y;
+        cab.height = bounds.size.z;
+        cab.origin = bounds.min;
+        cab.fronts = kind.default_fronts_for(cab.width);
+        cab
+    }
+
     pub fn has_toe_kick(&self) -> bool {
         matches!(
             self.kind,
@@ -70,6 +90,18 @@ impl CabinetKind {
         CabinetKind::DrawerBank,
         CabinetKind::OpenShelf,
     ];
+
+    /// The kind a drawn box most likely is: as tall as a pantry → tall, hanging off the floor →
+    /// wall, otherwise base. The user changes it in the picker.
+    pub fn for_box(bounds: &Aabb) -> CabinetKind {
+        if bounds.size.z >= TALL_FROM_HEIGHT {
+            CabinetKind::Tall
+        } else if bounds.min.z >= WALL_FROM_ELEVATION {
+            CabinetKind::Wall
+        } else {
+            CabinetKind::Base
+        }
+    }
 
     /// Typical Australian kitchen sizes (width, depth, height), mm.
     pub fn default_size(self) -> (f64, f64, f64) {
@@ -326,5 +358,44 @@ impl Density {
             Density::Normal => 180.0,
             Density::Dense => 120.0,
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn bounds(min: [f64; 3], size: [f64; 3]) -> Aabb {
+        Aabb::new(
+            Vec3::new(min[0], min[1], min[2]),
+            Vec3::new(size[0], size[1], size[2]),
+        )
+    }
+
+    #[test]
+    fn a_box_on_the_floor_becomes_a_base_cabinet_of_its_size_where_it_is() {
+        let cab = Cabinet::from_box("B01", bounds([1200.0, 30.0, 0.0], [450.0, 560.0, 870.0]));
+        assert_eq!(cab.kind, CabinetKind::Base);
+        assert_eq!((cab.width, cab.depth, cab.height), (450.0, 560.0, 870.0));
+        assert_eq!(cab.origin, Vec3::new(1200.0, 30.0, 0.0));
+        assert!(crate::build_cabinet(&cab).is_ok());
+    }
+
+    #[test]
+    fn a_box_up_the_wall_becomes_a_wall_cabinet() {
+        let cab = Cabinet::from_box("W01", bounds([0.0, 0.0, 1400.0], [600.0, 330.0, 720.0]));
+        assert_eq!(cab.kind, CabinetKind::Wall);
+    }
+
+    #[test]
+    fn a_pantry_sized_box_becomes_a_tall_cabinet() {
+        let cab = Cabinet::from_box("T01", bounds([0.0, 0.0, 0.0], [600.0, 580.0, 2100.0]));
+        assert_eq!(cab.kind, CabinetKind::Tall);
+    }
+
+    #[test]
+    fn a_wide_box_gets_a_door_pair() {
+        let cab = Cabinet::from_box("B01", bounds([0.0, 0.0, 0.0], [900.0, 580.0, 870.0]));
+        assert_eq!(cab.fronts, FrontLayout::DoorPair);
     }
 }
