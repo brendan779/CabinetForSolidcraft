@@ -41,7 +41,7 @@ Priorities: **P0** blocks most other work · **P1** MVP · **P2** commercial par
 
 | id | status | size | task | done when |
 |---|---|---|---|---|
-| CORE-1 | todo | M | Integrated toe-kick notch: verify the groove op cuts the notch in SolidCraft and in sheets | screenshot + sheet show the notch |
+| CORE-1 | done (night/2026-10-23) | M | Integrated toe-kick notch: verify the groove op cuts the notch in SolidCraft and in sheets | screenshot + sheet show the notch |
 | CORE-2 | todo | M | Fixed shelves (biscuited + screwed like a bottom) as an option per shelf | test: fixed shelf has joints both sides |
 | CORE-3 | todo | M | Wall cabinet: hanging rail / wall-hanger hardware option and back recess | wall kind builds with hanger hardware placements |
 | CORE-4 | todo | L | Corner cabinets: blind corner base, L-corner base, corner wall | split into CORE-4a/b/c |
@@ -185,3 +185,4 @@ Agents append one line per session: date, items touched, outcome.
 - 2026-10-23 (night) — SC-2 built: box recogniser (`model.faces`), `Cabinet::from_box` (kind from size/height), FFI + "Make Cabinets from Selected Boxes" in the SolidCraft menu; headless test turns 3 drawn boxes into base/tall/wall cabinets in place. Selection reading and hiding the boxes are untested: no SolidCraft app on this Mac.
 - 2026-10-23 (night) — SC-3 built: `design::cabinets_in_design` reads every component's spec under our metadata key; "Load Cabinets from Design" merges them by id. Headless test round-trips two cabinets and ignores a foreign component; the app path is untested here.
 - 2026-10-23 (night) — SC-4 built: when SolidCraft does not answer, the SolidCraft menu and the status bar offer Open SolidCraft (launches /Applications/SolidCraft.app with `--control 7878`, waits up to 30 s for the dot to turn green; explains when SolidCraft is missing or already open without the port). Untested: SolidCraft is not installed on this Mac.
+- 2026-10-23 (night) — CORE-1 done: headless test shows SolidCraft cuts exactly the notch volume from both sides; sheets label a through groove as a notch and draw it as a cut-out. Pictures: docs/images/core1-toe-kick-notch.png, core1-side-sheet.png.

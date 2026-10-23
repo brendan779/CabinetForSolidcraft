@@ -119,7 +119,10 @@ pub fn features(list: &PartList, part: &Part) -> Vec<Feature> {
                 out.push(rect(part, bounds.min, bounds.size, "biscuit"));
             }
             Operation::Groove { part: name, bounds } if *name == part.name => {
-                out.push(rect(part, bounds.min, bounds.size, "groove"));
+                // A groove through the whole thickness takes material away: a notch.
+                let through = bounds.size.get(part.thickness_axis) >= part.thickness() - 1e-6;
+                let label = if through { "notch" } else { "groove" };
+                out.push(rect(part, bounds.min, bounds.size, label));
             }
             _ => {}
         }
@@ -302,10 +305,11 @@ pub fn part_sheet(list: &PartList, part: &Part, board: &str, job: &str) -> Strin
                 ));
             }
             Feature::Rect { u, v, w, h, label } => {
-                let fill = if *label == "biscuit" {
-                    "#e8c27a"
-                } else {
-                    "#9bb7d4"
+                // A notch is drawn as the paper showing through: no board there.
+                let fill = match *label {
+                    "biscuit" => "#e8c27a",
+                    "notch" => "#ffffff",
+                    _ => "#9bb7d4",
                 };
                 let _ = writeln!(
                     svg,
@@ -412,6 +416,35 @@ mod tests {
                 ..
             }
         )));
+    }
+
+    #[test]
+    fn an_integrated_toe_kick_shows_as_a_notch_at_the_front_bottom_of_each_side() {
+        let mut cab = Cabinet::new("B01", CabinetKind::Base);
+        cab.standard.toe_kick = cabinet_core::model::ToeKick::IntegratedNotch;
+        let list = build_cabinet(&cab).unwrap();
+        for side in ["B01.LeftSide", "B01.RightSide"] {
+            let part = list.part(side).unwrap();
+            let notches: Vec<_> = features(&list, part)
+                .into_iter()
+                .filter(|f| matches!(f, Feature::Rect { label: "notch", .. }))
+                .collect();
+            let s = &cab.standard;
+            assert_eq!(
+                notches,
+                [Feature::Rect {
+                    u: 0.0,
+                    v: 0.0,
+                    // The side is drawn with its height along u and its depth along v.
+                    w: s.toe_kick_height,
+                    h: s.toe_kick_setback,
+                    label: "notch",
+                }],
+                "{side}"
+            );
+            let svg = part_sheet(&list, part, "Board", "Job");
+            assert!(svg.contains("notch 150 × 50 @ 0, 0"), "{side}");
+        }
     }
 
     #[test]

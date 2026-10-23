@@ -189,3 +189,45 @@ fn cabinets_built_into_a_design_read_back_as_they_were_specified() {
         .collect();
     assert_eq!(read, cabs);
 }
+
+#[test]
+fn an_integrated_toe_kick_notch_is_cut_out_of_both_sides() {
+    let Some(cli) = cli() else {
+        eprintln!("SOLIDCRAFT_CLI not set: skipped");
+        return;
+    };
+    use cabinet_core::part::Operation;
+    let mut cab = Cabinet::new("B01", CabinetKind::Base);
+    cab.standard.toe_kick = cabinet_core::model::ToeKick::IntegratedNotch;
+    let mut list = build_cabinet(&cab).unwrap();
+    // Only the notches (grooves at the front, from the floor), so the volumes are exact.
+    list.operations.retain(|o| {
+        matches!(o, Operation::Groove { bounds, .. } if bounds.min.z == 0.0 && bounds.min.y == 0.0)
+    });
+    assert_eq!(list.operations.len(), 2);
+    let r = run(
+        &cli,
+        "notch",
+        &emit_cabinet(&list, Detail::Manufacturing, None),
+        &["eval"],
+    );
+    let s = &cab.standard;
+    let notch = s.carcass_thickness * s.toe_kick_setback * s.toe_kick_height;
+    for side in ["B01.LeftSide", "B01.RightSide"] {
+        let part = list.part(side).unwrap();
+        let body = r["bodies"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|b| b["name"] == side)
+            .unwrap();
+        let got = body["volume_mm3"].as_f64().unwrap();
+        let expected = part.bounds.volume() - notch;
+        assert!(
+            (got - expected).abs() < 1e-6 * expected,
+            "{side}: {got} vs {expected}"
+        );
+        // The box still reaches the floor at the back: the notch is at the front only.
+        assert_eq!(body["bbox"]["min"][2], 0.0, "{side}");
+    }
+}
