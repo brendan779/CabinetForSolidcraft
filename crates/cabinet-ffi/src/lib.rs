@@ -402,6 +402,22 @@ fn next_id(kind: CabinetKind, taken: &[String]) -> String {
         .unwrap()
 }
 
+/// The cabinets built into the design open in SolidCraft, as cabinet JSON. Components whose stored
+/// spec this version cannot read are left out. Blocking.
+#[uniffi::export]
+pub fn cabinets_in_design(port: u16) -> Result<Vec<String>, CoreError> {
+    let sc = |e: solidcraft_bridge::Error| CoreError::SolidCraft {
+        message: e.to_string(),
+    };
+    let mut client = Client::connect(port).map_err(sc)?;
+    Ok(solidcraft_bridge::design::cabinets_in_design(&mut client)
+        .map_err(sc)?
+        .into_iter()
+        .filter_map(|v| serde_json::from_value::<Cabinet>(v).ok())
+        .filter_map(|c| serde_json::to_string(&c).ok())
+        .collect())
+}
+
 /// Hides bodies in SolidCraft (the boxes cabinets were made from). Blocking.
 #[uniffi::export]
 pub fn hide_bodies(port: u16, bodies: Vec<String>) -> Result<(), CoreError> {

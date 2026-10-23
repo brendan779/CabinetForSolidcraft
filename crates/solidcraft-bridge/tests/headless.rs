@@ -152,3 +152,40 @@ fn three_drawn_boxes_become_three_cabinets_in_place() {
     let after = bounds(&cli, "cabinets", &built);
     assert!(after.len() > 20);
 }
+
+#[test]
+fn cabinets_built_into_a_design_read_back_as_they_were_specified() {
+    let Some(cli) = cli() else {
+        eprintln!("SOLIDCRAFT_CLI not set: skipped");
+        return;
+    };
+    use solidcraft_bridge::design::{component_names, spec_from_metadata};
+    let mut wall = Cabinet::new("W01", CabinetKind::Wall);
+    wall.origin = cabinet_core::geom::Vec3::new(0.0, 250.0, 1450.0);
+    let cabs = [Cabinet::new("B01", CabinetKind::Base), wall];
+    let mut script = Vec::new();
+    for c in &cabs {
+        let list = build_cabinet(c).unwrap();
+        let spec = serde_json::to_value(c).unwrap();
+        script.extend(emit_cabinet(&list, Detail::Design, Some(&spec)));
+    }
+    // A component that is not a cabinet.
+    script.push(
+        json!({ "command": "component.create", "params": { "name": "Fridge", "activate": false } }),
+    );
+    script.push(json!({ "command": "component.list", "params": { "compact": true } }));
+    let listing = run(&cli, "readback-list", &script, &["run", "--results"]);
+    let names = component_names(listing.as_array().unwrap().last().unwrap());
+    assert_eq!(names, ["B01", "W01", "Fridge"]);
+    for name in &names {
+        script.push(json!({ "command": "component.metadata", "params": { "component": name } }));
+    }
+    let results = run(&cli, "readback", &script, &["run", "--results"]);
+    let results = results.as_array().unwrap();
+    let read: Vec<Cabinet> = results[results.len() - names.len()..]
+        .iter()
+        .filter_map(spec_from_metadata)
+        .map(|v| serde_json::from_value(v).unwrap())
+        .collect();
+    assert_eq!(read, cabs);
+}

@@ -7,6 +7,7 @@
 
 pub mod boxes;
 pub mod client;
+pub mod design;
 pub mod emit;
 
 pub use client::Client;

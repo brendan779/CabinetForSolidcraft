@@ -67,6 +67,9 @@ struct SolidCraftButton: View {
             Button("Make Cabinets from Selected Boxes", systemImage: "cube.transparent") {
                 Task { await project.makeCabinetsFromSelection() }
             }
+            Button("Load Cabinets from Design", systemImage: "square.and.arrow.down") {
+                Task { await project.loadCabinetsFromDesign() }
+            }
             Button("Check Connection") { Task { await project.checkConnection() } }
         } label: {
             HStack(spacing: 6) {

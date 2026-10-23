@@ -277,6 +277,47 @@ final class ProjectModel {
         status = note
     }
 
+    /// Loads the cabinets built into the design open in SolidCraft. A cabinet already in the
+    /// project (same id) is replaced by the design's version; they keep their design positions.
+    func loadCabinetsFromDesign() async {
+        isSending = true
+        lastError = nil
+        status = "Reading cabinets from the SolidCraft design…"
+        let port = self.port
+        let result = await Task.detached { () -> Result<[String], Error> in
+            Result { try cabinetsInDesign(port: port) }
+        }.value
+        isSending = false
+        switch result {
+        case .success(let jsons):
+            guard !jsons.isEmpty else {
+                status = "The SolidCraft design has no cabinets"
+                return
+            }
+            withAnimation(.snappy) {
+                for json in jsons {
+                    guard let data = json.data(using: .utf8),
+                          let id = (try? JSONSerialization.jsonObject(with: data) as? [String: Any])?["id"] as? String
+                    else { continue }
+                    let doc = CabinetDoc(id: id, json: json, placed: true)
+                    if let i = cabinets.firstIndex(where: { $0.id == id }) {
+                        cabinets[i] = doc
+                    } else {
+                        cabinets.append(doc)
+                    }
+                }
+                selection = selection ?? cabinets.first?.id
+            }
+            changed()
+            status = "Loaded \(jsons.count) cabinets from SolidCraft"
+            connection = .connected
+        case .failure(let e):
+            lastError = "\(e)"
+            status = "Could not read the SolidCraft design"
+            await checkConnection()
+        }
+    }
+
     // MARK: Persistence
 
     private var saveURL: URL {
