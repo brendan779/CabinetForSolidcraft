@@ -8,6 +8,7 @@
 //! Cabinet frame: X runs left to right across the front, Y runs from the front face (Y = 0) to the
 //! back, Z runs up from the floor. Lengths are millimetres.
 
+pub mod bom;
 pub mod build;
 pub mod collisions;
 pub mod cutlist;

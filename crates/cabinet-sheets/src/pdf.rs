@@ -41,6 +41,79 @@ pub fn job_pdf(lists: &[PartList], board: impl Fn(&Part) -> String, job: &str) -
     write_pdf(&pages.iter().map(|svg| svg_to_ops(svg)).collect::<Vec<_>>())
 }
 
+/// Rows per table page.
+const TABLE_ROWS: usize = 34;
+
+/// A table over as many pages as it needs: a title, then `headers` and `rows` in columns of the
+/// given widths (mm). Numbers in a column whose header ends in `#` are set right-aligned.
+pub fn table_pdf(
+    title: &str,
+    job: &str,
+    headers: &[&str],
+    widths: &[f64],
+    rows: &[Vec<String>],
+) -> Vec<u8> {
+    let chunks: Vec<&[Vec<String>]> = if rows.is_empty() {
+        vec![&[]]
+    } else {
+        rows.chunks(TABLE_ROWS).collect()
+    };
+    let n = chunks.len();
+    let pages: Vec<String> = chunks
+        .iter()
+        .enumerate()
+        .map(|(i, chunk)| {
+            let mut svg = String::new();
+            page_start(&mut svg);
+            let _ = writeln!(
+                svg,
+                r##"<text x="15.00" y="20.00" font-size="6">{}</text>"##,
+                esc(title)
+            );
+            let page = if n > 1 {
+                format!("   page {} of {n}", i + 1)
+            } else {
+                String::new()
+            };
+            let _ = writeln!(
+                svg,
+                r##"<text x="282.00" y="20.00" font-size="3" fill="#555" text-anchor="end">{}{page}</text>"##,
+                esc(job)
+            );
+            let row = |svg: &mut String, y: f64, cells: &[String], head: bool| {
+                let mut x = 15.0;
+                for ((cell, w), h) in cells.iter().zip(widths).zip(headers) {
+                    let right = h.ends_with('#');
+                    let (tx, anchor) = if right {
+                        (x + w - 2.0, r#" text-anchor="end""#)
+                    } else {
+                        (x, "")
+                    };
+                    let weight = if head { r##" fill="#555""## } else { "" };
+                    let _ = writeln!(
+                        svg,
+                        r##"<text x="{tx:.2}" y="{y:.2}" font-size="3"{anchor}{weight}>{}</text>"##,
+                        esc(cell.trim_end_matches('#'))
+                    );
+                    x += w;
+                }
+            };
+            let head: Vec<String> = headers.iter().map(|h| h.to_string()).collect();
+            row(&mut svg, 32.0, &head, true);
+            let _ = writeln!(
+                svg,
+                r##"<line x1="15.00" y1="34.00" x2="282.00" y2="34.00" stroke="#222" stroke-width="0.3"/>"##
+            );
+            for (j, cells) in chunk.iter().enumerate() {
+                row(&mut svg, 40.0 + j as f64 * 4.8, cells, false);
+            }
+            svg.push_str("</svg>\n");
+            svg
+        })
+        .collect();
+    write_pdf(&pages.iter().map(|svg| svg_to_ops(svg)).collect::<Vec<_>>())
+}
+
 fn page_start(svg: &mut String) {
     let _ = writeln!(
         svg,
@@ -550,6 +623,24 @@ mod tests {
         let pdf = job_pdf(&lists, |_| "Generic".into(), "Kitchen");
         let index = parts.div_ceil(INDEX_ROWS * INDEX_COLUMNS);
         assert_eq!(pages(&pdf), parts + 1 + index);
+    }
+
+    #[test]
+    fn a_long_table_runs_over_several_pages() {
+        let rows: Vec<Vec<String>> = (0..80)
+            .map(|i| vec![format!("item {i}"), "2".into()])
+            .collect();
+        let pdf = table_pdf(
+            "Hardware",
+            "Kitchen",
+            &["Item", "Qty#"],
+            &[100.0, 20.0],
+            &rows,
+        );
+        assert_eq!(pages(&pdf), 80usize.div_ceil(TABLE_ROWS));
+        let text = String::from_utf8_lossy(&pdf);
+        assert!(text.contains("(item 79) Tj"));
+        assert!(text.contains("(Qty) Tj"), "the # only aligns");
     }
 
     #[test]

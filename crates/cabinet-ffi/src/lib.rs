@@ -548,6 +548,95 @@ pub fn cut_sheets_pdf(items: JobItems, job: String) -> Result<Vec<u8>, CoreError
     ))
 }
 
+/// One line of the hardware bill.
+#[derive(uniffi::Record)]
+pub struct BomRecord {
+    pub item: String,
+    pub brand: String,
+    /// The supplier's article number from the hardware catalog, or "not catalogued".
+    pub article: String,
+    pub description: String,
+    pub quantity: u32,
+    pub cabinets: String,
+}
+
+fn bom_records(items: &JobItems, catalog_dir: &str) -> Result<Vec<BomRecord>, CoreError> {
+    use cabinet_core::bom::{NOT_CATALOGUED, hardware_bom};
+    let lists: Vec<PartList> = job_lists(items)?.into_iter().map(|(l, _)| l).collect();
+    let cat = cabinet_catalog::Catalog::load(std::path::Path::new(catalog_dir)).map_err(invalid)?;
+    Ok(hardware_bom(&lists)
+        .into_iter()
+        .map(|r| {
+            let found = cat.hardware_item(&r.item);
+            BomRecord {
+                brand: found.map(|h| h.brand.clone()).unwrap_or_default(),
+                article: found
+                    .map(|h| h.article.clone())
+                    .unwrap_or_else(|| NOT_CATALOGUED.into()),
+                item: r.item,
+                description: r.description,
+                quantity: r.quantity,
+                cabinets: r.cabinets.join(" "),
+            }
+        })
+        .collect())
+}
+
+/// The job's hardware, one row per item, with article numbers from the catalog at `catalog_dir`.
+#[uniffi::export]
+pub fn hardware_bom(items: JobItems, catalog_dir: String) -> Result<Vec<BomRecord>, CoreError> {
+    bom_records(&items, &catalog_dir)
+}
+
+#[uniffi::export]
+pub fn hardware_bom_csv(items: JobItems, catalog_dir: String) -> Result<String, CoreError> {
+    let lists: Vec<PartList> = job_lists(&items)?.into_iter().map(|(l, _)| l).collect();
+    let cat =
+        cabinet_catalog::Catalog::load(std::path::Path::new(&catalog_dir)).map_err(invalid)?;
+    Ok(cabinet_core::bom::bom_csv(
+        &cabinet_core::bom::hardware_bom(&lists),
+        |id| {
+            cat.hardware_item(id)
+                .map(|h| (h.brand.clone(), h.article.clone()))
+        },
+    ))
+}
+
+#[uniffi::export]
+pub fn hardware_bom_pdf(
+    items: JobItems,
+    catalog_dir: String,
+    job: String,
+) -> Result<Vec<u8>, CoreError> {
+    let rows: Vec<Vec<String>> = bom_records(&items, &catalog_dir)?
+        .into_iter()
+        .map(|r| {
+            vec![
+                format!("{}#", r.quantity),
+                r.description,
+                r.brand,
+                r.article,
+                r.item,
+                r.cabinets,
+            ]
+        })
+        .collect();
+    Ok(cabinet_sheets::pdf::table_pdf(
+        "Hardware",
+        &job,
+        &[
+            "Qty#",
+            "Description",
+            "Brand",
+            "Article",
+            "Item",
+            "Cabinets",
+        ],
+        &[14.0, 92.0, 22.0, 30.0, 70.0, 39.0],
+        &rows,
+    ))
+}
+
 /// Whether a SolidCraft app answers on `port`.
 #[uniffi::export]
 pub fn solidcraft_reachable(port: u16) -> bool {
@@ -868,5 +957,22 @@ mod tests {
         let built = build_job(job(&items));
         assert!(built[0].summary.is_some());
         assert!(built[1].error.is_some());
+    }
+
+    #[test]
+    fn the_sample_run_has_a_hardware_bill_as_csv_and_pdf() {
+        let items: Vec<String> = [("B01", "base"), ("D01", "drawer_bank"), ("T01", "tall")]
+            .iter()
+            .map(|(id, kind)| new_cabinet(id.to_string(), kind.to_string()).unwrap())
+            .collect();
+        let rows = hardware_bom(job(&items), catalog()).unwrap();
+        assert!(
+            rows.iter()
+                .any(|r| r.item.starts_with("blum.clip-top") && r.cabinets.contains("T01"))
+        );
+        let csv = hardware_bom_csv(job(&items), catalog()).unwrap();
+        assert_eq!(csv.lines().count(), rows.len() + 1);
+        let pdf = hardware_bom_pdf(job(&items), catalog(), "Sample".into()).unwrap();
+        assert!(pdf.starts_with(b"%PDF"));
     }
 }

@@ -25,6 +25,25 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         "Sample job",
     );
     std::fs::write(format!("{out}/sample.pdf"), pdf)?;
-    println!("{} sheets and sample.pdf in {out}", list.parts.len());
+    let rows: Vec<Vec<String>> = cabinet_core::bom::hardware_bom(std::slice::from_ref(&list))
+        .into_iter()
+        .map(|r| {
+            vec![
+                format!("{}#", r.quantity),
+                r.description,
+                r.item,
+                r.cabinets.join(" "),
+            ]
+        })
+        .collect();
+    let bom = cabinet_sheets::pdf::table_pdf(
+        "Hardware",
+        "Sample job",
+        &["Qty#", "Description", "Item", "Cabinets"],
+        &[14.0, 110.0, 100.0, 43.0],
+        &rows,
+    );
+    std::fs::write(format!("{out}/hardware.pdf"), bom)?;
+    println!("{} sheets, sample.pdf and hardware.pdf in {out}", list.parts.len());
     Ok(())
 }

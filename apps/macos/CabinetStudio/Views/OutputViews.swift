@@ -2,7 +2,90 @@ import SwiftUI
 import UniformTypeIdentifiers
 import WebKit
 
+/// The Cut List workspace: the parts to cut, or the hardware to order.
 struct CutListView: View {
+    @State private var showing = "Parts"
+
+    var body: some View {
+        Group {
+            if showing == "Parts" { PartsListView() } else { HardwareListView() }
+        }
+        .toolbar {
+            ToolbarItem(placement: .navigation) {
+                Picker("Show", selection: $showing) {
+                    Text("Parts").tag("Parts")
+                    Text("Hardware").tag("Hardware")
+                }
+                .pickerStyle(.segmented)
+                .help("Parts to cut, or hardware to order")
+            }
+        }
+    }
+}
+
+/// Every hardware item of the job, counted, with its supplier article where the catalog has it.
+struct HardwareListView: View {
+    @Environment(ProjectModel.self) private var project
+    @State private var export: (doc: DataDocument, type: UTType, name: String)?
+
+    private var rows: [BomRecord] {
+        guard let dir = Preferences.catalogDir else { return [] }
+        return (try? hardwareBom(items: project.jobItems, catalogDir: dir.path)) ?? []
+    }
+
+    var body: some View {
+        let rows = self.rows
+        VStack(spacing: 0) {
+            Table(rows) {
+                TableColumn("Qty") { Text("\($0.quantity)").monospacedDigit() }.width(40)
+                TableColumn("Description", value: \.description)
+                TableColumn("Brand", value: \.brand).width(80)
+                TableColumn("Article") { r in
+                    Text(r.article).foregroundStyle(r.brand.isEmpty ? .secondary : .primary)
+                }
+                .width(110)
+                TableColumn("Item") { Text($0.item).monospaced().foregroundStyle(.secondary) }
+                TableColumn("Cabinets", value: \.cabinets).width(120)
+            }
+            HStack {
+                let missing = rows.filter { $0.brand.isEmpty }.count
+                Text("\(rows.reduce(0) { $0 + Int($1.quantity) }) items in \(rows.count) lines"
+                     + (missing > 0 ? " · \(missing) without an article number yet" : ""))
+                    .foregroundStyle(.secondary)
+                Spacer()
+                Button("Export CSV…", systemImage: "square.and.arrow.up") { make(pdf: false) }
+                Button("Export PDF…", systemImage: "doc.richtext") { make(pdf: true) }
+            }
+            .padding(10)
+            .background(.bar)
+        }
+        .fileExporter(isPresented: Binding(get: { export != nil }, set: { if !$0 { export = nil } }),
+                      document: export?.doc, contentType: export?.type ?? .data,
+                      defaultFilename: export?.name ?? "") { _ in }
+    }
+
+    private func make(pdf: Bool) {
+        guard let dir = Preferences.catalogDir?.path else { return }
+        do {
+            let name = "\(project.jobName) hardware"
+            if pdf {
+                let data = try hardwareBomPdf(items: project.jobItems, catalogDir: dir, job: project.jobName)
+                export = (DataDocument(data: data), .pdf, name)
+            } else {
+                let csv = try hardwareBomCsv(items: project.jobItems, catalogDir: dir)
+                export = (DataDocument(data: Data(csv.utf8)), .commaSeparatedText, name)
+            }
+        } catch {
+            project.lastError = "Could not export the hardware: \(error)"
+        }
+    }
+}
+
+extension BomRecord: Identifiable {
+    public var id: String { item + "|" + description }
+}
+
+struct PartsListView: View {
     @Environment(ProjectModel.self) private var project
     @AppStorage(LengthUnit.key) private var unit: LengthUnit = .millimetres
     @State private var sort = [KeyPathComparator(\CutRowRecord.part)]
