@@ -275,3 +275,42 @@ fn biscuit_slots_remove_the_volume_of_a_plunged_100_mm_cutter() {
         "removed {removed:.0} mm³, expected {expected:.0} mm³"
     );
 }
+
+#[test]
+fn every_slot_holds_a_biscuit_body_of_the_biscuits_size() {
+    let Some(cli) = cli() else {
+        eprintln!("SOLIDCRAFT_CLI not set: skipped");
+        return;
+    };
+    use cabinet_core::part::Operation;
+    let cab = Cabinet::new("B01", CabinetKind::Base);
+    let list = build_cabinet(&cab).unwrap();
+    let slots = list
+        .operations
+        .iter()
+        .filter(|o| matches!(o, Operation::BiscuitSlot { .. }))
+        .count();
+    let r = run(
+        &cli,
+        "biscuit-bodies",
+        &emit_cabinet(&list, Detail::Manufacturing, None),
+        &["eval"],
+    );
+    let biscuits: Vec<&Value> = r["bodies"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .filter(|b| b["name"].as_str().unwrap().contains(".Biscuit"))
+        .collect();
+    assert_eq!(biscuits.len(), slots);
+    // A lens of two circular arcs: chord = the biscuit's length, bulge = half its width.
+    let b = cab.standard.biscuit;
+    let (half, h) = (b.length() / 2.0, b.width() / 2.0);
+    let r_arc = (half * half + h * h) / (2.0 * h);
+    let segment = r_arc * r_arc * (half / r_arc).asin() - (r_arc - h) * half;
+    let expected = 2.0 * segment * b.thickness();
+    for body in biscuits {
+        let v = body["volume_mm3"].as_f64().unwrap();
+        assert!((v - expected).abs() < 0.01 * expected, "{v} vs {expected}");
+    }
+}

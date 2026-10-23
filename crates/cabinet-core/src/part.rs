@@ -3,6 +3,7 @@
 use serde::{Deserialize, Serialize};
 
 use crate::geom::{Aabb, Axis, Vec3};
+use crate::model::BiscuitSize;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
@@ -174,6 +175,9 @@ pub enum Operation {
         parts: [String; 2],
         bounds: Aabb,
         along: Axis,
+        /// The biscuit that goes in it.
+        #[serde(default = "default_biscuit")]
+        size: BiscuitSize,
     },
     /// A rectangular groove or rebate.
     Groove { part: String, bounds: Aabb },
@@ -188,6 +192,10 @@ pub enum BorePurpose {
     HingeCup,
     HingePlate,
     Dowel,
+}
+
+fn default_biscuit() -> BiscuitSize {
+    BiscuitSize::No20
 }
 
 /// A direction along an axis.

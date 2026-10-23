@@ -196,6 +196,7 @@ impl ButtJoint<'_> {
             parts: [self.face_part.name.clone(), self.end_part.name.clone()],
             bounds: Aabb::new(min, extent),
             along: self.along,
+            size,
         }
     }
 

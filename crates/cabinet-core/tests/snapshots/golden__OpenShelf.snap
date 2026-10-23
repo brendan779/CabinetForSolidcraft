@@ -262,7 +262,8 @@ expression: list
           "z": 4.0
         }
       },
-      "along": "Y"
+      "along": "Y",
+      "size": "no20"
     },
     {
       "type": "biscuit_slot",
@@ -282,7 +283,8 @@ expression: list
           "z": 4.0
         }
       },
-      "along": "Y"
+      "along": "Y",
+      "size": "no20"
     },
     {
       "type": "bore",
@@ -334,7 +336,8 @@ expression: list
           "z": 4.0
         }
       },
-      "along": "Y"
+      "along": "Y",
+      "size": "no20"
     },
     {
       "type": "biscuit_slot",
@@ -354,7 +357,8 @@ expression: list
           "z": 4.0
         }
       },
-      "along": "Y"
+      "along": "Y",
+      "size": "no20"
     },
     {
       "type": "bore",
