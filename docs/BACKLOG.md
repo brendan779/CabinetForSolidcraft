@@ -43,7 +43,7 @@ Priorities: **P0** blocks most other work · **P1** MVP · **P2** commercial par
 |---|---|---|---|---|
 | CORE-1 | done (night/2026-10-23) | M | Integrated toe-kick notch: verify the groove op cuts the notch in SolidCraft and in sheets | screenshot + sheet show the notch |
 | CORE-2 | done (night/2026-10-23) | M | Fixed shelves (biscuited + screwed like a bottom) as an option per shelf | test: fixed shelf has joints both sides |
-| CORE-3 | todo | M | Wall cabinet: hanging rail / wall-hanger hardware option and back recess | wall kind builds with hanger hardware placements |
+| CORE-3 | done (night/2026-10-23) | M | Wall cabinet: hanging rail / wall-hanger hardware option and back recess | wall kind builds with hanger hardware placements |
 | CORE-4 | todo | L | Corner cabinets: blind corner base, L-corner base, corner wall | split into CORE-4a/b/c |
 | CORE-5 | todo | M | Sink cabinet (no bottom rail, back cut-out option, waterproof base liner option) | builds; liner appears in BOM |
 | CORE-6 | todo | M | Fillers, end panels and scribes as parts of a run | a run with an end panel each side builds |
@@ -94,6 +94,7 @@ Priorities: **P0** blocks most other work · **P1** MVP · **P2** commercial par
 | HAF-5 | todo | M | Lighting rules: no mixing 12/24 V; ≤ 80 % driver load; ports per distributor; cable holes Ø10 through panels added as ops | unit tests for each rule |
 | HAF-6 | todo | M | Lighting placement UI: click under-cabinet / in-cabinet / plinth zones on a cabinet drawing | picker in inspector |
 | HAF-7 | 👤 needs-human | M | Import the owner's Häfele STEP files (`vendor-cad/hafele/`) like BLUM-9 | — |
+| HAF-8 | todo | S | Wall hanger + wall rail articles for the generic `wall-hanger.concealed` / `wall-hanger.rail` placements (CORE-3): pick a system (Häfele/Camar), its drilling and rail lengths, from the supplier's data | BOM rows with article numbers; hanger drilling ops |
 
 ### Board and edge tape data (Australia)
 
@@ -187,3 +188,4 @@ Agents append one line per session: date, items touched, outcome.
 - 2026-10-23 (night) — SC-4 built: when SolidCraft does not answer, the SolidCraft menu and the status bar offer Open SolidCraft (launches /Applications/SolidCraft.app with `--control 7878`, waits up to 30 s for the dot to turn green; explains when SolidCraft is missing or already open without the port). Untested: SolidCraft is not installed on this Mac.
 - 2026-10-23 (night) — CORE-1 done: headless test shows SolidCraft cuts exactly the notch volume from both sides; sheets label a through groove as a notch and draw it as a cut-out. Pictures: docs/images/core1-toe-kick-notch.png, core1-side-sheet.png.
 - 2026-10-23 (night) — CORE-2 done: `fixed_shelves` (per shelf number): full width, to the back, biscuited + screwed to both sides; no shelf pins within a pitch of it. Inspector shows a lock chip per shelf.
+- 2026-10-23 (night) — CORE-3 done: `wall_hanging` standard option (hangers + rail / none) with a picker drawing; wall cabinets get two hangers in the top back corners (void behind the inset back) and a rail; other backs warn. Article numbers wait for HAF-8 (added).

@@ -2014,6 +2014,39 @@ expression: list
       },
       "part": "C01.Door1",
       "quantity": 1
+    },
+    {
+      "item": "wall-hanger.concealed",
+      "description": "Concealed adjustable wall cabinet hanger",
+      "at": {
+        "x": 16.0,
+        "y": 314.0,
+        "z": 720.0
+      },
+      "part": "C01.LeftSide",
+      "quantity": 1
+    },
+    {
+      "item": "wall-hanger.concealed",
+      "description": "Concealed adjustable wall cabinet hanger",
+      "at": {
+        "x": 584.0,
+        "y": 314.0,
+        "z": 720.0
+      },
+      "part": "C01.RightSide",
+      "quantity": 1
+    },
+    {
+      "item": "wall-hanger.rail",
+      "description": "Wall rail for cabinet hangers, cut to 600 mm",
+      "at": {
+        "x": 300.0,
+        "y": 330.0,
+        "z": 720.0
+      },
+      "part": "C01.Back",
+      "quantity": 1
     }
   ],
   "warnings": [

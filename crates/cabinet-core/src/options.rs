@@ -89,6 +89,18 @@ pub fn option_groups() -> Vec<OptionGroup> {
             ],
         ),
         group(
+            "wall_hanging",
+            "Wall hanging",
+            &[
+                (
+                    "hangers",
+                    "Hangers + rail",
+                    "Concealed adjustable hangers behind the back, on a wall rail",
+                ),
+                ("none", "None", "The installer fixes wall cabinets"),
+            ],
+        ),
+        group(
             "toe_kick",
             "Base",
             &[

@@ -202,6 +202,8 @@ pub struct ConstructionStandard {
     /// Front and back clearance of adjustable shelves.
     pub shelf_front_setback: f64,
     pub edge_band_thickness: f64,
+    /// How wall cabinets hang.
+    pub wall_hanging: WallHanging,
 }
 
 impl Default for ConstructionStandard {
@@ -228,6 +230,7 @@ impl Default for ConstructionStandard {
             rail_width: 100.0,
             shelf_front_setback: 2.0,
             edge_band_thickness: 1.0,
+            wall_hanging: WallHanging::Hangers,
         }
     }
 }
@@ -266,6 +269,16 @@ pub enum BackStyle {
     Applied,
     /// Full-thickness back between sides, top and bottom.
     Structural,
+    None,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum WallHanging {
+    /// Concealed adjustable hangers in the top back corners, hooked onto a rail screwed to the
+    /// wall. They sit in the void behind an inset back.
+    Hangers,
+    /// No hanging hardware: the installer fixes the cabinet.
     None,
 }
 

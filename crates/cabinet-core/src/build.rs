@@ -4,7 +4,7 @@ use crate::geom::{Aabb, Axis, Vec3};
 use crate::joinery::ButtJoint;
 use crate::model::{
     BackStyle, BottomJoint, Cabinet, CabinetKind, DoorOverlay, FrontLayout, HingeSide, ToeKick,
-    TopJoint,
+    TopJoint, WallHanging,
 };
 use crate::part::{
     BorePurpose, Dir, EdgeBanding, HardwarePlacement, Operation, Part, PartList, PartRole,
@@ -40,6 +40,7 @@ pub fn build_cabinet(cab: &Cabinet) -> Result<PartList> {
     // After the fronts, so shelf-pin holes can make way for hinge plates.
     b.shelves();
     b.plinth();
+    b.wall_hanging();
     let mut list = b.list;
     for p in &mut list.parts {
         let o = cab.origin;
@@ -718,6 +719,44 @@ impl<'a> Builder<'a> {
         }
     }
 
+    /// Hangers for a wall cabinet: one in each top back corner, fixed to the inside of the side in
+    /// the void behind an inset back, and a wall rail across the width for them to hook onto.
+    /// `at` is the corner of the void each hanger sits in; the hanger's own drilling comes from its
+    /// catalog record (BLUM-1 / HAF data), not from here.
+    fn wall_hanging(&mut self) {
+        let cab = self.cab;
+        let s = &cab.standard;
+        if cab.kind != CabinetKind::Wall || s.wall_hanging == WallHanging::None {
+            return;
+        }
+        if s.back != BackStyle::InsetGroove {
+            self.list.warnings.push(
+                "wall hangers need the void behind an inset back; with this back they are \
+                 left out"
+                    .into(),
+            );
+            return;
+        }
+        let (w, d, h, t) = (cab.width, cab.depth, cab.height, s.carcass_thickness);
+        let void_y = d - BACK_INSET;
+        for (role, x) in [(PartRole::LeftSide, t), (PartRole::RightSide, w - t)] {
+            self.list.hardware.push(HardwarePlacement {
+                item: "wall-hanger.concealed".into(),
+                description: "Concealed adjustable wall cabinet hanger".into(),
+                at: Vec3::new(x, void_y, h),
+                part: self.name(role, None),
+                quantity: 1,
+            });
+        }
+        self.list.hardware.push(HardwarePlacement {
+            item: "wall-hanger.rail".into(),
+            description: format!("Wall rail for cabinet hangers, cut to {w:.0} mm"),
+            at: Vec3::new(w / 2.0, d, h),
+            part: self.name(PartRole::Back, None),
+            quantity: 1,
+        });
+    }
+
     fn plinth(&mut self) {
         let cab = self.cab;
         let s = &cab.standard;
@@ -999,6 +1038,68 @@ mod tests {
                 }
             }
         }
+    }
+
+    #[test]
+    fn a_wall_cabinet_hangs_on_two_hangers_in_its_top_back_corners_and_a_rail() {
+        let cab = Cabinet::new("W01", CabinetKind::Wall);
+        let list = build_cabinet(&cab).unwrap();
+        let hangers: Vec<_> = list
+            .hardware
+            .iter()
+            .filter(|h| h.item == "wall-hanger.concealed")
+            .collect();
+        assert_eq!(hangers.len(), 2);
+        assert_eq!(hangers[0].part, "W01.LeftSide");
+        assert_eq!(hangers[1].part, "W01.RightSide");
+        for h in &hangers {
+            assert_eq!(h.at.z, cab.height, "at the top");
+            assert_eq!(
+                h.at.y,
+                cab.depth - BACK_INSET,
+                "in the void behind the back"
+            );
+        }
+        // The back sits in front of the void the hangers and rail use.
+        let back = list.part("W01.Back").unwrap();
+        assert!(back.bounds.max().y <= cab.depth - BACK_INSET);
+        assert_eq!(
+            list.hardware
+                .iter()
+                .filter(|h| h.item == "wall-hanger.rail")
+                .count(),
+            1
+        );
+    }
+
+    #[test]
+    fn base_cabinets_and_unhung_wall_cabinets_have_no_hangers() {
+        let base = build_cabinet(&Cabinet::new("B01", CabinetKind::Base)).unwrap();
+        let mut wall = Cabinet::new("W01", CabinetKind::Wall);
+        wall.standard.wall_hanging = WallHanging::None;
+        let wall = build_cabinet(&wall).unwrap();
+        for list in [base, wall] {
+            assert!(
+                !list
+                    .hardware
+                    .iter()
+                    .any(|h| h.item.starts_with("wall-hanger"))
+            );
+        }
+    }
+
+    #[test]
+    fn hangers_without_an_inset_back_are_left_out_with_a_warning() {
+        let mut cab = Cabinet::new("W01", CabinetKind::Wall);
+        cab.standard.back = BackStyle::Applied;
+        let list = build_cabinet(&cab).unwrap();
+        assert!(
+            !list
+                .hardware
+                .iter()
+                .any(|h| h.item.starts_with("wall-hanger"))
+        );
+        assert!(list.warnings.iter().any(|w| w.contains("wall hangers")));
     }
 
     #[test]
