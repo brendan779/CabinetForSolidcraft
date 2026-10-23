@@ -10,7 +10,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Tools
         run: |
-          brew install xcodegen
+          brew install xcodegen cargo-deny
           rustup default stable
           rustup component add rustfmt clippy
       - name: Check

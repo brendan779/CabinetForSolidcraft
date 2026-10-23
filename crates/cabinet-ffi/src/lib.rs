@@ -2,8 +2,10 @@
 //! stored in SolidCraft designs), results as small typed records the SwiftUI views draw directly.
 
 use cabinet_core::cutlist::{cut_list, to_csv};
+use cabinet_core::model::BoardSlot;
 use cabinet_core::{Cabinet, CabinetKind, build_cabinet};
-use solidcraft_bridge::{Client, Detail, emit_cabinet};
+use solidcraft_bridge::boxes::{cuboid, selected_bodies};
+use solidcraft_bridge::{Client, Detail, find_existing, replace_cabinet};
 
 uniffi::setup_scaffolding!();
 
@@ -118,9 +120,30 @@ pub fn set_standard_option(
     serde_json::to_string(&cab).map_err(invalid)
 }
 
+/// Uses catalog board `board_id` for the cabinet's `slot` (carcass, front, back); the slot's
+/// thickness becomes the board's.
+#[uniffi::export]
+pub fn assign_board(
+    cabinet_json: String,
+    slot: String,
+    board_id: String,
+    catalog_dir: String,
+) -> Result<String, CoreError> {
+    let mut cab = parse(&cabinet_json)?;
+    let slot: BoardSlot =
+        serde_json::from_value(serde_json::Value::String(slot)).map_err(invalid)?;
+    let cat =
+        cabinet_catalog::Catalog::load(std::path::Path::new(&catalog_dir)).map_err(invalid)?;
+    let board = cat
+        .board(&board_id)
+        .ok_or_else(|| invalid(format!("no board {board_id} in the catalog")))?;
+    cab.standard.set_board(slot, &board.id, board.thickness);
+    serde_json::to_string(&cab).map_err(invalid)
+}
+
 #[uniffi::export]
 pub fn build(cabinet_json: String) -> Result<BuildSummary, CoreError> {
-    use cabinet_core::part::{BorePurpose, Operation, PartRole};
+    use cabinet_core::part::{BorePurpose, Operation};
     let cab = parse(&cabinet_json)?;
     let list = build_cabinet(&cab).map_err(invalid)?;
     let panels = list
@@ -135,10 +158,7 @@ pub fn build(cabinet_json: String) -> Result<BuildSummary, CoreError> {
             width: p.bounds.size.x,
             depth: p.bounds.size.y,
             height: p.bounds.size.z,
-            is_front: matches!(
-                p.role,
-                PartRole::Door | PartRole::DrawerFront | PartRole::Plinth
-            ),
+            is_front: p.role.is_front(),
         })
         .collect();
     let biscuits = list
@@ -297,33 +317,32 @@ pub fn solidcraft_reachable(port: u16) -> bool {
 }
 
 /// Builds the cabinets in the running SolidCraft. Blocking: call it off the main thread.
-/// Cabinets already in the design (same component name) are replaced.
+/// Cabinets already in the design (same component name) are replaced in place.
 #[uniffi::export]
 pub fn send_to_solidcraft(
     cabinets_json: Vec<String>,
-    manufacturing: bool,
+    detail: String,
     port: u16,
 ) -> Result<String, CoreError> {
     let sc = |e: solidcraft_bridge::Error| CoreError::SolidCraft {
         message: e.to_string(),
     };
-    let mut client = Client::connect(port).map_err(sc)?;
-    let detail = if manufacturing {
-        Detail::Manufacturing
-    } else {
-        Detail::Design
+    let detail = match detail.as_str() {
+        "design" => Detail::Design,
+        "manufacturing" => Detail::Manufacturing,
+        "exact" => Detail::Exact,
+        other => return Err(invalid(format!("unknown detail level {other}"))),
     };
+    let mut client = Client::connect(port).map_err(sc)?;
     let mut report = Vec::new();
     for j in &cabinets_json {
         let cab = parse(j)?;
         let list = build_cabinet(&cab).map_err(invalid)?;
-        // Replace an earlier build of this cabinet; a missing component is fine.
-        let _ = client.execute(
-            "component.delete",
-            serde_json::json!({ "component": cab.id }),
-        );
+        // One batch replaces an earlier build of this cabinet and keeps it where the user moved
+        // it in SolidCraft.
+        let existing = find_existing(&client.components().map_err(sc)?, &cab.id);
         let spec = serde_json::to_value(&cab).map_err(invalid)?;
-        let cmds = emit_cabinet(&list, detail, Some(&spec));
+        let cmds = replace_cabinet(&list, detail, Some(&spec), existing.as_ref());
         let r = client.batch(&cmds).map_err(sc)?;
         report.push(format!(
             "{}: {} commands in {:.1} s",
@@ -333,6 +352,106 @@ pub fn send_to_solidcraft(
         ));
     }
     Ok(report.join("\n"))
+}
+
+/// A cabinet made from a box drawn in SolidCraft.
+#[derive(uniffi::Record)]
+pub struct DrawnCabinet {
+    pub id: String,
+    pub json: String,
+    /// The box body it was made from.
+    pub source: String,
+}
+
+#[derive(uniffi::Record)]
+pub struct BoxImport {
+    pub cabinets: Vec<DrawnCabinet>,
+    /// Selected bodies that were not made into cabinets, with the reason.
+    pub skipped: Vec<String>,
+}
+
+/// Turns each box selected in SolidCraft into a cabinet of its size and position. Ids follow the
+/// kind's letter and skip `taken_ids`. Blocking: call it off the main thread.
+#[uniffi::export]
+pub fn cabinets_from_selection(port: u16, taken_ids: Vec<String>) -> Result<BoxImport, CoreError> {
+    let sc = |e: solidcraft_bridge::Error| CoreError::SolidCraft {
+        message: e.to_string(),
+    };
+    let mut client = Client::connect(port).map_err(sc)?;
+    let bodies = selected_bodies(&client.inspect().map_err(sc)?);
+    let mut taken = taken_ids;
+    let mut out = BoxImport {
+        cabinets: Vec::new(),
+        skipped: Vec::new(),
+    };
+    for body in bodies {
+        let bounds = match cuboid(&client.faces(&body).map_err(sc)?) {
+            Ok(b) => b,
+            Err(why) => {
+                out.skipped.push(format!("{body} {why}"));
+                continue;
+            }
+        };
+        let kind = CabinetKind::for_box(&bounds);
+        let id = next_id(kind, &taken);
+        let cab = Cabinet::from_box(id.clone(), bounds);
+        if let Err(e) = build_cabinet(&cab) {
+            out.skipped.push(format!("{body}: {e}"));
+            continue;
+        }
+        taken.push(id.clone());
+        out.cabinets.push(DrawnCabinet {
+            id,
+            json: serde_json::to_string(&cab).map_err(invalid)?,
+            source: body,
+        });
+    }
+    Ok(out)
+}
+
+/// `B01`, `B02`... for base cabinets, the first one not taken. Same scheme as the app's Add menu.
+fn next_id(kind: CabinetKind, taken: &[String]) -> String {
+    let letter = serde_json::to_value(kind)
+        .ok()
+        .and_then(|v| v.as_str().and_then(|s| s.chars().next()))
+        .unwrap_or('C')
+        .to_ascii_uppercase();
+    (1..)
+        .map(|n| format!("{letter}{n:02}"))
+        .find(|id| !taken.contains(id))
+        .unwrap()
+}
+
+/// The cabinets built into the design open in SolidCraft, as cabinet JSON. Components whose stored
+/// spec this version cannot read are left out. Blocking.
+#[uniffi::export]
+pub fn cabinets_in_design(port: u16) -> Result<Vec<String>, CoreError> {
+    let sc = |e: solidcraft_bridge::Error| CoreError::SolidCraft {
+        message: e.to_string(),
+    };
+    let mut client = Client::connect(port).map_err(sc)?;
+    Ok(solidcraft_bridge::design::cabinets_in_design(&mut client)
+        .map_err(sc)?
+        .into_iter()
+        .filter_map(|v| serde_json::from_value::<Cabinet>(v).ok())
+        .filter_map(|c| serde_json::to_string(&c).ok())
+        .collect())
+}
+
+/// Hides bodies in SolidCraft (the boxes cabinets were made from). Blocking.
+#[uniffi::export]
+pub fn hide_bodies(port: u16, bodies: Vec<String>) -> Result<(), CoreError> {
+    let sc = |e: solidcraft_bridge::Error| CoreError::SolidCraft {
+        message: e.to_string(),
+    };
+    let mut client = Client::connect(port).map_err(sc)?;
+    client
+        .execute(
+            "browser.visibility",
+            serde_json::json!({ "visible": false, "items": bodies }),
+        )
+        .map_err(sc)?;
+    Ok(())
 }
 
 #[uniffi::export]
@@ -363,4 +482,58 @@ pub fn load_boards(catalog_dir: String) -> Result<Vec<BoardRecord>, CoreError> {
             grained: b.grained,
         })
         .collect())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn catalog() -> String {
+        concat!(env!("CARGO_MANIFEST_DIR"), "/../../catalog").to_string()
+    }
+
+    fn door_thickness(json: &str) -> f64 {
+        let list = build_cabinet(&parse(json).unwrap()).unwrap();
+        list.part("B01.Door1").unwrap().thickness()
+    }
+
+    #[test]
+    fn changing_the_front_board_changes_the_door_thickness() {
+        let json = new_cabinet("B01".into(), "base".into()).unwrap();
+        let sixteen = assign_board(
+            json.clone(),
+            "front".into(),
+            "polytec.decorative.classic-white-matt.16.mr-mdf".into(),
+            catalog(),
+        )
+        .unwrap();
+        assert_eq!(door_thickness(&sixteen), 16.0);
+        let eighteen = assign_board(
+            sixteen,
+            "front".into(),
+            "polytec.decorative.classic-white-matt.18.mr-mdf".into(),
+            catalog(),
+        )
+        .unwrap();
+        assert_eq!(door_thickness(&eighteen), 18.0);
+        let cab = parse(&eighteen).unwrap();
+        assert_eq!(
+            cab.standard.front_board,
+            "polytec.decorative.classic-white-matt.18.mr-mdf"
+        );
+    }
+
+    #[test]
+    fn an_unknown_board_is_refused() {
+        let json = new_cabinet("B01".into(), "base".into()).unwrap();
+        assert!(assign_board(json, "front".into(), "nope".into(), catalog()).is_err());
+    }
+
+    #[test]
+    fn drawn_cabinets_take_the_next_free_id_of_their_kind() {
+        let taken = vec!["B01".to_string(), "B02".to_string(), "T01".to_string()];
+        assert_eq!(next_id(CabinetKind::Base, &taken), "B03");
+        assert_eq!(next_id(CabinetKind::Tall, &taken), "T02");
+        assert_eq!(next_id(CabinetKind::Wall, &taken), "W01");
+    }
 }

@@ -2,7 +2,14 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::geom::Vec3;
+use crate::geom::{Aabb, Vec3};
+
+/// A drawn box at least this tall (mm) is a tall cabinet: base cabinets stop near 900, pantries
+/// and oven towers start near 1800.
+const TALL_FROM_HEIGHT: f64 = 1500.0;
+/// A drawn box whose underside is at least this high (mm) hangs on the wall: wall cabinets sit
+/// about 1350-1450 off the floor, above a 900 benchtop and splashback.
+const WALL_FROM_ELEVATION: f64 = 1000.0;
 
 /// A cabinet: an envelope (the box the user drew), a kind and a construction standard.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -22,9 +29,78 @@ pub struct Cabinet {
     pub standard: ConstructionStandard,
     #[serde(default)]
     pub fronts: FrontLayout,
-    /// Adjustable shelves inside the main opening.
+    /// Shelves inside the main opening (the name is historical: fixed ones count too).
     #[serde(default)]
     pub adjustable_shelves: u32,
+    /// Which shelves, numbered from 1 at the bottom, are fixed: full width, biscuited and screwed
+    /// between the sides like a bottom. The rest sit on shelf pins.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub fixed_shelves: Vec<u32>,
+    /// The blind part of a blind corner cabinet (ignored by other kinds).
+    #[serde(default)]
+    pub blind: Blind,
+    /// Sink cabinet options (ignored by other kinds).
+    #[serde(default)]
+    pub sink: Sink,
+    /// Sides seen from the room (the end of a run without an end panel): no screws through them.
+    #[serde(default, skip_serializing_if = "Exposed::is_none")]
+    pub exposed: Exposed,
+}
+
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(default)]
+pub struct Exposed {
+    pub left: bool,
+    pub right: bool,
+}
+
+impl Exposed {
+    pub fn is_none(&self) -> bool {
+        !self.left && !self.right
+    }
+}
+
+/// A sink cabinet is a base cabinet without the back rail, where the bowl and plumbing go.
+#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(default)]
+pub struct Sink {
+    /// A cut-out low in the back for the waste and water pipes.
+    pub back_cutout: bool,
+    /// A waterproof liner on the bottom panel.
+    pub liner: bool,
+}
+
+impl Default for Sink {
+    fn default() -> Self {
+        Self {
+            back_cutout: true,
+            liner: true,
+        }
+    }
+}
+
+/// A blind corner cabinet's front: from its blind side, a fixed blind panel and a filler cover
+/// `width` (where the other run of cabinets meets it); one door covers the rest.
+#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(default)]
+pub struct Blind {
+    pub side: HingeSide,
+    /// Front width covered by the blind panel and filler, from the blind side edge.
+    pub width: f64,
+    /// Width of the filler between the blind panel and the door.
+    pub filler: f64,
+}
+
+impl Default for Blind {
+    fn default() -> Self {
+        // Covers a 580 mm deep run meeting it, plus the filler that lets the door clear that
+        // run's handles.
+        Self {
+            side: HingeSide::Left,
+            width: 630.0,
+            filler: 50.0,
+        }
+    }
 }
 
 impl Cabinet {
@@ -41,13 +117,34 @@ impl Cabinet {
             standard: ConstructionStandard::default(),
             fronts: kind.default_fronts_for(w),
             adjustable_shelves: kind.default_shelves(),
+            fixed_shelves: Vec::new(),
+            blind: Blind::default(),
+            sink: Sink::default(),
+            exposed: Exposed::default(),
         }
+    }
+
+    /// A cabinet filling a box the user drew in the design: the box is the envelope, its front is
+    /// the box's −Y face, and its size picks the kind (see [`CabinetKind::for_box`]).
+    pub fn from_box(id: impl Into<String>, bounds: Aabb) -> Self {
+        let kind = CabinetKind::for_box(&bounds);
+        let mut cab = Self::new(id, kind);
+        cab.width = bounds.size.x;
+        cab.depth = bounds.size.y;
+        cab.height = bounds.size.z;
+        cab.origin = bounds.min;
+        cab.fronts = kind.default_fronts_for(cab.width);
+        cab
     }
 
     pub fn has_toe_kick(&self) -> bool {
         matches!(
             self.kind,
-            CabinetKind::Base | CabinetKind::Tall | CabinetKind::DrawerBank
+            CabinetKind::Base
+                | CabinetKind::Tall
+                | CabinetKind::DrawerBank
+                | CabinetKind::BlindCorner
+                | CabinetKind::Sink
         ) && self.standard.toe_kick != ToeKick::None
     }
 }
@@ -60,16 +157,34 @@ pub enum CabinetKind {
     Tall,
     DrawerBank,
     OpenShelf,
+    /// A base cabinet in an inside corner: part of its front is blind behind the other run.
+    BlindCorner,
+    /// A base cabinet for a sink: no back rail, a cut-out for pipes and a waterproof liner.
+    Sink,
 }
 
 impl CabinetKind {
-    pub const ALL: [CabinetKind; 5] = [
+    pub const ALL: [CabinetKind; 7] = [
         CabinetKind::Base,
         CabinetKind::Wall,
         CabinetKind::Tall,
         CabinetKind::DrawerBank,
         CabinetKind::OpenShelf,
+        CabinetKind::BlindCorner,
+        CabinetKind::Sink,
     ];
+
+    /// The kind a drawn box most likely is: as tall as a pantry → tall, hanging off the floor →
+    /// wall, otherwise base. The user changes it in the picker.
+    pub fn for_box(bounds: &Aabb) -> CabinetKind {
+        if bounds.size.z >= TALL_FROM_HEIGHT {
+            CabinetKind::Tall
+        } else if bounds.min.z >= WALL_FROM_ELEVATION {
+            CabinetKind::Wall
+        } else {
+            CabinetKind::Base
+        }
+    }
 
     /// Typical Australian kitchen sizes (width, depth, height), mm.
     pub fn default_size(self) -> (f64, f64, f64) {
@@ -79,12 +194,18 @@ impl CabinetKind {
             CabinetKind::Wall => (600.0, 330.0, 720.0),
             CabinetKind::Tall => (600.0, 580.0, 2100.0),
             CabinetKind::OpenShelf => (600.0, 300.0, 720.0),
+            CabinetKind::BlindCorner => (1000.0, 580.0, 870.0),
+            CabinetKind::Sink => (900.0, 580.0, 870.0),
         }
     }
 
     pub fn default_fronts_for(self, width: f64) -> FrontLayout {
         match self {
             CabinetKind::OpenShelf => FrontLayout::Open,
+            // One door on the open part, hinged away from the corner.
+            CabinetKind::BlindCorner => FrontLayout::Door {
+                hinge_side: HingeSide::Right,
+            },
             CabinetKind::DrawerBank => FrontLayout::Drawers {
                 ratios: vec![1.0, 1.0, 1.0],
             },
@@ -97,7 +218,12 @@ impl CabinetKind {
 
     fn default_shelves(self) -> u32 {
         match self {
-            CabinetKind::Base | CabinetKind::Wall | CabinetKind::OpenShelf => 1,
+            CabinetKind::Base
+            | CabinetKind::Wall
+            | CabinetKind::OpenShelf
+            | CabinetKind::BlindCorner => 1,
+            // The bowl and pipes take the space.
+            CabinetKind::Sink => 0,
             CabinetKind::Tall => 4,
             CabinetKind::DrawerBank => 0,
         }
@@ -146,6 +272,8 @@ pub struct ConstructionStandard {
     pub carcass_board: String,
     pub front_thickness: f64,
     pub front_board: String,
+    /// Catalog id of the back board, or empty for generic. Its thickness is `back_thickness`.
+    pub back_board: String,
     pub top_joint: TopJoint,
     pub bottom_joint: BottomJoint,
     pub back: BackStyle,
@@ -165,6 +293,33 @@ pub struct ConstructionStandard {
     /// Front and back clearance of adjustable shelves.
     pub shelf_front_setback: f64,
     pub edge_band_thickness: f64,
+    /// How wall cabinets hang.
+    pub wall_hanging: WallHanging,
+    /// How doors and drawers are opened.
+    pub opening: Opening,
+}
+
+/// Which boards of a cabinet a catalog board is assigned to.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum BoardSlot {
+    Carcass,
+    Front,
+    Back,
+}
+
+impl ConstructionStandard {
+    /// Uses catalog board `id` for `slot`. The thickness follows the board: a cabinet is built
+    /// from the boards it is made of.
+    pub fn set_board(&mut self, slot: BoardSlot, id: impl Into<String>, thickness: f64) {
+        let (board, t) = match slot {
+            BoardSlot::Carcass => (&mut self.carcass_board, &mut self.carcass_thickness),
+            BoardSlot::Front => (&mut self.front_board, &mut self.front_thickness),
+            BoardSlot::Back => (&mut self.back_board, &mut self.back_thickness),
+        };
+        *board = id.into();
+        *t = thickness;
+    }
 }
 
 impl Default for ConstructionStandard {
@@ -176,6 +331,7 @@ impl Default for ConstructionStandard {
             carcass_board: String::new(),
             front_thickness: 18.0,
             front_board: String::new(),
+            back_board: String::new(),
             top_joint: TopJoint::Rails,
             bottom_joint: BottomJoint::BetweenSides,
             back: BackStyle::InsetGroove,
@@ -191,6 +347,8 @@ impl Default for ConstructionStandard {
             rail_width: 100.0,
             shelf_front_setback: 2.0,
             edge_band_thickness: 1.0,
+            wall_hanging: WallHanging::Hangers,
+            opening: Opening::Handles,
         }
     }
 }
@@ -229,6 +387,28 @@ pub enum BackStyle {
     Applied,
     /// Full-thickness back between sides, top and bottom.
     Structural,
+    None,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum Opening {
+    /// Handles or knobs (HAF-2 places them).
+    Handles,
+    /// Handleless: press the front and a Blum TIP-ON unit pushes it open.
+    TipOn,
+    /// Handleless, electric: Blum SERVO-DRIVE opens drawers at a touch. Hinged doors cannot
+    /// take it and get TIP-ON.
+    ServoDrive,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum WallHanging {
+    /// Concealed adjustable hangers in the top back corners, hooked onto a rail screwed to the
+    /// wall. They sit in the void behind an inset back.
+    Hangers,
+    /// No hanging hardware: the installer fixes the cabinet.
     None,
 }
 
@@ -326,5 +506,44 @@ impl Density {
             Density::Normal => 180.0,
             Density::Dense => 120.0,
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn bounds(min: [f64; 3], size: [f64; 3]) -> Aabb {
+        Aabb::new(
+            Vec3::new(min[0], min[1], min[2]),
+            Vec3::new(size[0], size[1], size[2]),
+        )
+    }
+
+    #[test]
+    fn a_box_on_the_floor_becomes_a_base_cabinet_of_its_size_where_it_is() {
+        let cab = Cabinet::from_box("B01", bounds([1200.0, 30.0, 0.0], [450.0, 560.0, 870.0]));
+        assert_eq!(cab.kind, CabinetKind::Base);
+        assert_eq!((cab.width, cab.depth, cab.height), (450.0, 560.0, 870.0));
+        assert_eq!(cab.origin, Vec3::new(1200.0, 30.0, 0.0));
+        assert!(crate::build_cabinet(&cab).is_ok());
+    }
+
+    #[test]
+    fn a_box_up_the_wall_becomes_a_wall_cabinet() {
+        let cab = Cabinet::from_box("W01", bounds([0.0, 0.0, 1400.0], [600.0, 330.0, 720.0]));
+        assert_eq!(cab.kind, CabinetKind::Wall);
+    }
+
+    #[test]
+    fn a_pantry_sized_box_becomes_a_tall_cabinet() {
+        let cab = Cabinet::from_box("T01", bounds([0.0, 0.0, 0.0], [600.0, 580.0, 2100.0]));
+        assert_eq!(cab.kind, CabinetKind::Tall);
+    }
+
+    #[test]
+    fn a_wide_box_gets_a_door_pair() {
+        let cab = Cabinet::from_box("B01", bounds([0.0, 0.0, 0.0], [900.0, 580.0, 870.0]));
+        assert_eq!(cab.fronts, FrontLayout::DoorPair);
     }
 }

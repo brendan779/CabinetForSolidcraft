@@ -2,7 +2,8 @@
 
 use cabinet_core::PartList;
 use cabinet_core::geom::{Axis, Vec3};
-use cabinet_core::part::{Operation, PartRole};
+use cabinet_core::model::BiscuitSize;
+use cabinet_core::part::{BorePurpose, Dir, Operation, PartRole};
 use serde_json::{Value, json};
 
 /// How much of the machining to model.
@@ -10,16 +11,12 @@ use serde_json::{Value, json};
 pub enum Detail {
     /// Plain panels. Fast; for layout and presentation.
     Design,
-    /// Panels with every bore, groove and biscuit slot cut. For checking and export.
+    /// Panels with every bore, groove and biscuit slot cut. For checking and export. Slots are
+    /// their bounding boxes, which SolidCraft cuts quickly.
     Manufacturing,
-}
-
-fn axis_name(a: Axis) -> &'static str {
-    match a {
-        Axis::X => "X",
-        Axis::Y => "Y",
-        Axis::Z => "Z",
-    }
+    /// As Manufacturing, with each biscuit slot the lens the 100 mm cutter leaves. Its sloping
+    /// faces make SolidCraft's later cuts in those panels slow: about 3 × the time (docs/perf.md).
+    Exact,
 }
 
 fn arr(v: Vec3) -> Value {
@@ -33,7 +30,7 @@ fn round(v: f64) -> f64 {
 
 fn colour(role: PartRole) -> &'static str {
     match role {
-        PartRole::Door | PartRole::DrawerFront | PartRole::Plinth => "#c9a77c",
+        _ if role.is_front() => "#c9a77c",
         PartRole::Back => "#b9b4aa",
         _ => "#ece9e2",
     }
@@ -60,11 +57,28 @@ pub fn emit_cabinet(list: &PartList, detail: Detail, spec: Option<&Value>) -> Ve
             }
         }));
     }
-    if detail == Detail::Manufacturing {
+    if detail != Detail::Design {
         for op in &list.operations {
-            cmds.push(operation(op));
+            match op {
+                Operation::Groove { part, bounds } => {
+                    cmds.push(cut_box(bounds.min, bounds.size, std::slice::from_ref(part)))
+                }
+                Operation::BiscuitSlot { parts, bounds, .. } if detail == Detail::Manufacturing => {
+                    cmds.push(cut_box(bounds.min, bounds.size, parts.as_slice()))
+                }
+                _ => {}
+            }
         }
+        if detail == Detail::Exact {
+            cmds.extend(slot_batches(&list.cabinet, &list.operations));
+        }
+        cmds.extend(bore_batches(&list.operations));
     }
+    let biscuits = if detail == Detail::Design {
+        Vec::new()
+    } else {
+        biscuit_bodies(&list.cabinet, &list.operations, &mut cmds)
+    };
     // One appearance command per colour keeps the batch short.
     let mut by_colour: Vec<(&str, Vec<&str>)> = Vec::new();
     for p in &list.parts {
@@ -73,6 +87,12 @@ pub fn emit_cabinet(list: &PartList, detail: Detail, spec: Option<&Value>) -> Ve
             Some((_, v)) => v.push(&p.name),
             None => by_colour.push((c, vec![&p.name])),
         }
+    }
+    if !biscuits.is_empty() {
+        by_colour.push((
+            BISCUIT_COLOUR,
+            biscuits.iter().map(String::as_str).collect(),
+        ));
     }
     for (c, bodies) in by_colour {
         cmds.push(
@@ -93,40 +113,460 @@ pub fn emit_cabinet(list: &PartList, detail: Detail, spec: Option<&Value>) -> Ve
     cmds
 }
 
-fn operation(op: &Operation) -> Value {
-    match op {
-        Operation::Bore {
+/// An earlier build of a cabinet found in the design, read from `component.list`.
+#[derive(Clone, Debug, PartialEq)]
+pub struct Existing {
+    /// Where the user moved it: a row-major 3 × 4 rigid transform, or `None` where it was built.
+    pub moved: Option<[f64; 12]>,
+}
+
+/// Finds the cabinet's component in a `component.list` result. With several placements (the user
+/// copied it), the first one is kept.
+pub fn find_existing(listing: &Value, cabinet: &str) -> Option<Existing> {
+    let component = listing["components"]
+        .as_array()?
+        .iter()
+        .find(|c| c["name"] == cabinet)?;
+    let moved = component["occurrences"]
+        .as_array()
+        .and_then(|o| o.first())
+        .and_then(|o| row_major(&o["transform"]))
+        .filter(|m| *m != IDENTITY);
+    Some(Existing { moved })
+}
+
+const IDENTITY: [f64; 12] = [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0];
+
+/// SolidCraft lists a transform as four columns (the last one the translation, then 1);
+/// `occurrence.move` takes rows. Rounded like every coordinate we send.
+fn row_major(columns: &Value) -> Option<[f64; 12]> {
+    let c: Vec<Vec<f64>> = serde_json::from_value(columns.clone()).ok()?;
+    if c.len() != 4 || c.iter().any(|col| col.len() < 3) {
+        return None;
+    }
+    let mut m = [0.0; 12];
+    for row in 0..3 {
+        for col in 0..4 {
+            m[row * 4 + col] = round(c[col][row]);
+        }
+    }
+    Some(m)
+}
+
+/// [`emit_cabinet`] as one all-or-nothing batch that replaces an earlier build: it deletes the old
+/// component first and puts the new one where the user had moved the old one.
+pub fn replace_cabinet(
+    list: &PartList,
+    detail: Detail,
+    spec: Option<&Value>,
+    existing: Option<&Existing>,
+) -> Vec<Value> {
+    let mut cmds = Vec::new();
+    if existing.is_some() {
+        cmds.push(
+            json!({ "command": "component.delete", "params": { "component": list.cabinet } }),
+        );
+    }
+    cmds.extend(emit_cabinet(list, detail, spec));
+    if let Some(m) = existing.and_then(|e| e.moved) {
+        // A new component's only placement is `<name>:1`, at identity, so this rigid move puts it
+        // where the old one was.
+        cmds.push(json!({
+            "command": "occurrence.move",
+            "params": { "occurrence": format!("{}:1", list.cabinet), "space": "world", "matrix": m }
+        }));
+    }
+    cmds
+}
+
+/// A circle in sketch coordinates: centre u, centre v, diameter.
+type Circle = (f64, f64, f64);
+
+/// Bores that one extrude can cut: same part, same face, same direction and depth.
+#[derive(PartialEq)]
+struct BoreFace<'a> {
+    part: &'a str,
+    direction: Dir,
+    mouth: i64,
+    depth: i64,
+}
+
+/// Every bore as one sketch of circles plus one extrude cut per face and depth. Each cut costs
+/// more the more features its panel already has, so one cut per face instead of one per hole
+/// makes Manufacturing detail roughly linear in the hole count (docs/perf.md, PERF-1).
+fn bore_batches(ops: &[Operation]) -> Vec<Value> {
+    // Keyed in micrometres so equal faces compare equal despite float noise.
+    let um = |v: f64| (v * 1000.0).round() as i64;
+    let mut groups: Vec<(BoreFace, Vec<Circle>)> = Vec::new();
+    for op in ops {
+        let Operation::Bore {
             part,
             at,
             direction,
             diameter,
             depth,
+            purpose,
+        } = op
+        else {
+            continue;
+        };
+        // A countersink's cone is cosmetic in the model; the sheets and CNC carry it.
+        if *purpose == BorePurpose::Countersink {
+            continue;
+        }
+        let key = BoreFace {
+            part,
+            direction: *direction,
+            mouth: um(at.get(direction.axis)),
+            depth: um(*depth),
+        };
+        let [u, v] = sketch_axes(direction.axis);
+        let circle = (at.get(u), at.get(v), *diameter);
+        match groups.iter_mut().find(|(k, _)| *k == key) {
+            // A repeated hole would only add an overlapping profile.
+            Some((_, c)) if c.contains(&circle) => {}
+            Some((_, c)) => c.push(circle),
+            None => groups.push((key, vec![circle])),
+        }
+    }
+    let mut cmds = Vec::new();
+    let mut per_part: Vec<(&str, usize)> = Vec::new();
+    for (face, circles) in groups {
+        let n = match per_part.iter_mut().find(|(p, _)| *p == face.part) {
+            Some((_, n)) => {
+                *n += 1;
+                *n
+            }
+            None => {
+                per_part.push((face.part, 1));
+                1
+            }
+        };
+        let sketch = format!("{}.Bores{n}", face.part);
+        let axis = face.direction.axis;
+        let [u, v] = sketch_axes(axis);
+        let origin = Vec3::default().with(axis, face.mouth as f64 / 1000.0);
+        cmds.push(json!({
+            "command": "sketch.create",
+            "params": {
+                "plane": {
+                    "origin": arr(origin),
+                    "x_dir": arr(Vec3::default().with(u, 1.0)),
+                    "y_dir": arr(Vec3::default().with(v, 1.0)),
+                },
+                "name": sketch,
+            }
+        }));
+        for (cu, cv, d) in circles {
+            cmds.push(json!({
+                "command": "sketch.circle.center",
+                "params": { "center": [round(cu), round(cv)], "diameter": round(d), "connect": false }
+            }));
+        }
+        cmds.push(json!({ "command": "sketch.finish", "params": {} }));
+        cmds.push(json!({
+            "command": "solid.extrude",
+            "params": {
+                "sketch": sketch,
+                "profiles": "all",
+                "distance": face.depth as f64 / 1000.0,
+                "direction": if face.direction.positive { "positive" } else { "negative" },
+                "operation": "cut",
+                "targets": [face.part],
+            }
+        }));
+    }
+    cmds
+}
+
+/// Every biscuit slot as the lens a plunged cutter leaves: an arc into each of the two panels,
+/// meeting at the slot's ends on the joint. Slots in one plane share one sketch and one extrude,
+/// as bores do (PERF-1).
+fn slot_batches(cabinet: &str, ops: &[Operation]) -> Vec<Value> {
+    let mut planes: Vec<SlotPlane> = Vec::new();
+    for op in ops {
+        let Operation::BiscuitSlot {
+            parts,
+            bounds,
+            along,
             ..
-        } => {
-            // A cylinder grows from its base along the positive axis.
-            let base = if direction.positive {
-                *at
-            } else {
-                at.with(direction.axis, at.get(direction.axis) - depth)
-            };
-            json!({
-                "command": "solid.cylinder",
+        } = op
+        else {
+            continue;
+        };
+        // Across the joint the slot is two plunge depths; across the biscuit, its thickness.
+        let [a, b] = along.others();
+        let (normal, thick) = if bounds.size.get(a) >= bounds.size.get(b) {
+            (a, b)
+        } else {
+            (b, a)
+        };
+        let at = (bounds.min.get(thick) * 1000.0).round() as i64;
+        let i = match planes.iter().position(|p| p.axis == thick && p.at == at) {
+            Some(i) => i,
+            None => {
+                planes.push(SlotPlane {
+                    axis: thick,
+                    at,
+                    thickness: bounds.size.get(thick),
+                    lenses: Vec::new(),
+                    parts: Vec::new(),
+                });
+                planes.len() - 1
+            }
+        };
+        let plane = &mut planes[i];
+        let c = bounds.center();
+        let (half, depth) = (bounds.size.get(*along) / 2.0, bounds.size.get(normal) / 2.0);
+        plane.lenses.push([
+            c.with(*along, c.get(*along) - half),
+            c.with(*along, c.get(*along) + half),
+            c.with(normal, c.get(normal) - depth),
+            c.with(normal, c.get(normal) + depth),
+        ]);
+        for p in parts {
+            if !plane.parts.contains(p) {
+                plane.parts.push(p.clone());
+            }
+        }
+    }
+    let mut cmds = Vec::new();
+    for (n, plane) in planes.iter().enumerate() {
+        let sketch = format!("{cabinet}.Biscuits{}", n + 1);
+        let [u, v] = sketch_axes(plane.axis);
+        let uv = |p: Vec3| json!([round(p.get(u)), round(p.get(v))]);
+        cmds.push(json!({
+            "command": "sketch.create",
+            "params": {
+                "plane": {
+                    "origin": arr(Vec3::default().with(plane.axis, plane.at as f64 / 1000.0)),
+                    "x_dir": arr(Vec3::default().with(u, 1.0)),
+                    "y_dir": arr(Vec3::default().with(v, 1.0)),
+                },
+                "name": sketch,
+            }
+        }));
+        for lens in &plane.lenses {
+            let points: Vec<Value> = lens_outline(lens).into_iter().map(uv).collect();
+            cmds.push(json!({
+                "command": "sketch.line",
+                "params": { "points": points, "closed": true, "infer": false }
+            }));
+        }
+        cmds.push(json!({ "command": "sketch.finish", "params": {} }));
+        cmds.push(json!({
+            "command": "solid.extrude",
+            "params": {
+                "sketch": sketch,
+                "profiles": "all",
+                "distance": round(plane.thickness),
+                "direction": "positive",
+                "operation": "cut",
+                "targets": plane.parts,
+            }
+        }));
+    }
+    cmds
+}
+
+/// Pressed beech.
+const BISCUIT_COLOUR: &str = "#d8b06a";
+
+/// A body for every biscuit, in its slot: the biscuit's lens (its length along the joint line,
+/// its width split across the two panels), as thick as it is. One sketch per plane holds the
+/// outlines; each biscuit is its own extrude so it is its own named body. Returns the names.
+fn biscuit_bodies(cabinet: &str, ops: &[Operation], cmds: &mut Vec<Value>) -> Vec<String> {
+    // Per plane (the axis across the biscuits and where they start on it): its biscuits.
+    let mut planes: Vec<(Axis, i64, Vec<Biscuit>)> = Vec::new();
+    for op in ops {
+        let Operation::BiscuitSlot {
+            bounds,
+            along,
+            size,
+            ..
+        } = op
+        else {
+            continue;
+        };
+        let [a, b] = along.others();
+        let (across, thick) = if bounds.size.get(a) >= bounds.size.get(b) {
+            (a, b)
+        } else {
+            (b, a)
+        };
+        let centre = bounds.center();
+        let at = ((centre.get(thick) - size.thickness() / 2.0) * 1000.0).round() as i64;
+        let n = planes.iter().map(|p| p.2.len()).sum::<usize>() + 1;
+        let biscuit = Biscuit {
+            name: format!("{cabinet}.Biscuit{n}"),
+            centre,
+            size: *size,
+            along: *along,
+            across,
+        };
+        match planes.iter_mut().find(|p| p.0 == thick && p.1 == at) {
+            Some(p) => p.2.push(biscuit),
+            None => planes.push((thick, at, vec![biscuit])),
+        }
+    }
+    let mut names = Vec::new();
+    for (i, (thick, at, biscuits)) in planes.iter().enumerate() {
+        let sketch = format!("{cabinet}.BiscuitBodies{}", i + 1);
+        let [u, v] = sketch_axes(*thick);
+        let uv = |p: Vec3| json!([round(p.get(u)), round(p.get(v))]);
+        cmds.push(json!({
+            "command": "sketch.create",
+            "params": {
+                "plane": {
+                    "origin": arr(Vec3::default().with(*thick, *at as f64 / 1000.0)),
+                    "x_dir": arr(Vec3::default().with(u, 1.0)),
+                    "y_dir": arr(Vec3::default().with(v, 1.0)),
+                },
+                "name": sketch,
+            }
+        }));
+        for b in biscuits {
+            let c = b.centre;
+            let (half, bulge) = (b.size.length() / 2.0, b.size.width() / 2.0);
+            let start = c.with(b.along, c.get(b.along) - half);
+            let end = c.with(b.along, c.get(b.along) + half);
+            for side in [-1.0, 1.0] {
+                let through = c.with(b.across, c.get(b.across) + side * bulge);
+                cmds.push(json!({
+                    "command": "sketch.arc.three_point",
+                    "params": { "start": uv(start), "end": uv(end), "through": uv(through) }
+                }));
+            }
+        }
+        cmds.push(json!({ "command": "sketch.finish", "params": {} }));
+        for b in biscuits {
+            cmds.push(json!({
+                "command": "solid.extrude",
                 "params": {
-                    "diameter": round(*diameter),
-                    "height": round(*depth),
-                    "base": arr(base),
-                    "axis": axis_name(direction.axis),
-                    "operation": "cut",
-                    "targets": [part],
+                    "sketch": sketch,
+                    "profiles": [{ "point": uv(b.centre) }],
+                    "distance": round(b.size.thickness()),
+                    "direction": "positive",
+                    "operation": "new",
+                    "body_name": b.name,
+                    "name": b.name,
                 }
+            }));
+            names.push(b.name.clone());
+        }
+    }
+    names
+}
+
+struct Biscuit {
+    name: String,
+    centre: Vec3,
+    size: BiscuitSize,
+    /// Its length runs along the joint line; its width across the joint, half in each panel.
+    along: Axis,
+    across: Axis,
+}
+
+/// Chords per side of a slot's lens (even, so one vertex is the apex). SolidCraft cuts true arcs
+/// far more slowly (and less robustly) than flat faces, and every face a slot adds makes later
+/// cuts in that panel slower, so the arc is a few chords that keep its area (see `lens_outline`).
+const LENS_CHORDS: usize = 4;
+
+/// The lens as a closed polygon: out along the arc into one panel, back along the other.
+fn lens_outline([start, end, into_a, into_b]: &[Vec3; 4]) -> Vec<Vec3> {
+    let mid = Vec3::new(
+        (start.x + end.x) / 2.0,
+        (start.y + end.y) / 2.0,
+        (start.z + end.z) / 2.0,
+    );
+    let mut out = vec![*start];
+    for apex in [into_a, into_b] {
+        // The circle through start, apex and end: centre on the line from the apex through the
+        // chord's middle.
+        let half = dist(start, &mid);
+        let sag = dist(apex, &mid);
+        let r = (half * half + sag * sag) / (2.0 * sag);
+        let dir = |p: &Vec3, q: &Vec3| {
+            let l = dist(p, q);
+            Vec3::new((q.x - p.x) / l, (q.y - p.y) / l, (q.z - p.z) / l)
+        };
+        let down = dir(apex, &mid);
+        let centre = Vec3::new(
+            apex.x + down.x * r,
+            apex.y + down.y * r,
+            apex.z + down.z * r,
+        );
+        let (a, b) = if out.len() == 1 {
+            (start, end)
+        } else {
+            (end, start)
+        };
+        let (ua, ub) = (dir(&centre, a), dir(&centre, b));
+        let span = (ua.x * ub.x + ua.y * ub.y + ua.z * ub.z)
+            .clamp(-1.0, 1.0)
+            .acos();
+        let up = dir(&centre, apex);
+        let along = dir(a, b);
+        // The arc sampled at LENS_CHORDS + 1 points from a to b: (along the chord, height).
+        let pts: Vec<(f64, f64)> = (0..=LENS_CHORDS)
+            .map(|i| {
+                let t = span * i as f64 / LENS_CHORDS as f64 - span / 2.0;
+                (r * t.sin(), r * t.cos() - (r - sag))
             })
+            .collect();
+        // The chords cut corners off the arc. Lifting the vertices between the ends and the apex
+        // by a common factor makes up the area exactly, while the slot stays as deep as the
+        // cutter plunges (the apex does not move).
+        let segment = r * r * (span / 2.0) - (r - sag) * half;
+        let polygon: f64 = pts
+            .windows(2)
+            .map(|w| (w[1].0 - w[0].0) * (w[0].1 + w[1].1) / 2.0)
+            .sum();
+        let lift: f64 = (1..LENS_CHORDS)
+            .filter(|&i| i != LENS_CHORDS / 2)
+            .map(|i| pts[i].1 * (pts[i + 1].0 - pts[i - 1].0) / 2.0)
+            .sum();
+        let factor = 1.0 + (segment - polygon) / lift;
+        for (i, &(x, h)) in pts.iter().enumerate().skip(1) {
+            let h = if i == LENS_CHORDS / 2 || i == LENS_CHORDS {
+                h
+            } else {
+                h * factor
+            };
+            out.push(Vec3::new(
+                mid.x + up.x * h + along.x * x,
+                mid.y + up.y * h + along.y * x,
+                mid.z + up.z * h + along.z * x,
+            ));
         }
-        Operation::BiscuitSlot { parts, bounds, .. } => {
-            cut_box(bounds.min, bounds.size, parts.as_slice())
-        }
-        Operation::Groove { part, bounds } => {
-            cut_box(bounds.min, bounds.size, std::slice::from_ref(part))
-        }
+    }
+    // The walk ends back on start; the polyline closes itself.
+    out.pop();
+    out
+}
+
+fn dist(a: &Vec3, b: &Vec3) -> f64 {
+    ((a.x - b.x).powi(2) + (a.y - b.y).powi(2) + (a.z - b.z).powi(2)).sqrt()
+}
+
+/// Biscuit slots that one sketch and extrude can cut: the same plane across their thickness.
+struct SlotPlane {
+    axis: Axis,
+    /// Where the slots start along `axis`, in micrometres.
+    at: i64,
+    thickness: f64,
+    /// Each slot's two ends on the joint and its deepest point in each panel.
+    lenses: Vec<[Vec3; 4]>,
+    parts: Vec<String>,
+}
+
+/// In-plane axes of a sketch whose normal is `axis`, ordered so that x × y = +axis: an extrude
+/// in the "positive" direction then runs along +axis.
+fn sketch_axes(axis: Axis) -> [Axis; 2] {
+    match axis {
+        Axis::X => [Axis::Y, Axis::Z],
+        Axis::Y => [Axis::Z, Axis::X],
+        Axis::Z => [Axis::X, Axis::Y],
     }
 }
 
@@ -159,27 +599,297 @@ mod tests {
         assert_eq!(cmds.last().unwrap()["command"], "component.activate");
     }
 
-    #[test]
-    fn manufacturing_detail_cuts_every_operation() {
-        let list = build_cabinet(&Cabinet::new("B01", CabinetKind::Base)).unwrap();
-        let design = emit_cabinet(&list, Detail::Design, None).len();
-        let mfg = emit_cabinet(&list, Detail::Manufacturing, None).len();
-        assert_eq!(mfg - design, list.operations.len());
+    fn count(cmds: &[Value], command: &str) -> usize {
+        cmds.iter().filter(|c| c["command"] == command).count()
+    }
+
+    fn bore(part: &str, at: Vec3, direction: Dir, diameter: f64, depth: f64) -> Operation {
+        Operation::Bore {
+            part: part.into(),
+            at,
+            direction,
+            diameter,
+            depth,
+            purpose: BorePurpose::ShelfPin,
+        }
     }
 
     #[test]
-    fn a_bore_into_negative_direction_starts_at_its_bottom() {
-        use cabinet_core::part::{BorePurpose, Dir};
-        let op = Operation::Bore {
-            part: "P".into(),
-            at: Vec3::new(10.0, 0.0, 5.0),
-            direction: Dir::new(Axis::Y, false),
-            diameter: 35.0,
-            depth: 13.0,
-            purpose: BorePurpose::HingeCup,
-        };
-        let v = operation(&op);
-        assert_eq!(v["params"]["base"], json!([10.0, -13.0, 5.0]));
-        assert_eq!(v["params"]["axis"], "Y");
+    fn manufacturing_detail_cuts_every_slot_and_groove_as_a_box() {
+        let list = build_cabinet(&Cabinet::new("B01", CabinetKind::Base)).unwrap();
+        let boxes = |d| count(&emit_cabinet(&list, d, None), "solid.box");
+        let box_ops = list
+            .operations
+            .iter()
+            .filter(|o| !matches!(o, Operation::Bore { .. }))
+            .count();
+        assert_eq!(
+            boxes(Detail::Manufacturing) - boxes(Detail::Design),
+            box_ops
+        );
+        let grooves = list
+            .operations
+            .iter()
+            .filter(|o| matches!(o, Operation::Groove { .. }))
+            .count();
+        assert_eq!(boxes(Detail::Exact) - boxes(Detail::Design), grooves);
+    }
+
+    #[test]
+    fn manufacturing_detail_puts_a_coloured_biscuit_body_in_every_slot() {
+        let list = build_cabinet(&Cabinet::new("B01", CabinetKind::Base)).unwrap();
+        let slots = list
+            .operations
+            .iter()
+            .filter(|o| matches!(o, Operation::BiscuitSlot { .. }))
+            .count();
+        for detail in [Detail::Manufacturing, Detail::Exact] {
+            let cmds = emit_cabinet(&list, detail, None);
+            let bodies: Vec<_> = cmds
+                .iter()
+                .filter(|c| c["command"] == "solid.extrude" && c["params"]["operation"] == "new")
+                .collect();
+            assert_eq!(bodies.len(), slots);
+            assert_eq!(bodies[0]["params"]["body_name"], "B01.Biscuit1");
+            let paint = cmds
+                .iter()
+                .find(|c| {
+                    c["command"] == "appearance.assign" && c["params"]["color"] == BISCUIT_COLOUR
+                })
+                .unwrap();
+            assert_eq!(paint["params"]["bodies"].as_array().unwrap().len(), slots);
+        }
+        let design = emit_cabinet(&list, Detail::Design, None);
+        assert!(
+            !design
+                .iter()
+                .any(|c| c["params"]["operation"] == "new" && c["command"] == "solid.extrude")
+        );
+    }
+
+    #[test]
+    fn exact_detail_cuts_every_biscuit_slot_as_a_lens_batched_per_plane() {
+        let list = build_cabinet(&Cabinet::new("B01", CabinetKind::Base)).unwrap();
+        let cmds = emit_cabinet(&list, Detail::Exact, None);
+        let slots = list
+            .operations
+            .iter()
+            .filter(|o| matches!(o, Operation::BiscuitSlot { .. }))
+            .count();
+        assert!(slots > 0);
+        assert_eq!(count(&cmds, "sketch.line"), slots);
+        let sketches = cmds
+            .iter()
+            .filter(|c| c["command"] == "sketch.create")
+            .filter(|c| c["params"]["name"].as_str().unwrap().contains("Biscuits"))
+            .count();
+        assert!(sketches < slots, "slots share sketches");
+    }
+
+    #[test]
+    fn a_lens_outline_has_the_area_of_the_cutter_circle_segments() {
+        // A #20 slot along X across a joint at y = 0: 12.5 mm deep into each panel.
+        let (r, d) = (50.0_f64, 12.5);
+        let half = (r * r - (r - d) * (r - d)).sqrt();
+        let lens = [
+            Vec3::new(-half, 0.0, 0.0),
+            Vec3::new(half, 0.0, 0.0),
+            Vec3::new(0.0, -d, 0.0),
+            Vec3::new(0.0, d, 0.0),
+        ];
+        let pts = lens_outline(&lens);
+        assert_eq!(pts.len(), 2 * LENS_CHORDS);
+        assert_eq!(pts[0], lens[0]);
+        assert!(pts.iter().all(|p| p.z == 0.0), "flat in the slot's plane");
+        // Shoelace area against two circular segments.
+        let area: f64 = (0..pts.len())
+            .map(|i| {
+                let (p, q) = (pts[i], pts[(i + 1) % pts.len()]);
+                p.x * q.y - q.x * p.y
+            })
+            .sum::<f64>()
+            .abs()
+            / 2.0;
+        let segment = r * r * ((r - d) / r).acos() - (r - d) * half;
+        assert!(
+            (area - 2.0 * segment).abs() < 1e-9 * area,
+            "{area} vs {}",
+            2.0 * segment
+        );
+        // No deeper than the cutter plunges.
+        let deepest = pts.iter().map(|p| p.y.abs()).fold(0.0, f64::max);
+        assert!((deepest - d).abs() < 1e-9, "{deepest}");
+    }
+
+    #[test]
+    fn manufacturing_detail_draws_every_bore_as_a_circle_and_never_a_cylinder() {
+        let list = build_cabinet(&Cabinet::new("T01", CabinetKind::Tall)).unwrap();
+        let cmds = emit_cabinet(&list, Detail::Manufacturing, None);
+        let bores = list
+            .operations
+            .iter()
+            .filter(|o| {
+                matches!(o, Operation::Bore { purpose, .. } if *purpose != BorePurpose::Countersink)
+            })
+            .count();
+        assert_eq!(count(&cmds, "sketch.circle.center"), bores);
+        assert_eq!(count(&cmds, "solid.cylinder"), 0);
+        let bore_cuts = cmds
+            .iter()
+            .filter(|c| c["command"] == "solid.extrude" && c["params"]["operation"] == "cut")
+            .count();
+        let bore_sketches = cmds
+            .iter()
+            .filter(|c| c["command"] == "sketch.create")
+            .filter(|c| c["params"]["name"].as_str().unwrap().contains(".Bores"))
+            .count();
+        assert_eq!(bore_sketches, bore_cuts);
+        assert!(bore_cuts * 4 < bores, "bores are batched");
+    }
+
+    #[test]
+    fn bores_on_one_face_at_one_depth_are_one_extrude() {
+        use cabinet_core::part::Dir;
+        let into = Dir::new(Axis::X, false);
+        let ops: Vec<Operation> = (0..5)
+            .map(|i| {
+                bore(
+                    "P",
+                    Vec3::new(16.0, 37.0, 100.0 + 32.0 * i as f64),
+                    into,
+                    5.0,
+                    10.0,
+                )
+            })
+            .collect();
+        let cmds = bore_batches(&ops);
+        assert_eq!(count(&cmds, "solid.extrude"), 1);
+        assert_eq!(count(&cmds, "sketch.circle.center"), 5);
+        let plane = &cmds[0]["params"]["plane"];
+        assert_eq!(plane["origin"], json!([16.0, 0.0, 0.0]));
+        assert_eq!(cmds[1]["params"]["center"], json!([37.0, 100.0]));
+        let extrude = cmds.last().unwrap();
+        assert_eq!(extrude["params"]["direction"], "negative");
+        assert_eq!(extrude["params"]["distance"], json!(10.0));
+        assert_eq!(extrude["params"]["targets"], json!(["P"]));
+    }
+
+    #[test]
+    fn bores_differing_in_depth_face_or_direction_get_their_own_extrude() {
+        use cabinet_core::part::Dir;
+        let at = Vec3::new(16.0, 37.0, 100.0);
+        let ops = vec![
+            bore("P", at, Dir::new(Axis::X, false), 5.0, 10.0),
+            bore(
+                "P",
+                at.with(Axis::Z, 132.0),
+                Dir::new(Axis::X, false),
+                5.0,
+                13.0,
+            ),
+            bore(
+                "P",
+                at.with(Axis::X, 0.0),
+                Dir::new(Axis::X, true),
+                5.0,
+                10.0,
+            ),
+            bore("Q", at, Dir::new(Axis::X, false), 5.0, 10.0),
+        ];
+        let cmds = bore_batches(&ops);
+        assert_eq!(count(&cmds, "solid.extrude"), 4);
+        let names: Vec<&str> = cmds
+            .iter()
+            .filter(|c| c["command"] == "sketch.create")
+            .map(|c| c["params"]["name"].as_str().unwrap())
+            .collect();
+        assert_eq!(names, ["P.Bores1", "P.Bores2", "P.Bores3", "Q.Bores1"]);
+    }
+
+    #[test]
+    fn a_repeated_bore_is_drawn_once() {
+        use cabinet_core::part::Dir;
+        let b = bore(
+            "P",
+            Vec3::new(16.0, 37.0, 100.0),
+            Dir::new(Axis::X, false),
+            5.0,
+            10.0,
+        );
+        let cmds = bore_batches(&[b.clone(), b]);
+        assert_eq!(count(&cmds, "sketch.circle.center"), 1);
+    }
+
+    fn listing(name: &str, transform: Value) -> Value {
+        json!({ "components": [
+            { "id": 0, "name": "Untitled", "occurrences": [] },
+            { "id": 4, "name": name, "occurrences": [
+                { "id": 5, "name": format!("{name}:1"), "transform": transform }
+            ] }
+        ] })
+    }
+
+    #[test]
+    fn a_cabinet_not_in_the_design_is_built_without_a_delete() {
+        let list = build_cabinet(&Cabinet::new("B01", CabinetKind::Base)).unwrap();
+        let l = listing(
+            "W01",
+            json!([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]),
+        );
+        let existing = find_existing(&l, "B01");
+        assert_eq!(existing, None);
+        let cmds = replace_cabinet(&list, Detail::Design, None, existing.as_ref());
+        assert_eq!(cmds, emit_cabinet(&list, Detail::Design, None));
+    }
+
+    #[test]
+    fn a_rebuild_in_place_deletes_first_and_moves_nothing() {
+        let list = build_cabinet(&Cabinet::new("B01", CabinetKind::Base)).unwrap();
+        let l = listing(
+            "B01",
+            json!([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]),
+        );
+        let existing = find_existing(&l, "B01").unwrap();
+        assert_eq!(existing.moved, None);
+        let cmds = replace_cabinet(&list, Detail::Design, None, Some(&existing));
+        assert_eq!(cmds[0]["command"], "component.delete");
+        assert_eq!(cmds[0]["params"]["component"], "B01");
+        assert_eq!(count(&cmds, "occurrence.move"), 0);
+    }
+
+    #[test]
+    fn a_rebuild_of_a_moved_cabinet_puts_it_back_where_the_user_moved_it() {
+        let list = build_cabinet(&Cabinet::new("B01", CabinetKind::Base)).unwrap();
+        // Turned 90° about Z and moved to (500, 10, 0), as SolidCraft lists it: columns.
+        let l = listing(
+            "B01",
+            json!([[0, 1, 0, 0], [-1, 0, 0, 0], [0, 0, 1, 0], [500, 10, 0, 1]]),
+        );
+        let existing = find_existing(&l, "B01").unwrap();
+        let cmds = replace_cabinet(&list, Detail::Design, None, Some(&existing));
+        let mv = cmds.last().unwrap();
+        assert_eq!(mv["command"], "occurrence.move");
+        assert_eq!(mv["params"]["occurrence"], "B01:1");
+        assert_eq!(mv["params"]["space"], "world");
+        assert_eq!(
+            mv["params"]["matrix"],
+            json!([
+                0.0, -1.0, 0.0, 500.0, 1.0, 0.0, 0.0, 10.0, 0.0, 0.0, 1.0, 0.0
+            ])
+        );
+    }
+
+    #[test]
+    fn sketch_axes_make_a_right_handed_frame_around_the_normal() {
+        for axis in Axis::ALL {
+            let [u, v] = sketch_axes(axis);
+            let (a, b) = (Vec3::default().with(u, 1.0), Vec3::default().with(v, 1.0));
+            let cross = Vec3::new(
+                a.y * b.z - a.z * b.y,
+                a.z * b.x - a.x * b.z,
+                a.x * b.y - a.y * b.x,
+            );
+            assert_eq!(cross, Vec3::default().with(axis, 1.0));
+        }
     }
 }

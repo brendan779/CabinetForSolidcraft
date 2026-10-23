@@ -115,6 +115,16 @@ impl Client {
         Ok(r)
     }
 
+    /// Every component with its placements (`component.list`, compact).
+    pub fn components(&mut self) -> Result<Value> {
+        self.execute("component.list", json!({ "compact": true }))
+    }
+
+    /// A body's faces (`model.faces`): normals, centroids, areas.
+    pub fn faces(&mut self, body: &str) -> Result<Value> {
+        self.execute("model.faces", json!({ "body": body }))
+    }
+
     pub fn inspect(&mut self) -> Result<Value> {
         self.request("document.inspect", json!({ "measure": true }))
     }

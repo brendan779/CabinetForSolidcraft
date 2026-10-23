@@ -1,3 +1,4 @@
+import AppKit
 import Foundation
 import Observation
 import SwiftUI
@@ -7,6 +8,8 @@ import SwiftUI
 struct CabinetDoc: Identifiable, Hashable, Codable {
     var id: String
     var json: String
+    /// Made from a box drawn in SolidCraft: it keeps the box's position instead of joining the run.
+    var placed: Bool?
 
     private var object: [String: Any] {
         (try? JSONSerialization.jsonObject(with: Data(json.utf8))) as? [String: Any] ?? [:]
@@ -41,7 +44,79 @@ struct CabinetDoc: Identifiable, Hashable, Codable {
     }
     var shelves: Int {
         get { Int(number("adjustable_shelves")) }
-        set { setNumber("adjustable_shelves", Double(max(0, newValue))) }
+        set {
+            let n = max(0, newValue)
+            setNumber("adjustable_shelves", Double(n))
+            fixedShelves = fixedShelves.filter { $0 <= n }
+        }
+    }
+
+    /// Shelves (numbered from 1 at the bottom) fixed between the sides instead of on pins.
+    var fixedShelves: [Int] {
+        get { (object["fixed_shelves"] as? [NSNumber])?.map(\.intValue) ?? [] }
+        set { update { $0["fixed_shelves"] = newValue.isEmpty ? nil : newValue.sorted() } }
+    }
+
+    private var blind: [String: Any] { object["blind"] as? [String: Any] ?? [:] }
+
+    private mutating func setBlind(_ key: String, _ value: Any) {
+        update { o in
+            var b = o["blind"] as? [String: Any] ?? [:]
+            b[key] = value
+            o["blind"] = b
+        }
+    }
+
+    /// Blind corner: the side the other run meets it on. The door hinges on the other side.
+    var blindSide: String {
+        get { blind["side"] as? String ?? "left" }
+        set {
+            setBlind("side", newValue)
+            hingeSide = newValue == "left" ? "right" : "left"
+        }
+    }
+
+    /// Blind corner: front width covered by the blind panel and filler.
+    var blindWidth: Double {
+        get { (blind["width"] as? NSNumber)?.doubleValue ?? 630 }
+        set { setBlind("width", newValue) }
+    }
+
+    /// Blind corner: the filler between the blind panel and the door.
+    var blindFiller: Double {
+        get { (blind["filler"] as? NSNumber)?.doubleValue ?? 50 }
+        set { setBlind("filler", newValue) }
+    }
+
+    /// Whether the cabinet's `left` or `right` side is seen from the room (no screws through it).
+    func exposed(_ side: String) -> Bool {
+        ((object["exposed"] as? [String: Any])?[side] as? Bool) ?? false
+    }
+
+    mutating func setExposed(_ side: String, _ on: Bool) {
+        update { o in
+            var e = o["exposed"] as? [String: Any] ?? [:]
+            e[side] = on
+            o["exposed"] = e
+        }
+    }
+
+    /// Sink cabinet options: `back_cutout`, `liner`.
+    func sinkOption(_ key: String) -> Bool {
+        ((object["sink"] as? [String: Any])?[key] as? Bool) ?? true
+    }
+
+    mutating func setSinkOption(_ key: String, _ on: Bool) {
+        update { o in
+            var sink = o["sink"] as? [String: Any] ?? [:]
+            sink[key] = on
+            o["sink"] = sink
+        }
+    }
+
+    /// The catalog board id the cabinet uses for `slot` (carcass, front, back); empty for generic.
+    func board(for slot: String) -> String {
+        (object["standard"] as? [String: Any])?["\(slot)_board"] as? String ?? ""
     }
 
     /// X offset of the cabinet in the run.
@@ -83,7 +158,11 @@ enum ConnectionState: Equatable {
 enum DetailLevel: String, CaseIterable, Identifiable {
     case design = "Design"
     case manufacturing = "Manufacturing"
+    case exact = "Exact"
     var id: String { rawValue }
+
+    /// The core's name for the level.
+    var core: String { rawValue.lowercased() }
 }
 
 enum Workspace: String, CaseIterable, Identifiable {
@@ -193,10 +272,11 @@ final class ProjectModel {
         selected = cab
     }
 
-    /// Lays the cabinets out side by side in list order and saves.
+    /// Lays the cabinets out side by side in list order and saves. Cabinets drawn in SolidCraft
+    /// stay where they were drawn.
     func changed() {
         var x = 0.0
-        for i in cabinets.indices {
+        for i in cabinets.indices where cabinets[i].placed != true {
             cabinets[i].originX = x
             x += cabinets[i].width
         }
@@ -216,10 +296,10 @@ final class ProjectModel {
         lastError = nil
         status = "Building \(cabinets.count) cabinets in SolidCraft…"
         let jsons = cabinets.map(\.json)
-        let mfg = detail == .manufacturing
+        let level = detail.core
         let port = self.port
         let result = await Task.detached { () -> Result<String, Error> in
-            Result { try sendToSolidcraft(cabinetsJson: jsons, manufacturing: mfg, port: port) }
+            Result { try sendToSolidcraft(cabinetsJson: jsons, detail: level, port: port) }
         }.value
         isSending = false
         switch result {
@@ -229,6 +309,144 @@ final class ProjectModel {
         case .failure(let e):
             lastError = "\(e)"
             status = "SolidCraft did not build the cabinets"
+            await checkConnection()
+        }
+    }
+
+    /// Uses `board` for the selected cabinet's carcass, fronts or back; the thickness follows.
+    func useBoard(_ board: BoardRecord, for slot: String) {
+        guard var cab = selected else {
+            lastError = "Select a cabinet to use this board for."
+            return
+        }
+        guard let dir = Bundle.main.url(forResource: "catalog", withExtension: nil) else { return }
+        do {
+            cab.json = try CabinetStudio.assignBoard(cabinetJson: cab.json, slot: slot, boardId: board.id, catalogDir: dir.path)
+            withAnimation(.snappy) { selected = cab }
+            lastError = nil
+            status = "\(cab.id) \(slot): \(board.decor) \(board.finish), \(Int(board.thickness)) mm"
+        } catch {
+            lastError = "\(error)"
+        }
+    }
+
+    /// Where SolidCraft's installer puts the app.
+    static let solidCraftApp = URL(fileURLWithPath: "/Applications/SolidCraft.app")
+
+    /// Starts SolidCraft with its control port open and waits until it answers.
+    func openSolidCraft() async {
+        let app = Self.solidCraftApp
+        lastError = nil
+        guard FileManager.default.fileExists(atPath: app.path) else {
+            lastError = "SolidCraft is not in Applications. Get it from github.com/tangency-labs/solidcraft/releases."
+            return
+        }
+        // A running SolidCraft keeps the arguments it was started with.
+        if NSWorkspace.shared.runningApplications.contains(where: {
+            $0.bundleURL?.standardizedFileURL == app.standardizedFileURL
+        }) {
+            lastError = "SolidCraft is open without its control port. Quit it, then choose Open SolidCraft again."
+            return
+        }
+        let config = NSWorkspace.OpenConfiguration()
+        config.arguments = ["--control", "\(port)"]
+        do {
+            try await NSWorkspace.shared.openApplication(at: app, configuration: config)
+        } catch {
+            lastError = "Could not open SolidCraft: \(error.localizedDescription)"
+            return
+        }
+        status = "Waiting for SolidCraft…"
+        connection = .unknown
+        for _ in 0..<30 {
+            try? await Task.sleep(for: .seconds(1))
+            await checkConnection()
+            if connection == .connected {
+                status = "SolidCraft is connected"
+                return
+            }
+        }
+        lastError = "SolidCraft opened but does not answer on port \(port)"
+    }
+
+    /// Turns the boxes selected in SolidCraft into cabinets in place, builds them and hides the
+    /// boxes.
+    func makeCabinetsFromSelection() async {
+        isSending = true
+        lastError = nil
+        status = "Reading the selection in SolidCraft…"
+        let port = self.port
+        let taken = cabinets.map(\.id)
+        let result = await Task.detached { () -> Result<BoxImport, Error> in
+            Result { try cabinetsFromSelection(port: port, takenIds: taken) }
+        }.value
+        isSending = false
+        let made: BoxImport
+        switch result {
+        case .success(let r): made = r
+        case .failure(let e):
+            lastError = "\(e)"
+            status = "Could not read the selection in SolidCraft"
+            await checkConnection()
+            return
+        }
+        guard !made.cabinets.isEmpty else {
+            lastError = made.skipped.first.map { "Not a box: \($0)" } ?? "Select one or more boxes in SolidCraft first."
+            return
+        }
+        withAnimation(.snappy) {
+            for c in made.cabinets {
+                cabinets.append(CabinetDoc(id: c.id, json: c.json, placed: true))
+            }
+            selection = made.cabinets.last?.id
+        }
+        changed()
+        await sendToSolidCraft()
+        guard lastError == nil else { return }
+        let sources = made.cabinets.map(\.source)
+        _ = await Task.detached { try? hideBodies(port: port, bodies: sources) }.value
+        var note = "Made \(made.cabinets.count) cabinets from boxes"
+        if !made.skipped.isEmpty { note += " · skipped \(made.skipped.joined(separator: ", "))" }
+        status = note
+    }
+
+    /// Loads the cabinets built into the design open in SolidCraft. A cabinet already in the
+    /// project (same id) is replaced by the design's version; they keep their design positions.
+    func loadCabinetsFromDesign() async {
+        isSending = true
+        lastError = nil
+        status = "Reading cabinets from the SolidCraft design…"
+        let port = self.port
+        let result = await Task.detached { () -> Result<[String], Error> in
+            Result { try cabinetsInDesign(port: port) }
+        }.value
+        isSending = false
+        switch result {
+        case .success(let jsons):
+            guard !jsons.isEmpty else {
+                status = "The SolidCraft design has no cabinets"
+                return
+            }
+            withAnimation(.snappy) {
+                for json in jsons {
+                    guard let data = json.data(using: .utf8),
+                          let id = (try? JSONSerialization.jsonObject(with: data) as? [String: Any])?["id"] as? String
+                    else { continue }
+                    let doc = CabinetDoc(id: id, json: json, placed: true)
+                    if let i = cabinets.firstIndex(where: { $0.id == id }) {
+                        cabinets[i] = doc
+                    } else {
+                        cabinets.append(doc)
+                    }
+                }
+                selection = selection ?? cabinets.first?.id
+            }
+            changed()
+            status = "Loaded \(jsons.count) cabinets from SolidCraft"
+            connection = .connected
+        case .failure(let e):
+            lastError = "\(e)"
+            status = "Could not read the SolidCraft design"
             await checkConnection()
         }
     }
@@ -275,6 +493,8 @@ extension CabinetDoc {
         case "tall": "Tall"
         case "drawer_bank": "Drawer bank"
         case "open_shelf": "Open shelf"
+        case "blind_corner": "Blind corner"
+        case "sink": "Sink"
         default: kind.capitalized
         }
     }
@@ -286,6 +506,8 @@ extension CabinetDoc {
         case "tall": "rectangle.portrait"
         case "drawer_bank": "square.split.1x2.fill"
         case "open_shelf": "rectangle.split.3x1"
+        case "blind_corner": "rectangle.lefthalf.inset.filled"
+        case "sink": "drop"
         default: "cube"
         }
     }

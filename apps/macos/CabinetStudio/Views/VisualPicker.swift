@@ -60,6 +60,8 @@ struct ConstructionThumbnail: View {
             case "top_joint", "bottom_joint": pen.carcassFront(field: field, choice: choice)
             case "back": pen.backSection(choice)
             case "toe_kick": pen.toeKick(choice)
+            case "wall_hanging": pen.wallHanging(choice)
+            case "opening": pen.opening(choice)
             case "overlay": pen.overlayPlan(choice)
             case "fixings": pen.fixing(choice)
             case "biscuit": pen.biscuit(choice)
@@ -148,6 +150,65 @@ private struct Pen {
             line(p(x1, y0 + t), p(x1, y1 - t), colour: accent, width: 1.2, dash: [3, 3])
         }
         arrowText("front", at: p(x0 + 2, y1 + 6))
+    }
+
+    // MARK: Opening, a door and a drawer from the front
+
+    func opening(_ choice: String) {
+        board(14, 8, 34, 64)        // door
+        board(54, 8, 34, 28)        // drawer fronts
+        board(54, 40, 34, 32)
+        switch choice {
+        case "handles":
+            board(42, 34, 2.5, 14, hot: true)
+            board(63, 20, 16, 2.5, hot: true)
+            board(63, 54, 16, 2.5, hot: true)
+        case "tip_on":
+            // Press here: an arrow into the door and a drawer.
+            for (x, y) in [(31.0, 40.0), (71.0, 22.0), (71.0, 56.0)] as [(CGFloat, CGFloat)] {
+                ctx.fill(Path(ellipseIn: r(x - 4, y - 4, 8, 8)), with: .color(accent.opacity(0.35)))
+                ctx.stroke(Path(ellipseIn: r(x - 4, y - 4, 8, 8)), with: .color(accent), lineWidth: 1.2)
+                ctx.fill(Path(ellipseIn: r(x - 1.2, y - 1.2, 2.4, 2.4)), with: .color(accent))
+            }
+        default:
+            // A press point on the door; a lightning bolt on each drawer.
+            ctx.stroke(Path(ellipseIn: r(27, 36, 8, 8)), with: .color(accent), lineWidth: 1.2)
+            for y in [22.0, 56.0] as [CGFloat] {
+                var bolt = Path()
+                bolt.move(to: p(73, y - 7))
+                bolt.addLine(to: p(68, y + 1))
+                bolt.addLine(to: p(72, y + 1))
+                bolt.addLine(to: p(69, y + 8))
+                bolt.addLine(to: p(76, y - 1))
+                bolt.addLine(to: p(72, y - 1))
+                bolt.closeSubpath()
+                ctx.fill(bolt, with: .color(accent))
+            }
+        }
+    }
+
+    // MARK: Wall hanging, side section against the wall
+
+    func wallHanging(_ choice: String) {
+        // The wall on the right; the cabinet's side, top and inset back, with the void behind it.
+        let wall: CGFloat = 86
+        line(p(wall, 4), p(wall, 76), colour: .primary.opacity(0.5), width: 1.5)
+        let (x0, y0, y1): (CGFloat, CGFloat, CGFloat) = (20, 16, 66)
+        ctx.stroke(Path(r(x0, y0, wall - x0, y1 - y0)), with: .color(.primary.opacity(0.35)), lineWidth: 1)
+        board(x0, y0, wall - x0, 6)                  // top
+        board(x0, y1 - 6, wall - x0, 6)              // bottom
+        board(wall - 12, y0 + 4, 3, y1 - y0 - 8)     // inset back
+        guard choice == "hangers" else {
+            line(p(wall - 8, y0 + 10), p(wall - 2, y0 + 10), colour: accent, width: 1.2, dash: [2, 2])
+            return
+        }
+        board(wall - 4, y0 - 2, 4, 6, hot: true)     // wall rail
+        // The hanger in the void, its hook over the rail.
+        board(wall - 9, y0 + 7, 4, 12, hot: true)
+        var hook = Path()
+        hook.move(to: p(wall - 7, y0 + 7))
+        hook.addQuadCurve(to: p(wall - 3, y0 + 4), control: p(wall - 7, y0 + 3))
+        ctx.stroke(hook, with: .color(accent), lineWidth: 1.6)
     }
 
     // MARK: Toe kick, side elevation

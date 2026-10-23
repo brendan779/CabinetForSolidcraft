@@ -5,11 +5,13 @@
 //! commands that build it. Both are deliberately thin: when SolidCraft's WASM plugin runtime ships,
 //! the same command lists go through `engine.run` instead of the socket.
 
+pub mod boxes;
 pub mod client;
+pub mod design;
 pub mod emit;
 
 pub use client::Client;
-pub use emit::{Detail, emit_cabinet};
+pub use emit::{Detail, Existing, emit_cabinet, find_existing, replace_cabinet};
 
 /// The design metadata key this tool stores cabinet specs under (reverse-DNS, as SolidCraft
 /// requires for other tools' data).

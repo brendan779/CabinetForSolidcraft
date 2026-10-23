@@ -61,9 +61,21 @@ struct SolidCraftButton: View {
             Picker("Detail", selection: $project.detail) {
                 Text("Design: plain panels").tag(DetailLevel.design)
                 Text("Manufacturing: every bore, groove and slot").tag(DetailLevel.manufacturing)
+                Text("Exact: true biscuit slot shape (about 3× slower)").tag(DetailLevel.exact)
             }
             .pickerStyle(.inline)
             Divider()
+            if project.connection == .offline {
+                Button("Open SolidCraft", systemImage: "arrow.up.forward.app") {
+                    Task { await project.openSolidCraft() }
+                }
+            }
+            Button("Make Cabinets from Selected Boxes", systemImage: "cube.transparent") {
+                Task { await project.makeCabinetsFromSelection() }
+            }
+            Button("Load Cabinets from Design", systemImage: "square.and.arrow.down") {
+                Task { await project.loadCabinetsFromDesign() }
+            }
             Button("Check Connection") { Task { await project.checkConnection() } }
         } label: {
             HStack(spacing: 6) {
@@ -101,19 +113,25 @@ struct SolidCraftButton: View {
 
 struct StatusBar: View {
     @Environment(ProjectModel.self) private var project
+    @AppStorage(LengthUnit.key) private var unit: LengthUnit = .millimetres
 
     var body: some View {
         HStack(spacing: 10) {
             if let err = project.lastError {
                 Image(systemName: "exclamationmark.triangle.fill").foregroundStyle(.orange)
                 Text(err).lineLimit(1).truncationMode(.middle)
+            } else if project.connection == .offline {
+                Image(systemName: "bolt.horizontal.circle").foregroundStyle(.red)
+                Text("SolidCraft is not connected")
+                Button("Open SolidCraft") { Task { await project.openSolidCraft() } }
+                    .buttonStyle(.link)
             } else {
                 Text(project.status.isEmpty ? "\(project.cabinets.count) cabinets" : project.status)
                     .lineLimit(1)
             }
             Spacer()
             let total = project.cabinets.reduce(0) { $0 + $1.width }
-            Text("Run \(Int(total)) mm").monospacedDigit()
+            Text("Run \(unit.format(total))").monospacedDigit()
         }
         .font(.callout)
         .foregroundStyle(.secondary)

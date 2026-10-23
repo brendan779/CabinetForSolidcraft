@@ -1,0 +1,44 @@
+---
+source: crates/cabinet-sheets/tests/snapshots.rs
+expression: svg
+---
+<svg xmlns="http://www.w3.org/2000/svg" width="297mm" height="210mm" viewBox="0 0 297 210" font-family="Helvetica, Arial, sans-serif">
+<rect width="297" height="210" fill="#fff"/>
+<style>.o{fill:#f6f3ec;stroke:#222;stroke-width:0.35}.t{font-size:3px;fill:#222}.s{font-size:2.4px;fill:#555}.d{stroke:#4a6fa5;stroke-width:0.2;fill:none}.e{stroke:#c0392b;stroke-width:1.1}</style>
+<rect class="o" x="34.00" y="20.00" width="129.27" height="132.00"/>
+<line class="e" x1="34.00" y1="152.00" x2="163.27" y2="152.00"/>
+<line class="d" x1="34.00" y1="159.00" x2="163.27" y2="159.00"/>
+<text class="t" x="98.63" y="163.00" text-anchor="middle">568</text>
+<line class="d" x1="27.00" y1="152.00" x2="27.00" y2="20.00"/>
+<text class="t" x="25.00" y="86.00" text-anchor="middle" transform="rotate(-90 25.00 86.00)">580</text>
+<circle cx="34.00" cy="152.00" r="1" fill="#c0392b"/>
+<rect x="34.00" y="23.64" width="129.27" height="1.37" fill="#9bb7d4" stroke="#222" stroke-width="0.15"/>
+<rect x="34.00" y="133.09" width="2.84" height="15.05" fill="#e8c27a" stroke="#222" stroke-width="0.15"/>
+<rect x="34.00" y="98.35" width="2.84" height="15.05" fill="#e8c27a" stroke="#222" stroke-width="0.15"/>
+<rect x="34.00" y="63.60" width="2.84" height="15.05" fill="#e8c27a" stroke="#222" stroke-width="0.15"/>
+<rect x="34.00" y="28.86" width="2.84" height="15.05" fill="#e8c27a" stroke="#222" stroke-width="0.15"/>
+<line x1="34.00" y1="123.25" x2="41.97" y2="123.25" stroke="#7a3fa0" stroke-width="0.68"/>
+<line x1="34.00" y1="88.50" x2="41.97" y2="88.50" stroke="#7a3fa0" stroke-width="0.68"/>
+<line x1="34.00" y1="53.76" x2="41.97" y2="53.76" stroke="#7a3fa0" stroke-width="0.68"/>
+<rect x="160.42" y="133.09" width="2.84" height="15.05" fill="#e8c27a" stroke="#222" stroke-width="0.15"/>
+<rect x="160.42" y="98.35" width="2.84" height="15.05" fill="#e8c27a" stroke="#222" stroke-width="0.15"/>
+<rect x="160.42" y="63.60" width="2.84" height="15.05" fill="#e8c27a" stroke="#222" stroke-width="0.15"/>
+<rect x="160.42" y="28.86" width="2.84" height="15.05" fill="#e8c27a" stroke="#222" stroke-width="0.15"/>
+<line x1="163.27" y1="123.25" x2="155.30" y2="123.25" stroke="#7a3fa0" stroke-width="0.68"/>
+<line x1="163.27" y1="88.50" x2="155.30" y2="88.50" stroke="#7a3fa0" stroke-width="0.68"/>
+<line x1="163.27" y1="53.76" x2="155.30" y2="53.76" stroke="#7a3fa0" stroke-width="0.68"/>
+<rect x="12" y="168.00" width="273.00" height="30" fill="none" stroke="#222" stroke-width="0.3"/>
+<text class="t" x="15.00" y="175.00">B01.Bottom  —  Bottom</text>
+<text class="t" x="15.00" y="182.00">Finished 568 × 580 × 16 mm   Board: Polytec Classic White Matt 16 MR MDF</text>
+<text class="t" x="15.00" y="189.00">Job: Snapshot job   Cabinet: B01   Operations: 15   Reference corner ●   Edge tape ▬</text>
+<text class="s" x="158.50" y="172.50">groove 568 × 6 @ 0, 558</text>
+<text class="s" x="158.50" y="175.40">biscuit 12.5 × 66.1 @ 0, 16.9</text>
+<text class="s" x="158.50" y="178.30">biscuit 12.5 × 66.1 @ 0, 169.6</text>
+<text class="s" x="158.50" y="181.20">biscuit 12.5 × 66.1 @ 0, 322.3</text>
+<text class="s" x="158.50" y="184.10">biscuit 12.5 × 66.1 @ 0, 474.9</text>
+<text class="s" x="158.50" y="187.00">Edge Ø3 × 35 (Left) @ 0, 126.3</text>
+<text class="s" x="158.50" y="189.90">Edge Ø3 × 35 (Left) @ 0, 279</text>
+<text class="s" x="158.50" y="192.80">Edge Ø3 × 35 (Left) @ 0, 431.7</text>
+<text class="s" x="158.50" y="195.70">biscuit 12.5 × 66.1 @ 555.5, 16.9</text>
+<text class="s" x="265.00" y="196.00">+6 more</text>
+</svg>

@@ -48,7 +48,7 @@ cargo run -q -p solidcraft-bridge --example emit_base -- --script target/run.jso
 /Applications/SolidCraft.app/Contents/MacOS/solidcraft-cli run target/run.json --out target/run.step
 ```
 
-Add `--manufacturing` to cut every bore and slot (slow until PERF-1 is done). The connected
+Add `--manufacturing` to cut every bore and slot (about 6 s for the sample run, see perf.md). The connected
 check (`emit_base` without `--script`) drives the running app on port 7878. Use it only under the
 rule above.
 

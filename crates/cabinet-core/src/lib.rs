@@ -9,16 +9,21 @@
 //! back, Z runs up from the floor. Lengths are millimetres.
 
 pub mod build;
+pub mod collisions;
 pub mod cutlist;
 pub mod geom;
 pub mod joinery;
 pub mod model;
 pub mod options;
 pub mod part;
+pub mod project;
+pub mod run;
 
 pub use build::build_cabinet;
 pub use model::{Cabinet, CabinetKind, ConstructionStandard};
 pub use part::{Part, PartList};
+pub use project::Project;
+pub use run::{Run, RunItem, build_run};
 
 #[derive(Debug, thiserror::Error, PartialEq)]
 pub enum Error {

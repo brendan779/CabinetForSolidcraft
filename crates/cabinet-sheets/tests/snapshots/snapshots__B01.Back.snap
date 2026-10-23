@@ -1,0 +1,18 @@
+---
+source: crates/cabinet-sheets/tests/snapshots.rs
+expression: svg
+---
+<svg xmlns="http://www.w3.org/2000/svg" width="297mm" height="210mm" viewBox="0 0 297 210" font-family="Helvetica, Arial, sans-serif">
+<rect width="297" height="210" fill="#fff"/>
+<style>.o{fill:#f6f3ec;stroke:#222;stroke-width:0.35}.t{font-size:3px;fill:#222}.s{font-size:2.4px;fill:#555}.d{stroke:#4a6fa5;stroke-width:0.2;fill:none}.e{stroke:#c0392b;stroke-width:1.1}</style>
+<rect class="o" x="34.00" y="20.00" width="160.93" height="132.00"/>
+<line class="d" x1="34.00" y1="159.00" x2="194.93" y2="159.00"/>
+<text class="t" x="114.47" y="163.00" text-anchor="middle">712</text>
+<line class="d" x1="27.00" y1="152.00" x2="27.00" y2="20.00"/>
+<text class="t" x="25.00" y="86.00" text-anchor="middle" transform="rotate(-90 25.00 86.00)">584</text>
+<circle cx="34.00" cy="152.00" r="1" fill="#c0392b"/>
+<rect x="12" y="168.00" width="273.00" height="30" fill="none" stroke="#222" stroke-width="0.3"/>
+<text class="t" x="15.00" y="175.00">B01.Back  —  Back</text>
+<text class="t" x="15.00" y="182.00">Finished 712 × 584 × 6 mm   Board: Polytec Classic White Matt 16 MR MDF</text>
+<text class="t" x="15.00" y="189.00">Job: Snapshot job   Cabinet: B01   Operations: 0   Reference corner ●   Edge tape ▬</text>
+</svg>

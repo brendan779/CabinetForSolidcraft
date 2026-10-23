@@ -1,6 +1,6 @@
 //! Builds a sample run of cabinets in the running SolidCraft app.
 //!
-//! `cargo run -p solidcraft-bridge --example emit_base -- [--manufacturing] [--port 7878]`
+//! `cargo run -p solidcraft-bridge --example emit_base -- [--manufacturing | --exact] [--port 7878]`
 //!
 //! With `--script FILE` it writes a SolidCraft script instead of connecting, for headless runs:
 //! `solidcraft-cli run FILE --out run.step`.
@@ -11,7 +11,9 @@ use solidcraft_bridge::{Client, Detail, emit_cabinet};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args: Vec<String> = std::env::args().collect();
-    let detail = if args.iter().any(|a| a == "--manufacturing") {
+    let detail = if args.iter().any(|a| a == "--exact") {
+        Detail::Exact
+    } else if args.iter().any(|a| a == "--manufacturing") {
         Detail::Manufacturing
     } else {
         Detail::Design

@@ -3,6 +3,7 @@
 use serde::{Deserialize, Serialize};
 
 use crate::geom::{Aabb, Axis, Vec3};
+use crate::model::BiscuitSize;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
@@ -18,6 +19,12 @@ pub enum PartRole {
     Door,
     DrawerFront,
     Plinth,
+    /// The fixed front over the blind part of a blind corner cabinet.
+    BlindPanel,
+    /// A strip in the plane of the fronts: beside a blind panel, between cabinets or to a wall.
+    Filler,
+    /// A decorative panel on the end of a run.
+    EndPanel,
 }
 
 impl PartRole {
@@ -34,6 +41,9 @@ impl PartRole {
             PartRole::Door => "Door",
             PartRole::DrawerFront => "Drawer front",
             PartRole::Plinth => "Plinth",
+            PartRole::BlindPanel => "Blind panel",
+            PartRole::Filler => "Filler",
+            PartRole::EndPanel => "End panel",
         }
     }
 
@@ -51,7 +61,23 @@ impl PartRole {
             PartRole::Door => "Door",
             PartRole::DrawerFront => "DrawerFront",
             PartRole::Plinth => "Plinth",
+            PartRole::BlindPanel => "BlindPanel",
+            PartRole::Filler => "Filler",
+            PartRole::EndPanel => "EndPanel",
         }
+    }
+
+    /// Made from the front board and seen from the room.
+    pub fn is_front(self) -> bool {
+        matches!(
+            self,
+            PartRole::Door
+                | PartRole::DrawerFront
+                | PartRole::Plinth
+                | PartRole::BlindPanel
+                | PartRole::Filler
+                | PartRole::EndPanel
+        )
     }
 }
 
@@ -149,6 +175,9 @@ pub enum Operation {
         parts: [String; 2],
         bounds: Aabb,
         along: Axis,
+        /// The biscuit that goes in it.
+        #[serde(default = "default_biscuit")]
+        size: BiscuitSize,
     },
     /// A rectangular groove or rebate.
     Groove { part: String, bounds: Aabb },
@@ -157,12 +186,20 @@ pub enum Operation {
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum BorePurpose {
+    /// A screw's clearance hole through the face panel.
     Screw,
+    /// The seat for a countersunk screw head, at the mouth of its clearance hole. Recorded for
+    /// sheets and CNC; not cut in SolidCraft (a cone there is cosmetic).
+    Countersink,
     ScrewPilot,
     ShelfPin,
     HingeCup,
     HingePlate,
     Dowel,
+}
+
+fn default_biscuit() -> BiscuitSize {
+    BiscuitSize::No20
 }
 
 /// A direction along an axis.

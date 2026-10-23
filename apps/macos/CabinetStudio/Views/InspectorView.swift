@@ -9,6 +9,12 @@ struct InspectorView: View {
                 VStack(alignment: .leading, spacing: 22) {
                     header(cab)
                     SizeSection(cab: cab)
+                    if cab.kind == "blind_corner" {
+                        BlindSection(cab: cab)
+                    }
+                    if cab.kind == "sink" {
+                        SinkSection(cab: cab)
+                    }
                     FrontsSection(cab: cab)
                     ForEach(optionGroups(), id: \.field) { group in
                         VisualPicker(group: group, selected: project.option(group.field, of: cab)) { choice in
@@ -48,20 +54,15 @@ struct InspectorView: View {
 /// so the common case is one click.
 struct SizeSection: View {
     @Environment(ProjectModel.self) private var project
+    @AppStorage(LengthUnit.key) private var unit: LengthUnit = .millimetres
     let cab: CabinetDoc
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             SectionTitle("Size")
-            dimension("Width", value: cab.width, presets: [300, 400, 450, 500, 600, 800, 900, 1000, 1200]) { v in
-                var c = cab; c.width = v; project.selected = c
-            }
-            dimension("Height", value: cab.height, presets: heightPresets) { v in
-                var c = cab; c.height = v; project.selected = c
-            }
-            dimension("Depth", value: cab.depth, presets: [300, 330, 350, 450, 560, 580, 600]) { v in
-                var c = cab; c.depth = v; project.selected = c
-            }
+            dimension("Width", \.width, presets: [300, 400, 450, 500, 600, 800, 900, 1000, 1200])
+            dimension("Height", \.height, presets: heightPresets)
+            dimension("Depth", \.depth, presets: [300, 330, 350, 450, 560, 580, 600])
             HStack {
                 Text("Shelves").foregroundStyle(.secondary)
                 Spacer()
@@ -69,6 +70,44 @@ struct SizeSection: View {
                     var c = cab; c.shelves = v; project.selected = c
                 }), in: 0...8)
                 .monospacedDigit()
+            }
+            HStack(spacing: 6) {
+                Text("Seen ends").foregroundStyle(.secondary)
+                Spacer()
+                ForEach(["left", "right"], id: \.self) { side in
+                    let on = cab.exposed(side)
+                    Button {
+                        withAnimation(.snappy) { var c = cab; c.setExposed(side, !on); project.selected = c }
+                    } label: {
+                        Image(systemName: side == "left" ? "rectangle.lefthalf.inset.filled" : "rectangle.righthalf.inset.filled")
+                    }
+                    .buttonStyle(ChipStyle(selected: on))
+                    .help(on ? "The \(side) side is seen from the room: no screws through it (biscuits, dowels and glue)."
+                             : "The \(side) side is hidden: screws through it are fine. Click if it will be seen.")
+                    .accessibilityLabel("\(side.capitalized) side \(on ? "seen" : "hidden")")
+                }
+            }
+            if cab.shelves > 0 {
+                HStack(spacing: 6) {
+                    Text("Fixed").foregroundStyle(.secondary)
+                    Spacer()
+                    ForEach(1...cab.shelves, id: \.self) { i in
+                        let fixed = cab.fixedShelves.contains(i)
+                        Button {
+                            withAnimation(.snappy) {
+                                var c = cab
+                                c.fixedShelves = fixed ? c.fixedShelves.filter { $0 != i } : c.fixedShelves + [i]
+                                project.selected = c
+                            }
+                        } label: {
+                            Image(systemName: fixed ? "lock.fill" : "\(i).circle")
+                        }
+                        .buttonStyle(ChipStyle(selected: fixed))
+                        .help(fixed ? "Shelf \(i) is fixed: biscuited and screwed between the sides. Click to put it on pins."
+                                    : "Shelf \(i) sits on shelf pins. Click to fix it between the sides.")
+                        .accessibilityLabel("Shelf \(i) \(fixed ? "fixed" : "on pins")")
+                    }
+                }
             }
         }
     }
@@ -81,22 +120,140 @@ struct SizeSection: View {
         }
     }
 
-    private func dimension(_ title: String, value: Double, presets: [Double], set: @escaping (Double) -> Void) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
+    // A key path rather than a setter closure: Swift 6.3 crashes converting a @MainActor setter
+    // closure for Binding.
+    private func dimension(_ title: String, _ size: WritableKeyPath<CabinetDoc, Double> & Sendable, presets: [Double]) -> some View {
+        let value = cab[keyPath: size]
+        let set = { (v: Double) in
+            var c = cab; c[keyPath: size] = v; project.selected = c
+        }
+        return VStack(alignment: .leading, spacing: 6) {
             HStack {
                 Text(title).foregroundStyle(.secondary)
                 Spacer()
-                Stepper(value: Binding(get: { value }, set: set), in: 100...3000, step: 1) {
-                    Text("\(Int(value)) mm").monospacedDigit().fontWeight(.medium)
+                Stepper(value: Binding(get: { value }, set: { v in
+                    var c = cab; c[keyPath: size] = v; project.selected = c
+                }), in: 100...3000, step: 1) {
+                    Text(unit.format(value)).monospacedDigit().fontWeight(.medium)
                 }
             }
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 6) {
                     ForEach(presets, id: \.self) { p in
-                        Button("\(Int(p))") { withAnimation(.snappy) { set(p) } }
+                        Button(unit.format(p, suffix: false)) { withAnimation(.snappy) { set(p) } }
                             .buttonStyle(ChipStyle(selected: abs(p - value) < 0.5))
                     }
                 }
+            }
+        }
+    }
+}
+
+/// A sink cabinet's options, each a tile with a drawing.
+struct SinkSection: View {
+    @Environment(ProjectModel.self) private var project
+    let cab: CabinetDoc
+
+    private let options: [(key: String, title: String, symbol: String, help: String)] = [
+        ("back_cutout", "Pipe cut-out", "rectangle.bottomhalf.inset.filled",
+         "An opening low in the back for the waste and water pipes"),
+        ("liner", "Base liner", "drop.triangle",
+         "A waterproof liner on the bottom panel, in the hardware list"),
+    ]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            SectionTitle("Sink")
+            HStack(spacing: 8) {
+                ForEach(options, id: \.key) { o in
+                    let on = cab.sinkOption(o.key)
+                    Button {
+                        withAnimation(.snappy) { var c = cab; c.setSinkOption(o.key, !on); project.selected = c }
+                    } label: {
+                        VStack(spacing: 6) {
+                            Image(systemName: o.symbol).font(.title2).frame(height: 30)
+                            Text(o.title).font(.caption)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 8)
+                    }
+                    .buttonStyle(TileStyle(selected: on))
+                    .help(o.help)
+                    .accessibilityValue(on ? "on" : "off")
+                }
+            }
+        }
+    }
+}
+
+/// A blind corner's blind side and widths, drawn as the front seen from the room.
+struct BlindSection: View {
+    @Environment(ProjectModel.self) private var project
+    let cab: CabinetDoc
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            SectionTitle("Blind corner")
+            HStack(spacing: 8) {
+                ForEach(["left", "right"], id: \.self) { side in
+                    Button {
+                        withAnimation(.snappy) { var c = cab; c.blindSide = side; project.selected = c }
+                    } label: {
+                        VStack(spacing: 6) {
+                            BlindThumbnail(side: side, blind: cab.blindWidth / max(cab.width, 1))
+                                .frame(width: 64, height: 44)
+                            Text(side == "left" ? "Blind left" : "Blind right").font(.caption)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 8)
+                    }
+                    .buttonStyle(TileStyle(selected: cab.blindSide == side))
+                    .help("The other run meets this cabinet on its \(side); the door hinges on the other side.")
+                }
+            }
+            chips("Blind", value: cab.blindWidth, presets: [580, 600, 630, 650, 700]) { c, v in c.blindWidth = v }
+            chips("Filler", value: cab.blindFiller, presets: [25, 50, 75, 100]) { c, v in c.blindFiller = v }
+        }
+    }
+
+    private func chips(_ title: String, value: Double, presets: [Double],
+                       set: @escaping (inout CabinetDoc, Double) -> Void) -> some View {
+        HStack(spacing: 6) {
+            Text(title).foregroundStyle(.secondary)
+            Spacer()
+            ForEach(presets, id: \.self) { p in
+                Button("\(Int(p))") {
+                    withAnimation(.snappy) { var c = cab; set(&c, p); project.selected = c }
+                }
+                .buttonStyle(ChipStyle(selected: abs(p - value) < 0.5))
+            }
+        }
+    }
+}
+
+/// The front of a blind corner: blind panel, filler and door, the blind side shaded.
+struct BlindThumbnail: View {
+    let side: String
+    let blind: Double
+
+    var body: some View {
+        Canvas { ctx, size in
+            let w = size.width, h = size.height
+            let bw = w * min(max(blind, 0.2), 0.8)
+            let filler = w * 0.06
+            let left = side == "left"
+            let panel = CGRect(x: left ? 0 : w - bw + filler, y: 0, width: bw - filler, height: h)
+            let strip = CGRect(x: left ? bw - filler : w - bw, y: 0, width: filler, height: h)
+            let door = CGRect(x: left ? bw + 2 : 0, y: 0, width: w - bw - 2, height: h)
+            ctx.fill(Path(panel), with: .color(.primary.opacity(0.12)))
+            ctx.stroke(Path(panel), with: .color(.primary.opacity(0.5)), lineWidth: 1)
+            ctx.fill(Path(strip), with: .color(.primary.opacity(0.3)))
+            ctx.fill(Path(door), with: .color(.accentColor.opacity(0.3)))
+            ctx.stroke(Path(door), with: .color(.accentColor), lineWidth: 1.4)
+            // Hinge side marks on the door's far edge.
+            let hx = left ? door.maxX - 3 : door.minX + 3
+            for y in [h * 0.2, h * 0.8] {
+                ctx.fill(Path(ellipseIn: CGRect(x: hx - 2, y: y - 2, width: 4, height: 4)), with: .color(.accentColor))
             }
         }
     }
