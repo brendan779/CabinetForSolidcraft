@@ -24,7 +24,7 @@ Priorities: **P0** blocks most other work · **P1** MVP · **P2** commercial par
 | id | status | size | task | done when |
 |---|---|---|---|---|
 | INF-1 | done (initial) | M | Cargo workspace, crates, SwiftUI app shell, build-core.sh, check.sh | `scripts/check.sh` green |
-| INF-2 | todo | S | GitHub Actions CI on `macos-latest`: `scripts/check.sh` | CI badge green on main |
+| INF-2 | done (e4e904d) | S | GitHub Actions CI on `macos-latest`: `scripts/check.sh` | CI badge green on main |
 | INF-3 | todo | S | Move the Swift app to Swift 6 language mode with strict concurrency | builds with `SWIFT_VERSION = 6`, no warnings |
 | INF-4 | todo | M | Snapshot tests for SVG cut sheets (insta crate) and a golden part list per cabinet kind | `cargo insta test` passes; goldens committed |
 | INF-5 | todo | S | `cargo deny` licence/advisory check in check.sh | added and green |
@@ -173,3 +173,4 @@ committed: they are the brands' copyright. `preview_colour` is an approximation.
 Agents append one line per session: date, items touched, outcome.
 
 - 2026-10-23 — initial scaffold: core, catalog, bridge, sheets, FFI, macOS app; live build in SolidCraft 0.20 verified; PERF-1 found.
+- 2026-10-23 — repo published as brendan779/CabinetForSolidcraft; INF-2 CI green on macos-latest.
