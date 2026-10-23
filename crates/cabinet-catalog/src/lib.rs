@@ -238,9 +238,27 @@ impl Catalog {
         self.hardware.iter().find(|h| h.id == id)
     }
 
-    /// Unique ids, positive sizes and edge tape references that resolve.
+    /// Unique ids, positive sizes, edge tape references that resolve, and a source on every
+    /// board and tape: the document's URL and date, and when it was read.
     pub fn validate(&self) -> Result<(), Error> {
         let mut problems = Vec::new();
+        let sourced = |id: &str, s: &Source, problems: &mut Vec<String>| {
+            for (field, v) in [
+                ("url", &s.url),
+                ("document_date", &s.document_date),
+                ("retrieved", &s.retrieved),
+            ] {
+                if v.trim().is_empty() {
+                    problems.push(format!("{id}: source has no {field}"));
+                }
+            }
+        };
+        for b in &self.boards {
+            sourced(&b.id, &b.source, &mut problems);
+        }
+        for t in &self.edge_tapes {
+            sourced(&t.id, &t.source, &mut problems);
+        }
         let mut ids = HashSet::new();
         for b in &self.boards {
             if !ids.insert(b.id.as_str()) {
@@ -380,6 +398,25 @@ mod tests {
             .unwrap_err()
             .to_string();
         assert!(err.contains("duplicate hardware id"), "{err}");
+    }
+
+    #[test]
+    fn a_board_without_a_source_date_is_refused() {
+        let dir = std::env::temp_dir().join("cabinet-catalog-unsourced");
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(dir.join("boards")).unwrap();
+        let file = serde_json::json!({ "brand": "Test", "boards": [{
+            "id": "test.white.16", "brand": "Test", "range": "R", "decor": "White", "finish": "Matt",
+            "kind": "melamine", "substrate": "mdf", "thickness": 16.0,
+            "sheets": [{ "length": 2400.0, "width": 1200.0 }],
+            "source": { "url": "https://example.com/guide.pdf", "document_date": "", "retrieved": "2026-10-24" }
+        }] });
+        std::fs::write(dir.join("boards/test.json"), file.to_string()).unwrap();
+        let err = Catalog::load(&dir).unwrap_err().to_string();
+        assert!(
+            err.contains("test.white.16: source has no document_date"),
+            "{err}"
+        );
     }
 
     #[test]
