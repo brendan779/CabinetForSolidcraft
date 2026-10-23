@@ -77,11 +77,13 @@ Priorities: **P0** blocks most other work · **P1** MVP · **P2** commercial par
 |---|---|---|---|---|
 | BLUM-1 | done (night/2026-10-23) | M | Hardware catalog schema (`catalog/hardware/*.json`): article, family, variant, parameters, drilling pattern, source, verified | schema + loader + tests |
 | BLUM-2 | needs-human (Blum TD sheets) | M | CLIP top BLUMOTION 110° data: cup Ø35, depth, boring distance range, plate drilling (cruciform/wing, 0/3/9 mm), overlay tables | rows verified against the Blum document; build.rs constants replaced by catalog data |
-| BLUM-3 | todo | M | Hinge selection rule: overlay + door thickness → hinge + plate article | unit test table |
-| BLUM-4 | todo | M | LEGRABOX: nominal lengths, side heights (N/M/K/C/F), front fixing drilling, bottom/back cut sizes | drawer bank with LEGRABOX gives bottom and back parts in cut list |
-| BLUM-5 | todo | M | MERIVOBOX and TANDEMBOX as alternatives | picker shows 3 box systems |
+| BLUM-3 | blocked (Blum's hinge/plate selection tables: BLUM-2) | M | Hinge selection rule: overlay + door thickness → hinge + plate article | unit test table |
+| BLUM-4 | blocked (LEGRABOX dimensions from Blum's documents: BLUM-2-style owner data) | M | LEGRABOX: nominal lengths, side heights (N/M/K/C/F), front fixing drilling, bottom/back cut sizes | drawer bank with LEGRABOX gives bottom and back parts in cut list |
+| BLUM-5 | blocked (MERIVOBOX/TANDEMBOX data from Blum's documents; and BLUM-4's model first) | M | MERIVOBOX and TANDEMBOX as alternatives | picker shows 3 box systems |
 | BLUM-6 | todo | M | MOVENTO/TANDEM runners for wood drawers (see CORE-8) | — |
-| BLUM-7 | todo | L | AVENTOS lift systems (HK top, HK-S, HK-XS, HF, HS, HL): power factor = f(front height, weight) → article | split |
+| BLUM-7 | split → BLUM-7a, BLUM-7b | L | AVENTOS lift systems (HK top, HK-S, HK-XS, HF, HS, HL): power factor = f(front height, weight) → article | split |
+| BLUM-7a | todo | M | Lift-system model: a wall cabinet front opening upward (`opening: lift`), front height and weight from the board catalog (density × area), power factor computed per Blum's formula, and the AVENTOS family chosen by front height; picker drawing per family | test: front weight and power factor for a 600 × 360 front |
+| BLUM-7b | blocked (AVENTOS power-factor ranges and drilling per family from Blum's documents: owner data) | M | AVENTOS HK top, HK-S, HK-XS, HF, HS, HL catalog rows (articles by power-factor range, drilling) | hardware rows with sources; BLUM-7a picks articles from them |
 | BLUM-8 | todo | S | TIP-ON / SERVO-DRIVE options for handleless fronts | option + BOM |
 | BLUM-9 | 👤 needs-human | M | Import the owner's Blum STEP files from `vendor-cad/blum/` as linked components (`component.insert_design` after STEP → .solidcraft conversion) in place of stand-ins | a hinge renders with the real Blum model |
 | BLUM-10 | todo | M | Parametric stand-in models (hinge cup + arm, plate, runner, box side) emitted as bodies | visible in Manufacturing detail |
@@ -208,3 +210,4 @@ Agents append one line per session: date, items touched, outcome.
 - 2026-10-23 (night) — JOIN-5 done: every screw clearance hole gets a 90° countersink (Ø8 chipboard, Ø10 confirmat; in the part list for sheets/CNC, not cut in SolidCraft) and a cover cap in the hardware list; `exposed.left/right` sides get no through screws (biscuits + glue, blind dowels where biscuits do not fit); inspector "Seen ends" chips. JOIN-4 blocked on Häfele data.
 - 2026-10-23 (night) — JOIN-7 done: applied backs are screwed to the sides, bottom, top/back rail at ≤150 mm centres (countersunk, capped); grooved backs get none. The clash sweep caught 35 mm pilots reaching the rear shelf-pin row, so back screws pilot 15 mm (4 × 20 through a 6 mm back). JOIN-6 blocked on Lamello data.
 - 2026-10-23 (night) — BLUM-1 done: `cabinet_catalog::hardware` (HardwareItem: article, family, variant, kind, named parameters, drilling pattern, source/verified), loaded from `catalog/hardware/*.json` with validation (unique ids, article, source, real holes); format note in catalog/hardware/README.md. No Blum numbers entered: they wait for the owner's TD sheets (BLUM-2).
+- 2026-10-23 (night) — BLUM-3/4/5 blocked on Blum's own tables; BLUM-7 split into 7a (lift model) and 7b (AVENTOS data, blocked).
