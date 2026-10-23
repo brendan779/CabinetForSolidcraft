@@ -55,6 +55,9 @@ pub struct ButtJoint<'a> {
     pub normal: Dir,
     /// The axis the joint line runs along.
     pub along: Axis,
+    /// Where along the line fixings may go, when less than the whole contact: a back panel's
+    /// groove crosses the joint behind this, and a biscuit there would cut into it.
+    pub limit: Option<(f64, f64)>,
 }
 
 impl ButtJoint<'_> {
@@ -83,7 +86,10 @@ impl ButtJoint<'_> {
         let (a, b) = (&self.face_part.bounds, &self.end_part.bounds);
         let lo = a.min.get(self.along).max(b.min.get(self.along));
         let hi = a.max().get(self.along).min(b.max().get(self.along));
-        (lo, hi)
+        match self.limit {
+            Some((l, h)) => (lo.max(l), hi.min(h)),
+            None => (lo, hi),
+        }
     }
 
     /// The axis across the end part's thickness, and its middle.

@@ -14,12 +14,12 @@ expression: svg
 <circle cx="34.00" cy="152.00" r="1" fill="#c0392b"/>
 <rect x="34.00" y="23.64" width="163.86" height="1.37" fill="#9bb7d4" stroke="#222" stroke-width="0.15"/>
 <rect x="35.37" y="133.09" width="0.91" height="15.05" fill="#e8c27a" stroke="#222" stroke-width="0.15"/>
-<rect x="35.37" y="96.68" width="0.91" height="15.05" fill="#e8c27a" stroke="#222" stroke-width="0.15"/>
-<rect x="35.37" y="60.27" width="0.91" height="15.05" fill="#e8c27a" stroke="#222" stroke-width="0.15"/>
-<rect x="35.37" y="23.85" width="0.91" height="15.05" fill="#e8c27a" stroke="#222" stroke-width="0.15"/>
-<circle cx="35.82" cy="122.41" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
-<circle cx="35.82" cy="86.00" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
-<circle cx="35.82" cy="49.59" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
+<rect x="35.37" y="98.35" width="0.91" height="15.05" fill="#e8c27a" stroke="#222" stroke-width="0.15"/>
+<rect x="35.37" y="63.60" width="0.91" height="15.05" fill="#e8c27a" stroke="#222" stroke-width="0.15"/>
+<rect x="35.37" y="28.86" width="0.91" height="15.05" fill="#e8c27a" stroke="#222" stroke-width="0.15"/>
+<circle cx="35.82" cy="123.25" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
+<circle cx="35.82" cy="88.50" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
+<circle cx="35.82" cy="53.76" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
 <circle cx="196.04" cy="146.31" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
 <circle cx="196.04" cy="134.93" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
 <circle cx="196.04" cy="42.08" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
@@ -66,12 +66,12 @@ expression: svg
 <text class="t" x="15.00" y="189.00">Job: Snapshot job   Cabinet: B01   Operations: 48   Reference corner ●   Edge tape ▬</text>
 <text class="s" x="158.50" y="172.50">groove 720 × 6 @ 0, 558</text>
 <text class="s" x="158.50" y="175.40">biscuit 4 × 66.1 @ 6, 16.9</text>
-<text class="s" x="158.50" y="178.30">biscuit 4 × 66.1 @ 6, 176.9</text>
-<text class="s" x="158.50" y="181.20">biscuit 4 × 66.1 @ 6, 336.9</text>
-<text class="s" x="158.50" y="184.10">biscuit 4 × 66.1 @ 6, 496.9</text>
-<text class="s" x="158.50" y="187.00">Ø4.5 × 16 Screw @ 8, 130</text>
-<text class="s" x="158.50" y="189.90">Ø4.5 × 16 Screw @ 8, 290</text>
-<text class="s" x="158.50" y="192.80">Ø4.5 × 16 Screw @ 8, 450</text>
+<text class="s" x="158.50" y="178.30">biscuit 4 × 66.1 @ 6, 169.6</text>
+<text class="s" x="158.50" y="181.20">biscuit 4 × 66.1 @ 6, 322.3</text>
+<text class="s" x="158.50" y="184.10">biscuit 4 × 66.1 @ 6, 474.9</text>
+<text class="s" x="158.50" y="187.00">Ø4.5 × 16 Screw @ 8, 126.3</text>
+<text class="s" x="158.50" y="189.90">Ø4.5 × 16 Screw @ 8, 279</text>
+<text class="s" x="158.50" y="192.80">Ø4.5 × 16 Screw @ 8, 431.7</text>
 <text class="s" x="158.50" y="195.70">Ø4.5 × 16 Screw @ 712, 25</text>
 <text class="s" x="265.00" y="196.00">+39 more</text>
 </svg>

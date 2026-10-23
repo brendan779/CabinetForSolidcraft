@@ -381,7 +381,7 @@ expression: list
       "bounds": {
         "min": {
           "x": 3.5,
-          "y": 176.9281086116926,
+          "y": 169.59477527835926,
           "z": 156.0
         },
         "size": {
@@ -401,7 +401,7 @@ expression: list
       "bounds": {
         "min": {
           "x": 3.5,
-          "y": 336.9281086116926,
+          "y": 322.2614419450259,
           "z": 156.0
         },
         "size": {
@@ -421,7 +421,7 @@ expression: list
       "bounds": {
         "min": {
           "x": 3.5,
-          "y": 496.9281086116926,
+          "y": 474.9281086116926,
           "z": 156.0
         },
         "size": {
@@ -437,7 +437,7 @@ expression: list
       "part": "C01.LeftSide",
       "at": {
         "x": 0.0,
-        "y": 130.0,
+        "y": 126.33333333333333,
         "z": 158.0
       },
       "direction": {
@@ -453,7 +453,7 @@ expression: list
       "part": "C01.Bottom",
       "at": {
         "x": 16.0,
-        "y": 130.0,
+        "y": 126.33333333333333,
         "z": 158.0
       },
       "direction": {
@@ -469,7 +469,7 @@ expression: list
       "part": "C01.LeftSide",
       "at": {
         "x": 0.0,
-        "y": 290.0,
+        "y": 279.0,
         "z": 158.0
       },
       "direction": {
@@ -485,7 +485,7 @@ expression: list
       "part": "C01.Bottom",
       "at": {
         "x": 16.0,
-        "y": 290.0,
+        "y": 279.0,
         "z": 158.0
       },
       "direction": {
@@ -501,7 +501,7 @@ expression: list
       "part": "C01.LeftSide",
       "at": {
         "x": 0.0,
-        "y": 450.0,
+        "y": 431.66666666666663,
         "z": 158.0
       },
       "direction": {
@@ -517,7 +517,7 @@ expression: list
       "part": "C01.Bottom",
       "at": {
         "x": 16.0,
-        "y": 450.0,
+        "y": 431.66666666666663,
         "z": 158.0
       },
       "direction": {
@@ -557,7 +557,7 @@ expression: list
       "bounds": {
         "min": {
           "x": 971.5,
-          "y": 176.9281086116926,
+          "y": 169.59477527835926,
           "z": 156.0
         },
         "size": {
@@ -577,7 +577,7 @@ expression: list
       "bounds": {
         "min": {
           "x": 971.5,
-          "y": 336.9281086116926,
+          "y": 322.2614419450259,
           "z": 156.0
         },
         "size": {
@@ -597,7 +597,7 @@ expression: list
       "bounds": {
         "min": {
           "x": 971.5,
-          "y": 496.9281086116926,
+          "y": 474.9281086116926,
           "z": 156.0
         },
         "size": {
@@ -613,7 +613,7 @@ expression: list
       "part": "C01.RightSide",
       "at": {
         "x": 1000.0,
-        "y": 130.0,
+        "y": 126.33333333333333,
         "z": 158.0
       },
       "direction": {
@@ -629,7 +629,7 @@ expression: list
       "part": "C01.Bottom",
       "at": {
         "x": 984.0,
-        "y": 130.0,
+        "y": 126.33333333333333,
         "z": 158.0
       },
       "direction": {
@@ -645,7 +645,7 @@ expression: list
       "part": "C01.RightSide",
       "at": {
         "x": 1000.0,
-        "y": 290.0,
+        "y": 279.0,
         "z": 158.0
       },
       "direction": {
@@ -661,7 +661,7 @@ expression: list
       "part": "C01.Bottom",
       "at": {
         "x": 984.0,
-        "y": 290.0,
+        "y": 279.0,
         "z": 158.0
       },
       "direction": {
@@ -677,7 +677,7 @@ expression: list
       "part": "C01.RightSide",
       "at": {
         "x": 1000.0,
-        "y": 450.0,
+        "y": 431.66666666666663,
         "z": 158.0
       },
       "direction": {
@@ -693,7 +693,7 @@ expression: list
       "part": "C01.Bottom",
       "at": {
         "x": 984.0,
-        "y": 450.0,
+        "y": 431.66666666666663,
         "z": 158.0
       },
       "direction": {

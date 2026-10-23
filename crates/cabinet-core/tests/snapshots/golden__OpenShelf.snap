@@ -273,27 +273,7 @@ expression: list
       "bounds": {
         "min": {
           "x": 3.5,
-          "y": 116.92810861169261,
-          "z": 6.0
-        },
-        "size": {
-          "x": 25.0,
-          "y": 66.14378277661477,
-          "z": 4.0
-        }
-      },
-      "along": "Y"
-    },
-    {
-      "type": "biscuit_slot",
-      "parts": [
-        "C01.LeftSide",
-        "C01.Bottom"
-      ],
-      "bounds": {
-        "min": {
-          "x": 3.5,
-          "y": 216.9281086116926,
+          "y": 194.9281086116926,
           "z": 6.0
         },
         "size": {
@@ -309,7 +289,7 @@ expression: list
       "part": "C01.LeftSide",
       "at": {
         "x": 0.0,
-        "y": 100.0,
+        "y": 139.0,
         "z": 8.0
       },
       "direction": {
@@ -325,39 +305,7 @@ expression: list
       "part": "C01.Bottom",
       "at": {
         "x": 16.0,
-        "y": 100.0,
-        "z": 8.0
-      },
-      "direction": {
-        "axis": "X",
-        "positive": true
-      },
-      "diameter": 3.0,
-      "depth": 35.0,
-      "purpose": "screw_pilot"
-    },
-    {
-      "type": "bore",
-      "part": "C01.LeftSide",
-      "at": {
-        "x": 0.0,
-        "y": 200.0,
-        "z": 8.0
-      },
-      "direction": {
-        "axis": "X",
-        "positive": true
-      },
-      "diameter": 4.5,
-      "depth": 16.0,
-      "purpose": "screw"
-    },
-    {
-      "type": "bore",
-      "part": "C01.Bottom",
-      "at": {
-        "x": 16.0,
-        "y": 200.0,
+        "y": 139.0,
         "z": 8.0
       },
       "direction": {
@@ -397,27 +345,7 @@ expression: list
       "bounds": {
         "min": {
           "x": 571.5,
-          "y": 116.92810861169261,
-          "z": 6.0
-        },
-        "size": {
-          "x": 25.0,
-          "y": 66.14378277661477,
-          "z": 4.0
-        }
-      },
-      "along": "Y"
-    },
-    {
-      "type": "biscuit_slot",
-      "parts": [
-        "C01.RightSide",
-        "C01.Bottom"
-      ],
-      "bounds": {
-        "min": {
-          "x": 571.5,
-          "y": 216.9281086116926,
+          "y": 194.9281086116926,
           "z": 6.0
         },
         "size": {
@@ -433,7 +361,7 @@ expression: list
       "part": "C01.RightSide",
       "at": {
         "x": 600.0,
-        "y": 100.0,
+        "y": 139.0,
         "z": 8.0
       },
       "direction": {
@@ -449,39 +377,7 @@ expression: list
       "part": "C01.Bottom",
       "at": {
         "x": 584.0,
-        "y": 100.0,
-        "z": 8.0
-      },
-      "direction": {
-        "axis": "X",
-        "positive": false
-      },
-      "diameter": 3.0,
-      "depth": 35.0,
-      "purpose": "screw_pilot"
-    },
-    {
-      "type": "bore",
-      "part": "C01.RightSide",
-      "at": {
-        "x": 600.0,
-        "y": 200.0,
-        "z": 8.0
-      },
-      "direction": {
-        "axis": "X",
-        "positive": false
-      },
-      "diameter": 4.5,
-      "depth": 16.0,
-      "purpose": "screw"
-    },
-    {
-      "type": "bore",
-      "part": "C01.Bottom",
-      "at": {
-        "x": 584.0,
-        "y": 200.0,
+        "y": 139.0,
         "z": 8.0
       },
       "direction": {

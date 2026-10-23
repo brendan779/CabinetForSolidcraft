@@ -55,7 +55,7 @@ Priorities: **P0** blocks most other work · **P1** MVP · **P2** commercial par
 | CORE-9 | done (night/2026-10-23) | S | Material per part: carcass board, front board, back board from the catalog; thickness follows the board | changing the front board changes door thickness |
 | CORE-10 | blocked (cranked-hinge and plate offsets are Blum data: BLUM-2, the owner's TD sheets) | M | Half-overlay and inset hinge geometry (cranked hinges, plate offsets) | test per overlay type |
 | CORE-11 | done (night/2026-10-23) | S | Unit display: metric with optional imperial display in the app | toggle in preferences |
-| CORE-12 | todo | M | Collision checker as a module: every bore/slot vs every other op and vs panel edges, with warnings | test suite over all kinds × standards with zero clashes |
+| CORE-12 | done (night/2026-10-23) | M | Collision checker as a module: every bore/slot vs every other op and vs panel edges, with warnings | test suite over all kinds × standards with zero clashes |
 
 ### Joinery
 
@@ -202,3 +202,4 @@ Agents append one line per session: date, items touched, outcome.
 - 2026-10-23 (night) — CORE-7 done in the core: `project::Project` stores the standard once and each cabinet's differing fields as `overrides`; resolves back exactly. App side is UI-17 (added).
 - 2026-10-23 (night) — CORE-9 done: `back_board` slot; front-role parts use the front board; `set_board` / FFI `assign_board` set a slot's board and its catalogue thickness (test: 16 → 18 mm front board changes the door to 18 mm). Board library cards get "Use for Carcass / Fronts / Back" and badges. CORE-8 marked blocked on BLUM-1/BLUM-6 (supplier numbers belong in catalog data).
 - 2026-10-23 (night) — CORE-11 done: Settings scene (⌘,) with "Show lengths in" millimetres / inches (nearest 1/16″); sizes, chips, sidebar, run length and cut list follow it; files, CSV and SolidCraft stay in mm. Not seen on screen (no Screen Recording permission here). CORE-10 blocked on BLUM-2.
+- 2026-10-23 (night) — CORE-12 done: `collisions::check` (bores as cylinders, slots/grooves as boxes; overlaps, break-outs, thin floors), reported in build warnings. The sweep over every kind × every choice found one real clash family — the rearmost biscuit of each back-to-front joint cut into the back groove — fixed by stopping those joints at the interior back (goldens: fixings moved, nothing else).

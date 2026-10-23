@@ -56,6 +56,10 @@ pub fn build_cabinet(cab: &Cabinet) -> Result<PartList> {
         p.bounds.min = p.bounds.min + o;
     }
     offset_operations(&mut list, cab.origin);
+    // Whatever the rules above missed shows to the user rather than at the machine.
+    let clashes = crate::collisions::check(&list);
+    list.warnings
+        .extend(clashes.into_iter().map(|c| format!("clash: {c}")));
     Ok(list)
 }
 
@@ -215,11 +219,15 @@ impl<'a> Builder<'a> {
     }
 
     fn joint_parts(&mut self, face: &Part, end: &Part, normal: Dir, along: Axis) {
+        // Joints running back to front stop at the interior's back: behind it is the back
+        // panel and its grooves.
+        let limit = (along == Axis::Y).then_some((f64::NEG_INFINITY, self.interior_back));
         let joint = ButtJoint {
             face_part: face,
             end_part: end,
             normal,
             along,
+            limit,
         };
         let ops = joint.operations(&self.cab.standard, &mut self.list.warnings);
         self.list.operations.extend(ops);
