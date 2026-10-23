@@ -143,9 +143,14 @@ pub struct EdgeTape {
     pub code: String,
     pub decor: String,
     pub finish: String,
-    pub material: TapeMaterial,
+    /// As the source states it; absent when it does not (Laminex's board tables give a matching
+    /// tape's code, thickness and roll, not its material or width).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub material: Option<TapeMaterial>,
     pub thickness: f64,
-    pub width: f64,
+    /// Width in mm, absent when the source does not print it.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub width: Option<f64>,
     /// Roll lengths in metres.
     pub rolls: Vec<f64>,
     /// Pre-glued (hot melt) or un-glued.
@@ -258,7 +263,7 @@ impl Catalog {
             if !tape_ids.insert(t.id.as_str()) {
                 problems.push(format!("duplicate edge tape id {}", t.id));
             }
-            if !(positive(t.thickness) && positive(t.width)) {
+            if !(positive(t.thickness) && t.width.is_none_or(positive)) {
                 problems.push(format!("{}: bad tape size", t.id));
             }
         }
@@ -287,11 +292,13 @@ impl Catalog {
         self.boards.iter().find(|b| b.id == id)
     }
 
-    /// Edge tapes for `board` that are at least as wide as the board is thick.
+    /// Edge tapes for `board` known to be at least as wide as the board is thick.
     pub fn tapes_for(&self, board: &Board) -> Vec<&EdgeTape> {
         self.edge_tapes
             .iter()
-            .filter(|t| board.edge_tapes.contains(&t.id) && t.width >= board.thickness)
+            .filter(|t| {
+                board.edge_tapes.contains(&t.id) && t.width.is_some_and(|w| w >= board.thickness)
+            })
             .collect()
     }
 
@@ -379,9 +386,16 @@ mod tests {
     fn the_repository_catalog_loads_and_validates() {
         let cat = Catalog::load(&repo_catalog()).unwrap();
         assert!(!cat.boards.is_empty());
+        // A board whose tapes all give a width has one wide enough for it. (Laminex's tables give
+        // no tape widths.)
         for b in &cat.boards {
+            let widths_known = b.edge_tapes.iter().all(|id| {
+                cat.edge_tapes
+                    .iter()
+                    .any(|t| &t.id == id && t.width.is_some())
+            });
             assert!(
-                !cat.tapes_for(b).is_empty() || b.edge_tapes.is_empty(),
+                !cat.tapes_for(b).is_empty() || b.edge_tapes.is_empty() || !widths_known,
                 "{}",
                 b.id
             );
