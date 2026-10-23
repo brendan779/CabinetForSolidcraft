@@ -25,7 +25,7 @@ fn round(v: f64) -> f64 {
 
 fn colour(role: PartRole) -> &'static str {
     match role {
-        PartRole::Door | PartRole::DrawerFront | PartRole::Plinth => "#c9a77c",
+        _ if role.is_front() => "#c9a77c",
         PartRole::Back => "#b9b4aa",
         _ => "#ece9e2",
     }

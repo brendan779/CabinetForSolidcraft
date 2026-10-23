@@ -15,6 +15,9 @@ use crate::{Error, Result};
 const BACK_GROOVE_DEPTH: f64 = 8.0;
 /// Distance from the carcass rear to the rear face of an inset back (the wall-hanging void).
 const BACK_INSET: f64 = 16.0;
+/// The narrowest door a blind corner may be left with: a hinged door narrower than this has no
+/// room for hinge cups and a handle.
+const MIN_BLIND_DOOR: f64 = 250.0;
 /// Clearance each side of an adjustable shelf.
 const SHELF_SIDE_CLEARANCE: f64 = 1.0;
 /// 32 mm system: shelf-pin and hinge-plate rows sit 37 mm in from the front and back.
@@ -82,6 +85,21 @@ fn validate(cab: &Cabinet) -> Result<()> {
             "depth {} is too shallow",
             cab.depth
         )));
+    }
+    if cab.kind == CabinetKind::BlindCorner {
+        let b = &cab.blind;
+        if !(positive(b.filler) && b.width > b.filler) {
+            return Err(Error::Invalid(format!(
+                "blind width {} must be more than the filler {}",
+                b.width, b.filler
+            )));
+        }
+        if cab.width - b.width < MIN_BLIND_DOOR {
+            return Err(Error::TooSmall(format!(
+                "a {} mm blind leaves less than {MIN_BLIND_DOOR} mm for the door",
+                b.width
+            )));
+        }
     }
     let kick = if cab.has_toe_kick() {
         s.toe_kick_height
@@ -590,7 +608,10 @@ impl<'a> Builder<'a> {
             s.front_gap,
             s.front_thickness,
         );
-        let under_bench = matches!(cab.kind, CabinetKind::Base | CabinetKind::DrawerBank);
+        let under_bench = matches!(
+            cab.kind,
+            CabinetKind::Base | CabinetKind::DrawerBank | CabinetKind::BlindCorner
+        );
         let top_gap = if under_bench { g } else { 0.0 };
         match s.overlay {
             DoorOverlay::Full => (g / 2.0, w - g / 2.0, self.carcass_z0, h - top_gap, -ft, 0.0),
@@ -605,7 +626,10 @@ impl<'a> Builder<'a> {
     fn fronts(&mut self) {
         let cab = self.cab;
         let g = cab.standard.front_gap;
-        let (x0, x1, z0, z1, y0, y1) = self.front_region();
+        let (mut x0, mut x1, z0, z1, y0, y1) = self.front_region();
+        if cab.kind == CabinetKind::BlindCorner {
+            (x0, x1) = self.blind_front(x0, x1, z0, z1, y0, y1);
+        }
         match &cab.fronts {
             FrontLayout::Open => {}
             FrontLayout::Door { hinge_side } => {
@@ -651,6 +675,38 @@ impl<'a> Builder<'a> {
                 }
             }
         }
+    }
+
+    /// The blind panel and filler of a blind corner cabinet, from its blind side; returns the
+    /// front region left for the door.
+    fn blind_front(&mut self, x0: f64, x1: f64, z0: f64, z1: f64, y0: f64, y1: f64) -> (f64, f64) {
+        let cab = self.cab;
+        let g = cab.standard.front_gap;
+        let b = cab.blind;
+        // Measured from the cabinet's edge on the blind side, so it matches the other run.
+        let (panel, filler, open) = match b.side {
+            HingeSide::Left => (
+                (x0, b.width - b.filler),
+                (b.width - b.filler, b.width),
+                (b.width + g, x1),
+            ),
+            HingeSide::Right => (
+                (cab.width - b.width + b.filler, x1),
+                (cab.width - b.width, cab.width - b.width + b.filler),
+                (x0, cab.width - b.width - g),
+            ),
+        };
+        for (role, (a, c)) in [(PartRole::BlindPanel, panel), (PartRole::Filler, filler)] {
+            self.add(
+                role,
+                None,
+                aabb(a, y0, z0, c, y1, z1),
+                Axis::Y,
+                Axis::Z,
+                EdgeBanding::all(),
+            );
+        }
+        open
     }
 
     fn door(&mut self, n: usize, b: Aabb, hinge: HingeSide) {
@@ -1100,6 +1156,68 @@ mod tests {
                 .any(|h| h.item.starts_with("wall-hanger"))
         );
         assert!(list.warnings.iter().any(|w| w.contains("wall hangers")));
+    }
+
+    #[test]
+    fn a_blind_corner_has_a_blind_panel_a_filler_and_one_door_on_the_open_width() {
+        let cab = Cabinet::new("C01", CabinetKind::BlindCorner);
+        assert_eq!(cab.width, 1000.0);
+        let list = build_cabinet(&cab).unwrap();
+        let panel = list.part("C01.BlindPanel").unwrap();
+        let filler = list.part("C01.Filler").unwrap();
+        let doors: Vec<_> = list.by_role(PartRole::Door).collect();
+        assert_eq!(doors.len(), 1);
+        let door = doors[0];
+        let (b, g) = (cab.blind, cab.standard.front_gap);
+        // From the left: blind panel, filler, gap, door to the right edge's overlay gap.
+        assert_eq!(panel.bounds.max().x, b.width - b.filler);
+        assert_eq!(filler.bounds.min.x, panel.bounds.max().x);
+        assert_eq!(filler.bounds.max().x, b.width);
+        assert_eq!(door.bounds.min.x, b.width + g);
+        assert_eq!(door.bounds.max().x, cab.width - g / 2.0);
+        assert_eq!(door.bounds.size.x, cab.width - b.width - g - g / 2.0);
+        // Hinged away from the corner, on the right side.
+        assert!(
+            list.hardware
+                .iter()
+                .any(|h| h.item.contains("clip-top") && h.part == door.name)
+        );
+        assert!(list.operations.iter().any(|o| matches!(o,
+            Operation::Bore { part, purpose: BorePurpose::HingePlate, .. } if part == "C01.RightSide")));
+        for p in [panel, filler] {
+            assert!(p.role.is_front());
+            assert_eq!(p.thickness(), cab.standard.front_thickness);
+            assert_eq!(
+                (p.bounds.min.z, p.bounds.max().z),
+                (door.bounds.min.z, door.bounds.max().z)
+            );
+        }
+    }
+
+    #[test]
+    fn a_right_hand_blind_corner_mirrors_and_hinges_on_the_left() {
+        let mut cab = Cabinet::new("C01", CabinetKind::BlindCorner);
+        cab.blind.side = HingeSide::Right;
+        cab.fronts = FrontLayout::Door {
+            hinge_side: HingeSide::Left,
+        };
+        let list = build_cabinet(&cab).unwrap();
+        let filler = list.part("C01.Filler").unwrap();
+        assert_eq!(filler.bounds.min.x, cab.width - cab.blind.width);
+        let door = list.by_role(PartRole::Door).next().unwrap();
+        assert_eq!(
+            door.bounds.max().x,
+            cab.width - cab.blind.width - cab.standard.front_gap
+        );
+    }
+
+    #[test]
+    fn a_blind_too_wide_for_a_door_is_refused() {
+        let mut cab = Cabinet::new("C01", CabinetKind::BlindCorner);
+        cab.blind.width = 900.0;
+        assert!(matches!(build_cabinet(&cab), Err(Error::TooSmall(_))));
+        cab.blind.width = 40.0;
+        assert!(matches!(build_cabinet(&cab), Err(Error::Invalid(_))));
     }
 
     #[test]

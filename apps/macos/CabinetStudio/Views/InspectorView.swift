@@ -9,6 +9,9 @@ struct InspectorView: View {
                 VStack(alignment: .leading, spacing: 22) {
                     header(cab)
                     SizeSection(cab: cab)
+                    if cab.kind == "blind_corner" {
+                        BlindSection(cab: cab)
+                    }
                     FrontsSection(cab: cab)
                     ForEach(optionGroups(), id: \.field) { group in
                         VisualPicker(group: group, selected: project.option(group.field, of: cab)) { choice in
@@ -121,6 +124,79 @@ struct SizeSection: View {
                             .buttonStyle(ChipStyle(selected: abs(p - value) < 0.5))
                     }
                 }
+            }
+        }
+    }
+}
+
+/// A blind corner's blind side and widths, drawn as the front seen from the room.
+struct BlindSection: View {
+    @Environment(ProjectModel.self) private var project
+    let cab: CabinetDoc
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            SectionTitle("Blind corner")
+            HStack(spacing: 8) {
+                ForEach(["left", "right"], id: \.self) { side in
+                    Button {
+                        withAnimation(.snappy) { var c = cab; c.blindSide = side; project.selected = c }
+                    } label: {
+                        VStack(spacing: 6) {
+                            BlindThumbnail(side: side, blind: cab.blindWidth / max(cab.width, 1))
+                                .frame(width: 64, height: 44)
+                            Text(side == "left" ? "Blind left" : "Blind right").font(.caption)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 8)
+                    }
+                    .buttonStyle(TileStyle(selected: cab.blindSide == side))
+                    .help("The other run meets this cabinet on its \(side); the door hinges on the other side.")
+                }
+            }
+            chips("Blind", value: cab.blindWidth, presets: [580, 600, 630, 650, 700]) { c, v in c.blindWidth = v }
+            chips("Filler", value: cab.blindFiller, presets: [25, 50, 75, 100]) { c, v in c.blindFiller = v }
+        }
+    }
+
+    private func chips(_ title: String, value: Double, presets: [Double],
+                       set: @escaping (inout CabinetDoc, Double) -> Void) -> some View {
+        HStack(spacing: 6) {
+            Text(title).foregroundStyle(.secondary)
+            Spacer()
+            ForEach(presets, id: \.self) { p in
+                Button("\(Int(p))") {
+                    withAnimation(.snappy) { var c = cab; set(&c, p); project.selected = c }
+                }
+                .buttonStyle(ChipStyle(selected: abs(p - value) < 0.5))
+            }
+        }
+    }
+}
+
+/// The front of a blind corner: blind panel, filler and door, the blind side shaded.
+struct BlindThumbnail: View {
+    let side: String
+    let blind: Double
+
+    var body: some View {
+        Canvas { ctx, size in
+            let w = size.width, h = size.height
+            let bw = w * min(max(blind, 0.2), 0.8)
+            let filler = w * 0.06
+            let left = side == "left"
+            let panel = CGRect(x: left ? 0 : w - bw + filler, y: 0, width: bw - filler, height: h)
+            let strip = CGRect(x: left ? bw - filler : w - bw, y: 0, width: filler, height: h)
+            let door = CGRect(x: left ? bw + 2 : 0, y: 0, width: w - bw - 2, height: h)
+            ctx.fill(Path(panel), with: .color(.primary.opacity(0.12)))
+            ctx.stroke(Path(panel), with: .color(.primary.opacity(0.5)), lineWidth: 1)
+            ctx.fill(Path(strip), with: .color(.primary.opacity(0.3)))
+            ctx.fill(Path(door), with: .color(.accentColor.opacity(0.3)))
+            ctx.stroke(Path(door), with: .color(.accentColor), lineWidth: 1.4)
+            // Hinge side marks on the door's far edge.
+            let hx = left ? door.maxX - 3 : door.minX + 3
+            for y in [h * 0.2, h * 0.8] {
+                ctx.fill(Path(ellipseIn: CGRect(x: hx - 2, y: y - 2, width: 4, height: 4)), with: .color(.accentColor))
             }
         }
     }

@@ -57,6 +57,37 @@ struct CabinetDoc: Identifiable, Hashable, Codable {
         set { update { $0["fixed_shelves"] = newValue.isEmpty ? nil : newValue.sorted() } }
     }
 
+    private var blind: [String: Any] { object["blind"] as? [String: Any] ?? [:] }
+
+    private mutating func setBlind(_ key: String, _ value: Any) {
+        update { o in
+            var b = o["blind"] as? [String: Any] ?? [:]
+            b[key] = value
+            o["blind"] = b
+        }
+    }
+
+    /// Blind corner: the side the other run meets it on. The door hinges on the other side.
+    var blindSide: String {
+        get { blind["side"] as? String ?? "left" }
+        set {
+            setBlind("side", newValue)
+            hingeSide = newValue == "left" ? "right" : "left"
+        }
+    }
+
+    /// Blind corner: front width covered by the blind panel and filler.
+    var blindWidth: Double {
+        get { (blind["width"] as? NSNumber)?.doubleValue ?? 630 }
+        set { setBlind("width", newValue) }
+    }
+
+    /// Blind corner: the filler between the blind panel and the door.
+    var blindFiller: Double {
+        get { (blind["filler"] as? NSNumber)?.doubleValue ?? 50 }
+        set { setBlind("filler", newValue) }
+    }
+
     /// X offset of the cabinet in the run.
     var originX: Double {
         get { ((object["origin"] as? [String: Any])?["x"] as? NSNumber)?.doubleValue ?? 0 }
@@ -410,6 +441,7 @@ extension CabinetDoc {
         case "tall": "Tall"
         case "drawer_bank": "Drawer bank"
         case "open_shelf": "Open shelf"
+        case "blind_corner": "Blind corner"
         default: kind.capitalized
         }
     }
@@ -421,6 +453,7 @@ extension CabinetDoc {
         case "tall": "rectangle.portrait"
         case "drawer_bank": "square.split.1x2.fill"
         case "open_shelf": "rectangle.split.3x1"
+        case "blind_corner": "rectangle.lefthalf.inset.filled"
         default: "cube"
         }
     }

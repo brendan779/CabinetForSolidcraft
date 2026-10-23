@@ -121,7 +121,7 @@ pub fn set_standard_option(
 
 #[uniffi::export]
 pub fn build(cabinet_json: String) -> Result<BuildSummary, CoreError> {
-    use cabinet_core::part::{BorePurpose, Operation, PartRole};
+    use cabinet_core::part::{BorePurpose, Operation};
     let cab = parse(&cabinet_json)?;
     let list = build_cabinet(&cab).map_err(invalid)?;
     let panels = list
@@ -136,10 +136,7 @@ pub fn build(cabinet_json: String) -> Result<BuildSummary, CoreError> {
             width: p.bounds.size.x,
             depth: p.bounds.size.y,
             height: p.bounds.size.z,
-            is_front: matches!(
-                p.role,
-                PartRole::Door | PartRole::DrawerFront | PartRole::Plinth
-            ),
+            is_front: p.role.is_front(),
         })
         .collect();
     let biscuits = list

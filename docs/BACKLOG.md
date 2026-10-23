@@ -45,7 +45,7 @@ Priorities: **P0** blocks most other work · **P1** MVP · **P2** commercial par
 | CORE-2 | done (night/2026-10-23) | M | Fixed shelves (biscuited + screwed like a bottom) as an option per shelf | test: fixed shelf has joints both sides |
 | CORE-3 | done (night/2026-10-23) | M | Wall cabinet: hanging rail / wall-hanger hardware option and back recess | wall kind builds with hanger hardware placements |
 | CORE-4 | split → CORE-4a, CORE-4b, CORE-4c | L | Corner cabinets: blind corner base, L-corner base, corner wall | split into CORE-4a/b/c |
-| CORE-4a | todo | M | Blind corner base: a base carcass with a fixed blind panel on the blind side (width = run-in − door), a filler/stile against the neighbouring run, door on the open side; `blind_side` and `blind_width` in the model | a 1000 mm blind corner builds with blind panel + filler + one door; test on the open width |
+| CORE-4a | done (night/2026-10-23) | M | Blind corner base: a base carcass with a fixed blind panel on the blind side (width = run-in − door), a filler/stile against the neighbouring run, door on the open side; `blind_side` and `blind_width` in the model | a 1000 mm blind corner builds with blind panel + filler + one door; test on the open width |
 | CORE-4b | todo | M | L-shaped corner base (diagonal or bi-fold door): two carcass legs sharing a corner, parts not axis-aligned to one front; needs a second front direction in the part model | an L-corner 900 × 900 builds; cut list has every panel once |
 | CORE-4c | todo | M | Corner wall cabinet (diagonal front or L): as CORE-4b at wall height with hangers (CORE-3) | builds with two hangers per leg |
 | CORE-5 | todo | M | Sink cabinet (no bottom rail, back cut-out option, waterproof base liner option) | builds; liner appears in BOM |
@@ -193,3 +193,4 @@ Agents append one line per session: date, items touched, outcome.
 - 2026-10-23 (night) — CORE-2 done: `fixed_shelves` (per shelf number): full width, to the back, biscuited + screwed to both sides; no shelf pins within a pitch of it. Inspector shows a lock chip per shelf.
 - 2026-10-23 (night) — CORE-3 done: `wall_hanging` standard option (hangers + rail / none) with a picker drawing; wall cabinets get two hangers in the top back corners (void behind the inset back) and a rail; other backs warn. Article numbers wait for HAF-8 (added).
 - 2026-10-23 (night) — CORE-4 split into CORE-4a (blind corner base), CORE-4b (L-corner base), CORE-4c (corner wall).
+- 2026-10-23 (night) — CORE-4a done: `blind_corner` kind (1000 wide): blind panel + filler from the blind side (`blind.width` 630, `filler` 50 by default), one door on the open width hinged away from the corner; too-wide blinds are refused. Inspector "Blind corner" section with drawn side tiles and width chips.

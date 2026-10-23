@@ -18,6 +18,10 @@ pub enum PartRole {
     Door,
     DrawerFront,
     Plinth,
+    /// The fixed front over the blind part of a blind corner cabinet.
+    BlindPanel,
+    /// A strip between a blind panel and the door, so the door clears the next run's fronts.
+    Filler,
 }
 
 impl PartRole {
@@ -34,6 +38,8 @@ impl PartRole {
             PartRole::Door => "Door",
             PartRole::DrawerFront => "Drawer front",
             PartRole::Plinth => "Plinth",
+            PartRole::BlindPanel => "Blind panel",
+            PartRole::Filler => "Filler",
         }
     }
 
@@ -51,7 +57,21 @@ impl PartRole {
             PartRole::Door => "Door",
             PartRole::DrawerFront => "DrawerFront",
             PartRole::Plinth => "Plinth",
+            PartRole::BlindPanel => "BlindPanel",
+            PartRole::Filler => "Filler",
         }
+    }
+
+    /// Made from the front board and seen from the room.
+    pub fn is_front(self) -> bool {
+        matches!(
+            self,
+            PartRole::Door
+                | PartRole::DrawerFront
+                | PartRole::Plinth
+                | PartRole::BlindPanel
+                | PartRole::Filler
+        )
     }
 }
 

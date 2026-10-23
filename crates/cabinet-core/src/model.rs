@@ -36,6 +36,33 @@ pub struct Cabinet {
     /// between the sides like a bottom. The rest sit on shelf pins.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub fixed_shelves: Vec<u32>,
+    /// The blind part of a blind corner cabinet (ignored by other kinds).
+    #[serde(default)]
+    pub blind: Blind,
+}
+
+/// A blind corner cabinet's front: from its blind side, a fixed blind panel and a filler cover
+/// `width` (where the other run of cabinets meets it); one door covers the rest.
+#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(default)]
+pub struct Blind {
+    pub side: HingeSide,
+    /// Front width covered by the blind panel and filler, from the blind side edge.
+    pub width: f64,
+    /// Width of the filler between the blind panel and the door.
+    pub filler: f64,
+}
+
+impl Default for Blind {
+    fn default() -> Self {
+        // Covers a 580 mm deep run meeting it, plus the filler that lets the door clear that
+        // run's handles.
+        Self {
+            side: HingeSide::Left,
+            width: 630.0,
+            filler: 50.0,
+        }
+    }
 }
 
 impl Cabinet {
@@ -53,6 +80,7 @@ impl Cabinet {
             fronts: kind.default_fronts_for(w),
             adjustable_shelves: kind.default_shelves(),
             fixed_shelves: Vec::new(),
+            blind: Blind::default(),
         }
     }
 
@@ -72,7 +100,10 @@ impl Cabinet {
     pub fn has_toe_kick(&self) -> bool {
         matches!(
             self.kind,
-            CabinetKind::Base | CabinetKind::Tall | CabinetKind::DrawerBank
+            CabinetKind::Base
+                | CabinetKind::Tall
+                | CabinetKind::DrawerBank
+                | CabinetKind::BlindCorner
         ) && self.standard.toe_kick != ToeKick::None
     }
 }
@@ -85,15 +116,18 @@ pub enum CabinetKind {
     Tall,
     DrawerBank,
     OpenShelf,
+    /// A base cabinet in an inside corner: part of its front is blind behind the other run.
+    BlindCorner,
 }
 
 impl CabinetKind {
-    pub const ALL: [CabinetKind; 5] = [
+    pub const ALL: [CabinetKind; 6] = [
         CabinetKind::Base,
         CabinetKind::Wall,
         CabinetKind::Tall,
         CabinetKind::DrawerBank,
         CabinetKind::OpenShelf,
+        CabinetKind::BlindCorner,
     ];
 
     /// The kind a drawn box most likely is: as tall as a pantry → tall, hanging off the floor →
@@ -116,12 +150,17 @@ impl CabinetKind {
             CabinetKind::Wall => (600.0, 330.0, 720.0),
             CabinetKind::Tall => (600.0, 580.0, 2100.0),
             CabinetKind::OpenShelf => (600.0, 300.0, 720.0),
+            CabinetKind::BlindCorner => (1000.0, 580.0, 870.0),
         }
     }
 
     pub fn default_fronts_for(self, width: f64) -> FrontLayout {
         match self {
             CabinetKind::OpenShelf => FrontLayout::Open,
+            // One door on the open part, hinged away from the corner.
+            CabinetKind::BlindCorner => FrontLayout::Door {
+                hinge_side: HingeSide::Right,
+            },
             CabinetKind::DrawerBank => FrontLayout::Drawers {
                 ratios: vec![1.0, 1.0, 1.0],
             },
@@ -134,7 +173,10 @@ impl CabinetKind {
 
     fn default_shelves(self) -> u32 {
         match self {
-            CabinetKind::Base | CabinetKind::Wall | CabinetKind::OpenShelf => 1,
+            CabinetKind::Base
+            | CabinetKind::Wall
+            | CabinetKind::OpenShelf
+            | CabinetKind::BlindCorner => 1,
             CabinetKind::Tall => 4,
             CabinetKind::DrawerBank => 0,
         }
