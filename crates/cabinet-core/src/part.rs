@@ -20,8 +20,10 @@ pub enum PartRole {
     Plinth,
     /// The fixed front over the blind part of a blind corner cabinet.
     BlindPanel,
-    /// A strip between a blind panel and the door, so the door clears the next run's fronts.
+    /// A strip in the plane of the fronts: beside a blind panel, between cabinets or to a wall.
     Filler,
+    /// A decorative panel on the end of a run.
+    EndPanel,
 }
 
 impl PartRole {
@@ -40,6 +42,7 @@ impl PartRole {
             PartRole::Plinth => "Plinth",
             PartRole::BlindPanel => "Blind panel",
             PartRole::Filler => "Filler",
+            PartRole::EndPanel => "End panel",
         }
     }
 
@@ -59,6 +62,7 @@ impl PartRole {
             PartRole::Plinth => "Plinth",
             PartRole::BlindPanel => "BlindPanel",
             PartRole::Filler => "Filler",
+            PartRole::EndPanel => "EndPanel",
         }
     }
 
@@ -71,6 +75,7 @@ impl PartRole {
                 | PartRole::Plinth
                 | PartRole::BlindPanel
                 | PartRole::Filler
+                | PartRole::EndPanel
         )
     }
 }

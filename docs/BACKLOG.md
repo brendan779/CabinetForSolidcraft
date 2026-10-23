@@ -49,7 +49,7 @@ Priorities: **P0** blocks most other work · **P1** MVP · **P2** commercial par
 | CORE-4b | needs-human (which door: bi-fold pair on two fronts, or one diagonal door? For bi-fold, which hinge system (e.g. Blum CLIP top 170° + bi-fold connector)? OK to model L-shaped bottom/top/shelves as one rectangular blank with a through notch, as the toe-kick notch is?) | M | L-shaped corner base (diagonal or bi-fold door): two carcass legs sharing a corner, parts not axis-aligned to one front; needs a second front direction in the part model | an L-corner 900 × 900 builds; cut list has every panel once |
 | CORE-4c | blocked (CORE-4b) | M | Corner wall cabinet (diagonal front or L): as CORE-4b at wall height with hangers (CORE-3) | builds with two hangers per leg |
 | CORE-5 | done (night/2026-10-23) | M | Sink cabinet (no bottom rail, back cut-out option, waterproof base liner option) | builds; liner appears in BOM |
-| CORE-6 | todo | M | Fillers, end panels and scribes as parts of a run | a run with an end panel each side builds |
+| CORE-6 | done (night/2026-10-23) | M | Fillers, end panels and scribes as parts of a run | a run with an end panel each side builds |
 | CORE-7 | todo | M | Runs: shared construction standard per project, per-cabinet overrides only | project JSON stores one standard + overrides |
 | CORE-8 | todo | M | Drawer boxes for wood drawers on runners (sides, front, back, bottom) from Blum MOVENTO/TANDEM rules: inside width = opening − 42, length = NL − 10 (verify against Blum TD) | parts + cut list for a 3-drawer bank |
 | CORE-9 | todo | S | Material per part: carcass board, front board, back board from the catalog; thickness follows the board | changing the front board changes door thickness |
@@ -152,6 +152,7 @@ committed: they are the brands' copyright. `preview_colour` is an approximation.
 | UI-13 | todo | M | Construction standard editor: save/load named standards ("My shop") as visual presets | standards menu |
 | UI-14 | todo | S | Accessibility pass: VoiceOver labels on every drawn tile, Dynamic Type sizes | Accessibility Inspector clean |
 | UI-15 | todo | M | UI tests (XCUITest) for add cabinet, change option, export CSV | tests pass in check.sh |
+| UI-16 | todo | M | Run items in the app: add filler and end panel to the sidebar list (drawn tiles, width/scribe chips), lay out and send the project through `cabinet_core::build_run` (FFI) instead of the Swift layout loop | a run with an end panel each side shows in the viewport, cut list and SolidCraft |
 
 ## P2 — Commercial parity
 
@@ -196,3 +197,4 @@ Agents append one line per session: date, items touched, outcome.
 - 2026-10-23 (night) — CORE-4a done: `blind_corner` kind (1000 wide): blind panel + filler from the blind side (`blind.width` 630, `filler` 50 by default), one door on the open width hinged away from the corner; too-wide blinds are refused. Inspector "Blind corner" section with drawn side tiles and width chips.
 - 2026-10-23 (night) — CORE-4b set to needs-human with the design questions (door type, hinge system, notched blanks); CORE-4c blocked on it.
 - 2026-10-23 (night) — CORE-5 done: `sink` kind (900 wide, door pair, no shelf): no back rail ("no bottom rail" read as the back top rail the bowl would hit — owner to confirm), optional pipe cut-out through the back (400 high, 50 in from the sides) and waterproof liner in the hardware list.
+- 2026-10-23 (night) — CORE-6 done in the core: `run::{Run, RunItem, build_run}` lays out cabinets, fillers (door plane, scribe allowance) and end panels (door face to wall + scribe, optionally to the floor) left to right. App support is UI-16 (added).
