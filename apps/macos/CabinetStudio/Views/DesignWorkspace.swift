@@ -16,6 +16,12 @@ struct DesignWorkspace: View {
                 }
             }
             .padding(14)
+            VStack {
+                Spacer()
+                RunStrip()
+                    .padding(.horizontal, 14)
+                    .padding(.bottom, 12)
+            }
             if let hovered {
                 PartTooltip(part: hovered.panel)
                     .position(x: hovered.at.x + 90, y: hovered.at.y + 34)
@@ -94,6 +100,144 @@ struct ViewportControls: View {
         .controlSize(.small)
         .padding(8)
         .glassBackground()
+    }
+}
+
+/// The run along the bottom of the viewport, to scale: drag a cabinet to move it along the run,
+/// drag its right edge to change its width (snapping to the usual sizes). A drag is one edit.
+struct RunStrip: View {
+    @Environment(ProjectModel.self) private var project
+    @AppStorage(LengthUnit.key) private var unit: LengthUnit = .millimetres
+    /// The item being resized and its width so far.
+    @State private var resizing: (id: String, width: Double)?
+    /// The item being moved and how far.
+    @State private var moving: (id: String, dx: CGFloat)?
+
+    private static let cabinetWidths: [Double] = [150, 200, 300, 400, 450, 500, 600, 700, 800, 900, 1000, 1200]
+    private static let fillerWidths: [Double] = [25, 38, 50, 75, 100, 150, 200]
+
+    private var items: [CabinetDoc] {
+        project.cabinets.filter { $0.placed != true && $0.kind != "end_panel" }
+    }
+
+    private func width(_ c: CabinetDoc) -> Double {
+        resizing?.id == c.id ? resizing!.width : c.width
+    }
+
+    var body: some View {
+        GeometryReader { geo in
+            let total = max(items.reduce(0) { $0 + width($1) }, 1)
+            let scale = (geo.size.width - CGFloat(max(items.count - 1, 0)) * 2) / total
+            HStack(spacing: 2) {
+                ForEach(items) { c in
+                    block(c, width: CGFloat(width(c)) * scale, scale: scale)
+                }
+            }
+        }
+        .frame(height: 34)
+        .padding(6)
+        .glassBackground()
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel("Run")
+    }
+
+    private func block(_ c: CabinetDoc, width: CGFloat, scale: CGFloat) -> some View {
+        let selected = c.id == project.selection
+        return ZStack(alignment: .trailing) {
+            RoundedRectangle(cornerRadius: 5)
+                .fill(selected ? Color.accentColor.opacity(0.45) : Color.primary.opacity(c.isPiece ? 0.06 : 0.12))
+                .overlay(RoundedRectangle(cornerRadius: 5).strokeBorder(selected ? Color.accentColor : .primary.opacity(0.25)))
+                .overlay {
+                    if width > 46 {
+                        VStack(spacing: 0) {
+                            Text(c.id).font(.caption2.weight(.semibold)).monospaced()
+                            Text(unit.format(self.width(c), suffix: false)).font(.caption2.monospacedDigit())
+                                .foregroundStyle(.secondary)
+                        }
+                        .lineLimit(1)
+                    }
+                }
+            // The width handle.
+            Rectangle()
+                .fill(Color.clear)
+                .frame(width: 8)
+                .contentShape(Rectangle())
+                .overlay(Capsule().fill(selected ? Color.accentColor : .secondary).frame(width: 3, height: 16))
+                .pointerStyle(.frameResize(position: .trailing))
+                .gesture(
+                    DragGesture(minimumDistance: 1)
+                        .onChanged { v in
+                            resizing = (c.id, snap(c, c.width + Double(v.translation.width / scale)))
+                        }
+                        .onEnded { _ in
+                            if let r = resizing, abs(r.width - c.width) > 0.5,
+                               let i = project.cabinets.firstIndex(where: { $0.id == c.id }) {
+                                withAnimation(.snappy) {
+                                    project.cabinets[i].width = r.width
+                                    project.selection = c.id
+                                }
+                                project.changed()
+                            }
+                            resizing = nil
+                        }
+                )
+                .accessibilityLabel("\(c.id) width")
+                .accessibilityValue(unit.format(c.width))
+                .accessibilityAdjustableAction { direction in
+                    let list = c.isPiece ? Self.fillerWidths : Self.cabinetWidths
+                    let next = direction == .increment ? list.first { $0 > c.width } : list.last { $0 < c.width }
+                    if let next, let i = project.cabinets.firstIndex(where: { $0.id == c.id }) {
+                        project.cabinets[i].width = next
+                        project.changed()
+                    }
+                }
+        }
+        .frame(width: max(width, 6))
+        .offset(x: moving?.id == c.id ? moving!.dx : 0)
+        .zIndex(moving?.id == c.id ? 1 : 0)
+        .onTapGesture { withAnimation(.snappy) { project.selection = c.id } }
+        .gesture(
+            DragGesture(minimumDistance: 4)
+                .onChanged { v in moving = (c.id, v.translation.width) }
+                .onEnded { v in
+                    reorder(c, by: Double(v.translation.width / scale))
+                    moving = nil
+                }
+        )
+        .help("\(c.id): drag to move along the run, drag the right edge to change the width")
+    }
+
+    /// The nearest usual width: cabinet sizes for cabinets, filler sizes for fillers.
+    private func snap(_ c: CabinetDoc, _ w: Double) -> Double {
+        let list = c.isPiece ? Self.fillerWidths : Self.cabinetWidths
+        return list.min { abs($0 - w) < abs($1 - w) } ?? w
+    }
+
+    /// Moves `c` to where its middle lands after a drag of `dx` mm along the run.
+    private func reorder(_ c: CabinetDoc, by dx: Double) {
+        let run = items
+        guard let from = run.firstIndex(where: { $0.id == c.id }) else { return }
+        var x = 0.0
+        var centres: [Double] = []
+        for item in run {
+            centres.append(x + item.width / 2)
+            x += item.width
+        }
+        let target = centres[from] + dx
+        let others = run.indices.filter { $0 != from }
+        let slot = others.filter { centres[$0] < target }.count
+        guard slot != from else { return }
+        // Indices in the whole job: before the run item now at `slot`, or after the last one.
+        let all = project.cabinets
+        guard let source = all.firstIndex(where: { $0.id == c.id }) else { return }
+        let remaining = others.map { run[$0].id }
+        let dest: Int = slot < remaining.count
+            ? all.firstIndex { $0.id == remaining[slot] }!
+            : all.firstIndex { $0.id == remaining.last! }! + 1
+        withAnimation(.snappy) {
+            project.move(from: IndexSet(integer: source), to: dest)
+            project.selection = c.id
+        }
     }
 }
 
