@@ -64,6 +64,11 @@ struct SolidCraftButton: View {
             }
             .pickerStyle(.inline)
             Divider()
+            if project.connection == .offline {
+                Button("Open SolidCraft", systemImage: "arrow.up.forward.app") {
+                    Task { await project.openSolidCraft() }
+                }
+            }
             Button("Make Cabinets from Selected Boxes", systemImage: "cube.transparent") {
                 Task { await project.makeCabinetsFromSelection() }
             }
@@ -113,6 +118,11 @@ struct StatusBar: View {
             if let err = project.lastError {
                 Image(systemName: "exclamationmark.triangle.fill").foregroundStyle(.orange)
                 Text(err).lineLimit(1).truncationMode(.middle)
+            } else if project.connection == .offline {
+                Image(systemName: "bolt.horizontal.circle").foregroundStyle(.red)
+                Text("SolidCraft is not connected")
+                Button("Open SolidCraft") { Task { await project.openSolidCraft() } }
+                    .buttonStyle(.link)
             } else {
                 Text(project.status.isEmpty ? "\(project.cabinets.count) cabinets" : project.status)
                     .lineLimit(1)

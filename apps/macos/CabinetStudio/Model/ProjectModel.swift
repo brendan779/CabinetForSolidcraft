@@ -1,3 +1,4 @@
+import AppKit
 import Foundation
 import Observation
 import SwiftUI
@@ -234,6 +235,45 @@ final class ProjectModel {
             status = "SolidCraft did not build the cabinets"
             await checkConnection()
         }
+    }
+
+    /// Where SolidCraft's installer puts the app.
+    static let solidCraftApp = URL(fileURLWithPath: "/Applications/SolidCraft.app")
+
+    /// Starts SolidCraft with its control port open and waits until it answers.
+    func openSolidCraft() async {
+        let app = Self.solidCraftApp
+        lastError = nil
+        guard FileManager.default.fileExists(atPath: app.path) else {
+            lastError = "SolidCraft is not in Applications. Get it from github.com/tangency-labs/solidcraft/releases."
+            return
+        }
+        // A running SolidCraft keeps the arguments it was started with.
+        if NSWorkspace.shared.runningApplications.contains(where: {
+            $0.bundleURL?.standardizedFileURL == app.standardizedFileURL
+        }) {
+            lastError = "SolidCraft is open without its control port. Quit it, then choose Open SolidCraft again."
+            return
+        }
+        let config = NSWorkspace.OpenConfiguration()
+        config.arguments = ["--control", "\(port)"]
+        do {
+            try await NSWorkspace.shared.openApplication(at: app, configuration: config)
+        } catch {
+            lastError = "Could not open SolidCraft: \(error.localizedDescription)"
+            return
+        }
+        status = "Waiting for SolidCraft…"
+        connection = .unknown
+        for _ in 0..<30 {
+            try? await Task.sleep(for: .seconds(1))
+            await checkConnection()
+            if connection == .connected {
+                status = "SolidCraft is connected"
+                return
+            }
+        }
+        lastError = "SolidCraft opened but does not answer on port \(port)"
     }
 
     /// Turns the boxes selected in SolidCraft into cabinets in place, builds them and hides the
