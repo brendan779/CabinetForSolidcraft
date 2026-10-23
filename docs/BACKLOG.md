@@ -186,6 +186,33 @@ committed: they are the brands' copyright. `preview_colour` is an approximation.
 | P2-6 | todo | L | CNC post-processors (MPR, CIX), BXF exchange with Blum (needs Blum spec 👤) |
 | P2-7 | todo | L | True-shape nesting for CNC |
 
+## P2 — Kitchen design: benchtops, Surround linings and curved details
+
+Stretch goal set by the owner on 2026-10-24, to start **after the cabinet systems are finished**.
+The aim is kitchens like the owner's reference photos: fluted and curved islands (rounded ends
+clad in vertical fluting), stone benchtops with rounded ends and overhangs, slab splashbacks
+with recessed open shelves, handleless full-height fronts, clad rangehoods, and arched pantry
+doors with shaker wall cabinets. The photos are not in the repo (third-party images). Describe
+features in words.
+
+| id | status | size | task | done when |
+|---|---|---|---|---|
+| BENCH-1 | todo | M | Benchtop model per run: thickness presets (20, 33, 40, 60, 80+ mm built-up), front/side overhangs, back and end clearances, material from catalog (laminate, compact, stone, timber) | a run gets a benchtop part that follows the run and overhangs |
+| BENCH-2 | todo | M | Edge profiles as a visual picker: square, pencil round, bullnose, bevel, mitred apron (thick look) | profile shown in the 3D view and on sheets |
+| BENCH-3 | todo | L | Transitions: L and U corners (mitre or butt joint, joint position picker), thickness steps, waterfall ends (mitred drop to floor), rounded/radius island ends, breakfast-bar overhang with a support rule | split into BENCH-3a..e |
+| BENCH-4 | todo | M | Cut-outs: sink (undermount/top mount), cooktop, tap holes, power pop-ups, from appliance templates | cut-outs on the benchtop sheet |
+| BENCH-5 | todo | M | Benchtop outputs: dimensioned template sheet per piece with joins, cut-outs and edge profiles; area and edge metres for quoting | PDF/SVG sheet |
+| BENCH-6 | todo | M | Splashbacks: slab splashback panels matching the benchtop, with a niche/recess for open shelves and power points | splashback part + sheet |
+| SURR-1 | todo | M | Laminex Surround profiles as catalog data (`kind: lining`) from Laminex's own current documents: profile names (Classic VJ, Scallop, Demi Round...), module width, flute/groove pitch, thickness, sheet sizes, substrate, flexible/curved variants | catalog rows with sources |
+| SURR-2 | todo | M | Cladding as a cabinet finish: island backs and ends, end panels and kick panels clad in a Surround profile, flutes vertical and aligned across panels | an island back renders fluted |
+| SURR-3 | todo | L | Curved ends: rounded island ends (radius picker) from curved substrate (bending ply / kerfed MDF / flexible Surround), fluting following the curve, benchtop ends to match | split |
+| SURR-4 | todo | M | Clad rangehood / canopy box with rounded front corners, in a Surround profile or paint finish | rangehood part between wall cabinets |
+| SURR-5 | todo | S | Flute and VJ procedural textures in the viewport (normal-mapped grooves) | looks fluted in the app |
+| STYLE-1 | todo | M | Door styles for the look: shaker 5-piece, arched-top tall doors, handleless (J-pull, finger pull, push-to-open), full-height tall fronts with continuous grain | picker tiles |
+| STYLE-2 | todo | M | Open shelving: floating timber shelves (concealed brackets) in niches between wall cabinets, with LED strip (ties to HAF-5) | shelf parts + hardware |
+| STYLE-3 | todo | S | Handle finishes: brushed brass, black, stainless; long pulls on tall doors | rendered handle colour |
+| STYLE-4 | todo | M | Appliance housings: integrated ovens (single/double stacked), integrated fridge with SERVO-DRIVE flex, rangehood insert | tall cabinet variants |
+
 ## P3 — SolidCraft plugin
 
 | id | status | size | task |
@@ -257,3 +284,4 @@ Agents append one line per session: date, items touched, outcome.
 - 2026-10-24 (night) — PLG-3 checked: SolidCraft still has no plugin runtime (#1221 open, draft #4980 open, #4330 open; v0.20.0 latest). FEASIBILITY_PLAN updated.
 - 2026-10-24 (night) — Owner's answers to PR #1 recorded: CORE-4b unblocked (bi-fold doors; hinge article split to CORE-4d), supplier-number rows stay needs-human, JOIN-2 accepted, CORE-5 question restated, JOIN-8 (Domino) and JOIN-9 (dowels) added. Not built: the run hit its usage limit.
 - 2026-10-24 (night) — Blum catalogue arrived (owner-supplied, local only): BLUM-2/3/4/5/6/7a/7b, CORE-8 and CORE-10 unblocked; BLUM-11..16 and BLUM-CAD-1 added. Order for the next run: BLUM-11, BLUM-2, BLUM-3, CORE-10, BLUM-4, BLUM-6/CORE-8, BLUM-7 HF top, BLUM-CAD-1. Not started: usage limit.
+- 2026-10-24 — owner added the benchtop / Surround / kitchen-style stretch goals (P2 kitchen design), to start after the cabinet systems. **Next run starts at BLUM-11** (suggested order above) and branches from night/2026-10-24. Open stacked PRs: #1 (night/2026-10-23 → main), #2 (night/2026-10-24 → night/2026-10-23).
