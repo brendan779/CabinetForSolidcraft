@@ -129,7 +129,7 @@ committed: they are the brands' copyright. `preview_colour` is an approximation.
 | OUT-3 | done (d29080e) | M | Both faces + edge views on sheets when a part has machining on more than one face | side sheet shows inner face and edges |
 | OUT-4 | todo | M | Sheet quality: dimension chains from the reference corner for every hole row; hole table grouped by diameter/depth | reviewed by owner 👤 |
 | OUT-5 | todo | L | Guillotine nesting optimiser with grain and kerf (panel saw), sheet diagrams in PDF, offcut list | split |
-| OUT-6 | done (SHA) | M | Hardware BOM with supplier article numbers and quantities, CSV + PDF | BOM for the sample run |
+| OUT-6 | done (13b9afb) | M | Hardware BOM with supplier article numbers and quantities, CSV + PDF | BOM for the sample run |
 | OUT-7 | todo | M | Part labels (62 mm label printer) with QR code of part id | PDF of labels |
 | OUT-8 | todo | M | Assembly sheet per cabinet: exploded view (SolidCraft exploded view + export view) | image per cabinet |
 | OUT-9 | todo | L | DXF per part for CNC with layer conventions (outline, bores by Ø/depth, grooves) | split |

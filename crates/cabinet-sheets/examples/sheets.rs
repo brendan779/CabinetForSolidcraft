@@ -44,6 +44,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         &rows,
     );
     std::fs::write(format!("{out}/hardware.pdf"), bom)?;
-    println!("{} sheets, sample.pdf and hardware.pdf in {out}", list.parts.len());
+    println!(
+        "{} sheets, sample.pdf and hardware.pdf in {out}",
+        list.parts.len()
+    );
     Ok(())
 }
