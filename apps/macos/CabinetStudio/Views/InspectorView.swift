@@ -175,6 +175,74 @@ struct ConstructionScope: View {
                     .accessibilityLabel(only ? "Change only \(cab.id)" : "Change the whole job")
                 }
             }
+            StandardPresets()
+        }
+    }
+}
+
+/// Saved standards as tiles: each drawn with its back and top joint. Click one to make it the
+/// job's standard; the last tile saves the job's standard under a name.
+struct StandardPresets: View {
+    @Environment(ProjectModel.self) private var project
+    @State private var library = StandardLibrary.shared
+    @State private var naming = false
+    @State private var name = ""
+
+    var body: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 8) {
+                ForEach(library.standards) { preset in
+                    let current = project.jobStandardIs(preset.standardJson)
+                    Button {
+                        project.applyJobStandard(preset.standardJson)
+                        project.status = "Job standard: \(preset.name)"
+                    } label: {
+                        VStack(spacing: 4) {
+                            HStack(spacing: 2) {
+                                ConstructionThumbnail(field: "top_joint", choice: preset.choice("top_joint"), highlighted: current)
+                                ConstructionThumbnail(field: "back", choice: preset.choice("back"), highlighted: current)
+                            }
+                            .frame(width: 76, height: 30)
+                            Text(preset.name).font(.caption).lineLimit(1)
+                        }
+                        .frame(width: 90)
+                        .padding(.vertical, 6)
+                    }
+                    .buttonStyle(TileStyle(selected: current))
+                    .help("Use \(preset.name) for this job")
+                    .contextMenu {
+                        Button("Update from This Job") { try? library.save(preset.name, standardJson: project.standardJson) }
+                        Button("Delete", role: .destructive) { library.delete(preset.name) }
+                    }
+                }
+                Button {
+                    name = ""
+                    naming = true
+                } label: {
+                    VStack(spacing: 4) {
+                        Image(systemName: "plus").font(.title3).frame(height: 30)
+                        Text("Save…").font(.caption)
+                    }
+                    .frame(width: 70)
+                    .padding(.vertical, 6)
+                }
+                .buttonStyle(TileStyle(selected: false))
+                .help("Save this job's construction as a named standard, to use on other jobs")
+            }
+        }
+        .alert("Save the job's construction as", isPresented: $naming) {
+            TextField("My shop", text: $name)
+            Button("Save") {
+                let n = name.trimmingCharacters(in: .whitespaces)
+                guard !n.isEmpty else { return }
+                do {
+                    try library.save(n, standardJson: project.standardJson)
+                    project.status = "Saved standard \(n)"
+                } catch {
+                    project.lastError = "Could not save the standard: \(error.localizedDescription)"
+                }
+            }
+            Button("Cancel", role: .cancel) {}
         }
     }
 }

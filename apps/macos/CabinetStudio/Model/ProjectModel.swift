@@ -245,7 +245,9 @@ final class ProjectModel {
     /// sample run.
     init() {
         let legacy = Self.takeLegacyJob()
-        standardJson = legacy?.standardJson ?? JobContents.defaultStandard
+        let preferred = UserDefaults.standard.string(forKey: StandardLibrary.defaultKey)
+            .flatMap { StandardLibrary.shared.standard(named: $0)?.standardJson }
+        standardJson = legacy?.standardJson ?? preferred ?? JobContents.defaultStandard
         if let legacy {
             cabinets = legacy.cabinets
         }
@@ -415,6 +417,29 @@ final class ProjectModel {
         for f in fields { standard[f] = job[f] }
         c.standard = standard
         withAnimation(.snappy) { selected = c }
+    }
+
+    /// Makes `json` the job's standard. Cabinets follow it except where they override a field.
+    func applyJobStandard(_ json: String) {
+        guard let new = (try? JSONSerialization.jsonObject(with: Data(json.utf8))) as? [String: Any] else { return }
+        let job = projectStandard
+        let fields = Set(new.keys).union(job.keys).filter { !Self.same(new[$0], job[$0]) }
+        withAnimation(.snappy) {
+            for i in cabinets.indices where !cabinets[i].isPiece {
+                var standard = cabinets[i].standard
+                for f in fields where Self.same(standard[f], job[f]) { standard[f] = new[f] }
+                cabinets[i].standard = standard
+            }
+            projectStandard = new
+        }
+        changed()
+    }
+
+    /// Whether the job's standard is `json`, field for field.
+    func jobStandardIs(_ json: String) -> Bool {
+        guard let other = (try? JSONSerialization.jsonObject(with: Data(json.utf8))) as? [String: Any] else { return false }
+        let job = projectStandard
+        return Set(other.keys).union(job.keys).allSatisfy { Self.same(other[$0], job[$0]) }
     }
 
     /// Takes the standard fields that changed between `old` and `new` (one cabinet, before and after
