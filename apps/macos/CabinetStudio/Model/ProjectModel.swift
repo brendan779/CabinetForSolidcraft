@@ -25,7 +25,31 @@ struct CabinetDoc: Identifiable, Hashable, Codable {
         }
     }
 
-    var kind: String { object["kind"] as? String ?? "base" }
+    /// The cabinet kind, or `filler` / `end_panel` for those run pieces.
+    var kind: String { object["kind"] as? String ?? object["type"] as? String ?? "base" }
+
+    /// A filler or end panel rather than a cabinet.
+    var isPiece: Bool { object["type"] != nil }
+
+    /// Filler and end panel: extra to cut to the wall on site.
+    var scribe: Double {
+        get { number("scribe") }
+        set { setNumber("scribe", newValue) }
+    }
+
+    /// End panel: down to the floor over the toe kick.
+    var toFloor: Bool {
+        get { (object["to_floor"] as? Bool) ?? true }
+        set { update { $0["to_floor"] = newValue } }
+    }
+
+    /// A new filler or end panel as run item JSON.
+    static func piece(_ type: String, id: String) -> CabinetDoc {
+        let json = type == "filler"
+            ? #"{"id":"\#(id)","scribe":10,"type":"filler","width":50}"#
+            : #"{"id":"\#(id)","scribe":20,"to_floor":true,"type":"end_panel"}"#
+        return CabinetDoc(id: id, json: json)
+    }
 
     /// The cabinet's construction standard as JSON values, field by field.
     var standard: [String: Any] {
@@ -131,12 +155,6 @@ struct CabinetDoc: Identifiable, Hashable, Codable {
         (object["standard"] as? [String: Any])?["\(slot)_board"] as? String ?? ""
     }
 
-    /// X offset of the cabinet in the run.
-    var originX: Double {
-        get { ((object["origin"] as? [String: Any])?["x"] as? NSNumber)?.doubleValue ?? 0 }
-        set { update { $0["origin"] = ["x": newValue, "y": 0.0, "z": 0.0] } }
-    }
-
     /// The front layout's type: open, door, door_pair, drawers.
     var frontType: String {
         get { (object["fronts"] as? [String: Any])?["type"] as? String ?? "open" }
@@ -213,7 +231,8 @@ final class ProjectModel {
     var onlyThisCabinet = false
     let port: UInt16 = 7878
 
-    private var builds: [String: BuildSummary] = [:]
+    /// The last job build, by the items and placements it was built from.
+    @ObservationIgnored private var jobBuild: (key: [String], items: [ItemBuild])?
     /// The window's undo manager. Every edit registers its reverse here, which is also how the
     /// document knows it has changes to save.
     @ObservationIgnored weak var undoManager: UndoManager?
@@ -228,7 +247,7 @@ final class ProjectModel {
         let legacy = Self.takeLegacyJob()
         standardJson = legacy?.standardJson ?? JobContents.defaultStandard
         if let legacy {
-            cabinets = legacy.cabinets.filter { (try? CabinetStudio.build(cabinetJson: $0.json)) != nil }
+            cabinets = legacy.cabinets
         }
         if cabinets.isEmpty {
             for kind in ["base", "drawer_bank", "base"] { add(kind: kind) }
@@ -240,7 +259,7 @@ final class ProjectModel {
     init(contents: JobContents) {
         jobName = contents.name
         standardJson = contents.standardJson
-        cabinets = contents.cabinets.filter { (try? CabinetStudio.build(cabinetJson: $0.json)) != nil }
+        cabinets = contents.cabinets
         selection = cabinets.first?.id
         committed = Committed(cabinets: cabinets, standardJson: standardJson)
     }
@@ -254,24 +273,40 @@ final class ProjectModel {
         }
     }
 
+    /// The job as the core takes it: every item in order, and the cabinets kept where drawn.
+    var jobItems: JobItems {
+        JobItems(itemsJson: cabinets.map(\.json), placed: cabinets.filter { $0.placed == true }.map(\.id))
+    }
+
+    private var built: [ItemBuild] {
+        let job = jobItems
+        let key = job.itemsJson + ["placed"] + job.placed
+        if let b = jobBuild, b.key == key { return b.items }
+        let items = buildJob(job: job)
+        jobBuild = (key, items)
+        return items
+    }
+
+    /// The item's parts where the job puts them.
     func build(_ cab: CabinetDoc) -> BuildSummary? {
-        if let b = builds[cab.json] { return b }
-        do {
-            let b = try CabinetStudio.build(cabinetJson: cab.json)
-            builds[cab.json] = b
-            return b
-        } catch {
-            return nil
-        }
+        guard let i = cabinets.firstIndex(where: { $0.id == cab.id }) else { return nil }
+        let b = built
+        return i < b.count ? b[i].summary : nil
     }
 
     func error(for cab: CabinetDoc) -> String? {
-        do {
-            _ = try CabinetStudio.build(cabinetJson: cab.json)
-            return nil
-        } catch {
-            return "\(error)"
-        }
+        guard let i = cabinets.firstIndex(where: { $0.id == cab.id }) else { return nil }
+        let b = built
+        return i < b.count ? b[i].error : nil
+    }
+
+    /// From the left end of the run to its right end.
+    var runLength: Double {
+        let xs = zip(cabinets, built).filter { $0.0.placed != true }
+            .flatMap { $0.1.summary?.panels ?? [] }
+            .flatMap { [$0.x, $0.x + $0.width] }
+        guard let lo = xs.min(), let hi = xs.max() else { return 0 }
+        return hi - lo
     }
 
     // MARK: Editing
@@ -286,6 +321,21 @@ final class ProjectModel {
         cab.standard = projectStandard
         cabinets.append(cab)
         selection = id
+        changed()
+    }
+
+    /// Adds a filler or end panel after the selected item (an end panel with nothing selected goes
+    /// first, as the run's left end).
+    func addPiece(_ type: String) {
+        let prefix = type == "filler" ? "F" : "E"
+        var n = 1
+        while cabinets.contains(where: { $0.id == String(format: "%@%02d", prefix, n) }) { n += 1 }
+        let piece = CabinetDoc.piece(type, id: String(format: "%@%02d", prefix, n))
+        let at = cabinets.firstIndex { $0.id == selection }.map { $0 + 1 } ?? 0
+        withAnimation(.snappy) {
+            cabinets.insert(piece, at: at)
+            selection = piece.id
+        }
         changed()
     }
 
@@ -360,7 +410,7 @@ final class ProjectModel {
         let before = old.standard, after = new.standard
         let fields = after.keys.filter { !Self.same(before[$0], after[$0]) }
         var job = projectStandard
-        for i in cabinets.indices where cabinets[i].id != new.id {
+        for i in cabinets.indices where cabinets[i].id != new.id && !cabinets[i].isPiece {
             var standard = cabinets[i].standard
             for f in fields where Self.same(standard[f], job[f]) { standard[f] = after[f] }
             cabinets[i].standard = standard
@@ -371,14 +421,9 @@ final class ProjectModel {
         changed()
     }
 
-    /// Lays the cabinets out side by side in list order and saves. Cabinets drawn in SolidCraft
-    /// stay where they were drawn.
+    /// Records an edit. The core lays the run out (`build_job`); cabinets drawn in SolidCraft stay
+    /// where they were drawn.
     func changed() {
-        var x = 0.0
-        for i in cabinets.indices where cabinets[i].placed != true {
-            cabinets[i].originX = x
-            x += cabinets[i].width
-        }
         save()
     }
 
@@ -394,11 +439,11 @@ final class ProjectModel {
         isSending = true
         lastError = nil
         status = "Building \(cabinets.count) cabinets in SolidCraft…"
-        let jsons = cabinets.map(\.json)
+        let job = jobItems
         let level = detail.core
         let port = self.port
         let result = await Task.detached { () -> Result<String, Error> in
-            Result { try sendToSolidcraft(cabinetsJson: jsons, detail: level, port: port) }
+            Result { try sendToSolidcraft(job: job, detail: level, port: port) }
         }.value
         isSending = false
         switch result {
@@ -583,7 +628,7 @@ final class ProjectModel {
 
     /// The job file: the core's project JSON.
     func encoded() throws -> Data {
-        let text = try projectJson(name: jobName, standardJson: standardJson, cabinetsJson: cabinets.map(\.json),
+        let text = try projectJson(name: jobName, standardJson: standardJson, itemsJson: cabinets.map(\.json),
                                    placed: cabinets.filter { $0.placed == true }.map(\.id))
         return Data(text.utf8)
     }
@@ -632,7 +677,7 @@ struct JobContents: Sendable {
         if let p = try? openProject(json: String(decoding: data, as: UTF8.self)) {
             name = p.name
             standardJson = p.standardJson
-            cabinets = p.cabinetsJson.compactMap { json in
+            cabinets = p.itemsJson.compactMap { json in
                 CabinetDoc.id(of: json).map { CabinetDoc(id: $0, json: json, placed: p.placed.contains($0) ? true : nil) }
             }
             return
@@ -660,6 +705,8 @@ extension CabinetDoc {
         case "open_shelf": "Open shelf"
         case "blind_corner": "Blind corner"
         case "sink": "Sink"
+        case "filler": "Filler"
+        case "end_panel": "End panel"
         default: kind.capitalized
         }
     }
@@ -673,6 +720,8 @@ extension CabinetDoc {
         case "open_shelf": "rectangle.split.3x1"
         case "blind_corner": "rectangle.lefthalf.inset.filled"
         case "sink": "drop"
+        case "filler": "rectangle.portrait.split.2x1"
+        case "end_panel": "rectangle.portrait.lefthalf.filled"
         default: "cube"
         }
     }

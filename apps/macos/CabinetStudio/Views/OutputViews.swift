@@ -9,7 +9,7 @@ struct CutListView: View {
     @State private var exporting = false
 
     private var rows: [CutRowRecord] {
-        ((try? cutListRows(cabinetsJson: project.cabinets.map(\.json))) ?? []).sorted(using: sort)
+        ((try? cutListRows(job: project.jobItems)) ?? []).sorted(using: sort)
     }
 
     var body: some View {
@@ -41,7 +41,7 @@ struct CutListView: View {
                       defaultFilename: "\(project.jobName) cut list") { _ in }
     }
 
-    private var csv: String { (try? cutListCsv(cabinetsJson: project.cabinets.map(\.json))) ?? "" }
+    private var csv: String { (try? cutListCsv(job: project.jobItems)) ?? "" }
 
     private func mm(_ v: Double) -> String { unit.format(v, suffix: false) }
 }
@@ -80,8 +80,7 @@ struct CutSheetsView: View {
             }
             .frame(minWidth: 200, maxWidth: 280)
             Group {
-                if let part, let cab = project.cabinets.first(where: { part.hasPrefix($0.id + ".") }),
-                   let svg = try? cutSheetSvg(cabinetJson: cab.json, partName: part, job: project.jobName) {
+                if let part, let svg = try? cutSheetSvg(items: project.jobItems, partName: part, job: project.jobName) {
                     SVGView(svg: svg)
                 } else {
                     ContentUnavailableView("Pick a part", systemImage: "doc.richtext",

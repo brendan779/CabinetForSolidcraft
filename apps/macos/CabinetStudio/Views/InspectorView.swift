@@ -4,7 +4,15 @@ struct InspectorView: View {
     @Environment(ProjectModel.self) private var project
 
     var body: some View {
-        if let cab = project.selected {
+        if let cab = project.selected, cab.isPiece {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 22) {
+                    header(cab)
+                    PieceSection(cab: cab)
+                }
+                .padding(16)
+            }
+        } else if let cab = project.selected {
             ScrollView {
                 VStack(alignment: .leading, spacing: 22) {
                     header(cab)
@@ -50,6 +58,79 @@ struct InspectorView: View {
                     .foregroundStyle(.orange)
                     .help(err)
             }
+        }
+    }
+}
+
+/// A filler's width or an end panel's reach, and the scribe left on to fit the wall.
+struct PieceSection: View {
+    @Environment(ProjectModel.self) private var project
+    @AppStorage(LengthUnit.key) private var unit: LengthUnit = .millimetres
+    let cab: CabinetDoc
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            if cab.kind == "filler" {
+                SectionTitle("Filler")
+                chips("Width", value: cab.width, presets: [25, 38, 50, 75, 100, 150]) { c, v in c.width = v }
+            } else {
+                SectionTitle("End panel")
+                HStack(spacing: 8) {
+                    ForEach([true, false], id: \.self) { floor in
+                        Button {
+                            withAnimation(.snappy) { var c = cab; c.toFloor = floor; project.selected = c }
+                        } label: {
+                            VStack(spacing: 6) {
+                                EndPanelThumbnail(toFloor: floor).frame(width: 44, height: 52)
+                                Text(floor ? "To the floor" : "On the kick").font(.caption)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 8)
+                        }
+                        .buttonStyle(TileStyle(selected: cab.toFloor == floor))
+                        .help(floor ? "The panel runs down over the toe kick to the floor."
+                                    : "The panel stops on top of the toe kick, like the doors.")
+                    }
+                }
+            }
+            chips("Scribe", value: cab.scribe, presets: [0, 10, 20, 30, 40]) { c, v in c.scribe = v }
+            Text("The scribe is extra board, cut off on site to follow the wall. It is not part of the run's length.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    private func chips(_ title: String, value: Double, presets: [Double],
+                       set: @escaping (inout CabinetDoc, Double) -> Void) -> some View {
+        HStack(spacing: 6) {
+            Text(title).foregroundStyle(.secondary)
+            Spacer()
+            ForEach(presets, id: \.self) { p in
+                Button(unit.format(p, suffix: false)) {
+                    withAnimation(.snappy) { var c = cab; set(&c, p); project.selected = c }
+                }
+                .buttonStyle(ChipStyle(selected: abs(p - value) < 0.5))
+            }
+        }
+    }
+}
+
+/// A cabinet side seen from the side with an end panel on it, to the floor or stopping at the kick.
+struct EndPanelThumbnail: View {
+    let toFloor: Bool
+
+    var body: some View {
+        Canvas { ctx, size in
+            let w = size.width, h = size.height, kick = h * 0.16
+            let carcass = CGRect(x: w * 0.15, y: 0, width: w * 0.7, height: h - kick)
+            ctx.stroke(Path(carcass), with: .color(.primary.opacity(0.4)), lineWidth: 1)
+            var notch = Path()
+            notch.addRect(CGRect(x: w * 0.25, y: h - kick, width: w * 0.6, height: kick))
+            ctx.stroke(notch, with: .color(.primary.opacity(0.25)), lineWidth: 1)
+            let panel = CGRect(x: w * 0.08, y: 0, width: w * 0.84, height: toFloor ? h : h - kick)
+            ctx.fill(Path(panel), with: .color(.accentColor.opacity(0.3)))
+            ctx.stroke(Path(panel), with: .color(.accentColor), lineWidth: 1.4)
         }
     }
 }

@@ -24,7 +24,7 @@ pub use build::build_cabinet;
 pub use model::{Cabinet, CabinetKind, ConstructionStandard};
 pub use part::{Part, PartList};
 pub use project::Project;
-pub use run::{Run, RunItem, build_run};
+pub use run::{Run, RunItem, build_run, laid_out};
 
 #[derive(Debug, thiserror::Error, PartialEq)]
 pub enum Error {

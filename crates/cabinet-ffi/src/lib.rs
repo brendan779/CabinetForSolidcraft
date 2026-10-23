@@ -3,7 +3,11 @@
 
 use cabinet_core::cutlist::{cut_list, to_csv};
 use cabinet_core::model::BoardSlot;
-use cabinet_core::{Cabinet, CabinetKind, ConstructionStandard, Project, build_cabinet};
+use cabinet_core::project::Piece;
+use cabinet_core::{
+    Cabinet, CabinetKind, ConstructionStandard, PartList, Project, Run, RunItem, build_cabinet,
+    build_run, laid_out,
+};
 use solidcraft_bridge::boxes::{cuboid, selected_bodies};
 use solidcraft_bridge::{Client, Detail, find_existing, replace_cabinet};
 
@@ -80,6 +84,140 @@ pub struct BoardRecord {
     pub verified: bool,
 }
 
+/// A job's items in the sidebar's order: cabinets (cabinet JSON) and the fillers and end panels
+/// between them (run item JSON, `type` `filler` or `end_panel`). Cabinets named in `placed` keep
+/// their own position; everything else is one run along X from the origin.
+#[derive(uniffi::Record)]
+pub struct JobItems {
+    pub items_json: Vec<String>,
+    pub placed: Vec<String>,
+}
+
+/// A cabinet, or a filler or end panel.
+fn parse_item(json: &str) -> Result<RunItem, CoreError> {
+    let v: serde_json::Value = serde_json::from_str(json).map_err(invalid)?;
+    match v.get("type").and_then(|t| t.as_str()) {
+        Some("filler" | "end_panel") => serde_json::from_value(v).map_err(invalid),
+        _ => Ok(RunItem::Cabinet(Box::new(
+            serde_json::from_value(v).map_err(invalid)?,
+        ))),
+    }
+}
+
+/// The id a run item's parts are named after.
+fn item_id(item: &RunItem) -> &str {
+    match item {
+        RunItem::Cabinet(c) => &c.id,
+        RunItem::Filler(f) => &f.id,
+        RunItem::EndPanel(e) => &e.id,
+    }
+}
+
+/// Every item built where the job puts it, in order, each with the cabinet it was built from (none
+/// for fillers and end panels).
+fn job_lists(job: &JobItems) -> Result<Vec<(PartList, Option<Cabinet>)>, CoreError> {
+    let items = job
+        .items_json
+        .iter()
+        .map(|j| parse_item(j))
+        .collect::<Result<Vec<_>, _>>()?;
+    let in_run: Vec<bool> = items
+        .iter()
+        .map(|i| !job.placed.iter().any(|p| p == item_id(i)))
+        .collect();
+    let run = laid_out(&Run {
+        origin: Default::default(),
+        items: items
+            .iter()
+            .zip(&in_run)
+            .filter(|(_, r)| **r)
+            .map(|(i, _)| i.clone())
+            .collect(),
+    });
+    let mut built = if run.items.is_empty() {
+        Vec::new()
+    } else {
+        build_run(&run).map_err(invalid)?
+    }
+    .into_iter()
+    .zip(run.items);
+    items
+        .into_iter()
+        .zip(in_run)
+        .map(|(item, r)| {
+            let (list, item) = if r {
+                built.next().expect("one list per run item")
+            } else {
+                let RunItem::Cabinet(c) = &item else {
+                    return Err(invalid("only cabinets can be placed"));
+                };
+                (build_cabinet(c).map_err(invalid)?, item)
+            };
+            let cab = match item {
+                RunItem::Cabinet(c) => Some(*c),
+                _ => None,
+            };
+            Ok((list, cab))
+        })
+        .collect()
+}
+
+/// One item's build, or why it does not build.
+#[derive(uniffi::Record)]
+pub struct ItemBuild {
+    pub summary: Option<BuildSummary>,
+    pub error: Option<String>,
+}
+
+/// Builds every item of the job. An item that does not build on its own reports its error and
+/// stays out of the run, so the rest still lay out.
+#[uniffi::export]
+pub fn build_job(job: JobItems) -> Vec<ItemBuild> {
+    let errors: Vec<Option<String>> = job
+        .items_json
+        .iter()
+        .map(|j| match parse_item(j) {
+            Ok(RunItem::Cabinet(c)) => build_cabinet(&c).err().map(|e| e.to_string()),
+            Ok(_) => None,
+            Err(e) => Some(e.to_string()),
+        })
+        .collect();
+    let good = JobItems {
+        items_json: job
+            .items_json
+            .iter()
+            .zip(&errors)
+            .filter(|(_, e)| e.is_none())
+            .map(|(j, _)| j.clone())
+            .collect(),
+        placed: job.placed.clone(),
+    };
+    let mut lists = match job_lists(&good) {
+        Ok(l) => l.into_iter().map(|(l, _)| Ok(l)).collect::<Vec<_>>(),
+        Err(e) => vec![Err(e.to_string()); good.items_json.len()],
+    }
+    .into_iter();
+    errors
+        .into_iter()
+        .map(|e| match e {
+            Some(error) => ItemBuild {
+                summary: None,
+                error: Some(error),
+            },
+            None => match lists.next().expect("one list per good item") {
+                Ok(list) => ItemBuild {
+                    summary: Some(summary(list)),
+                    error: None,
+                },
+                Err(error) => ItemBuild {
+                    summary: None,
+                    error: Some(error),
+                },
+            },
+        })
+        .collect()
+}
+
 #[uniffi::export]
 pub fn core_version() -> String {
     env!("CARGO_PKG_VERSION").to_string()
@@ -146,7 +284,8 @@ pub fn assign_board(
 pub struct ProjectRecord {
     pub name: String,
     pub standard_json: String,
-    pub cabinets_json: Vec<String>,
+    /// Cabinets (cabinet JSON) and fillers and end panels (run item JSON), in the job's order.
+    pub items_json: Vec<String>,
     /// Ids of cabinets kept where they were drawn in SolidCraft.
     pub placed: Vec<String>,
 }
@@ -156,16 +295,21 @@ pub struct ProjectRecord {
 pub fn project_json(
     name: String,
     standard_json: String,
-    cabinets_json: Vec<String>,
+    items_json: Vec<String>,
     placed: Vec<String>,
 ) -> Result<String, CoreError> {
     let standard: ConstructionStandard = serde_json::from_str(&standard_json).map_err(invalid)?;
-    let cabinets = cabinets_json
-        .iter()
-        .map(|c| parse(c))
-        .collect::<Result<Vec<_>, _>>()?;
+    let mut cabinets = Vec::new();
+    let mut pieces = Vec::new();
+    for (index, j) in items_json.iter().enumerate() {
+        match parse_item(j)? {
+            RunItem::Cabinet(c) => cabinets.push(*c),
+            item => pieces.push(Piece { index, item }),
+        }
+    }
     let mut p = Project::new(name, standard, &cabinets).map_err(invalid)?;
     p.placed = placed;
+    p.pieces = pieces;
     serde_json::to_string_pretty(&p).map_err(invalid)
 }
 
@@ -173,25 +317,32 @@ pub fn project_json(
 #[uniffi::export]
 pub fn open_project(json: String) -> Result<ProjectRecord, CoreError> {
     let p: Project = serde_json::from_str(&json).map_err(invalid)?;
-    let cabinets_json = p
+    let mut items_json: Vec<String> = p
         .resolved()
         .map_err(invalid)?
         .iter()
         .map(|c| serde_json::to_string(c).map_err(invalid))
         .collect::<Result<_, _>>()?;
+    for piece in &p.pieces {
+        let at = piece.index.min(items_json.len());
+        items_json.insert(at, serde_json::to_string(&piece.item).map_err(invalid)?);
+    }
     Ok(ProjectRecord {
         name: p.name,
         standard_json: serde_json::to_string(&p.standard).map_err(invalid)?,
-        cabinets_json,
+        items_json,
         placed: p.placed,
     })
 }
 
 #[uniffi::export]
 pub fn build(cabinet_json: String) -> Result<BuildSummary, CoreError> {
-    use cabinet_core::part::{BorePurpose, Operation};
     let cab = parse(&cabinet_json)?;
-    let list = build_cabinet(&cab).map_err(invalid)?;
+    Ok(summary(build_cabinet(&cab).map_err(invalid)?))
+}
+
+fn summary(list: PartList) -> BuildSummary {
+    use cabinet_core::part::{BorePurpose, Operation};
     let panels = list
         .parts
         .iter()
@@ -225,7 +376,7 @@ pub fn build(cabinet_json: String) -> Result<BuildSummary, CoreError> {
             )
         })
         .count() as u32;
-    Ok(BuildSummary {
+    BuildSummary {
         panels,
         operations: list.operations.len() as u32,
         biscuits,
@@ -236,7 +387,7 @@ pub fn build(cabinet_json: String) -> Result<BuildSummary, CoreError> {
             .map(|h| format!("{} — {}", h.item, h.description))
             .collect(),
         warnings: list.warnings,
-    })
+    }
 }
 
 #[uniffi::export]
@@ -270,15 +421,24 @@ pub fn standard_option(cabinet_json: String, field: String) -> Result<String, Co
 }
 
 #[uniffi::export]
-pub fn cut_list_csv(cabinets_json: Vec<String>) -> Result<String, CoreError> {
-    let mut lists = Vec::new();
-    let mut tape = 1.0;
-    for j in &cabinets_json {
-        let cab = parse(j)?;
-        tape = cab.standard.edge_band_thickness;
-        lists.push(build_cabinet(&cab).map_err(invalid)?);
-    }
+pub fn cut_list_csv(job: JobItems) -> Result<String, CoreError> {
+    let (lists, tape) = cut_lists(&job)?;
     Ok(to_csv(&cut_list(&lists, "Generic", tape)))
+}
+
+/// Every item's part list, and the edge tape thickness of the job's cabinets.
+fn cut_lists(job: &JobItems) -> Result<(Vec<PartList>, f64), CoreError> {
+    let mut tape = 1.0;
+    let lists = job_lists(job)?
+        .into_iter()
+        .map(|(l, c)| {
+            if let Some(c) = c {
+                tape = c.standard.edge_band_thickness;
+            }
+            l
+        })
+        .collect();
+    Ok((lists, tape))
 }
 
 #[derive(uniffi::Record)]
@@ -298,14 +458,8 @@ pub struct CutRowRecord {
 }
 
 #[uniffi::export]
-pub fn cut_list_rows(cabinets_json: Vec<String>) -> Result<Vec<CutRowRecord>, CoreError> {
-    let mut lists = Vec::new();
-    let mut tape = 1.0;
-    for j in &cabinets_json {
-        let cab = parse(j)?;
-        tape = cab.standard.edge_band_thickness;
-        lists.push(build_cabinet(&cab).map_err(invalid)?);
-    }
+pub fn cut_list_rows(job: JobItems) -> Result<Vec<CutRowRecord>, CoreError> {
+    let (lists, tape) = cut_lists(&job)?;
     Ok(cut_list(&lists, "Generic", tape)
         .rows
         .into_iter()
@@ -336,13 +490,12 @@ pub fn cut_list_rows(cabinets_json: Vec<String>) -> Result<Vec<CutRowRecord>, Co
 }
 
 #[uniffi::export]
-pub fn cut_sheet_svg(
-    cabinet_json: String,
-    part_name: String,
-    job: String,
-) -> Result<String, CoreError> {
-    let cab = parse(&cabinet_json)?;
-    let list = build_cabinet(&cab).map_err(invalid)?;
+pub fn cut_sheet_svg(items: JobItems, part_name: String, job: String) -> Result<String, CoreError> {
+    let list = job_lists(&items)?
+        .into_iter()
+        .map(|(l, _)| l)
+        .find(|l| l.part(&part_name).is_some())
+        .ok_or_else(|| invalid(format!("no part {part_name}")))?;
     let part = list
         .part(&part_name)
         .ok_or_else(|| invalid(format!("no part {part_name}")))?;
@@ -365,11 +518,7 @@ pub fn solidcraft_reachable(port: u16) -> bool {
 /// Builds the cabinets in the running SolidCraft. Blocking: call it off the main thread.
 /// Cabinets already in the design (same component name) are replaced in place.
 #[uniffi::export]
-pub fn send_to_solidcraft(
-    cabinets_json: Vec<String>,
-    detail: String,
-    port: u16,
-) -> Result<String, CoreError> {
+pub fn send_to_solidcraft(job: JobItems, detail: String, port: u16) -> Result<String, CoreError> {
     let sc = |e: solidcraft_bridge::Error| CoreError::SolidCraft {
         message: e.to_string(),
     };
@@ -381,18 +530,18 @@ pub fn send_to_solidcraft(
     };
     let mut client = Client::connect(port).map_err(sc)?;
     let mut report = Vec::new();
-    for j in &cabinets_json {
-        let cab = parse(j)?;
-        let list = build_cabinet(&cab).map_err(invalid)?;
-        // One batch replaces an earlier build of this cabinet and keeps it where the user moved
-        // it in SolidCraft.
-        let existing = find_existing(&client.components().map_err(sc)?, &cab.id);
-        let spec = serde_json::to_value(&cab).map_err(invalid)?;
-        let cmds = replace_cabinet(&list, detail, Some(&spec), existing.as_ref());
+    for (list, cab) in job_lists(&job)? {
+        // One batch replaces an earlier build of this item and keeps it where the user moved it
+        // in SolidCraft. Only cabinets carry a spec to load back (SC-3).
+        let existing = find_existing(&client.components().map_err(sc)?, &list.cabinet);
+        let spec = cab
+            .map(|c| serde_json::to_value(&c).map_err(invalid))
+            .transpose()?;
+        let cmds = replace_cabinet(&list, detail, spec.as_ref(), existing.as_ref());
         let r = client.batch(&cmds).map_err(sc)?;
         report.push(format!(
             "{}: {} commands in {:.1} s",
-            cab.id,
+            list.cabinet,
             cmds.len(),
             r["total_ms"].as_f64().unwrap_or(0.0) / 1000.0
         ));
@@ -609,7 +758,74 @@ mod tests {
         assert_eq!(p.name, "Kitchen");
         assert_eq!(p.standard_json, standard);
         assert_eq!(p.placed, vec!["W01".to_string()]);
-        let cabs: Vec<Cabinet> = p.cabinets_json.iter().map(|c| parse(c).unwrap()).collect();
+        let cabs: Vec<Cabinet> = p.items_json.iter().map(|c| parse(c).unwrap()).collect();
         assert_eq!(cabs, vec![parse(&base).unwrap(), parse(&wall).unwrap()]);
+    }
+
+    fn job(items: &[String]) -> JobItems {
+        JobItems {
+            items_json: items.to_vec(),
+            placed: Vec::new(),
+        }
+    }
+
+    #[test]
+    fn a_job_with_an_end_panel_each_side_lays_out_and_lists_every_piece() {
+        let end = |id: &str| format!(r#"{{"type":"end_panel","id":"{id}","scribe":20}}"#);
+        let items = vec![
+            end("E01"),
+            new_cabinet("B01".into(), "base".into()).unwrap(),
+            r#"{"type":"filler","id":"F01","width":50}"#.to_string(),
+            new_cabinet("B02".into(), "base".into()).unwrap(),
+            end("E02"),
+        ];
+        let built = build_job(job(&items));
+        assert_eq!(built.len(), 5);
+        assert!(built.iter().all(|b| b.error.is_none()));
+        let left_x = |i: usize| {
+            built[i]
+                .summary
+                .as_ref()
+                .unwrap()
+                .panels
+                .iter()
+                .map(|p| p.x)
+                .fold(f64::MAX, f64::min)
+        };
+        let ft = parse(&items[1]).unwrap().standard.front_thickness;
+        assert_eq!(left_x(1), ft, "B01 after the end panel");
+        assert_eq!(left_x(3), ft + 600.0 + 50.0, "B02 after the filler");
+        let rows = cut_list_rows(job(&items)).unwrap();
+        for part in ["E01.EndPanel", "F01.Filler", "E02.EndPanel"] {
+            assert!(
+                rows.iter().any(|r| r.part == part),
+                "{part} in the cut list"
+            );
+        }
+        assert!(cut_sheet_svg(job(&items), "F01.Filler".into(), "Job".into()).is_ok());
+        // The job file keeps the pieces where they were.
+        let standard = serde_json::to_string(&parse(&items[1]).unwrap().standard).unwrap();
+        let file = project_json("Kitchen".into(), standard, items.clone(), Vec::new()).unwrap();
+        let back = open_project(file).unwrap();
+        let ids: Vec<String> = back
+            .items_json
+            .iter()
+            .map(|j| item_id(&parse_item(j).unwrap()).to_string())
+            .collect();
+        assert_eq!(ids, ["E01", "B01", "F01", "B02", "E02"]);
+    }
+
+    #[test]
+    fn a_cabinet_that_does_not_build_reports_its_error_and_the_rest_still_build() {
+        let mut bad: serde_json::Value =
+            serde_json::from_str(&new_cabinet("B02".into(), "base".into()).unwrap()).unwrap();
+        bad["width"] = serde_json::json!(10.0);
+        let items = vec![
+            new_cabinet("B01".into(), "base".into()).unwrap(),
+            bad.to_string(),
+        ];
+        let built = build_job(job(&items));
+        assert!(built[0].summary.is_some());
+        assert!(built[1].error.is_some());
     }
 }

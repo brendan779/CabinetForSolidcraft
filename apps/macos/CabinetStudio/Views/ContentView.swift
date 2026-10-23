@@ -130,8 +130,7 @@ struct StatusBar: View {
                     .lineLimit(1)
             }
             Spacer()
-            let total = project.cabinets.reduce(0) { $0 + $1.width }
-            Text("Run \(unit.format(total))").monospacedDigit()
+            Text("Run \(unit.format(project.runLength))").monospacedDigit()
         }
         .font(.callout)
         .foregroundStyle(.secondary)

@@ -28,6 +28,14 @@ struct SidebarView: View {
                                 Label(CabinetDoc.kindTitle(kind), systemImage: CabinetDoc.kindSymbol(kind))
                             }
                         }
+                        Divider()
+                        ForEach(["filler", "end_panel"], id: \.self) { type in
+                            Button {
+                                project.addPiece(type)
+                            } label: {
+                                Label(CabinetDoc.kindTitle(type), systemImage: CabinetDoc.kindSymbol(type))
+                            }
+                        }
                     } label: {
                         Image(systemName: "plus")
                     }
@@ -56,7 +64,7 @@ struct CabinetRow: View {
                     Text(cab.id).font(.headline).monospaced()
                     Text(CabinetDoc.kindTitle(cab.kind)).foregroundStyle(.secondary)
                 }
-                Text([cab.width, cab.height, cab.depth].map { unit.format($0, suffix: false) }.joined(separator: " × "))
+                Text(dimensions)
                     .font(.caption)
                     .monospacedDigit()
                     .foregroundStyle(.secondary)
@@ -68,6 +76,14 @@ struct CabinetRow: View {
         }
         .padding(.vertical, 2)
     }
+
+    private var dimensions: String {
+        switch cab.kind {
+        case "filler": "\(unit.format(cab.width)) + \(unit.format(cab.scribe, suffix: false)) scribe"
+        case "end_panel": cab.scribe > 0 ? "\(unit.format(cab.scribe)) scribe" : "no scribe"
+        default: [cab.width, cab.height, cab.depth].map { unit.format($0, suffix: false) }.joined(separator: " × ")
+        }
+    }
 }
 
 /// A tiny front elevation of a cabinet, drawn from its fronts.
@@ -76,6 +92,20 @@ struct CabinetGlyph: View {
 
     var body: some View {
         Canvas { ctx, size in
+            if doc.isPiece {
+                // A narrow upright strip; an end panel's scribe edge hatched.
+                let w = size.width * (doc.kind == "filler" ? 0.3 : 0.22)
+                let r = CGRect(x: (size.width - w) / 2, y: 0, width: w, height: size.height)
+                ctx.fill(Path(roundedRect: r, cornerRadius: 1.5), with: .color(.primary.opacity(0.15)))
+                ctx.stroke(Path(roundedRect: r, cornerRadius: 1.5), with: .color(.primary.opacity(0.8)), lineWidth: 1)
+                if doc.scribe > 0 {
+                    var p = Path()
+                    p.move(to: CGPoint(x: r.maxX + 2, y: r.minY))
+                    p.addLine(to: CGPoint(x: r.maxX + 2, y: r.maxY))
+                    ctx.stroke(p, with: .color(.accentColor), style: StrokeStyle(lineWidth: 1, dash: [2, 2]))
+                }
+                return
+            }
             let aspect = doc.width / max(doc.height, 1)
             let h = size.height
             let w = min(size.width, h * aspect)
