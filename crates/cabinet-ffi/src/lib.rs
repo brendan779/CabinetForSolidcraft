@@ -3,7 +3,7 @@
 
 use cabinet_core::cutlist::{cut_list, to_csv};
 use cabinet_core::{Cabinet, CabinetKind, build_cabinet};
-use solidcraft_bridge::{Client, Detail, emit_cabinet};
+use solidcraft_bridge::{Client, Detail, find_existing, replace_cabinet};
 
 uniffi::setup_scaffolding!();
 
@@ -297,7 +297,7 @@ pub fn solidcraft_reachable(port: u16) -> bool {
 }
 
 /// Builds the cabinets in the running SolidCraft. Blocking: call it off the main thread.
-/// Cabinets already in the design (same component name) are replaced.
+/// Cabinets already in the design (same component name) are replaced in place.
 #[uniffi::export]
 pub fn send_to_solidcraft(
     cabinets_json: Vec<String>,
@@ -317,13 +317,11 @@ pub fn send_to_solidcraft(
     for j in &cabinets_json {
         let cab = parse(j)?;
         let list = build_cabinet(&cab).map_err(invalid)?;
-        // Replace an earlier build of this cabinet; a missing component is fine.
-        let _ = client.execute(
-            "component.delete",
-            serde_json::json!({ "component": cab.id }),
-        );
+        // One batch replaces an earlier build of this cabinet and keeps it where the user moved
+        // it in SolidCraft.
+        let existing = find_existing(&client.components().map_err(sc)?, &cab.id);
         let spec = serde_json::to_value(&cab).map_err(invalid)?;
-        let cmds = emit_cabinet(&list, detail, Some(&spec));
+        let cmds = replace_cabinet(&list, detail, Some(&spec), existing.as_ref());
         let r = client.batch(&cmds).map_err(sc)?;
         report.push(format!(
             "{}: {} commands in {:.1} s",

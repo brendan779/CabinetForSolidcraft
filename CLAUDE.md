@@ -61,6 +61,8 @@ Rust is installed through Homebrew's rustup: `export PATH="$HOME/.cargo/bin:/opt
   under a reverse-DNS key), `appearance.assign` (bodies, color), `sketch.create` (plane
   `{origin, x_dir, y_dir}`), `sketch.circle.center`, `solid.extrude` (sketch, profiles, direction,
   operation `cut`, targets). `solidcraft-cli commands` lists them all with their params.
+- `component.list` gives each occurrence's `transform` as four columns (translation last);
+  `occurrence.move` takes `matrix` as rows. A new component's placement is `<name>:1`.
 - Every cut costs more the more features its body has: batch holes into one sketch extrude
   (docs/perf.md).
 - Preferences › Plugins only lists folders. No plugin code runs yet (issue #1221, draft PR #4980).

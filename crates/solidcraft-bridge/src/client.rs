@@ -115,6 +115,11 @@ impl Client {
         Ok(r)
     }
 
+    /// Every component with its placements (`component.list`, compact).
+    pub fn components(&mut self) -> Result<Value> {
+        self.execute("component.list", json!({ "compact": true }))
+    }
+
     pub fn inspect(&mut self) -> Result<Value> {
         self.request("document.inspect", json!({ "measure": true }))
     }

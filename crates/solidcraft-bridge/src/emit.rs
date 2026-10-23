@@ -94,6 +94,72 @@ pub fn emit_cabinet(list: &PartList, detail: Detail, spec: Option<&Value>) -> Ve
     cmds
 }
 
+/// An earlier build of a cabinet found in the design, read from `component.list`.
+#[derive(Clone, Debug, PartialEq)]
+pub struct Existing {
+    /// Where the user moved it: a row-major 3 × 4 rigid transform, or `None` where it was built.
+    pub moved: Option<[f64; 12]>,
+}
+
+/// Finds the cabinet's component in a `component.list` result. With several placements (the user
+/// copied it), the first one is kept.
+pub fn find_existing(listing: &Value, cabinet: &str) -> Option<Existing> {
+    let component = listing["components"]
+        .as_array()?
+        .iter()
+        .find(|c| c["name"] == cabinet)?;
+    let moved = component["occurrences"]
+        .as_array()
+        .and_then(|o| o.first())
+        .and_then(|o| row_major(&o["transform"]))
+        .filter(|m| *m != IDENTITY);
+    Some(Existing { moved })
+}
+
+const IDENTITY: [f64; 12] = [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0];
+
+/// SolidCraft lists a transform as four columns (the last one the translation, then 1);
+/// `occurrence.move` takes rows. Rounded like every coordinate we send.
+fn row_major(columns: &Value) -> Option<[f64; 12]> {
+    let c: Vec<Vec<f64>> = serde_json::from_value(columns.clone()).ok()?;
+    if c.len() != 4 || c.iter().any(|col| col.len() < 3) {
+        return None;
+    }
+    let mut m = [0.0; 12];
+    for row in 0..3 {
+        for col in 0..4 {
+            m[row * 4 + col] = round(c[col][row]);
+        }
+    }
+    Some(m)
+}
+
+/// [`emit_cabinet`] as one all-or-nothing batch that replaces an earlier build: it deletes the old
+/// component first and puts the new one where the user had moved the old one.
+pub fn replace_cabinet(
+    list: &PartList,
+    detail: Detail,
+    spec: Option<&Value>,
+    existing: Option<&Existing>,
+) -> Vec<Value> {
+    let mut cmds = Vec::new();
+    if existing.is_some() {
+        cmds.push(
+            json!({ "command": "component.delete", "params": { "component": list.cabinet } }),
+        );
+    }
+    cmds.extend(emit_cabinet(list, detail, spec));
+    if let Some(m) = existing.and_then(|e| e.moved) {
+        // A new component's only placement is `<name>:1`, at identity, so this rigid move puts it
+        // where the old one was.
+        cmds.push(json!({
+            "command": "occurrence.move",
+            "params": { "occurrence": format!("{}:1", list.cabinet), "space": "world", "matrix": m }
+        }));
+    }
+    cmds
+}
+
 /// A circle in sketch coordinates: centre u, centre v, diameter.
 type Circle = (f64, f64, f64);
 
@@ -349,6 +415,65 @@ mod tests {
         );
         let cmds = bore_batches(&[b.clone(), b]);
         assert_eq!(count(&cmds, "sketch.circle.center"), 1);
+    }
+
+    fn listing(name: &str, transform: Value) -> Value {
+        json!({ "components": [
+            { "id": 0, "name": "Untitled", "occurrences": [] },
+            { "id": 4, "name": name, "occurrences": [
+                { "id": 5, "name": format!("{name}:1"), "transform": transform }
+            ] }
+        ] })
+    }
+
+    #[test]
+    fn a_cabinet_not_in_the_design_is_built_without_a_delete() {
+        let list = build_cabinet(&Cabinet::new("B01", CabinetKind::Base)).unwrap();
+        let l = listing(
+            "W01",
+            json!([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]),
+        );
+        let existing = find_existing(&l, "B01");
+        assert_eq!(existing, None);
+        let cmds = replace_cabinet(&list, Detail::Design, None, existing.as_ref());
+        assert_eq!(cmds, emit_cabinet(&list, Detail::Design, None));
+    }
+
+    #[test]
+    fn a_rebuild_in_place_deletes_first_and_moves_nothing() {
+        let list = build_cabinet(&Cabinet::new("B01", CabinetKind::Base)).unwrap();
+        let l = listing(
+            "B01",
+            json!([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]),
+        );
+        let existing = find_existing(&l, "B01").unwrap();
+        assert_eq!(existing.moved, None);
+        let cmds = replace_cabinet(&list, Detail::Design, None, Some(&existing));
+        assert_eq!(cmds[0]["command"], "component.delete");
+        assert_eq!(cmds[0]["params"]["component"], "B01");
+        assert_eq!(count(&cmds, "occurrence.move"), 0);
+    }
+
+    #[test]
+    fn a_rebuild_of_a_moved_cabinet_puts_it_back_where_the_user_moved_it() {
+        let list = build_cabinet(&Cabinet::new("B01", CabinetKind::Base)).unwrap();
+        // Turned 90° about Z and moved to (500, 10, 0), as SolidCraft lists it: columns.
+        let l = listing(
+            "B01",
+            json!([[0, 1, 0, 0], [-1, 0, 0, 0], [0, 0, 1, 0], [500, 10, 0, 1]]),
+        );
+        let existing = find_existing(&l, "B01").unwrap();
+        let cmds = replace_cabinet(&list, Detail::Design, None, Some(&existing));
+        let mv = cmds.last().unwrap();
+        assert_eq!(mv["command"], "occurrence.move");
+        assert_eq!(mv["params"]["occurrence"], "B01:1");
+        assert_eq!(mv["params"]["space"], "world");
+        assert_eq!(
+            mv["params"]["matrix"],
+            json!([
+                0.0, -1.0, 0.0, 500.0, 1.0, 0.0, 0.0, 10.0, 0.0, 0.0, 1.0, 0.0
+            ])
+        );
     }
 
     #[test]

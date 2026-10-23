@@ -9,6 +9,11 @@ export PATH="$HOME/.cargo/bin:/opt/homebrew/opt/rustup/bin:/opt/homebrew/bin:$PA
 
 cargo fmt --all --check
 cargo clippy --workspace --all-targets -q -- -D warnings
+# The headless SolidCraft tests run when SolidCraft is installed (or SOLIDCRAFT_CLI is set).
+CLI=/Applications/SolidCraft.app/Contents/MacOS/solidcraft-cli
+if [[ -z "${SOLIDCRAFT_CLI:-}" && -x "$CLI" ]]; then
+  export SOLIDCRAFT_CLI="$CLI"
+fi
 cargo test --workspace -q
 python3 -m unittest discover -s tools -q
 if ! command -v cargo-deny >/dev/null; then
