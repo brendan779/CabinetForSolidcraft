@@ -2,7 +2,7 @@
 
 import unittest
 
-from parse_laminex import labels_in, spans, table
+from parse_laminex import essentials_table, labels_in, spans, table
 from parse_polytec import Word
 
 SOURCE = {"url": "u", "document_date": "2025-09", "retrieved": "2026-10-23", "verified": False}
@@ -83,6 +83,27 @@ class ParseLaminex(unittest.TestCase):
         single = by_id["laminex.decorated-mdf.coastal-oak-natural.18.mdf-std-e0.single-sided"]
         self.assertEqual(single["substrate"], "mdf")
         self.assertFalse(single["double_sided"])
+
+
+    def test_an_essentials_table_reads_merged_thickness_and_a_title_set_on_end(self):
+        hx = {"TYPE": 33, "SUBSTRATE": 62, "THICKNESS": 91, "SHEET": 128, "FINISH": 168,
+              "PROD": 198, "PACK": 228}
+        words = [word(x, 120, k) for k, x in hx.items()]
+        # The title column: upright words, not a substrate.
+        words += [Word(33, 300, 40, 330, "RAW"), Word(33, 330, 40, 345, "MDF")]
+        for y, prod, size in ((144, "994289", "3050 × 1200"), (155, "994340", "3600 × 1200")):
+            a, _, b = size.split()
+            words += [word(120, y, a), word(134, y, "×", 3), word(138, y, b), word(168, y, "UF"),
+                      word(192, y, prod), word(228, y, "60")]
+        words += [word(48, 150, "MDF"), word(61, 150, "STD"), word(72, 150, "E0"), word(95, 150, "4.75")]
+        problems = []
+        boards = essentials_table(words, "Raw MDF", 10_000, {"UF": "No Finish"}, SOURCE, problems)
+        self.assertEqual(problems, [])
+        self.assertEqual(len(boards), 1)
+        b = boards[0]
+        self.assertEqual(b["id"], "trade-essentials.raw-mdf.raw-no-finish.4.75.mdf-std-e0")
+        self.assertEqual((b["kind"], b["substrate"], b["thickness"]), ("raw", "mdf", 4.75))
+        self.assertEqual(b["item_codes"], {"3050x1200": "994289", "3600x1200": "994340"})
 
 
 if __name__ == "__main__":

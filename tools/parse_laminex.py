@@ -30,9 +30,12 @@ from parse_polytec import ROOT, Word, lines, merge_existing, slug
 URL = "https://www.laminex.com.au/documents/Laminex-National-Availability-Guide-Master"
 
 TITLES = {"Decorated MDF": "Decorated MDF", "Decorated Particleboard": "Decorated Particleboard"}
+# Trade Essentials pages: raw boards, and white melamine boards for carcasses (DATA-5).
+ESSENTIALS = {"Raw Particleboard": "raw", "Raw MDF": "raw", "White Particleboard": "melamine",
+              "White MDF": "melamine"}
 PROD = re.compile(r"^\d{6}$")
 NUMBER = re.compile(r"^\d{2,4}$")
-THICKNESS = re.compile(r"^\d{1,2}(\.\d)?$")
+THICKNESS = re.compile(r"^\d{1,2}(\.\d{1,2})?$")
 # Colour codes: Laminex's are numbers, Formica's letters and digits (AWI, BC5, 1028).
 COLOUR_CODE = re.compile(r"^[A-Z0-9]{2,4}$")
 FINISH = re.compile(r"^[A-Z]{1,3}$")
@@ -80,12 +83,20 @@ def legend(lines):
     out = {}
     for line in lines:
         words = [w.text for w in line]
-        if "LEGEND:" not in words or "FINISHES" not in words:
+        # The finishes legend; some pages print it as plain LEGEND:. (Not the substrate legend.)
+        if "LEGEND:" not in words or "SUBSTRATE" in words:
             continue
         rest = words[words.index("LEGEND:") + 1:]
-        for code, name in zip(rest, rest[1:]):
-            if FINISH.match(code) and not FINISH.match(name):
-                out[code] = name
+        # A code, then its name up to the next code: `MR Moisture Resistant UF Unfinished`.
+        code = None
+        for w in rest:
+            if FINISH.match(w) or w == "LEGEND:":
+                code = w if w != "LEGEND:" else None
+                if code:
+                    out[code] = ""
+            elif code:
+                out[code] = (out[code] + " " + w).strip()
+        out = {k: v for k, v in out.items() if v}
     return out
 
 
@@ -212,7 +223,7 @@ def table(words, title, brand, legend_y, finishes, grained, source, problems):
             y = (w.y0 + w.y1) / 2
             same = [v for v in body if abs((v.y0 + v.y1) / 2 - y) < 3]
             size = [v.text for v in same if cols["THICKNESS"] + 8 < v.x0 < cols["PROD"] - 12]
-            sheet = re.findall(r"(\d{4}) × (\d{4})", " ".join(size))
+            sheet = re.findall(r"(\d{3,4}) × (\d{3,4})", " ".join(size))
             face = next((v.text for v in same if FACE.match(v.text)), "")
             codes = [None] * len(edging_x)
             for v in same:
@@ -284,6 +295,92 @@ def table(words, title, brand, legend_y, finishes, grained, source, problems):
     return list(boards.values())
 
 
+def essentials_table(words, title, legend_y, finishes, source, problems):
+    """One Trade Essentials table: TYPE, then substrate and thickness as merged cells, then sheet
+    size, face, colour, finish code and product code on each product's own line."""
+    hx = {}
+    for w in words:
+        if w.y0 < 150 and w.text in ("TYPE", "SUBSTRATE", "THICKNESS", "SHEET", "FACE", "COLOUR",
+                                     "FINISH", "FINSIH", "PROD", "PACK"):
+            hx.setdefault("FINISH" if w.text == "FINSIH" else w.text, w.x0)
+    if not all(k in hx for k in ("TYPE", "THICKNESS", "SHEET", "FINISH", "PROD")):
+        problems.append(f"{title}: table header not found ({hx})")
+        return []
+    top = max(w.y1 for w in words if w.y0 < 150 and w.text in ("PROD", "PACK", "SHEET")) + 0.5
+    body = [w for w in words if top <= w.y0 < legend_y - 2 and w.text.strip()]
+    right = sorted(x for k, x in hx.items() if x > hx["SHEET"] + 5)
+    rows = []
+    for w in body:
+        if not (PROD.match(w.text) and abs(w.x0 - hx["PROD"]) < 14):
+            continue
+        y = (w.y0 + w.y1) / 2
+        same = [v for v in body if abs((v.y0 + v.y1) / 2 - y) < 3]
+        sheet = re.findall(r"(\d{3,4}) × (\d{3,4})", " ".join(
+            v.text for v in sorted(same, key=lambda v: v.x0) if hx["SHEET"] - 10 <= v.x0 < right[0] - 3))
+        if not sheet:
+            problems.append(f"{title}: product {w.text} has no sheet size")
+            continue
+        r = {"prod": w.text, "sheet": sheet[0]}
+        if "FACE" in hx:
+            r["face"] = next((v.text for v in same if FACE.match(v.text) and abs(v.x0 - hx["FACE"]) < 8), "")
+        r["finish"] = next((v.text for v in same if FINISH.match(v.text)
+                            and -8 <= v.x0 - hx["FINISH"] <= 12), "")
+        rows.append((y, r))
+    if not rows:
+        return []
+    thick_x0 = hx["THICKNESS"] - 4
+    thick = labels_in(body, thick_x0, hx["SHEET"] - 8, lambda w: THICKNESS.match(w.text))
+    # The TYPE column holds the table's title set on end, except where the heading reads MDF TYPE:
+    # there it holds the MDF type, and the grade follows under SUBSTRATE.
+    mdf_type = any(w.text == "MDF" and abs(w.x0 - hx["TYPE"]) < 4 for w in words if w.y0 < 150)
+    sub_x0 = hx["TYPE"] - 3 if mdf_type else hx["TYPE"] + 12
+    subst = labels_in(body, sub_x0, thick_x0, lambda w: w.text.isalnum())
+    rows.sort(key=lambda r: r[0])
+    assigned = spans(thick, rows)
+    for label, members in assigned:
+        for _, r in members:
+            r["thickness"] = label[1]
+    for label, members in spans(subst, rows, run_ends(assigned)):
+        for _, r in members:
+            r["substrate"] = label[1]
+    # A colour may be set on two lines around its row ("White / Aquaban"), or span rows.
+    if "COLOUR" in hx:
+        colour = labels_in(body, hx["COLOUR"] - 3, hx["FINISH"] - 8, lambda w: w.text[0].isalpha())
+        for label, members in spans(colour, rows):
+            for _, r in members:
+                r["colour"] = label[1]
+    kind = ESSENTIALS[title]
+    boards = {}
+    for _, r in rows:
+        if "thickness" not in r or "substrate" not in r:
+            problems.append(f"{title}: product {r['prod']} is missing a label: {r}")
+            continue
+        sub, emission = substrate(r["substrate"])
+        if sub is None:
+            problems.append(f"{title}: product {r['prod']}: unknown substrate {r['substrate']!r}")
+            continue
+        decor = r.get("colour") or "Raw"
+        fin = finishes.get(r["finish"], r["finish"])
+        single = r.get("face", "DS") not in ("DS", "")
+        rid = f"trade-essentials.{slug(title)}.{slug(decor)}-{slug(fin)}.{r['thickness']}.{slug(r['substrate'])}"
+        if single:
+            rid += ".single-sided"
+        b = boards.setdefault(rid, {
+            "id": rid, "brand": "Trade Essentials", "range": title, "decor": decor, "finish": fin,
+            "kind": kind, "substrate": sub, "thickness": float(r["thickness"]), "sheets": [],
+            "grained": False, "double_sided": not single, "emission": emission, "edge_tapes": [],
+            "preview_colour": "", "item_codes": {}, "source": source,
+        })
+        length, width = r["sheet"]
+        size = f"{length}x{width}"
+        if {"length": float(length), "width": float(width)} not in b["sheets"]:
+            b["sheets"].append({"length": float(length), "width": float(width)})
+        if b["item_codes"].get(size, r["prod"]) != r["prod"]:
+            problems.append(f"{rid}: two products for {size}: {b['item_codes'][size]}, {r['prod']}")
+        b["item_codes"][size] = r["prod"]
+    return list(boards.values())
+
+
 def parse(pages, sources):
     """Boards and edgings per brand: `sources` maps a brand to its source record."""
     finishes = {}
@@ -299,16 +396,27 @@ def parse(pages, sources):
     for n, lines in enumerate(pages):
         words = [w for line in lines for w in line]
         top = " ".join(w.text for w in sorted((w for w in words if w.y0 < 40), key=lambda w: w.x0))
+        essentials = next((t for t in ESSENTIALS if top.endswith(t)), None)
+        page_finishes = {**finishes, **legend(lines)}
+        legend_y = min((w.y0 for w in words if w.text == "LEGEND:"), default=10_000)
+        if essentials and n >= formica:
+            # Up to four tables a page, each starting at its TYPE column.
+            starts = sorted(w.x0 for w in words if w.text == "TYPE" and w.y0 < 150)
+            for a, b in zip(starts, starts[1:] + [10_000]):
+                part = [w for w in words if a - 3 <= w.x0 < b - 3]
+                boards += essentials_table(part, essentials, legend_y, page_finishes,
+                                           sources["Trade Essentials"], problems)
+            continue
         title = next((t for t in TITLES if top.endswith(t)), None)
         if title is None or n < 45:
             continue
         brand = "Formica" if n >= formica else "Laminex"
+        finishes_here = page_finishes
         # Only Laminex's Specifier pages group colours into WOODGRAINS and the rest.
         woodgrains = grained if brand == "Laminex" else set()
-        legend_y = min((w.y0 for w in words if w.text == "FINISHES"), default=10_000)
         mid = max(w.x1 for w in words) / 2 if words else 420
         for half in ([w for w in words if w.cx < mid], [w for w in words if w.cx >= mid]):
-            boards += table(half, title, brand, legend_y, finishes, woodgrains, sources[brand], problems)
+            boards += table(half, title, brand, legend_y, finishes_here, woodgrains, sources[brand], problems)
     tapes = {}
     for b in boards:
         ids = []
@@ -335,7 +443,26 @@ def parse(pages, sources):
 BRANDS = {
     "Laminex": ("https://www.laminex.com.au", "catalog/boards/laminex.json"),
     "Formica": ("https://www.formica.com.au", "catalog/boards/formica.json"),
+    "Trade Essentials": ("https://www.tradeessentials.com.au", "catalog/boards/trade-essentials.json"),
 }
+
+
+def notes(brand, date):
+    what = {
+        "Trade Essentials": "Trade Essentials Raw and White Particleboard and MDF tables (DATA-5); "
+                            "`kind` raw for raw boards, melamine for white ones. ",
+    }.get(brand, f"{brand} Decorated MDF and Decorated Particleboard trade tables. Edging records "
+                 "carry only what the tables print (code, thickness, roll): width and material are "
+                 "not printed there, and the suggested (not exact match) edgings of some tables "
+                 "print no thickness, so they are left out. ")
+    grain = {
+        "Laminex": "Woodgrains are the decors the guide's Specifier pages list under WOODGRAINS. ",
+        "Formica": "The guide does not say which Formica decors are woodgrains: `grained` is false "
+                   "throughout, so check the grain direction of woodgrain decors yourself. ",
+    }.get(brand, "")
+    return (f"Generated by tools/parse_laminex.py from the Laminex National Availability Guide "
+            f"({date}): {what}Item codes are per sheet size. Stocking columns are not recorded. "
+            f"{grain}Do not edit by hand: rerun the tool.")
 
 
 def main():
@@ -363,17 +490,7 @@ def main():
         out = {
             "brand": brand,
             "website": website,
-            "notes": "Generated by tools/parse_laminex.py from the Laminex National Availability Guide "
-                     f"({args.date}), {brand} Decorated MDF and Decorated Particleboard trade tables. "
-                     "Item codes are per sheet size. Edging records carry only what the tables print "
-                     "(code, thickness, roll); width and material are not printed there, and the "
-                     "suggested (not exact match) edgings of some tables print no thickness, so they "
-                     "are left out. Stocking columns are not recorded. "
-                     + ("Woodgrains are the decors the guide's Specifier pages list under WOODGRAINS. "
-                        if brand == "Laminex" else
-                        "The guide does not say which Formica decors are woodgrains: `grained` is false "
-                        "throughout, so check the grain direction of woodgrain decors yourself. ")
-                     + "Do not edit by hand: rerun the tool.",
+            "notes": notes(brand, args.date),
             "boards": sorted(mine, key=lambda b: b["id"]),
             "edge_tapes": sorted(my_tapes, key=lambda t: t["id"]),
         }
