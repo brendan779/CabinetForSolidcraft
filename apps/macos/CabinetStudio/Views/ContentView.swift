@@ -39,6 +39,8 @@ struct ContentView: View {
                 .fixedSize()
             }
             ToolbarItemGroup(placement: .primaryAction) {
+                // A toolbar menu draws only its label's icon and title, so the dot stands beside it.
+                ConnectionDot()
                 SolidCraftButton()
 
                 Button {
@@ -78,15 +80,8 @@ struct SolidCraftButton: View {
             }
             Button("Check Connection") { Task { await project.checkConnection() } }
         } label: {
-            HStack(spacing: 6) {
-                Circle()
-                    .fill(dotColour)
-                    .frame(width: 8, height: 8)
-                if project.isSending {
-                    ProgressView().controlSize(.small)
-                }
-                Text("SolidCraft")
-            }
+            Label("SolidCraft", systemImage: project.isSending ? "hourglass" : "shippingbox")
+                .labelStyle(.titleAndIcon)
         } primaryAction: {
             Task { await project.sendToSolidCraft() }
         }
@@ -94,7 +89,39 @@ struct SolidCraftButton: View {
         .help(helpText + " Click to build; hold for options.")
     }
 
-    private var dotColour: Color {
+    private var helpText: String {
+        switch project.connection {
+        case .connected: "SolidCraft is connected on port \(project.port)"
+        case .offline: "SolidCraft is not answering on port \(project.port). Start it with --control \(project.port)."
+        case .unknown: "Checking for SolidCraft…"
+        }
+    }
+}
+
+/// SolidCraft's connection as a coloured dot: green connected, red not answering, grey checking.
+struct ConnectionDot: View {
+    @Environment(ProjectModel.self) private var project
+
+    var body: some View {
+        ZStack {
+            if project.isSending {
+                ProgressView().controlSize(.small)
+            } else {
+                Circle()
+                    .fill(colour)
+                    .frame(width: 9, height: 9)
+                    .shadow(color: colour.opacity(0.6), radius: project.connection == .connected ? 3 : 0)
+            }
+        }
+        .frame(width: 18, height: 18)
+        .animation(.snappy, value: project.connection)
+        .help(help)
+        .accessibilityElement()
+        .accessibilityLabel("SolidCraft")
+        .accessibilityValue(help)
+    }
+
+    private var colour: Color {
         switch project.connection {
         case .connected: .green
         case .offline: .red
@@ -102,11 +129,11 @@ struct SolidCraftButton: View {
         }
     }
 
-    private var helpText: String {
+    private var help: String {
         switch project.connection {
-        case .connected: "SolidCraft is connected on port \(project.port)"
-        case .offline: "SolidCraft is not answering on port \(project.port). Start it with --control \(project.port)."
-        case .unknown: "Checking for SolidCraft…"
+        case .connected: "Connected"
+        case .offline: "Not answering on port \(project.port)"
+        case .unknown: "Checking…"
         }
     }
 }
