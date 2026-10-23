@@ -24,6 +24,7 @@ struct InspectorView: View {
                         SinkSection(cab: cab)
                     }
                     FrontsSection(cab: cab)
+                    BoardsSection(cab: cab)
                     ConstructionScope(cab: cab)
                     let overrides = project.overrides(of: cab)
                     ForEach(optionGroups(), id: \.field) { group in
