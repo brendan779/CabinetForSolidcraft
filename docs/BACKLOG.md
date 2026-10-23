@@ -119,7 +119,7 @@ committed: they are the brands' copyright. `preview_colour` is an approximation.
 | DATA-6 | split → DATA-6a, DATA-6b | M | Linings: Polytec wall linings / Steccawood / Easycraft, Laminex Surround: profile, module width, length, thickness (`kind: lining`) | records + a lining picker stub |
 | DATA-6a | done (d6e2505) | S | Laminex Surround (MDF Primed Panels) from the Laminex guide, and a Boards / Linings switch in the board picker | records + picker stub |
 | DATA-6b | todo | M | Polytec wall linings, Steccawood, Easycraft and Laminex Architectural Panels (decorated battens and VGroove: pack and module sizes need reading) | records with sources |
-| DATA-7 | done (SHA) | S | Catalog validation in CI: ids unique, tapes resolve, each brand file has a source | part of check.sh (already partly) |
+| DATA-7 | done (3e69102) | S | Catalog validation in CI: ids unique, tapes resolve, each brand file has a source | part of check.sh (already partly) |
 | DATA-8 | needs-human (built in 670db45; pick an oak for Fronts in the inspector and check the viewport and cut list) | M | Board picker in the app: brand → range → decor grid with grain and finish filters; assign to carcass/fronts/backs | picking a decor updates the 3D colour and the cut list |
 | DATA-9 | 👤 needs-human | S | Owner verifies a sample of rows per brand; flip `verified: true` | — |
 | DATA-10 | todo | M | Polytec guide, the rest: COMMERCIAL board + edge tape (guide p14-17), Internal Carcass tape widths (the table prints "1mm Rigid" without a width), wall linings (DATA-6) | records with sources; parse_polytec.py tests |
@@ -179,7 +179,7 @@ committed: they are the brands' copyright. `preview_colour` is an approximation.
 |---|---|---|---|
 | PLG-1 | blocked (SolidCraft has no plugin runtime yet; check #1221/#4980 weekly) | L | Port the bridge to a `command-plugin` WASM component (same commands via `engine.run`) |
 | PLG-2 | blocked (PLG-1) | L | `panel-plugin` with pins; propose an image-choice widget upstream so pickers can live in SolidCraft |
-| PLG-3 | todo | S | Weekly check: has SolidCraft merged plugin runtime work? Update this row and docs/FEASIBILITY_PLAN.md |
+| PLG-3 | todo | S | Weekly check: has SolidCraft merged plugin runtime work? Update this row and docs/FEASIBILITY_PLAN.md. Last check 2026-10-24: no runtime; #1221 and draft #4980 open, #4330 (install a plugin from a GitHub link) open, latest release v0.20.0 |
 
 ## Log
 
@@ -241,3 +241,4 @@ Agents append one line per session: date, items touched, outcome.
 - 2026-10-24 (night) — DATA-5 split into 5a/5b. DATA-5a done: parse_laminex.py also reads the four-tables-a-page Trade Essentials pages (Raw/White Particleboard, Raw/White MDF): 88 boards, 302 product codes, `kind` raw or melamine, in catalog/boards/trade-essentials.json. Merged substrate/thickness cells nest as before; colours set on two lines around a row (White Aquaban) are read as spans; the TYPE column is a title set on end except under MDF TYPE. 11 White MDF rows whose substrate cell gives only a grade (SELECT, SS 06MM BOW) are left out rather than guessing MR or not. Checks over all three brands: 1376/1376 sheet sizes (one by eye: its size sits a line above in the layout text), 930/930 printed thicknesses. Finish legends are now read per page, multi-word (MR Moisture Resistant).
 - 2026-10-24 (night) — DATA-6 split into 6a/6b. DATA-6a done: parse_laminex.py reads the MDF Primed Panels (Surround by Laminex) page: 26 `kind: lining` records (profile as printed, e.g. Classic VJ 100, Scallop 22.5; 9/12 mm; MDF MR E0 or MDF FR; sheet sizes and product codes). The guide never says what the number in a profile name measures, so no module width is recorded. FFI BoardRecord gains `kind`; the board picker has a Boards / Linings switch when the catalog has linings.
 - 2026-10-24 (night) — DATA-7 done: on top of unique ids and resolving tapes, `Catalog::validate` now refuses any board or tape whose source lacks a URL, document date or retrieval date; check.sh (and CI) load the repository catalog through it.
+- 2026-10-24 (night) — PLG-3 checked: SolidCraft still has no plugin runtime (#1221 open, draft #4980 open, #4330 open; v0.20.0 latest). FEASIBILITY_PLAN updated.
