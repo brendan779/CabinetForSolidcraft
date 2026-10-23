@@ -154,6 +154,7 @@ struct BoardLibraryView: View {
                             .overlay(alignment: .bottomLeading) { usedFor(b) }
                             .frame(height: 110)
                             .shadow(color: .black.opacity(0.15), radius: 4, y: 2)
+                            .accessibilityLabel("\(b.decor) swatch\(b.colourIsGuessed ? ", colour approximate" : "")")
                         HStack {
                             Text(b.decor).font(.headline)
                             Spacer()
@@ -228,6 +229,7 @@ struct GrainPattern: View {
                 i += 1
             }
         }
+        .accessibilityHidden(true)
     }
 }
 

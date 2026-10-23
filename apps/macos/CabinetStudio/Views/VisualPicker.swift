@@ -53,6 +53,8 @@ struct VisualPicker: View {
                         .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(TileStyle(selected: choice.id == selected))
+                    .accessibilityLabel("\(group.title): \(choice.label)")
+                    .accessibilityHint(choice.description)
                     .onHover { hovered = $0 ? choice.id : nil }
                     .help(choice.description)
                 }
@@ -83,6 +85,7 @@ struct ConstructionThumbnail: View {
             default: pen.unknown()
             }
         }
+        .accessibilityHidden(true)
     }
 }
 
@@ -382,5 +385,6 @@ struct FrontThumbnail: View {
                 for i in 1..<3 { hLine(r.minY + r.height * CGFloat(i) / 3) }
             }
         }
+        .accessibilityHidden(true)
     }
 }

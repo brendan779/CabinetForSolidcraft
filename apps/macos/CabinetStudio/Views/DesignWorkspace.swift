@@ -190,6 +190,8 @@ struct CabinetViewport: View {
                 scene.update(project: project, look: look, hovered: hovered?.panel.name)
             }
             .realityViewCameraControls(.orbit)
+            .accessibilityLabel("3D view of the job")
+            .accessibilityHint("Drag to orbit. Click a cabinet to select it; the arrow keys step through cabinets.")
             .gesture(
                 SpatialTapGesture().targetedToAnyEntity().onEnded { value in
                     if let id = scene.cabinet(of: value.entity, in: project) {

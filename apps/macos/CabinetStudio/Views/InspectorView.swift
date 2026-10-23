@@ -111,6 +111,7 @@ struct PieceSection: View {
                     withAnimation(.snappy) { var c = cab; set(&c, p); project.selected = c }
                 }
                 .buttonStyle(ChipStyle(selected: abs(p - value) < 0.5))
+                .accessibilityLabel("\(title) \(unit.format(p))")
             }
         }
     }
@@ -132,6 +133,7 @@ struct EndPanelThumbnail: View {
             ctx.fill(Path(panel), with: .color(.accentColor.opacity(0.3)))
             ctx.stroke(Path(panel), with: .color(.accentColor), lineWidth: 1.4)
         }
+        .accessibilityHidden(true)
     }
 }
 
@@ -263,6 +265,7 @@ struct RunThumbnail: View {
                 ctx.stroke(Path(roundedRect: r, cornerRadius: 2), with: .color(on ? .accentColor : .primary.opacity(0.3)), lineWidth: 1)
             }
         }
+        .accessibilityHidden(true)
     }
 }
 
@@ -358,6 +361,7 @@ struct SizeSection: View {
                     ForEach(presets, id: \.self) { p in
                         Button(unit.format(p, suffix: false)) { withAnimation(.snappy) { set(p) } }
                             .buttonStyle(ChipStyle(selected: abs(p - value) < 0.5))
+                            .accessibilityLabel("\(title) \(unit.format(p))")
                     }
                 }
             }
@@ -442,6 +446,7 @@ struct BlindSection: View {
                     withAnimation(.snappy) { var c = cab; set(&c, p); project.selected = c }
                 }
                 .buttonStyle(ChipStyle(selected: abs(p - value) < 0.5))
+                .accessibilityLabel("\(title) \(Int(p)) millimetres")
             }
         }
     }
@@ -472,6 +477,7 @@ struct BlindThumbnail: View {
                 ctx.fill(Path(ellipseIn: CGRect(x: hx - 2, y: y - 2, width: 4, height: 4)), with: .color(.accentColor))
             }
         }
+        .accessibilityHidden(true)
     }
 }
 
@@ -539,6 +545,7 @@ struct DrawerStackPicker: View {
                         .padding(.vertical, 6)
                 }
                 .buttonStyle(TileStyle(selected: cab.drawerRatios == stack))
+                .accessibilityLabel("\(stack.count) drawers, heights \(stack.map { String(Int($0)) }.joined(separator: " to "))")
             }
         }
     }
@@ -578,6 +585,7 @@ struct ChipStyle: ButtonStyle {
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
+            .accessibilityAddTraits(selected ? .isSelected : [])
             .font(.caption.monospacedDigit())
             .padding(.horizontal, 9)
             .padding(.vertical, 4)
@@ -593,6 +601,7 @@ struct TileStyle: ButtonStyle {
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
+            .accessibilityAddTraits(selected ? .isSelected : [])
             .background(
                 RoundedRectangle(cornerRadius: 10)
                     .fill(Color.primary.opacity(configuration.isPressed ? 0.12 : 0.04))

@@ -75,6 +75,7 @@ struct CabinetRow: View {
             }
         }
         .padding(.vertical, 2)
+        .accessibilityElement(children: .combine)
     }
 
     private var dimensions: String {
@@ -140,5 +141,6 @@ struct CabinetGlyph: View {
                 break
             }
         }
+        .accessibilityHidden(true)
     }
 }
