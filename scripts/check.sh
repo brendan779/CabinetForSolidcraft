@@ -9,6 +9,7 @@ export PATH="$HOME/.cargo/bin:/opt/homebrew/opt/rustup/bin:/opt/homebrew/bin:$PA
 cargo fmt --all --check
 cargo clippy --workspace --all-targets -q -- -D warnings
 cargo test --workspace -q
+python3 -m unittest discover -s tools -q
 
 if [[ "$(uname)" == "Darwin" && "${SKIP_APP:-0}" != "1" ]]; then
   # The bindings and xcframework are generated, so a fresh checkout must build them before

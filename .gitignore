@@ -8,3 +8,4 @@ xcuserdata/
 # Supplier CAD (Blum, Häfele STEP files) stays on this machine; see vendor-cad/README.md
 /vendor-cad/*
 !/vendor-cad/README.md
+__pycache__/

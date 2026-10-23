@@ -103,7 +103,7 @@ committed: they are the brands' copyright. `preview_colour` is an approximation.
 
 | id | status | size | task | done when |
 |---|---|---|---|---|
-| DATA-1 | todo | M | **Polytec parser.** `tools/parse_polytec.py`: download the Availability Guide PDF, `pdftotext -layout`, and parse every board table (decor, finish, thickness, substrate, sheet sizes, item codes) and matching edge tape codes (1×21, 1×29, roll lengths) into `catalog/boards/polytec.json` | ≥ 90 % of the guide's decorative 16/18 mm rows parsed; spot-check 20 random rows against the PDF and record them in the PR |
+| DATA-1 | done (night/2026-10-23) | M | **Polytec parser.** `tools/parse_polytec.py`: download the Availability Guide PDF, `pdftotext -layout`, and parse every board table (decor, finish, thickness, substrate, sheet sizes, item codes) and matching edge tape codes (1×21, 1×29, roll lengths) into `catalog/boards/polytec.json` | ≥ 90 % of the guide's decorative 16/18 mm rows parsed; spot-check 20 random rows against the PDF and record them in the PR |
 | DATA-2 | todo | M | Laminex: decorative board (Laminex Colour Collection, Natural Wood, Essastone is out of scope), sizes, substrates, matching edges, from laminex.com.au availability documents | `catalog/boards/laminex.json` with sources |
 | DATA-3 | todo | M | Other Australian brands: Egger (AU range), Nikpol (Sonae Arauco/Egger/Fundermax distribution), Formica AU, Bestwood, Briggs Veneers, Navurban, Karaboard/Wilsonart | one file per brand |
 | DATA-4 | todo | M | Edge tape suppliers: Surteco, Dölken (Doellken), Rehau, Titus Tekform, Häfele AU edging, Fastedge; brand match tables (tape code ↔ board decor) | `catalog/edge-tape/*.json` |
@@ -112,6 +112,7 @@ committed: they are the brands' copyright. `preview_colour` is an approximation.
 | DATA-7 | todo | S | Catalog validation in CI: ids unique, tapes resolve, each brand file has a source | part of check.sh (already partly) |
 | DATA-8 | todo | M | Board picker in the app: brand → range → decor grid with grain and finish filters; assign to carcass/fronts/backs | picking a decor updates the 3D colour and the cut list |
 | DATA-9 | 👤 needs-human | S | Owner verifies a sample of rows per brand; flip `verified: true` | — |
+| DATA-10 | todo | M | Polytec guide, the rest: COMMERCIAL board + edge tape (guide p14-17), Internal Carcass tape widths (the table prints "1mm Rigid" without a width), wall linings (DATA-6) | records with sources; parse_polytec.py tests |
 
 ### Outputs
 
@@ -176,3 +177,4 @@ Agents append one line per session: date, items touched, outcome.
 - 2026-10-23 — repo published as brendan779/CabinetForSolidcraft; INF-2 CI green on macos-latest.
 - 2026-10-23 (night) — PERF-2 done: per-command costs in docs/perf.md (cylinder cuts grow ~3 ms per existing feature; one sketch extrude is 11–33× faster).
 - 2026-10-23 (night) — PERF-1 done: bores batched per panel face (sketch + one extrude); tall cabinet at Manufacturing detail 88.1 s → 3.9 s headless, volumes unchanged. Connected (app) timing still to confirm.
+- 2026-10-23 (night) — DATA-1 done: tools/parse_polytec.py reads the DECORATIVE board tables (9-32 mm) from word positions; 459 boards, 717 tapes; 263/263 decorative 16/18 mm rows with board codes parsed and cross-checked against `pdftotext -layout`. DATA-10 added for the rest of the guide.
