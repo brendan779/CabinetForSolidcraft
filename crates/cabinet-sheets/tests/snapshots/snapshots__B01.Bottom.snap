@@ -5,28 +5,39 @@ expression: svg
 <svg xmlns="http://www.w3.org/2000/svg" width="297mm" height="210mm" viewBox="0 0 297 210" font-family="Helvetica, Arial, sans-serif">
 <rect width="297" height="210" fill="#fff"/>
 <style>.o{fill:#f6f3ec;stroke:#222;stroke-width:0.35}.t{font-size:3px;fill:#222}.s{font-size:2.4px;fill:#555}.d{stroke:#4a6fa5;stroke-width:0.2;fill:none}.e{stroke:#c0392b;stroke-width:1.1}</style>
-<rect class="o" x="34.00" y="20.00" width="129.27" height="132.00"/>
-<line class="e" x1="34.00" y1="152.00" x2="163.27" y2="152.00"/>
-<line class="d" x1="34.00" y1="159.00" x2="163.27" y2="159.00"/>
-<text class="t" x="98.63" y="163.00" text-anchor="middle">568</text>
-<line class="d" x1="27.00" y1="152.00" x2="27.00" y2="20.00"/>
-<text class="t" x="25.00" y="86.00" text-anchor="middle" transform="rotate(-90 25.00 86.00)">580</text>
-<circle cx="34.00" cy="152.00" r="1" fill="#c0392b"/>
-<rect x="34.00" y="23.64" width="129.27" height="1.37" fill="#9bb7d4" stroke="#222" stroke-width="0.15"/>
-<rect x="34.00" y="133.09" width="2.84" height="15.05" fill="#e8c27a" stroke="#222" stroke-width="0.15"/>
-<rect x="34.00" y="98.35" width="2.84" height="15.05" fill="#e8c27a" stroke="#222" stroke-width="0.15"/>
-<rect x="34.00" y="63.60" width="2.84" height="15.05" fill="#e8c27a" stroke="#222" stroke-width="0.15"/>
-<rect x="34.00" y="28.86" width="2.84" height="15.05" fill="#e8c27a" stroke="#222" stroke-width="0.15"/>
-<line x1="34.00" y1="123.25" x2="41.97" y2="123.25" stroke="#7a3fa0" stroke-width="0.68"/>
-<line x1="34.00" y1="88.50" x2="41.97" y2="88.50" stroke="#7a3fa0" stroke-width="0.68"/>
-<line x1="34.00" y1="53.76" x2="41.97" y2="53.76" stroke="#7a3fa0" stroke-width="0.68"/>
-<rect x="160.42" y="133.09" width="2.84" height="15.05" fill="#e8c27a" stroke="#222" stroke-width="0.15"/>
-<rect x="160.42" y="98.35" width="2.84" height="15.05" fill="#e8c27a" stroke="#222" stroke-width="0.15"/>
-<rect x="160.42" y="63.60" width="2.84" height="15.05" fill="#e8c27a" stroke="#222" stroke-width="0.15"/>
-<rect x="160.42" y="28.86" width="2.84" height="15.05" fill="#e8c27a" stroke="#222" stroke-width="0.15"/>
-<line x1="163.27" y1="123.25" x2="155.30" y2="123.25" stroke="#7a3fa0" stroke-width="0.68"/>
-<line x1="163.27" y1="88.50" x2="155.30" y2="88.50" stroke="#7a3fa0" stroke-width="0.68"/>
-<line x1="163.27" y1="53.76" x2="155.30" y2="53.76" stroke="#7a3fa0" stroke-width="0.68"/>
+<rect class="o" x="34.00" y="20.00" width="111.64" height="114.00"/>
+<line class="e" x1="34.00" y1="134.00" x2="145.64" y2="134.00"/>
+<line class="d" x1="34.00" y1="141.00" x2="145.64" y2="141.00"/>
+<text class="t" x="89.82" y="145.00" text-anchor="middle">568</text>
+<line class="d" x1="27.00" y1="134.00" x2="27.00" y2="20.00"/>
+<text class="t" x="25.00" y="77.00" text-anchor="middle" transform="rotate(-90 25.00 77.00)">580</text>
+<circle cx="34.00" cy="134.00" r="1" fill="#c0392b"/>
+<rect x="34.00" y="23.14" width="111.64" height="1.18" fill="#9bb7d4" stroke="#222" stroke-width="0.15"/>
+<rect x="34.00" y="117.67" width="2.46" height="13.00" fill="#e8c27a" stroke="#222" stroke-width="0.15"/>
+<rect x="34.00" y="87.67" width="2.46" height="13.00" fill="#e8c27a" stroke="#222" stroke-width="0.15"/>
+<rect x="34.00" y="57.66" width="2.46" height="13.00" fill="#e8c27a" stroke="#222" stroke-width="0.15"/>
+<rect x="34.00" y="27.65" width="2.46" height="13.00" fill="#e8c27a" stroke="#222" stroke-width="0.15"/>
+<line x1="34.00" y1="109.17" x2="40.88" y2="109.17" stroke="#7a3fa0" stroke-width="0.59"/>
+<line x1="34.00" y1="79.16" x2="40.88" y2="79.16" stroke="#7a3fa0" stroke-width="0.59"/>
+<line x1="34.00" y1="49.16" x2="40.88" y2="49.16" stroke="#7a3fa0" stroke-width="0.59"/>
+<rect x="143.18" y="117.67" width="2.46" height="13.00" fill="#e8c27a" stroke="#222" stroke-width="0.15"/>
+<rect x="143.18" y="87.67" width="2.46" height="13.00" fill="#e8c27a" stroke="#222" stroke-width="0.15"/>
+<rect x="143.18" y="57.66" width="2.46" height="13.00" fill="#e8c27a" stroke="#222" stroke-width="0.15"/>
+<rect x="143.18" y="27.65" width="2.46" height="13.00" fill="#e8c27a" stroke="#222" stroke-width="0.15"/>
+<line x1="145.64" y1="109.17" x2="138.76" y2="109.17" stroke="#7a3fa0" stroke-width="0.59"/>
+<line x1="145.64" y1="79.16" x2="138.76" y2="79.16" stroke="#7a3fa0" stroke-width="0.59"/>
+<line x1="145.64" y1="49.16" x2="138.76" y2="49.16" stroke="#7a3fa0" stroke-width="0.59"/>
+<text class="s" x="34.00" y="18.00">Face</text>
+<rect class="o" x="34.00" y="150.00" width="114.00" height="4.00"/>
+<text class="s" x="150.00" y="152.80">Left edge</text>
+<circle cx="58.83" cy="152.00" r="0.60" fill="none" stroke="#7a3fa0" stroke-width="0.25"/>
+<circle cx="88.84" cy="152.00" r="0.60" fill="none" stroke="#7a3fa0" stroke-width="0.25"/>
+<circle cx="118.84" cy="152.00" r="0.60" fill="none" stroke="#7a3fa0" stroke-width="0.25"/>
+<rect class="o" x="34.00" y="159.00" width="114.00" height="4.00"/>
+<text class="s" x="150.00" y="161.80">Right edge</text>
+<circle cx="58.83" cy="161.00" r="0.60" fill="none" stroke="#7a3fa0" stroke-width="0.25"/>
+<circle cx="88.84" cy="161.00" r="0.60" fill="none" stroke="#7a3fa0" stroke-width="0.25"/>
+<circle cx="118.84" cy="161.00" r="0.60" fill="none" stroke="#7a3fa0" stroke-width="0.25"/>
 <rect x="12" y="168.00" width="273.00" height="30" fill="none" stroke="#222" stroke-width="0.3"/>
 <text class="t" x="15.00" y="175.00">B01.Bottom  —  Bottom</text>
 <text class="t" x="15.00" y="182.00">Finished 568 × 580 × 16 mm   Board: Polytec Classic White Matt 16 MR MDF</text>
