@@ -14,5 +14,8 @@ cabinet-core.workspace = true
 [[example]]
 name = "emit_base"
 
+[[example]]
+name = "perf_probe"
+
 [lints]
 workspace = true
