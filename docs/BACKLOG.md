@@ -50,7 +50,7 @@ Priorities: **P0** blocks most other work · **P1** MVP · **P2** commercial par
 | CORE-4c | blocked (CORE-4b) | M | Corner wall cabinet (diagonal front or L): as CORE-4b at wall height with hangers (CORE-3) | builds with two hangers per leg |
 | CORE-5 | done (night/2026-10-23) | M | Sink cabinet (no bottom rail, back cut-out option, waterproof base liner option) | builds; liner appears in BOM |
 | CORE-6 | done (night/2026-10-23) | M | Fillers, end panels and scribes as parts of a run | a run with an end panel each side builds |
-| CORE-7 | todo | M | Runs: shared construction standard per project, per-cabinet overrides only | project JSON stores one standard + overrides |
+| CORE-7 | done (night/2026-10-23) | M | Runs: shared construction standard per project, per-cabinet overrides only | project JSON stores one standard + overrides |
 | CORE-8 | todo | M | Drawer boxes for wood drawers on runners (sides, front, back, bottom) from Blum MOVENTO/TANDEM rules: inside width = opening − 42, length = NL − 10 (verify against Blum TD) | parts + cut list for a 3-drawer bank |
 | CORE-9 | todo | S | Material per part: carcass board, front board, back board from the catalog; thickness follows the board | changing the front board changes door thickness |
 | CORE-10 | todo | M | Half-overlay and inset hinge geometry (cranked hinges, plate offsets) | test per overlay type |
@@ -153,6 +153,7 @@ committed: they are the brands' copyright. `preview_colour` is an approximation.
 | UI-14 | todo | S | Accessibility pass: VoiceOver labels on every drawn tile, Dynamic Type sizes | Accessibility Inspector clean |
 | UI-15 | todo | M | UI tests (XCUITest) for add cabinet, change option, export CSV | tests pass in check.sh |
 | UI-16 | todo | M | Run items in the app: add filler and end panel to the sidebar list (drawn tiles, width/scribe chips), lay out and send the project through `cabinet_core::build_run` (FFI) instead of the Swift layout loop | a run with an end panel each side shows in the viewport, cut list and SolidCraft |
+| UI-17 | todo | M | Project standard in the app: the construction pickers edit the project standard, with an "Only this cabinet" override switch; save through `cabinet_core::Project` (migrate the old project.json) | changing the back style for the project changes every cabinet without an override |
 
 ## P2 — Commercial parity
 
@@ -198,3 +199,4 @@ Agents append one line per session: date, items touched, outcome.
 - 2026-10-23 (night) — CORE-4b set to needs-human with the design questions (door type, hinge system, notched blanks); CORE-4c blocked on it.
 - 2026-10-23 (night) — CORE-5 done: `sink` kind (900 wide, door pair, no shelf): no back rail ("no bottom rail" read as the back top rail the bowl would hit — owner to confirm), optional pipe cut-out through the back (400 high, 50 in from the sides) and waterproof liner in the hardware list.
 - 2026-10-23 (night) — CORE-6 done in the core: `run::{Run, RunItem, build_run}` lays out cabinets, fillers (door plane, scribe allowance) and end panels (door face to wall + scribe, optionally to the floor) left to right. App support is UI-16 (added).
+- 2026-10-23 (night) — CORE-7 done in the core: `project::Project` stores the standard once and each cabinet's differing fields as `overrides`; resolves back exactly. App side is UI-17 (added).
