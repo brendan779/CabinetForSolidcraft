@@ -15,6 +15,10 @@ pub const MIN_BISCUIT_PANEL: f64 = 12.0;
 
 /// Chipboard screw: clearance hole in the face part, pilot in the end part.
 const SCREW_CLEARANCE: f64 = 4.5;
+/// Countersunk head of a 4 mm chipboard screw (DIN 7997 style, 90°).
+const SCREW_HEAD: f64 = 8.0;
+/// Countersunk head of a 7 mm confirmat.
+const CONFIRMAT_HEAD: f64 = 10.0;
 const SCREW_PILOT: f64 = 3.0;
 const SCREW_PILOT_DEPTH: f64 = 35.0;
 /// Confirmat 7 × 50.
@@ -58,6 +62,9 @@ pub struct ButtJoint<'a> {
     /// Where along the line fixings may go, when less than the whole contact: a back panel's
     /// groove crosses the joint behind this, and a biscuit there would cut into it.
     pub limit: Option<(f64, f64)>,
+    /// The face part's outside is seen from the room: nothing may come through it. Biscuits and
+    /// glue where they fit, blind dowels where they do not.
+    pub hidden: bool,
 }
 
 impl ButtJoint<'_> {
@@ -148,23 +155,28 @@ impl ButtJoint<'_> {
         }
 
         let screw_positions = match std.fixings {
+            _ if self.hidden => Vec::new(),
             FixingRecipe::BiscuitAndScrew if biscuits => between(&biscuit_positions),
             FixingRecipe::BiscuitOnly if biscuits => Vec::new(),
             FixingRecipe::Dowel | FixingRecipe::CamLock => Vec::new(),
             _ => fixing_positions(length, END_SETBACK.min(length / 4.0), spacing, 20.0),
         };
-        let (clearance, pilot, pilot_depth) = match std.fixings {
-            FixingRecipe::Confirmat => {
-                (CONFIRMAT_CLEARANCE, CONFIRMAT_PILOT, CONFIRMAT_PILOT_DEPTH)
-            }
-            _ => (SCREW_CLEARANCE, SCREW_PILOT, SCREW_PILOT_DEPTH),
+        let (clearance, head, pilot, pilot_depth) = match std.fixings {
+            FixingRecipe::Confirmat => (
+                CONFIRMAT_CLEARANCE,
+                CONFIRMAT_HEAD,
+                CONFIRMAT_PILOT,
+                CONFIRMAT_PILOT_DEPTH,
+            ),
+            _ => (SCREW_CLEARANCE, SCREW_HEAD, SCREW_PILOT, SCREW_PILOT_DEPTH),
         };
         for p in screw_positions {
-            ops.extend(self.screw(lo + p, clearance, pilot, pilot_depth));
+            ops.extend(self.screw(lo + p, clearance, head, pilot, pilot_depth));
         }
 
+        let dowels = std.fixings == FixingRecipe::Dowel || (self.hidden && !biscuits);
         match std.fixings {
-            FixingRecipe::Dowel => {
+            _ if dowels => {
                 for p in fixing_positions(length, 32.0, 96.0, 20.0) {
                     ops.extend(self.dowel(lo + p));
                 }
@@ -200,7 +212,14 @@ impl ButtJoint<'_> {
         }
     }
 
-    fn screw(&self, at: f64, clearance: f64, pilot: f64, pilot_depth: f64) -> [Operation; 2] {
+    fn screw(
+        &self,
+        at: f64,
+        clearance: f64,
+        head: f64,
+        pilot: f64,
+        pilot_depth: f64,
+    ) -> [Operation; 3] {
         [
             Operation::Bore {
                 part: self.face_part.name.clone(),
@@ -209,6 +228,15 @@ impl ButtJoint<'_> {
                 diameter: clearance,
                 depth: self.face_part.thickness(),
                 purpose: BorePurpose::Screw,
+            },
+            // A 90° seat: as deep as the head is wider than the hole, halved.
+            Operation::Bore {
+                part: self.face_part.name.clone(),
+                at: self.point(self.outside(), at),
+                direction: self.normal,
+                diameter: head,
+                depth: (head - clearance) / 2.0,
+                purpose: BorePurpose::Countersink,
             },
             Operation::Bore {
                 part: self.end_part.name.clone(),

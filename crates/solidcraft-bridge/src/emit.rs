@@ -3,7 +3,7 @@
 use cabinet_core::PartList;
 use cabinet_core::geom::{Axis, Vec3};
 use cabinet_core::model::BiscuitSize;
-use cabinet_core::part::{Dir, Operation, PartRole};
+use cabinet_core::part::{BorePurpose, Dir, Operation, PartRole};
 use serde_json::{Value, json};
 
 /// How much of the machining to model.
@@ -205,11 +205,15 @@ fn bore_batches(ops: &[Operation]) -> Vec<Value> {
             direction,
             diameter,
             depth,
-            ..
+            purpose,
         } = op
         else {
             continue;
         };
+        // A countersink's cone is cosmetic in the model; the sheets and CNC carry it.
+        if *purpose == BorePurpose::Countersink {
+            continue;
+        }
         let key = BoreFace {
             part,
             direction: *direction,
@@ -583,7 +587,6 @@ fn cut_box(min: Vec3, size: Vec3, targets: &[String]) -> Value {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use cabinet_core::part::BorePurpose;
     use cabinet_core::{Cabinet, CabinetKind, build_cabinet};
 
     #[test]
@@ -725,7 +728,9 @@ mod tests {
         let bores = list
             .operations
             .iter()
-            .filter(|o| matches!(o, Operation::Bore { .. }))
+            .filter(|o| {
+                matches!(o, Operation::Bore { purpose, .. } if *purpose != BorePurpose::Countersink)
+            })
             .count();
         assert_eq!(count(&cmds, "sketch.circle.center"), bores);
         assert_eq!(count(&cmds, "solid.cylinder"), 0);

@@ -454,6 +454,22 @@ expression: list
     },
     {
       "type": "bore",
+      "part": "C01.LeftSide",
+      "at": {
+        "x": 0.0,
+        "y": 126.33333333333333,
+        "z": 158.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 8.0,
+      "depth": 1.75,
+      "purpose": "countersink"
+    },
+    {
+      "type": "bore",
       "part": "C01.Bottom",
       "at": {
         "x": 16.0,
@@ -486,6 +502,22 @@ expression: list
     },
     {
       "type": "bore",
+      "part": "C01.LeftSide",
+      "at": {
+        "x": 0.0,
+        "y": 279.0,
+        "z": 158.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 8.0,
+      "depth": 1.75,
+      "purpose": "countersink"
+    },
+    {
+      "type": "bore",
       "part": "C01.Bottom",
       "at": {
         "x": 16.0,
@@ -515,6 +547,22 @@ expression: list
       "diameter": 4.5,
       "depth": 16.0,
       "purpose": "screw"
+    },
+    {
+      "type": "bore",
+      "part": "C01.LeftSide",
+      "at": {
+        "x": 0.0,
+        "y": 431.66666666666663,
+        "z": 158.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 8.0,
+      "depth": 1.75,
+      "purpose": "countersink"
     },
     {
       "type": "bore",
@@ -634,6 +682,22 @@ expression: list
     },
     {
       "type": "bore",
+      "part": "C01.RightSide",
+      "at": {
+        "x": 1000.0,
+        "y": 126.33333333333333,
+        "z": 158.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 8.0,
+      "depth": 1.75,
+      "purpose": "countersink"
+    },
+    {
+      "type": "bore",
       "part": "C01.Bottom",
       "at": {
         "x": 984.0,
@@ -666,6 +730,22 @@ expression: list
     },
     {
       "type": "bore",
+      "part": "C01.RightSide",
+      "at": {
+        "x": 1000.0,
+        "y": 279.0,
+        "z": 158.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 8.0,
+      "depth": 1.75,
+      "purpose": "countersink"
+    },
+    {
+      "type": "bore",
       "part": "C01.Bottom",
       "at": {
         "x": 984.0,
@@ -698,6 +778,22 @@ expression: list
     },
     {
       "type": "bore",
+      "part": "C01.RightSide",
+      "at": {
+        "x": 1000.0,
+        "y": 431.66666666666663,
+        "z": 158.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 8.0,
+      "depth": 1.75,
+      "purpose": "countersink"
+    },
+    {
+      "type": "bore",
       "part": "C01.Bottom",
       "at": {
         "x": 984.0,
@@ -730,6 +826,22 @@ expression: list
     },
     {
       "type": "bore",
+      "part": "C01.LeftSide",
+      "at": {
+        "x": 0.0,
+        "y": 25.0,
+        "z": 862.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 8.0,
+      "depth": 1.75,
+      "purpose": "countersink"
+    },
+    {
+      "type": "bore",
       "part": "C01.FrontRail",
       "at": {
         "x": 16.0,
@@ -762,6 +874,22 @@ expression: list
     },
     {
       "type": "bore",
+      "part": "C01.LeftSide",
+      "at": {
+        "x": 0.0,
+        "y": 75.0,
+        "z": 862.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 8.0,
+      "depth": 1.75,
+      "purpose": "countersink"
+    },
+    {
+      "type": "bore",
       "part": "C01.FrontRail",
       "at": {
         "x": 16.0,
@@ -791,6 +919,22 @@ expression: list
       "diameter": 4.5,
       "depth": 16.0,
       "purpose": "screw"
+    },
+    {
+      "type": "bore",
+      "part": "C01.RightSide",
+      "at": {
+        "x": 1000.0,
+        "y": 25.0,
+        "z": 862.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 8.0,
+      "depth": 1.75,
+      "purpose": "countersink"
     },
     {
       "type": "bore",
@@ -826,6 +970,22 @@ expression: list
     },
     {
       "type": "bore",
+      "part": "C01.RightSide",
+      "at": {
+        "x": 1000.0,
+        "y": 75.0,
+        "z": 862.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 8.0,
+      "depth": 1.75,
+      "purpose": "countersink"
+    },
+    {
+      "type": "bore",
       "part": "C01.FrontRail",
       "at": {
         "x": 984.0,
@@ -858,6 +1018,22 @@ expression: list
     },
     {
       "type": "bore",
+      "part": "C01.LeftSide",
+      "at": {
+        "x": 0.0,
+        "y": 483.0,
+        "z": 862.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 8.0,
+      "depth": 1.75,
+      "purpose": "countersink"
+    },
+    {
+      "type": "bore",
       "part": "C01.BackRail",
       "at": {
         "x": 16.0,
@@ -890,6 +1066,22 @@ expression: list
     },
     {
       "type": "bore",
+      "part": "C01.LeftSide",
+      "at": {
+        "x": 0.0,
+        "y": 533.0,
+        "z": 862.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 8.0,
+      "depth": 1.75,
+      "purpose": "countersink"
+    },
+    {
+      "type": "bore",
       "part": "C01.BackRail",
       "at": {
         "x": 16.0,
@@ -922,6 +1114,22 @@ expression: list
     },
     {
       "type": "bore",
+      "part": "C01.RightSide",
+      "at": {
+        "x": 1000.0,
+        "y": 483.0,
+        "z": 862.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 8.0,
+      "depth": 1.75,
+      "purpose": "countersink"
+    },
+    {
+      "type": "bore",
       "part": "C01.BackRail",
       "at": {
         "x": 984.0,
@@ -951,6 +1159,22 @@ expression: list
       "diameter": 4.5,
       "depth": 16.0,
       "purpose": "screw"
+    },
+    {
+      "type": "bore",
+      "part": "C01.RightSide",
+      "at": {
+        "x": 1000.0,
+        "y": 533.0,
+        "z": 862.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 8.0,
+      "depth": 1.75,
+      "purpose": "countersink"
     },
     {
       "type": "bore",
@@ -2273,6 +2497,28 @@ expression: list
       },
       "part": "C01.Bottom",
       "quantity": 1
+    },
+    {
+      "item": "screw-cover-cap",
+      "description": "Screw cover cap, colour to match the carcass",
+      "at": {
+        "x": 8.0,
+        "y": 290.0,
+        "z": 510.0
+      },
+      "part": "C01.LeftSide",
+      "quantity": 7
+    },
+    {
+      "item": "screw-cover-cap",
+      "description": "Screw cover cap, colour to match the carcass",
+      "at": {
+        "x": 992.0,
+        "y": 290.0,
+        "z": 510.0
+      },
+      "part": "C01.RightSide",
+      "quantity": 7
     }
   ],
   "warnings": [

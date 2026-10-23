@@ -186,7 +186,11 @@ pub enum Operation {
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum BorePurpose {
+    /// A screw's clearance hole through the face panel.
     Screw,
+    /// The seat for a countersunk screw head, at the mouth of its clearance hole. Recorded for
+    /// sheets and CNC; not cut in SolidCraft (a cone there is cosmetic).
+    Countersink,
     ScrewPilot,
     ShelfPin,
     HingeCup,

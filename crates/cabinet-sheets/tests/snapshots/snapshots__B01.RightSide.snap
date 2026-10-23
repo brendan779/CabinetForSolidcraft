@@ -18,12 +18,19 @@ expression: svg
 <rect x="35.37" y="63.60" width="0.91" height="15.05" fill="#e8c27a" stroke="#222" stroke-width="0.15"/>
 <rect x="35.37" y="28.86" width="0.91" height="15.05" fill="#e8c27a" stroke="#222" stroke-width="0.15"/>
 <circle cx="35.82" cy="123.25" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
+<circle cx="35.82" cy="123.25" r="0.91" fill="none" stroke="#222" stroke-width="0.25"/>
 <circle cx="35.82" cy="88.50" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
+<circle cx="35.82" cy="88.50" r="0.91" fill="none" stroke="#222" stroke-width="0.25"/>
 <circle cx="35.82" cy="53.76" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
+<circle cx="35.82" cy="53.76" r="0.91" fill="none" stroke="#222" stroke-width="0.25"/>
 <circle cx="196.04" cy="146.31" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
+<circle cx="196.04" cy="146.31" r="0.91" fill="none" stroke="#222" stroke-width="0.25"/>
 <circle cx="196.04" cy="134.93" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
+<circle cx="196.04" cy="134.93" r="0.91" fill="none" stroke="#222" stroke-width="0.25"/>
 <circle cx="196.04" cy="42.08" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
+<circle cx="196.04" cy="42.08" r="0.91" fill="none" stroke="#222" stroke-width="0.25"/>
 <circle cx="196.04" cy="30.70" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
+<circle cx="196.04" cy="30.70" r="0.91" fill="none" stroke="#222" stroke-width="0.25"/>
 <circle cx="52.21" cy="143.58" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
 <circle cx="52.21" cy="33.43" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
 <circle cx="59.49" cy="143.58" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
@@ -63,15 +70,15 @@ expression: svg
 <rect x="12" y="168.00" width="273.00" height="30" fill="none" stroke="#222" stroke-width="0.3"/>
 <text class="t" x="15.00" y="175.00">B01.RightSide  —  Right side</text>
 <text class="t" x="15.00" y="182.00">Finished 720 × 580 × 16 mm   Board: Polytec Classic White Matt 16 MR MDF</text>
-<text class="t" x="15.00" y="189.00">Job: Snapshot job   Cabinet: B01   Operations: 48   Reference corner ●   Edge tape ▬</text>
+<text class="t" x="15.00" y="189.00">Job: Snapshot job   Cabinet: B01   Operations: 55   Reference corner ●   Edge tape ▬</text>
 <text class="s" x="158.50" y="172.50">groove 720 × 6 @ 0, 558</text>
 <text class="s" x="158.50" y="175.40">biscuit 4 × 66.1 @ 6, 16.9</text>
 <text class="s" x="158.50" y="178.30">biscuit 4 × 66.1 @ 6, 169.6</text>
 <text class="s" x="158.50" y="181.20">biscuit 4 × 66.1 @ 6, 322.3</text>
 <text class="s" x="158.50" y="184.10">biscuit 4 × 66.1 @ 6, 474.9</text>
 <text class="s" x="158.50" y="187.00">Ø4.5 × 16 Screw @ 8, 126.3</text>
-<text class="s" x="158.50" y="189.90">Ø4.5 × 16 Screw @ 8, 279</text>
-<text class="s" x="158.50" y="192.80">Ø4.5 × 16 Screw @ 8, 431.7</text>
-<text class="s" x="158.50" y="195.70">Ø4.5 × 16 Screw @ 712, 25</text>
-<text class="s" x="265.00" y="196.00">+39 more</text>
+<text class="s" x="158.50" y="189.90">Ø8 × 1.8 Countersink @ 8, 126.3</text>
+<text class="s" x="158.50" y="192.80">Ø4.5 × 16 Screw @ 8, 279</text>
+<text class="s" x="158.50" y="195.70">Ø8 × 1.8 Countersink @ 8, 279</text>
+<text class="s" x="265.00" y="196.00">+46 more</text>
 </svg>

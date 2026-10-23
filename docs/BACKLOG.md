@@ -64,8 +64,8 @@ Priorities: **P0** blocks most other work · **P1** MVP · **P2** commercial par
 | JOIN-1 | done (initial) | M | Biscuits (#0/#10/#20) + screws between, density presets, short joints screwed | tests in joinery.rs |
 | JOIN-2 | done (night/2026-10-23) | M | Real biscuit slot shape (arc ends from the 100 mm cutter) instead of a box | slot volume matches analytic value ±1 % |
 | JOIN-3 | done (night/2026-10-23) | S | Biscuit bodies as solids (lens shape) in Manufacturing detail, coloured | visible in SolidCraft |
-| JOIN-4 | todo | M | Cam-lock (Häfele Minifix 15) bores: Ø15 cam, Ø8/Ø5 bolt, from verified Häfele data | cut sheet shows cam bores |
-| JOIN-5 | todo | S | Screw countersinks and cover caps; "hide screws on visible end panels" rule | end panels have no through screws |
+| JOIN-4 | blocked (needs verified Häfele Minifix 15 drilling data in the catalog: owner-supplied, like HAF-4) | M | Cam-lock (Häfele Minifix 15) bores: Ø15 cam, Ø8/Ø5 bolt, from verified Häfele data | cut sheet shows cam bores |
+| JOIN-5 | done (night/2026-10-23) | S | Screw countersinks and cover caps; "hide screws on visible end panels" rule | end panels have no through screws |
 | JOIN-6 | todo | M | Lamello Clamex P-14 / Tenso P-14 P-System slots | option in picker; slots on sheets |
 | JOIN-7 | todo | S | Back panel fixing (screws at 150 mm centres for applied backs; none for grooved) | ops present per back style |
 
@@ -205,3 +205,4 @@ Agents append one line per session: date, items touched, outcome.
 - 2026-10-23 (night) — CORE-12 done: `collisions::check` (bores as cylinders, slots/grooves as boxes; overlaps, break-outs, thin floors), reported in build warnings. The sweep over every kind × every choice found one real clash family — the rearmost biscuit of each back-to-front joint cut into the back groove — fixed by stopping those joints at the interior back (goldens: fixings moved, nothing else).
 - 2026-10-23 (night) — JOIN-2 done as a new `Exact` detail level: biscuit slots as area-exact 4-chord lenses (volume within 1 % of the analytic lens in a headless test). Manufacturing keeps box slots: lens slots make the tall cabinet 12.2 s instead of 3.9 s (docs/perf.md). Owner: is that trade right?
 - 2026-10-23 (night) — JOIN-3 done: at Manufacturing and Exact detail every slot gets a named lens-shaped biscuit body (`B01.Biscuit3`, beech colour), true arcs (no boolean, so no slowdown: tall still 3.8 s). Headless test: one per slot, volume within 1 %. Picture: docs/images/join3-biscuits.png. Slot operations now record their biscuit size.
+- 2026-10-23 (night) — JOIN-5 done: every screw clearance hole gets a 90° countersink (Ø8 chipboard, Ø10 confirmat; in the part list for sheets/CNC, not cut in SolidCraft) and a cover cap in the hardware list; `exposed.left/right` sides get no through screws (biscuits + glue, blind dowels where biscuits do not fit); inspector "Seen ends" chips. JOIN-4 blocked on Häfele data.

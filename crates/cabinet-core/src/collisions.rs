@@ -85,7 +85,7 @@ pub fn check(list: &PartList) -> Vec<Clash> {
         }
         for (i, a) in cuts.iter().enumerate() {
             for b in &cuts[i + 1..] {
-                if intersects(a, b) {
+                if intersects(a, b) && !seat_and_hole(a, b) {
                     out.push(Clash {
                         part: part.name.clone(),
                         what: format!("{} runs into {}", a.label(), b.label()),
@@ -185,6 +185,33 @@ fn leaves_part(part: &Part, cut: &Cut) -> Option<String> {
     None
 }
 
+/// A countersink and the clearance hole it is the seat of: one axis, one mouth.
+fn seat_and_hole(a: &Cut, b: &Cut) -> bool {
+    match (a, b) {
+        (
+            Cut::Bore {
+                axis: x,
+                start: s,
+                label: la,
+                ..
+            },
+            Cut::Bore {
+                axis: y,
+                start: t,
+                label: lb,
+                ..
+            },
+        ) => {
+            x == y
+                && x.others()
+                    .iter()
+                    .all(|&o| (s.get(o) - t.get(o)).abs() < EPS)
+                && (la.starts_with("Countersink") || lb.starts_with("Countersink"))
+        }
+        _ => false,
+    }
+}
+
 fn intersects(a: &Cut, b: &Cut) -> bool {
     let (ba, bb) = (a.bounds(), b.bounds());
     if !ba.overlaps(&bb) {
@@ -265,11 +292,15 @@ mod tests {
     }
 
     #[test]
-    fn every_kind_with_every_shelf_fixed_builds_without_clashes() {
+    fn every_kind_with_fixed_shelves_and_exposed_ends_builds_without_clashes() {
         for kind in CabinetKind::ALL {
             let mut cab = Cabinet::new("C01", kind);
             cab.adjustable_shelves = cab.adjustable_shelves.max(2);
             cab.fixed_shelves = (1..=cab.adjustable_shelves).collect();
+            cab.exposed = Exposed {
+                left: true,
+                right: true,
+            };
             let list = build_cabinet(&cab).unwrap();
             assert_eq!(check(&list), [], "{kind:?}");
         }

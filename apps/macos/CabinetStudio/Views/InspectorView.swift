@@ -71,6 +71,22 @@ struct SizeSection: View {
                 }), in: 0...8)
                 .monospacedDigit()
             }
+            HStack(spacing: 6) {
+                Text("Seen ends").foregroundStyle(.secondary)
+                Spacer()
+                ForEach(["left", "right"], id: \.self) { side in
+                    let on = cab.exposed(side)
+                    Button {
+                        withAnimation(.snappy) { var c = cab; c.setExposed(side, !on); project.selected = c }
+                    } label: {
+                        Image(systemName: side == "left" ? "rectangle.lefthalf.inset.filled" : "rectangle.righthalf.inset.filled")
+                    }
+                    .buttonStyle(ChipStyle(selected: on))
+                    .help(on ? "The \(side) side is seen from the room: no screws through it (biscuits, dowels and glue)."
+                             : "The \(side) side is hidden: screws through it are fine. Click if it will be seen.")
+                    .accessibilityLabel("\(side.capitalized) side \(on ? "seen" : "hidden")")
+                }
+            }
             if cab.shelves > 0 {
                 HStack(spacing: 6) {
                     Text("Fixed").foregroundStyle(.secondary)

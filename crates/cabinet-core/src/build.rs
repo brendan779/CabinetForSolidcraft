@@ -50,6 +50,7 @@ pub fn build_cabinet(cab: &Cabinet) -> Result<PartList> {
     b.plinth();
     b.wall_hanging();
     b.sink();
+    b.cover_caps();
     let mut list = b.list;
     for p in &mut list.parts {
         let o = cab.origin;
@@ -222,15 +223,54 @@ impl<'a> Builder<'a> {
         // Joints running back to front stop at the interior's back: behind it is the back
         // panel and its grooves.
         let limit = (along == Axis::Y).then_some((f64::NEG_INFINITY, self.interior_back));
+        // Through an exposed side, screws would show from the room.
+        let hidden = match face.role {
+            PartRole::LeftSide => self.cab.exposed.left,
+            PartRole::RightSide => self.cab.exposed.right,
+            _ => false,
+        };
         let joint = ButtJoint {
             face_part: face,
             end_part: end,
             normal,
             along,
             limit,
+            hidden,
         };
         let ops = joint.operations(&self.cab.standard, &mut self.list.warnings);
         self.list.operations.extend(ops);
+    }
+
+    /// A cover cap for every screw head left showing, per panel.
+    fn cover_caps(&mut self) {
+        let mut per_part: Vec<(String, u32)> = Vec::new();
+        for op in &self.list.operations {
+            if let Operation::Bore {
+                part,
+                purpose: BorePurpose::Countersink,
+                ..
+            } = op
+            {
+                match per_part.iter_mut().find(|(p, _)| p == part) {
+                    Some((_, n)) => *n += 1,
+                    None => per_part.push((part.clone(), 1)),
+                }
+            }
+        }
+        for (part, quantity) in per_part {
+            let at = self
+                .list
+                .part(&part)
+                .map(|p| p.bounds.center())
+                .unwrap_or_default();
+            self.list.hardware.push(HardwarePlacement {
+                item: "screw-cover-cap".into(),
+                description: "Screw cover cap, colour to match the carcass".into(),
+                at,
+                part,
+                quantity,
+            });
+        }
     }
 
     fn carcass(&mut self) {
@@ -1129,6 +1169,10 @@ mod tests {
                 .iter()
                 .filter_map(|o| match o {
                     Operation::Bore {
+                        purpose: BorePurpose::Countersink,
+                        ..
+                    } => None,
+                    Operation::Bore {
                         part,
                         at,
                         diameter,
@@ -1350,6 +1394,61 @@ mod tests {
     }
 
     #[test]
+    fn every_screw_is_countersunk_and_capped() {
+        let list = build_cabinet(&Cabinet::new("B01", CabinetKind::Base)).unwrap();
+        let screws: Vec<_> = list
+            .operations
+            .iter()
+            .filter_map(|o| match o {
+                Operation::Bore {
+                    part,
+                    at,
+                    purpose: BorePurpose::Screw,
+                    ..
+                } => Some((part, at)),
+                _ => None,
+            })
+            .collect();
+        assert!(!screws.is_empty());
+        for (part, at) in &screws {
+            assert!(
+                list.operations.iter().any(|o| matches!(o,
+                Operation::Bore { part: p, at: a, purpose: BorePurpose::Countersink, diameter, .. }
+                    if p == *part && a == *at && *diameter == 8.0)),
+                "{part} {at:?}"
+            );
+        }
+        let caps: u32 = list
+            .hardware
+            .iter()
+            .filter(|h| h.item == "screw-cover-cap")
+            .map(|h| h.quantity)
+            .sum();
+        assert_eq!(caps as usize, screws.len());
+    }
+
+    #[test]
+    fn an_exposed_end_has_no_screws_through_it() {
+        let mut cab = Cabinet::new("B01", CabinetKind::Base);
+        cab.exposed.left = true;
+        let list = build_cabinet(&cab).unwrap();
+        let through = |side: &str| {
+            list.operations
+                .iter()
+                .filter(|o| matches!(o, Operation::Bore { part, purpose: BorePurpose::Screw, .. } if part == side))
+                .count()
+        };
+        assert_eq!(through("B01.LeftSide"), 0);
+        assert!(
+            through("B01.RightSide") > 0,
+            "the hidden side keeps its screws"
+        );
+        // Its joints are still biscuited.
+        assert!(list.operations.iter().any(|o| matches!(o,
+            Operation::BiscuitSlot { parts, .. } if parts[0] == "B01.LeftSide")));
+    }
+
+    #[test]
     fn rails_are_screwed_not_biscuited() {
         let list = build_cabinet(&base()).unwrap();
         assert!(!list.operations.iter().any(
@@ -1439,6 +1538,11 @@ mod tests {
                 .operations
                 .iter()
                 .filter_map(|o| match o {
+                    // A countersink is its screw hole's seat, not another hole.
+                    Operation::Bore {
+                        purpose: BorePurpose::Countersink,
+                        ..
+                    } => None,
                     Operation::Bore {
                         part, at, diameter, ..
                     } => Some((part, *at, *diameter)),

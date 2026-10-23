@@ -88,6 +88,19 @@ struct CabinetDoc: Identifiable, Hashable, Codable {
         set { setBlind("filler", newValue) }
     }
 
+    /// Whether the cabinet's `left` or `right` side is seen from the room (no screws through it).
+    func exposed(_ side: String) -> Bool {
+        ((object["exposed"] as? [String: Any])?[side] as? Bool) ?? false
+    }
+
+    mutating func setExposed(_ side: String, _ on: Bool) {
+        update { o in
+            var e = o["exposed"] as? [String: Any] ?? [:]
+            e[side] = on
+            o["exposed"] = e
+        }
+    }
+
     /// Sink cabinet options: `back_cutout`, `liner`.
     func sinkOption(_ key: String) -> Bool {
         ((object["sink"] as? [String: Any])?[key] as? Bool) ?? true

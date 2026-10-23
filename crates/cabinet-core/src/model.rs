@@ -42,6 +42,22 @@ pub struct Cabinet {
     /// Sink cabinet options (ignored by other kinds).
     #[serde(default)]
     pub sink: Sink,
+    /// Sides seen from the room (the end of a run without an end panel): no screws through them.
+    #[serde(default, skip_serializing_if = "Exposed::is_none")]
+    pub exposed: Exposed,
+}
+
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(default)]
+pub struct Exposed {
+    pub left: bool,
+    pub right: bool,
+}
+
+impl Exposed {
+    pub fn is_none(&self) -> bool {
+        !self.left && !self.right
+    }
 }
 
 /// A sink cabinet is a base cabinet without the back rail, where the bowl and plumbing go.
@@ -104,6 +120,7 @@ impl Cabinet {
             fixed_shelves: Vec::new(),
             blind: Blind::default(),
             sink: Sink::default(),
+            exposed: Exposed::default(),
         }
     }
 
