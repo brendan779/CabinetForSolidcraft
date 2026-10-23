@@ -26,6 +26,7 @@ over its control socket. When SolidCraft ships its WASM plugin runtime, the core
 ```bash
 scripts/check.sh               # the gate: fmt, clippy -D warnings, tests, app build
 scripts/build-core.sh          # Rust → CabinetCore.xcframework + Swift bindings
+cargo insta review             # accept changed golden part lists / cut sheet snapshots (cargo install cargo-insta)
 cd apps/macos && xcodegen      # regenerate the Xcode project
 cargo run -q -p solidcraft-bridge --example emit_base   # live build into the running SolidCraft
 cargo run -q -p solidcraft-bridge --example emit_base -- --script target/run.json \
@@ -43,7 +44,8 @@ Rust is installed through Homebrew's rustup: `export PATH="$HOME/.cargo/bin:/opt
   source, never as unexplained literals. Existing constants in `build.rs` that say VERIFY are
   temporary.
 - Tests describe behaviour in their names (`rails_are_screwed_not_biscuited`). Every new rule gets
-  a test.
+  a test. A rule change also changes the golden part lists (`crates/cabinet-core/tests/snapshots`):
+  review the diff, then accept it with `cargo insta review`.
 - Comments explain why, briefly. Match the density of the file you're in.
 - The UI is the product: every option is a picture, not a number field. Use system materials and
   controls, Liquid Glass on macOS 26 through `glassBackground()`, and animate changes with

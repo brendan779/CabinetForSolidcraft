@@ -26,7 +26,7 @@ Priorities: **P0** blocks most other work · **P1** MVP · **P2** commercial par
 | INF-1 | done (initial) | M | Cargo workspace, crates, SwiftUI app shell, build-core.sh, check.sh | `scripts/check.sh` green |
 | INF-2 | done (e4e904d) | S | GitHub Actions CI on `macos-latest`: `scripts/check.sh` | CI badge green on main |
 | INF-3 | todo | S | Move the Swift app to Swift 6 language mode with strict concurrency | builds with `SWIFT_VERSION = 6`, no warnings |
-| INF-4 | todo | M | Snapshot tests for SVG cut sheets (insta crate) and a golden part list per cabinet kind | `cargo insta test` passes; goldens committed |
+| INF-4 | done (night/2026-10-23) | M | Snapshot tests for SVG cut sheets (insta crate) and a golden part list per cabinet kind | `cargo insta test` passes; goldens committed |
 | INF-5 | todo | S | `cargo deny` licence/advisory check in check.sh | added and green |
 | PERF-1 | done (night/2026-10-23) | M | **Batch machining per panel.** Emit all bores on one face of a panel as one sketch (circles) + one extrude cut instead of one `solid.cylinder` cut each. Tall cabinet at Manufacturing detail currently takes ~121 s for 293 commands | Tall cabinet at Manufacturing detail builds in < 10 s against SolidCraft 0.20; timing recorded in docs/perf.md |
 | PERF-2 | done (night/2026-10-23) | S | Measure and record per-command cost (`engine.batch` `profile: true`) for box, cut box, cylinder cut and sketch cut on 16 mm panels | table in docs/perf.md |
@@ -178,3 +178,4 @@ Agents append one line per session: date, items touched, outcome.
 - 2026-10-23 (night) — PERF-2 done: per-command costs in docs/perf.md (cylinder cuts grow ~3 ms per existing feature; one sketch extrude is 11–33× faster).
 - 2026-10-23 (night) — PERF-1 done: bores batched per panel face (sketch + one extrude); tall cabinet at Manufacturing detail 88.1 s → 3.9 s headless, volumes unchanged. Connected (app) timing still to confirm.
 - 2026-10-23 (night) — DATA-1 done: tools/parse_polytec.py reads the DECORATIVE board tables (9-32 mm) from word positions; 459 boards, 717 tapes; 263/263 decorative 16/18 mm rows with board codes parsed and cross-checked against `pdftotext -layout`. DATA-10 added for the rest of the guide.
+- 2026-10-23 (night) — INF-4 done: insta golden part list per cabinet kind and SVG snapshots of every base cabinet sheet; `cargo insta test --check` passes.
