@@ -88,6 +88,19 @@ struct CabinetDoc: Identifiable, Hashable, Codable {
         set { setBlind("filler", newValue) }
     }
 
+    /// Sink cabinet options: `back_cutout`, `liner`.
+    func sinkOption(_ key: String) -> Bool {
+        ((object["sink"] as? [String: Any])?[key] as? Bool) ?? true
+    }
+
+    mutating func setSinkOption(_ key: String, _ on: Bool) {
+        update { o in
+            var sink = o["sink"] as? [String: Any] ?? [:]
+            sink[key] = on
+            o["sink"] = sink
+        }
+    }
+
     /// X offset of the cabinet in the run.
     var originX: Double {
         get { ((object["origin"] as? [String: Any])?["x"] as? NSNumber)?.doubleValue ?? 0 }
@@ -442,6 +455,7 @@ extension CabinetDoc {
         case "drawer_bank": "Drawer bank"
         case "open_shelf": "Open shelf"
         case "blind_corner": "Blind corner"
+        case "sink": "Sink"
         default: kind.capitalized
         }
     }
@@ -454,6 +468,7 @@ extension CabinetDoc {
         case "drawer_bank": "square.split.1x2.fill"
         case "open_shelf": "rectangle.split.3x1"
         case "blind_corner": "rectangle.lefthalf.inset.filled"
+        case "sink": "drop"
         default: "cube"
         }
     }

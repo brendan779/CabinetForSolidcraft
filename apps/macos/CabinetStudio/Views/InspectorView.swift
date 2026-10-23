@@ -12,6 +12,9 @@ struct InspectorView: View {
                     if cab.kind == "blind_corner" {
                         BlindSection(cab: cab)
                     }
+                    if cab.kind == "sink" {
+                        SinkSection(cab: cab)
+                    }
                     FrontsSection(cab: cab)
                     ForEach(optionGroups(), id: \.field) { group in
                         VisualPicker(group: group, selected: project.option(group.field, of: cab)) { choice in
@@ -123,6 +126,43 @@ struct SizeSection: View {
                         Button("\(Int(p))") { withAnimation(.snappy) { set(p) } }
                             .buttonStyle(ChipStyle(selected: abs(p - value) < 0.5))
                     }
+                }
+            }
+        }
+    }
+}
+
+/// A sink cabinet's options, each a tile with a drawing.
+struct SinkSection: View {
+    @Environment(ProjectModel.self) private var project
+    let cab: CabinetDoc
+
+    private let options: [(key: String, title: String, symbol: String, help: String)] = [
+        ("back_cutout", "Pipe cut-out", "rectangle.bottomhalf.inset.filled",
+         "An opening low in the back for the waste and water pipes"),
+        ("liner", "Base liner", "drop.triangle",
+         "A waterproof liner on the bottom panel, in the hardware list"),
+    ]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            SectionTitle("Sink")
+            HStack(spacing: 8) {
+                ForEach(options, id: \.key) { o in
+                    let on = cab.sinkOption(o.key)
+                    Button {
+                        withAnimation(.snappy) { var c = cab; c.setSinkOption(o.key, !on); project.selected = c }
+                    } label: {
+                        VStack(spacing: 6) {
+                            Image(systemName: o.symbol).font(.title2).frame(height: 30)
+                            Text(o.title).font(.caption)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 8)
+                    }
+                    .buttonStyle(TileStyle(selected: on))
+                    .help(o.help)
+                    .accessibilityValue(on ? "on" : "off")
                 }
             }
         }

@@ -39,6 +39,28 @@ pub struct Cabinet {
     /// The blind part of a blind corner cabinet (ignored by other kinds).
     #[serde(default)]
     pub blind: Blind,
+    /// Sink cabinet options (ignored by other kinds).
+    #[serde(default)]
+    pub sink: Sink,
+}
+
+/// A sink cabinet is a base cabinet without the back rail, where the bowl and plumbing go.
+#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(default)]
+pub struct Sink {
+    /// A cut-out low in the back for the waste and water pipes.
+    pub back_cutout: bool,
+    /// A waterproof liner on the bottom panel.
+    pub liner: bool,
+}
+
+impl Default for Sink {
+    fn default() -> Self {
+        Self {
+            back_cutout: true,
+            liner: true,
+        }
+    }
 }
 
 /// A blind corner cabinet's front: from its blind side, a fixed blind panel and a filler cover
@@ -81,6 +103,7 @@ impl Cabinet {
             adjustable_shelves: kind.default_shelves(),
             fixed_shelves: Vec::new(),
             blind: Blind::default(),
+            sink: Sink::default(),
         }
     }
 
@@ -104,6 +127,7 @@ impl Cabinet {
                 | CabinetKind::Tall
                 | CabinetKind::DrawerBank
                 | CabinetKind::BlindCorner
+                | CabinetKind::Sink
         ) && self.standard.toe_kick != ToeKick::None
     }
 }
@@ -118,16 +142,19 @@ pub enum CabinetKind {
     OpenShelf,
     /// A base cabinet in an inside corner: part of its front is blind behind the other run.
     BlindCorner,
+    /// A base cabinet for a sink: no back rail, a cut-out for pipes and a waterproof liner.
+    Sink,
 }
 
 impl CabinetKind {
-    pub const ALL: [CabinetKind; 6] = [
+    pub const ALL: [CabinetKind; 7] = [
         CabinetKind::Base,
         CabinetKind::Wall,
         CabinetKind::Tall,
         CabinetKind::DrawerBank,
         CabinetKind::OpenShelf,
         CabinetKind::BlindCorner,
+        CabinetKind::Sink,
     ];
 
     /// The kind a drawn box most likely is: as tall as a pantry → tall, hanging off the floor →
@@ -151,6 +178,7 @@ impl CabinetKind {
             CabinetKind::Tall => (600.0, 580.0, 2100.0),
             CabinetKind::OpenShelf => (600.0, 300.0, 720.0),
             CabinetKind::BlindCorner => (1000.0, 580.0, 870.0),
+            CabinetKind::Sink => (900.0, 580.0, 870.0),
         }
     }
 
@@ -177,6 +205,8 @@ impl CabinetKind {
             | CabinetKind::Wall
             | CabinetKind::OpenShelf
             | CabinetKind::BlindCorner => 1,
+            // The bowl and pipes take the space.
+            CabinetKind::Sink => 0,
             CabinetKind::Tall => 4,
             CabinetKind::DrawerBank => 0,
         }

@@ -18,6 +18,11 @@ const BACK_INSET: f64 = 16.0;
 /// The narrowest door a blind corner may be left with: a hinged door narrower than this has no
 /// room for hinge cups and a handle.
 const MIN_BLIND_DOOR: f64 = 250.0;
+/// A sink cabinet's pipe cut-out in the back: how high it reaches above the bottom panel, and how
+/// far it stays in from the sides (room for the back's fixings and stiffness). Wastes and stop
+/// valves sit low, under about 400 mm.
+const SINK_CUTOUT_HEIGHT: f64 = 400.0;
+const SINK_CUTOUT_SIDE_MARGIN: f64 = 50.0;
 /// Clearance each side of an adjustable shelf.
 const SHELF_SIDE_CLEARANCE: f64 = 1.0;
 /// 32 mm system: shelf-pin and hinge-plate rows sit 37 mm in from the front and back.
@@ -44,6 +49,7 @@ pub fn build_cabinet(cab: &Cabinet) -> Result<PartList> {
     b.shelves();
     b.plinth();
     b.wall_hanging();
+    b.sink();
     let mut list = b.list;
     for p in &mut list.parts {
         let o = cab.origin;
@@ -316,14 +322,17 @@ impl<'a> Builder<'a> {
                     Axis::X,
                     EdgeBanding::front_only(),
                 );
-                self.add(
-                    PartRole::BackRail,
-                    None,
-                    aabb(t, back_y0 - rw, h - t, w - t, back_y0, h),
-                    Axis::Z,
-                    Axis::X,
-                    EdgeBanding::default(),
-                );
+                // A sink bowl and its plumbing take the back rail's place.
+                if cab.kind != CabinetKind::Sink {
+                    self.add(
+                        PartRole::BackRail,
+                        None,
+                        aabb(t, back_y0 - rw, h - t, w - t, back_y0, h),
+                        Axis::Z,
+                        Axis::X,
+                        EdgeBanding::default(),
+                    );
+                }
             }
             TopJoint::BetweenSides => {
                 self.add(
@@ -610,7 +619,10 @@ impl<'a> Builder<'a> {
         );
         let under_bench = matches!(
             cab.kind,
-            CabinetKind::Base | CabinetKind::DrawerBank | CabinetKind::BlindCorner
+            CabinetKind::Base
+                | CabinetKind::DrawerBank
+                | CabinetKind::BlindCorner
+                | CabinetKind::Sink
         );
         let top_gap = if under_bench { g } else { 0.0 };
         match s.overlay {
@@ -811,6 +823,46 @@ impl<'a> Builder<'a> {
             part: self.name(PartRole::Back, None),
             quantity: 1,
         });
+    }
+
+    /// A sink cabinet's pipe cut-out in the back and its waterproof liner.
+    fn sink(&mut self) {
+        let cab = self.cab;
+        if cab.kind != CabinetKind::Sink {
+            return;
+        }
+        let t = cab.standard.carcass_thickness;
+        let (z0, _) = self.opening_z;
+        if cab.sink.back_cutout {
+            if let Some(back) = self.part(PartRole::Back) {
+                // Through the back, from the bottom panel up, leaving the sides' fixings clear.
+                let b = &back.bounds;
+                let x0 = (t + SINK_CUTOUT_SIDE_MARGIN).max(b.min.x);
+                let x1 = (cab.width - t - SINK_CUTOUT_SIDE_MARGIN).min(b.max().x);
+                let z1 = (z0 + SINK_CUTOUT_HEIGHT).min(b.max().z);
+                self.list.operations.push(Operation::Groove {
+                    part: back.name.clone(),
+                    bounds: aabb(x0, b.min.y, z0, x1, b.max().y, z1),
+                });
+            } else {
+                self.list
+                    .warnings
+                    .push("no back to cut the pipe opening in".into());
+            }
+        }
+        if cab.sink.liner {
+            let bottom = self
+                .part(PartRole::Bottom)
+                .expect("every carcass has a bottom");
+            let (iw, id) = (cab.width - 2.0 * t, self.interior_back);
+            self.list.hardware.push(HardwarePlacement {
+                item: "sink-base-liner".into(),
+                description: format!("Waterproof sink base liner, cut to {iw:.0} × {id:.0} mm"),
+                at: Vec3::new(cab.width / 2.0, id / 2.0, bottom.bounds.max().z),
+                part: bottom.name,
+                quantity: 1,
+            });
+        }
     }
 
     fn plinth(&mut self) {
@@ -1218,6 +1270,55 @@ mod tests {
         assert!(matches!(build_cabinet(&cab), Err(Error::TooSmall(_))));
         cab.blind.width = 40.0;
         assert!(matches!(build_cabinet(&cab), Err(Error::Invalid(_))));
+    }
+
+    #[test]
+    fn a_sink_cabinet_has_no_back_rail_a_pipe_cut_out_and_a_liner() {
+        let cab = Cabinet::new("S01", CabinetKind::Sink);
+        let list = build_cabinet(&cab).unwrap();
+        assert!(list.part("S01.FrontRail").is_some());
+        assert!(list.part("S01.BackRail").is_none());
+        assert_eq!(list.by_role(PartRole::Shelf).count(), 0);
+        let back = list.part("S01.Back").unwrap();
+        let cutout = list
+            .operations
+            .iter()
+            .find_map(|o| match o {
+                Operation::Groove { part, bounds } if *part == back.name => Some(bounds),
+                _ => None,
+            })
+            .expect("a pipe cut-out in the back");
+        assert_eq!(cutout.size.y, back.thickness(), "through the back");
+        assert_eq!(
+            cutout.min.z,
+            list.part("S01.Bottom").unwrap().bounds.max().z
+        );
+        let liner = list
+            .hardware
+            .iter()
+            .find(|h| h.item == "sink-base-liner")
+            .expect("liner in the hardware list");
+        assert_eq!(liner.part, "S01.Bottom");
+        assert!(
+            liner.description.contains("868 × 558"),
+            "{}",
+            liner.description
+        );
+    }
+
+    #[test]
+    fn sink_options_can_be_turned_off() {
+        let mut cab = Cabinet::new("S01", CabinetKind::Sink);
+        cab.sink.back_cutout = false;
+        cab.sink.liner = false;
+        let list = build_cabinet(&cab).unwrap();
+        assert!(!list.hardware.iter().any(|h| h.item == "sink-base-liner"));
+        assert!(
+            !list
+                .operations
+                .iter()
+                .any(|o| matches!(o, Operation::Groove { part, .. } if part == "S01.Back"))
+        );
     }
 
     #[test]
