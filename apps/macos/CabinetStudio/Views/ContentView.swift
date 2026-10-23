@@ -78,6 +78,9 @@ struct SolidCraftButton: View {
             Button("Load Cabinets from Design", systemImage: "square.and.arrow.down") {
                 Task { await project.loadCabinetsFromDesign() }
             }
+            Button("Render to PNG", systemImage: "camera.aperture") {
+                Task { await project.render() }
+            }
             Button("Check Connection") { Task { await project.checkConnection() } }
         } label: {
             Label("SolidCraft", systemImage: project.isSending ? "hourglass" : "shippingbox")

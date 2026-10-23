@@ -50,6 +50,9 @@ struct JobCommands: Commands {
             Button("Build in SolidCraft") { Task { await project?.sendToSolidCraft() } }
                 .keyboardShortcut("b", modifiers: [.command, .shift])
                 .disabled(project == nil || project?.isSending == true)
+            Button("Render to PNG") { Task { await project?.render() } }
+                .keyboardShortcut("r", modifiers: [.command, .shift])
+                .disabled(project == nil || project?.isSending == true)
             Button("Check Connection") { Task { await project?.checkConnection() } }
                 .disabled(project == nil)
         }

@@ -642,6 +642,99 @@ pub fn hardware_bom_pdf(
     ))
 }
 
+/// The render setup the app saves in the design: SolidCraft 0.20's built-in renderer offers the
+/// `preview` mode only.
+const RENDER_SETUP: &str = "Cabinet Studio";
+
+/// A three-quarter view from the front that takes in every part of `lists`: SolidCraft's own
+/// isometric angles, aimed at the middle, far enough back for the whole box.
+fn render_camera(lists: &[PartList]) -> serde_json::Value {
+    let mut lo = [f64::MAX; 3];
+    let mut hi = [f64::MIN; 3];
+    for p in lists.iter().flat_map(|l| &l.parts) {
+        let (a, b) = (p.bounds.min.to_array(), p.bounds.max().to_array());
+        for i in 0..3 {
+            lo[i] = lo[i].min(a[i]);
+            hi[i] = hi[i].max(b[i]);
+        }
+    }
+    if lo[0] > hi[0] {
+        (lo, hi) = ([0.0; 3], [600.0; 3]);
+    }
+    let centre: Vec<f64> = (0..3).map(|i| (lo[i] + hi[i]) / 2.0).collect();
+    let diagonal = (0..3).map(|i| (hi[i] - lo[i]).powi(2)).sum::<f64>().sqrt();
+    serde_json::json!({
+        "target": centre,
+        "yaw": -std::f64::consts::FRAC_PI_4,
+        "pitch": 0.45,
+        "distance": 1.35 * diagonal,
+        "fov": 0.0,
+        "roll": 0.0,
+        "up": "z",
+    })
+}
+
+/// Renders the design open in SolidCraft to a PNG at `path`, `width` × `height` pixels, framed on
+/// the job's cabinets, and returns the path. Saves (or updates) a render setup named "Cabinet
+/// Studio" in the design. Blocking, up to two minutes: call it off the main thread.
+#[uniffi::export]
+pub fn render_png(
+    items: JobItems,
+    port: u16,
+    path: String,
+    width: u32,
+    height: u32,
+) -> Result<String, CoreError> {
+    let sc = |e: solidcraft_bridge::Error| CoreError::SolidCraft {
+        message: e.to_string(),
+    };
+    let lists: Vec<PartList> = job_lists(&items)?.into_iter().map(|(l, _)| l).collect();
+    let mut client = Client::connect(port).map_err(sc)?;
+    client
+        .execute(
+            "render.settings.set",
+            serde_json::json!({ "name": RENDER_SETUP, "set": {
+                "mode": "preview", "width": width, "height": height, "camera": render_camera(&lists)
+            } }),
+        )
+        .map_err(sc)?;
+    let started = client
+        .execute("render.start", serde_json::json!({ "setup": RENDER_SETUP }))
+        .map_err(sc)?;
+    let job = started["job"].clone();
+    if job.is_null() {
+        return Err(invalid(format!(
+            "SolidCraft started no render job: {started}"
+        )));
+    }
+    let deadline = std::time::Instant::now() + std::time::Duration::from_secs(120);
+    loop {
+        // The status names its error when the job failed; otherwise the export succeeds once the
+        // image is done.
+        let status = client
+            .execute("render.status", serde_json::json!({ "job": job }))
+            .map_err(sc)?;
+        if let Some(e) = status.get("error").filter(|e| !e.is_null()) {
+            return Err(CoreError::SolidCraft {
+                message: format!("the render failed: {e}"),
+            });
+        }
+        let exported = client.execute(
+            "render.export",
+            serde_json::json!({ "job": job, "path": path, "overwrite": true }),
+        );
+        if exported.is_ok() {
+            return Ok(path);
+        }
+        if std::time::Instant::now() > deadline {
+            return Err(CoreError::SolidCraft {
+                message: format!("the render did not finish in two minutes: {status}"),
+            });
+        }
+        std::thread::sleep(std::time::Duration::from_millis(400));
+    }
+}
+
 /// Whether a SolidCraft app answers on `port`.
 #[uniffi::export]
 pub fn solidcraft_reachable(port: u16) -> bool {

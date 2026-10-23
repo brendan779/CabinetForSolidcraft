@@ -229,6 +229,8 @@ final class ProjectModel {
     var standardJson: String
     /// Picker changes go to the selected cabinet only, as an override, instead of the whole job.
     var onlyThisCabinet = false
+    /// Where the job is saved; nil until it is.
+    var fileURL: URL?
     /// SolidCraft's control port, from Settings.
     var port: UInt16 { Preferences.port }
 
@@ -497,6 +499,40 @@ final class ProjectModel {
         case .failure(let e):
             lastError = "\(e)"
             status = "SolidCraft did not build the cabinets"
+            await checkConnection()
+        }
+    }
+
+    /// Renders the design in SolidCraft to a PNG next to the job file (or where the user picks
+    /// for a job not saved yet) and shows it in the Finder.
+    func render() async {
+        let url: URL
+        if let file = fileURL {
+            url = file.deletingLastPathComponent().appendingPathComponent("\(jobName) render.png")
+        } else {
+            let panel = NSSavePanel()
+            panel.allowedContentTypes = [.png]
+            panel.nameFieldStringValue = "\(jobName) render.png"
+            guard panel.runModal() == .OK, let picked = panel.url else { return }
+            url = picked
+        }
+        isSending = true
+        lastError = nil
+        status = "Rendering in SolidCraft…"
+        let port = self.port
+        let path = url.path
+        let job = jobItems
+        let result = await Task.detached { () -> Result<String, Error> in
+            Result { try renderPng(items: job, port: port, path: path, width: 2000, height: 1250) }
+        }.value
+        isSending = false
+        switch result {
+        case .success:
+            status = "Rendered \(url.lastPathComponent)"
+            NSWorkspace.shared.activateFileViewerSelecting([url])
+        case .failure(let e):
+            lastError = "\(e)"
+            status = "SolidCraft did not render"
             await checkConnection()
         }
     }

@@ -70,6 +70,7 @@ struct JobWindow: View {
             }
             .onChange(of: undoManager) { _, new in project.undoManager = new }
             .onChange(of: fileURL, initial: true) { _, url in
+                project.fileURL = url
                 if let url { project.jobName = url.deletingPathExtension().lastPathComponent }
             }
     }
