@@ -142,11 +142,14 @@ struct CabinetViewport: View {
     let look: ViewportLook
     @Binding var hovered: HoveredPart?
     @State private var scene = ViewportScene()
+    /// Bumped when a texture finishes loading, to update the scene.
+    @State private var textures = 0
 
     var body: some View {
         GeometryReader { geo in
             RealityView { content in
                 content.add(scene.root)
+                scene.onTextureLoaded = { textures += 1 }
 
                 let sun = DirectionalLight()
                 sun.light.intensity = 3200
@@ -171,6 +174,7 @@ struct CabinetViewport: View {
                 floor.position.y = -0.0005
                 content.add(floor)
             } update: { _ in
+                _ = textures
                 scene.update(project: project, look: look, hovered: hovered?.panel.name)
             }
             .realityViewCameraControls(.orbit)
@@ -234,7 +238,8 @@ final class ViewportScene {
                 seen.insert(p.name)
                 panels[p.name] = p
                 let e = entity(for: box)
-                e.model?.materials = [Self.material(box, selected: selected, hovered: p.name == hovered)]
+                let board = project.boardsById[p.board]
+                e.model?.materials = [material(box, board: board, selected: selected, hovered: p.name == hovered)]
                 let target = Self.transform(box, centre: centre, look: look)
                 if animate && p.isFront {
                     e.move(to: target, relativeTo: root, duration: 0.45, timingFunction: .easeInOut)
@@ -264,7 +269,7 @@ final class ViewportScene {
         root.findEntity(named: p.name)?.removeFromParent()
         // The geometry sits off the entity's origin so the origin is the pivot.
         let offset = Self.mid(p) - Self.pivot(p)
-        let e = ModelEntity(mesh: Self.offsetMesh(size: size, by: offset), materials: [])
+        let e = ModelEntity(mesh: Self.offsetMesh(size: size, by: offset, grain: Self.grainAxis(p)), materials: [])
         e.name = p.name
         e.components.set(InputTargetComponent())
         e.collision = CollisionComponent(shapes: [ShapeResource.generateBox(size: size).offsetBy(translation: offset)])
@@ -273,7 +278,19 @@ final class ViewportScene {
         return e
     }
 
-    private static func offsetMesh(size: SIMD3<Float>, by offset: SIMD3<Float>) -> MeshResource {
+    /// The panel's grain direction as a RealityKit axis index (x 0, y 1, z 2).
+    private static func grainAxis(_ p: PanelBox) -> Int? {
+        switch p.grain {
+        case "x": 0
+        case "y": 2
+        case "z": 1
+        default: nil
+        }
+    }
+
+    /// A box mesh whose texture coordinates are in metres along each face, the first one along the
+    /// grain where the face has it, so a woodgrain texture runs the right way at its true scale.
+    private static func offsetMesh(size: SIMD3<Float>, by offset: SIMD3<Float>, grain: Int?) -> MeshResource {
         var desc = MeshDescriptor()
         let h = size / 2
         let corners: [SIMD3<Float>] = (0..<8).map { i in
@@ -289,10 +306,14 @@ final class ViewportScene {
         var indices: [UInt32] = []
         for (quad, n) in faces {
             let base = UInt32(positions.count)
-            for (k, i) in quad.enumerated() {
+            let normal = n.x != 0 ? 0 : n.y != 0 ? 1 : 2
+            var plane = [0, 1, 2].filter { $0 != normal }
+            if let g = grain, plane.contains(g), plane[0] != g { plane.reverse() }
+            for i in quad {
                 positions.append(corners[i])
                 normals.append(n)
-                uvs.append([k == 1 || k == 2 ? 1 : 0, k >= 2 ? 1 : 0])
+                let p = corners[i] - offset + size / 2
+                uvs.append([p[plane[0]], p[plane[1]]] / Self.grainRepeat)
             }
             // Counter-clockwise seen from outside, so the faces point out.
             indices += [base, base + 2, base + 1, base, base + 3, base + 2]
@@ -344,19 +365,101 @@ final class ViewportScene {
         return t
     }
 
-    private static func material(_ p: PanelBox, selected: Bool, hovered: Bool) -> PhysicallyBasedMaterial {
-        let colour: NSColor = p.isFront
+    /// One woodgrain texture tile covers this many metres.
+    private static let grainRepeat: Float = 0.6
+    private var grainTextures: [String: TextureResource] = [:]
+
+    /// The board's preview colour (generic colours without a board), with a woodgrain texture for
+    /// grained decors. Cabinets other than the selected one are greyed a little.
+    private func material(_ p: PanelBox, board: BoardRecord?, selected: Bool, hovered: Bool) -> PhysicallyBasedMaterial {
+        let generic: NSColor = p.isFront
             ? NSColor(calibratedRed: 0.78, green: 0.65, blue: 0.48, alpha: 1)
             : NSColor(calibratedWhite: p.role == "Back" ? 0.78 : 0.93, alpha: 1)
+        let colour = board?.displayColour ?? generic
         var m = PhysicallyBasedMaterial()
-        m.baseColor = .init(tint: selected ? colour : colour.blended(withFraction: 0.35, of: .gray) ?? colour)
-        m.roughness = 0.65
+        let tint = selected ? NSColor.white : NSColor(calibratedWhite: 0.72, alpha: 1)
+        if let board, board.grained, let texture = grainTexture(board.id, colour) {
+            let sampler = MTLSamplerDescriptor()
+            sampler.sAddressMode = .repeat
+            sampler.tAddressMode = .repeat
+            sampler.minFilter = .linear
+            sampler.magFilter = .linear
+            sampler.mipFilter = .linear
+            m.baseColor = .init(tint: tint, texture: .init(texture, sampler: .init(sampler)))
+        } else {
+            m.baseColor = .init(tint: selected ? colour : colour.blended(withFraction: 0.35, of: .gray) ?? colour)
+        }
+        m.roughness = board?.finish.lowercased().contains("gloss") == true ? 0.2 : 0.65
         // The selected cabinet glows faintly in the accent colour; the panel under the pointer more.
         if selected || hovered {
             m.emissiveColor = .init(color: .controlAccentColor)
             m.emissiveIntensity = hovered ? 0.6 : 0.12
         }
         return m
+    }
+
+    private var loading: Set<String> = []
+    /// Called when a texture has loaded, so the viewport updates with it.
+    var onTextureLoaded: (() -> Void)?
+
+    /// The decor's woodgrain texture, or nil while it loads.
+    private func grainTexture(_ key: String, _ colour: NSColor) -> TextureResource? {
+        if let t = grainTextures[key] { return t }
+        guard !loading.contains(key), let image = Self.woodgrain(colour) else { return nil }
+        loading.insert(key)
+        Task {
+            let t = try? await TextureResource(image: image, options: .init(semantic: .color, mipmapsMode: .allocateAndGenerateAll))
+            grainTextures[key] = t
+            loading.remove(key)
+            onTextureLoaded?()
+        }
+        return nil
+    }
+
+    /// A woodgrain tile in the board's colour: long, slightly wavy streaks of darker and lighter
+    /// wood along the image's x axis, the grain direction. Seeded, so a decor always looks the same.
+    static func woodgrain(_ colour: NSColor) -> CGImage? {
+        let w = 512, h = 512
+        guard let rgb = colour.usingColorSpace(.sRGB),
+              let ctx = CGContext(data: nil, width: w, height: h, bitsPerComponent: 8, bytesPerRow: 0,
+                                  space: CGColorSpace(name: CGColorSpace.sRGB)!,
+                                  bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)
+        else { return nil }
+        ctx.setFillColor(rgb.cgColor)
+        ctx.fill(CGRect(x: 0, y: 0, width: w, height: h))
+        var seed: UInt64 = 0x9E37_79B9_7F4A_7C15
+        func random() -> CGFloat {
+            seed = seed &* 6_364_136_223_846_793_005 &+ 1_442_695_040_888_963_407
+            return CGFloat(seed >> 33) / CGFloat(1 << 31)
+        }
+        // Broad soft bands first (growth rings seen flat), then fine streaks. Each is drawn again
+        // one tile up and down, so the tile repeats without a seam.
+        func stroke(y: CGFloat, width: CGFloat, colour: CGColor, amplitude: CGFloat, periods: CGFloat, phase: CGFloat) {
+            ctx.setStrokeColor(colour)
+            ctx.setLineWidth(width)
+            for shift in [-CGFloat(h), 0, CGFloat(h)] {
+                let path = CGMutablePath()
+                for x in stride(from: 0, through: w, by: 4) {
+                    let p = CGPoint(x: CGFloat(x), y: y + shift + amplitude * sin(CGFloat(x) / CGFloat(w) * 2 * .pi * periods + phase))
+                    x == 0 ? path.move(to: p) : path.addLine(to: p)
+                }
+                ctx.addPath(path)
+                ctx.strokePath()
+            }
+        }
+        for _ in 0..<14 {
+            let dark = random() < 0.5
+            stroke(y: random() * CGFloat(h), width: 10 + random() * 36,
+                   colour: dark ? CGColor(gray: 0, alpha: 0.03 + random() * 0.05) : CGColor(gray: 1, alpha: 0.03 + random() * 0.05),
+                   amplitude: 2 + random() * 6, periods: CGFloat(Int(1 + random() * 2)), phase: random() * 2 * .pi)
+        }
+        for _ in 0..<110 {
+            let dark = random() < 0.7
+            stroke(y: random() * CGFloat(h), width: 0.5 + random() * 1.6,
+                   colour: dark ? CGColor(gray: 0, alpha: 0.03 + random() * 0.08) : CGColor(gray: 1, alpha: 0.03 + random() * 0.06),
+                   amplitude: 0.5 + random() * 2.5, periods: CGFloat(Int(1 + random() * 3)), phase: random() * 2 * .pi)
+        }
+        return ctx.makeImage()
     }
 
     /// The cabinet an entity in the viewport belongs to: its part names start with the id.

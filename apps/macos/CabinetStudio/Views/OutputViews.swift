@@ -130,14 +130,21 @@ struct BoardLibraryView: View {
                 ForEach(boards, id: \.id) { b in
                     VStack(alignment: .leading, spacing: 8) {
                         RoundedRectangle(cornerRadius: 10)
-                            .fill(Color(hex: b.previewColour) ?? .gray)
+                            .fill(Color(nsColor: b.displayColour))
                             .overlay(alignment: .topTrailing) {
-                                if !b.verified {
-                                    Image(systemName: "checkmark.seal")
-                                        .foregroundStyle(.white.opacity(0.8))
-                                        .padding(6)
-                                        .help("Not yet checked against the supplier's document")
+                                HStack(spacing: 4) {
+                                    if b.colourIsGuessed {
+                                        Image(systemName: "eyedropper.halffull")
+                                            .help("Colour guessed from the decor's name: see the brand's swatch")
+                                    }
+                                    if !b.verified {
+                                        Image(systemName: "checkmark.seal")
+                                            .help("Not yet checked against the supplier's document")
+                                    }
                                 }
+                                .foregroundStyle(.white.opacity(0.8))
+                                .shadow(radius: 1)
+                                .padding(6)
                             }
                             .overlay {
                                 if b.grained {
@@ -221,6 +228,15 @@ struct GrainPattern: View {
                 i += 1
             }
         }
+    }
+}
+
+extension NSColor {
+    convenience init?(hex: String) {
+        let s = hex.trimmingCharacters(in: CharacterSet(charactersIn: "#"))
+        guard s.count == 6, let v = UInt32(s, radix: 16) else { return nil }
+        self.init(srgbRed: CGFloat((v >> 16) & 0xff) / 255, green: CGFloat((v >> 8) & 0xff) / 255,
+                  blue: CGFloat(v & 0xff) / 255, alpha: 1)
     }
 }
 

@@ -45,6 +45,10 @@ pub struct PanelBox {
     pub is_front: bool,
     /// A door's hinged edge, `left` or `right`; empty for other parts.
     pub hinged: String,
+    /// Catalog board id, or empty for the standard's generic board.
+    pub board: String,
+    /// The axis the decor's grain runs along in the cabinet frame (`x`, `y`, `z`), or empty.
+    pub grain: String,
 }
 
 #[derive(uniffi::Record)]
@@ -371,6 +375,11 @@ fn summary(list: PartList) -> BuildSummary {
                 })
                 .unwrap_or_default()
                 .to_string(),
+            board: p.board.clone(),
+            grain: p
+                .grain_axis
+                .map(|a| format!("{a:?}").to_lowercase())
+                .unwrap_or_default(),
         })
         .collect();
     let biscuits = list

@@ -644,6 +644,10 @@ final class ProjectModel {
         return job
     }
 
+    /// The bundled board catalog by id.
+    @ObservationIgnored private(set) lazy var boardsById: [String: BoardRecord] =
+        Dictionary(boards.map { ($0.id, $0) }, uniquingKeysWith: { a, _ in a })
+
     /// The bundled board catalog.
     @ObservationIgnored private(set) lazy var boards: [BoardRecord] = {
         guard let dir = Bundle.main.url(forResource: "catalog", withExtension: nil) else { return [] }
