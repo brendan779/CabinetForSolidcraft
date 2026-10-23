@@ -89,6 +89,23 @@ pub fn option_groups() -> Vec<OptionGroup> {
             ],
         ),
         group(
+            "opening",
+            "Opening",
+            &[
+                ("handles", "Handles", "Handles or knobs on every front"),
+                (
+                    "tip_on",
+                    "TIP-ON",
+                    "Handleless: press the front and it springs open",
+                ),
+                (
+                    "servo_drive",
+                    "SERVO-DRIVE",
+                    "Handleless, electric drawers; doors get TIP-ON",
+                ),
+            ],
+        ),
+        group(
             "wall_hanging",
             "Wall hanging",
             &[

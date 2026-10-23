@@ -61,6 +61,7 @@ struct ConstructionThumbnail: View {
             case "back": pen.backSection(choice)
             case "toe_kick": pen.toeKick(choice)
             case "wall_hanging": pen.wallHanging(choice)
+            case "opening": pen.opening(choice)
             case "overlay": pen.overlayPlan(choice)
             case "fixings": pen.fixing(choice)
             case "biscuit": pen.biscuit(choice)
@@ -149,6 +150,41 @@ private struct Pen {
             line(p(x1, y0 + t), p(x1, y1 - t), colour: accent, width: 1.2, dash: [3, 3])
         }
         arrowText("front", at: p(x0 + 2, y1 + 6))
+    }
+
+    // MARK: Opening, a door and a drawer from the front
+
+    func opening(_ choice: String) {
+        board(14, 8, 34, 64)        // door
+        board(54, 8, 34, 28)        // drawer fronts
+        board(54, 40, 34, 32)
+        switch choice {
+        case "handles":
+            board(42, 34, 2.5, 14, hot: true)
+            board(63, 20, 16, 2.5, hot: true)
+            board(63, 54, 16, 2.5, hot: true)
+        case "tip_on":
+            // Press here: an arrow into the door and a drawer.
+            for (x, y) in [(31.0, 40.0), (71.0, 22.0), (71.0, 56.0)] as [(CGFloat, CGFloat)] {
+                ctx.fill(Path(ellipseIn: r(x - 4, y - 4, 8, 8)), with: .color(accent.opacity(0.35)))
+                ctx.stroke(Path(ellipseIn: r(x - 4, y - 4, 8, 8)), with: .color(accent), lineWidth: 1.2)
+                ctx.fill(Path(ellipseIn: r(x - 1.2, y - 1.2, 2.4, 2.4)), with: .color(accent))
+            }
+        default:
+            // A press point on the door; a lightning bolt on each drawer.
+            ctx.stroke(Path(ellipseIn: r(27, 36, 8, 8)), with: .color(accent), lineWidth: 1.2)
+            for y in [22.0, 56.0] as [CGFloat] {
+                var bolt = Path()
+                bolt.move(to: p(73, y - 7))
+                bolt.addLine(to: p(68, y + 1))
+                bolt.addLine(to: p(72, y + 1))
+                bolt.addLine(to: p(69, y + 8))
+                bolt.addLine(to: p(76, y - 1))
+                bolt.addLine(to: p(72, y - 1))
+                bolt.closeSubpath()
+                ctx.fill(bolt, with: .color(accent))
+            }
+        }
     }
 
     // MARK: Wall hanging, side section against the wall

@@ -295,6 +295,8 @@ pub struct ConstructionStandard {
     pub edge_band_thickness: f64,
     /// How wall cabinets hang.
     pub wall_hanging: WallHanging,
+    /// How doors and drawers are opened.
+    pub opening: Opening,
 }
 
 /// Which boards of a cabinet a catalog board is assigned to.
@@ -346,6 +348,7 @@ impl Default for ConstructionStandard {
             shelf_front_setback: 2.0,
             edge_band_thickness: 1.0,
             wall_hanging: WallHanging::Hangers,
+            opening: Opening::Handles,
         }
     }
 }
@@ -385,6 +388,18 @@ pub enum BackStyle {
     /// Full-thickness back between sides, top and bottom.
     Structural,
     None,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum Opening {
+    /// Handles or knobs (HAF-2 places them).
+    Handles,
+    /// Handleless: press the front and a Blum TIP-ON unit pushes it open.
+    TipOn,
+    /// Handleless, electric: Blum SERVO-DRIVE opens drawers at a touch. Hinged doors cannot
+    /// take it and get TIP-ON.
+    ServoDrive,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]

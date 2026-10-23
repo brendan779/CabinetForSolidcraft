@@ -3,8 +3,8 @@
 use crate::geom::{Aabb, Axis, Vec3};
 use crate::joinery::ButtJoint;
 use crate::model::{
-    BackStyle, BottomJoint, Cabinet, CabinetKind, DoorOverlay, FrontLayout, HingeSide, ToeKick,
-    TopJoint, WallHanging,
+    BackStyle, BottomJoint, Cabinet, CabinetKind, DoorOverlay, FrontLayout, HingeSide, Opening,
+    ToeKick, TopJoint, WallHanging,
 };
 use crate::part::{
     BorePurpose, Dir, EdgeBanding, HardwarePlacement, Operation, Part, PartList, PartRole,
@@ -23,6 +23,8 @@ const MIN_BLIND_DOOR: f64 = 250.0;
 /// valves sit low, under about 400 mm.
 const SINK_CUTOUT_HEIGHT: f64 = 400.0;
 const SINK_CUTOUT_SIDE_MARGIN: f64 = 50.0;
+/// Doors taller than this (mm) get a TIP-ON unit near each end so they open square.
+const TALL_DOOR: f64 = 1200.0;
 /// Screw centres along each edge an applied back is screwed to.
 const BACK_SCREW_SPACING: f64 = 150.0;
 /// Pilot for a 4 × 20 screw through a 6 mm back: short enough to stay clear of the shelf-pin row
@@ -56,6 +58,7 @@ pub fn build_cabinet(cab: &Cabinet) -> Result<PartList> {
     b.wall_hanging();
     b.sink();
     b.cover_caps();
+    b.opening();
     let mut list = b.list;
     for p in &mut list.parts {
         let o = cab.origin;
@@ -244,6 +247,71 @@ impl<'a> Builder<'a> {
         };
         let ops = joint.operations(&self.cab.standard, &mut self.list.warnings);
         self.list.operations.extend(ops);
+    }
+
+    /// Handleless opening hardware: a TIP-ON unit per door (two on tall doors) and per drawer, or
+    /// a SERVO-DRIVE unit per drawer plus the cabinet's power supply. Generic ids until the
+    /// articles are in the hardware catalog (BLUM-2).
+    fn opening(&mut self) {
+        let opening = self.cab.standard.opening;
+        if opening == Opening::Handles {
+            return;
+        }
+        let fronts: Vec<Part> = self
+            .list
+            .parts
+            .iter()
+            .filter(|p| matches!(p.role, PartRole::Door | PartRole::DrawerFront))
+            .cloned()
+            .collect();
+        let mut servo = 0;
+        for f in &fronts {
+            let (item, description, quantity) = match (f.role, opening) {
+                (PartRole::DrawerFront, Opening::ServoDrive) => {
+                    servo += 1;
+                    (
+                        "blum.servo-drive.drawer",
+                        "SERVO-DRIVE drive unit for a drawer",
+                        1,
+                    )
+                }
+                (PartRole::DrawerFront, _) => (
+                    "blum.tip-on.drawer",
+                    "TIP-ON BLUMOTION unit set for a drawer",
+                    1,
+                ),
+                _ => {
+                    let n = if f.bounds.size.z > TALL_DOOR { 2 } else { 1 };
+                    (
+                        "blum.tip-on.door",
+                        "TIP-ON unit for a door, with a no-spring hinge",
+                        n,
+                    )
+                }
+            };
+            self.list.hardware.push(HardwarePlacement {
+                item: item.into(),
+                description: description.into(),
+                at: f.bounds.center(),
+                part: f.name.clone(),
+                quantity,
+            });
+        }
+        if opening == Opening::ServoDrive && fronts.iter().any(|f| f.role == PartRole::Door) {
+            self.list
+                .warnings
+                .push("SERVO-DRIVE does not open hinged doors: they get TIP-ON".into());
+        }
+        if servo > 0 {
+            let bottom = self.name(PartRole::Bottom, None);
+            self.list.hardware.push(HardwarePlacement {
+                item: "blum.servo-drive.power-supply".into(),
+                description: "SERVO-DRIVE power supply and cable set".into(),
+                at: Vec3::new(self.cab.width / 2.0, self.interior_back, self.carcass_z0),
+                part: bottom,
+                quantity: 1,
+            });
+        }
     }
 
     /// A cover cap for every screw head left showing, per panel.
@@ -1538,6 +1606,73 @@ mod tests {
         let list = build_cabinet(&Cabinet::new("B01", CabinetKind::Base)).unwrap();
         assert!(!list.operations.iter().any(|o| matches!(o,
             Operation::Bore { part, .. } if part == "B01.Back")));
+    }
+
+    #[test]
+    fn tip_on_puts_a_unit_on_every_front() {
+        let mut tall = Cabinet::new("T01", CabinetKind::Tall);
+        tall.standard.opening = Opening::TipOn;
+        let list = build_cabinet(&tall).unwrap();
+        let units: u32 = list
+            .hardware
+            .iter()
+            .filter(|h| h.item == "blum.tip-on.door")
+            .map(|h| h.quantity)
+            .sum();
+        assert_eq!(units, 2, "one tall door, two units");
+        let mut bank = Cabinet::new("D01", CabinetKind::DrawerBank);
+        bank.standard.opening = Opening::TipOn;
+        let list = build_cabinet(&bank).unwrap();
+        assert_eq!(
+            list.hardware
+                .iter()
+                .filter(|h| h.item == "blum.tip-on.drawer")
+                .count(),
+            3
+        );
+    }
+
+    #[test]
+    fn servo_drive_drives_drawers_and_leaves_doors_to_tip_on() {
+        let mut bank = Cabinet::new("D01", CabinetKind::DrawerBank);
+        bank.standard.opening = Opening::ServoDrive;
+        let list = build_cabinet(&bank).unwrap();
+        assert_eq!(
+            list.hardware
+                .iter()
+                .filter(|h| h.item == "blum.servo-drive.drawer")
+                .count(),
+            3
+        );
+        assert_eq!(
+            list.hardware
+                .iter()
+                .filter(|h| h.item == "blum.servo-drive.power-supply")
+                .count(),
+            1
+        );
+        let mut base = Cabinet::new("B01", CabinetKind::Base);
+        base.standard.opening = Opening::ServoDrive;
+        let list = build_cabinet(&base).unwrap();
+        assert!(list.hardware.iter().any(|h| h.item == "blum.tip-on.door"));
+        assert!(
+            !list
+                .hardware
+                .iter()
+                .any(|h| h.item.starts_with("blum.servo-drive"))
+        );
+        assert!(list.warnings.iter().any(|w| w.contains("SERVO-DRIVE")));
+    }
+
+    #[test]
+    fn handles_add_no_opening_hardware() {
+        let list = build_cabinet(&Cabinet::new("B01", CabinetKind::Base)).unwrap();
+        assert!(
+            !list
+                .hardware
+                .iter()
+                .any(|h| h.item.contains("tip-on") || h.item.contains("servo"))
+        );
     }
 
     #[test]
