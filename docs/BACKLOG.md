@@ -86,7 +86,7 @@ Priorities: **P0** blocks most other work · **P1** MVP · **P2** commercial par
 | BLUM-7b | blocked (AVENTOS power-factor ranges and drilling per family from Blum's documents: owner data) | M | AVENTOS HK top, HK-S, HK-XS, HF, HS, HL catalog rows (articles by power-factor range, drilling) | hardware rows with sources; BLUM-7a picks articles from them |
 | BLUM-8 | done (05f6929) | S | TIP-ON / SERVO-DRIVE options for handleless fronts | option + BOM |
 | BLUM-9 | 👤 needs-human | M | Import the owner's Blum STEP files from `vendor-cad/blum/` as linked components (`component.insert_design` after STEP → .solidcraft conversion) in place of stand-ins | a hinge renders with the real Blum model |
-| BLUM-10 | doing (night/2026-10-24) | M | Parametric stand-in models (hinge cup + arm, plate, runner, box side) emitted as bodies | visible in Manufacturing detail |
+| BLUM-10 | done (this commit) | M | Parametric stand-in models (hinge cup + arm, plate, runner, box side) emitted as bodies | visible in Manufacturing detail |
 
 ### Hardware: Häfele and lighting
 
@@ -212,3 +212,5 @@ Agents append one line per session: date, items touched, outcome.
 - 2026-10-23 (night) — BLUM-1 done: `cabinet_catalog::hardware` (HardwareItem: article, family, variant, kind, named parameters, drilling pattern, source/verified), loaded from `catalog/hardware/*.json` with validation (unique ids, article, source, real holes); format note in catalog/hardware/README.md. No Blum numbers entered: they wait for the owner's TD sheets (BLUM-2).
 - 2026-10-23 (night) — BLUM-3/4/5 blocked on Blum's own tables; BLUM-7 split into 7a (lift model) and 7b (AVENTOS data, blocked).
 - 2026-10-23 (night) — BLUM-8 done: `opening` standard option (handles / TIP-ON / SERVO-DRIVE) with drawn picker tiles; TIP-ON unit per door (2 over 1200 mm) and per drawer, SERVO-DRIVE unit per drawer + power supply per cabinet, doors under SERVO-DRIVE fall back to TIP-ON with a warning. Generic item ids until Blum articles are catalogued. Owner: TIP-ON doors assume no-spring hinges; the hinge row does not change yet.
+- 2026-10-24 (night) — BACKLOG rows from the first night now carry commit SHAs instead of the branch name.
+- 2026-10-24 (night) — BLUM-10 done: `cabinet_core::standins` draws a hinge (cup in its bore, arm, plate on its two holes) and per drawer a runner + box side on each inside face, from the parts and machining around them (proportions drawn, not Blum data). Emitted at Manufacturing/Exact as one grey body each (`B01.Hinge1`, `D01.Runner1L`); tested never to enter a panel across kinds × overlays, and headless (bounds match). Sample run still ~7 s headless. Picture: docs/images/blum10-stand-ins.png.

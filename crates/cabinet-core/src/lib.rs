@@ -18,6 +18,7 @@ pub mod options;
 pub mod part;
 pub mod project;
 pub mod run;
+pub mod standins;
 
 pub use build::build_cabinet;
 pub use model::{Cabinet, CabinetKind, ConstructionStandard};
