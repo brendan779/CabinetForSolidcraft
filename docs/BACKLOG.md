@@ -75,7 +75,7 @@ Priorities: **P0** blocks most other work · **P1** MVP · **P2** commercial par
 
 | id | status | size | task | done when |
 |---|---|---|---|---|
-| BLUM-1 | todo | M | Hardware catalog schema (`catalog/hardware/*.json`): article, family, variant, parameters, drilling pattern, source, verified | schema + loader + tests |
+| BLUM-1 | done (night/2026-10-23) | M | Hardware catalog schema (`catalog/hardware/*.json`): article, family, variant, parameters, drilling pattern, source, verified | schema + loader + tests |
 | BLUM-2 | needs-human (Blum TD sheets) | M | CLIP top BLUMOTION 110° data: cup Ø35, depth, boring distance range, plate drilling (cruciform/wing, 0/3/9 mm), overlay tables | rows verified against the Blum document; build.rs constants replaced by catalog data |
 | BLUM-3 | todo | M | Hinge selection rule: overlay + door thickness → hinge + plate article | unit test table |
 | BLUM-4 | todo | M | LEGRABOX: nominal lengths, side heights (N/M/K/C/F), front fixing drilling, bottom/back cut sizes | drawer bank with LEGRABOX gives bottom and back parts in cut list |
@@ -207,3 +207,4 @@ Agents append one line per session: date, items touched, outcome.
 - 2026-10-23 (night) — JOIN-3 done: at Manufacturing and Exact detail every slot gets a named lens-shaped biscuit body (`B01.Biscuit3`, beech colour), true arcs (no boolean, so no slowdown: tall still 3.8 s). Headless test: one per slot, volume within 1 %. Picture: docs/images/join3-biscuits.png. Slot operations now record their biscuit size.
 - 2026-10-23 (night) — JOIN-5 done: every screw clearance hole gets a 90° countersink (Ø8 chipboard, Ø10 confirmat; in the part list for sheets/CNC, not cut in SolidCraft) and a cover cap in the hardware list; `exposed.left/right` sides get no through screws (biscuits + glue, blind dowels where biscuits do not fit); inspector "Seen ends" chips. JOIN-4 blocked on Häfele data.
 - 2026-10-23 (night) — JOIN-7 done: applied backs are screwed to the sides, bottom, top/back rail at ≤150 mm centres (countersunk, capped); grooved backs get none. The clash sweep caught 35 mm pilots reaching the rear shelf-pin row, so back screws pilot 15 mm (4 × 20 through a 6 mm back). JOIN-6 blocked on Lamello data.
+- 2026-10-23 (night) — BLUM-1 done: `cabinet_catalog::hardware` (HardwareItem: article, family, variant, kind, named parameters, drilling pattern, source/verified), loaded from `catalog/hardware/*.json` with validation (unique ids, article, source, real holes); format note in catalog/hardware/README.md. No Blum numbers entered: they wait for the owner's TD sheets (BLUM-2).

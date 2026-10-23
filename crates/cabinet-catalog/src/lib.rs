@@ -9,6 +9,9 @@ use std::path::Path;
 
 use serde::{Deserialize, Serialize};
 
+pub mod hardware;
+pub use hardware::{DrillHole, HardwareFile, HardwareItem, HardwareKind};
+
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
     #[error("{path}: {source}")]
@@ -169,6 +172,32 @@ pub struct BrandFile {
     pub edge_tapes: Vec<EdgeTape>,
 }
 
+/// Every `*.json` in `dir`, in name order, parsed as `T`. A missing folder holds nothing.
+fn read_dir<T: serde::de::DeserializeOwned>(dir: &Path) -> Result<Vec<T>, Error> {
+    let Ok(entries) = std::fs::read_dir(dir) else {
+        return Ok(Vec::new());
+    };
+    let mut paths: Vec<_> = entries
+        .filter_map(|e| e.ok().map(|e| e.path()))
+        .filter(|p| p.extension().is_some_and(|x| x == "json"))
+        .collect();
+    paths.sort();
+    paths
+        .into_iter()
+        .map(|path| {
+            let shown = path.display().to_string();
+            let text = std::fs::read_to_string(&path).map_err(|source| Error::Io {
+                path: shown.clone(),
+                source,
+            })?;
+            serde_json::from_str(&text).map_err(|source| Error::Json {
+                path: shown,
+                source,
+            })
+        })
+        .collect()
+}
+
 /// True for a finite size above zero (NaN is not positive).
 fn positive(v: f64) -> bool {
     v.is_finite() && v > 0.0
@@ -179,39 +208,29 @@ fn positive(v: f64) -> bool {
 pub struct Catalog {
     pub boards: Vec<Board>,
     pub edge_tapes: Vec<EdgeTape>,
+    pub hardware: Vec<HardwareItem>,
 }
 
 impl Catalog {
-    /// Loads every `*.json` under `root/boards` and `root/edge-tape` and checks the result.
+    /// Loads every `*.json` under `root/boards`, `root/edge-tape` and `root/hardware` and checks
+    /// the result.
     pub fn load(root: &Path) -> Result<Self, Error> {
         let mut cat = Catalog::default();
         for sub in ["boards", "edge-tape"] {
-            let dir = root.join(sub);
-            let Ok(entries) = std::fs::read_dir(&dir) else {
-                continue;
-            };
-            let mut paths: Vec<_> = entries
-                .filter_map(|e| e.ok().map(|e| e.path()))
-                .filter(|p| p.extension().is_some_and(|x| x == "json"))
-                .collect();
-            paths.sort();
-            for path in paths {
-                let shown = path.display().to_string();
-                let text = std::fs::read_to_string(&path).map_err(|source| Error::Io {
-                    path: shown.clone(),
-                    source,
-                })?;
-                let file: BrandFile =
-                    serde_json::from_str(&text).map_err(|source| Error::Json {
-                        path: shown.clone(),
-                        source,
-                    })?;
+            for file in read_dir::<BrandFile>(&root.join(sub))? {
                 cat.boards.extend(file.boards);
                 cat.edge_tapes.extend(file.edge_tapes);
             }
         }
+        for file in read_dir::<HardwareFile>(&root.join("hardware"))? {
+            cat.hardware.extend(file.items);
+        }
         cat.validate()?;
         Ok(cat)
+    }
+
+    pub fn hardware_item(&self, id: &str) -> Option<&HardwareItem> {
+        self.hardware.iter().find(|h| h.id == id)
     }
 
     /// Unique ids, positive sizes and edge tape references that resolve.
@@ -250,6 +269,13 @@ impl Catalog {
                 }
             }
         }
+        let mut hw_ids = HashSet::new();
+        for h in &self.hardware {
+            if !hw_ids.insert(h.id.as_str()) {
+                problems.push(format!("duplicate hardware id {}", h.id));
+            }
+            problems.extend(h.problems());
+        }
         if problems.is_empty() {
             Ok(())
         } else {
@@ -283,6 +309,70 @@ mod tests {
 
     fn repo_catalog() -> std::path::PathBuf {
         Path::new(env!("CARGO_MANIFEST_DIR")).join("../../catalog")
+    }
+
+    fn hinge_json() -> serde_json::Value {
+        serde_json::json!({
+            "brand": "Example",
+            "items": [{
+                "id": "example.hinge.110.full",
+                "brand": "Example",
+                "article": "H-110-F",
+                "family": "Example hinge",
+                "variant": "110°, full overlay",
+                "kind": "hinge",
+                "parameters": { "cup_diameter": 35.0, "cup_depth": 13.0 },
+                "drilling": [{ "x": 0.0, "y": 21.5, "diameter": 35.0, "depth": 13.0, "note": "cup" }],
+                "source": { "url": "https://example.invalid/td.pdf", "document_date": "2026",
+                            "retrieved": "2026-10-23", "verified": false }
+            }]
+        })
+    }
+
+    fn temp_catalog(name: &str, hardware: &serde_json::Value) -> std::path::PathBuf {
+        let root = std::env::temp_dir().join(format!("cabinet-catalog-{name}"));
+        let _ = std::fs::remove_dir_all(&root);
+        std::fs::create_dir_all(root.join("hardware")).unwrap();
+        std::fs::write(root.join("hardware/example.json"), hardware.to_string()).unwrap();
+        root
+    }
+
+    #[test]
+    fn hardware_items_load_with_named_parameters_and_drilling() {
+        let cat = Catalog::load(&temp_catalog("ok", &hinge_json())).unwrap();
+        let h = cat.hardware_item("example.hinge.110.full").unwrap();
+        assert_eq!(h.kind, HardwareKind::Hinge);
+        assert_eq!(h.param("cup_diameter"), Ok(35.0));
+        assert!(
+            h.param("boring_distance")
+                .unwrap_err()
+                .contains("boring_distance")
+        );
+        assert_eq!(h.drilling[0].note, "cup");
+        assert!(!h.source.verified);
+    }
+
+    #[test]
+    fn hardware_without_an_article_or_with_a_bad_hole_is_refused() {
+        let mut j = hinge_json();
+        j["items"][0]["article"] = "".into();
+        j["items"][0]["drilling"][0]["diameter"] = 0.0.into();
+        let err = Catalog::load(&temp_catalog("bad", &j))
+            .unwrap_err()
+            .to_string();
+        assert!(err.contains("no article number"), "{err}");
+        assert!(err.contains("not a real hole"), "{err}");
+    }
+
+    #[test]
+    fn duplicate_hardware_ids_are_refused() {
+        let mut j = hinge_json();
+        let item = j["items"][0].clone();
+        j["items"].as_array_mut().unwrap().push(item);
+        let err = Catalog::load(&temp_catalog("dup", &j))
+            .unwrap_err()
+            .to_string();
+        assert!(err.contains("duplicate hardware id"), "{err}");
     }
 
     #[test]
