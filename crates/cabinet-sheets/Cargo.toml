@@ -1,0 +1,12 @@
+[package]
+name = "cabinet-sheets"
+description = "Technical cut sheets (SVG) for cabinet parts."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+cabinet-core.workspace = true
+
+[lints]
+workspace = true

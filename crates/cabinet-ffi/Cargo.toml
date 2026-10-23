@@ -1,0 +1,23 @@
+[package]
+name = "cabinet-ffi"
+description = "Swift bindings (UniFFI) for the macOS app."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lib]
+crate-type = ["staticlib", "lib"]
+name = "cabinet_ffi"
+
+[[bin]]
+name = "uniffi-bindgen"
+path = "src/bin/uniffi-bindgen.rs"
+
+[dependencies]
+uniffi = { version = "0.32", features = ["cli"] }
+serde_json.workspace = true
+thiserror.workspace = true
+cabinet-core.workspace = true
+cabinet-catalog.workspace = true
+cabinet-sheets.workspace = true
+solidcraft-bridge.workspace = true

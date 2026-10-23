@@ -1,0 +1,390 @@
+{
+  "brand": "Polytec",
+  "website": "https://www.polytec.com.au",
+  "notes": "Seed rows hand-copied from the polytec Availability Guide of 23 Oct 2026 (DECORATIVE 16mm board, page 4). The full guide is to be parsed by tools/parse_polytec (BACKLOG DATA-1). Board item codes are per sheet size.",
+  "boards": [
+    {
+      "id": "polytec.decorative.classic-white-texture.16.mr-mdf",
+      "brand": "Polytec",
+      "range": "Decorative",
+      "decor": "Classic White",
+      "finish": "Texture",
+      "kind": "melamine",
+      "substrate": "moisture_resistant_mdf",
+      "thickness": 16.0,
+      "sheets": [
+        {
+          "length": 2400.0,
+          "width": 1200.0
+        },
+        {
+          "length": 3115.0,
+          "width": 1200.0
+        }
+      ],
+      "grained": false,
+      "double_sided": true,
+      "emission": "E-Zero",
+      "edge_tapes": [
+        "polytec.abs.classic-white-texture.1x21.100m",
+        "polytec.abs.classic-white-texture.1x21.20m"
+      ],
+      "preview_colour": "#f2f1ec",
+      "item_codes": {
+        "2400x1200": "1048",
+        "3115x1200": "531"
+      },
+      "source": {
+        "url": "https://www.polytec.com.au/docs/technical/polytec-technical-availability-guide.pdf",
+        "document_date": "2026-10-23",
+        "retrieved": "2026-10-23",
+        "verified": false
+      }
+    },
+    {
+      "id": "polytec.decorative.black-texture.16.mr-mdf",
+      "brand": "Polytec",
+      "range": "Decorative",
+      "decor": "Black",
+      "finish": "Texture",
+      "kind": "melamine",
+      "substrate": "moisture_resistant_mdf",
+      "thickness": 16.0,
+      "sheets": [
+        {
+          "length": 2400.0,
+          "width": 1200.0
+        }
+      ],
+      "grained": false,
+      "double_sided": true,
+      "emission": "E-Zero",
+      "edge_tapes": [
+        "polytec.abs.black-texture.1x21.100m",
+        "polytec.abs.black-texture.1x21.20m",
+        "polytec.abs.black-texture.1x29.100m"
+      ],
+      "preview_colour": "#1d1d1d",
+      "item_codes": {
+        "2400x1200": "6604"
+      },
+      "source": {
+        "url": "https://www.polytec.com.au/docs/technical/polytec-technical-availability-guide.pdf",
+        "document_date": "2026-10-23",
+        "retrieved": "2026-10-23",
+        "verified": false
+      }
+    },
+    {
+      "id": "polytec.decorative.prime-oak-matt.16.mr-mdf",
+      "brand": "Polytec",
+      "range": "Decorative",
+      "decor": "Prime Oak",
+      "finish": "Matt",
+      "kind": "melamine",
+      "substrate": "moisture_resistant_mdf",
+      "thickness": 16.0,
+      "sheets": [
+        {
+          "length": 2400.0,
+          "width": 1200.0
+        },
+        {
+          "length": 3115.0,
+          "width": 1200.0
+        }
+      ],
+      "grained": true,
+      "double_sided": true,
+      "emission": "E-Zero",
+      "edge_tapes": [
+        "polytec.abs.prime-oak-matt.1x21.100m",
+        "polytec.abs.prime-oak-matt.1x21.20m",
+        "polytec.abs.prime-oak-matt.1x29.100m"
+      ],
+      "preview_colour": "#c9a77c",
+      "item_codes": {
+        "2400x1200": "53299",
+        "3115x1200": "55572"
+      },
+      "source": {
+        "url": "https://www.polytec.com.au/docs/technical/polytec-technical-availability-guide.pdf",
+        "document_date": "2026-10-23",
+        "retrieved": "2026-10-23",
+        "verified": false
+      }
+    },
+    {
+      "id": "polytec.decorative.tasmanian-oak-matt.16.mr-mdf",
+      "brand": "Polytec",
+      "range": "Decorative",
+      "decor": "Tasmanian Oak",
+      "finish": "Matt",
+      "kind": "melamine",
+      "substrate": "moisture_resistant_mdf",
+      "thickness": 16.0,
+      "sheets": [
+        {
+          "length": 2400.0,
+          "width": 1200.0
+        },
+        {
+          "length": 3115.0,
+          "width": 1200.0
+        }
+      ],
+      "grained": true,
+      "double_sided": true,
+      "emission": "E-Zero",
+      "edge_tapes": [
+        "polytec.abs.tasmanian-oak-matt.1x21.100m",
+        "polytec.abs.tasmanian-oak-matt.1x21.20m",
+        "polytec.abs.tasmanian-oak-matt.1x29.100m"
+      ],
+      "preview_colour": "#d2b48c",
+      "item_codes": {
+        "2400x1200": "53298",
+        "3115x1200": "55573"
+      },
+      "source": {
+        "url": "https://www.polytec.com.au/docs/technical/polytec-technical-availability-guide.pdf",
+        "document_date": "2026-10-23",
+        "retrieved": "2026-10-23",
+        "verified": false
+      }
+    }
+  ],
+  "edge_tapes": [
+    {
+      "id": "polytec.abs.classic-white-texture.1x21.100m",
+      "brand": "Polytec",
+      "code": "1879",
+      "decor": "Classic White",
+      "finish": "Texture",
+      "material": "abs",
+      "thickness": 1.0,
+      "width": 21.0,
+      "rolls": [
+        100.0
+      ],
+      "pre_glued": false,
+      "laser": false,
+      "source": {
+        "url": "https://www.polytec.com.au/docs/technical/polytec-technical-availability-guide.pdf",
+        "document_date": "2026-10-23",
+        "retrieved": "2026-10-23",
+        "verified": false
+      }
+    },
+    {
+      "id": "polytec.abs.classic-white-texture.1x21.20m",
+      "brand": "Polytec",
+      "code": "17643",
+      "decor": "Classic White",
+      "finish": "Texture",
+      "material": "abs",
+      "thickness": 1.0,
+      "width": 21.0,
+      "rolls": [
+        20.0
+      ],
+      "pre_glued": false,
+      "laser": false,
+      "source": {
+        "url": "https://www.polytec.com.au/docs/technical/polytec-technical-availability-guide.pdf",
+        "document_date": "2026-10-23",
+        "retrieved": "2026-10-23",
+        "verified": false
+      }
+    },
+    {
+      "id": "polytec.abs.black-texture.1x21.100m",
+      "brand": "Polytec",
+      "code": "9053",
+      "decor": "Black",
+      "finish": "Texture",
+      "material": "abs",
+      "thickness": 1.0,
+      "width": 21.0,
+      "rolls": [
+        100.0
+      ],
+      "pre_glued": false,
+      "laser": false,
+      "source": {
+        "url": "https://www.polytec.com.au/docs/technical/polytec-technical-availability-guide.pdf",
+        "document_date": "2026-10-23",
+        "retrieved": "2026-10-23",
+        "verified": false
+      }
+    },
+    {
+      "id": "polytec.abs.black-texture.1x21.20m",
+      "brand": "Polytec",
+      "code": "17638",
+      "decor": "Black",
+      "finish": "Texture",
+      "material": "abs",
+      "thickness": 1.0,
+      "width": 21.0,
+      "rolls": [
+        20.0
+      ],
+      "pre_glued": false,
+      "laser": false,
+      "source": {
+        "url": "https://www.polytec.com.au/docs/technical/polytec-technical-availability-guide.pdf",
+        "document_date": "2026-10-23",
+        "retrieved": "2026-10-23",
+        "verified": false
+      }
+    },
+    {
+      "id": "polytec.abs.black-texture.1x29.100m",
+      "brand": "Polytec",
+      "code": "51836",
+      "decor": "Black",
+      "finish": "Texture",
+      "material": "abs",
+      "thickness": 1.0,
+      "width": 29.0,
+      "rolls": [
+        100.0
+      ],
+      "pre_glued": false,
+      "laser": false,
+      "source": {
+        "url": "https://www.polytec.com.au/docs/technical/polytec-technical-availability-guide.pdf",
+        "document_date": "2026-10-23",
+        "retrieved": "2026-10-23",
+        "verified": false
+      }
+    },
+    {
+      "id": "polytec.abs.prime-oak-matt.1x21.100m",
+      "brand": "Polytec",
+      "code": "53306",
+      "decor": "Prime Oak",
+      "finish": "Matt",
+      "material": "abs",
+      "thickness": 1.0,
+      "width": 21.0,
+      "rolls": [
+        100.0
+      ],
+      "pre_glued": false,
+      "laser": false,
+      "source": {
+        "url": "https://www.polytec.com.au/docs/technical/polytec-technical-availability-guide.pdf",
+        "document_date": "2026-10-23",
+        "retrieved": "2026-10-23",
+        "verified": false
+      }
+    },
+    {
+      "id": "polytec.abs.prime-oak-matt.1x21.20m",
+      "brand": "Polytec",
+      "code": "53307",
+      "decor": "Prime Oak",
+      "finish": "Matt",
+      "material": "abs",
+      "thickness": 1.0,
+      "width": 21.0,
+      "rolls": [
+        20.0
+      ],
+      "pre_glued": false,
+      "laser": false,
+      "source": {
+        "url": "https://www.polytec.com.au/docs/technical/polytec-technical-availability-guide.pdf",
+        "document_date": "2026-10-23",
+        "retrieved": "2026-10-23",
+        "verified": false
+      }
+    },
+    {
+      "id": "polytec.abs.prime-oak-matt.1x29.100m",
+      "brand": "Polytec",
+      "code": "53308",
+      "decor": "Prime Oak",
+      "finish": "Matt",
+      "material": "abs",
+      "thickness": 1.0,
+      "width": 29.0,
+      "rolls": [
+        100.0
+      ],
+      "pre_glued": false,
+      "laser": false,
+      "source": {
+        "url": "https://www.polytec.com.au/docs/technical/polytec-technical-availability-guide.pdf",
+        "document_date": "2026-10-23",
+        "retrieved": "2026-10-23",
+        "verified": false
+      }
+    },
+    {
+      "id": "polytec.abs.tasmanian-oak-matt.1x21.100m",
+      "brand": "Polytec",
+      "code": "53302",
+      "decor": "Tasmanian Oak",
+      "finish": "Matt",
+      "material": "abs",
+      "thickness": 1.0,
+      "width": 21.0,
+      "rolls": [
+        100.0
+      ],
+      "pre_glued": false,
+      "laser": false,
+      "source": {
+        "url": "https://www.polytec.com.au/docs/technical/polytec-technical-availability-guide.pdf",
+        "document_date": "2026-10-23",
+        "retrieved": "2026-10-23",
+        "verified": false
+      }
+    },
+    {
+      "id": "polytec.abs.tasmanian-oak-matt.1x21.20m",
+      "brand": "Polytec",
+      "code": "53303",
+      "decor": "Tasmanian Oak",
+      "finish": "Matt",
+      "material": "abs",
+      "thickness": 1.0,
+      "width": 21.0,
+      "rolls": [
+        20.0
+      ],
+      "pre_glued": false,
+      "laser": false,
+      "source": {
+        "url": "https://www.polytec.com.au/docs/technical/polytec-technical-availability-guide.pdf",
+        "document_date": "2026-10-23",
+        "retrieved": "2026-10-23",
+        "verified": false
+      }
+    },
+    {
+      "id": "polytec.abs.tasmanian-oak-matt.1x29.100m",
+      "brand": "Polytec",
+      "code": "53304",
+      "decor": "Tasmanian Oak",
+      "finish": "Matt",
+      "material": "abs",
+      "thickness": 1.0,
+      "width": 29.0,
+      "rolls": [
+        100.0
+      ],
+      "pre_glued": false,
+      "laser": false,
+      "source": {
+        "url": "https://www.polytec.com.au/docs/technical/polytec-technical-availability-guide.pdf",
+        "document_date": "2026-10-23",
+        "retrieved": "2026-10-23",
+        "verified": false
+      }
+    }
+  ]
+}

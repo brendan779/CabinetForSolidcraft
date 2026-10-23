@@ -1,0 +1,330 @@
+//! The cabinet model: what the user chooses. Every enum here is a visual picker in the app.
+
+use serde::{Deserialize, Serialize};
+
+use crate::geom::Vec3;
+
+/// A cabinet: an envelope (the box the user drew), a kind and a construction standard.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct Cabinet {
+    /// Short stable id, used in part names (`B01`).
+    pub id: String,
+    pub kind: CabinetKind,
+    /// Outside width (X), depth (Y) and height (Z) of the envelope, carcass + toe kick, without
+    /// doors.
+    pub width: f64,
+    pub depth: f64,
+    pub height: f64,
+    /// Where the envelope's minimum corner sits in the design (mm).
+    #[serde(default)]
+    pub origin: Vec3,
+    #[serde(default)]
+    pub standard: ConstructionStandard,
+    #[serde(default)]
+    pub fronts: FrontLayout,
+    /// Adjustable shelves inside the main opening.
+    #[serde(default)]
+    pub adjustable_shelves: u32,
+}
+
+impl Cabinet {
+    /// A cabinet of `kind` with the kind's usual size and the default standard.
+    pub fn new(id: impl Into<String>, kind: CabinetKind) -> Self {
+        let (w, d, h) = kind.default_size();
+        Self {
+            id: id.into(),
+            kind,
+            width: w,
+            depth: d,
+            height: h,
+            origin: Vec3::default(),
+            standard: ConstructionStandard::default(),
+            fronts: kind.default_fronts_for(w),
+            adjustable_shelves: kind.default_shelves(),
+        }
+    }
+
+    pub fn has_toe_kick(&self) -> bool {
+        matches!(
+            self.kind,
+            CabinetKind::Base | CabinetKind::Tall | CabinetKind::DrawerBank
+        ) && self.standard.toe_kick != ToeKick::None
+    }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum CabinetKind {
+    Base,
+    Wall,
+    Tall,
+    DrawerBank,
+    OpenShelf,
+}
+
+impl CabinetKind {
+    pub const ALL: [CabinetKind; 5] = [
+        CabinetKind::Base,
+        CabinetKind::Wall,
+        CabinetKind::Tall,
+        CabinetKind::DrawerBank,
+        CabinetKind::OpenShelf,
+    ];
+
+    /// Typical Australian kitchen sizes (width, depth, height), mm.
+    pub fn default_size(self) -> (f64, f64, f64) {
+        match self {
+            CabinetKind::Base => (600.0, 580.0, 870.0),
+            CabinetKind::DrawerBank => (600.0, 580.0, 870.0),
+            CabinetKind::Wall => (600.0, 330.0, 720.0),
+            CabinetKind::Tall => (600.0, 580.0, 2100.0),
+            CabinetKind::OpenShelf => (600.0, 300.0, 720.0),
+        }
+    }
+
+    pub fn default_fronts_for(self, width: f64) -> FrontLayout {
+        match self {
+            CabinetKind::OpenShelf => FrontLayout::Open,
+            CabinetKind::DrawerBank => FrontLayout::Drawers {
+                ratios: vec![1.0, 1.0, 1.0],
+            },
+            _ if width > 600.0 => FrontLayout::DoorPair,
+            _ => FrontLayout::Door {
+                hinge_side: HingeSide::Left,
+            },
+        }
+    }
+
+    fn default_shelves(self) -> u32 {
+        match self {
+            CabinetKind::Base | CabinetKind::Wall | CabinetKind::OpenShelf => 1,
+            CabinetKind::Tall => 4,
+            CabinetKind::DrawerBank => 0,
+        }
+    }
+}
+
+/// How the front of the main opening is filled.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case", tag = "type")]
+pub enum FrontLayout {
+    Open,
+    Door {
+        hinge_side: HingeSide,
+    },
+    DoorPair,
+    /// Drawer fronts top to bottom, sized in proportion to `ratios`.
+    Drawers {
+        ratios: Vec<f64>,
+    },
+}
+
+impl Default for FrontLayout {
+    fn default() -> Self {
+        FrontLayout::Door {
+            hinge_side: HingeSide::Left,
+        }
+    }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum HingeSide {
+    Left,
+    Right,
+}
+
+/// A shop's way of building cabinets, applied to every cabinet unless overridden.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(default)]
+pub struct ConstructionStandard {
+    pub name: String,
+    pub carcass: CarcassStyle,
+    /// Carcass board thickness.
+    pub carcass_thickness: f64,
+    /// Catalog id of the carcass board (see cabinet-catalog), or empty for generic.
+    pub carcass_board: String,
+    pub front_thickness: f64,
+    pub front_board: String,
+    pub top_joint: TopJoint,
+    pub bottom_joint: BottomJoint,
+    pub back: BackStyle,
+    pub back_thickness: f64,
+    pub toe_kick: ToeKick,
+    pub toe_kick_height: f64,
+    /// How far the plinth sits back from the carcass front.
+    pub toe_kick_setback: f64,
+    pub overlay: DoorOverlay,
+    /// Gap between a front and its neighbour or the envelope edge.
+    pub front_gap: f64,
+    pub fixings: FixingRecipe,
+    pub biscuit: BiscuitSize,
+    pub fixing_density: Density,
+    /// Width of the front and back rails when the top is rails.
+    pub rail_width: f64,
+    /// Front and back clearance of adjustable shelves.
+    pub shelf_front_setback: f64,
+    pub edge_band_thickness: f64,
+}
+
+impl Default for ConstructionStandard {
+    fn default() -> Self {
+        Self {
+            name: "Frameless 16 mm, biscuit + screw".into(),
+            carcass: CarcassStyle::Frameless,
+            carcass_thickness: 16.0,
+            carcass_board: String::new(),
+            front_thickness: 18.0,
+            front_board: String::new(),
+            top_joint: TopJoint::Rails,
+            bottom_joint: BottomJoint::BetweenSides,
+            back: BackStyle::InsetGroove,
+            back_thickness: 6.0,
+            toe_kick: ToeKick::LegsAndPlinth,
+            toe_kick_height: 150.0,
+            toe_kick_setback: 50.0,
+            overlay: DoorOverlay::Full,
+            front_gap: 2.0,
+            fixings: FixingRecipe::BiscuitAndScrew,
+            biscuit: BiscuitSize::No20,
+            fixing_density: Density::Normal,
+            rail_width: 100.0,
+            shelf_front_setback: 2.0,
+            edge_band_thickness: 1.0,
+        }
+    }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum CarcassStyle {
+    Frameless,
+    FaceFrame,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum TopJoint {
+    /// Full top panel fitted between the sides.
+    BetweenSides,
+    /// Full top panel over the sides; sides are shorter.
+    OverSides,
+    /// Front and back rails between the sides (base cabinets under a benchtop).
+    Rails,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum BottomJoint {
+    BetweenSides,
+    UnderSides,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum BackStyle {
+    /// Thin back in grooves in sides, top and bottom, set in from the rear.
+    InsetGroove,
+    /// Back screwed flush onto the rear of the carcass.
+    Applied,
+    /// Full-thickness back between sides, top and bottom.
+    Structural,
+    None,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum ToeKick {
+    /// Carcass on adjustable legs, separate clip-on plinth.
+    LegsAndPlinth,
+    /// Carcass on a separate plinth box.
+    PlinthBox,
+    /// Sides run to the floor with a notch at the front.
+    IntegratedNotch,
+    None,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum DoorOverlay {
+    Full,
+    Half,
+    Inset,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum FixingRecipe {
+    /// Biscuits for alignment, a screw between each pair of biscuits.
+    BiscuitAndScrew,
+    BiscuitOnly,
+    ScrewOnly,
+    /// 7 mm confirmat screws.
+    Confirmat,
+    /// 8 mm dowels on the 32 mm grid.
+    Dowel,
+    /// Cam and bolt (Häfele Minifix style) for flat-pack.
+    CamLock,
+}
+
+/// Lamello-style biscuit sizes. Nominal length × width × thickness in mm.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum BiscuitSize {
+    No0,
+    No10,
+    No20,
+}
+
+impl BiscuitSize {
+    pub fn length(self) -> f64 {
+        match self {
+            BiscuitSize::No0 => 47.0,
+            BiscuitSize::No10 => 53.0,
+            BiscuitSize::No20 => 56.0,
+        }
+    }
+
+    pub fn width(self) -> f64 {
+        match self {
+            BiscuitSize::No0 => 15.0,
+            BiscuitSize::No10 => 19.0,
+            BiscuitSize::No20 => 23.0,
+        }
+    }
+
+    pub fn thickness(self) -> f64 {
+        4.0
+    }
+
+    /// Slot depth in each panel: half the biscuit width plus 1 mm glue room.
+    pub fn slot_depth(self) -> f64 {
+        self.width() / 2.0 + 1.0
+    }
+
+    /// Length of the slot at the panel face for a 100 mm cutter plunged to `slot_depth`.
+    pub fn slot_length(self) -> f64 {
+        let r = 50.0;
+        let d = self.slot_depth();
+        2.0 * (r * r - (r - d) * (r - d)).sqrt()
+    }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum Density {
+    Sparse,
+    Normal,
+    Dense,
+}
+
+impl Density {
+    /// Largest centre-to-centre spacing between biscuits.
+    pub fn max_spacing(self) -> f64 {
+        match self {
+            Density::Sparse => 250.0,
+            Density::Normal => 180.0,
+            Density::Dense => 120.0,
+        }
+    }
+}

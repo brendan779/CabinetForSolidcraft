@@ -1,0 +1,46 @@
+# XcodeGen spec. Regenerate the project with: cd apps/macos && xcodegen
+name: CabinetStudio
+options:
+  bundleIdPrefix: io.github.brendan779
+  deploymentTarget:
+    macOS: "15.0"
+  createIntermediateGroups: true
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    MACOSX_DEPLOYMENT_TARGET: "15.0"
+    ENABLE_USER_SCRIPT_SANDBOXING: NO
+    DEAD_CODE_STRIPPING: YES
+targets:
+  CabinetStudio:
+    type: application
+    platform: macOS
+    sources:
+      - path: CabinetStudio
+      - path: Core/CabinetCore.swift
+      - path: ../../catalog
+        type: folder
+        buildPhase: resources
+    dependencies:
+      - framework: Core/CabinetCore.xcframework
+        embed: false
+    preBuildScripts:
+      - name: Build Rust core
+        script: |
+          "$SRCROOT/../../scripts/build-core.sh"
+        basedOnDependencyAnalysis: false
+    settings:
+      base:
+        PRODUCT_NAME: Cabinet Studio
+        PRODUCT_MODULE_NAME: CabinetStudio
+        PRODUCT_BUNDLE_IDENTIFIER: io.github.brendan779.cabinetstudio
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: Cabinet Studio
+        INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.graphics-design
+        INFOPLIST_KEY_NSHumanReadableCopyright: "MIT OR Apache-2.0"
+        MARKETING_VERSION: "0.1.0"
+        CURRENT_PROJECT_VERSION: "1"
+        CODE_SIGN_IDENTITY: "-"
+        CODE_SIGN_STYLE: Manual
+        ENABLE_HARDENED_RUNTIME: NO
+        OTHER_LDFLAGS: "-lc++"

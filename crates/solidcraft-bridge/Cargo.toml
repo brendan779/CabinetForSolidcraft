@@ -1,0 +1,18 @@
+[package]
+name = "solidcraft-bridge"
+description = "Talks to a running SolidCraft over its control protocol and turns part lists into engine commands."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+cabinet-core.workspace = true
+
+[[example]]
+name = "emit_base"
+
+[lints]
+workspace = true
