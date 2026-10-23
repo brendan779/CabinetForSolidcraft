@@ -44,7 +44,10 @@ Priorities: **P0** blocks most other work · **P1** MVP · **P2** commercial par
 | CORE-1 | done (night/2026-10-23) | M | Integrated toe-kick notch: verify the groove op cuts the notch in SolidCraft and in sheets | screenshot + sheet show the notch |
 | CORE-2 | done (night/2026-10-23) | M | Fixed shelves (biscuited + screwed like a bottom) as an option per shelf | test: fixed shelf has joints both sides |
 | CORE-3 | done (night/2026-10-23) | M | Wall cabinet: hanging rail / wall-hanger hardware option and back recess | wall kind builds with hanger hardware placements |
-| CORE-4 | todo | L | Corner cabinets: blind corner base, L-corner base, corner wall | split into CORE-4a/b/c |
+| CORE-4 | split → CORE-4a, CORE-4b, CORE-4c | L | Corner cabinets: blind corner base, L-corner base, corner wall | split into CORE-4a/b/c |
+| CORE-4a | todo | M | Blind corner base: a base carcass with a fixed blind panel on the blind side (width = run-in − door), a filler/stile against the neighbouring run, door on the open side; `blind_side` and `blind_width` in the model | a 1000 mm blind corner builds with blind panel + filler + one door; test on the open width |
+| CORE-4b | todo | M | L-shaped corner base (diagonal or bi-fold door): two carcass legs sharing a corner, parts not axis-aligned to one front; needs a second front direction in the part model | an L-corner 900 × 900 builds; cut list has every panel once |
+| CORE-4c | todo | M | Corner wall cabinet (diagonal front or L): as CORE-4b at wall height with hangers (CORE-3) | builds with two hangers per leg |
 | CORE-5 | todo | M | Sink cabinet (no bottom rail, back cut-out option, waterproof base liner option) | builds; liner appears in BOM |
 | CORE-6 | todo | M | Fillers, end panels and scribes as parts of a run | a run with an end panel each side builds |
 | CORE-7 | todo | M | Runs: shared construction standard per project, per-cabinet overrides only | project JSON stores one standard + overrides |
@@ -189,3 +192,4 @@ Agents append one line per session: date, items touched, outcome.
 - 2026-10-23 (night) — CORE-1 done: headless test shows SolidCraft cuts exactly the notch volume from both sides; sheets label a through groove as a notch and draw it as a cut-out. Pictures: docs/images/core1-toe-kick-notch.png, core1-side-sheet.png.
 - 2026-10-23 (night) — CORE-2 done: `fixed_shelves` (per shelf number): full width, to the back, biscuited + screwed to both sides; no shelf pins within a pitch of it. Inspector shows a lock chip per shelf.
 - 2026-10-23 (night) — CORE-3 done: `wall_hanging` standard option (hangers + rail / none) with a picker drawing; wall cabinets get two hangers in the top back corners (void behind the inset back) and a rail; other backs warn. Article numbers wait for HAF-8 (added).
+- 2026-10-23 (night) — CORE-4 split into CORE-4a (blind corner base), CORE-4b (L-corner base), CORE-4c (corner wall).
