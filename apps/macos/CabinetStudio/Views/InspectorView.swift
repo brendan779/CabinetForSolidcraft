@@ -54,6 +54,7 @@ struct InspectorView: View {
 /// so the common case is one click.
 struct SizeSection: View {
     @Environment(ProjectModel.self) private var project
+    @AppStorage(LengthUnit.key) private var unit: LengthUnit = .millimetres
     let cab: CabinetDoc
 
     var body: some View {
@@ -117,13 +118,13 @@ struct SizeSection: View {
                 Stepper(value: Binding(get: { value }, set: { v in
                     var c = cab; c[keyPath: size] = v; project.selected = c
                 }), in: 100...3000, step: 1) {
-                    Text("\(Int(value)) mm").monospacedDigit().fontWeight(.medium)
+                    Text(unit.format(value)).monospacedDigit().fontWeight(.medium)
                 }
             }
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 6) {
                     ForEach(presets, id: \.self) { p in
-                        Button("\(Int(p))") { withAnimation(.snappy) { set(p) } }
+                        Button(unit.format(p, suffix: false)) { withAnimation(.snappy) { set(p) } }
                             .buttonStyle(ChipStyle(selected: abs(p - value) < 0.5))
                     }
                 }

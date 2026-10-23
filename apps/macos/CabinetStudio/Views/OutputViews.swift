@@ -4,6 +4,7 @@ import WebKit
 
 struct CutListView: View {
     @Environment(ProjectModel.self) private var project
+    @AppStorage(LengthUnit.key) private var unit: LengthUnit = .millimetres
     @State private var sort = [KeyPathComparator(\CutRowRecord.part)]
     @State private var exporting = false
 
@@ -42,9 +43,7 @@ struct CutListView: View {
 
     private var csv: String { (try? cutListCsv(cabinetsJson: project.cabinets.map(\.json))) ?? "" }
 
-    private func mm(_ v: Double) -> String {
-        v.rounded() == v ? String(Int(v)) : String(format: "%.1f", v)
-    }
+    private func mm(_ v: Double) -> String { unit.format(v, suffix: false) }
 }
 
 extension CutRowRecord: Identifiable {

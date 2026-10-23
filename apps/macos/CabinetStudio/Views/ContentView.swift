@@ -112,6 +112,7 @@ struct SolidCraftButton: View {
 
 struct StatusBar: View {
     @Environment(ProjectModel.self) private var project
+    @AppStorage(LengthUnit.key) private var unit: LengthUnit = .millimetres
 
     var body: some View {
         HStack(spacing: 10) {
@@ -129,7 +130,7 @@ struct StatusBar: View {
             }
             Spacer()
             let total = project.cabinets.reduce(0) { $0 + $1.width }
-            Text("Run \(Int(total)) mm").monospacedDigit()
+            Text("Run \(unit.format(total))").monospacedDigit()
         }
         .font(.callout)
         .foregroundStyle(.secondary)

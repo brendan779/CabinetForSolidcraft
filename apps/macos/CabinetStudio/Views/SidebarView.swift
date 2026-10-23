@@ -44,6 +44,7 @@ struct SidebarView: View {
 
 struct CabinetRow: View {
     @Environment(ProjectModel.self) private var project
+    @AppStorage(LengthUnit.key) private var unit: LengthUnit = .millimetres
     let cab: CabinetDoc
 
     var body: some View {
@@ -55,7 +56,7 @@ struct CabinetRow: View {
                     Text(cab.id).font(.headline).monospaced()
                     Text(CabinetDoc.kindTitle(cab.kind)).foregroundStyle(.secondary)
                 }
-                Text("\(Int(cab.width)) × \(Int(cab.height)) × \(Int(cab.depth))")
+                Text([cab.width, cab.height, cab.depth].map { unit.format($0, suffix: false) }.joined(separator: " × "))
                     .font(.caption)
                     .monospacedDigit()
                     .foregroundStyle(.secondary)

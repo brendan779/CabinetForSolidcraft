@@ -27,5 +27,8 @@ struct CabinetStudioApp: App {
                 Button("Check Connection") { Task { await project.checkConnection() } }
             }
         }
+        Settings {
+            SettingsView()
+        }
     }
 }
