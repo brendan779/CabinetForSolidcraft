@@ -28,7 +28,7 @@ and dimensioned cut sheets.
 
 ## Build
 
-Requirements: macOS 15+, Xcode 26+, Homebrew, `brew install rustup xcodegen poppler`,
+Requirements: macOS 15+, Xcode 26+, Homebrew, `brew install rustup xcodegen poppler cargo-deny`,
 `rustup default stable`.
 
 ```bash
