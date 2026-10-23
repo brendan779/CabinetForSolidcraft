@@ -186,11 +186,11 @@ impl<'a> Builder<'a> {
         edges: EdgeBanding,
     ) {
         let name = self.name(role, n);
+        let s = &self.cab.standard;
         let board = match role {
-            PartRole::Door | PartRole::DrawerFront | PartRole::Plinth => {
-                self.cab.standard.front_board.clone()
-            }
-            _ => self.cab.standard.carcass_board.clone(),
+            _ if role.is_front() => s.front_board.clone(),
+            PartRole::Back if s.back != BackStyle::Structural => s.back_board.clone(),
+            _ => s.carcass_board.clone(),
         };
         self.list.parts.push(Part {
             name,
@@ -1319,6 +1319,26 @@ mod tests {
                 .iter()
                 .any(|o| matches!(o, Operation::Groove { part, .. } if part == "S01.Back"))
         );
+    }
+
+    #[test]
+    fn each_part_is_made_from_its_slots_board_and_thickness() {
+        use crate::model::BoardSlot;
+        let mut cab = Cabinet::new("B01", CabinetKind::Base);
+        cab.standard
+            .set_board(BoardSlot::Carcass, "carcass-18", 18.0);
+        cab.standard.set_board(BoardSlot::Front, "front-16", 16.0);
+        cab.standard.set_board(BoardSlot::Back, "back-9", 9.0);
+        let list = build_cabinet(&cab).unwrap();
+        for p in &list.parts {
+            let (board, t) = match p.role {
+                r if r.is_front() => ("front-16", 16.0),
+                PartRole::Back => ("back-9", 9.0),
+                _ => ("carcass-18", 18.0),
+            };
+            assert_eq!(p.board, board, "{}", p.name);
+            assert_eq!(p.thickness(), t, "{}", p.name);
+        }
     }
 
     #[test]

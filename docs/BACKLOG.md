@@ -51,8 +51,8 @@ Priorities: **P0** blocks most other work · **P1** MVP · **P2** commercial par
 | CORE-5 | done (night/2026-10-23) | M | Sink cabinet (no bottom rail, back cut-out option, waterproof base liner option) | builds; liner appears in BOM |
 | CORE-6 | done (night/2026-10-23) | M | Fillers, end panels and scribes as parts of a run | a run with an end panel each side builds |
 | CORE-7 | done (night/2026-10-23) | M | Runs: shared construction standard per project, per-cabinet overrides only | project JSON stores one standard + overrides |
-| CORE-8 | todo | M | Drawer boxes for wood drawers on runners (sides, front, back, bottom) from Blum MOVENTO/TANDEM rules: inside width = opening − 42, length = NL − 10 (verify against Blum TD) | parts + cut list for a 3-drawer bank |
-| CORE-9 | todo | S | Material per part: carcass board, front board, back board from the catalog; thickness follows the board | changing the front board changes door thickness |
+| CORE-8 | blocked (needs the runner deductions as catalog data with a source: BLUM-1 schema first, then BLUM-6) | M | Drawer boxes for wood drawers on runners (sides, front, back, bottom) from Blum MOVENTO/TANDEM rules: inside width = opening − 42, length = NL − 10 (verify against Blum TD) | parts + cut list for a 3-drawer bank |
+| CORE-9 | done (night/2026-10-23) | S | Material per part: carcass board, front board, back board from the catalog; thickness follows the board | changing the front board changes door thickness |
 | CORE-10 | todo | M | Half-overlay and inset hinge geometry (cranked hinges, plate offsets) | test per overlay type |
 | CORE-11 | todo | S | Unit display: metric with optional imperial display in the app | toggle in preferences |
 | CORE-12 | todo | M | Collision checker as a module: every bore/slot vs every other op and vs panel edges, with warnings | test suite over all kinds × standards with zero clashes |
@@ -200,3 +200,4 @@ Agents append one line per session: date, items touched, outcome.
 - 2026-10-23 (night) — CORE-5 done: `sink` kind (900 wide, door pair, no shelf): no back rail ("no bottom rail" read as the back top rail the bowl would hit — owner to confirm), optional pipe cut-out through the back (400 high, 50 in from the sides) and waterproof liner in the hardware list.
 - 2026-10-23 (night) — CORE-6 done in the core: `run::{Run, RunItem, build_run}` lays out cabinets, fillers (door plane, scribe allowance) and end panels (door face to wall + scribe, optionally to the floor) left to right. App support is UI-16 (added).
 - 2026-10-23 (night) — CORE-7 done in the core: `project::Project` stores the standard once and each cabinet's differing fields as `overrides`; resolves back exactly. App side is UI-17 (added).
+- 2026-10-23 (night) — CORE-9 done: `back_board` slot; front-role parts use the front board; `set_board` / FFI `assign_board` set a slot's board and its catalogue thickness (test: 16 → 18 mm front board changes the door to 18 mm). Board library cards get "Use for Carcass / Fronts / Back" and badges. CORE-8 marked blocked on BLUM-1/BLUM-6 (supplier numbers belong in catalog data).

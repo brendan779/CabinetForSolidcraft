@@ -146,9 +146,14 @@ struct BoardLibraryView: View {
                                     GrainPattern().clipShape(RoundedRectangle(cornerRadius: 10))
                                 }
                             }
+                            .overlay(alignment: .bottomLeading) { usedFor(b) }
                             .frame(height: 110)
                             .shadow(color: .black.opacity(0.15), radius: 4, y: 2)
-                        Text(b.decor).font(.headline)
+                        HStack {
+                            Text(b.decor).font(.headline)
+                            Spacer()
+                            useMenu(b)
+                        }
                         Text("\(b.brand) · \(b.finish)").font(.subheadline).foregroundStyle(.secondary)
                         Text("\(Int(b.thickness)) mm \(b.substrate.replacingOccurrences(of: "_", with: " ")) · \(b.sheets.joined(separator: ", "))")
                             .font(.caption)
@@ -159,6 +164,46 @@ struct BoardLibraryView: View {
             .padding(20)
         }
         .searchable(text: $search, prompt: "Search decors")
+    }
+
+    private static let slots: [(id: String, title: String, symbol: String)] = [
+        ("carcass", "Carcass", "square.split.bottomrightquarter"),
+        ("front", "Fronts", "door.left.hand.closed"),
+        ("back", "Back", "rectangle.portrait"),
+    ]
+
+    /// Assigns the board to a part of the selected cabinet.
+    private func useMenu(_ b: BoardRecord) -> some View {
+        Menu {
+            ForEach(Self.slots, id: \.id) { slot in
+                Button("Use for \(slot.title)", systemImage: slot.symbol) { project.useBoard(b, for: slot.id) }
+            }
+        } label: {
+            Image(systemName: "plus.circle")
+        }
+        .menuStyle(.borderlessButton)
+        .fixedSize()
+        .disabled(project.selected == nil)
+        .help(project.selected.map { "Use this board for \($0.id)" } ?? "Select a cabinet first")
+    }
+
+    /// Badges for what the selected cabinet already uses this board for.
+    @ViewBuilder
+    private func usedFor(_ b: BoardRecord) -> some View {
+        if let cab = project.selected {
+            let used = Self.slots.filter { cab.board(for: $0.id) == b.id }
+            if !used.isEmpty {
+                HStack(spacing: 4) {
+                    ForEach(used, id: \.id) { slot in
+                        Label(slot.title, systemImage: slot.symbol)
+                            .font(.caption2.weight(.semibold))
+                            .padding(.horizontal, 6).padding(.vertical, 3)
+                            .background(.regularMaterial, in: Capsule())
+                    }
+                }
+                .padding(6)
+            }
+        }
     }
 }
 

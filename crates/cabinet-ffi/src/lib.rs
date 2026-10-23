@@ -2,6 +2,7 @@
 //! stored in SolidCraft designs), results as small typed records the SwiftUI views draw directly.
 
 use cabinet_core::cutlist::{cut_list, to_csv};
+use cabinet_core::model::BoardSlot;
 use cabinet_core::{Cabinet, CabinetKind, build_cabinet};
 use solidcraft_bridge::boxes::{cuboid, selected_bodies};
 use solidcraft_bridge::{Client, Detail, find_existing, replace_cabinet};
@@ -116,6 +117,27 @@ pub fn set_standard_option(
     let mut v: serde_json::Value = serde_json::from_str(&cabinet_json).map_err(invalid)?;
     v["standard"][&field] = serde_json::Value::String(choice);
     let cab: Cabinet = serde_json::from_value(v).map_err(invalid)?;
+    serde_json::to_string(&cab).map_err(invalid)
+}
+
+/// Uses catalog board `board_id` for the cabinet's `slot` (carcass, front, back); the slot's
+/// thickness becomes the board's.
+#[uniffi::export]
+pub fn assign_board(
+    cabinet_json: String,
+    slot: String,
+    board_id: String,
+    catalog_dir: String,
+) -> Result<String, CoreError> {
+    let mut cab = parse(&cabinet_json)?;
+    let slot: BoardSlot =
+        serde_json::from_value(serde_json::Value::String(slot)).map_err(invalid)?;
+    let cat =
+        cabinet_catalog::Catalog::load(std::path::Path::new(&catalog_dir)).map_err(invalid)?;
+    let board = cat
+        .board(&board_id)
+        .ok_or_else(|| invalid(format!("no board {board_id} in the catalog")))?;
+    cab.standard.set_board(slot, &board.id, board.thickness);
     serde_json::to_string(&cab).map_err(invalid)
 }
 
@@ -464,6 +486,47 @@ pub fn load_boards(catalog_dir: String) -> Result<Vec<BoardRecord>, CoreError> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    fn catalog() -> String {
+        concat!(env!("CARGO_MANIFEST_DIR"), "/../../catalog").to_string()
+    }
+
+    fn door_thickness(json: &str) -> f64 {
+        let list = build_cabinet(&parse(json).unwrap()).unwrap();
+        list.part("B01.Door1").unwrap().thickness()
+    }
+
+    #[test]
+    fn changing_the_front_board_changes_the_door_thickness() {
+        let json = new_cabinet("B01".into(), "base".into()).unwrap();
+        let sixteen = assign_board(
+            json.clone(),
+            "front".into(),
+            "polytec.decorative.classic-white-matt.16.mr-mdf".into(),
+            catalog(),
+        )
+        .unwrap();
+        assert_eq!(door_thickness(&sixteen), 16.0);
+        let eighteen = assign_board(
+            sixteen,
+            "front".into(),
+            "polytec.decorative.classic-white-matt.18.mr-mdf".into(),
+            catalog(),
+        )
+        .unwrap();
+        assert_eq!(door_thickness(&eighteen), 18.0);
+        let cab = parse(&eighteen).unwrap();
+        assert_eq!(
+            cab.standard.front_board,
+            "polytec.decorative.classic-white-matt.18.mr-mdf"
+        );
+    }
+
+    #[test]
+    fn an_unknown_board_is_refused() {
+        let json = new_cabinet("B01".into(), "base".into()).unwrap();
+        assert!(assign_board(json, "front".into(), "nope".into(), catalog()).is_err());
+    }
 
     #[test]
     fn drawn_cabinets_take_the_next_free_id_of_their_kind() {

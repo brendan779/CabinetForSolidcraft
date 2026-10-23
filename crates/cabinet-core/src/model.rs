@@ -255,6 +255,8 @@ pub struct ConstructionStandard {
     pub carcass_board: String,
     pub front_thickness: f64,
     pub front_board: String,
+    /// Catalog id of the back board, or empty for generic. Its thickness is `back_thickness`.
+    pub back_board: String,
     pub top_joint: TopJoint,
     pub bottom_joint: BottomJoint,
     pub back: BackStyle,
@@ -278,6 +280,29 @@ pub struct ConstructionStandard {
     pub wall_hanging: WallHanging,
 }
 
+/// Which boards of a cabinet a catalog board is assigned to.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum BoardSlot {
+    Carcass,
+    Front,
+    Back,
+}
+
+impl ConstructionStandard {
+    /// Uses catalog board `id` for `slot`. The thickness follows the board: a cabinet is built
+    /// from the boards it is made of.
+    pub fn set_board(&mut self, slot: BoardSlot, id: impl Into<String>, thickness: f64) {
+        let (board, t) = match slot {
+            BoardSlot::Carcass => (&mut self.carcass_board, &mut self.carcass_thickness),
+            BoardSlot::Front => (&mut self.front_board, &mut self.front_thickness),
+            BoardSlot::Back => (&mut self.back_board, &mut self.back_thickness),
+        };
+        *board = id.into();
+        *t = thickness;
+    }
+}
+
 impl Default for ConstructionStandard {
     fn default() -> Self {
         Self {
@@ -287,6 +312,7 @@ impl Default for ConstructionStandard {
             carcass_board: String::new(),
             front_thickness: 18.0,
             front_board: String::new(),
+            back_board: String::new(),
             top_joint: TopJoint::Rails,
             bottom_joint: BottomJoint::BetweenSides,
             back: BackStyle::InsetGroove,

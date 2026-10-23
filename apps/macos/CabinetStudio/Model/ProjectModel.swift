@@ -101,6 +101,11 @@ struct CabinetDoc: Identifiable, Hashable, Codable {
         }
     }
 
+    /// The catalog board id the cabinet uses for `slot` (carcass, front, back); empty for generic.
+    func board(for slot: String) -> String {
+        (object["standard"] as? [String: Any])?["\(slot)_board"] as? String ?? ""
+    }
+
     /// X offset of the cabinet in the run.
     var originX: Double {
         get { ((object["origin"] as? [String: Any])?["x"] as? NSNumber)?.doubleValue ?? 0 }
@@ -288,6 +293,23 @@ final class ProjectModel {
             lastError = "\(e)"
             status = "SolidCraft did not build the cabinets"
             await checkConnection()
+        }
+    }
+
+    /// Uses `board` for the selected cabinet's carcass, fronts or back; the thickness follows.
+    func useBoard(_ board: BoardRecord, for slot: String) {
+        guard var cab = selected else {
+            lastError = "Select a cabinet to use this board for."
+            return
+        }
+        guard let dir = Bundle.main.url(forResource: "catalog", withExtension: nil) else { return }
+        do {
+            cab.json = try CabinetStudio.assignBoard(cabinetJson: cab.json, slot: slot, boardId: board.id, catalogDir: dir.path)
+            withAnimation(.snappy) { selected = cab }
+            lastError = nil
+            status = "\(cab.id) \(slot): \(board.decor) \(board.finish), \(Int(board.thickness)) mm"
+        } catch {
+            lastError = "\(error)"
         }
     }
 
