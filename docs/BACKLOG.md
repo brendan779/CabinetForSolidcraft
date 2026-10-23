@@ -147,9 +147,9 @@ committed: they are the brands' copyright. `preview_colour` is an approximation.
 | UI-6 | needs-human (built in 4765cd2; look at the toolbar with SolidCraft open and closed) | S | Status dot visible in the SolidCraft toolbar menu (currently hidden by the menu label) | screenshot |
 | UI-7 | todo | M | Room planner: wall lengths, run along a wall, appliances as placeholders | split |
 | UI-8 | todo | M | Drag to reorder and resize cabinets in the viewport (width handles snap to presets) | drag changes width |
-| UI-9 | needs-human (built in SHA; try the keys) | S | Keyboard: ⌘1–4 workspaces, arrows to step through cabinets, ⌫ delete | works |
+| UI-9 | needs-human (built in 9fd31d0; try the keys) | S | Keyboard: ⌘1–4 workspaces, arrows to step through cabinets, ⌫ delete | works |
 | UI-10 | todo | M | Onboarding: first launch connects to SolidCraft, explains Design vs Manufacturing detail | first-run sheet |
-| UI-11 | todo | S | App icon and accent colour | icon in Dock |
+| UI-11 | done (SHA) | S | App icon and accent colour | icon in Dock |
 | UI-12 | todo | M | Preferences: SolidCraft port, default standard, units, catalog folder, vendor-cad folder | Settings scene |
 | UI-13 | todo | M | Construction standard editor: save/load named standards ("My shop") as visual presets | standards menu |
 | UI-14 | todo | S | Accessibility pass: VoiceOver labels on every drawn tile, Dynamic Type sizes | Accessibility Inspector clean |
@@ -221,3 +221,4 @@ Agents append one line per session: date, items touched, outcome.
 - 2026-10-24 (night) — UI-5 built: panels take their board's colour (FFI `PanelBox.board`/`grain`); grained decors get a seeded procedural woodgrain tile (docs/images/ui5-woodgrain-oak.png) laid along the part's grain at 0.6 m per tile, loaded async; gloss finishes are shinier. Only 4 of 459 catalog boards have a `preview_colour`, so the app guesses one from the decor name (Oak, Walnut, Grey…) and marks those cards with an eyedropper. Owner: assign an oak to the fronts and look.
 - 2026-10-24 (night) — UI-6 built: a toolbar menu draws only its label's icon and title, so the connection dot is its own toolbar view beside the SolidCraft menu (green with a glow / red / grey, a spinner while sending, VoiceOver value).
 - 2026-10-24 (night) — UI-9 built: View menu ⌘1–4 for the workspaces and ⌘[ / ⌘] for previous/next cabinet; in the viewport (after a click) the arrows step and ⌫ deletes; Edit › Delete Cabinet is ⌘⌫ (a bare ⌫ menu shortcut would eat text-field deletes); the sidebar list keeps its own arrows and ⌫.
+- 2026-10-24 (night) — UI-11 done: asset catalog with an AppIcon (a two-door oak cabinet on a blue tile, drawn by tools/make_app_icon.swift at every macOS size; AppIcon.icns lands in the bundle) and an oak AccentColor (#c67c3c, lighter in dark mode).

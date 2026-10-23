@@ -47,6 +47,8 @@ targets:
     settings:
       base:
         PRODUCT_NAME: Cabinet Studio
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
         PRODUCT_MODULE_NAME: CabinetStudio
         PRODUCT_BUNDLE_IDENTIFIER: io.github.brendan779.cabinetstudio
         GENERATE_INFOPLIST_FILE: YES
