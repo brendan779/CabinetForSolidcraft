@@ -147,7 +147,7 @@ pub fn to_csv(list: &CutList) -> String {
     out
 }
 
-fn csv(s: &str) -> String {
+pub(crate) fn csv(s: &str) -> String {
     if s.contains([',', '"', '\n']) {
         format!("\"{}\"", s.replace('"', "\"\""))
     } else {

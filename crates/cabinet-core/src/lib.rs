@@ -8,6 +8,7 @@
 //! Cabinet frame: X runs left to right across the front, Y runs from the front face (Y = 0) to the
 //! back, Z runs up from the floor. Lengths are millimetres.
 
+pub mod bom;
 pub mod build;
 pub mod collisions;
 pub mod cutlist;
@@ -18,12 +19,13 @@ pub mod options;
 pub mod part;
 pub mod project;
 pub mod run;
+pub mod standins;
 
 pub use build::build_cabinet;
 pub use model::{Cabinet, CabinetKind, ConstructionStandard};
 pub use part::{Part, PartList};
 pub use project::Project;
-pub use run::{Run, RunItem, build_run};
+pub use run::{Run, RunItem, build_run, laid_out};
 
 #[derive(Debug, thiserror::Error, PartialEq)]
 pub enum Error {

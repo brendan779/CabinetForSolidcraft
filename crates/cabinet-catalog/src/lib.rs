@@ -143,9 +143,14 @@ pub struct EdgeTape {
     pub code: String,
     pub decor: String,
     pub finish: String,
-    pub material: TapeMaterial,
+    /// As the source states it; absent when it does not (Laminex's board tables give a matching
+    /// tape's code, thickness and roll, not its material or width).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub material: Option<TapeMaterial>,
     pub thickness: f64,
-    pub width: f64,
+    /// Width in mm, absent when the source does not print it.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub width: Option<f64>,
     /// Roll lengths in metres.
     pub rolls: Vec<f64>,
     /// Pre-glued (hot melt) or un-glued.
@@ -233,9 +238,27 @@ impl Catalog {
         self.hardware.iter().find(|h| h.id == id)
     }
 
-    /// Unique ids, positive sizes and edge tape references that resolve.
+    /// Unique ids, positive sizes, edge tape references that resolve, and a source on every
+    /// board and tape: the document's URL and date, and when it was read.
     pub fn validate(&self) -> Result<(), Error> {
         let mut problems = Vec::new();
+        let sourced = |id: &str, s: &Source, problems: &mut Vec<String>| {
+            for (field, v) in [
+                ("url", &s.url),
+                ("document_date", &s.document_date),
+                ("retrieved", &s.retrieved),
+            ] {
+                if v.trim().is_empty() {
+                    problems.push(format!("{id}: source has no {field}"));
+                }
+            }
+        };
+        for b in &self.boards {
+            sourced(&b.id, &b.source, &mut problems);
+        }
+        for t in &self.edge_tapes {
+            sourced(&t.id, &t.source, &mut problems);
+        }
         let mut ids = HashSet::new();
         for b in &self.boards {
             if !ids.insert(b.id.as_str()) {
@@ -258,7 +281,7 @@ impl Catalog {
             if !tape_ids.insert(t.id.as_str()) {
                 problems.push(format!("duplicate edge tape id {}", t.id));
             }
-            if !(positive(t.thickness) && positive(t.width)) {
+            if !(positive(t.thickness) && t.width.is_none_or(positive)) {
                 problems.push(format!("{}: bad tape size", t.id));
             }
         }
@@ -287,11 +310,13 @@ impl Catalog {
         self.boards.iter().find(|b| b.id == id)
     }
 
-    /// Edge tapes for `board` that are at least as wide as the board is thick.
+    /// Edge tapes for `board` known to be at least as wide as the board is thick.
     pub fn tapes_for(&self, board: &Board) -> Vec<&EdgeTape> {
         self.edge_tapes
             .iter()
-            .filter(|t| board.edge_tapes.contains(&t.id) && t.width >= board.thickness)
+            .filter(|t| {
+                board.edge_tapes.contains(&t.id) && t.width.is_some_and(|w| w >= board.thickness)
+            })
             .collect()
     }
 
@@ -376,12 +401,38 @@ mod tests {
     }
 
     #[test]
+    fn a_board_without_a_source_date_is_refused() {
+        let dir = std::env::temp_dir().join("cabinet-catalog-unsourced");
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(dir.join("boards")).unwrap();
+        let file = serde_json::json!({ "brand": "Test", "boards": [{
+            "id": "test.white.16", "brand": "Test", "range": "R", "decor": "White", "finish": "Matt",
+            "kind": "melamine", "substrate": "mdf", "thickness": 16.0,
+            "sheets": [{ "length": 2400.0, "width": 1200.0 }],
+            "source": { "url": "https://example.com/guide.pdf", "document_date": "", "retrieved": "2026-10-24" }
+        }] });
+        std::fs::write(dir.join("boards/test.json"), file.to_string()).unwrap();
+        let err = Catalog::load(&dir).unwrap_err().to_string();
+        assert!(
+            err.contains("test.white.16: source has no document_date"),
+            "{err}"
+        );
+    }
+
+    #[test]
     fn the_repository_catalog_loads_and_validates() {
         let cat = Catalog::load(&repo_catalog()).unwrap();
         assert!(!cat.boards.is_empty());
+        // A board whose tapes all give a width has one wide enough for it. (Laminex's tables give
+        // no tape widths.)
         for b in &cat.boards {
+            let widths_known = b.edge_tapes.iter().all(|id| {
+                cat.edge_tapes
+                    .iter()
+                    .any(|t| &t.id == id && t.width.is_some())
+            });
             assert!(
-                !cat.tapes_for(b).is_empty() || b.edge_tapes.is_empty(),
+                !cat.tapes_for(b).is_empty() || b.edge_tapes.is_empty() || !widths_known,
                 "{}",
                 b.id
             );

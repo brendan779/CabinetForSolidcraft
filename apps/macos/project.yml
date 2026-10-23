@@ -25,6 +25,20 @@ targets:
     dependencies:
       - framework: Core/CabinetCore.xcframework
         embed: false
+    info:
+      path: CabinetStudio/Info.plist
+      properties:
+        CFBundleDocumentTypes:
+          - CFBundleTypeName: Cabinet Job
+            CFBundleTypeRole: Editor
+            LSHandlerRank: Owner
+            LSItemContentTypes: [io.github.brendan779.cabinetjob]
+        UTExportedTypeDeclarations:
+          - UTTypeIdentifier: io.github.brendan779.cabinetjob
+            UTTypeDescription: Cabinet Job
+            UTTypeConformsTo: [public.json, public.data]
+            UTTypeTagSpecification:
+              public.filename-extension: [cabinetjob]
     preBuildScripts:
       - name: Build Rust core
         script: |
@@ -33,6 +47,8 @@ targets:
     settings:
       base:
         PRODUCT_NAME: Cabinet Studio
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
         PRODUCT_MODULE_NAME: CabinetStudio
         PRODUCT_BUNDLE_IDENTIFIER: io.github.brendan779.cabinetstudio
         GENERATE_INFOPLIST_FILE: YES

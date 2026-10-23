@@ -4,7 +4,15 @@ struct InspectorView: View {
     @Environment(ProjectModel.self) private var project
 
     var body: some View {
-        if let cab = project.selected {
+        if let cab = project.selected, cab.isPiece {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 22) {
+                    header(cab)
+                    PieceSection(cab: cab)
+                }
+                .padding(16)
+            }
+        } else if let cab = project.selected {
             ScrollView {
                 VStack(alignment: .leading, spacing: 22) {
                     header(cab)
@@ -16,8 +24,13 @@ struct InspectorView: View {
                         SinkSection(cab: cab)
                     }
                     FrontsSection(cab: cab)
+                    BoardsSection(cab: cab)
+                    ConstructionScope(cab: cab)
+                    let overrides = project.overrides(of: cab)
                     ForEach(optionGroups(), id: \.field) { group in
-                        VisualPicker(group: group, selected: project.option(group.field, of: cab)) { choice in
+                        VisualPicker(group: group, selected: project.option(group.field, of: cab),
+                                     overridden: overrides.contains(group.field),
+                                     onReset: { project.resetToProject([group.field]) }) { choice in
                             withAnimation(.snappy) { project.setOption(group.field, choice) }
                         }
                     }
@@ -47,6 +60,213 @@ struct InspectorView: View {
                     .help(err)
             }
         }
+    }
+}
+
+/// A filler's width or an end panel's reach, and the scribe left on to fit the wall.
+struct PieceSection: View {
+    @Environment(ProjectModel.self) private var project
+    @AppStorage(LengthUnit.key) private var unit: LengthUnit = .millimetres
+    let cab: CabinetDoc
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            if cab.kind == "filler" {
+                SectionTitle("Filler")
+                chips("Width", value: cab.width, presets: [25, 38, 50, 75, 100, 150]) { c, v in c.width = v }
+            } else {
+                SectionTitle("End panel")
+                HStack(spacing: 8) {
+                    ForEach([true, false], id: \.self) { floor in
+                        Button {
+                            withAnimation(.snappy) { var c = cab; c.toFloor = floor; project.selected = c }
+                        } label: {
+                            VStack(spacing: 6) {
+                                EndPanelThumbnail(toFloor: floor).frame(width: 44, height: 52)
+                                Text(floor ? "To the floor" : "On the kick").font(.caption)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 8)
+                        }
+                        .buttonStyle(TileStyle(selected: cab.toFloor == floor))
+                        .help(floor ? "The panel runs down over the toe kick to the floor."
+                                    : "The panel stops on top of the toe kick, like the doors.")
+                    }
+                }
+            }
+            chips("Scribe", value: cab.scribe, presets: [0, 10, 20, 30, 40]) { c, v in c.scribe = v }
+            Text("The scribe is extra board, cut off on site to follow the wall. It is not part of the run's length.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    private func chips(_ title: String, value: Double, presets: [Double],
+                       set: @escaping (inout CabinetDoc, Double) -> Void) -> some View {
+        HStack(spacing: 6) {
+            Text(title).foregroundStyle(.secondary)
+            Spacer()
+            ForEach(presets, id: \.self) { p in
+                Button(unit.format(p, suffix: false)) {
+                    withAnimation(.snappy) { var c = cab; set(&c, p); project.selected = c }
+                }
+                .buttonStyle(ChipStyle(selected: abs(p - value) < 0.5))
+                .accessibilityLabel("\(title) \(unit.format(p))")
+            }
+        }
+    }
+}
+
+/// A cabinet side seen from the side with an end panel on it, to the floor or stopping at the kick.
+struct EndPanelThumbnail: View {
+    let toFloor: Bool
+
+    var body: some View {
+        Canvas { ctx, size in
+            let w = size.width, h = size.height, kick = h * 0.16
+            let carcass = CGRect(x: w * 0.15, y: 0, width: w * 0.7, height: h - kick)
+            ctx.stroke(Path(carcass), with: .color(.primary.opacity(0.4)), lineWidth: 1)
+            var notch = Path()
+            notch.addRect(CGRect(x: w * 0.25, y: h - kick, width: w * 0.6, height: kick))
+            ctx.stroke(notch, with: .color(.primary.opacity(0.25)), lineWidth: 1)
+            let panel = CGRect(x: w * 0.08, y: 0, width: w * 0.84, height: toFloor ? h : h - kick)
+            ctx.fill(Path(panel), with: .color(.accentColor.opacity(0.3)))
+            ctx.stroke(Path(panel), with: .color(.accentColor), lineWidth: 1.4)
+        }
+        .accessibilityHidden(true)
+    }
+}
+
+/// Whether construction choices change the whole job or only this cabinet, drawn as a run of
+/// cabinets with all of them or just one lit.
+struct ConstructionScope: View {
+    @Environment(ProjectModel.self) private var project
+    let cab: CabinetDoc
+
+    var body: some View {
+        @Bindable var project = project
+        let overrides = project.overrides(of: cab)
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                SectionTitle("Construction")
+                Spacer()
+                if !overrides.isEmpty {
+                    Button("Match job", systemImage: "arrow.uturn.backward") {
+                        project.resetToProject(Array(overrides))
+                    }
+                    .buttonStyle(.borderless)
+                    .font(.caption)
+                    .help("\(cab.id) differs from the job in \(overrides.count) choices. Click to follow the job's standard again.")
+                }
+            }
+            HStack(spacing: 8) {
+                ForEach([false, true], id: \.self) { only in
+                    Button {
+                        withAnimation(.snappy) { project.onlyThisCabinet = only }
+                    } label: {
+                        VStack(spacing: 6) {
+                            RunThumbnail(lit: only ? .one : .all).frame(width: 64, height: 30)
+                            Text(only ? "Only \(cab.id)" : "Whole job").font(.caption)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 8)
+                    }
+                    .buttonStyle(TileStyle(selected: project.onlyThisCabinet == only))
+                    .help(only ? "Choices below change only \(cab.id); the rest of the job keeps the job's standard."
+                               : "Choices below change every cabinet in the job, except where a cabinet has its own choice.")
+                    .accessibilityLabel(only ? "Change only \(cab.id)" : "Change the whole job")
+                }
+            }
+            StandardPresets()
+        }
+    }
+}
+
+/// Saved standards as tiles: each drawn with its back and top joint. Click one to make it the
+/// job's standard; the last tile saves the job's standard under a name.
+struct StandardPresets: View {
+    @Environment(ProjectModel.self) private var project
+    @State private var library = StandardLibrary.shared
+    @State private var naming = false
+    @State private var name = ""
+
+    var body: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 8) {
+                ForEach(library.standards) { preset in
+                    let current = project.jobStandardIs(preset.standardJson)
+                    Button {
+                        project.applyJobStandard(preset.standardJson)
+                        project.status = "Job standard: \(preset.name)"
+                    } label: {
+                        VStack(spacing: 4) {
+                            HStack(spacing: 2) {
+                                ConstructionThumbnail(field: "top_joint", choice: preset.choice("top_joint"), highlighted: current)
+                                ConstructionThumbnail(field: "back", choice: preset.choice("back"), highlighted: current)
+                            }
+                            .frame(width: 76, height: 30)
+                            Text(preset.name).font(.caption).lineLimit(1)
+                        }
+                        .frame(width: 90)
+                        .padding(.vertical, 6)
+                    }
+                    .buttonStyle(TileStyle(selected: current))
+                    .help("Use \(preset.name) for this job")
+                    .contextMenu {
+                        Button("Update from This Job") { try? library.save(preset.name, standardJson: project.standardJson) }
+                        Button("Delete", role: .destructive) { library.delete(preset.name) }
+                    }
+                }
+                Button {
+                    name = ""
+                    naming = true
+                } label: {
+                    VStack(spacing: 4) {
+                        Image(systemName: "plus").font(.title3).frame(height: 30)
+                        Text("Save…").font(.caption)
+                    }
+                    .frame(width: 70)
+                    .padding(.vertical, 6)
+                }
+                .buttonStyle(TileStyle(selected: false))
+                .help("Save this job's construction as a named standard, to use on other jobs")
+            }
+        }
+        .alert("Save the job's construction as", isPresented: $naming) {
+            TextField("My shop", text: $name)
+            Button("Save") {
+                let n = name.trimmingCharacters(in: .whitespaces)
+                guard !n.isEmpty else { return }
+                do {
+                    try library.save(n, standardJson: project.standardJson)
+                    project.status = "Saved standard \(n)"
+                } catch {
+                    project.lastError = "Could not save the standard: \(error.localizedDescription)"
+                }
+            }
+            Button("Cancel", role: .cancel) {}
+        }
+    }
+}
+
+/// Four cabinets in a row, all or only the second one highlighted.
+struct RunThumbnail: View {
+    enum Lit { case all, one }
+    let lit: Lit
+
+    var body: some View {
+        Canvas { ctx, size in
+            let n = 4, gap: CGFloat = 3
+            let w = (size.width - gap * CGFloat(n - 1)) / CGFloat(n)
+            for i in 0..<n {
+                let r = CGRect(x: CGFloat(i) * (w + gap), y: 0, width: w, height: size.height)
+                let on = lit == .all || i == 1
+                ctx.fill(Path(roundedRect: r, cornerRadius: 2), with: .color(on ? .accentColor.opacity(0.35) : .primary.opacity(0.06)))
+                ctx.stroke(Path(roundedRect: r, cornerRadius: 2), with: .color(on ? .accentColor : .primary.opacity(0.3)), lineWidth: 1)
+            }
+        }
+        .accessibilityHidden(true)
     }
 }
 
@@ -142,6 +362,7 @@ struct SizeSection: View {
                     ForEach(presets, id: \.self) { p in
                         Button(unit.format(p, suffix: false)) { withAnimation(.snappy) { set(p) } }
                             .buttonStyle(ChipStyle(selected: abs(p - value) < 0.5))
+                            .accessibilityLabel("\(title) \(unit.format(p))")
                     }
                 }
             }
@@ -226,6 +447,7 @@ struct BlindSection: View {
                     withAnimation(.snappy) { var c = cab; set(&c, p); project.selected = c }
                 }
                 .buttonStyle(ChipStyle(selected: abs(p - value) < 0.5))
+                .accessibilityLabel("\(title) \(Int(p)) millimetres")
             }
         }
     }
@@ -256,6 +478,7 @@ struct BlindThumbnail: View {
                 ctx.fill(Path(ellipseIn: CGRect(x: hx - 2, y: y - 2, width: 4, height: 4)), with: .color(.accentColor))
             }
         }
+        .accessibilityHidden(true)
     }
 }
 
@@ -323,6 +546,7 @@ struct DrawerStackPicker: View {
                         .padding(.vertical, 6)
                 }
                 .buttonStyle(TileStyle(selected: cab.drawerRatios == stack))
+                .accessibilityLabel("\(stack.count) drawers, heights \(stack.map { String(Int($0)) }.joined(separator: " to "))")
             }
         }
     }
@@ -362,6 +586,7 @@ struct ChipStyle: ButtonStyle {
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
+            .accessibilityAddTraits(selected ? .isSelected : [])
             .font(.caption.monospacedDigit())
             .padding(.horizontal, 9)
             .padding(.vertical, 4)
@@ -377,6 +602,7 @@ struct TileStyle: ButtonStyle {
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
+            .accessibilityAddTraits(selected ? .isSelected : [])
             .background(
                 RoundedRectangle(cornerRadius: 10)
                     .fill(Color.primary.opacity(configuration.isPressed ? 0.12 : 0.04))

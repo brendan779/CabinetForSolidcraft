@@ -1,15 +1,18 @@
 //! Cut sheets: one A4-landscape SVG per part, showing the part's main face with every operation
 //! dimensioned from the reference corner (bottom-left as drawn), edge tape marked and a title
-//! block. PDF output and multi-part sheets are BACKLOG items.
+//! block. [`pdf::job_pdf`] puts every sheet of a job in one PDF.
 
 use std::fmt::Write;
+
+pub mod labels;
+pub mod pdf;
 
 use cabinet_core::geom::{Axis, Vec3};
 use cabinet_core::part::{BorePurpose, Operation, Part, PartList};
 
 /// A4 landscape in mm; the SVG uses mm units.
-const PAGE_W: f64 = 297.0;
-const PAGE_H: f64 = 210.0;
+pub(crate) const PAGE_W: f64 = 297.0;
+pub(crate) const PAGE_H: f64 = 210.0;
 const MARGIN: f64 = 12.0;
 const TITLE_H: f64 = 30.0;
 
@@ -17,13 +20,14 @@ const TITLE_H: f64 = 30.0;
 /// reference corner), with the face it is on.
 #[derive(Debug, Clone, PartialEq)]
 pub enum Feature {
-    /// A bore into the drawn face.
+    /// A bore into one of the part's faces.
     FaceBore {
         u: f64,
         v: f64,
         diameter: f64,
         depth: f64,
         purpose: BorePurpose,
+        face: Face,
     },
     /// A bore into an edge: shown as a tick at the edge, with its depth.
     EdgeBore {
@@ -33,14 +37,34 @@ pub enum Feature {
         depth: f64,
         edge: Edge,
     },
-    /// A slot or groove footprint on the drawn face (or through an edge).
+    /// A slot or groove footprint, on one face, or `None` when it goes through or is cut from an
+    /// edge (both faces show it).
     Rect {
         u: f64,
         v: f64,
         w: f64,
         h: f64,
         label: &'static str,
+        face: Option<Face>,
     },
+}
+
+/// A part's two big faces: at the low and the high end of its thickness axis.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Face {
+    Low,
+    High,
+}
+
+impl Feature {
+    /// The face it is machined into, if it is on one face only.
+    pub fn face(&self) -> Option<Face> {
+        match self {
+            Feature::FaceBore { face, .. } => Some(*face),
+            Feature::Rect { face, .. } => *face,
+            Feature::EdgeBore { .. } => None,
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -87,12 +111,19 @@ pub fn features(list: &PartList, part: &Part) -> Vec<Feature> {
             } if *name == part.name => {
                 let (u, v) = to_uv(part, *at);
                 if direction.axis == part.thickness_axis {
+                    // Drilled towards +t, the hole opens on the low face.
+                    let face = if direction.positive {
+                        Face::Low
+                    } else {
+                        Face::High
+                    };
                     out.push(Feature::FaceBore {
                         u,
                         v,
                         diameter: *diameter,
                         depth: *depth,
                         purpose: *purpose,
+                        face,
                     });
                 } else {
                     let edge = if direction.axis == ua {
@@ -132,6 +163,14 @@ pub fn features(list: &PartList, part: &Part) -> Vec<Feature> {
 
 fn rect(part: &Part, min: Vec3, size: Vec3, label: &'static str) -> Feature {
     let (ua, va) = frame(part);
+    let t = part.thickness_axis;
+    let (lo, hi) = (part.bounds.min.get(t), part.bounds.max().get(t));
+    let (r0, r1) = (min.get(t), min.get(t) + size.get(t));
+    let face = match (r0 <= lo + 1e-6, r1 >= hi - 1e-6) {
+        (true, false) => Some(Face::Low),
+        (false, true) => Some(Face::High),
+        _ => None,
+    };
     let (u0, v0) = to_uv(part, min);
     // Clip to the part so slots shared by two parts show only this part's half.
     let u1 = (u0 + size.get(ua)).min(part.bounds.size.get(ua));
@@ -143,17 +182,18 @@ fn rect(part: &Part, min: Vec3, size: Vec3, label: &'static str) -> Feature {
         w: u1 - u0,
         h: v1 - v0,
         label,
+        face,
     }
 }
 
-fn esc(s: &str) -> String {
+pub(crate) fn esc(s: &str) -> String {
     s.replace('&', "&amp;")
         .replace('<', "&lt;")
         .replace('>', "&gt;")
         .replace('"', "&quot;")
 }
 
-fn fmt(v: f64) -> String {
+pub(crate) fn fmt(v: f64) -> String {
     let r = (v * 10.0).round() / 10.0;
     if r.fract() == 0.0 {
         format!("{r:.0}")
@@ -162,16 +202,32 @@ fn fmt(v: f64) -> String {
     }
 }
 
-/// The cut sheet for one part as an SVG document.
+/// The cut sheet for one part as an SVG document. A part machined on both faces gets a view of
+/// each (the far one turned over, so mirrored); an edge with bores in it gets an edge view.
 pub fn part_sheet(list: &PartList, part: &Part, board: &str, job: &str) -> String {
     let (ua, va) = frame(part);
     let (lu, lv) = (part.bounds.size.get(ua), part.bounds.size.get(va));
+    let feats = features(list, part);
+    let has = |f: Face| feats.iter().any(|x| x.face() == Some(f));
+    let two_faces = has(Face::Low) && has(Face::High);
+    let mut edges: Vec<Edge> = Vec::new();
+    for f in &feats {
+        if let Feature::EdgeBore { edge, .. } = f
+            && !edges.contains(edge)
+        {
+            edges.push(*edge);
+        }
+    }
+    let edge_views = two_faces || !edges.is_empty();
+    if !edge_views {
+        edges.clear();
+    }
     let draw_w = PAGE_W - 2.0 * MARGIN - 30.0;
-    let draw_h = PAGE_H - 2.0 * MARGIN - TITLE_H - 24.0;
-    let s = (draw_w / lu).min(draw_h / lv);
-    let (ox, oy) = (MARGIN + 22.0, MARGIN + 8.0 + draw_h); // reference corner on the page
-    let x = |u: f64| ox + u * s;
-    let y = |v: f64| oy - v * s;
+    let draw_h = PAGE_H - 2.0 * MARGIN - TITLE_H - 24.0 - EDGE_ROW * edges.len() as f64;
+    let views = if two_faces { 2.0 } else { 1.0 };
+    let view_w = (draw_w - VIEW_GAP * (views - 1.0)) / views;
+    let s = (view_w / lu).min(draw_h / lv);
+    let oy = MARGIN + 8.0 + draw_h; // reference corner on the page
 
     let mut svg = String::new();
     let _ = write!(
@@ -181,153 +237,83 @@ pub fn part_sheet(list: &PartList, part: &Part, board: &str, job: &str) -> Strin
 <style>.o{{fill:#f6f3ec;stroke:#222;stroke-width:0.35}}.t{{font-size:3px;fill:#222}}.s{{font-size:2.4px;fill:#555}}.d{{stroke:#4a6fa5;stroke-width:0.2;fill:none}}.e{{stroke:#c0392b;stroke-width:1.1}}</style>
 "##
     );
-    let _ = writeln!(
-        svg,
-        r#"<rect class="o" x="{:.2}" y="{:.2}" width="{:.2}" height="{:.2}"/>"#,
-        x(0.0),
-        y(lv),
-        lu * s,
-        lv * s
-    );
-
-    // Edge tape: a heavy line along each taped edge.
-    let (l0, l1) = part.edges.on_axis(ua);
-    let (v0e, v1e) = part.edges.on_axis(va);
-    let taped = [
-        (l0, x(0.0), y(0.0), x(0.0), y(lv)),
-        (l1, x(lu), y(0.0), x(lu), y(lv)),
-        (v0e, x(0.0), y(0.0), x(lu), y(0.0)),
-        (v1e, x(0.0), y(lv), x(lu), y(lv)),
-    ];
-    for (on, x1, y1, x2, y2) in taped {
-        if on {
-            let _ = writeln!(
-                svg,
-                r#"<line class="e" x1="{x1:.2}" y1="{y1:.2}" x2="{x2:.2}" y2="{y2:.2}"/>"#
-            );
+    // Which face is inside: the one facing the middle of the cabinet.
+    let inside = {
+        let t = part.thickness_axis;
+        let mid = list
+            .parts
+            .iter()
+            .map(|p| p.bounds.center().get(t))
+            .sum::<f64>()
+            / list.parts.len().max(1) as f64;
+        if mid < part.bounds.center().get(t) {
+            Face::Low
+        } else {
+            Face::High
+        }
+    };
+    let outside = if inside == Face::Low {
+        Face::High
+    } else {
+        Face::Low
+    };
+    let mut table = Vec::new();
+    if two_faces {
+        let ox = MARGIN + 22.0;
+        let view = View {
+            ox,
+            oy,
+            s,
+            lu,
+            lv,
+            mirror: false,
+            face: Some(inside),
+            tag: "in ",
+            shared: true,
+        };
+        face_view(&mut svg, part, &feats, &view, &mut table);
+        caption(&mut svg, &view, "Inside face");
+        let view = View {
+            ox: ox + view_w + VIEW_GAP,
+            mirror: true,
+            face: Some(outside),
+            tag: "out ",
+            shared: false,
+            ..view
+        };
+        face_view(&mut svg, part, &feats, &view, &mut table);
+        caption(
+            &mut svg,
+            &view,
+            "Outside face, turned over (left and right swap)",
+        );
+    } else {
+        let view = View {
+            ox: MARGIN + 22.0,
+            oy,
+            s,
+            lu,
+            lv,
+            mirror: false,
+            face: None,
+            tag: "",
+            shared: true,
+        };
+        face_view(&mut svg, part, &feats, &view, &mut table);
+        if edge_views {
+            caption(&mut svg, &view, "Face");
         }
     }
-
-    // Overall dimensions.
-    let _ = writeln!(
-        svg,
-        r#"<line class="d" x1="{:.2}" y1="{:.2}" x2="{:.2}" y2="{:.2}"/>"#,
-        x(0.0),
-        y(0.0) + 7.0,
-        x(lu),
-        y(0.0) + 7.0
-    );
-    let _ = writeln!(
-        svg,
-        r#"<text class="t" x="{:.2}" y="{:.2}" text-anchor="middle">{}</text>"#,
-        x(lu / 2.0),
-        y(0.0) + 11.0,
-        fmt(lu)
-    );
-    let _ = writeln!(
-        svg,
-        r#"<line class="d" x1="{:.2}" y1="{:.2}" x2="{:.2}" y2="{:.2}"/>"#,
-        x(0.0) - 7.0,
-        y(0.0),
-        x(0.0) - 7.0,
-        y(lv)
-    );
-    let _ = writeln!(
-        svg,
-        r#"<text class="t" x="{:.2}" y="{:.2}" text-anchor="middle" transform="rotate(-90 {:.2} {:.2})">{}</text>"#,
-        x(0.0) - 9.0,
-        y(lv / 2.0),
-        x(0.0) - 9.0,
-        y(lv / 2.0),
-        fmt(lv)
-    );
-    let _ = writeln!(
-        svg,
-        r##"<circle cx="{:.2}" cy="{:.2}" r="1" fill="#c0392b"/>"##,
-        x(0.0),
-        y(0.0)
-    );
-
-    // Machining.
-    let feats = features(list, part);
-    let mut table = Vec::new();
-    for f in &feats {
-        match f {
-            Feature::FaceBore {
-                u,
-                v,
-                diameter,
-                depth,
-                purpose,
-            } => {
-                let r = (diameter / 2.0 * s).max(0.6);
-                let _ = writeln!(
-                    svg,
-                    r##"<circle cx="{:.2}" cy="{:.2}" r="{r:.2}" fill="none" stroke="#222" stroke-width="0.25"/>"##,
-                    x(*u),
-                    y(*v)
-                );
-                table.push(format!(
-                    "Ø{} × {} {:?} @ {}, {}",
-                    fmt(*diameter),
-                    fmt(*depth),
-                    purpose,
-                    fmt(*u),
-                    fmt(*v)
-                ));
-            }
-            Feature::EdgeBore {
-                u,
-                v,
-                diameter,
-                depth,
-                edge,
-            } => {
-                let (cx, cy) = (x(*u), y(*v));
-                let len = (depth * s).max(1.5);
-                let (x2, y2) = match edge {
-                    Edge::Left => (cx + len, cy),
-                    Edge::Right => (cx - len, cy),
-                    Edge::Bottom => (cx, cy - len),
-                    Edge::Top => (cx, cy + len),
-                };
-                let _ = writeln!(
-                    svg,
-                    r##"<line x1="{cx:.2}" y1="{cy:.2}" x2="{x2:.2}" y2="{y2:.2}" stroke="#7a3fa0" stroke-width="{:.2}"/>"##,
-                    (diameter * s).max(0.4)
-                );
-                table.push(format!(
-                    "Edge Ø{} × {} ({edge:?}) @ {}, {}",
-                    fmt(*diameter),
-                    fmt(*depth),
-                    fmt(*u),
-                    fmt(*v)
-                ));
-            }
-            Feature::Rect { u, v, w, h, label } => {
-                // A notch is drawn as the paper showing through: no board there.
-                let fill = match *label {
-                    "biscuit" => "#e8c27a",
-                    "notch" => "#ffffff",
-                    _ => "#9bb7d4",
-                };
-                let _ = writeln!(
-                    svg,
-                    r##"<rect x="{:.2}" y="{:.2}" width="{:.2}" height="{:.2}" fill="{fill}" stroke="#222" stroke-width="0.15"/>"##,
-                    x(*u),
-                    y(v + h),
-                    (w * s).max(0.3),
-                    (h * s).max(0.3)
-                );
-                table.push(format!(
-                    "{label} {} × {} @ {}, {}",
-                    fmt(*w),
-                    fmt(*h),
-                    fmt(*u),
-                    fmt(*v)
-                ));
-            }
-        }
+    for (i, edge) in edges.iter().enumerate() {
+        edge_view(
+            &mut svg,
+            part,
+            &feats,
+            *edge,
+            MARGIN + 22.0,
+            oy + 16.0 + EDGE_ROW * i as f64,
+            s,
+        );
     }
 
     // Title block.
@@ -385,10 +371,325 @@ pub fn part_sheet(list: &PartList, part: &Part, board: &str, job: &str) -> Strin
     svg
 }
 
+/// Height of one edge view row, and the gap between two face views.
+const EDGE_ROW: f64 = 9.0;
+const VIEW_GAP: f64 = 16.0;
+
+/// A face view: its reference corner on the page, the scale, the part's size, whether it is seen
+/// turned over (u runs right to left), the face it shows (`None`: every feature), the tag its
+/// features get in the table, and whether it lists the edge bores and through cuts every view
+/// shows.
+#[derive(Clone, Copy)]
+struct View {
+    ox: f64,
+    oy: f64,
+    s: f64,
+    lu: f64,
+    lv: f64,
+    mirror: bool,
+    face: Option<Face>,
+    tag: &'static str,
+    shared: bool,
+}
+
+impl View {
+    fn x(&self, u: f64) -> f64 {
+        let u = if self.mirror { self.lu - u } else { u };
+        self.ox + u * self.s
+    }
+
+    fn y(&self, v: f64) -> f64 {
+        self.oy - v * self.s
+    }
+}
+
+fn caption(svg: &mut String, v: &View, text: &str) {
+    let _ = writeln!(
+        svg,
+        r#"<text class="s" x="{:.2}" y="{:.2}">{}</text>"#,
+        v.ox,
+        v.y(v.lv) - 2.0,
+        esc(text)
+    );
+}
+
+/// One face of the part: outline, edge tape, overall dimensions, reference corner and the
+/// view's features, each added to `table`.
+fn face_view(
+    svg: &mut String,
+    part: &Part,
+    feats: &[Feature],
+    view: &View,
+    table: &mut Vec<String>,
+) {
+    let (face, tag, shared) = (view.face, view.tag, view.shared);
+    let (ua, va) = frame(part);
+    let (lu, lv, s) = (view.lu, view.lv, view.s);
+    let x = |u: f64| view.x(u);
+    let y = |v: f64| view.y(v);
+    let left = x(0.0).min(x(lu));
+    let _ = writeln!(
+        svg,
+        r#"<rect class="o" x="{:.2}" y="{:.2}" width="{:.2}" height="{:.2}"/>"#,
+        left,
+        y(lv),
+        lu * s,
+        lv * s
+    );
+
+    // Edge tape: a heavy line along each taped edge.
+    let (l0, l1) = part.edges.on_axis(ua);
+    let (v0e, v1e) = part.edges.on_axis(va);
+    let taped = [
+        (l0, x(0.0), y(0.0), x(0.0), y(lv)),
+        (l1, x(lu), y(0.0), x(lu), y(lv)),
+        (v0e, x(0.0), y(0.0), x(lu), y(0.0)),
+        (v1e, x(0.0), y(lv), x(lu), y(lv)),
+    ];
+    for (on, x1, y1, x2, y2) in taped {
+        if on {
+            let _ = writeln!(
+                svg,
+                r#"<line class="e" x1="{x1:.2}" y1="{y1:.2}" x2="{x2:.2}" y2="{y2:.2}"/>"#
+            );
+        }
+    }
+
+    // Overall dimensions.
+    let _ = writeln!(
+        svg,
+        r#"<line class="d" x1="{:.2}" y1="{:.2}" x2="{:.2}" y2="{:.2}"/>"#,
+        x(0.0),
+        y(0.0) + 7.0,
+        x(lu),
+        y(0.0) + 7.0
+    );
+    let _ = writeln!(
+        svg,
+        r#"<text class="t" x="{:.2}" y="{:.2}" text-anchor="middle">{}</text>"#,
+        x(lu / 2.0),
+        y(0.0) + 11.0,
+        fmt(lu)
+    );
+    let _ = writeln!(
+        svg,
+        r#"<line class="d" x1="{:.2}" y1="{:.2}" x2="{:.2}" y2="{:.2}"/>"#,
+        left - 7.0,
+        y(0.0),
+        left - 7.0,
+        y(lv)
+    );
+    let _ = writeln!(
+        svg,
+        r#"<text class="t" x="{:.2}" y="{:.2}" text-anchor="middle" transform="rotate(-90 {:.2} {:.2})">{}</text>"#,
+        left - 9.0,
+        y(lv / 2.0),
+        left - 9.0,
+        y(lv / 2.0),
+        fmt(lv)
+    );
+    let _ = writeln!(
+        svg,
+        r##"<circle cx="{:.2}" cy="{:.2}" r="1" fill="#c0392b"/>"##,
+        x(0.0),
+        y(0.0)
+    );
+
+    // Machining.
+    for f in feats {
+        if face.is_some() && f.face().is_some_and(|ff| Some(ff) != face) {
+            continue;
+        }
+        match f {
+            Feature::FaceBore {
+                u,
+                v,
+                diameter,
+                depth,
+                purpose,
+                ..
+            } => {
+                let r = (diameter / 2.0 * s).max(0.6);
+                let _ = writeln!(
+                    svg,
+                    r##"<circle cx="{:.2}" cy="{:.2}" r="{r:.2}" fill="none" stroke="#222" stroke-width="0.25"/>"##,
+                    x(*u),
+                    y(*v)
+                );
+                table.push(format!(
+                    "{tag}Ø{} × {} {:?} @ {}, {}",
+                    fmt(*diameter),
+                    fmt(*depth),
+                    purpose,
+                    fmt(*u),
+                    fmt(*v)
+                ));
+            }
+            Feature::EdgeBore {
+                u,
+                v,
+                diameter,
+                depth,
+                edge,
+            } => {
+                let (cx, cy) = (x(*u), y(*v));
+                let len = (depth * s).max(1.5);
+                // Turned over, left and right edges swap sides on the page.
+                let (x2, y2) = match (edge, view.mirror) {
+                    (Edge::Left, false) | (Edge::Right, true) => (cx + len, cy),
+                    (Edge::Right, false) | (Edge::Left, true) => (cx - len, cy),
+                    (Edge::Bottom, _) => (cx, cy - len),
+                    (Edge::Top, _) => (cx, cy + len),
+                };
+                let _ = writeln!(
+                    svg,
+                    r##"<line x1="{cx:.2}" y1="{cy:.2}" x2="{x2:.2}" y2="{y2:.2}" stroke="#7a3fa0" stroke-width="{:.2}"/>"##,
+                    (diameter * s).max(0.4)
+                );
+                if shared {
+                    table.push(format!(
+                        "Edge Ø{} × {} ({edge:?}) @ {}, {}",
+                        fmt(*diameter),
+                        fmt(*depth),
+                        fmt(*u),
+                        fmt(*v)
+                    ));
+                }
+            }
+            Feature::Rect {
+                u,
+                v,
+                w,
+                h,
+                label,
+                face: on,
+            } => {
+                // A notch is drawn as the paper showing through: no board there.
+                let fill = match *label {
+                    "biscuit" => "#e8c27a",
+                    "notch" => "#ffffff",
+                    _ => "#9bb7d4",
+                };
+                let (xa, xb) = (x(*u), x(u + w));
+                let _ = writeln!(
+                    svg,
+                    r##"<rect x="{:.2}" y="{:.2}" width="{:.2}" height="{:.2}" fill="{fill}" stroke="#222" stroke-width="0.15"/>"##,
+                    xa.min(xb),
+                    y(v + h),
+                    (w * s).max(0.3),
+                    (h * s).max(0.3)
+                );
+                if on.is_some()
+                    || face != Some(Face::High) && face != Some(Face::Low)
+                    || tag == "in "
+                {
+                    table.push(format!(
+                        "{tag}{label} {} × {} @ {}, {}",
+                        fmt(*w),
+                        fmt(*h),
+                        fmt(*u),
+                        fmt(*v)
+                    ));
+                }
+            }
+        }
+    }
+}
+
+/// One edge seen straight on, as long as the face view and as thick as the board, with its bores.
+fn edge_view(
+    svg: &mut String,
+    part: &Part,
+    feats: &[Feature],
+    edge: Edge,
+    ox: f64,
+    top: f64,
+    s: f64,
+) {
+    let (ua, va) = frame(part);
+    let length = match edge {
+        Edge::Bottom | Edge::Top => part.bounds.size.get(ua),
+        Edge::Left | Edge::Right => part.bounds.size.get(va),
+    };
+    // Thin boards are drawn at least 4 mm thick so the holes show.
+    let th = (part.thickness() * s).max(4.0);
+    let _ = writeln!(
+        svg,
+        r#"<rect class="o" x="{ox:.2}" y="{top:.2}" width="{:.2}" height="{th:.2}"/>"#,
+        length * s
+    );
+    let name = match edge {
+        Edge::Bottom => "Bottom edge",
+        Edge::Top => "Top edge",
+        Edge::Left => "Left edge",
+        Edge::Right => "Right edge",
+    };
+    let _ = writeln!(
+        svg,
+        r#"<text class="s" x="{:.2}" y="{:.2}">{name}</text>"#,
+        ox + length * s + 2.0,
+        top + th / 2.0 + 0.8
+    );
+    for f in feats {
+        if let Feature::EdgeBore {
+            u,
+            v,
+            diameter,
+            edge: e,
+            ..
+        } = f
+            && *e == edge
+        {
+            let along = match edge {
+                Edge::Bottom | Edge::Top => *u,
+                Edge::Left | Edge::Right => *v,
+            };
+            let r = (diameter / 2.0 * s).max(0.6).min(th / 2.0);
+            let _ = writeln!(
+                svg,
+                r##"<circle cx="{:.2}" cy="{:.2}" r="{r:.2}" fill="none" stroke="#7a3fa0" stroke-width="0.25"/>"##,
+                ox + along * s,
+                top + th / 2.0
+            );
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use cabinet_core::{Cabinet, CabinetKind, build_cabinet};
+
+    #[test]
+    fn a_side_machined_on_both_faces_shows_the_inside_and_the_outside_turned_over() {
+        let list = build_cabinet(&Cabinet::new("B01", CabinetKind::Base)).unwrap();
+        let side = list.part("B01.LeftSide").unwrap();
+        let svg = part_sheet(&list, side, "Board", "Job");
+        assert!(svg.contains(">Inside face<"));
+        assert!(svg.contains(">Outside face, turned over"));
+        // Shelf pins and hinge plates are inside; the screws into the bottom come from outside.
+        let feats = features(&list, side);
+        let face_of = |p: BorePurpose| {
+            feats.iter().find_map(|f| match f {
+                Feature::FaceBore { purpose, face, .. } if *purpose == p => Some(*face),
+                _ => None,
+            })
+        };
+        assert_ne!(face_of(BorePurpose::ShelfPin), face_of(BorePurpose::Screw));
+        assert_eq!(
+            face_of(BorePurpose::ShelfPin),
+            face_of(BorePurpose::HingePlate)
+        );
+    }
+
+    #[test]
+    fn edges_with_bores_get_an_edge_view_and_a_one_face_part_keeps_one_view() {
+        let list = build_cabinet(&Cabinet::new("B01", CabinetKind::Base)).unwrap();
+        let bottom = part_sheet(&list, list.part("B01.Bottom").unwrap(), "Board", "Job");
+        assert!(bottom.contains(">Left edge<") && bottom.contains(">Right edge<"));
+        let door = part_sheet(&list, list.part("B01.Door1").unwrap(), "Board", "Job");
+        assert!(!door.contains("face<") && !door.contains(" edge<"));
+    }
 
     #[test]
     fn the_left_side_shows_its_shelf_pins_and_hinge_plate_holes_on_its_face() {
@@ -439,6 +740,7 @@ mod tests {
                     w: s.toe_kick_height,
                     h: s.toe_kick_setback,
                     label: "notch",
+                    face: None,
                 }],
                 "{side}"
             );

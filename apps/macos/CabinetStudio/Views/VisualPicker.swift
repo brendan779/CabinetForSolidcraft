@@ -5,6 +5,9 @@ import SwiftUI
 struct VisualPicker: View {
     let group: OptionGroupRecord
     let selected: String
+    /// The cabinet's choice differs from the job's.
+    var overridden = false
+    var onReset: (() -> Void)?
     let onPick: (String) -> Void
 
     @State private var hovered: String?
@@ -13,6 +16,17 @@ struct VisualPicker: View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
                 SectionTitle(group.title)
+                if overridden {
+                    Button {
+                        withAnimation(.snappy) { onReset?() }
+                    } label: {
+                        Label("Own choice", systemImage: "arrow.uturn.backward.circle.fill")
+                            .font(.caption2.weight(.semibold))
+                    }
+                    .buttonStyle(.borderless)
+                    .foregroundStyle(.orange)
+                    .help("This cabinet has its own choice here. Click to follow the job's standard.")
+                }
                 Spacer()
                 Text(group.choices.first { $0.id == (hovered ?? selected) }?.description ?? "")
                     .font(.caption)
@@ -39,6 +53,8 @@ struct VisualPicker: View {
                         .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(TileStyle(selected: choice.id == selected))
+                    .accessibilityLabel("\(group.title): \(choice.label)")
+                    .accessibilityHint(choice.description)
                     .onHover { hovered = $0 ? choice.id : nil }
                     .help(choice.description)
                 }
@@ -69,6 +85,7 @@ struct ConstructionThumbnail: View {
             default: pen.unknown()
             }
         }
+        .accessibilityHidden(true)
     }
 }
 
@@ -368,5 +385,6 @@ struct FrontThumbnail: View {
                 for i in 1..<3 { hLine(r.minY + r.height * CGFloat(i) / 3) }
             }
         }
+        .accessibilityHidden(true)
     }
 }

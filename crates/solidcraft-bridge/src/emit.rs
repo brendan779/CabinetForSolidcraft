@@ -4,6 +4,7 @@ use cabinet_core::PartList;
 use cabinet_core::geom::{Axis, Vec3};
 use cabinet_core::model::BiscuitSize;
 use cabinet_core::part::{BorePurpose, Dir, Operation, PartRole};
+use cabinet_core::standins::{Shape, StandIn, stand_ins};
 use serde_json::{Value, json};
 
 /// How much of the machining to model.
@@ -74,10 +75,13 @@ pub fn emit_cabinet(list: &PartList, detail: Detail, spec: Option<&Value>) -> Ve
         }
         cmds.extend(bore_batches(&list.operations));
     }
-    let biscuits = if detail == Detail::Design {
-        Vec::new()
+    let (biscuits, hardware) = if detail == Detail::Design {
+        (Vec::new(), Vec::new())
     } else {
-        biscuit_bodies(&list.cabinet, &list.operations, &mut cmds)
+        let biscuits = biscuit_bodies(&list.cabinet, &list.operations, &mut cmds);
+        let hardware = stand_ins(list);
+        cmds.extend(hardware.iter().flat_map(stand_in));
+        (biscuits, hardware)
     };
     // One appearance command per colour keeps the batch short.
     let mut by_colour: Vec<(&str, Vec<&str>)> = Vec::new();
@@ -92,6 +96,12 @@ pub fn emit_cabinet(list: &PartList, detail: Detail, spec: Option<&Value>) -> Ve
         by_colour.push((
             BISCUIT_COLOUR,
             biscuits.iter().map(String::as_str).collect(),
+        ));
+    }
+    if !hardware.is_empty() {
+        by_colour.push((
+            HARDWARE_COLOUR,
+            hardware.iter().map(|h| h.name.as_str()).collect(),
         ));
     }
     for (c, bodies) in by_colour {
@@ -371,6 +381,51 @@ fn slot_batches(cabinet: &str, ops: &[Operation]) -> Vec<Value> {
 
 /// Pressed beech.
 const BISCUIT_COLOUR: &str = "#d8b06a";
+/// Nickel-plated steel, for hinge and runner stand-ins.
+const HARDWARE_COLOUR: &str = "#9ea3a8";
+
+/// A stand-in as one named body: its first shape makes the body, the rest join it.
+fn stand_in(s: &StandIn) -> Vec<Value> {
+    s.shapes
+        .iter()
+        .enumerate()
+        .map(|(i, shape)| {
+            let mut params = match shape {
+                Shape::Box(b) => json!({
+                    "length": round(b.size.x),
+                    "width": round(b.size.y),
+                    "height": round(b.size.z),
+                    "corner": arr(b.min),
+                }),
+                Shape::Cylinder {
+                    base,
+                    axis,
+                    diameter,
+                    height,
+                } => json!({
+                    "diameter": round(*diameter),
+                    "height": round(*height),
+                    "base": arr(*base),
+                    "axis": arr(Vec3::default().with(axis.axis, axis.sign())),
+                }),
+            };
+            let p = params.as_object_mut().expect("params are an object");
+            if i == 0 {
+                p.insert("operation".into(), json!("new"));
+                p.insert("body_name".into(), json!(s.name));
+                p.insert("name".into(), json!(s.name));
+            } else {
+                p.insert("operation".into(), json!("join"));
+                p.insert("targets".into(), json!([s.name]));
+            }
+            let command = match shape {
+                Shape::Box(_) => "solid.box",
+                Shape::Cylinder { .. } => "solid.cylinder",
+            };
+            json!({ "command": command, "params": params })
+        })
+        .collect()
+}
 
 /// A body for every biscuit, in its slot: the biscuit's lens (its length along the joint line,
 /// its width split across the two panels), as thick as it is. One sketch per plane holds the
@@ -599,6 +654,12 @@ mod tests {
         assert_eq!(cmds.last().unwrap()["command"], "component.activate");
     }
 
+    fn cuts(cmds: &[Value], command: &str) -> usize {
+        cmds.iter()
+            .filter(|c| c["command"] == command && c["params"]["operation"] == "cut")
+            .count()
+    }
+
     fn count(cmds: &[Value], command: &str) -> usize {
         cmds.iter().filter(|c| c["command"] == command).count()
     }
@@ -617,7 +678,8 @@ mod tests {
     #[test]
     fn manufacturing_detail_cuts_every_slot_and_groove_as_a_box() {
         let list = build_cabinet(&Cabinet::new("B01", CabinetKind::Base)).unwrap();
-        let boxes = |d| count(&emit_cabinet(&list, d, None), "solid.box");
+        // Cuts only: stand-in hardware is built from boxes too.
+        let boxes = |d| cuts(&emit_cabinet(&list, d, None), "solid.box");
         let box_ops = list
             .operations
             .iter()
@@ -665,6 +727,35 @@ mod tests {
                 .iter()
                 .any(|c| c["params"]["operation"] == "new" && c["command"] == "solid.extrude")
         );
+    }
+
+    #[test]
+    fn manufacturing_detail_adds_a_named_grey_stand_in_per_hinge_and_runner() {
+        let list = build_cabinet(&Cabinet::new("D01", CabinetKind::DrawerBank)).unwrap();
+        let expected = stand_ins(&list);
+        assert!(!expected.is_empty());
+        let named = |cmds: &[Value]| {
+            cmds.iter()
+                .filter(|c| c["params"]["operation"] == "new")
+                .filter_map(|c| c["params"]["body_name"].as_str().map(String::from))
+                .filter(|n| n.contains(".Runner") || n.contains(".Hinge"))
+                .collect::<Vec<_>>()
+        };
+        let cmds = emit_cabinet(&list, Detail::Manufacturing, None);
+        assert_eq!(
+            named(&cmds),
+            expected.iter().map(|s| s.name.clone()).collect::<Vec<_>>()
+        );
+        let joins = cmds
+            .iter()
+            .filter(|c| c["params"]["operation"] == "join")
+            .count();
+        let shapes: usize = expected.iter().map(|s| s.shapes.len() - 1).sum();
+        assert_eq!(joins, shapes);
+        assert!(cmds.iter().any(
+            |c| c["command"] == "appearance.assign" && c["params"]["color"] == HARDWARE_COLOUR
+        ));
+        assert!(named(&emit_cabinet(&list, Detail::Design, None)).is_empty());
     }
 
     #[test]
@@ -733,7 +824,7 @@ mod tests {
             })
             .count();
         assert_eq!(count(&cmds, "sketch.circle.center"), bores);
-        assert_eq!(count(&cmds, "solid.cylinder"), 0);
+        assert_eq!(cuts(&cmds, "solid.cylinder"), 0);
         let bore_cuts = cmds
             .iter()
             .filter(|c| c["command"] == "solid.extrude" && c["params"]["operation"] == "cut")

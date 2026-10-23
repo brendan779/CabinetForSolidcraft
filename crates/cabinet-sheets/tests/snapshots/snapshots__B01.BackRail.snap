@@ -5,16 +5,25 @@ expression: svg
 <svg xmlns="http://www.w3.org/2000/svg" width="297mm" height="210mm" viewBox="0 0 297 210" font-family="Helvetica, Arial, sans-serif">
 <rect width="297" height="210" fill="#fff"/>
 <style>.o{fill:#f6f3ec;stroke:#222;stroke-width:0.35}.t{font-size:3px;fill:#222}.s{font-size:2.4px;fill:#555}.d{stroke:#4a6fa5;stroke-width:0.2;fill:none}.e{stroke:#c0392b;stroke-width:1.1}</style>
-<rect class="o" x="34.00" y="109.22" width="243.00" height="42.78"/>
-<line class="d" x1="34.00" y1="159.00" x2="277.00" y2="159.00"/>
-<text class="t" x="155.50" y="163.00" text-anchor="middle">568</text>
-<line class="d" x1="27.00" y1="152.00" x2="27.00" y2="109.22"/>
-<text class="t" x="25.00" y="130.61" text-anchor="middle" transform="rotate(-90 25.00 130.61)">100</text>
-<circle cx="34.00" cy="152.00" r="1" fill="#c0392b"/>
-<line x1="34.00" y1="141.30" x2="48.97" y2="141.30" stroke="#7a3fa0" stroke-width="1.28"/>
-<line x1="34.00" y1="119.91" x2="48.97" y2="119.91" stroke="#7a3fa0" stroke-width="1.28"/>
-<line x1="277.00" y1="141.30" x2="262.03" y2="141.30" stroke="#7a3fa0" stroke-width="1.28"/>
-<line x1="277.00" y1="119.91" x2="262.03" y2="119.91" stroke="#7a3fa0" stroke-width="1.28"/>
+<rect class="o" x="34.00" y="91.22" width="243.00" height="42.78"/>
+<line class="d" x1="34.00" y1="141.00" x2="277.00" y2="141.00"/>
+<text class="t" x="155.50" y="145.00" text-anchor="middle">568</text>
+<line class="d" x1="27.00" y1="134.00" x2="27.00" y2="91.22"/>
+<text class="t" x="25.00" y="112.61" text-anchor="middle" transform="rotate(-90 25.00 112.61)">100</text>
+<circle cx="34.00" cy="134.00" r="1" fill="#c0392b"/>
+<line x1="34.00" y1="123.30" x2="48.97" y2="123.30" stroke="#7a3fa0" stroke-width="1.28"/>
+<line x1="34.00" y1="101.91" x2="48.97" y2="101.91" stroke="#7a3fa0" stroke-width="1.28"/>
+<line x1="277.00" y1="123.30" x2="262.03" y2="123.30" stroke="#7a3fa0" stroke-width="1.28"/>
+<line x1="277.00" y1="101.91" x2="262.03" y2="101.91" stroke="#7a3fa0" stroke-width="1.28"/>
+<text class="s" x="34.00" y="89.22">Face</text>
+<rect class="o" x="34.00" y="150.00" width="42.78" height="6.85"/>
+<text class="s" x="78.78" y="154.22">Left edge</text>
+<circle cx="44.70" cy="153.42" r="0.64" fill="none" stroke="#7a3fa0" stroke-width="0.25"/>
+<circle cx="66.09" cy="153.42" r="0.64" fill="none" stroke="#7a3fa0" stroke-width="0.25"/>
+<rect class="o" x="34.00" y="159.00" width="42.78" height="6.85"/>
+<text class="s" x="78.78" y="163.22">Right edge</text>
+<circle cx="44.70" cy="162.42" r="0.64" fill="none" stroke="#7a3fa0" stroke-width="0.25"/>
+<circle cx="66.09" cy="162.42" r="0.64" fill="none" stroke="#7a3fa0" stroke-width="0.25"/>
 <rect x="12" y="168.00" width="273.00" height="30" fill="none" stroke="#222" stroke-width="0.3"/>
 <text class="t" x="15.00" y="175.00">B01.BackRail  —  Back rail</text>
 <text class="t" x="15.00" y="182.00">Finished 568 × 100 × 16 mm   Board: Polytec Classic White Matt 16 MR MDF</text>

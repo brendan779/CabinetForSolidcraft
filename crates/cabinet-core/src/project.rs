@@ -6,6 +6,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
 
 use crate::model::{Cabinet, ConstructionStandard};
+use crate::run::RunItem;
 use crate::{Error, Result};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -13,6 +14,21 @@ pub struct Project {
     pub name: String,
     pub standard: ConstructionStandard,
     pub cabinets: Vec<StoredCabinet>,
+    /// Cabinets made from boxes drawn in SolidCraft: they stay where they were drawn instead of
+    /// joining the run.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub placed: Vec<String>,
+    /// Fillers and end panels, each at its place in the job's list of items.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub pieces: Vec<Piece>,
+}
+
+/// A filler or end panel and its position among the job's items (cabinets and pieces together).
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct Piece {
+    pub index: usize,
+    #[serde(flatten)]
+    pub item: RunItem,
 }
 
 /// A cabinet as the project stores it: everything but the standard, plus the standard's fields
@@ -53,6 +69,8 @@ impl Project {
             name: name.into(),
             standard,
             cabinets,
+            placed: Vec::new(),
+            pieces: Vec::new(),
         })
     }
 

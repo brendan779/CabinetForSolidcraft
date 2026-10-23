@@ -1,4 +1,4 @@
-//! Writes a cut sheet SVG for every part of a sample base cabinet.
+//! Writes a cut sheet SVG for every part of a sample base cabinet, and all of them as one PDF.
 //!
 //! `cargo run -p cabinet-sheets --example sheets -- OUT_DIR`
 
@@ -19,6 +19,40 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         );
         std::fs::write(format!("{out}/{}.svg", p.name), svg)?;
     }
-    println!("{} sheets in {out}", list.parts.len());
+    let pdf = cabinet_sheets::pdf::job_pdf(
+        std::slice::from_ref(&list),
+        |_| "Polytec Classic White Texture 16 MR MDF".into(),
+        "Sample job",
+    );
+    std::fs::write(format!("{out}/sample.pdf"), pdf)?;
+    let rows: Vec<Vec<String>> = cabinet_core::bom::hardware_bom(std::slice::from_ref(&list))
+        .into_iter()
+        .map(|r| {
+            vec![
+                format!("{}#", r.quantity),
+                r.description,
+                r.item,
+                r.cabinets.join(" "),
+            ]
+        })
+        .collect();
+    let bom = cabinet_sheets::pdf::table_pdf(
+        "Hardware",
+        "Sample job",
+        &["Qty#", "Description", "Item", "Cabinets"],
+        &[14.0, 110.0, 100.0, 43.0],
+        &rows,
+    );
+    std::fs::write(format!("{out}/hardware.pdf"), bom)?;
+    let labels = cabinet_sheets::labels::labels_pdf(
+        std::slice::from_ref(&list),
+        |_| "Polytec Classic White Texture 16 MR MDF".into(),
+        "Sample job",
+    );
+    std::fs::write(format!("{out}/labels.pdf"), labels)?;
+    println!(
+        "{} sheets, sample.pdf, hardware.pdf and labels.pdf in {out}",
+        list.parts.len()
+    );
     Ok(())
 }

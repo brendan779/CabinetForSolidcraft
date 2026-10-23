@@ -2,14 +2,97 @@ import SwiftUI
 import UniformTypeIdentifiers
 import WebKit
 
+/// The Cut List workspace: the parts to cut, or the hardware to order.
 struct CutListView: View {
+    @State private var showing = "Parts"
+
+    var body: some View {
+        Group {
+            if showing == "Parts" { PartsListView() } else { HardwareListView() }
+        }
+        .toolbar {
+            ToolbarItem(placement: .navigation) {
+                Picker("Show", selection: $showing) {
+                    Text("Parts").tag("Parts")
+                    Text("Hardware").tag("Hardware")
+                }
+                .pickerStyle(.segmented)
+                .help("Parts to cut, or hardware to order")
+            }
+        }
+    }
+}
+
+/// Every hardware item of the job, counted, with its supplier article where the catalog has it.
+struct HardwareListView: View {
+    @Environment(ProjectModel.self) private var project
+    @State private var export: (doc: DataDocument, type: UTType, name: String)?
+
+    private var rows: [BomRecord] {
+        guard let dir = Preferences.catalogDir else { return [] }
+        return (try? hardwareBom(items: project.jobItems, catalogDir: dir.path)) ?? []
+    }
+
+    var body: some View {
+        let rows = self.rows
+        VStack(spacing: 0) {
+            Table(rows) {
+                TableColumn("Qty") { Text("\($0.quantity)").monospacedDigit() }.width(40)
+                TableColumn("Description", value: \.description)
+                TableColumn("Brand", value: \.brand).width(80)
+                TableColumn("Article") { r in
+                    Text(r.article).foregroundStyle(r.brand.isEmpty ? .secondary : .primary)
+                }
+                .width(110)
+                TableColumn("Item") { Text($0.item).monospaced().foregroundStyle(.secondary) }
+                TableColumn("Cabinets", value: \.cabinets).width(120)
+            }
+            HStack {
+                let missing = rows.filter { $0.brand.isEmpty }.count
+                Text("\(rows.reduce(0) { $0 + Int($1.quantity) }) items in \(rows.count) lines"
+                     + (missing > 0 ? " · \(missing) without an article number yet" : ""))
+                    .foregroundStyle(.secondary)
+                Spacer()
+                Button("Export CSV…", systemImage: "square.and.arrow.up") { make(pdf: false) }
+                Button("Export PDF…", systemImage: "doc.richtext") { make(pdf: true) }
+            }
+            .padding(10)
+            .background(.bar)
+        }
+        .fileExporter(isPresented: Binding(get: { export != nil }, set: { if !$0 { export = nil } }),
+                      document: export?.doc, contentType: export?.type ?? .data,
+                      defaultFilename: export?.name ?? "") { _ in }
+    }
+
+    private func make(pdf: Bool) {
+        guard let dir = Preferences.catalogDir?.path else { return }
+        do {
+            let name = "\(project.jobName) hardware"
+            if pdf {
+                let data = try hardwareBomPdf(items: project.jobItems, catalogDir: dir, job: project.jobName)
+                export = (DataDocument(data: data), .pdf, name)
+            } else {
+                let csv = try hardwareBomCsv(items: project.jobItems, catalogDir: dir)
+                export = (DataDocument(data: Data(csv.utf8)), .commaSeparatedText, name)
+            }
+        } catch {
+            project.lastError = "Could not export the hardware: \(error)"
+        }
+    }
+}
+
+extension BomRecord: Identifiable {
+    public var id: String { item + "|" + description }
+}
+
+struct PartsListView: View {
     @Environment(ProjectModel.self) private var project
     @AppStorage(LengthUnit.key) private var unit: LengthUnit = .millimetres
     @State private var sort = [KeyPathComparator(\CutRowRecord.part)]
     @State private var exporting = false
 
     private var rows: [CutRowRecord] {
-        ((try? cutListRows(cabinetsJson: project.cabinets.map(\.json))) ?? []).sorted(using: sort)
+        ((try? cutListRows(job: project.jobItems)) ?? []).sorted(using: sort)
     }
 
     var body: some View {
@@ -41,7 +124,7 @@ struct CutListView: View {
                       defaultFilename: "\(project.jobName) cut list") { _ in }
     }
 
-    private var csv: String { (try? cutListCsv(cabinetsJson: project.cabinets.map(\.json))) ?? "" }
+    private var csv: String { (try? cutListCsv(job: project.jobItems)) ?? "" }
 
     private func mm(_ v: Double) -> String { unit.format(v, suffix: false) }
 }
@@ -62,9 +145,23 @@ struct TextDocument: FileDocument {
     }
 }
 
+/// Bytes to save through a file exporter, typed by the exporter's content type.
+struct DataDocument: FileDocument {
+    static var readableContentTypes: [UTType] { [.data] }
+    var data: Data
+    init(data: Data) { self.data = data }
+    init(configuration: ReadConfiguration) throws {
+        data = configuration.file.regularFileContents ?? Data()
+    }
+    func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper {
+        FileWrapper(regularFileWithContents: data)
+    }
+}
+
 struct CutSheetsView: View {
     @Environment(ProjectModel.self) private var project
     @State private var part: String?
+    @State private var pdf: (doc: DataDocument, name: String)?
 
     var body: some View {
         HSplitView {
@@ -80,8 +177,7 @@ struct CutSheetsView: View {
             }
             .frame(minWidth: 200, maxWidth: 280)
             Group {
-                if let part, let cab = project.cabinets.first(where: { part.hasPrefix($0.id + ".") }),
-                   let svg = try? cutSheetSvg(cabinetJson: cab.json, partName: part, job: project.jobName) {
+                if let part, let svg = try? cutSheetSvg(items: project.jobItems, partName: part, job: project.jobName) {
                     SVGView(svg: svg)
                 } else {
                     ContentUnavailableView("Pick a part", systemImage: "doc.richtext",
@@ -89,6 +185,33 @@ struct CutSheetsView: View {
                 }
             }
             .frame(minWidth: 500, maxWidth: .infinity, maxHeight: .infinity)
+        }
+        .toolbar {
+            ToolbarItemGroup {
+                Button("Labels…", systemImage: "qrcode") {
+                    do {
+                        pdf = (DataDocument(data: try partLabelsPdf(items: project.jobItems, job: project.jobName)),
+                               "\(project.jobName) labels")
+                    } catch {
+                        project.lastError = "Could not make the labels: \(error)"
+                    }
+                }
+                .help("A 62 × 40 mm label per part with a QR code of its name, for a 62 mm label printer")
+                Button("Export PDF…", systemImage: "doc.richtext") {
+                    do {
+                        pdf = (DataDocument(data: try cutSheetsPdf(items: project.jobItems, job: project.jobName)),
+                               "\(project.jobName) cut sheets")
+                    } catch {
+                        project.lastError = "Could not make the PDF: \(error)"
+                    }
+                }
+                .help("Every part's sheet in one PDF, after a cover and an index")
+            }
+        }
+        .fileExporter(isPresented: Binding(get: { pdf != nil }, set: { if !$0 { pdf = nil } }),
+                      document: pdf?.doc, contentType: .pdf,
+                      defaultFilename: pdf?.name ?? "") { result in
+            if case .success(let url) = result { project.status = "Saved \(url.lastPathComponent)" }
         }
     }
 }
@@ -113,99 +236,6 @@ struct SVGView: NSViewRepresentable {
     }
 }
 
-struct BoardLibraryView: View {
-    @Environment(ProjectModel.self) private var project
-    @State private var search = ""
-
-    var body: some View {
-        let boards = project.boards.filter {
-            search.isEmpty || "\($0.brand) \($0.decor) \($0.finish)".localizedCaseInsensitiveContains(search)
-        }
-        ScrollView {
-            if boards.isEmpty {
-                ContentUnavailableView("No boards", systemImage: "square.stack.3d.up.slash",
-                                       description: Text("Board data from Polytec, Laminex and others is added to catalog/boards."))
-                    .padding(.top, 80)
-            }
-            LazyVGrid(columns: [GridItem(.adaptive(minimum: 170), spacing: 16)], spacing: 16) {
-                ForEach(boards, id: \.id) { b in
-                    VStack(alignment: .leading, spacing: 8) {
-                        RoundedRectangle(cornerRadius: 10)
-                            .fill(Color(hex: b.previewColour) ?? .gray)
-                            .overlay(alignment: .topTrailing) {
-                                if !b.verified {
-                                    Image(systemName: "checkmark.seal")
-                                        .foregroundStyle(.white.opacity(0.8))
-                                        .padding(6)
-                                        .help("Not yet checked against the supplier's document")
-                                }
-                            }
-                            .overlay {
-                                if b.grained {
-                                    GrainPattern().clipShape(RoundedRectangle(cornerRadius: 10))
-                                }
-                            }
-                            .overlay(alignment: .bottomLeading) { usedFor(b) }
-                            .frame(height: 110)
-                            .shadow(color: .black.opacity(0.15), radius: 4, y: 2)
-                        HStack {
-                            Text(b.decor).font(.headline)
-                            Spacer()
-                            useMenu(b)
-                        }
-                        Text("\(b.brand) · \(b.finish)").font(.subheadline).foregroundStyle(.secondary)
-                        Text("\(Int(b.thickness)) mm \(b.substrate.replacingOccurrences(of: "_", with: " ")) · \(b.sheets.joined(separator: ", "))")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                }
-            }
-            .padding(20)
-        }
-        .searchable(text: $search, prompt: "Search decors")
-    }
-
-    private static let slots: [(id: String, title: String, symbol: String)] = [
-        ("carcass", "Carcass", "square.split.bottomrightquarter"),
-        ("front", "Fronts", "door.left.hand.closed"),
-        ("back", "Back", "rectangle.portrait"),
-    ]
-
-    /// Assigns the board to a part of the selected cabinet.
-    private func useMenu(_ b: BoardRecord) -> some View {
-        Menu {
-            ForEach(Self.slots, id: \.id) { slot in
-                Button("Use for \(slot.title)", systemImage: slot.symbol) { project.useBoard(b, for: slot.id) }
-            }
-        } label: {
-            Image(systemName: "plus.circle")
-        }
-        .menuStyle(.borderlessButton)
-        .fixedSize()
-        .disabled(project.selected == nil)
-        .help(project.selected.map { "Use this board for \($0.id)" } ?? "Select a cabinet first")
-    }
-
-    /// Badges for what the selected cabinet already uses this board for.
-    @ViewBuilder
-    private func usedFor(_ b: BoardRecord) -> some View {
-        if let cab = project.selected {
-            let used = Self.slots.filter { cab.board(for: $0.id) == b.id }
-            if !used.isEmpty {
-                HStack(spacing: 4) {
-                    ForEach(used, id: \.id) { slot in
-                        Label(slot.title, systemImage: slot.symbol)
-                            .font(.caption2.weight(.semibold))
-                            .padding(.horizontal, 6).padding(.vertical, 3)
-                            .background(.regularMaterial, in: Capsule())
-                    }
-                }
-                .padding(6)
-            }
-        }
-    }
-}
-
 struct GrainPattern: View {
     var body: some View {
         Canvas { ctx, size in
@@ -222,6 +252,16 @@ struct GrainPattern: View {
                 i += 1
             }
         }
+        .accessibilityHidden(true)
+    }
+}
+
+extension NSColor {
+    convenience init?(hex: String) {
+        let s = hex.trimmingCharacters(in: CharacterSet(charactersIn: "#"))
+        guard s.count == 6, let v = UInt32(s, radix: 16) else { return nil }
+        self.init(srgbRed: CGFloat((v >> 16) & 0xff) / 255, green: CGFloat((v >> 8) & 0xff) / 255,
+                  blue: CGFloat(v & 0xff) / 255, alpha: 1)
     }
 }
 

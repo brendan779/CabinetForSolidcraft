@@ -25,15 +25,15 @@ Priorities: **P0** blocks most other work · **P1** MVP · **P2** commercial par
 |---|---|---|---|---|
 | INF-1 | done (initial) | M | Cargo workspace, crates, SwiftUI app shell, build-core.sh, check.sh | `scripts/check.sh` green |
 | INF-2 | done (e4e904d) | S | GitHub Actions CI on `macos-latest`: `scripts/check.sh` | CI badge green on main |
-| INF-3 | done (night/2026-10-23) | S | Move the Swift app to Swift 6 language mode with strict concurrency | builds with `SWIFT_VERSION = 6`, no warnings |
-| INF-4 | done (night/2026-10-23) | M | Snapshot tests for SVG cut sheets (insta crate) and a golden part list per cabinet kind | `cargo insta test` passes; goldens committed |
-| INF-5 | done (night/2026-10-23) | S | `cargo deny` licence/advisory check in check.sh | added and green |
-| PERF-1 | done (night/2026-10-23) | M | **Batch machining per panel.** Emit all bores on one face of a panel as one sketch (circles) + one extrude cut instead of one `solid.cylinder` cut each. Tall cabinet at Manufacturing detail currently takes ~121 s for 293 commands | Tall cabinet at Manufacturing detail builds in < 10 s against SolidCraft 0.20; timing recorded in docs/perf.md |
-| PERF-2 | done (night/2026-10-23) | S | Measure and record per-command cost (`engine.batch` `profile: true`) for box, cut box, cylinder cut and sketch cut on 16 mm panels | table in docs/perf.md |
-| SC-1 | done (night/2026-10-23) | M | Replace-in-place: when re-sending a cabinet, delete its component and rebuild in one batch (currently two requests) and keep its placement if the user moved it in SolidCraft | resend after a move keeps the new position |
-| SC-2 | needs-human (built in night/2026-10-23 and tested headless; needs a try in the running app: select 3 boxes, SolidCraft menu › Make Cabinets from Selected Boxes) | M | **Box → cabinet.** Read selected bodies from SolidCraft (`document.inspect` selection + `model.faces`), recognise axis-aligned cuboids, turn each into a cabinet at that size and position, hide the source box | selecting 3 boxes in SolidCraft and pressing "Make cabinets" in the app creates 3 cabinets in place |
-| SC-3 | needs-human (built in night/2026-10-23 and tested headless; needs a try in the running app: SolidCraft menu › Load Cabinets from Design) | S | Read cabinets back from a design: list components carrying `io.github.brendan779.cabinetforsolidcraft` metadata and load their spec into the app | open a design built earlier and the app shows its cabinets |
-| SC-4 | needs-human (built in night/2026-10-23; needs a try with SolidCraft installed: quit it, then SolidCraft menu › Open SolidCraft or the status bar link) | S | Detect SolidCraft not running / wrong port and offer "Open SolidCraft with control port" (launch `/Applications/SolidCraft.app` with `--control 7878`) | button launches it and the status dot turns green |
+| INF-3 | done (cd8b363) | S | Move the Swift app to Swift 6 language mode with strict concurrency | builds with `SWIFT_VERSION = 6`, no warnings |
+| INF-4 | done (e8d2eb3) | M | Snapshot tests for SVG cut sheets (insta crate) and a golden part list per cabinet kind | `cargo insta test` passes; goldens committed |
+| INF-5 | done (d4452e9) | S | `cargo deny` licence/advisory check in check.sh | added and green |
+| PERF-1 | done (67aac6d) | M | **Batch machining per panel.** Emit all bores on one face of a panel as one sketch (circles) + one extrude cut instead of one `solid.cylinder` cut each. Tall cabinet at Manufacturing detail currently takes ~121 s for 293 commands | Tall cabinet at Manufacturing detail builds in < 10 s against SolidCraft 0.20; timing recorded in docs/perf.md |
+| PERF-2 | done (e8ffb58) | S | Measure and record per-command cost (`engine.batch` `profile: true`) for box, cut box, cylinder cut and sketch cut on 16 mm panels | table in docs/perf.md |
+| SC-1 | done (01b8daf) | M | Replace-in-place: when re-sending a cabinet, delete its component and rebuild in one batch (currently two requests) and keep its placement if the user moved it in SolidCraft | resend after a move keeps the new position |
+| SC-2 | needs-human (built in 90b3953; the FFI path now passes live against a running SolidCraft 0.20: 3 selected boxes become base/tall/wall cabinets in place and the boxes hide (`cabinet-ffi/tests/live.rs`). Left to try: the menu click in Cabinet Studio) | M | **Box → cabinet.** Read selected bodies from SolidCraft (`document.inspect` selection + `model.faces`), recognise axis-aligned cuboids, turn each into a cabinet at that size and position, hide the source box | selecting 3 boxes in SolidCraft and pressing "Make cabinets" in the app creates 3 cabinets in place |
+| SC-3 | needs-human (built in 3292595; live test reads the built cabinets back from a running SolidCraft identical to what was sent. Left to try: the menu click) | S | Read cabinets back from a design: list components carrying `io.github.brendan779.cabinetforsolidcraft` metadata and load their spec into the app | open a design built earlier and the app shows its cabinets |
+| SC-4 | needs-human (built in bd96cff; SolidCraft 0.20 started with `--control 7878` answers on the port within 2 s on this Mac. Left to try: the menu button) | S | Detect SolidCraft not running / wrong port and offer "Open SolidCraft with control port" (launch `/Applications/SolidCraft.app` with `--control 7878`) | button launches it and the status dot turns green |
 
 ## P1 — MVP: cabinets, joinery, Blum basics, cut list, cut sheets
 
@@ -41,33 +41,36 @@ Priorities: **P0** blocks most other work · **P1** MVP · **P2** commercial par
 
 | id | status | size | task | done when |
 |---|---|---|---|---|
-| CORE-1 | done (night/2026-10-23) | M | Integrated toe-kick notch: verify the groove op cuts the notch in SolidCraft and in sheets | screenshot + sheet show the notch |
-| CORE-2 | done (night/2026-10-23) | M | Fixed shelves (biscuited + screwed like a bottom) as an option per shelf | test: fixed shelf has joints both sides |
-| CORE-3 | done (night/2026-10-23) | M | Wall cabinet: hanging rail / wall-hanger hardware option and back recess | wall kind builds with hanger hardware placements |
+| CORE-1 | done (d94c3e3) | M | Integrated toe-kick notch: verify the groove op cuts the notch in SolidCraft and in sheets | screenshot + sheet show the notch |
+| CORE-2 | done (e0b3667) | M | Fixed shelves (biscuited + screwed like a bottom) as an option per shelf | test: fixed shelf has joints both sides |
+| CORE-3 | done (4c42ae7) | M | Wall cabinet: hanging rail / wall-hanger hardware option and back recess | wall kind builds with hanger hardware placements |
 | CORE-4 | split → CORE-4a, CORE-4b, CORE-4c | L | Corner cabinets: blind corner base, L-corner base, corner wall | split into CORE-4a/b/c |
-| CORE-4a | done (night/2026-10-23) | M | Blind corner base: a base carcass with a fixed blind panel on the blind side (width = run-in − door), a filler/stile against the neighbouring run, door on the open side; `blind_side` and `blind_width` in the model | a 1000 mm blind corner builds with blind panel + filler + one door; test on the open width |
-| CORE-4b | needs-human (which door: bi-fold pair on two fronts, or one diagonal door? For bi-fold, which hinge system (e.g. Blum CLIP top 170° + bi-fold connector)? OK to model L-shaped bottom/top/shelves as one rectangular blank with a through notch, as the toe-kick notch is?) | M | L-shaped corner base (diagonal or bi-fold door): two carcass legs sharing a corner, parts not axis-aligned to one front; needs a second front direction in the part model | an L-corner 900 × 900 builds; cut list has every panel once |
+| CORE-4a | done (ff4fd55) | M | Blind corner base: a base carcass with a fixed blind panel on the blind side (width = run-in − door), a filler/stile against the neighbouring run, door on the open side; `blind_side` and `blind_width` in the model | a 1000 mm blind corner builds with blind panel + filler + one door; test on the open width |
+| CORE-4b | todo (owner chose bi-fold doors, 2026-10-24: use a generic bi-fold hinge placement, hinge numbers in catalog data with `verified: false`; the hinge article is CORE-4d) | M | L-shaped corner base (diagonal or bi-fold door): two carcass legs sharing a corner, parts not axis-aligned to one front; needs a second front direction in the part model | an L-corner 900 × 900 builds; cut list has every panel once |
+| CORE-4d | needs-human (which bi-fold hinge system and article) | S | Bi-fold corner hinge article and its drilling, replacing the generic placement | hinge row verified against the supplier's document |
 | CORE-4c | blocked (CORE-4b) | M | Corner wall cabinet (diagonal front or L): as CORE-4b at wall height with hangers (CORE-3) | builds with two hangers per leg |
-| CORE-5 | done (night/2026-10-23) | M | Sink cabinet (no bottom rail, back cut-out option, waterproof base liner option) | builds; liner appears in BOM |
-| CORE-6 | done (night/2026-10-23) | M | Fillers, end panels and scribes as parts of a run | a run with an end panel each side builds |
-| CORE-7 | done (night/2026-10-23) | M | Runs: shared construction standard per project, per-cabinet overrides only | project JSON stores one standard + overrides |
-| CORE-8 | blocked (needs the runner deductions as catalog data with a source: BLUM-1 schema first, then BLUM-6) | M | Drawer boxes for wood drawers on runners (sides, front, back, bottom) from Blum MOVENTO/TANDEM rules: inside width = opening − 42, length = NL − 10 (verify against Blum TD) | parts + cut list for a 3-drawer bank |
-| CORE-9 | done (night/2026-10-23) | S | Material per part: carcass board, front board, back board from the catalog; thickness follows the board | changing the front board changes door thickness |
-| CORE-10 | blocked (cranked-hinge and plate offsets are Blum data: BLUM-2, the owner's TD sheets) | M | Half-overlay and inset hinge geometry (cranked hinges, plate offsets) | test per overlay type |
-| CORE-11 | done (night/2026-10-23) | S | Unit display: metric with optional imperial display in the app | toggle in preferences |
-| CORE-12 | done (night/2026-10-23) | M | Collision checker as a module: every bore/slot vs every other op and vs panel edges, with warnings | test suite over all kinds × standards with zero clashes |
+| CORE-5 | needs-human (built 4bc5e17. Question: should a sink cabinet drop its bottom front rail, its back rail, or both? Today it drops only the back top rail, where the bowl sits) | M | Sink cabinet (no bottom rail, back cut-out option, waterproof base liner option) | builds; liner appears in BOM |
+| CORE-6 | done (ed3f43a) | M | Fillers, end panels and scribes as parts of a run | a run with an end panel each side builds |
+| CORE-7 | done (43ead80) | M | Runs: shared construction standard per project, per-cabinet overrides only | project JSON stores one standard + overrides |
+| CORE-8 | todo (unblocked by BLUM-6: wood drawer box parts from its rules) | M | Drawer boxes for wood drawers on runners (sides, front, back, bottom) from Blum MOVENTO/TANDEM rules: inside width = opening − 42, length = NL − 10 (verify against Blum TD) | parts + cut list for a 3-drawer bank |
+| CORE-9 | done (6b515ee) | S | Material per part: carcass board, front board, back board from the catalog; thickness follows the board | changing the front board changes door thickness |
+| CORE-10 | todo (unblocked: half-overlay and inset geometry from the hinge planning pages) | M | Half-overlay and inset hinge geometry (cranked hinges, plate offsets) | test per overlay type |
+| CORE-11 | done (e3e3ad1) | S | Unit display: metric with optional imperial display in the app | toggle in preferences |
+| CORE-12 | done (cee783c) | M | Collision checker as a module: every bore/slot vs every other op and vs panel edges, with warnings | test suite over all kinds × standards with zero clashes |
 
 ### Joinery
 
 | id | status | size | task | done when |
 |---|---|---|---|---|
 | JOIN-1 | done (initial) | M | Biscuits (#0/#10/#20) + screws between, density presets, short joints screwed | tests in joinery.rs |
-| JOIN-2 | done (night/2026-10-23) | M | Real biscuit slot shape (arc ends from the 100 mm cutter) instead of a box | slot volume matches analytic value ±1 % |
-| JOIN-3 | done (night/2026-10-23) | S | Biscuit bodies as solids (lens shape) in Manufacturing detail, coloured | visible in SolidCraft |
-| JOIN-4 | blocked (needs verified Häfele Minifix 15 drilling data in the catalog: owner-supplied, like HAF-4) | M | Cam-lock (Häfele Minifix 15) bores: Ø15 cam, Ø8/Ø5 bolt, from verified Häfele data | cut sheet shows cam bores |
-| JOIN-5 | done (night/2026-10-23) | S | Screw countersinks and cover caps; "hide screws on visible end panels" rule | end panels have no through screws |
-| JOIN-6 | blocked (needs Lamello P-System slot data from Lamello's documents, added to the hardware catalog after BLUM-1) | M | Lamello Clamex P-14 / Tenso P-14 P-System slots | option in picker; slots on sheets |
-| JOIN-7 | done (night/2026-10-23) | S | Back panel fixing (screws at 150 mm centres for applied backs; none for grooved) | ops present per back style |
+| JOIN-2 | done (2acc0d9; owner accepted: box slots at Manufacturing, lens slots opt-in at Exact) | M | Real biscuit slot shape (arc ends from the 100 mm cutter) instead of a box | slot volume matches analytic value ±1 % |
+| JOIN-3 | done (67eaf55) | S | Biscuit bodies as solids (lens shape) in Manufacturing detail, coloured | visible in SolidCraft |
+| JOIN-4 | needs-human (owner is collecting the documents; needs verified Häfele Minifix 15 drilling data in the catalog: owner-supplied, like HAF-4) | M | Cam-lock (Häfele Minifix 15) bores: Ø15 cam, Ø8/Ø5 bolt, from verified Häfele data | cut sheet shows cam bores |
+| JOIN-5 | done (86c5db4) | S | Screw countersinks and cover caps; "hide screws on visible end panels" rule | end panels have no through screws |
+| JOIN-6 | needs-human (owner is collecting the documents; needs Lamello P-System slot data from Lamello's documents, added to the hardware catalog after BLUM-1) | M | Lamello Clamex P-14 / Tenso P-14 P-System slots | option in picker; slots on sheets |
+| JOIN-8 | todo | M | Festool Domino loose-tenon mortises as a fixing recipe and picker choice: DF 500 (4/5/6/8/10 mm) and DF 700 (8/10/12/14 mm); mortise width/length/depth from Festool's published sizes as catalog data with a source and `verified: false`; mortises in both parts like biscuit slots, spacing and setback rules, picker thumbnail, cut sheet rendering | joint test per size; mortises on sheets |
+| JOIN-9 | todo | M | Traditional fluted wooden dowels extending the 8 mm dowel recipe: 6/8/10 mm with length choices, a doweling-jig spacing pattern as well as the 32 mm grid, depth split between face and end parts, picker thumbnail | tests for spacing and depth split |
+| JOIN-7 | done (d31e409) | S | Back panel fixing (screws at 150 mm centres for applied backs; none for grooved) | ops present per back style |
 
 ### Hardware: Blum
 
@@ -75,18 +78,28 @@ Priorities: **P0** blocks most other work · **P1** MVP · **P2** commercial par
 
 | id | status | size | task | done when |
 |---|---|---|---|---|
-| BLUM-1 | done (night/2026-10-23) | M | Hardware catalog schema (`catalog/hardware/*.json`): article, family, variant, parameters, drilling pattern, source, verified | schema + loader + tests |
-| BLUM-2 | needs-human (Blum TD sheets) | M | CLIP top BLUMOTION 110° data: cup Ø35, depth, boring distance range, plate drilling (cruciform/wing, 0/3/9 mm), overlay tables | rows verified against the Blum document; build.rs constants replaced by catalog data |
-| BLUM-3 | blocked (Blum's hinge/plate selection tables: BLUM-2) | M | Hinge selection rule: overlay + door thickness → hinge + plate article | unit test table |
-| BLUM-4 | blocked (LEGRABOX dimensions from Blum's documents: BLUM-2-style owner data) | M | LEGRABOX: nominal lengths, side heights (N/M/K/C/F), front fixing drilling, bottom/back cut sizes | drawer bank with LEGRABOX gives bottom and back parts in cut list |
-| BLUM-5 | blocked (MERIVOBOX/TANDEMBOX data from Blum's documents; and BLUM-4's model first) | M | MERIVOBOX and TANDEMBOX as alternatives | picker shows 3 box systems |
-| BLUM-6 | todo | M | MOVENTO/TANDEM runners for wood drawers (see CORE-8) | — |
+| BLUM-1 | done (56a5858) | M | Hardware catalog schema (`catalog/hardware/*.json`): article, family, variant, parameters, drilling pattern, source, verified | schema + loader + tests |
+| BLUM-2 | todo (unblocked: catalogue printed pp. 72–149 hinges, 150–157 plates, 157–161 accessories; part numbers per boss and spring, TB table by FA × MD, cup, INSERTA pattern, gap F, protrusion; replace the VERIFY constants in build.rs) | M | CLIP top BLUMOTION 110° data: cup Ø35, depth, boring distance range, plate drilling (cruciform/wing, 0/3/9 mm), overlay tables | rows verified against the Blum document; build.rs constants replaced by catalog data |
+| BLUM-3 | todo (unblocked: overlay + door thickness + angle → hinge + plate part numbers, tested table) | M | Hinge selection rule: overlay + door thickness → hinge + plate article | unit test table |
+| BLUM-4 | todo (unblocked: LEGRABOX printed 196–249; start with drawer N/M/K and inner drawer M/K) | M | LEGRABOX: nominal lengths, side heights (N/M/K/C/F), front fixing drilling, bottom/back cut sizes | drawer bank with LEGRABOX gives bottom and back parts in cut list |
+| BLUM-5 | todo (unblocked: MERIVOBOX 250–289, TANDEMBOX antaro 290–335, plus 336, METABOX 338) | M | MERIVOBOX and TANDEMBOX as alternatives | picker shows 3 box systems |
+| BLUM-6 | todo (unblocked: MOVENTO 410–429, TANDEM 430–461; inside width/length rules, part numbers by length and load, System 32 drilling) | M | MOVENTO/TANDEM runners for wood drawers (see CORE-8) | — |
 | BLUM-7 | split → BLUM-7a, BLUM-7b | L | AVENTOS lift systems (HK top, HK-S, HK-XS, HF, HS, HL): power factor = f(front height, weight) → article | split |
-| BLUM-7a | todo | M | Lift-system model: a wall cabinet front opening upward (`opening: lift`), front height and weight from the board catalog (density × area), power factor computed per Blum's formula, and the AVENTOS family chosen by front height; picker drawing per family | test: front weight and power factor for a 600 × 360 front |
-| BLUM-7b | blocked (AVENTOS power-factor ranges and drilling per family from Blum's documents: owner data) | M | AVENTOS HK top, HK-S, HK-XS, HF, HS, HL catalog rows (articles by power-factor range, drilling) | hardware rows with sources; BLUM-7a picks articles from them |
-| BLUM-8 | done (night/2026-10-23) | S | TIP-ON / SERVO-DRIVE options for handleless fronts | option + BOM |
-| BLUM-9 | 👤 needs-human | M | Import the owner's Blum STEP files from `vendor-cad/blum/` as linked components (`component.insert_design` after STEP → .solidcraft conversion) in place of stand-ins | a hinge renders with the real Blum model |
-| BLUM-10 | todo | M | Parametric stand-in models (hinge cup + arm, plate, runner, box side) emitted as bodies | visible in Manufacturing detail |
+| BLUM-7a | todo (unblocked: AVENTOS printed 11–69; HF top (bi-fold) first, then HK top, HKi, HS, HL, HK-S, HK-XS) | M | Lift-system model: a wall cabinet front opening upward (`opening: lift`), front height and weight from the board catalog (density × area), power factor computed per Blum's formula, and the AVENTOS family chosen by front height; picker drawing per family | test: front weight and power factor for a 600 × 360 front |
+| BLUM-7b | todo (unblocked: power-factor tables → lift part numbers and drilling, one sub-row per family) | M | AVENTOS HK top, HK-S, HK-XS, HF, HS, HL catalog rows (articles by power-factor range, drilling) | hardware rows with sources; BLUM-7a picks articles from them |
+| BLUM-8 | done (05f6929) | S | TIP-ON / SERVO-DRIVE options for handleless fronts | option + BOM |
+| BLUM-9 | 👤 needs-human (until STEP files exist in vendor-cad/blum/; see BLUM-CAD-1) | M | Import the owner's Blum STEP files from `vendor-cad/blum/` as linked components (`component.insert_design` after STEP → .solidcraft conversion) in place of stand-ins | a hinge renders with the real Blum model |
+| BLUM-10 | done (fbb3804) | M | Parametric stand-in models (hinge cup + arm, plate, runner, box side) emitted as bodies | visible in Manufacturing detail |
+
+| BLUM-11 | todo | S | Facts-only `docs/blum/webcodes.csv` (code, product, printed pages); no catalogue text beyond product names | committed |
+| BLUM-12 | todo | M | BLUMOTION for doors (printed 176–189) and TIP-ON for doors (190–193); TIP-ON doors use unsprung hinges (finishes BLUM-8's hinge row) | option + BOM rows with part numbers |
+| BLUM-13 | todo | M | SERVO-DRIVE, TIP-ON BLUMOTION and TIP-ON for box systems and runners (printed 362–408, 462–531) | options + BOM rows |
+| BLUM-14 | todo | S | Wall hanging bracket (598), cabinet connectors (599), EXPANDO T (596) for CORE-3's hangers | part numbers + drilling |
+| BLUM-15 | todo | S | General information and System 32 definitions (710–731) as the reference for our constants; record any constant in code that disagrees | list in docs/blum/ |
+| BLUM-16 | todo | M | Later: REVEGO (534–540), AMBIA-LINE / ORGA-LINE (542–569), SPACE STEP (586), CABLOXX (594) | — |
+| BLUM-CAD-1 | needs-human (prep is agent work) | S | `docs/blum/cad-shopping-list.md`: short prioritised list of configurations the app uses (default hinges + plates, LEGRABOX N/M/K, MOVENTO/TANDEM common lengths, AVENTOS HF top): web code, configurator choices, expected part numbers, file name `vendor-cad/blum/<part-no>.step`, for the owner to download from E-SERVICES | list committed; owner downloads |
+
+All Blum rows: source = Blum Catalogue and technical manual 2024/2025 in `vendor-cad/blum/catalogue/` (local only; PDF page = printed + 4; web codes in its webcodes.csv); records get `source.url` "Blum Catalogue and technical manual 2024/2025, p.<printed>, web code <code>", `document_date` "2024/2025", `verified: false`. Never commit catalogue text, pages or drawings. BLUM-10's stand-in dimensions should move to this data.
 
 ### Hardware: Häfele and lighting
 
@@ -109,14 +122,18 @@ committed: they are the brands' copyright. `preview_colour` is an approximation.
 
 | id | status | size | task | done when |
 |---|---|---|---|---|
-| DATA-1 | done (night/2026-10-23) | M | **Polytec parser.** `tools/parse_polytec.py`: download the Availability Guide PDF, `pdftotext -layout`, and parse every board table (decor, finish, thickness, substrate, sheet sizes, item codes) and matching edge tape codes (1×21, 1×29, roll lengths) into `catalog/boards/polytec.json` | ≥ 90 % of the guide's decorative 16/18 mm rows parsed; spot-check 20 random rows against the PDF and record them in the PR |
-| DATA-2 | todo | M | Laminex: decorative board (Laminex Colour Collection, Natural Wood, Essastone is out of scope), sizes, substrates, matching edges, from laminex.com.au availability documents | `catalog/boards/laminex.json` with sources |
-| DATA-3 | todo | M | Other Australian brands: Egger (AU range), Nikpol (Sonae Arauco/Egger/Fundermax distribution), Formica AU, Bestwood, Briggs Veneers, Navurban, Karaboard/Wilsonart | one file per brand |
+| DATA-1 | done (e9d599e) | M | **Polytec parser.** `tools/parse_polytec.py`: download the Availability Guide PDF, `pdftotext -layout`, and parse every board table (decor, finish, thickness, substrate, sheet sizes, item codes) and matching edge tape codes (1×21, 1×29, roll lengths) into `catalog/boards/polytec.json` | ≥ 90 % of the guide's decorative 16/18 mm rows parsed; spot-check 20 random rows against the PDF and record them in the PR |
+| DATA-2 | done (e4f23a7) | M | Laminex: decorative board (Laminex Colour Collection, Natural Wood, Essastone is out of scope), sizes, substrates, matching edges, from laminex.com.au availability documents | `catalog/boards/laminex.json` with sources |
+| DATA-3 | todo | M | Other Australian brands: Egger (AU range), Nikpol (Sonae Arauco/Egger/Fundermax distribution), Formica AU (decorated MDF already in `formica.json` from the Laminex guide, DATA-2; its HPL is not), Bestwood, Briggs Veneers, Navurban, Karaboard/Wilsonart | one file per brand |
 | DATA-4 | todo | M | Edge tape suppliers: Surteco, Dölken (Doellken), Rehau, Titus Tekform, Häfele AU edging, Fastedge; brand match tables (tape code ↔ board decor) | `catalog/edge-tape/*.json` |
-| DATA-5 | todo | M | Specialty boards: HMR, compact laminate, plywood (Hoop pine, birch), MR MDF raw for paint, thermolaminates, high-gloss acrylic | records with `kind` set |
-| DATA-6 | todo | M | Linings: Polytec wall linings / Steccawood / Easycraft, Laminex Surround: profile, module width, length, thickness (`kind: lining`) | records + a lining picker stub |
-| DATA-7 | todo | S | Catalog validation in CI: ids unique, tapes resolve, each brand file has a source | part of check.sh (already partly) |
-| DATA-8 | todo | M | Board picker in the app: brand → range → decor grid with grain and finish filters; assign to carcass/fronts/backs | picking a decor updates the 3D colour and the cut list |
+| DATA-5 | split → DATA-5a, DATA-5b | M | Specialty boards: HMR, compact laminate, plywood (Hoop pine, birch), MR MDF raw for paint, thermolaminates, high-gloss acrylic | records with `kind` set |
+| DATA-5a | done (cb49931) | S | Raw and white MDF and particleboard (MR MDF raw for paint, white carcass board): Trade Essentials tables of the Laminex guide | `trade-essentials.json`, `kind` raw / melamine |
+| DATA-5b | todo | M | Plywood (Hoop pine, birch), compact laminate, HMR, thermolaminates, high-gloss acrylic, from each brand's documents (the Laminex guide's plywood and compact pages first) | records with `kind` set |
+| DATA-6 | split → DATA-6a, DATA-6b | M | Linings: Polytec wall linings / Steccawood / Easycraft, Laminex Surround: profile, module width, length, thickness (`kind: lining`) | records + a lining picker stub |
+| DATA-6a | done (d6e2505) | S | Laminex Surround (MDF Primed Panels) from the Laminex guide, and a Boards / Linings switch in the board picker | records + picker stub |
+| DATA-6b | todo | M | Polytec wall linings, Steccawood, Easycraft and Laminex Architectural Panels (decorated battens and VGroove: pack and module sizes need reading) | records with sources |
+| DATA-7 | done (3e69102) | S | Catalog validation in CI: ids unique, tapes resolve, each brand file has a source | part of check.sh (already partly) |
+| DATA-8 | needs-human (built in 670db45; pick an oak for Fronts in the inspector and check the viewport and cut list) | M | Board picker in the app: brand → range → decor grid with grain and finish filters; assign to carcass/fronts/backs | picking a decor updates the 3D colour and the cut list |
 | DATA-9 | 👤 needs-human | S | Owner verifies a sample of rows per brand; flip `verified: true` | — |
 | DATA-10 | todo | M | Polytec guide, the rest: COMMERCIAL board + edge tape (guide p14-17), Internal Carcass tape widths (the table prints "1mm Rigid" without a width), wall linings (DATA-6) | records with sources; parse_polytec.py tests |
 
@@ -125,37 +142,37 @@ committed: they are the brands' copyright. `preview_colour` is an approximation.
 | id | status | size | task | done when |
 |---|---|---|---|---|
 | OUT-1 | done (initial) | M | Cut list rows + CSV; per-part SVG cut sheets | tests |
-| OUT-2 | todo | M | Cut sheets as multi-page PDF (one part per page plus cover and index) | PDF opens in Preview with N+2 pages |
-| OUT-3 | todo | M | Both faces + edge views on sheets when a part has machining on more than one face | side sheet shows inner face and edges |
+| OUT-2 | done (6537e37) | M | Cut sheets as multi-page PDF (one part per page plus cover and index) | PDF opens in Preview with N+2 pages |
+| OUT-3 | done (d29080e) | M | Both faces + edge views on sheets when a part has machining on more than one face | side sheet shows inner face and edges |
 | OUT-4 | todo | M | Sheet quality: dimension chains from the reference corner for every hole row; hole table grouped by diameter/depth | reviewed by owner 👤 |
 | OUT-5 | todo | L | Guillotine nesting optimiser with grain and kerf (panel saw), sheet diagrams in PDF, offcut list | split |
-| OUT-6 | todo | M | Hardware BOM with supplier article numbers and quantities, CSV + PDF | BOM for the sample run |
-| OUT-7 | todo | M | Part labels (62 mm label printer) with QR code of part id | PDF of labels |
+| OUT-6 | done (13b9afb) | M | Hardware BOM with supplier article numbers and quantities, CSV + PDF | BOM for the sample run |
+| OUT-7 | done (dee5a94) | M | Part labels (62 mm label printer) with QR code of part id | PDF of labels |
 | OUT-8 | todo | M | Assembly sheet per cabinet: exploded view (SolidCraft exploded view + export view) | image per cabinet |
 | OUT-9 | todo | L | DXF per part for CNC with layer conventions (outline, bores by Ø/depth, grooves) | split |
-| OUT-10 | todo | M | Renders: Render workspace setup (`render.settings.set`, `render.start`, `render.export`) from the app, PNG saved next to the job | "Render" button produces a PNG |
+| OUT-10 | done (e7eeccb) | M | Renders: Render workspace setup (`render.settings.set`, `render.start`, `render.export`) from the app, PNG saved next to the job | "Render" button produces a PNG |
 
 ### macOS app (make it shine)
 
 | id | status | size | task | done when |
 |---|---|---|---|---|
 | UI-1 | done (initial) | M | Split view: sidebar, RealityKit viewport, inspector with visual pickers, cut list table, sheet viewer, board library | app runs |
-| UI-2 | todo | M | Document-based app (`.cabinetjob` files, autosave, versions, recent jobs) replacing the single Application Support file | File > New/Open/Save work |
-| UI-3 | todo | M | Undo/redo for every edit (UndoManager) | ⌘Z reverts a picker change |
-| UI-4 | todo | M | Viewport: selection outline/glow, hover highlight, part tooltip, exploded slider, section view, door open animation | each item visible in a screenshot |
-| UI-5 | todo | M | Viewport materials from board preview colours; woodgrain procedural texture for grained decors | oak fronts look like oak |
-| UI-6 | todo | S | Status dot visible in the SolidCraft toolbar menu (currently hidden by the menu label) | screenshot |
+| UI-2 | needs-human (built in 5a91eed; not seen on screen here: try File › New, Save, Open Recent and Browse All Versions) | M | Document-based app (`.cabinetjob` files, autosave, versions, recent jobs) replacing the single Application Support file | File > New/Open/Save work |
+| UI-3 | needs-human (built in 5a91eed; not seen on screen here: try ⌘Z after a picker change) | M | Undo/redo for every edit (UndoManager) | ⌘Z reverts a picker change |
+| UI-4 | needs-human (built in 63a3bff; not seen on screen here: look at the glow, hover tooltip, explode, Section and Open) | M | Viewport: selection outline/glow, hover highlight, part tooltip, exploded slider, section view, door open animation | each item visible in a screenshot |
+| UI-5 | needs-human (built in 665cfe1; assign an oak decor to the fronts and look at the viewport) | M | Viewport materials from board preview colours; woodgrain procedural texture for grained decors | oak fronts look like oak |
+| UI-6 | needs-human (built in 4765cd2; look at the toolbar with SolidCraft open and closed) | S | Status dot visible in the SolidCraft toolbar menu (currently hidden by the menu label) | screenshot |
 | UI-7 | todo | M | Room planner: wall lengths, run along a wall, appliances as placeholders | split |
-| UI-8 | todo | M | Drag to reorder and resize cabinets in the viewport (width handles snap to presets) | drag changes width |
-| UI-9 | todo | S | Keyboard: ⌘1–4 workspaces, arrows to step through cabinets, ⌫ delete | works |
+| UI-8 | needs-human (built in 8c867b5; drag in the run strip; say whether a strip is acceptable instead of dragging the 3D cabinets) | M | Drag to reorder and resize cabinets in the viewport (width handles snap to presets) | drag changes width |
+| UI-9 | needs-human (built in 9fd31d0; try the keys) | S | Keyboard: ⌘1–4 workspaces, arrows to step through cabinets, ⌫ delete | works |
 | UI-10 | todo | M | Onboarding: first launch connects to SolidCraft, explains Design vs Manufacturing detail | first-run sheet |
-| UI-11 | todo | S | App icon and accent colour | icon in Dock |
-| UI-12 | todo | M | Preferences: SolidCraft port, default standard, units, catalog folder, vendor-cad folder | Settings scene |
-| UI-13 | todo | M | Construction standard editor: save/load named standards ("My shop") as visual presets | standards menu |
-| UI-14 | todo | S | Accessibility pass: VoiceOver labels on every drawn tile, Dynamic Type sizes | Accessibility Inspector clean |
+| UI-11 | done (bae6fe6) | S | App icon and accent colour | icon in Dock |
+| UI-12 | needs-human (built in 983d877; open Settings (⌘,) and change each) | M | Preferences: SolidCraft port, default standard, units, catalog folder, vendor-cad folder | Settings scene |
+| UI-13 | needs-human (built in 6ac857e; save a standard, start a new job, apply it) | M | Construction standard editor: save/load named standards ("My shop") as visual presets | standards menu |
+| UI-14 | needs-human (built in a696d89; run Accessibility Inspector over the inspector and sidebar) | S | Accessibility pass: VoiceOver labels on every drawn tile, Dynamic Type sizes | Accessibility Inspector clean |
 | UI-15 | todo | M | UI tests (XCUITest) for add cabinet, change option, export CSV | tests pass in check.sh |
-| UI-16 | todo | M | Run items in the app: add filler and end panel to the sidebar list (drawn tiles, width/scribe chips), lay out and send the project through `cabinet_core::build_run` (FFI) instead of the Swift layout loop | a run with an end panel each side shows in the viewport, cut list and SolidCraft |
-| UI-17 | todo | M | Project standard in the app: the construction pickers edit the project standard, with an "Only this cabinet" override switch; save through `cabinet_core::Project` (migrate the old project.json) | changing the back style for the project changes every cabinet without an override |
+| UI-16 | needs-human (built in 8bfa5ee; not seen on screen here: add an end panel each side and look at the viewport and cut list) | M | Run items in the app: add filler and end panel to the sidebar list (drawn tiles, width/scribe chips), lay out and send the project through `cabinet_core::build_run` (FFI) instead of the Swift layout loop | a run with an end panel each side shows in the viewport, cut list and SolidCraft |
+| UI-17 | needs-human (built in dbc5e9d; not seen on screen here: change the back style for the job, then with "Only B01") | M | Project standard in the app: the construction pickers edit the project standard, with an "Only this cabinet" override switch; save through `cabinet_core::Project` (migrate the old project.json) | changing the back style for the project changes every cabinet without an override |
 
 ## P2 — Commercial parity
 
@@ -169,13 +186,40 @@ committed: they are the brands' copyright. `preview_colour` is an approximation.
 | P2-6 | todo | L | CNC post-processors (MPR, CIX), BXF exchange with Blum (needs Blum spec 👤) |
 | P2-7 | todo | L | True-shape nesting for CNC |
 
+## P2 — Kitchen design: benchtops, Surround linings and curved details
+
+Stretch goal set by the owner on 2026-10-24, to start **after the cabinet systems are finished**.
+The aim is kitchens like the owner's reference photos: fluted and curved islands (rounded ends
+clad in vertical fluting), stone benchtops with rounded ends and overhangs, slab splashbacks
+with recessed open shelves, handleless full-height fronts, clad rangehoods, and arched pantry
+doors with shaker wall cabinets. The photos are not in the repo (third-party images). Describe
+features in words.
+
+| id | status | size | task | done when |
+|---|---|---|---|---|
+| BENCH-1 | todo | M | Benchtop model per run: thickness presets (20, 33, 40, 60, 80+ mm built-up), front/side overhangs, back and end clearances, material from catalog (laminate, compact, stone, timber) | a run gets a benchtop part that follows the run and overhangs |
+| BENCH-2 | todo | M | Edge profiles as a visual picker: square, pencil round, bullnose, bevel, mitred apron (thick look) | profile shown in the 3D view and on sheets |
+| BENCH-3 | todo | L | Transitions: L and U corners (mitre or butt joint, joint position picker), thickness steps, waterfall ends (mitred drop to floor), rounded/radius island ends, breakfast-bar overhang with a support rule | split into BENCH-3a..e |
+| BENCH-4 | todo | M | Cut-outs: sink (undermount/top mount), cooktop, tap holes, power pop-ups, from appliance templates | cut-outs on the benchtop sheet |
+| BENCH-5 | todo | M | Benchtop outputs: dimensioned template sheet per piece with joins, cut-outs and edge profiles; area and edge metres for quoting | PDF/SVG sheet |
+| BENCH-6 | todo | M | Splashbacks: slab splashback panels matching the benchtop, with a niche/recess for open shelves and power points | splashback part + sheet |
+| SURR-1 | todo | M | Laminex Surround profiles as catalog data (`kind: lining`) from Laminex's own current documents: profile names (Classic VJ, Scallop, Demi Round...), module width, flute/groove pitch, thickness, sheet sizes, substrate, flexible/curved variants | catalog rows with sources |
+| SURR-2 | todo | M | Cladding as a cabinet finish: island backs and ends, end panels and kick panels clad in a Surround profile, flutes vertical and aligned across panels | an island back renders fluted |
+| SURR-3 | todo | L | Curved ends: rounded island ends (radius picker) from curved substrate (bending ply / kerfed MDF / flexible Surround), fluting following the curve, benchtop ends to match | split |
+| SURR-4 | todo | M | Clad rangehood / canopy box with rounded front corners, in a Surround profile or paint finish | rangehood part between wall cabinets |
+| SURR-5 | todo | S | Flute and VJ procedural textures in the viewport (normal-mapped grooves) | looks fluted in the app |
+| STYLE-1 | todo | M | Door styles for the look: shaker 5-piece, arched-top tall doors, handleless (J-pull, finger pull, push-to-open), full-height tall fronts with continuous grain | picker tiles |
+| STYLE-2 | todo | M | Open shelving: floating timber shelves (concealed brackets) in niches between wall cabinets, with LED strip (ties to HAF-5) | shelf parts + hardware |
+| STYLE-3 | todo | S | Handle finishes: brushed brass, black, stainless; long pulls on tall doors | rendered handle colour |
+| STYLE-4 | todo | M | Appliance housings: integrated ovens (single/double stacked), integrated fridge with SERVO-DRIVE flex, rangehood insert | tall cabinet variants |
+
 ## P3 — SolidCraft plugin
 
 | id | status | size | task |
 |---|---|---|---|
 | PLG-1 | blocked (SolidCraft has no plugin runtime yet; check #1221/#4980 weekly) | L | Port the bridge to a `command-plugin` WASM component (same commands via `engine.run`) |
 | PLG-2 | blocked (PLG-1) | L | `panel-plugin` with pins; propose an image-choice widget upstream so pickers can live in SolidCraft |
-| PLG-3 | todo | S | Weekly check: has SolidCraft merged plugin runtime work? Update this row and docs/FEASIBILITY_PLAN.md |
+| PLG-3 | todo | S | Weekly check: has SolidCraft merged plugin runtime work? Update this row and docs/FEASIBILITY_PLAN.md. Last check 2026-10-24: no runtime; #1221 and draft #4980 open, #4330 (install a plugin from a GitHub link) open, latest release v0.20.0 |
 
 ## Log
 
@@ -212,3 +256,32 @@ Agents append one line per session: date, items touched, outcome.
 - 2026-10-23 (night) — BLUM-1 done: `cabinet_catalog::hardware` (HardwareItem: article, family, variant, kind, named parameters, drilling pattern, source/verified), loaded from `catalog/hardware/*.json` with validation (unique ids, article, source, real holes); format note in catalog/hardware/README.md. No Blum numbers entered: they wait for the owner's TD sheets (BLUM-2).
 - 2026-10-23 (night) — BLUM-3/4/5 blocked on Blum's own tables; BLUM-7 split into 7a (lift model) and 7b (AVENTOS data, blocked).
 - 2026-10-23 (night) — BLUM-8 done: `opening` standard option (handles / TIP-ON / SERVO-DRIVE) with drawn picker tiles; TIP-ON unit per door (2 over 1200 mm) and per drawer, SERVO-DRIVE unit per drawer + power supply per cabinet, doors under SERVO-DRIVE fall back to TIP-ON with a warning. Generic item ids until Blum articles are catalogued. Owner: TIP-ON doors assume no-spring hinges; the hinge row does not change yet.
+- 2026-10-24 (night) — BACKLOG rows from the first night now carry commit SHAs instead of the branch name.
+- 2026-10-24 (night) — BLUM-10 done: `cabinet_core::standins` draws a hinge (cup in its bore, arm, plate on its two holes) and per drawer a runner + box side on each inside face, from the parts and machining around them (proportions drawn, not Blum data). Emitted at Manufacturing/Exact as one grey body each (`B01.Hinge1`, `D01.Runner1L`); tested never to enter a panel across kinds × overlays, and headless (bounds match). Sample run still ~7 s headless. Picture: docs/images/blum10-stand-ins.png.
+- 2026-10-24 (night) — UI-2 + UI-3 done: DocumentGroup over `.cabinetjob` files (exported UTType, JSON: job name + cabinets), so File › New/Open/Save/Open Recent, autosave and Browse All Versions come from the system; the old Application Support project.json is imported into the first new job, then renamed. Every edit registers its reverse with the window's UndoManager (⌘Z/⇧⌘Z), which is also what marks the job edited. Menu commands follow the key window. Not seen on screen here (no Screen Recording): owner to try New, Save, ⌘Z on a picker.
+- 2026-10-24 (night) — UI-17 done: the job file is the core's `Project` JSON (FFI `project_json`/`open_project`; drawn cabinets kept in `placed`); older files and the Application Support job migrate with the first cabinet's standard as the job's. Construction pickers change the whole job (every cabinet not overriding that field) or, with the "Only B01" tile, just the selection; overridden options get an "Own choice" reset badge and the section a "Match job" button. Board assignments follow the same rule. Not seen on screen.
+- 2026-10-24 (night) — UI-16 done: the sidebar's + menu adds fillers (F01) and end panels (E01) after the selection; the inspector has width/scribe chips and drawn to-floor/on-kick tiles. The app hands the whole job (items in order + drawn cabinets) to the core (`build_job`, `run::laid_out`), which lays out the run for the viewport, cut list, sheets and SolidCraft; the Swift layout loop is gone. Job files keep pieces at their index (`Project.pieces`). Run length in the status bar comes from the built panels. Not seen on screen.
+- 2026-10-24 (night) — UI-4 built: the viewport keeps one entity per panel (named by part) and moves them instead of rebuilding; selected cabinet glows faintly in the accent colour, the panel under the pointer brighter (hover by a ray from the camera through `Scene.raycast`: RealityView has no hit test on macOS 15) with a glass tooltip (name, role, size); explode slider (up to 250 mm from each cabinet's centre); Section cuts the run through the selected cabinet's middle (boxes trimmed); Open swings doors 100° about their hinged edge (FFI `PanelBox.hinged`) and pulls drawers out, animated. Needs the owner's visual check: none of it was seen on screen here.
+- 2026-10-24 (night) — UI-5 built: panels take their board's colour (FFI `PanelBox.board`/`grain`); grained decors get a seeded procedural woodgrain tile (docs/images/ui5-woodgrain-oak.png) laid along the part's grain at 0.6 m per tile, loaded async; gloss finishes are shinier. Only 4 of 459 catalog boards have a `preview_colour`, so the app guesses one from the decor name (Oak, Walnut, Grey…) and marks those cards with an eyedropper. Owner: assign an oak to the fronts and look.
+- 2026-10-24 (night) — UI-6 built: a toolbar menu draws only its label's icon and title, so the connection dot is its own toolbar view beside the SolidCraft menu (green with a glow / red / grey, a spinner while sending, VoiceOver value).
+- 2026-10-24 (night) — UI-9 built: View menu ⌘1–4 for the workspaces and ⌘[ / ⌘] for previous/next cabinet; in the viewport (after a click) the arrows step and ⌫ deletes; Edit › Delete Cabinet is ⌘⌫ (a bare ⌫ menu shortcut would eat text-field deletes); the sidebar list keeps its own arrows and ⌫.
+- 2026-10-24 (night) — UI-11 done: asset catalog with an AppIcon (a two-door oak cabinet on a blue tile, drawn by tools/make_app_icon.swift at every macOS size; AppIcon.icns lands in the bundle) and an oak AccentColor (#c67c3c, lighter in dark mode).
+- 2026-10-24 (night) — UI-13 built: saved standards ("My shop") are JSON files in Application Support/CabinetStudio/Standards, shown under Construction as tiles drawn with their top joint and back; a click makes one the job's standard (cabinets keep their overrides), Save… names the job's standard, the context menu updates or deletes. New jobs can start from one (UI-12).
+- 2026-10-24 (night) — UI-12 built: Settings has General (units, SolidCraft control port with a stepper and Default), Jobs (the saved standard new jobs start from) and Folders (catalog folder in place of the bundled one, supplier CAD folder for BLUM-9). The model reads the port and catalog from there.
+- 2026-10-24 (night) — UI-14 built: every drawn thumbnail is hidden from VoiceOver and its button speaks words instead ("Back: Inset in groove" with the choice's description as hint; drawer stacks by count and heights; size chips with their dimension and unit); tile and chip styles add the Selected trait; sidebar rows read as one element; the viewport and board swatches are labelled. Fonts are the semantic text styles throughout. Needs a run of Accessibility Inspector on screen.
+- 2026-10-24 (night) — UI-8 built: RealityView offers no reliable 3D drag on macOS 15, so the viewport has a run strip along its bottom: each cabinet and filler to scale; drag one to move it along the run, drag its right edge (resize pointer) to change the width, snapping to 150–1200 mm cabinet sizes or 25–200 mm filler sizes; one undo step per drag; VoiceOver can step widths. Owner: is a strip acceptable, or must the drag be on the 3D cabinets?
+- 2026-10-24 (night) — DATA-8 built: one BoardPicker (brand → range menus, Woodgrains/Colours, finish chips, search) over decor cards grouped by decor + finish with their thicknesses as chips. It is the Boards workspace ("Use for" menu per card) and, new, the inspector's Boards section: Carcass / Fronts / Back rows with swatches open it in a popover. A pick goes through useBoard (job-wide unless "Only B01"), so the viewport colour (UI-5) and the cut list's board and thickness follow.
+- 2026-10-24 (night) — OUT-2 done: `cabinet_sheets::pdf::job_pdf` turns each sheet SVG (rect, line, circle, text) into PDF operators in standard Helvetica (WinAnsi, AFM widths for centred text; no fonts embedded, no new crates), after a cover and an index with page numbers (more index pages past 126 parts). FFI `cut_sheets_pdf`; Cut Sheets has Export PDF…. The sample base cabinet's 9 parts make 11 pages in PDFKit, text selectable; picture docs/images/out2-pdf-sheet.png.
+- 2026-10-24 (night) — OUT-3 done: sheet features know their face (bores by drilling direction, slots by the face they open on). A part machined on both faces gets two views, inside and outside turned over (mirrored), the inside found by facing the cabinet's middle; table rows are tagged in/out. Each edge with bores gets an edge view strip under the views. One-face parts are unchanged (door, back, shelf, plinth snapshots identical); sides, bottom and rails snapshots reviewed. Pictures docs/images/out3-side-both-faces.png, out3-bottom-edges.png. Edge views show bores, not the biscuit slots in an edge.
+- 2026-10-24 (night) — OUT-6 done: `cabinet_core::bom` counts every hardware placement per item and description with the cabinets using it; the article column comes from the hardware catalog and says "not catalogued" until the Blum/Häfele rows exist (BLUM-2, HAF-*), so today every row says that. `pdf::table_pdf` sets any table over pages. The Cut List workspace has a Parts / Hardware switch with Export CSV… and Export PDF…. Sample: docs/images/out6-hardware-pdf.png.
+- 2026-10-24 (night) — OUT-7 done: `cabinet_sheets::labels` makes a 62 × 40 mm PDF page per part (continuous 62 mm tape): QR code (`qrcode` crate, MIT/Apache, no image features) of the part name, name, role, finished size, board, taped edges, job. Every label of the sample cabinet decodes back to its part name with Core Image's QR detector. Cut Sheets has Labels…. Picture docs/images/out7-label.png.
+- 2026-10-24 (night) — OUT-10 done: FFI `render_png` saves a "Cabinet Studio" render setup in the design (preview mode, the only profile SolidCraft 0.20's built-in renderer has; camera aimed at the job's bounding box from SolidCraft's isometric angles, distance 1.35 × its diagonal), starts the job, polls status/export for up to two minutes and writes the PNG. SolidCraft menu › Render to PNG (⇧⌘R) saves it next to the job (or asks for an unsaved one) and shows it in the Finder. New opt-in live test (`SOLIDCRAFT_LIVE_PORT=7878`, only on an untitled empty design) built base + filler + drawer bank in the running SolidCraft 0.20 and rendered docs/images/out10-render.png. Same session: sample run at Manufacturing detail connected took 1.9 / 0.4 / 4.5 s (B01/D01/T01), so PERF-1's connected timing is confirmed under 10 s.
+- 2026-10-24 (night) — SC-2/SC-3/SC-4: SolidCraft 0.20 is installed on this Mac. Started it with `--control 7878` (answers within 2 s) on an untitled empty design; new opt-in `cabinet-ffi/tests/live.rs` (SOLIDCRAFT_LIVE_PORT) draws 3 boxes, selects them (`select.set`), makes base/tall/wall cabinets in place, builds them, hides the boxes, reads them back identical, then deletes what it made. Only the menu clicks in Cabinet Studio are left for the owner.
+- 2026-10-24 (night) — DATA-2 done: tools/parse_laminex.py reads the guide's Decorated MDF / Decorated Particleboard trade tables (Sep 2025, 109 pages) from word positions; merged colour/finish/substrate/thickness cells are given to the run of product rows they are centred on, nested (colour ⊇ finish ⊇ substrate ⊇ thickness). 881 Laminex boards (1074 product codes with Formica), 568 matching edgings (code, 1 mm/25 m standard or 2 mm/100 m large format; width and material are not printed, so the tape schema now allows them absent), woodgrains from the Specifier's WOODGRAINS group; 102 Formica boards (no woodgrain flag in the guide, no tape thickness: none recorded). Checks: every product code's sheet size matches the layout text (1074/1074), every thickness printed on a code's own line (882/882), and every (decor, colour code) pair the specifier pages list agrees (Laminex 132/136, 4 codes the trade tables add). Spot-checked rows in the PR.
+- 2026-10-24 (night) — DATA-5 split into 5a/5b. DATA-5a done: parse_laminex.py also reads the four-tables-a-page Trade Essentials pages (Raw/White Particleboard, Raw/White MDF): 88 boards, 302 product codes, `kind` raw or melamine, in catalog/boards/trade-essentials.json. Merged substrate/thickness cells nest as before; colours set on two lines around a row (White Aquaban) are read as spans; the TYPE column is a title set on end except under MDF TYPE. 11 White MDF rows whose substrate cell gives only a grade (SELECT, SS 06MM BOW) are left out rather than guessing MR or not. Checks over all three brands: 1376/1376 sheet sizes (one by eye: its size sits a line above in the layout text), 930/930 printed thicknesses. Finish legends are now read per page, multi-word (MR Moisture Resistant).
+- 2026-10-24 (night) — DATA-6 split into 6a/6b. DATA-6a done: parse_laminex.py reads the MDF Primed Panels (Surround by Laminex) page: 26 `kind: lining` records (profile as printed, e.g. Classic VJ 100, Scallop 22.5; 9/12 mm; MDF MR E0 or MDF FR; sheet sizes and product codes). The guide never says what the number in a profile name measures, so no module width is recorded. FFI BoardRecord gains `kind`; the board picker has a Boards / Linings switch when the catalog has linings.
+- 2026-10-24 (night) — DATA-7 done: on top of unique ids and resolving tapes, `Catalog::validate` now refuses any board or tape whose source lacks a URL, document date or retrieval date; check.sh (and CI) load the repository catalog through it.
+- 2026-10-24 (night) — PLG-3 checked: SolidCraft still has no plugin runtime (#1221 open, draft #4980 open, #4330 open; v0.20.0 latest). FEASIBILITY_PLAN updated.
+- 2026-10-24 (night) — Owner's answers to PR #1 recorded: CORE-4b unblocked (bi-fold doors; hinge article split to CORE-4d), supplier-number rows stay needs-human, JOIN-2 accepted, CORE-5 question restated, JOIN-8 (Domino) and JOIN-9 (dowels) added. Not built: the run hit its usage limit.
+- 2026-10-24 (night) — Blum catalogue arrived (owner-supplied, local only): BLUM-2/3/4/5/6/7a/7b, CORE-8 and CORE-10 unblocked; BLUM-11..16 and BLUM-CAD-1 added. Order for the next run: BLUM-11, BLUM-2, BLUM-3, CORE-10, BLUM-4, BLUM-6/CORE-8, BLUM-7 HF top, BLUM-CAD-1. Not started: usage limit.
+- 2026-10-24 — owner added the benchtop / Surround / kitchen-style stretch goals (P2 kitchen design), to start after the cabinet systems. **Next run starts at BLUM-11** (suggested order above) and branches from night/2026-10-24. Open stacked PRs: #1 (night/2026-10-23 → main), #2 (night/2026-10-24 → night/2026-10-23).

@@ -314,3 +314,39 @@ fn every_slot_holds_a_biscuit_body_of_the_biscuits_size() {
         assert!((v - expected).abs() < 0.01 * expected, "{v} vs {expected}");
     }
 }
+
+#[test]
+fn hinges_and_runners_show_as_one_stand_in_body_each_where_the_core_puts_them() {
+    let Some(cli) = cli() else {
+        eprintln!("SOLIDCRAFT_CLI not set: skipped");
+        return;
+    };
+    use cabinet_core::standins::stand_ins;
+    for (id, kind) in [("B01", CabinetKind::Base), ("D01", CabinetKind::DrawerBank)] {
+        let list = build_cabinet(&Cabinet::new(id, kind)).unwrap();
+        let expected = stand_ins(&list);
+        assert!(!expected.is_empty(), "{id}");
+        let built = bounds(
+            &cli,
+            &format!("standins-{id}"),
+            &emit_cabinet(&list, Detail::Manufacturing, None),
+        );
+        let um = |v: f64| (v * 1000.0).round() as i64;
+        for s in &expected {
+            let b = s.bounds();
+            let (lo, hi) = (b.min, b.max());
+            let want = vec![um(lo.x), um(lo.y), um(lo.z), um(hi.x), um(hi.y), um(hi.z)];
+            let got = &built
+                .iter()
+                .find(|(n, _)| *n == s.name)
+                .unwrap_or_else(|| panic!("{} is not a body", s.name))
+                .1;
+            // The cup's tessellated round sides may fall a few micrometres short of the box.
+            for (g, w) in got.iter().zip(&want) {
+                assert!((g - w).abs() <= 5, "{}: {got:?} vs {want:?}", s.name);
+            }
+        }
+        let names = |prefix: &str| built.iter().filter(|(n, _)| n.contains(prefix)).count();
+        assert_eq!(names(".Hinge") + names(".Runner"), expected.len(), "{id}");
+    }
+}

@@ -57,50 +57,86 @@ fn yes() -> bool {
 /// Builds every item of the run in place. Fillers and end panels take their height, depth and
 /// board from the nearest cabinet, so a run needs at least one.
 pub fn build_run(run: &Run) -> Result<Vec<PartList>> {
-    let cabinets: Vec<(usize, &Cabinet)> = run
-        .items
+    let cabinets = cabinets(run);
+    if cabinets.is_empty() {
+        return Err(Error::Invalid("a run needs at least one cabinet".into()));
+    }
+    let neighbour = |i: usize| nearest(&cabinets, i);
+    let mut out = Vec::new();
+    for (i, (item, at)) in run.items.iter().zip(lefts(run, &neighbour)).enumerate() {
+        match item {
+            RunItem::Cabinet(c) => out.push(build_cabinet(&placed(c, at))?),
+            RunItem::Filler(f) => out.push(filler(f, neighbour(i), at)?),
+            RunItem::EndPanel(e) => out.push(end_panel(e, neighbour(i), at)),
+        }
+    }
+    Ok(out)
+}
+
+/// The run with each cabinet's origin where the run puts it, as [`build_run`] builds it.
+pub fn laid_out(run: &Run) -> Run {
+    let cabinets: Vec<(usize, &Cabinet)> = cabinets(run);
+    let items = if cabinets.is_empty() {
+        run.items.clone()
+    } else {
+        let neighbour = |i: usize| nearest(&cabinets, i);
+        run.items
+            .iter()
+            .zip(lefts(run, &neighbour))
+            .map(|(item, at)| match item {
+                RunItem::Cabinet(c) => RunItem::Cabinet(Box::new(placed(c, at))),
+                other => other.clone(),
+            })
+            .collect()
+    };
+    Run {
+        origin: run.origin,
+        items,
+    }
+}
+
+fn cabinets(run: &Run) -> Vec<(usize, &Cabinet)> {
+    run.items
         .iter()
         .enumerate()
         .filter_map(|(i, item)| match item {
             RunItem::Cabinet(c) => Some((i, c.as_ref())),
             _ => None,
         })
-        .collect();
-    if cabinets.is_empty() {
-        return Err(Error::Invalid("a run needs at least one cabinet".into()));
-    }
-    // The cabinet a filler or end panel at `i` belongs against: the nearest one, left first.
-    let neighbour = |i: usize| {
-        cabinets
-            .iter()
-            .min_by_key(|(j, _)| (i.abs_diff(*j), *j > i))
-            .map(|(_, c)| *c)
-            .unwrap()
-    };
+        .collect()
+}
+
+/// The cabinet a filler or end panel at `i` belongs against: the nearest one, left first.
+fn nearest<'a>(cabinets: &[(usize, &'a Cabinet)], i: usize) -> &'a Cabinet {
+    cabinets
+        .iter()
+        .min_by_key(|(j, _)| (i.abs_diff(*j), *j > i))
+        .map(|(_, c)| *c)
+        .expect("a run with a cabinet")
+}
+
+/// Where each item's left end sits, side by side from the run's origin.
+fn lefts<'a>(run: &Run, neighbour: &dyn Fn(usize) -> &'a Cabinet) -> Vec<Vec3> {
     let mut x = run.origin.x;
-    let mut out = Vec::new();
-    for (i, item) in run.items.iter().enumerate() {
-        match item {
-            RunItem::Cabinet(c) => {
-                let mut c = c.as_ref().clone();
-                c.origin = Vec3::new(x, run.origin.y, run.origin.z + c.origin.z);
-                x += c.width;
-                out.push(build_cabinet(&c)?);
-            }
-            RunItem::Filler(f) => {
-                let list = filler(f, neighbour(i), Vec3::new(x, run.origin.y, run.origin.z))?;
-                x += f.width;
-                out.push(list);
-            }
-            RunItem::EndPanel(e) => {
-                let c = neighbour(i);
-                let list = end_panel(e, c, Vec3::new(x, run.origin.y, run.origin.z));
-                x += c.standard.front_thickness;
-                out.push(list);
-            }
-        }
-    }
-    Ok(out)
+    run.items
+        .iter()
+        .enumerate()
+        .map(|(i, item)| {
+            let at = Vec3::new(x, run.origin.y, run.origin.z);
+            x += match item {
+                RunItem::Cabinet(c) => c.width,
+                RunItem::Filler(f) => f.width,
+                RunItem::EndPanel(_) => neighbour(i).standard.front_thickness,
+            };
+            at
+        })
+        .collect()
+}
+
+fn placed(c: &Cabinet, at: Vec3) -> Cabinet {
+    let mut c = c.clone();
+    c.origin = Vec3::new(at.x, at.y, at.z + c.origin.z);
+    c
 }
 
 /// The run's front region of `c` in Z: where its doors start and stop.
@@ -253,6 +289,25 @@ mod tests {
         );
         // The scribe is cut away on site: the cabinet starts after the finished width.
         assert_eq!(lists[1].part("B01.LeftSide").unwrap().bounds.min.x, 50.0);
+    }
+
+    #[test]
+    fn laying_out_a_run_gives_each_cabinet_the_origin_it_is_built_at() {
+        let run = Run {
+            origin: Vec3::default(),
+            items: vec![
+                end("E01"),
+                RunItem::Cabinet(Box::new(Cabinet::new("B01", CabinetKind::Base))),
+                RunItem::Cabinet(Box::new(Cabinet::new("B02", CabinetKind::Base))),
+            ],
+        };
+        let lists = build_run(&run).unwrap();
+        for (item, list) in laid_out(&run).items.iter().zip(&lists).skip(1) {
+            let RunItem::Cabinet(c) = item else {
+                panic!("a cabinet")
+            };
+            assert_eq!(build_cabinet(c).unwrap(), *list);
+        }
     }
 
     #[test]
