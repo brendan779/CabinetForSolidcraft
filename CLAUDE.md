@@ -56,5 +56,9 @@ Rust is installed through Homebrew's rustup: `export PATH="$HOME/.cargo/bin:/opt
   `engine.batch` (all-or-nothing, up to 10 000 steps), `document.inspect`.
 - Useful commands: `solid.box` (corner, body_name, operation, targets), `solid.cylinder` (base,
   axis, diameter, height), `component.create/activate/delete`, `component.metadata.set` (values
-  under a reverse-DNS key), `appearance.assign` (bodies, color).
+  under a reverse-DNS key), `appearance.assign` (bodies, color), `sketch.create` (plane
+  `{origin, x_dir, y_dir}`), `sketch.circle.center`, `solid.extrude` (sketch, profiles, direction,
+  operation `cut`, targets). `solidcraft-cli commands` lists them all with their params.
+- Every cut costs more the more features its body has: batch holes into one sketch extrude
+  (docs/perf.md).
 - Preferences › Plugins only lists folders. No plugin code runs yet (issue #1221, draft PR #4980).

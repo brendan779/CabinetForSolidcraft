@@ -46,3 +46,26 @@ What it says:
 `emit_base --manufacturing` (base, drawer bank, tall: 475 commands): **99.9 s**, of which the 393
 `solid.cylinder` cuts take 99.3 s, the 64 boxes (panels and slot cuts) 0.6 s and everything else
 under 0.1 s.
+
+## PERF-1: one extrude per panel face
+
+Manufacturing detail now draws every bore on one face of a panel (same direction and depth) as
+circles in one sketch and cuts them with one `solid.extrude`, instead of one `solid.cylinder` cut
+per hole. Slots and grooves stay box cuts: they cost little (see above).
+
+`emit_base --manufacturing --script target/run.json`, then `solidcraft-cli run --timings`:
+
+| cabinet | before: commands | before: s | after: commands | after: s |
+|---|---:|---:|---:|---:|
+| B01 base | 130 | 10.44 | 166 | 1.38 |
+| D01 drawer bank | 55 | 1.39 | 79 | 0.38 |
+| **T01 tall** | 290 | **88.09** | 326 | **3.87** |
+| run | 475 | 99.9 | 571 | 5.6 |
+
+The geometry is unchanged: `solidcraft-cli eval` of both scripts gives the same 31 bodies, and every
+body's volume matches the cylinder version to within 3 × 10⁻¹⁰ (relative).
+
+These are headless CLI times. The 121 s the owner saw for the tall cabinet was in the desktop app
+over the control socket, which also redraws; the connected run has not been re-timed yet.
+
+![Sample run at Manufacturing detail](images/perf1-manufacturing.png)

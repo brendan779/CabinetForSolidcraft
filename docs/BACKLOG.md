@@ -28,7 +28,7 @@ Priorities: **P0** blocks most other work · **P1** MVP · **P2** commercial par
 | INF-3 | todo | S | Move the Swift app to Swift 6 language mode with strict concurrency | builds with `SWIFT_VERSION = 6`, no warnings |
 | INF-4 | todo | M | Snapshot tests for SVG cut sheets (insta crate) and a golden part list per cabinet kind | `cargo insta test` passes; goldens committed |
 | INF-5 | todo | S | `cargo deny` licence/advisory check in check.sh | added and green |
-| PERF-1 | todo | M | **Batch machining per panel.** Emit all bores on one face of a panel as one sketch (circles) + one extrude cut instead of one `solid.cylinder` cut each. Tall cabinet at Manufacturing detail currently takes ~121 s for 293 commands | Tall cabinet at Manufacturing detail builds in < 10 s against SolidCraft 0.20; timing recorded in docs/perf.md |
+| PERF-1 | done (night/2026-10-23) | M | **Batch machining per panel.** Emit all bores on one face of a panel as one sketch (circles) + one extrude cut instead of one `solid.cylinder` cut each. Tall cabinet at Manufacturing detail currently takes ~121 s for 293 commands | Tall cabinet at Manufacturing detail builds in < 10 s against SolidCraft 0.20; timing recorded in docs/perf.md |
 | PERF-2 | done (night/2026-10-23) | S | Measure and record per-command cost (`engine.batch` `profile: true`) for box, cut box, cylinder cut and sketch cut on 16 mm panels | table in docs/perf.md |
 | SC-1 | todo | M | Replace-in-place: when re-sending a cabinet, delete its component and rebuild in one batch (currently two requests) and keep its placement if the user moved it in SolidCraft | resend after a move keeps the new position |
 | SC-2 | todo | M | **Box → cabinet.** Read selected bodies from SolidCraft (`document.inspect` selection + `model.faces`), recognise axis-aligned cuboids, turn each into a cabinet at that size and position, hide the source box | selecting 3 boxes in SolidCraft and pressing "Make cabinets" in the app creates 3 cabinets in place |
@@ -175,3 +175,4 @@ Agents append one line per session: date, items touched, outcome.
 - 2026-10-23 — initial scaffold: core, catalog, bridge, sheets, FFI, macOS app; live build in SolidCraft 0.20 verified; PERF-1 found.
 - 2026-10-23 — repo published as brendan779/CabinetForSolidcraft; INF-2 CI green on macos-latest.
 - 2026-10-23 (night) — PERF-2 done: per-command costs in docs/perf.md (cylinder cuts grow ~3 ms per existing feature; one sketch extrude is 11–33× faster).
+- 2026-10-23 (night) — PERF-1 done: bores batched per panel face (sketch + one extrude); tall cabinet at Manufacturing detail 88.1 s → 3.9 s headless, volumes unchanged. Connected (app) timing still to confirm.

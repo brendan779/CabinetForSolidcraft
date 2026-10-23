@@ -2,7 +2,7 @@
 
 use cabinet_core::PartList;
 use cabinet_core::geom::{Axis, Vec3};
-use cabinet_core::part::{Operation, PartRole};
+use cabinet_core::part::{Dir, Operation, PartRole};
 use serde_json::{Value, json};
 
 /// How much of the machining to model.
@@ -12,14 +12,6 @@ pub enum Detail {
     Design,
     /// Panels with every bore, groove and biscuit slot cut. For checking and export.
     Manufacturing,
-}
-
-fn axis_name(a: Axis) -> &'static str {
-    match a {
-        Axis::X => "X",
-        Axis::Y => "Y",
-        Axis::Z => "Z",
-    }
 }
 
 fn arr(v: Vec3) -> Value {
@@ -62,8 +54,17 @@ pub fn emit_cabinet(list: &PartList, detail: Detail, spec: Option<&Value>) -> Ve
     }
     if detail == Detail::Manufacturing {
         for op in &list.operations {
-            cmds.push(operation(op));
+            match op {
+                Operation::BiscuitSlot { parts, bounds, .. } => {
+                    cmds.push(cut_box(bounds.min, bounds.size, parts.as_slice()))
+                }
+                Operation::Groove { part, bounds } => {
+                    cmds.push(cut_box(bounds.min, bounds.size, std::slice::from_ref(part)))
+                }
+                Operation::Bore { .. } => {}
+            }
         }
+        cmds.extend(bore_batches(&list.operations));
     }
     // One appearance command per colour keeps the batch short.
     let mut by_colour: Vec<(&str, Vec<&str>)> = Vec::new();
@@ -93,40 +94,109 @@ pub fn emit_cabinet(list: &PartList, detail: Detail, spec: Option<&Value>) -> Ve
     cmds
 }
 
-fn operation(op: &Operation) -> Value {
-    match op {
-        Operation::Bore {
+/// A circle in sketch coordinates: centre u, centre v, diameter.
+type Circle = (f64, f64, f64);
+
+/// Bores that one extrude can cut: same part, same face, same direction and depth.
+#[derive(PartialEq)]
+struct BoreFace<'a> {
+    part: &'a str,
+    direction: Dir,
+    mouth: i64,
+    depth: i64,
+}
+
+/// Every bore as one sketch of circles plus one extrude cut per face and depth. Each cut costs
+/// more the more features its panel already has, so one cut per face instead of one per hole
+/// makes Manufacturing detail roughly linear in the hole count (docs/perf.md, PERF-1).
+fn bore_batches(ops: &[Operation]) -> Vec<Value> {
+    // Keyed in micrometres so equal faces compare equal despite float noise.
+    let um = |v: f64| (v * 1000.0).round() as i64;
+    let mut groups: Vec<(BoreFace, Vec<Circle>)> = Vec::new();
+    for op in ops {
+        let Operation::Bore {
             part,
             at,
             direction,
             diameter,
             depth,
             ..
-        } => {
-            // A cylinder grows from its base along the positive axis.
-            let base = if direction.positive {
-                *at
-            } else {
-                at.with(direction.axis, at.get(direction.axis) - depth)
-            };
-            json!({
-                "command": "solid.cylinder",
-                "params": {
-                    "diameter": round(*diameter),
-                    "height": round(*depth),
-                    "base": arr(base),
-                    "axis": axis_name(direction.axis),
-                    "operation": "cut",
-                    "targets": [part],
-                }
-            })
+        } = op
+        else {
+            continue;
+        };
+        let key = BoreFace {
+            part,
+            direction: *direction,
+            mouth: um(at.get(direction.axis)),
+            depth: um(*depth),
+        };
+        let [u, v] = sketch_axes(direction.axis);
+        let circle = (at.get(u), at.get(v), *diameter);
+        match groups.iter_mut().find(|(k, _)| *k == key) {
+            // A repeated hole would only add an overlapping profile.
+            Some((_, c)) if c.contains(&circle) => {}
+            Some((_, c)) => c.push(circle),
+            None => groups.push((key, vec![circle])),
         }
-        Operation::BiscuitSlot { parts, bounds, .. } => {
-            cut_box(bounds.min, bounds.size, parts.as_slice())
+    }
+    let mut cmds = Vec::new();
+    let mut per_part: Vec<(&str, usize)> = Vec::new();
+    for (face, circles) in groups {
+        let n = match per_part.iter_mut().find(|(p, _)| *p == face.part) {
+            Some((_, n)) => {
+                *n += 1;
+                *n
+            }
+            None => {
+                per_part.push((face.part, 1));
+                1
+            }
+        };
+        let sketch = format!("{}.Bores{n}", face.part);
+        let axis = face.direction.axis;
+        let [u, v] = sketch_axes(axis);
+        let origin = Vec3::default().with(axis, face.mouth as f64 / 1000.0);
+        cmds.push(json!({
+            "command": "sketch.create",
+            "params": {
+                "plane": {
+                    "origin": arr(origin),
+                    "x_dir": arr(Vec3::default().with(u, 1.0)),
+                    "y_dir": arr(Vec3::default().with(v, 1.0)),
+                },
+                "name": sketch,
+            }
+        }));
+        for (cu, cv, d) in circles {
+            cmds.push(json!({
+                "command": "sketch.circle.center",
+                "params": { "center": [round(cu), round(cv)], "diameter": round(d), "connect": false }
+            }));
         }
-        Operation::Groove { part, bounds } => {
-            cut_box(bounds.min, bounds.size, std::slice::from_ref(part))
-        }
+        cmds.push(json!({ "command": "sketch.finish", "params": {} }));
+        cmds.push(json!({
+            "command": "solid.extrude",
+            "params": {
+                "sketch": sketch,
+                "profiles": "all",
+                "distance": face.depth as f64 / 1000.0,
+                "direction": if face.direction.positive { "positive" } else { "negative" },
+                "operation": "cut",
+                "targets": [face.part],
+            }
+        }));
+    }
+    cmds
+}
+
+/// In-plane axes of a sketch whose normal is `axis`, ordered so that x × y = +axis: an extrude
+/// in the "positive" direction then runs along +axis.
+fn sketch_axes(axis: Axis) -> [Axis; 2] {
+    match axis {
+        Axis::X => [Axis::Y, Axis::Z],
+        Axis::Y => [Axis::Z, Axis::X],
+        Axis::Z => [Axis::X, Axis::Y],
     }
 }
 
@@ -147,6 +217,7 @@ fn cut_box(min: Vec3, size: Vec3, targets: &[String]) -> Value {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use cabinet_core::part::BorePurpose;
     use cabinet_core::{Cabinet, CabinetKind, build_cabinet};
 
     #[test]
@@ -159,27 +230,138 @@ mod tests {
         assert_eq!(cmds.last().unwrap()["command"], "component.activate");
     }
 
-    #[test]
-    fn manufacturing_detail_cuts_every_operation() {
-        let list = build_cabinet(&Cabinet::new("B01", CabinetKind::Base)).unwrap();
-        let design = emit_cabinet(&list, Detail::Design, None).len();
-        let mfg = emit_cabinet(&list, Detail::Manufacturing, None).len();
-        assert_eq!(mfg - design, list.operations.len());
+    fn count(cmds: &[Value], command: &str) -> usize {
+        cmds.iter().filter(|c| c["command"] == command).count()
+    }
+
+    fn bore(part: &str, at: Vec3, direction: Dir, diameter: f64, depth: f64) -> Operation {
+        Operation::Bore {
+            part: part.into(),
+            at,
+            direction,
+            diameter,
+            depth,
+            purpose: BorePurpose::ShelfPin,
+        }
     }
 
     #[test]
-    fn a_bore_into_negative_direction_starts_at_its_bottom() {
-        use cabinet_core::part::{BorePurpose, Dir};
-        let op = Operation::Bore {
-            part: "P".into(),
-            at: Vec3::new(10.0, 0.0, 5.0),
-            direction: Dir::new(Axis::Y, false),
-            diameter: 35.0,
-            depth: 13.0,
-            purpose: BorePurpose::HingeCup,
-        };
-        let v = operation(&op);
-        assert_eq!(v["params"]["base"], json!([10.0, -13.0, 5.0]));
-        assert_eq!(v["params"]["axis"], "Y");
+    fn manufacturing_detail_cuts_every_slot_and_groove_as_a_box() {
+        let list = build_cabinet(&Cabinet::new("B01", CabinetKind::Base)).unwrap();
+        let boxes = |d| count(&emit_cabinet(&list, d, None), "solid.box");
+        let box_ops = list
+            .operations
+            .iter()
+            .filter(|o| !matches!(o, Operation::Bore { .. }))
+            .count();
+        assert_eq!(
+            boxes(Detail::Manufacturing) - boxes(Detail::Design),
+            box_ops
+        );
+    }
+
+    #[test]
+    fn manufacturing_detail_draws_every_bore_as_a_circle_and_never_a_cylinder() {
+        let list = build_cabinet(&Cabinet::new("T01", CabinetKind::Tall)).unwrap();
+        let cmds = emit_cabinet(&list, Detail::Manufacturing, None);
+        let bores = list
+            .operations
+            .iter()
+            .filter(|o| matches!(o, Operation::Bore { .. }))
+            .count();
+        assert_eq!(count(&cmds, "sketch.circle.center"), bores);
+        assert_eq!(count(&cmds, "solid.cylinder"), 0);
+        assert_eq!(count(&cmds, "sketch.create"), count(&cmds, "solid.extrude"));
+        assert!(
+            count(&cmds, "solid.extrude") * 4 < bores,
+            "bores are batched"
+        );
+    }
+
+    #[test]
+    fn bores_on_one_face_at_one_depth_are_one_extrude() {
+        use cabinet_core::part::Dir;
+        let into = Dir::new(Axis::X, false);
+        let ops: Vec<Operation> = (0..5)
+            .map(|i| {
+                bore(
+                    "P",
+                    Vec3::new(16.0, 37.0, 100.0 + 32.0 * i as f64),
+                    into,
+                    5.0,
+                    10.0,
+                )
+            })
+            .collect();
+        let cmds = bore_batches(&ops);
+        assert_eq!(count(&cmds, "solid.extrude"), 1);
+        assert_eq!(count(&cmds, "sketch.circle.center"), 5);
+        let plane = &cmds[0]["params"]["plane"];
+        assert_eq!(plane["origin"], json!([16.0, 0.0, 0.0]));
+        assert_eq!(cmds[1]["params"]["center"], json!([37.0, 100.0]));
+        let extrude = cmds.last().unwrap();
+        assert_eq!(extrude["params"]["direction"], "negative");
+        assert_eq!(extrude["params"]["distance"], json!(10.0));
+        assert_eq!(extrude["params"]["targets"], json!(["P"]));
+    }
+
+    #[test]
+    fn bores_differing_in_depth_face_or_direction_get_their_own_extrude() {
+        use cabinet_core::part::Dir;
+        let at = Vec3::new(16.0, 37.0, 100.0);
+        let ops = vec![
+            bore("P", at, Dir::new(Axis::X, false), 5.0, 10.0),
+            bore(
+                "P",
+                at.with(Axis::Z, 132.0),
+                Dir::new(Axis::X, false),
+                5.0,
+                13.0,
+            ),
+            bore(
+                "P",
+                at.with(Axis::X, 0.0),
+                Dir::new(Axis::X, true),
+                5.0,
+                10.0,
+            ),
+            bore("Q", at, Dir::new(Axis::X, false), 5.0, 10.0),
+        ];
+        let cmds = bore_batches(&ops);
+        assert_eq!(count(&cmds, "solid.extrude"), 4);
+        let names: Vec<&str> = cmds
+            .iter()
+            .filter(|c| c["command"] == "sketch.create")
+            .map(|c| c["params"]["name"].as_str().unwrap())
+            .collect();
+        assert_eq!(names, ["P.Bores1", "P.Bores2", "P.Bores3", "Q.Bores1"]);
+    }
+
+    #[test]
+    fn a_repeated_bore_is_drawn_once() {
+        use cabinet_core::part::Dir;
+        let b = bore(
+            "P",
+            Vec3::new(16.0, 37.0, 100.0),
+            Dir::new(Axis::X, false),
+            5.0,
+            10.0,
+        );
+        let cmds = bore_batches(&[b.clone(), b]);
+        assert_eq!(count(&cmds, "sketch.circle.center"), 1);
+    }
+
+    #[test]
+    fn sketch_axes_make_a_right_handed_frame_around_the_normal() {
+        for axis in Axis::ALL {
+            let [u, v] = sketch_axes(axis);
+            let (a, b) = (Vec3::default().with(u, 1.0), Vec3::default().with(v, 1.0));
+            let cross = Vec3::new(
+                a.y * b.z - a.z * b.y,
+                a.z * b.x - a.x * b.z,
+                a.x * b.y - a.y * b.x,
+            );
+            assert_eq!(cross, Vec3::default().with(axis, 1.0));
+        }
     }
 }
