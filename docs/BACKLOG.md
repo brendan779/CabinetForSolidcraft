@@ -86,7 +86,7 @@ Priorities: **P0** blocks most other work · **P1** MVP · **P2** commercial par
 | BLUM-7b | blocked (AVENTOS power-factor ranges and drilling per family from Blum's documents: owner data) | M | AVENTOS HK top, HK-S, HK-XS, HF, HS, HL catalog rows (articles by power-factor range, drilling) | hardware rows with sources; BLUM-7a picks articles from them |
 | BLUM-8 | done (05f6929) | S | TIP-ON / SERVO-DRIVE options for handleless fronts | option + BOM |
 | BLUM-9 | 👤 needs-human | M | Import the owner's Blum STEP files from `vendor-cad/blum/` as linked components (`component.insert_design` after STEP → .solidcraft conversion) in place of stand-ins | a hinge renders with the real Blum model |
-| BLUM-10 | done (this commit) | M | Parametric stand-in models (hinge cup + arm, plate, runner, box side) emitted as bodies | visible in Manufacturing detail |
+| BLUM-10 | done (fbb3804) | M | Parametric stand-in models (hinge cup + arm, plate, runner, box side) emitted as bodies | visible in Manufacturing detail |
 
 ### Hardware: Häfele and lighting
 
