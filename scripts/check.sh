@@ -11,6 +11,9 @@ cargo clippy --workspace --all-targets -q -- -D warnings
 cargo test --workspace -q
 
 if [[ "$(uname)" == "Darwin" && "${SKIP_APP:-0}" != "1" ]]; then
+  # The bindings and xcframework are generated, so a fresh checkout must build them before
+  # xcodegen can find them.
+  scripts/build-core.sh
   (cd apps/macos && xcodegen -q && xcodebuild -project CabinetStudio.xcodeproj -scheme CabinetStudio \
     -configuration Debug -derivedDataPath "$ROOT/target/xcode" build -quiet)
 fi
