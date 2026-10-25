@@ -21,6 +21,7 @@ pub mod joinery;
 pub mod lift;
 pub mod lighting;
 pub mod model;
+pub mod nesting;
 pub mod options;
 pub mod part;
 pub mod project;
