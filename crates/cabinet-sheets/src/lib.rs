@@ -5,6 +5,7 @@
 use std::fmt::Write;
 
 pub mod assembly;
+pub mod dxf;
 pub mod labels;
 pub mod nesting;
 pub mod pdf;
@@ -46,6 +47,8 @@ pub enum Feature {
         v: f64,
         w: f64,
         h: f64,
+        /// How deep it goes into the part, across its thickness.
+        depth: f64,
         label: &'static str,
         face: Option<Face>,
     },
@@ -78,7 +81,7 @@ pub enum Edge {
 }
 
 /// The drawing frame for a part: which cabinet axes map to u and v.
-fn frame(p: &Part) -> (Axis, Axis) {
+pub(crate) fn frame(p: &Part) -> (Axis, Axis) {
     let [a, b] = p.thickness_axis.others();
     let (len, _) = p.finished_size();
     if (p.bounds.size.get(a) - len).abs() < 1e-9 && p.grain_axis != Some(b) {
@@ -188,6 +191,7 @@ fn rect(part: &Part, min: Vec3, size: Vec3, label: &'static str) -> Feature {
         v: v0,
         w: u1 - u0,
         h: v1 - v0,
+        depth: r1.min(hi) - r0.max(lo),
         label,
         face,
     }
@@ -569,6 +573,7 @@ fn face_view(
                 h,
                 label,
                 face: on,
+                ..
             } => {
                 // A notch is drawn as the paper showing through: no board there.
                 let fill = match *label {
@@ -852,6 +857,7 @@ mod tests {
                     // The side is drawn with its height along u and its depth along v.
                     w: s.toe_kick_height,
                     h: s.toe_kick_setback,
+                    depth: s.carcass_thickness,
                     label: "notch",
                     face: None,
                 }],

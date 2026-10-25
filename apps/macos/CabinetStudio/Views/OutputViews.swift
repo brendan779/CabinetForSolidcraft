@@ -224,42 +224,75 @@ struct CutSheetsView: View {
         }
     }
 
+    /// Writes every part's DXF into a new "<job> DXF" folder in the folder the user picks.
+    private func exportDxf() {
+        let panel = NSOpenPanel()
+        panel.canChooseDirectories = true
+        panel.canChooseFiles = false
+        panel.canCreateDirectories = true
+        panel.prompt = "Export Here"
+        panel.message = "Choose where the \(project.jobName) DXF folder goes"
+        guard panel.runModal() == .OK, let base = panel.url else { return }
+        do {
+            let files = try jobDxfs(items: project.jobItems)
+            let folder = base.appending(path: "\(project.jobName) DXF", directoryHint: .isDirectory)
+            try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+            for f in files {
+                try Data(f.contents.utf8).write(to: folder.appending(path: "\(f.name).dxf"))
+            }
+            project.status = "Saved \(files.count) DXF files in \(folder.lastPathComponent)"
+        } catch {
+            project.lastError = "Could not export the DXF files: \(error)"
+        }
+    }
+
     /// Export buttons in a bar over the sheet (above the status bar's reach). They used to be window toolbar items, which crashed
     /// the app: the toolbar had no room left and its layout became unsatisfiable.
     private var actions: some View {
-        HStack {
-            Spacer()
-                Button("Labels…", systemImage: "qrcode") {
-                    do {
-                        pdf = (DataDocument(data: try partLabelsPdf(items: project.jobItems, job: project.jobName)),
-                               "\(project.jobName) labels")
-                    } catch {
-                        project.lastError = "Could not make the labels: \(error)"
-                    }
-                }
-                .help("A 62 × 40 mm label per part with a QR code of its name, for a 62 mm label printer")
-                Button("Assembly…", systemImage: "square.3.layers.3d.down.right") {
-                    do {
-                        pdf = (DataDocument(data: try assemblyPdf(items: project.jobItems, job: project.jobName)),
-                               "\(project.jobName) assembly")
-                    } catch {
-                        project.lastError = "Could not make the assembly sheets: \(error)"
-                    }
-                }
-                .help("Each cabinet exploded, with its parts list, one page per cabinet")
-                Button("Export PDF…", systemImage: "doc.richtext") {
-                    do {
-                        pdf = (DataDocument(data: try cutSheetsPdf(items: project.jobItems, job: project.jobName)),
-                               "\(project.jobName) cut sheets")
-                    } catch {
-                        project.lastError = "Could not make the PDF: \(error)"
-                    }
-                }
-                .help("Every part's sheet in one PDF, after a cover and an index")
+        // Four labelled buttons need ~430 pt; narrower, they show their icons only.
+        ViewThatFits(in: .horizontal) {
+            buttons.labelStyle(.titleAndIcon)
+            buttons.labelStyle(.iconOnly)
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 6)
+        .frame(minWidth: 0, maxWidth: .infinity)
         .background(.bar)
+    }
+
+    private var buttons: some View {
+        HStack {
+            Spacer(minLength: 0)
+            Button("Labels…", systemImage: "qrcode") {
+                do {
+                    pdf = (DataDocument(data: try partLabelsPdf(items: project.jobItems, job: project.jobName)),
+                           "\(project.jobName) labels")
+                } catch {
+                    project.lastError = "Could not make the labels: \(error)"
+                }
+            }
+            .help("A 62 × 40 mm label per part with a QR code of its name, for a 62 mm label printer")
+            Button("Assembly…", systemImage: "square.3.layers.3d.down.right") {
+                do {
+                    pdf = (DataDocument(data: try assemblyPdf(items: project.jobItems, job: project.jobName)),
+                           "\(project.jobName) assembly")
+                } catch {
+                    project.lastError = "Could not make the assembly sheets: \(error)"
+                }
+            }
+            .help("Each cabinet exploded, with its parts list, one page per cabinet")
+            Button("DXF…", systemImage: "square.and.arrow.up.on.square") { exportDxf() }
+                .help("A DXF per part for CNC (outline, bores by size and depth, pockets, cut-outs on their own layers) into a folder you choose")
+            Button("Export PDF…", systemImage: "doc.richtext") {
+                do {
+                    pdf = (DataDocument(data: try cutSheetsPdf(items: project.jobItems, job: project.jobName)),
+                           "\(project.jobName) cut sheets")
+                } catch {
+                    project.lastError = "Could not make the PDF: \(error)"
+                }
+            }
+            .help("Every part's sheet in one PDF, after a cover and an index")
+        }
     }
 }
 

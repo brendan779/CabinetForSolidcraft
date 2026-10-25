@@ -620,6 +620,27 @@ pub fn assembly_pdf(items: JobItems, job: String) -> Result<Vec<u8>, CoreError> 
     Ok(cabinet_sheets::assembly::assembly_pdf(&lists, &job))
 }
 
+/// One part's DXF file for CNC (see `cabinet_sheets::dxf` for the layers).
+#[derive(uniffi::Record)]
+pub struct DxfRecord {
+    /// The part name, `-back` for its second face; no extension.
+    pub name: String,
+    pub contents: String,
+}
+
+/// Every part's DXF files.
+#[uniffi::export]
+pub fn job_dxfs(items: JobItems) -> Result<Vec<DxfRecord>, CoreError> {
+    let lists: Vec<PartList> = job_lists(&items)?.into_iter().map(|(l, _)| l).collect();
+    Ok(cabinet_sheets::dxf::job_dxfs(&lists)
+        .into_iter()
+        .map(|f| DxfRecord {
+            name: f.name,
+            contents: f.contents,
+        })
+        .collect())
+}
+
 /// One line of the hardware bill.
 #[derive(uniffi::Record)]
 pub struct BomRecord {
