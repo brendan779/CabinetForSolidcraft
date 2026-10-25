@@ -53,7 +53,7 @@ const HINGE_END_OFFSET: f64 = 100.0;
 /// Builds the part list for one cabinet.
 pub fn build_cabinet(cab: &Cabinet) -> Result<PartList> {
     validate(cab)?;
-    let mut list = if cab.kind == CabinetKind::CornerBase {
+    let mut list = if matches!(cab.kind, CabinetKind::CornerBase | CabinetKind::CornerWall) {
         l_corner(cab)?
     } else {
         let mut b = Builder::new(cab);
@@ -82,7 +82,9 @@ pub fn build_cabinet(cab: &Cabinet) -> Result<PartList> {
 
 /// An L-shaped corner base, from two straight legs: the main leg as a base cabinet along X, the
 /// second built the same way, its end against the main leg opened, and turned to face +X in
-/// front of the main leg's end. Bi-fold doors close both fronts.
+/// front of the main leg's end. Bi-fold doors close both fronts. A corner wall's legs are wall
+/// cabinets: the main leg hangs on its two hangers, the second on one at its outer end and, at
+/// its open end, on the main leg's corner hanger (owner, 2026-10-26).
 fn l_corner(cab: &Cabinet) -> Result<PartList> {
     let (w, d, w2) = (cab.width, cab.depth, cab.corner.width);
     for (name, v) in [("width", w), ("corner width", w2)] {
@@ -93,8 +95,12 @@ fn l_corner(cab: &Cabinet) -> Result<PartList> {
             )));
         }
     }
+    let kind = match cab.kind {
+        CabinetKind::CornerWall => CabinetKind::Wall,
+        _ => CabinetKind::Base,
+    };
     let leg = |width: f64, exposed: Exposed| Cabinet {
-        kind: CabinetKind::Base,
+        kind,
         width,
         fronts: FrontLayout::Open,
         origin: Vec3::default(),
@@ -128,9 +134,12 @@ fn l_corner(cab: &Cabinet) -> Result<PartList> {
     a.corner_doors();
     a.shelves();
     a.plinth();
+    a.wall_hanging();
     let mut b = Builder::new(&second);
     b.carcass();
     b.plinth();
+    // The hanger at the open end goes with its side.
+    b.wall_hanging();
     let mut leg_b = b.list;
     corner::open_end(&mut leg_b, &format!("{}.RightSide", cab.id), w2 - d);
     corner::rename(&mut leg_b, |n| format!("{n}2"));
@@ -2749,6 +2758,75 @@ mod tests {
         assert!((leg.bounds.min.x - (900.0 - 580.0)).abs() < 1e-9);
         // The second leg's end side is now on its right.
         assert!(list.part("C01.RightSide2").is_some());
+    }
+
+    /// CORE-4c: a 600 × 600 corner wall: wall-height legs, bi-fold pair, two hangers per leg with
+    /// the corner one shared, and a rail behind each leg.
+    #[test]
+    fn a_corner_wall_hangs_each_leg_on_two_hangers_sharing_the_corner_one() {
+        for side in [HingeSide::Left, HingeSide::Right] {
+            let mut cab = Cabinet::new("C01", CabinetKind::CornerWall);
+            cab.corner.side = side;
+            let list = build_cabinet(&cab).unwrap();
+            assert!(
+                list.warnings
+                    .iter()
+                    .all(|w| w.contains("shelf-pin holes left out")),
+                "{:?}",
+                list.warnings
+            );
+            assert!(list.by_role(PartRole::Plinth).next().is_none());
+            assert!(list.part("C01.Door1").is_some() && list.part("C01.Door2").is_some());
+            let tops = list
+                .parts
+                .iter()
+                .filter(|p| p.bounds.max().z > 719.0)
+                .count();
+            assert!(tops > 0);
+            let hangers: Vec<_> = list
+                .hardware
+                .iter()
+                .filter(|h| h.item.starts_with("blum.wall-hanging-bracket."))
+                .collect();
+            let on = |part: &str| hangers.iter().filter(|h| h.part == part).count();
+            // Main leg: the corner side and its outer end. Second leg: its outer end.
+            assert_eq!(hangers.len(), 3, "{hangers:?}");
+            let (corner, outer, outer2) = match side {
+                HingeSide::Left => ("C01.LeftSide", "C01.RightSide", "C01.LeftSide2"),
+                HingeSide::Right => ("C01.RightSide", "C01.LeftSide", "C01.RightSide2"),
+            };
+            assert_eq!((on(corner), on(outer), on(outer2)), (1, 1, 1));
+            // Each hanger is handed for the side it is on.
+            for h in &hangers {
+                let hand = if h.item.ends_with(".left") {
+                    "Left"
+                } else {
+                    "Right"
+                };
+                assert!(h.part.contains(hand), "{} on {}", h.item, h.part);
+            }
+            // Each hanger sits at the top, in the void behind its leg's back.
+            for h in &hangers {
+                assert!((h.at.z - 720.0).abs() < 1e-9);
+            }
+            let rails: Vec<_> = list
+                .hardware
+                .iter()
+                .filter(|h| h.item == "wall-hanger.rail")
+                .map(|h| h.part.as_str())
+                .collect();
+            assert_eq!(rails, ["C01.Back", "C01.Back2"]);
+        }
+    }
+
+    #[test]
+    fn a_corner_wall_is_square_by_default() {
+        let cab = Cabinet::new("C01", CabinetKind::CornerWall);
+        assert_eq!(
+            (cab.width, cab.corner.width, cab.depth),
+            (600.0, 600.0, 330.0)
+        );
+        assert!(!cab.has_toe_kick());
     }
 
     #[test]

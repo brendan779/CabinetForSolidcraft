@@ -106,8 +106,8 @@ impl Default for Blind {
     }
 }
 
-/// An L-shaped corner base: its main leg runs `width` along the back wall like any base cabinet
-/// (front at Y = 0); the second leg runs `width` here along the side wall on `side`, coming
+/// An L-shaped corner base or corner wall: its main leg runs `width` along the back wall like any
+/// straight cabinet (front at Y = 0); the second leg runs `width` here along the side wall on `side`, coming
 /// forward (to negative Y), both `depth` deep. The legs share one interior behind a bi-fold door
 /// pair. Its envelope therefore reaches `width − depth` in front of the cabinet's origin.
 #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
@@ -123,6 +123,19 @@ impl Default for Corner {
         Self {
             side: HingeSide::Left,
             width: 900.0,
+        }
+    }
+}
+
+impl Corner {
+    /// Square by default: a corner wall's second leg is as long as its usual width.
+    pub fn for_kind(kind: CabinetKind) -> Self {
+        match kind {
+            CabinetKind::CornerWall => Self {
+                width: kind.default_size().0,
+                ..Self::default()
+            },
+            _ => Self::default(),
         }
     }
 }
@@ -144,7 +157,7 @@ impl Cabinet {
             fixed_shelves: Vec::new(),
             blind: Blind::default(),
             sink: Sink::default(),
-            corner: Corner::default(),
+            corner: Corner::for_kind(kind),
             exposed: Exposed::default(),
         }
     }
@@ -189,10 +202,12 @@ pub enum CabinetKind {
     Sink,
     /// An L-shaped base cabinet in an inside corner, both legs one interior, with bi-fold doors.
     CornerBase,
+    /// The wall-height L-corner: the corner base's legs and bi-fold doors, hung on hangers.
+    CornerWall,
 }
 
 impl CabinetKind {
-    pub const ALL: [CabinetKind; 8] = [
+    pub const ALL: [CabinetKind; 9] = [
         CabinetKind::Base,
         CabinetKind::Wall,
         CabinetKind::Tall,
@@ -201,6 +216,7 @@ impl CabinetKind {
         CabinetKind::BlindCorner,
         CabinetKind::Sink,
         CabinetKind::CornerBase,
+        CabinetKind::CornerWall,
     ];
 
     /// The kind a drawn box most likely is: as tall as a pantry → tall, hanging off the floor →
@@ -226,6 +242,7 @@ impl CabinetKind {
             CabinetKind::BlindCorner => (1000.0, 580.0, 870.0),
             CabinetKind::Sink => (900.0, 580.0, 870.0),
             CabinetKind::CornerBase => (900.0, 580.0, 870.0),
+            CabinetKind::CornerWall => (600.0, 330.0, 720.0),
         }
     }
 
@@ -233,7 +250,7 @@ impl CabinetKind {
         match self {
             CabinetKind::OpenShelf => FrontLayout::Open,
             // Its bi-fold pair, whatever the layout says.
-            CabinetKind::CornerBase => FrontLayout::DoorPair,
+            CabinetKind::CornerBase | CabinetKind::CornerWall => FrontLayout::DoorPair,
             // One door on the open part, hinged away from the corner.
             CabinetKind::BlindCorner => FrontLayout::Door {
                 hinge_side: HingeSide::Right,
@@ -254,7 +271,8 @@ impl CabinetKind {
             | CabinetKind::Wall
             | CabinetKind::OpenShelf
             | CabinetKind::BlindCorner
-            | CabinetKind::CornerBase => 1,
+            | CabinetKind::CornerBase
+            | CabinetKind::CornerWall => 1,
             // The bowl and pipes take the space.
             CabinetKind::Sink => 0,
             CabinetKind::Tall => 4,

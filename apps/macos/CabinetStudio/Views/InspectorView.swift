@@ -23,7 +23,7 @@ struct InspectorView: View {
                     if cab.kind == "sink" {
                         SinkSection(cab: cab)
                     }
-                    if cab.kind == "corner_base" {
+                    if cab.kind == "corner_base" || cab.kind == "corner_wall" {
                         CornerSection(cab: cab)
                     } else {
                         FrontsSection(cab: cab)
@@ -461,9 +461,14 @@ struct CornerSection: View {
     @Environment(ProjectModel.self) private var project
     let cab: CabinetDoc
 
+    /// Second-leg lengths: wall corners are shallower, so their legs are shorter.
+    private var legLengths: [Double] {
+        cab.kind == "corner_wall" ? [600, 650, 700, 800, 900] : [800, 900, 1000, 1100, 1200]
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            SectionTitle("L-corner")
+            SectionTitle(cab.kind == "corner_wall" ? "Corner wall" : "L-corner")
             HStack(spacing: 8) {
                 ForEach(["left", "right"], id: \.self) { side in
                     Button {
@@ -485,7 +490,7 @@ struct CornerSection: View {
             HStack(spacing: 6) {
                 Text("Second leg").foregroundStyle(.secondary)
                 Spacer()
-                ForEach([800.0, 900, 1000, 1100, 1200], id: \.self) { p in
+                ForEach(legLengths, id: \.self) { p in
                     Button("\(Int(p))") {
                         withAnimation(.snappy) { var c = cab; c.cornerWidth = p; project.selected = c }
                     }

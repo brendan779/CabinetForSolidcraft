@@ -364,6 +364,7 @@ fn the_new_cabinets_build_every_part_where_the_core_puts_it() {
     let corner = Cabinet::new("C01", CabinetKind::CornerBase);
     let mut right = Cabinet::new("C02", CabinetKind::CornerBase);
     right.corner.side = HingeSide::Right;
+    let corner_wall = Cabinet::new("C03", CabinetKind::CornerWall);
     let mut lift = Cabinet::new("W01", CabinetKind::Wall);
     lift.fronts = FrontLayout::BiFoldLift { handle_weight: 0.4 };
     let mut wood = Cabinet::new("D01", CabinetKind::DrawerBank);
@@ -371,7 +372,7 @@ fn the_new_cabinets_build_every_part_where_the_core_puts_it() {
     let legrabox = Cabinet::new("D02", CabinetKind::DrawerBank);
     let mut tandembox = Cabinet::new("D03", CabinetKind::DrawerBank);
     tandembox.standard.drawer_system = DrawerSystem::Tandembox;
-    for cab in [corner, right, lift, wood, legrabox, tandembox] {
+    for cab in [corner, right, corner_wall, lift, wood, legrabox, tandembox] {
         let list = build_cabinet(&cab).unwrap();
         let built = bounds(
             &cli,

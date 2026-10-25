@@ -82,7 +82,8 @@ pub fn turn_to_face_x(list: &mut PartList, depth: f64, y0: f64) {
     );
 }
 
-/// Mirrors a cabinet left to right across its `width`; left and right sides swap names.
+/// Mirrors a cabinet left to right across its `width`; left and right sides swap names, and so
+/// do handed hardware items (`….left` / `….right`).
 pub fn mirror_x(list: &mut PartList, width: f64) {
     transform(
         list,
@@ -106,6 +107,15 @@ pub fn mirror_x(list: &mut PartList, width: f64) {
             name.replace(r, l)
         }
     });
+    for h in &mut list.hardware {
+        if let Some(base) = h.item.strip_suffix(".left") {
+            h.item = format!("{base}.right");
+            h.description = h.description.replace("left", "right");
+        } else if let Some(base) = h.item.strip_suffix(".right") {
+            h.item = format!("{base}.left");
+            h.description = h.description.replace("right", "left");
+        }
+    }
     for p in &mut list.parts {
         p.role = match p.role {
             PartRole::LeftSide => PartRole::RightSide,
