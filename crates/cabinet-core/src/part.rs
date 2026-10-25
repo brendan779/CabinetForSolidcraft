@@ -230,6 +230,8 @@ pub enum BorePurpose {
     FrontFixing,
     /// A light's cable, through a panel.
     CableHole,
+    /// A handle's or knob's screw hole, through the front from the back.
+    HandleScrew,
 }
 
 fn default_biscuit() -> BiscuitSize {

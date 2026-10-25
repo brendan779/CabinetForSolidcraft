@@ -106,6 +106,42 @@ pub fn option_groups() -> Vec<OptionGroup> {
             ],
         ),
         group(
+            "handle_size",
+            "Handle",
+            &[
+                ("knob", "Knob", "A knob on one screw"),
+                ("cc96", "96", "Handle with 96 mm hole centres"),
+                ("cc128", "128", "Handle with 128 mm hole centres"),
+                ("cc160", "160", "Handle with 160 mm hole centres"),
+                ("cc192", "192", "Handle with 192 mm hole centres"),
+                ("cc224", "224", "Handle with 224 mm hole centres"),
+                ("cc256", "256", "Handle with 256 mm hole centres"),
+                ("cc320", "320", "Handle with 320 mm hole centres"),
+                ("cc448", "448", "Handle with 448 mm hole centres"),
+            ],
+        ),
+        group(
+            "handle_place",
+            "Handle place",
+            &[
+                (
+                    "corner",
+                    "Corner",
+                    "Doors: by the free edge, near the top (wall: the bottom); deep drawers near the top",
+                ),
+                (
+                    "centre",
+                    "Centre",
+                    "Doors: by the free edge, halfway up; drawers across the middle",
+                ),
+                (
+                    "edge_pull",
+                    "Edge pull",
+                    "A pull on the top edge (wall doors: the bottom), screwed from behind",
+                ),
+            ],
+        ),
+        group(
             "drawer_system",
             "Drawers",
             &[

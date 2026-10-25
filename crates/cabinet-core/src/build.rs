@@ -8,8 +8,8 @@ use crate::joinery::ButtJoint;
 use crate::lift;
 use crate::model::{
     BackStyle, BottomJoint, Cabinet, CabinetKind, DoorOverlay, DrawerSides, DrawerSystem, Exposed,
-    FrontCore, FrontLayout, HingeSide, LiftKind, LightZone, Opening, ToeKick, TopJoint,
-    WallHanging,
+    FrontCore, FrontLayout, HandlePlace, HingeSide, LiftKind, LightZone, Opening, ToeKick,
+    TopJoint, WallHanging,
 };
 use crate::part::{
     BorePurpose, Dir, EdgeBanding, HardwarePlacement, Operation, Part, PartList, PartRole,
@@ -47,6 +47,14 @@ const SYSTEM32_SETBACK: f64 = 37.0;
 const SYSTEM32_PITCH: f64 = 32.0;
 const SHELF_PIN_DIAMETER: f64 = 5.0;
 const SHELF_PIN_DEPTH: f64 = 10.0;
+/// Our choices for handles: the screw hole, the handle's centre line in from a door's free edge,
+/// the nearest hole in from the top or bottom edge, the height of a tall door's handle centre,
+/// and how deep a drawer front is before its handle moves up from the middle.
+const HANDLE_SCREW_DIAMETER: f64 = 5.0;
+const HANDLE_EDGE_INSET: f64 = 35.0;
+const HANDLE_END_INSET: f64 = 50.0;
+const TALL_HANDLE_HEIGHT: f64 = 1050.0;
+const DEEP_FRONT: f64 = 200.0;
 /// Generic until a supplier's shelf support is catalogued (HAF-3).
 const SHELF_SUPPORT: &str = "shelf-support.5mm";
 /// Our choice, not Blum's: the end hinges sit this far in from the door's top and bottom. The
@@ -388,6 +396,7 @@ impl<'a> Builder<'a> {
     fn opening(&mut self) {
         let opening = self.cab.standard.opening;
         if opening == Opening::Handles {
+            self.handles();
             return;
         }
         let fronts: Vec<Part> = self
@@ -1878,6 +1887,155 @@ impl<'a> Builder<'a> {
         });
     }
 
+    /// A handle (or knob, or edge pull) on every door, drawer front and lift front, with its
+    /// screw holes through the front. A door's handle goes by its free edge: the edge away from
+    /// its hinge cups, or, for a door hung on another door (an L-corner's second door), away from
+    /// that door. A door with cups by both edges (the first door of a bi-fold pair) has none.
+    fn handles(&mut self) {
+        let cab = self.cab;
+        let s = &cab.standard;
+        let fronts: Vec<Part> = self
+            .list
+            .parts
+            .iter()
+            .filter(|p| {
+                matches!(
+                    p.role,
+                    PartRole::Door | PartRole::DrawerFront | PartRole::LiftFront
+                )
+            })
+            .cloned()
+            .collect();
+        let wall_hung = matches!(
+            cab.kind,
+            CabinetKind::Wall | CabinetKind::CornerWall | CabinetKind::OpenShelf
+        );
+        for f in &fronts {
+            let b = f.bounds;
+            let ta = f.thickness_axis;
+            let wa = if ta == Axis::X { Axis::Y } else { Axis::X };
+            let (w0, w1) = (b.min.get(wa), b.max().get(wa));
+            let (z0, z1) = (b.min.z, b.max().z);
+            // Holes are drilled from the face towards the cabinet's inside.
+            let inside = Vec3::new(cab.width / 2.0, cab.depth / 2.0, 0.0).get(ta);
+            let back_low = (b.min.get(ta) - inside).abs() < (b.max().get(ta) - inside).abs();
+            let back = if back_low {
+                b.min.get(ta)
+            } else {
+                b.max().get(ta)
+            };
+            let dir = Dir::new(ta, back_low);
+            // (position along the width, height) of each hole.
+            let holes: Vec<(f64, f64)> = if f.role == PartRole::Door {
+                let cups: Vec<f64> = self
+                    .list
+                    .operations
+                    .iter()
+                    .filter_map(|o| match o {
+                        Operation::Bore {
+                            part,
+                            at,
+                            purpose: BorePurpose::HingeCup,
+                            ..
+                        } if *part == f.name => Some(at.get(wa)),
+                        _ => None,
+                    })
+                    .collect();
+                let mid = (w0 + w1) / 2.0;
+                let hinge_low = if cups.is_empty() {
+                    // Hung on another door: its free edge is the one away from that door.
+                    let other = fronts
+                        .iter()
+                        .filter(|o| o.name != f.name && o.role == PartRole::Door)
+                        .map(|o| o.bounds.center().get(wa))
+                        .next();
+                    match other {
+                        Some(c) => c < mid,
+                        None => continue,
+                    }
+                } else if cups.iter().all(|&c| c < mid) {
+                    true
+                } else if cups.iter().all(|&c| c > mid) {
+                    false
+                } else {
+                    continue;
+                };
+                let x = if hinge_low {
+                    w1 - HANDLE_EDGE_INSET
+                } else {
+                    w0 + HANDLE_EDGE_INSET
+                };
+                let span = s.handle_size.centres().unwrap_or(0.0);
+                let (lo, hi) = match s.handle_place {
+                    HandlePlace::Centre => {
+                        let c = (z0 + z1) / 2.0;
+                        (c - span / 2.0, c + span / 2.0)
+                    }
+                    _ if wall_hung => (z0 + HANDLE_END_INSET, z0 + HANDLE_END_INSET + span),
+                    _ if cab.kind == CabinetKind::Tall => {
+                        let c = TALL_HANDLE_HEIGHT.clamp(z0 + span / 2.0, z1 - span / 2.0);
+                        (c - span / 2.0, c + span / 2.0)
+                    }
+                    _ => (z1 - HANDLE_END_INSET - span, z1 - HANDLE_END_INSET),
+                };
+                if s.handle_size.centres().is_some() {
+                    vec![(x, lo), (x, hi)]
+                } else {
+                    // A knob sits where the handle's end nearest the edge would.
+                    let z = if wall_hung { lo } else { hi };
+                    vec![(
+                        x,
+                        if s.handle_place == HandlePlace::Centre {
+                            (lo + hi) / 2.0
+                        } else {
+                            z
+                        },
+                    )]
+                }
+            } else {
+                let c = (w0 + w1) / 2.0;
+                let z = match (f.role, s.handle_place) {
+                    // Lift fronts are pulled up from the bottom.
+                    (PartRole::LiftFront, _) => z0 + HANDLE_END_INSET,
+                    (_, HandlePlace::Corner) if z1 - z0 > DEEP_FRONT => z1 - HANDLE_END_INSET,
+                    _ => (z0 + z1) / 2.0,
+                };
+                match s.handle_size.centres() {
+                    Some(cc) => vec![(c - cc / 2.0, z), (c + cc / 2.0, z)],
+                    None => vec![(c, z)],
+                }
+            };
+            let (item, description) = match (s.handle_place, s.handle_size.centres()) {
+                (HandlePlace::EdgePull, _) => ("handle.edge-pull".to_string(), "Edge pull".into()),
+                (_, Some(cc)) => (
+                    format!("handle.cc{cc:.0}"),
+                    format!("Handle, {cc:.0} mm hole centres"),
+                ),
+                (_, None) => ("handle.knob".to_string(), "Knob".to_string()),
+            };
+            if s.handle_place != HandlePlace::EdgePull {
+                for (w, z) in &holes {
+                    let at = Vec3::new(0.0, 0.0, *z).with(wa, *w).with(ta, back);
+                    self.list.operations.push(Operation::Bore {
+                        part: f.name.clone(),
+                        at,
+                        direction: dir,
+                        diameter: HANDLE_SCREW_DIAMETER,
+                        depth: f.thickness(),
+                        purpose: BorePurpose::HandleScrew,
+                    });
+                }
+            }
+            self.list.hardware.push(HardwarePlacement {
+                item,
+                description,
+                at: b.center(),
+                part: f.name.clone(),
+                quantity: 1,
+            });
+        }
+    }
+
     /// Each light's strip, and a cable hole through the panel between it and the void behind
     /// the back: down through the bottom for under-cabinet and plinth lights, up through the
     /// top (or back rail) for lights inside.
@@ -3122,6 +3280,99 @@ mod tests {
         );
         let back = list.part("D01.DrawerBack1").unwrap();
         assert_eq!(back.bounds.size.z, 212.0);
+    }
+
+    fn handle_holes(list: &PartList, part: &str) -> Vec<Vec3> {
+        list.operations
+            .iter()
+            .filter_map(|o| match o {
+                Operation::Bore {
+                    part: p,
+                    at,
+                    purpose: BorePurpose::HandleScrew,
+                    ..
+                } if p == part => Some(*at),
+                _ => None,
+            })
+            .collect()
+    }
+
+    /// HAF-2: a base door's handle stands by its free edge near the top, a wall door's near
+    /// the bottom, 128 mm centres by default, holes through the door.
+    #[test]
+    fn door_handles_stand_by_the_free_edge_top_on_base_bottom_on_wall() {
+        let base = build_cabinet(&Cabinet::new("B01", CabinetKind::Base)).unwrap();
+        let door = base.part("B01.Door1").unwrap().bounds;
+        // A left-hinged door: the handle by its right edge.
+        let h = handle_holes(&base, "B01.Door1");
+        assert_eq!(h.len(), 2);
+        for at in &h {
+            assert!((at.x - (door.max().x - HANDLE_EDGE_INSET)).abs() < 1e-9);
+            assert!((at.y - door.max().y).abs() < 1e-9, "from the back face");
+        }
+        let top = h.iter().map(|a| a.z).fold(f64::MIN, f64::max);
+        assert!((top - (door.max().z - HANDLE_END_INSET)).abs() < 1e-9);
+        assert!((top - h.iter().map(|a| a.z).fold(f64::MAX, f64::min) - 128.0).abs() < 1e-9);
+        let wall = build_cabinet(&Cabinet::new("W01", CabinetKind::Wall)).unwrap();
+        let wd = wall.part("W01.Door1").unwrap().bounds;
+        let low = handle_holes(&wall, "W01.Door1")
+            .iter()
+            .map(|a| a.z)
+            .fold(f64::MAX, f64::min);
+        assert!((low - (wd.min.z + HANDLE_END_INSET)).abs() < 1e-9);
+        assert!(base.hardware.iter().any(|h| h.item == "handle.cc128"));
+    }
+
+    #[test]
+    fn a_door_pair_gets_handles_at_the_meeting_edges_and_drawers_across_the_middle() {
+        let mut cab = Cabinet::new("B01", CabinetKind::Base);
+        cab.width = 900.0;
+        cab.fronts = FrontLayout::DoorPair;
+        let list = build_cabinet(&cab).unwrap();
+        let (l, r) = (
+            handle_holes(&list, "B01.Door1")[0].x,
+            handle_holes(&list, "B01.Door2")[0].x,
+        );
+        assert!(l > 400.0 && r < 500.0 && l < r, "{l} {r}");
+        let bank = build_cabinet(&Cabinet::new("D01", CabinetKind::DrawerBank)).unwrap();
+        for n in 1..=3 {
+            let name = format!("D01.DrawerFront{n}");
+            let f = bank.part(&name).unwrap().bounds;
+            let h = handle_holes(&bank, &name);
+            assert_eq!(h.len(), 2);
+            assert!(((h[0].x + h[1].x) / 2.0 - f.center().x).abs() < 1e-9);
+            assert!((h[0].z - h[1].z).abs() < 1e-9);
+        }
+    }
+
+    #[test]
+    fn knobs_take_one_hole_edge_pulls_none_and_handleless_fronts_no_handle() {
+        let mut cab = Cabinet::new("B01", CabinetKind::Base);
+        cab.standard.handle_size = crate::model::HandleSize::Knob;
+        let list = build_cabinet(&cab).unwrap();
+        assert_eq!(handle_holes(&list, "B01.Door1").len(), 1);
+        cab.standard.handle_place = HandlePlace::EdgePull;
+        let list = build_cabinet(&cab).unwrap();
+        assert!(handle_holes(&list, "B01.Door1").is_empty());
+        assert!(list.hardware.iter().any(|h| h.item == "handle.edge-pull"));
+        cab.standard.opening = Opening::TipOn;
+        let list = build_cabinet(&cab).unwrap();
+        assert!(!list.hardware.iter().any(|h| h.item.starts_with("handle.")));
+    }
+
+    /// The L-corner's bi-fold pair: one handle, on the second door's free edge.
+    #[test]
+    fn an_l_corner_has_one_handle_on_the_folding_door() {
+        let list = build_cabinet(&Cabinet::new("C01", CabinetKind::CornerBase)).unwrap();
+        assert!(handle_holes(&list, "C01.Door1").is_empty());
+        let h = handle_holes(&list, "C01.Door2");
+        assert_eq!(h.len(), 2);
+        let d2 = list.part("C01.Door2").unwrap().bounds;
+        assert!(
+            (h[0].y - (d2.min.y + HANDLE_EDGE_INSET)).abs() < 1e-9,
+            "{h:?}"
+        );
+        assert!((h[0].x - d2.min.x).abs() < 1e-9, "from its back face");
     }
 
     /// HAF-3: four supports per adjustable shelf, none for fixed ones.

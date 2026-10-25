@@ -2765,6 +2765,38 @@ expression: list
       "diameter": 3.0,
       "depth": 35.0,
       "purpose": "screw_pilot"
+    },
+    {
+      "type": "bore",
+      "part": "C01.Door2",
+      "at": {
+        "x": 330.0,
+        "y": -234.0,
+        "z": 50.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 5.0,
+      "depth": 18.0,
+      "purpose": "handle_screw"
+    },
+    {
+      "type": "bore",
+      "part": "C01.Door2",
+      "at": {
+        "x": 330.0,
+        "y": -234.0,
+        "z": 178.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 5.0,
+      "depth": 18.0,
+      "purpose": "handle_screw"
     }
   ],
   "hardware": [
@@ -2954,6 +2986,17 @@ expression: list
       },
       "part": "C01.LeftSide2",
       "quantity": 6
+    },
+    {
+      "item": "handle.cc128",
+      "description": "Handle, 128 mm hole centres",
+      "at": {
+        "x": 339.0,
+        "y": -134.5,
+        "z": 359.0
+      },
+      "part": "C01.Door2",
+      "quantity": 1
     }
   ],
   "warnings": [

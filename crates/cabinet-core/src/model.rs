@@ -424,6 +424,10 @@ pub struct ConstructionStandard {
     pub wall_hanging: WallHanging,
     /// How doors and drawers are opened.
     pub opening: Opening,
+    /// The handle's hole centres, or a knob, when the fronts have handles.
+    pub handle_size: HandleSize,
+    /// Where handles go on the fronts.
+    pub handle_place: HandlePlace,
     /// What the drawers are made of and run on.
     pub drawer_system: DrawerSystem,
     /// Whether deep LEGRABOX drawers may be high fronted pull-outs (C, F).
@@ -487,6 +491,8 @@ impl Default for ConstructionStandard {
             edge_band_thickness: 1.0,
             wall_hanging: WallHanging::Hangers,
             opening: Opening::Handles,
+            handle_size: HandleSize::Cc128,
+            handle_place: HandlePlace::Corner,
             drawer_system: DrawerSystem::Legrabox,
             drawer_sides: DrawerSides::Standard,
             drawer_board_thickness: 16.0,
@@ -542,6 +548,54 @@ pub enum Opening {
     /// Handleless, electric: Blum SERVO-DRIVE opens drawers at a touch. Hinged doors cannot
     /// take it and get TIP-ON.
     ServoDrive,
+}
+
+/// A handle's hole centres (the common sizes, as handle makers list them), or a knob.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum HandleSize {
+    Knob,
+    Cc96,
+    #[default]
+    Cc128,
+    Cc160,
+    Cc192,
+    Cc224,
+    Cc256,
+    Cc320,
+    Cc448,
+}
+
+impl HandleSize {
+    /// Hole centres (mm); `None` for a knob's single hole.
+    pub fn centres(self) -> Option<f64> {
+        match self {
+            HandleSize::Knob => None,
+            HandleSize::Cc96 => Some(96.0),
+            HandleSize::Cc128 => Some(128.0),
+            HandleSize::Cc160 => Some(160.0),
+            HandleSize::Cc192 => Some(192.0),
+            HandleSize::Cc224 => Some(224.0),
+            HandleSize::Cc256 => Some(256.0),
+            HandleSize::Cc320 => Some(320.0),
+            HandleSize::Cc448 => Some(448.0),
+        }
+    }
+}
+
+/// Where a front's handle goes.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum HandlePlace {
+    /// Doors: upright, by the free edge near the top (base), bottom (wall) or at hand height
+    /// (tall). Drawers: across the middle of the front, near the top of deep ones.
+    #[default]
+    Corner,
+    /// Doors: upright, by the free edge, halfway up. Drawers: across the middle of the front.
+    Centre,
+    /// An edge pull on the top edge (bottom edge of wall doors): screwed from behind, no holes
+    /// through the front.
+    EdgePull,
 }
 
 /// How a single lifting front moves.

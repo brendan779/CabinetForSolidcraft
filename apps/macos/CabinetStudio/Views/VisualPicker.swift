@@ -80,6 +80,8 @@ struct ConstructionThumbnail: View {
             case "opening": pen.opening(choice)
             case "drawer_system": pen.drawerSystem(choice)
             case "drawer_sides": pen.drawerSides(choice)
+            case "handle_size": pen.handleSize(choice)
+            case "handle_place": pen.handlePlace(choice)
             case "overlay": pen.overlayPlan(choice)
             case "fixings": pen.fixing(choice)
             case "biscuit": pen.biscuit(choice)
@@ -232,6 +234,42 @@ private struct Pen {
             board(18, 58, 64, 5)
             board(14, 64, 12, 4, hot: true)
             board(74, 64, 12, 4, hot: true)
+        }
+    }
+
+    /// A drawer front with the handle to scale against it (a 600 mm front is 80 units).
+    func handleSize(_ choice: String) {
+        board(10, 26, 80, 30)
+        guard let cc = Double(choice.dropFirst(2)) else {
+            ctx.fill(Path(ellipseIn: r(45, 36, 10, 10)), with: .color(accent.opacity(0.35)))
+            ctx.stroke(Path(ellipseIn: r(45, 36, 10, 10)), with: .color(accent), lineWidth: 1.4)
+            return
+        }
+        let w = CGFloat(cc) * 80 / 600
+        board(50 - w / 2 - 3, 39, w + 6, 4, hot: true)
+        for x in [50 - w / 2, 50 + w / 2] {
+            ctx.fill(Path(ellipseIn: r(x - 1, 40, 2, 2)), with: .color(accent))
+        }
+    }
+
+    /// A base door hinged on the left and a drawer, with the handles where the choice puts them.
+    func handlePlace(_ choice: String) {
+        board(12, 8, 36, 64)       // door
+        board(56, 8, 32, 26)       // drawer fronts
+        board(56, 38, 32, 34)
+        switch choice {
+        case "edge_pull":
+            board(30, 5, 16, 3, hot: true)
+            board(64, 5, 16, 3, hot: true)
+            board(64, 35, 16, 3, hot: true)
+        case "centre":
+            board(41, 32, 2.5, 16, hot: true)
+            board(64, 20, 16, 2.5, hot: true)
+            board(64, 54, 16, 2.5, hot: true)
+        default:
+            board(41, 12, 2.5, 16, hot: true)
+            board(64, 20, 16, 2.5, hot: true)
+            board(64, 42, 16, 2.5, hot: true)
         }
     }
 

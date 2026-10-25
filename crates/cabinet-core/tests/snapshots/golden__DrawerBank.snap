@@ -1518,6 +1518,102 @@ expression: list
       "diameter": 10.0,
       "depth": 12.0,
       "purpose": "front_fixing"
+    },
+    {
+      "type": "bore",
+      "part": "C01.DrawerFront1",
+      "at": {
+        "x": 236.0,
+        "y": 0.0,
+        "z": 818.0
+      },
+      "direction": {
+        "axis": "Y",
+        "positive": false
+      },
+      "diameter": 5.0,
+      "depth": 18.0,
+      "purpose": "handle_screw"
+    },
+    {
+      "type": "bore",
+      "part": "C01.DrawerFront1",
+      "at": {
+        "x": 364.0,
+        "y": 0.0,
+        "z": 818.0
+      },
+      "direction": {
+        "axis": "Y",
+        "positive": false
+      },
+      "diameter": 5.0,
+      "depth": 18.0,
+      "purpose": "handle_screw"
+    },
+    {
+      "type": "bore",
+      "part": "C01.DrawerFront2",
+      "at": {
+        "x": 236.0,
+        "y": 0.0,
+        "z": 578.0
+      },
+      "direction": {
+        "axis": "Y",
+        "positive": false
+      },
+      "diameter": 5.0,
+      "depth": 18.0,
+      "purpose": "handle_screw"
+    },
+    {
+      "type": "bore",
+      "part": "C01.DrawerFront2",
+      "at": {
+        "x": 364.0,
+        "y": 0.0,
+        "z": 578.0
+      },
+      "direction": {
+        "axis": "Y",
+        "positive": false
+      },
+      "diameter": 5.0,
+      "depth": 18.0,
+      "purpose": "handle_screw"
+    },
+    {
+      "type": "bore",
+      "part": "C01.DrawerFront3",
+      "at": {
+        "x": 236.0,
+        "y": 0.0,
+        "z": 338.0
+      },
+      "direction": {
+        "axis": "Y",
+        "positive": false
+      },
+      "diameter": 5.0,
+      "depth": 18.0,
+      "purpose": "handle_screw"
+    },
+    {
+      "type": "bore",
+      "part": "C01.DrawerFront3",
+      "at": {
+        "x": 364.0,
+        "y": 0.0,
+        "z": 338.0
+      },
+      "direction": {
+        "axis": "Y",
+        "positive": false
+      },
+      "diameter": 5.0,
+      "depth": 18.0,
+      "purpose": "handle_screw"
     }
   ],
   "hardware": [
@@ -1718,6 +1814,39 @@ expression: list
       },
       "part": "C01.RightSide",
       "quantity": 7
+    },
+    {
+      "item": "handle.cc128",
+      "description": "Handle, 128 mm hole centres",
+      "at": {
+        "x": 300.0,
+        "y": -9.0,
+        "z": 749.0
+      },
+      "part": "C01.DrawerFront1",
+      "quantity": 1
+    },
+    {
+      "item": "handle.cc128",
+      "description": "Handle, 128 mm hole centres",
+      "at": {
+        "x": 300.0,
+        "y": -9.0,
+        "z": 509.0
+      },
+      "part": "C01.DrawerFront2",
+      "quantity": 1
+    },
+    {
+      "item": "handle.cc128",
+      "description": "Handle, 128 mm hole centres",
+      "at": {
+        "x": 300.0,
+        "y": -9.0,
+        "z": 269.0
+      },
+      "part": "C01.DrawerFront3",
+      "quantity": 1
     }
   ],
   "warnings": []

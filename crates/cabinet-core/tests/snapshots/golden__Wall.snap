@@ -2188,6 +2188,38 @@ expression: list
       "diameter": 5.0,
       "depth": 10.0,
       "purpose": "shelf_pin"
+    },
+    {
+      "type": "bore",
+      "part": "C01.Door1",
+      "at": {
+        "x": 564.0,
+        "y": 0.0,
+        "z": 50.0
+      },
+      "direction": {
+        "axis": "Y",
+        "positive": false
+      },
+      "diameter": 5.0,
+      "depth": 18.0,
+      "purpose": "handle_screw"
+    },
+    {
+      "type": "bore",
+      "part": "C01.Door1",
+      "at": {
+        "x": 564.0,
+        "y": 0.0,
+        "z": 178.0
+      },
+      "direction": {
+        "axis": "Y",
+        "positive": false
+      },
+      "diameter": 5.0,
+      "depth": 18.0,
+      "purpose": "handle_screw"
     }
   ],
   "hardware": [
@@ -2300,6 +2332,17 @@ expression: list
       },
       "part": "C01.RightSide",
       "quantity": 6
+    },
+    {
+      "item": "handle.cc128",
+      "description": "Handle, 128 mm hole centres",
+      "at": {
+        "x": 300.0,
+        "y": -9.0,
+        "z": 360.0
+      },
+      "part": "C01.Door1",
+      "quantity": 1
     }
   ],
   "warnings": [
