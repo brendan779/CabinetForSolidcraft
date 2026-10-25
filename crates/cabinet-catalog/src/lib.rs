@@ -10,7 +10,7 @@ use std::path::Path;
 use serde::{Deserialize, Serialize};
 
 pub mod hardware;
-pub use hardware::{DrillHole, HardwareFile, HardwareItem, HardwareKind};
+pub use hardware::{DrillHole, HardwareFile, HardwareItem, HardwareKind, Table};
 
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
@@ -398,6 +398,41 @@ mod tests {
             .unwrap_err()
             .to_string();
         assert!(err.contains("duplicate hardware id"), "{err}");
+    }
+
+    #[test]
+    fn a_table_reads_the_safe_side_between_headings_and_nothing_where_none_is_printed() {
+        let mut j = hinge_json();
+        j["items"][0]["tables"] = serde_json::json!({ "min_gap": {
+            "rows_name": "boring_distance", "cols_name": "front_thickness",
+            "rows": [3.0, 4.0], "cols": [16.0, 18.0, 28.0],
+            "values": [[0.5, 0.8, null], [0.5, 0.7, null]]
+        }});
+        let cat = Catalog::load(&temp_catalog("table", &j)).unwrap();
+        let t = cat
+            .hardware_item("example.hinge.110.full")
+            .unwrap()
+            .table("min_gap")
+            .unwrap();
+        assert_eq!(t.upper(3.0, 16.0), Some(0.5));
+        assert_eq!(t.upper(3.5, 17.0), Some(0.8));
+        assert_eq!(t.lower(3.5, 17.0), Some(0.5));
+        assert_eq!(t.upper(3.0, 28.0), None);
+        assert_eq!(t.upper(3.0, 40.0), None);
+        assert_eq!(t.upper(2.0, 16.0), None);
+    }
+
+    #[test]
+    fn a_table_whose_values_do_not_fit_its_headings_is_refused() {
+        let mut j = hinge_json();
+        j["items"][0]["tables"] = serde_json::json!({ "min_gap": {
+            "rows_name": "a", "cols_name": "b", "rows": [3.0], "cols": [16.0, 18.0],
+            "values": [[0.5]]
+        }});
+        let err = Catalog::load(&temp_catalog("badtable", &j))
+            .unwrap_err()
+            .to_string();
+        assert!(err.contains("table min_gap"), "{err}");
     }
 
     #[test]

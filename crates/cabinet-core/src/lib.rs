@@ -13,6 +13,8 @@ pub mod build;
 pub mod collisions;
 pub mod cutlist;
 pub mod geom;
+pub mod hardware;
+pub mod hinges;
 pub mod joinery;
 pub mod model;
 pub mod options;

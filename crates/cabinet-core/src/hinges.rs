@@ -1,0 +1,244 @@
+//! Hinge selection: a door's overlay and thickness → the Blum hinge, mounting plate and boring
+//! distance, from the CLIP top data in `catalog/hardware/blum-clip-top.json`.
+//!
+//! Blum's planning rule (catalogue 2024/2025 p.77, p.721): front overlay FA = boring distance
+//! TB + boss overlay TO − arm cranking − plate spacing MD. TB must stay inside the hinge's
+//! range of 3–7 mm, so the plate spacing is chosen to bring it there.
+
+use cabinet_catalog::HardwareItem;
+
+use crate::hardware;
+use crate::model::DoorOverlay;
+
+/// What a door asks of its hinges.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct HingeNeed {
+    pub overlay: DoorOverlay,
+    /// How far the door's hinged edge covers the side's front edge (FA). Negative for an inset
+    /// door: its gap to the side.
+    pub front_overlay: f64,
+    pub door_thickness: f64,
+    pub side_thickness: f64,
+    /// The gap beside the door's hinged edge (to the next door or the wall), which must leave
+    /// the door room to swing.
+    pub gap: f64,
+    /// False for doors opened by TIP-ON: those hinges have no spring.
+    pub sprung: bool,
+}
+
+/// The hinge and plate for a door, and where they go.
+#[derive(Clone, Debug, PartialEq)]
+pub struct HingeChoice {
+    pub hinge: &'static HardwareItem,
+    pub plate: &'static HardwareItem,
+    /// TB: door edge to the edge of the cup bore.
+    pub boring_distance: f64,
+    /// Front edge of the side to the plate's hole row.
+    pub plate_setback: f64,
+    /// Things the user should check (a gap too small to open, a door too thick to clip on).
+    pub warnings: Vec<String>,
+}
+
+impl HingeChoice {
+    /// Door edge to the cup's centre.
+    pub fn cup_inset(&self) -> Result<f64, String> {
+        Ok(self.boring_distance + self.hinge.param("cup_diameter")? / 2.0)
+    }
+}
+
+/// The hinge row for an overlay, by the cranking that application needs.
+fn hinge_id(overlay: DoorOverlay, sprung: bool) -> String {
+    let app = match overlay {
+        DoorOverlay::Full => "overlay",
+        DoorOverlay::Half => "dual",
+        DoorOverlay::Inset => "inset",
+    };
+    if sprung {
+        format!("blum.clip-top-blumotion.110.{app}")
+    } else {
+        format!("blum.clip-top.110.{app}.unsprung")
+    }
+}
+
+/// The plates, thinnest spacing first.
+fn plates() -> Vec<&'static HardwareItem> {
+    let mut out: Vec<_> = hardware::items()
+        .iter()
+        .filter(|h| {
+            h.id.starts_with("blum.mounting-plate.cruciform-37-32.system-screw.")
+        })
+        .collect();
+    out.sort_by(|a, b| {
+        let md = |h: &HardwareItem| h.param("plate_spacing").unwrap_or(f64::MAX);
+        md(a).total_cmp(&md(b))
+    });
+    out
+}
+
+/// Picks the hinge and the thinnest plate that brings the boring distance into the hinge's range.
+pub fn select(need: &HingeNeed) -> Result<HingeChoice, String> {
+    let hinge = hardware::item(&hinge_id(need.overlay, need.sprung))?;
+    let (to, crank) = (hinge.param("boss_overlay")?, hinge.param("arm_cranking")?);
+    let (tb_min, tb_max) = (
+        hinge.param("boring_distance_min")?,
+        hinge.param("boring_distance_max")?,
+    );
+    let mut fitted = None;
+    for plate in plates() {
+        let md = plate.param("plate_spacing")?;
+        let tb = need.front_overlay - to + crank + md;
+        if (tb_min - 1e-9..=tb_max + 1e-9).contains(&tb) {
+            fitted = Some((plate, md, tb));
+            break;
+        }
+    }
+    let Some((plate, md, tb)) = fitted else {
+        return Err(format!(
+            "no {} {} and plate gives a boring distance of {tb_min}–{tb_max} mm for a front \
+             overlay of {} mm",
+            hinge.family, hinge.variant, need.front_overlay
+        ));
+    };
+    let mut plate_setback = plate.param("setback")?;
+    if need.overlay == DoorOverlay::Inset {
+        // The plate moves back with the door (p.77, note A).
+        plate_setback += need.door_thickness + hinge.param("inset_plate_setback_extra")?;
+    }
+    let mut warnings = Vec::new();
+    let fd = need.door_thickness;
+    // Inset doors swing clear of the side; the gap tables are for doors in front of it.
+    if need.overlay != DoorOverlay::Inset {
+        let gaps = hinge.table("min_gap")?;
+        let last = gaps.cols.last().copied().unwrap_or(0.0);
+        match gaps.upper(tb, fd) {
+            Some(f) if need.gap + 1e-9 < f => warnings.push(format!(
+                "a {fd} mm door on {} hinges needs a gap of {f} mm beside its hinged edge; it \
+                 has {}",
+                hinge.family, need.gap
+            )),
+            None if fd <= last => warnings.push(format!(
+                "Blum recommends a trial for {fd} mm doors at boring distance {tb} mm"
+            )),
+            None => warnings.push(format!(
+                "a {fd} mm door is thicker than Blum's gap table for {}",
+                hinge.family
+            )),
+            Some(_) => {}
+        }
+    }
+    let max_fd = hinge.table("max_front_thickness")?;
+    if let Some(max) = max_fd.lower(md, need.side_thickness)
+        && fd > max
+    {
+        warnings.push(format!(
+            "a {fd} mm door is too thick to clip onto {} hinges on {} mm sides (max {max} mm)",
+            hinge.family, need.side_thickness
+        ));
+    }
+    Ok(HingeChoice {
+        hinge,
+        plate,
+        boring_distance: tb,
+        plate_setback,
+        warnings,
+    })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn need(overlay: DoorOverlay, fa: f64, fd: f64) -> HingeNeed {
+        HingeNeed {
+            overlay,
+            front_overlay: fa,
+            door_thickness: fd,
+            side_thickness: 16.0,
+            gap: 2.0,
+            sprung: true,
+        }
+    }
+
+    /// Blum p.77: each row of the TB tables, read back through the rule.
+    #[test]
+    fn hinge_selection_table() {
+        use DoorOverlay::*;
+        // overlay, FA, FD → article, plate article, TB
+        let rows = [
+            (Full, 15.0, 16.0, "71B3550", "175H9100", 4.0),
+            (Full, 17.0, 18.0, "71B3550", "175H9100", 6.0),
+            (Full, 18.0, 18.0, "71B3550", "175H9100", 7.0),
+            (Full, 13.0, 16.0, "71B3550", "175H9130", 5.0),
+            (Full, 9.0, 16.0, "71B3550", "175H9160", 4.0),
+            (Full, 5.0, 16.0, "71B3550", "175H9190", 3.0),
+            (Half, 8.0, 16.0, "71B3650", "175H9100", 6.5),
+            (Half, 2.5, 18.0, "71B3650", "175H9130", 4.0),
+            (Half, -4.5, 16.0, "71B3650", "175H9190", 3.0),
+            (Inset, -2.0, 16.0, "71B3750", "175H9100", 5.0),
+            (Inset, -4.0, 16.0, "71B3750", "175H9100", 3.0),
+            (Inset, -6.0, 16.0, "71B3750", "175H9130", 4.0),
+        ];
+        for (overlay, fa, fd, hinge, plate, tb) in rows {
+            let c = select(&need(overlay, fa, fd)).unwrap();
+            assert_eq!(
+                (
+                    c.hinge.article.as_str(),
+                    c.plate.article.as_str(),
+                    c.boring_distance
+                ),
+                (hinge, plate, tb),
+                "{overlay:?} FA {fa}"
+            );
+        }
+    }
+
+    #[test]
+    fn tip_on_doors_get_hinges_without_a_spring() {
+        let mut n = need(DoorOverlay::Full, 15.0, 16.0);
+        n.sprung = false;
+        assert_eq!(select(&n).unwrap().hinge.article, "70T3550.TL");
+    }
+
+    #[test]
+    fn an_overlay_no_plate_can_reach_is_refused() {
+        // TB 7 at MD 0 is FA 18: more needs a cranked-out hinge Blum does not make.
+        assert!(select(&need(DoorOverlay::Full, 19.0, 16.0)).is_err());
+    }
+
+    #[test]
+    fn an_inset_door_moves_its_plate_back_by_its_thickness_and_a_bit() {
+        let c = select(&need(DoorOverlay::Inset, -2.0, 18.0)).unwrap();
+        assert_eq!(c.plate_setback, 37.0 + 18.0 + 1.5);
+        let c = select(&need(DoorOverlay::Full, 15.0, 18.0)).unwrap();
+        assert_eq!(c.plate_setback, 37.0);
+    }
+
+    #[test]
+    fn a_thick_door_with_a_small_gap_warns() {
+        // TB 4, FD 26 needs 3.8 mm.
+        let c = select(&need(DoorOverlay::Full, 15.0, 26.0)).unwrap();
+        assert!(
+            c.warnings.iter().any(|w| w.contains("3.8 mm")),
+            "{:?}",
+            c.warnings
+        );
+        // and is too thick to clip onto 16 mm sides at MD 0 (max 20).
+        assert!(
+            c.warnings.iter().any(|w| w.contains("max 20")),
+            "{:?}",
+            c.warnings
+        );
+        assert!(
+            select(&need(DoorOverlay::Full, 15.0, 18.0))
+                .unwrap()
+                .warnings
+                .is_empty()
+        );
+    }
+
+    #[test]
+    fn the_cup_centre_is_the_boring_distance_plus_half_the_cup() {
+        let c = select(&need(DoorOverlay::Full, 15.0, 16.0)).unwrap();
+        assert_eq!(c.cup_inset(), Ok(4.0 + 17.5));
+    }
+}

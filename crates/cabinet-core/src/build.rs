@@ -1,6 +1,7 @@
 //! Cabinet → parts, machining and hardware.
 
 use crate::geom::{Aabb, Axis, Vec3};
+use crate::hinges::{self, HingeNeed};
 use crate::joinery::ButtJoint;
 use crate::model::{
     BackStyle, BottomJoint, Cabinet, CabinetKind, DoorOverlay, FrontLayout, HingeSide, Opening,
@@ -37,14 +38,9 @@ const SYSTEM32_SETBACK: f64 = 37.0;
 const SYSTEM32_PITCH: f64 = 32.0;
 const SHELF_PIN_DIAMETER: f64 = 5.0;
 const SHELF_PIN_DEPTH: f64 = 10.0;
-/// Hinge cup: Ø35, boring distance from the door edge to the cup edge.
-/// Source: Blum CLIP top planning data. VERIFY against the current Blum TD sheet (see BACKLOG).
-const HINGE_CUP_DIAMETER: f64 = 35.0;
-const HINGE_CUP_DEPTH: f64 = 13.0;
-const HINGE_BORING_DISTANCE: f64 = 4.0;
+/// Our choice, not Blum's: the end hinges sit this far in from the door's top and bottom. The
+/// hinge itself, its cup and plate come from the hardware catalog (see `hinges`).
 const HINGE_END_OFFSET: f64 = 100.0;
-const HINGE_PLATE_HOLE: f64 = 5.0;
-const HINGE_PLATE_HOLE_DEPTH: f64 = 13.0;
 
 /// Builds the part list for one cabinet.
 pub fn build_cabinet(cab: &Cabinet) -> Result<PartList> {
@@ -284,7 +280,7 @@ impl<'a> Builder<'a> {
                     let n = if f.bounds.size.z > TALL_DOOR { 2 } else { 1 };
                     (
                         "blum.tip-on.door",
-                        "TIP-ON unit for a door, with a no-spring hinge",
+                        "TIP-ON unit for a door (its hinges have no spring)",
                         n,
                     )
                 }
@@ -899,17 +895,58 @@ impl<'a> Builder<'a> {
             h if h <= 2000.0 => 4,
             _ => 5,
         };
-        let cup_from_edge = HINGE_BORING_DISTANCE + HINGE_CUP_DIAMETER / 2.0;
+        // How far the door covers its hinge side's front edge (negative: inset, its gap).
+        let t = s.carcass_thickness;
+        let front_overlay = match hinge {
+            HingeSide::Left => t - b.min.x,
+            HingeSide::Right => b.max().x - (cab.width - t),
+        };
+        let need = HingeNeed {
+            overlay: s.overlay,
+            front_overlay,
+            door_thickness: b.size.y,
+            side_thickness: t,
+            gap: s.front_gap,
+            sprung: s.opening == Opening::Handles,
+        };
+        let choice = match hinges::select(&need) {
+            Ok(c) => c,
+            Err(e) => {
+                self.list
+                    .warnings
+                    .push(format!("{door}: {e}; no hinges placed"));
+                return;
+            }
+        };
+        let numbers = (|| {
+            Ok::<_, String>((
+                choice.cup_inset()?,
+                choice.hinge.param("cup_diameter")?,
+                choice.hinge.param("cup_depth")?,
+                choice.plate.param("setback")?,
+            ))
+        })();
+        let Ok((cup_inset, cup_diameter, cup_depth, pattern_setback)) = numbers else {
+            self.list
+                .warnings
+                .push(format!("{door}: {}", numbers.unwrap_err()));
+            return;
+        };
+        for w in &choice.warnings {
+            self.list.warnings.push(format!("{door}: {w}"));
+        }
         let cup_x = match hinge {
-            HingeSide::Left => b.min.x + cup_from_edge,
-            HingeSide::Right => b.max().x - cup_from_edge,
+            HingeSide::Left => b.min.x + cup_inset,
+            HingeSide::Right => b.max().x - cup_inset,
         };
         // The cup is bored into the door's back face, towards the front.
         let back_y = b.max().y;
         let (inner_x, toward_side) = match hinge {
-            HingeSide::Left => (s.carcass_thickness, false),
-            HingeSide::Right => (cab.width - s.carcass_thickness, true),
+            HingeSide::Left => (t, false),
+            HingeSide::Right => (cab.width - t, true),
         };
+        // The carcass front is Y = 0 whatever the overlay; the plate is set out from it.
+        let plate_y = choice.plate_setback;
         let span = height - 2.0 * HINGE_END_OFFSET;
         for i in 0..count {
             let z = b.min.z + HINGE_END_OFFSET + span * i as f64 / (count - 1) as f64;
@@ -917,25 +954,33 @@ impl<'a> Builder<'a> {
                 part: door.clone(),
                 at: Vec3::new(cup_x, back_y, z),
                 direction: Dir::new(Axis::Y, false),
-                diameter: HINGE_CUP_DIAMETER,
-                depth: HINGE_CUP_DEPTH.min(b.size.y - 3.0),
+                diameter: cup_diameter,
+                depth: cup_depth.min(b.size.y - 3.0),
                 purpose: BorePurpose::HingeCup,
             });
-            for dz in [-SYSTEM32_PITCH / 2.0, SYSTEM32_PITCH / 2.0] {
+            // The plate's pattern: x along the side (up), y in from its front edge.
+            for hole in &choice.plate.drilling {
                 self.list.operations.push(Operation::Bore {
                     part: side.clone(),
-                    at: Vec3::new(inner_x, SYSTEM32_SETBACK, z + dz),
+                    at: Vec3::new(inner_x, plate_y + hole.y - pattern_setback, z + hole.x),
                     direction: Dir::new(Axis::X, toward_side),
-                    diameter: HINGE_PLATE_HOLE,
-                    depth: HINGE_PLATE_HOLE_DEPTH.min(s.carcass_thickness - 3.0),
+                    diameter: hole.diameter,
+                    depth: hole.depth.min(t - 3.0),
                     purpose: BorePurpose::HingePlate,
                 });
             }
             self.list.hardware.push(HardwarePlacement {
-                item: format!("blum.clip-top-blumotion.110.{}", overlay_code(s.overlay)),
-                description: "Hinge with soft close and mounting plate".into(),
+                item: choice.hinge.id.clone(),
+                description: format!("{} {}", choice.hinge.family, choice.hinge.variant),
                 at: Vec3::new(cup_x, back_y, z),
                 part: door.clone(),
+                quantity: 1,
+            });
+            self.list.hardware.push(HardwarePlacement {
+                item: choice.plate.id.clone(),
+                description: format!("{} {}", choice.plate.family, choice.plate.variant),
+                at: Vec3::new(inner_x, plate_y, z),
+                part: side.clone(),
                 quantity: 1,
             });
         }
@@ -1057,14 +1102,6 @@ impl<'a> Builder<'a> {
                 }
             }
         }
-    }
-}
-
-fn overlay_code(o: DoorOverlay) -> &'static str {
-    match o {
-        DoorOverlay::Full => "full",
-        DoorOverlay::Half => "half",
-        DoorOverlay::Inset => "inset",
     }
 }
 
