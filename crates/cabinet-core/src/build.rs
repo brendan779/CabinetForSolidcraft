@@ -1020,6 +1020,9 @@ impl<'a> Builder<'a> {
             FrontLayout::BiFoldLift { handle_weight } => {
                 self.bi_fold_lift(aabb(x0, y0, z0, x1, y1, z1), *handle_weight);
             }
+            FrontLayout::StayLift { handle_weight } => {
+                self.stay_lift(aabb(x0, y0, z0, x1, y1, z1), *handle_weight);
+            }
             FrontLayout::Drawers { ratios } => {
                 let ratios: Vec<f64> = ratios.iter().copied().filter(|r| *r > 0.0).collect();
                 if ratios.is_empty() {
@@ -1274,6 +1277,56 @@ impl<'a> Builder<'a> {
             // Blum's sizes are cut sizes; tape would take them off.
             edges: EdgeBanding::default(),
         });
+    }
+
+    /// One front on AVENTOS HK top: no hinges, the lift mechanism holds it.
+    fn stay_lift(&mut self, front: Aabb, handle_weight: f64) {
+        let cab = self.cab;
+        let s = &cab.standard;
+        self.add(
+            PartRole::LiftFront,
+            Some(1),
+            front,
+            Axis::Y,
+            Axis::X,
+            EdgeBanding::all(),
+        );
+        let name = self.name(PartRole::LiftFront, Some(1));
+        let chosen = lift::reference_density(s.front_core == FrontCore::Mdf).and_then(|density| {
+            lift::hk_top(
+                cab.height,
+                cab.width,
+                self.opening_z.1 - self.opening_z.0,
+                lift::front_weight(front.size.z, front.size.x, front.size.y, density),
+                handle_weight,
+            )
+        });
+        let hk = match chosen {
+            Ok(h) => h,
+            Err(e) => {
+                self.list
+                    .warnings
+                    .push(format!("{name}: {e}; no lift fitted"));
+                return;
+            }
+        };
+        for w in &hk.warnings {
+            self.list.warnings.push(format!("{name}: {w}"));
+        }
+        if s.opening == Opening::Handles && handle_weight == 0.0 {
+            self.list.warnings.push(format!(
+                "{name}: the lift is chosen without a handle weight"
+            ));
+        }
+        for item in [hk.mechanism, hk.cover_caps, hk.front_fixing] {
+            self.list.hardware.push(HardwarePlacement {
+                item: item.id.clone(),
+                description: format!("{} {}", item.family, item.variant),
+                at: front.center(),
+                part: name.clone(),
+                quantity: 1,
+            });
+        }
     }
 
     /// Two equal fronts on AVENTOS HF top: the upper hinged to the cabinet top with 120° hinges,
@@ -2758,6 +2811,29 @@ mod tests {
                 .operations
                 .iter()
                 .any(|o| matches!(o, Operation::Mortise { .. }))
+        );
+    }
+
+    /// BLUM-7 (HK top): a 360 mm wall cabinet with a stay lift: one front, no hinges, the
+    /// mechanism for its power factor.
+    #[test]
+    fn a_stay_lift_wall_cabinet_gets_one_front_and_an_hk_top_mechanism() {
+        let mut cab = Cabinet::new("W01", CabinetKind::Wall);
+        cab.height = 360.0;
+        cab.fronts = FrontLayout::StayLift { handle_weight: 0.3 };
+        let list = build_cabinet(&cab).unwrap();
+        assert!(list.warnings.is_empty(), "{:?}", list.warnings);
+        assert_eq!(list.by_role(PartRole::LiftFront).count(), 1);
+        assert!(
+            !list
+                .hardware
+                .iter()
+                .any(|h| h.item.starts_with("blum.clip-top"))
+        );
+        assert!(
+            list.hardware
+                .iter()
+                .any(|h| h.item.starts_with("blum.aventos.hk-top.mechanism."))
         );
     }
 

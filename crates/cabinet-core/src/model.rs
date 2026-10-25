@@ -276,6 +276,12 @@ pub enum FrontLayout {
     Drawers {
         ratios: Vec<f64>,
     },
+    /// One front that swings up and stays open on Blum AVENTOS HK top.
+    StayLift {
+        /// Weight of the handle on the front, for the power factor.
+        #[serde(default)]
+        handle_weight: f64,
+    },
     /// Two equal fronts that fold up together on Blum AVENTOS HF top.
     BiFoldLift {
         /// Weight of the handle on the fronts, for the power factor.

@@ -1,0 +1,139 @@
+{
+  "brand": "Blum",
+  "website": "https://www.blum.com",
+  "notes": "AVENTOS HK top stay lift from the Blum Catalogue and technical manual 2024/2025, printed pages 46-48. Power factor LF = cabinet height KH x front weight FG including double the handle weight; the stronger mechanism where ranges overlap; at most 18 kg front for two mechanisms; inside height at least 173 mm. Mechanism side drilling (p.48) is not recorded yet. Not verified by a person.",
+  "items": [
+    {
+      "id": "blum.aventos.hk-top",
+      "brand": "Blum",
+      "article": "AVENTOS HK top",
+      "family": "AVENTOS HK top",
+      "variant": "stay lift, wooden fronts and alu frames",
+      "kind": "lift_system",
+      "parameters": {
+        "cabinet_height_min": 205,
+        "cabinet_height_max": 600,
+        "cabinet_width_max": 1800,
+        "front_weight_max_kg": 18,
+        "inside_height_min": 173,
+        "handle_weight_factor": 2
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.46, web code DQHFJY",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.aventos.hk-top.mechanism.22k2310",
+      "brand": "Blum",
+      "article": "22K2310",
+      "family": "AVENTOS HK top",
+      "variant": "lift mechanism set (2, symmetrical), LF 420-1610, system screws",
+      "kind": "lift_system",
+      "parameters": {
+        "power_factor_min": 420,
+        "power_factor_max": 1610,
+        "opening_angle_min": 75,
+        "opening_angle_max": 107
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.46, web code DQHFJY",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.aventos.hk-top.mechanism.22k2510",
+      "brand": "Blum",
+      "article": "22K2510",
+      "family": "AVENTOS HK top",
+      "variant": "lift mechanism set (2, symmetrical), LF 930-2800, system screws",
+      "kind": "lift_system",
+      "parameters": {
+        "power_factor_min": 930,
+        "power_factor_max": 2800,
+        "opening_angle_min": 75,
+        "opening_angle_max": 107
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.46, web code DQHFJY",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.aventos.hk-top.mechanism.22k2710",
+      "brand": "Blum",
+      "article": "22K2710",
+      "family": "AVENTOS HK top",
+      "variant": "lift mechanism set (2, symmetrical), LF 1730-5200, system screws",
+      "kind": "lift_system",
+      "parameters": {
+        "power_factor_min": 1730,
+        "power_factor_max": 5200,
+        "opening_angle_min": 75,
+        "opening_angle_max": 107
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.46, web code DQHFJY",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.aventos.hk-top.mechanism.22k2910",
+      "brand": "Blum",
+      "article": "22K2910",
+      "family": "AVENTOS HK top",
+      "variant": "lift mechanism set (2, symmetrical), LF 3200-9000, system screws",
+      "kind": "lift_system",
+      "parameters": {
+        "power_factor_min": 3200,
+        "power_factor_max": 9000,
+        "opening_angle_min": 75,
+        "opening_angle_max": 107
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.46, web code DQHFJY",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.aventos.hk-top.cover-caps",
+      "brand": "Blum",
+      "article": "22K8000",
+      "family": "AVENTOS HK top",
+      "variant": "cover cap set",
+      "kind": "lift_system",
+      "parameters": {},
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.46, web code DQHFJY",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.aventos.hk-top.front-fixing",
+      "brand": "Blum",
+      "article": "20S4200",
+      "family": "AVENTOS HK top",
+      "variant": "front fixing bracket set (2), screw-on, wooden fronts",
+      "kind": "lift_system",
+      "parameters": {},
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.46, web code DQHFJY",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    }
+  ]
+}

@@ -562,13 +562,13 @@ struct FrontsSection: View {
     let cab: CabinetDoc
 
     private let layouts: [(id: String, title: String)] = [
-        ("door", "Door"), ("door_pair", "Pair"), ("drawers", "Drawers"), ("bi_fold_lift", "Lift"), ("open", "Open"),
+        ("door", "Door"), ("door_pair", "Pair"), ("drawers", "Drawers"), ("stay_lift", "Stay lift"), ("bi_fold_lift", "Bi-fold"), ("open", "Open"),
     ]
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             SectionTitle("Fronts")
-            HStack(spacing: 8) {
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 3), spacing: 8) {
                 ForEach(layouts, id: \.id) { layout in
                     let selected = cab.frontType == layout.id
                     Button {

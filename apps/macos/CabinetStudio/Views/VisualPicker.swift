@@ -457,6 +457,13 @@ struct FrontThumbnail: View {
                 ctx.stroke(p, with: .color(.primary.opacity(0.75)), lineWidth: 1.2)
                 handle(r.midX - 5, r.minY + 12, vertical: true)
                 handle(r.midX + 5, r.minY + 12, vertical: true)
+            case "stay_lift":
+                // One front swinging up: an arc from its bottom edge.
+                var arc = Path()
+                arc.addArc(center: CGPoint(x: r.midX, y: r.minY + 4), radius: r.height * 0.55,
+                           startAngle: .degrees(100), endAngle: .degrees(160), clockwise: false)
+                ctx.stroke(arc, with: .color(.accentColor), lineWidth: 1.4)
+                handle(r.midX, r.maxY - 6, vertical: false)
             case "bi_fold_lift":
                 // Two fronts folding up at the middle: the fold line and an arrow up.
                 hLine(r.midY)

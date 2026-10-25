@@ -163,6 +163,80 @@ pub fn hf_top(need: &BiFoldNeed) -> Result<BiFold, String> {
     })
 }
 
+/// AVENTOS HK top for one front: the stronger mechanism set where ranges overlap (p.46).
+#[derive(Clone, Debug, PartialEq)]
+pub struct StayLift {
+    pub power_factor: f64,
+    pub mechanism: &'static HardwareItem,
+    pub cover_caps: &'static HardwareItem,
+    pub front_fixing: &'static HardwareItem,
+    pub warnings: Vec<String>,
+}
+
+/// Picks AVENTOS HK top for a cabinet `cabinet_height` high and `cabinet_width` wide whose front
+/// weighs `front_weight` kg and carries a handle of `handle_weight` kg (counted twice, as Blum
+/// does for stay lifts), with `inside_height` between bottom and top.
+pub fn hk_top(
+    cabinet_height: f64,
+    cabinet_width: f64,
+    inside_height: f64,
+    front_weight: f64,
+    handle_weight: f64,
+) -> Result<StayLift, String> {
+    let sys = hardware::item("blum.aventos.hk-top")?;
+    let p = |k: &str| sys.param(k);
+    let kh = cabinet_height;
+    if !(p("cabinet_height_min")?..=p("cabinet_height_max")?).contains(&kh) {
+        return Err(format!(
+            "AVENTOS HK top is for cabinets {}–{} mm high, not {kh:.0}",
+            p("cabinet_height_min")?,
+            p("cabinet_height_max")?
+        ));
+    }
+    if cabinet_width > p("cabinet_width_max")? {
+        return Err(format!(
+            "AVENTOS HK top is for cabinets up to {} mm wide",
+            p("cabinet_width_max")?
+        ));
+    }
+    let fg = front_weight + p("handle_weight_factor")? * handle_weight;
+    if fg > p("front_weight_max_kg")? {
+        return Err(format!(
+            "a {fg:.1} kg front is over AVENTOS HK top's {} kg",
+            p("front_weight_max_kg")?
+        ));
+    }
+    let mut warnings = Vec::new();
+    if inside_height < p("inside_height_min")? {
+        warnings.push(format!(
+            "AVENTOS HK top needs {} mm inside height; this cabinet has {inside_height:.0}",
+            p("inside_height_min")?
+        ));
+    }
+    let lf = kh * fg;
+    let mechanism = hardware::items()
+        .iter()
+        .filter(|i| i.id.starts_with("blum.aventos.hk-top.mechanism."))
+        .filter(|i| {
+            matches!(
+                (i.param("power_factor_min"), i.param("power_factor_max")),
+                (Ok(lo), Ok(hi)) if (lo..=hi).contains(&lf)
+            )
+        })
+        .max_by(|a, b| {
+            let hi = |i: &HardwareItem| i.param("power_factor_max").unwrap_or(0.0);
+            hi(a).total_cmp(&hi(b))
+        })
+        .ok_or_else(|| format!("no AVENTOS HK top mechanism takes power factor {lf:.0}"))?;
+    Ok(StayLift {
+        power_factor: lf,
+        mechanism,
+        cover_caps: hardware::item("blum.aventos.hk-top.cover-caps")?,
+        front_fixing: hardware::item("blum.aventos.hk-top.front-fixing")?,
+        warnings,
+    })
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -240,5 +314,20 @@ mod tests {
             "22F3900"
         );
         assert!(hf_top(&need(400.0, 900.0, 8.0)).is_err());
+    }
+
+    /// p.46: LF = KH × (FG + 2 × handle); overlapping ranges take the stronger set.
+    #[test]
+    fn hk_top_picks_the_mechanism_by_power_factor_with_double_handle_weight() {
+        let pick = |kh: f64, fg: f64, handle: f64| {
+            hk_top(kh, 600.0, kh - 32.0, fg, handle)
+                .map(|h| (h.mechanism.article.clone(), h.power_factor))
+        };
+        // 360 × (3 + 2 × 0.3) = 1296: in 420–1610 and 930–2800, so the stronger.
+        assert_eq!(pick(360.0, 3.0, 0.3), Ok(("22K2510".to_string(), 1296.0)));
+        assert_eq!(pick(400.0, 1.5, 0.0).unwrap().0, "22K2310");
+        assert_eq!(pick(600.0, 14.0, 0.5).unwrap().0, "22K2910");
+        assert!(pick(600.0, 17.0, 1.0).is_err(), "19 kg is over 18");
+        assert!(pick(720.0, 5.0, 0.0).is_err(), "too tall for HK top");
     }
 }
