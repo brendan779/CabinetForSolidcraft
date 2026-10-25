@@ -306,3 +306,4 @@ Agents append one line per session: date, items touched, outcome.
 - 2026-10-26 (night) — BLUM-13 finished: TIP-ON BLUMOTION units for MERIVOBOX (T60H) and TANDEMBOX (T60B) with their synchronisation; BLUM-13b: SERVO-DRIVE for MOVENTO/TANDEM uses the same parts as the box systems (p.464), no generic rows left.
 - 2026-10-26 (night) — OUT-4 built (f557f9b): ordinate dimensions from the reference corner for every bore row and column, hole table grouped by kind with counts; needs the owner's look.
 - 2026-10-26 (night) — UI-10 built (94108a4): first-run welcome sheet (connect SolidCraft, pick detail with drawn tiles, start); Help › Welcome to Cabinet Studio reopens it.
+- 2026-10-26 (night) — Run stopped at the usage limit. DATA-10 not started (the Polytec guide downloads fine; COMMERCIAL tables are guide p14-17, wall linings p28). Next: DATA-10, HAF-5, BLUM-4b/6b drilling once the owner confirms the readings.
