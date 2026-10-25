@@ -48,7 +48,7 @@ Priorities: **P0** blocks most other work · **P1** MVP · **P2** commercial par
 | CORE-4a | done (ff4fd55) | M | Blind corner base: a base carcass with a fixed blind panel on the blind side (width = run-in − door), a filler/stile against the neighbouring run, door on the open side; `blind_side` and `blind_width` in the model | a 1000 mm blind corner builds with blind panel + filler + one door; test on the open width |
 | CORE-4b | done (0aaca7c) | M | L-shaped corner base (diagonal or bi-fold door): two carcass legs sharing a corner, parts not axis-aligned to one front; needs a second front direction in the part model | an L-corner 900 × 900 builds; cut list has every panel once |
 | CORE-4d | done (owner 2026-10-26: keep Blum's corner bi-fold hinge 79T8500 + 155° hinges) | S | Bi-fold corner hinge article and its drilling, replacing the generic placement | hinge row verified against the supplier's document |
-| CORE-4c | todo (owner 2026-10-26: the second leg shares the main leg's corner hanger) | M | Corner wall cabinet (diagonal front or L): as CORE-4b at wall height with hangers (CORE-3) | builds with two hangers per leg |
+| CORE-4c | done (f791844) | M | Corner wall cabinet (diagonal front or L): as CORE-4b at wall height with hangers (CORE-3) | builds with two hangers per leg |
 | CORE-5 | done (owner 2026-10-26 doesn't know; keep dropping the back rail, as built in 4bc5e17) | M | Sink cabinet (no bottom rail, back cut-out option, waterproof base liner option) | builds; liner appears in BOM |
 | CORE-6 | done (ed3f43a) | M | Fillers, end panels and scribes as parts of a run | a run with an end panel each side builds |
 | CORE-7 | done (43ead80) | M | Runs: shared construction standard per project, per-cabinet overrides only | project JSON stores one standard + overrides |
@@ -322,3 +322,4 @@ Agents append one line per session: date, items touched, outcome.
   12. SERVO-DRIVE power supply Z10NE04KI: confirmed.
   13. Blum CAD: the owner will download the shopping list into `vendor-cad/blum/` soon.
   14. Sink cabinet: keep "no back rail" (CORE-5 done).
+- 2026-10-26b (night) — CORE-4c done: `corner_wall` kind (600 × 600 × 330 × 720 by default): the L-corner's legs built as wall cabinets with the bi-fold pair; three Blum wall hanging brackets (main leg both ends, second leg its outer end, its open end carried by the main leg's corner bracket), a rail behind each leg; a right-hand corner swaps the brackets' hands. Headless SolidCraft 0.20 builds it with every part's bounds as the core put them.
