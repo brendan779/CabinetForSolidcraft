@@ -613,6 +613,13 @@ pub fn nesting_pdf(
     ))
 }
 
+/// An exploded assembly drawing per cabinet with its parts list, as a PDF.
+#[uniffi::export]
+pub fn assembly_pdf(items: JobItems, job: String) -> Result<Vec<u8>, CoreError> {
+    let lists: Vec<PartList> = job_lists(&items)?.into_iter().map(|(l, _)| l).collect();
+    Ok(cabinet_sheets::assembly::assembly_pdf(&lists, &job))
+}
+
 /// One line of the hardware bill.
 #[derive(uniffi::Record)]
 pub struct BomRecord {

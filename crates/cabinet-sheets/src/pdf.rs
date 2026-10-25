@@ -239,6 +239,24 @@ pub(crate) fn page_ops(svg: &str, height: f64) -> String {
                 let _ = writeln!(ops, "{x1:.3} {y1:.3} m {x2:.3} {y2:.3} l S");
                 ops.push_str("Q\n");
             }
+            "polygon" => {
+                let pts: Vec<f64> = a
+                    .get("points")
+                    .unwrap_or("")
+                    .split([' ', ','])
+                    .filter_map(|v| v.parse().ok())
+                    .collect();
+                if pts.len() >= 6 {
+                    if paint(&mut ops, &a, style) {
+                        for (i, [x, y]) in pts.as_chunks::<2>().0.iter().enumerate() {
+                            let op = if i == 0 { "m" } else { "l" };
+                            let _ = write!(ops, "{x:.3} {y:.3} {op} ");
+                        }
+                        let _ = writeln!(ops, "h {}", a.paint_op(style));
+                    }
+                    ops.push_str("Q\n");
+                }
+            }
             "circle" => {
                 let (cx, cy, r) = (a.num("cx"), a.num("cy"), a.num("r"));
                 if paint(&mut ops, &a, style) {

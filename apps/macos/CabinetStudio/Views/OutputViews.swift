@@ -238,6 +238,15 @@ struct CutSheetsView: View {
                     }
                 }
                 .help("A 62 × 40 mm label per part with a QR code of its name, for a 62 mm label printer")
+                Button("Assembly…", systemImage: "square.3.layers.3d.down.right") {
+                    do {
+                        pdf = (DataDocument(data: try assemblyPdf(items: project.jobItems, job: project.jobName)),
+                               "\(project.jobName) assembly")
+                    } catch {
+                        project.lastError = "Could not make the assembly sheets: \(error)"
+                    }
+                }
+                .help("Each cabinet exploded, with its parts list, one page per cabinet")
                 Button("Export PDF…", systemImage: "doc.richtext") {
                     do {
                         pdf = (DataDocument(data: try cutSheetsPdf(items: project.jobItems, job: project.jobName)),

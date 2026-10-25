@@ -4,6 +4,7 @@
 
 use std::fmt::Write;
 
+pub mod assembly;
 pub mod labels;
 pub mod nesting;
 pub mod pdf;
