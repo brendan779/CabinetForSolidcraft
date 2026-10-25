@@ -1,7 +1,7 @@
 {
   "brand": "Blum",
   "website": "https://www.blum.com",
-  "notes": "Drawer motion: TIP-ON BLUMOTION for LEGRABOX (p.396) and MOVENTO (p.504), TANDEM with TIP-ON (p.512), SERVO-DRIVE for LEGRABOX (pp. 364-366), from the Blum Catalogue and technical manual 2024/2025. TIP-ON BLUMOTION units are chosen by nominal length and the pull-out's total weight (Blum's recommended ranges). SERVO-DRIVE for MOVENTO/TANDEM (p.462 on) is not entered yet. The power supply is the Australian market/English article. Not verified by a person.",
+  "notes": "Drawer motion: TIP-ON BLUMOTION for LEGRABOX (p.396) and MOVENTO (p.504), TANDEM with TIP-ON (p.512), SERVO-DRIVE for LEGRABOX (pp. 364-366), from the Blum Catalogue and technical manual 2024/2025. TIP-ON BLUMOTION units are chosen by nominal length and the pull-out's total weight (Blum's recommended ranges). SERVO-DRIVE for MOVENTO/TANDEM (p.462 on) is not entered yet. The power supply is the Australian market/English article. Not verified by a person. MERIVOBOX (p.398) and TANDEMBOX (p.400) have their own TIP-ON BLUMOTION unit articles (T60H, T60B).",
   "items": [
     {
       "id": "blum.tip-on-blumotion.legrabox",
@@ -659,6 +659,250 @@
       },
       "source": {
         "url": "Blum Catalogue and technical manual 2024/2025, p.364",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.tip-on-blumotion.merivobox",
+      "brand": "Blum",
+      "article": "TIP-ON BLUMOTION for MERIVOBOX",
+      "family": "TIP-ON BLUMOTION",
+      "variant": "planning: units by nominal length and pull-out weight, synchronisation by inside width",
+      "kind": "other",
+      "parameters": {
+        "short_nl_max": 300,
+        "square_sync_lw_min": 243,
+        "square_sync_lw_max": 296,
+        "square_sync_cut_deduction": 224,
+        "round_sync_cut_deduction": 250,
+        "round_sync_lw_max": 1375
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.398",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.tip-on-blumotion.tandembox",
+      "brand": "Blum",
+      "article": "TIP-ON BLUMOTION for TANDEMBOX",
+      "family": "TIP-ON BLUMOTION",
+      "variant": "planning: units by nominal length and pull-out weight, synchronisation by inside width",
+      "kind": "other",
+      "parameters": {
+        "short_nl_max": 300,
+        "square_sync_lw_min": 238,
+        "square_sync_lw_max": 286,
+        "square_sync_cut_deduction": 214,
+        "round_sync_cut_deduction": 240,
+        "round_sync_lw_max": 1365
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.400",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.tip-on-blumotion.merivobox.s0",
+      "brand": "Blum",
+      "article": "T60H4040",
+      "family": "TIP-ON BLUMOTION",
+      "variant": "TIP-ON BLUMOTION set S0 for MERIVOBOX, pull-out 0-10 kg",
+      "kind": "other",
+      "parameters": {
+        "nominal_length_min": 270,
+        "nominal_length_max": 300,
+        "weight_min_kg": 0,
+        "weight_max_kg": 10
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.398",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.tip-on-blumotion.merivobox.s1",
+      "brand": "Blum",
+      "article": "T60H4140",
+      "family": "TIP-ON BLUMOTION",
+      "variant": "TIP-ON BLUMOTION set S1 for MERIVOBOX, pull-out 10-20 kg",
+      "kind": "other",
+      "parameters": {
+        "nominal_length_min": 270,
+        "nominal_length_max": 300,
+        "weight_min_kg": 10,
+        "weight_max_kg": 20
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.398",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.tip-on-blumotion.merivobox.l1",
+      "brand": "Blum",
+      "article": "T60H4340",
+      "family": "TIP-ON BLUMOTION",
+      "variant": "TIP-ON BLUMOTION set L1 for MERIVOBOX, pull-out 0-20 kg",
+      "kind": "other",
+      "parameters": {
+        "nominal_length_min": 350,
+        "nominal_length_max": 600,
+        "weight_min_kg": 0,
+        "weight_max_kg": 20
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.398",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.tip-on-blumotion.merivobox.l3",
+      "brand": "Blum",
+      "article": "T60H4540",
+      "family": "TIP-ON BLUMOTION",
+      "variant": "TIP-ON BLUMOTION set L3 for MERIVOBOX, pull-out 15-40 kg",
+      "kind": "other",
+      "parameters": {
+        "nominal_length_min": 350,
+        "nominal_length_max": 600,
+        "weight_min_kg": 15,
+        "weight_max_kg": 40
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.398",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.tip-on-blumotion.merivobox.l5",
+      "brand": "Blum",
+      "article": "T60H4570",
+      "family": "TIP-ON BLUMOTION",
+      "variant": "TIP-ON BLUMOTION set L5 for MERIVOBOX, pull-out 35-70 kg",
+      "kind": "other",
+      "parameters": {
+        "nominal_length_min": 450,
+        "nominal_length_max": 600,
+        "weight_min_kg": 35,
+        "weight_max_kg": 70
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.398",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.tip-on-blumotion.tandembox.s0",
+      "brand": "Blum",
+      "article": "T60B3030",
+      "family": "TIP-ON BLUMOTION",
+      "variant": "TIP-ON BLUMOTION set S0 for TANDEMBOX, pull-out 0-10 kg",
+      "kind": "other",
+      "parameters": {
+        "nominal_length_min": 270,
+        "nominal_length_max": 300,
+        "weight_min_kg": 0,
+        "weight_max_kg": 10
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.400",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.tip-on-blumotion.tandembox.s1",
+      "brand": "Blum",
+      "article": "T60B3130",
+      "family": "TIP-ON BLUMOTION",
+      "variant": "TIP-ON BLUMOTION set S1 for TANDEMBOX, pull-out 10-20 kg",
+      "kind": "other",
+      "parameters": {
+        "nominal_length_min": 270,
+        "nominal_length_max": 300,
+        "weight_min_kg": 10,
+        "weight_max_kg": 20
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.400",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.tip-on-blumotion.tandembox.l1",
+      "brand": "Blum",
+      "article": "T60B3330",
+      "family": "TIP-ON BLUMOTION",
+      "variant": "TIP-ON BLUMOTION set L1 for TANDEMBOX, pull-out 0-20 kg",
+      "kind": "other",
+      "parameters": {
+        "nominal_length_min": 350,
+        "nominal_length_max": 600,
+        "weight_min_kg": 0,
+        "weight_max_kg": 20
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.400",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.tip-on-blumotion.tandembox.l3",
+      "brand": "Blum",
+      "article": "T60B3530",
+      "family": "TIP-ON BLUMOTION",
+      "variant": "TIP-ON BLUMOTION set L3 for TANDEMBOX, pull-out 15-30 kg",
+      "kind": "other",
+      "parameters": {
+        "nominal_length_min": 350,
+        "nominal_length_max": 600,
+        "weight_min_kg": 15,
+        "weight_max_kg": 30
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.400",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.tip-on-blumotion.tandembox.l5",
+      "brand": "Blum",
+      "article": "T60B3560",
+      "family": "TIP-ON BLUMOTION",
+      "variant": "TIP-ON BLUMOTION set L5 for TANDEMBOX, pull-out 30-65 kg",
+      "kind": "other",
+      "parameters": {
+        "nominal_length_min": 450,
+        "nominal_length_max": 650,
+        "weight_min_kg": 30,
+        "weight_max_kg": 65
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.400",
         "document_date": "2024/2025",
         "retrieved": "2026-10-26",
         "verified": false

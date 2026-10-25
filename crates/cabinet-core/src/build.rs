@@ -470,8 +470,8 @@ impl<'a> Builder<'a> {
         }
     }
 
-    /// TIP-ON for a drawer: a TIP-ON BLUMOTION set and its synchronisation on LEGRABOX and
-    /// MOVENTO; TANDEM has TIP-ON in its runners and takes a synchronisation linkage.
+    /// TIP-ON for a drawer: a TIP-ON BLUMOTION set and its synchronisation on the box systems
+    /// and MOVENTO; TANDEM has TIP-ON in its runners and takes a synchronisation linkage.
     fn drawer_tip_on(
         &self,
         d: &DrawerFit,
@@ -480,12 +480,6 @@ impl<'a> Builder<'a> {
         let row = |i: &cabinet_catalog::HardwareItem, n: u32| {
             (i.id.clone(), format!("{} {}", i.family, i.variant), n)
         };
-        if matches!(d.system, "merivobox" | "tandembox") {
-            return Err(format!(
-                "TIP-ON BLUMOTION for {} is not catalogued yet",
-                d.system.to_uppercase()
-            ));
-        }
         if d.system == "tandem" {
             let sync = crate::hardware::item("blum.tandem.tip-on-sync")?;
             return Ok(if lw <= sync.param("lw_max")? {

@@ -247,9 +247,9 @@ pub fn wood(
     })
 }
 
-/// The TIP-ON BLUMOTION parts for one drawer on LEGRABOX or MOVENTO (`system`): the unit set
-/// for its nominal length and load, and the synchronisation for the cabinet's inside width
-/// (catalogue p.396, p.504). `heavy_runner` is the 70 kg profile / 60–70 kg runner; `heavy_load`
+/// The TIP-ON BLUMOTION parts for one drawer on `system` (LEGRABOX, MERIVOBOX, TANDEMBOX or
+/// MOVENTO): the unit set for its nominal length and load, and the synchronisation for the
+/// cabinet's inside width (catalogue pp. 396, 398, 400, 504). `heavy_runner` is the 70 kg profile / 60–70 kg runner; `heavy_load`
 /// asks for the 15–40 kg unit instead of the ≤ 20 kg one.
 pub fn tip_on_blumotion(
     system: &str,
@@ -271,7 +271,9 @@ pub fn tip_on_blumotion(
         (false, false, false) => "l1",
         (false, false, true) => "l3",
     };
-    let unit = hardware::item(&format!("blum.tip-on-blumotion.{unit}"))?;
+    // MERIVOBOX and TANDEMBOX have their own units; LEGRABOX and MOVENTO share one range.
+    let unit = hardware::item(&format!("blum.tip-on-blumotion.{system}.{unit}"))
+        .or_else(|_| hardware::item(&format!("blum.tip-on-blumotion.{unit}")))?;
     let (lo, hi) = (
         unit.param("nominal_length_min")?,
         unit.param("nominal_length_max")?,
@@ -491,5 +493,20 @@ mod tests {
         // Only the 65 kg profile comes in 650.
         let long = steel_box(BoxSystem::Tandembox, 568.0, 660.0, 120.0).unwrap();
         assert!(long.heavy_profile && long.profile.article == "576.6501M");
+    }
+
+    #[test]
+    fn merivobox_and_tandembox_take_their_own_tip_on_units() {
+        let unit = |sys| {
+            tip_on_blumotion(sys, 500.0, false, false, 568.0).unwrap()[0]
+                .0
+                .article
+                .clone()
+        };
+        assert_eq!(unit("merivobox"), "T60H4340");
+        assert_eq!(unit("tandembox"), "T60B3330");
+        assert_eq!(unit("legrabox"), "T60L7340");
+        let narrow = tip_on_blumotion("tandembox", 500.0, false, false, 280.0).unwrap();
+        assert_eq!(narrow[1].0.article, "T60.300D");
     }
 }
