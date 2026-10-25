@@ -1725,6 +1725,65 @@ mod tests {
         );
     }
 
+    /// CORE-10: each overlay gets the hinge cranked for it, the cup at Blum's boring distance
+    /// for that overlay, and inset doors move the plate back with the door.
+    #[test]
+    fn each_overlay_gets_its_cranked_hinge_boring_distance_and_plate_position() {
+        let ft = ConstructionStandard::default().front_thickness;
+        // overlay, carcass thickness → hinge article, TB, plate row from the front
+        let rows = [
+            (DoorOverlay::Full, 16.0, "71B3550", 4.0, 37.0),
+            (DoorOverlay::Full, 18.0, "71B3550", 6.0, 37.0),
+            (DoorOverlay::Half, 16.0, "71B3650", 6.5, 37.0),
+            (DoorOverlay::Inset, 16.0, "71B3750", 5.0, 37.0 + ft + 1.5),
+        ];
+        for (overlay, t, article, tb, plate_y) in rows {
+            let mut cab = Cabinet::new("B01", CabinetKind::Base);
+            cab.standard.overlay = overlay;
+            cab.standard.carcass_thickness = t;
+            cab.fronts = FrontLayout::Door {
+                hinge_side: HingeSide::Left,
+            };
+            let list = build_cabinet(&cab).unwrap();
+            let hinge = list
+                .hardware
+                .iter()
+                .find(|h| h.item.starts_with("blum.clip-top"))
+                .unwrap();
+            let item = crate::hardware::item(&hinge.item).unwrap();
+            assert_eq!(item.article, article, "{overlay:?} {t}");
+            let door = list.part("B01.Door1").unwrap();
+            assert!(
+                (hinge.at.x - door.bounds.min.x - (tb + 17.5)).abs() < 1e-9,
+                "{overlay:?} {t}: cup at {}",
+                hinge.at.x - door.bounds.min.x
+            );
+            let plate_holes: Vec<f64> = list
+                .operations
+                .iter()
+                .filter_map(|o| match o {
+                    Operation::Bore {
+                        part,
+                        at,
+                        purpose: BorePurpose::HingePlate,
+                        ..
+                    } if part == "B01.LeftSide" => Some(at.y),
+                    _ => None,
+                })
+                .collect();
+            assert!(!plate_holes.is_empty());
+            assert!(
+                plate_holes.iter().all(|y| (y - plate_y).abs() < 1e-9),
+                "{overlay:?}"
+            );
+            assert!(
+                !list.warnings.iter().any(|w| w.contains("Door1")),
+                "{overlay:?}: {:?}",
+                list.warnings
+            );
+        }
+    }
+
     #[test]
     fn hinges_scale_with_door_height() {
         let mut tall = Cabinet::new("T01", CabinetKind::Tall);
