@@ -457,7 +457,7 @@ struct FrontThumbnail: View {
                 ctx.stroke(p, with: .color(.primary.opacity(0.75)), lineWidth: 1.2)
                 handle(r.midX - 5, r.minY + 12, vertical: true)
                 handle(r.midX + 5, r.minY + 12, vertical: true)
-            case "stay_lift":
+            case "lift":
                 // One front swinging up: an arc from its bottom edge.
                 var arc = Path()
                 arc.addArc(center: CGPoint(x: r.midX, y: r.minY + 4), radius: r.height * 0.55,

@@ -276,9 +276,11 @@ pub enum FrontLayout {
     Drawers {
         ratios: Vec<f64>,
     },
-    /// One front that swings up and stays open on Blum AVENTOS HK top.
-    StayLift {
-        /// Weight of the handle on the front, for the power factor.
+    /// One front that lifts on Blum AVENTOS: HK top, HS top or HL top.
+    Lift {
+        #[serde(default)]
+        kind: LiftKind,
+        /// Weight of the handle on the front, for choosing the mechanism.
         #[serde(default)]
         handle_weight: f64,
     },
@@ -462,6 +464,19 @@ pub enum Opening {
     /// Handleless, electric: Blum SERVO-DRIVE opens drawers at a touch. Hinged doors cannot
     /// take it and get TIP-ON.
     ServoDrive,
+}
+
+/// How a single lifting front moves.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum LiftKind {
+    /// Swings up about its top edge and stays (AVENTOS HK top).
+    #[default]
+    StayLift,
+    /// Rises and tips over the cabinet top (AVENTOS HS top), for large fronts.
+    UpAndOver,
+    /// Rises parallel to itself (AVENTOS HL top), for small fronts.
+    LiftUp,
 }
 
 /// A front's core board, for its weight (Blum's reference densities).

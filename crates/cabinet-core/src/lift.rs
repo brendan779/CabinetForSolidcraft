@@ -163,76 +163,138 @@ pub fn hf_top(need: &BiFoldNeed) -> Result<BiFold, String> {
     })
 }
 
-/// AVENTOS HK top for one front: the stronger mechanism set where ranges overlap (p.46).
+/// The kinds of lift for one front.
+pub use crate::model::LiftKind;
+
+/// The AVENTOS parts for one lifting front.
 #[derive(Clone, Debug, PartialEq)]
-pub struct StayLift {
-    pub power_factor: f64,
-    pub mechanism: &'static HardwareItem,
-    pub cover_caps: &'static HardwareItem,
-    pub front_fixing: &'static HardwareItem,
+pub struct SingleLift {
+    /// LF, where the family selects by it (HK top).
+    pub power_factor: Option<f64>,
+    /// The lift mechanism set first, then the rest of the parts, one set each.
+    pub parts: Vec<&'static HardwareItem>,
     pub warnings: Vec<String>,
 }
 
-/// Picks AVENTOS HK top for a cabinet `cabinet_height` high and `cabinet_width` wide whose front
-/// weighs `front_weight` kg and carries a handle of `handle_weight` kg (counted twice, as Blum
-/// does for stay lifts), with `inside_height` between bottom and top.
-pub fn hk_top(
-    cabinet_height: f64,
-    cabinet_width: f64,
-    inside_height: f64,
-    front_weight: f64,
-    handle_weight: f64,
-) -> Result<StayLift, String> {
-    let sys = hardware::item("blum.aventos.hk-top")?;
+/// What a lift for one front needs to know.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct LiftNeed {
+    pub cabinet_height: f64,
+    pub cabinet_width: f64,
+    pub inside_height: f64,
+    pub inside_depth: f64,
+    /// The front alone, kg.
+    pub front_weight: f64,
+    pub handle_weight: f64,
+}
+
+/// Of the items under `prefix`, those whose cabinet height (and front weight, where given)
+/// ranges hold `kh` and `fg`; the strongest where they overlap, as Blum recommends.
+fn by_ranges(prefix: &str, kh: f64, fg: f64) -> Option<&'static HardwareItem> {
+    let within = |i: &HardwareItem, lo: &str, hi: &str, v: f64| match (i.param(lo), i.param(hi)) {
+        (Ok(lo), Ok(hi)) => (lo..=hi).contains(&v),
+        _ => true,
+    };
+    hardware::items()
+        .iter()
+        .filter(|i| i.id.starts_with(prefix))
+        .filter(|i| within(i, "cabinet_height_min", "cabinet_height_max", kh))
+        .filter(|i| within(i, "front_weight_min_kg", "front_weight_max_kg", fg))
+        .filter(|i| within(i, "power_factor_min", "power_factor_max", kh * fg))
+        .max_by(|a, b| {
+            let top = |i: &HardwareItem| {
+                i.param("power_factor_max")
+                    .or_else(|_| i.param("front_weight_max_kg"))
+                    .or_else(|_| i.param("cabinet_height_max"))
+                    .unwrap_or(0.0)
+            };
+            top(a).total_cmp(&top(b))
+        })
+}
+
+/// Picks the AVENTOS parts for one front: HK top (stay lift, p.46), HS top (up and over, p.34)
+/// or HL top (lift up, p.40).
+pub fn single_front(kind: LiftKind, need: &LiftNeed) -> Result<SingleLift, String> {
+    let family = match kind {
+        LiftKind::StayLift => "hk-top",
+        LiftKind::UpAndOver => "hs-top",
+        LiftKind::LiftUp => "hl-top",
+    };
+    let sys = hardware::item(&format!("blum.aventos.{family}"))?;
     let p = |k: &str| sys.param(k);
-    let kh = cabinet_height;
+    let kh = need.cabinet_height;
     if !(p("cabinet_height_min")?..=p("cabinet_height_max")?).contains(&kh) {
         return Err(format!(
-            "AVENTOS HK top is for cabinets {}–{} mm high, not {kh:.0}",
+            "{} is for cabinets {}–{} mm high, not {kh:.0}",
+            sys.family,
             p("cabinet_height_min")?,
             p("cabinet_height_max")?
         ));
     }
-    if cabinet_width > p("cabinet_width_max")? {
+    if need.cabinet_width > p("cabinet_width_max")? {
         return Err(format!(
-            "AVENTOS HK top is for cabinets up to {} mm wide",
+            "{} is for cabinets up to {} mm wide",
+            sys.family,
             p("cabinet_width_max")?
         ));
     }
-    let fg = front_weight + p("handle_weight_factor")? * handle_weight;
-    if fg > p("front_weight_max_kg")? {
+    let fg = need.front_weight + p("handle_weight_factor")? * need.handle_weight;
+    if let Ok(max) = p("front_weight_max_kg")
+        && fg > max
+    {
         return Err(format!(
-            "a {fg:.1} kg front is over AVENTOS HK top's {} kg",
-            p("front_weight_max_kg")?
+            "a {fg:.1} kg front is over {}'s {max} kg",
+            sys.family
         ));
     }
     let mut warnings = Vec::new();
-    if inside_height < p("inside_height_min")? {
-        warnings.push(format!(
-            "AVENTOS HK top needs {} mm inside height; this cabinet has {inside_height:.0}",
-            p("inside_height_min")?
-        ));
+    for (key, have) in [
+        ("inside_height_min", need.inside_height),
+        ("inside_depth_min", need.inside_depth),
+    ] {
+        if let Ok(min) = p(key)
+            && have < min
+        {
+            warnings.push(format!(
+                "{} needs {min} mm {}; this cabinet has {have:.0}",
+                sys.family,
+                if key.contains("height") {
+                    "inside height"
+                } else {
+                    "inside depth"
+                }
+            ));
+        }
     }
-    let lf = kh * fg;
-    let mechanism = hardware::items()
-        .iter()
-        .filter(|i| i.id.starts_with("blum.aventos.hk-top.mechanism."))
-        .filter(|i| {
-            matches!(
-                (i.param("power_factor_min"), i.param("power_factor_max")),
-                (Ok(lo), Ok(hi)) if (lo..=hi).contains(&lf)
+    let mechanism =
+        by_ranges(&format!("blum.aventos.{family}.mechanism."), kh, fg).ok_or_else(|| {
+            format!(
+                "no {} mechanism for KH {kh:.0} and a {fg:.1} kg front",
+                sys.family
             )
-        })
-        .max_by(|a, b| {
-            let hi = |i: &HardwareItem| i.param("power_factor_max").unwrap_or(0.0);
-            hi(a).total_cmp(&hi(b))
-        })
-        .ok_or_else(|| format!("no AVENTOS HK top mechanism takes power factor {lf:.0}"))?;
-    Ok(StayLift {
-        power_factor: lf,
-        mechanism,
-        cover_caps: hardware::item("blum.aventos.hk-top.cover-caps")?,
-        front_fixing: hardware::item("blum.aventos.hk-top.front-fixing")?,
+        })?;
+    let item = hardware::item;
+    let mut parts = vec![mechanism];
+    match kind {
+        LiftKind::StayLift => parts.push(item("blum.aventos.hk-top.cover-caps")?),
+        LiftKind::UpAndOver => {
+            parts.push(item("blum.aventos.hs-top.lever-arm")?);
+            parts.push(item("blum.aventos.cover-caps")?);
+        }
+        LiftKind::LiftUp => {
+            parts.push(
+                by_ranges("blum.aventos.hl-top.lever-arm.", kh, fg).ok_or_else(|| {
+                    format!("no AVENTOS HL top lever arm for KH {kh:.0} and {fg:.1} kg")
+                })?,
+            );
+            parts.push(item("blum.aventos.hl-top.stabiliser")?);
+            parts.push(item("blum.aventos.cover-caps")?);
+        }
+    }
+    parts.push(item("blum.aventos.hk-top.front-fixing")?);
+    Ok(SingleLift {
+        power_factor: (kind == LiftKind::StayLift).then_some(kh * fg),
+        parts,
         warnings,
     })
 }
@@ -316,12 +378,26 @@ mod tests {
         assert!(hf_top(&need(400.0, 900.0, 8.0)).is_err());
     }
 
+    fn lift(kind: LiftKind, kh: f64, fg: f64, handle: f64) -> Result<SingleLift, String> {
+        single_front(
+            kind,
+            &LiftNeed {
+                cabinet_height: kh,
+                cabinet_width: 600.0,
+                inside_height: kh - 32.0,
+                inside_depth: 300.0,
+                front_weight: fg,
+                handle_weight: handle,
+            },
+        )
+    }
+
     /// p.46: LF = KH × (FG + 2 × handle); overlapping ranges take the stronger set.
     #[test]
     fn hk_top_picks_the_mechanism_by_power_factor_with_double_handle_weight() {
         let pick = |kh: f64, fg: f64, handle: f64| {
-            hk_top(kh, 600.0, kh - 32.0, fg, handle)
-                .map(|h| (h.mechanism.article.clone(), h.power_factor))
+            lift(LiftKind::StayLift, kh, fg, handle)
+                .map(|h| (h.parts[0].article.clone(), h.power_factor.unwrap()))
         };
         // 360 × (3 + 2 × 0.3) = 1296: in 420–1610 and 930–2800, so the stronger.
         assert_eq!(pick(360.0, 3.0, 0.3), Ok(("22K2510".to_string(), 1296.0)));
@@ -329,5 +405,38 @@ mod tests {
         assert_eq!(pick(600.0, 14.0, 0.5).unwrap().0, "22K2910");
         assert!(pick(600.0, 17.0, 1.0).is_err(), "19 kg is over 18");
         assert!(pick(720.0, 5.0, 0.0).is_err(), "too tall for HK top");
+    }
+
+    /// p.34: HS top by cabinet height and front weight (twice the handle); Blum's example,
+    /// KH 600 and FG 10 kg, takes 22S25x0.
+    #[test]
+    fn hs_top_follows_blums_example_and_its_overlaps() {
+        let mech = |kh: f64, fg: f64| {
+            lift(LiftKind::UpAndOver, kh, fg, 0.0).map(|l| l.parts[0].article.clone())
+        };
+        assert_eq!(mech(600.0, 10.0).as_deref(), Ok("22S2510"));
+        assert_eq!(mech(400.0, 5.0).as_deref(), Ok("22S2210"));
+        // 500 high, 12 kg: both 22S2210 (to 12.5) and 22S2510 (to 15.25) fit; the stronger.
+        assert_eq!(mech(500.0, 12.0).as_deref(), Ok("22S2510"));
+        assert_eq!(mech(700.0, 18.0).as_deref(), Ok("22S2810"));
+        assert!(mech(400.0, 1.0).is_err());
+    }
+
+    /// p.40: HL top's mechanism by height, its lever arm by height and weight with the handle.
+    #[test]
+    fn hl_top_picks_mechanism_by_height_and_arm_by_height_and_weight() {
+        let parts = |kh: f64, fg: f64, handle: f64| {
+            lift(LiftKind::LiftUp, kh, fg, handle)
+                .unwrap()
+                .parts
+                .iter()
+                .map(|i| i.article.clone())
+                .collect::<Vec<_>>()
+        };
+        let p = parts(360.0, 6.0, 0.5);
+        assert_eq!(&p[..3], ["22L2210", "22L3500", "22Q1076U"]);
+        let p = parts(500.0, 11.0, 0.5);
+        assert_eq!(&p[..2], ["22L2510", "22L3900"]);
+        assert!(lift(LiftKind::LiftUp, 600.0, 5.0, 0.0).is_err());
     }
 }

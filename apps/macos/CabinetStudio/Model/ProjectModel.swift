@@ -177,7 +177,7 @@ struct CabinetDoc: Identifiable, Hashable, Codable {
         (object["standard"] as? [String: Any])?["\(slot)_board"] as? String ?? ""
     }
 
-    /// The front layout's type: open, door, door_pair, drawers, stay_lift, bi_fold_lift.
+    /// The front layout's type: open, door, door_pair, drawers, lift, bi_fold_lift.
     var frontType: String {
         get { (object["fronts"] as? [String: Any])?["type"] as? String ?? "open" }
         set {
@@ -187,7 +187,7 @@ struct CabinetDoc: Identifiable, Hashable, Codable {
                 case "door_pair": o["fronts"] = ["type": "door_pair"]
                 case "drawers": o["fronts"] = ["type": "drawers", "ratios": [1.0, 1.0, 1.0]]
                 case "bi_fold_lift": o["fronts"] = ["type": "bi_fold_lift", "handle_weight": 0.0]
-                case "stay_lift": o["fronts"] = ["type": "stay_lift", "handle_weight": 0.0]
+                case "lift": o["fronts"] = ["type": "lift", "kind": "stay_lift", "handle_weight": 0.0]
                 default: o["fronts"] = ["type": "open"]
                 }
             }
@@ -197,6 +197,12 @@ struct CabinetDoc: Identifiable, Hashable, Codable {
     var drawerRatios: [Double] {
         get { ((object["fronts"] as? [String: Any])?["ratios"] as? [NSNumber])?.map(\.doubleValue) ?? [] }
         set { update { $0["fronts"] = ["type": "drawers", "ratios": newValue] } }
+    }
+
+    /// A lifting front's movement: stay_lift, up_and_over, lift_up.
+    var liftKind: String {
+        get { (object["fronts"] as? [String: Any])?["kind"] as? String ?? "stay_lift" }
+        set { update { $0["fronts"] = ["type": "lift", "kind": newValue, "handle_weight": 0.0] } }
     }
 
     var hingeSide: String {

@@ -562,7 +562,7 @@ struct FrontsSection: View {
     let cab: CabinetDoc
 
     private let layouts: [(id: String, title: String)] = [
-        ("door", "Door"), ("door_pair", "Pair"), ("drawers", "Drawers"), ("stay_lift", "Stay lift"), ("bi_fold_lift", "Bi-fold"), ("open", "Open"),
+        ("door", "Door"), ("door_pair", "Pair"), ("drawers", "Drawers"), ("lift", "Lift"), ("bi_fold_lift", "Bi-fold"), ("open", "Open"),
     ]
 
     var body: some View {
@@ -597,7 +597,74 @@ struct FrontsSection: View {
             if cab.frontType == "drawers" {
                 DrawerStackPicker(cab: cab)
             }
+            if cab.frontType == "lift" {
+                LiftKindPicker(cab: cab)
+            }
         }
+    }
+}
+
+/// How a lifting front moves, drawn from the side: each picks its AVENTOS family.
+struct LiftKindPicker: View {
+    @Environment(ProjectModel.self) private var project
+    let cab: CabinetDoc
+
+    private let kinds: [(id: String, title: String, help: String)] = [
+        ("stay_lift", "Stay lift", "Swings up about its top edge and stays open (AVENTOS HK top)"),
+        ("up_and_over", "Up and over", "Rises and tips over the top, for large fronts (AVENTOS HS top)"),
+        ("lift_up", "Lift up", "Rises parallel to itself, for small fronts (AVENTOS HL top)"),
+    ]
+
+    var body: some View {
+        HStack(spacing: 8) {
+            ForEach(kinds, id: \.id) { kind in
+                Button {
+                    withAnimation(.snappy) { var c = cab; c.liftKind = kind.id; project.selected = c }
+                } label: {
+                    VStack(spacing: 6) {
+                        LiftKindThumbnail(kind: kind.id).frame(width: 52, height: 44)
+                        Text(kind.title).font(.caption).lineLimit(1).minimumScaleFactor(0.8)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 8)
+                }
+                .buttonStyle(TileStyle(selected: cab.liftKind == kind.id))
+                .help(kind.help)
+                .accessibilityLabel("Lift: \(kind.title)")
+                .accessibilityHint(kind.help)
+            }
+        }
+    }
+}
+
+/// A wall cabinet from the side with its front closed (faint) and open (accent).
+struct LiftKindThumbnail: View {
+    let kind: String
+
+    var body: some View {
+        Canvas { ctx, size in
+            let w = size.width, h = size.height
+            let body = CGRect(x: w * 0.35, y: h * 0.35, width: w * 0.55, height: h * 0.6)
+            ctx.stroke(Path(body), with: .color(.primary.opacity(0.6)), lineWidth: 1)
+            var closed = Path()
+            closed.move(to: CGPoint(x: body.minX - 2, y: body.minY))
+            closed.addLine(to: CGPoint(x: body.minX - 2, y: body.maxY))
+            ctx.stroke(closed, with: .color(.primary.opacity(0.3)), lineWidth: 2)
+            var open = Path()
+            switch kind {
+            case "up_and_over":
+                open.move(to: CGPoint(x: body.minX + 4, y: body.minY - 3))
+                open.addLine(to: CGPoint(x: body.maxX - 2, y: body.minY - 3))
+            case "lift_up":
+                open.move(to: CGPoint(x: body.minX - 2, y: 2))
+                open.addLine(to: CGPoint(x: body.minX - 2, y: body.minY - 2))
+            default:
+                open.move(to: CGPoint(x: body.minX - 2, y: body.minY))
+                open.addLine(to: CGPoint(x: 2, y: body.minY - h * 0.25))
+            }
+            ctx.stroke(open, with: .color(.accentColor), lineWidth: 2.2)
+        }
+        .accessibilityHidden(true)
     }
 }
 

@@ -8,7 +8,7 @@ use crate::joinery::ButtJoint;
 use crate::lift;
 use crate::model::{
     BackStyle, BottomJoint, Cabinet, CabinetKind, DoorOverlay, DrawerSystem, Exposed, FrontCore,
-    FrontLayout, HingeSide, Opening, ToeKick, TopJoint, WallHanging,
+    FrontLayout, HingeSide, LiftKind, Opening, ToeKick, TopJoint, WallHanging,
 };
 use crate::part::{
     BorePurpose, Dir, EdgeBanding, HardwarePlacement, Operation, Part, PartList, PartRole,
@@ -1020,8 +1020,11 @@ impl<'a> Builder<'a> {
             FrontLayout::BiFoldLift { handle_weight } => {
                 self.bi_fold_lift(aabb(x0, y0, z0, x1, y1, z1), *handle_weight);
             }
-            FrontLayout::StayLift { handle_weight } => {
-                self.stay_lift(aabb(x0, y0, z0, x1, y1, z1), *handle_weight);
+            FrontLayout::Lift {
+                kind,
+                handle_weight,
+            } => {
+                self.single_lift(*kind, aabb(x0, y0, z0, x1, y1, z1), *handle_weight);
             }
             FrontLayout::Drawers { ratios } => {
                 let ratios: Vec<f64> = ratios.iter().copied().filter(|r| *r > 0.0).collect();
@@ -1279,8 +1282,8 @@ impl<'a> Builder<'a> {
         });
     }
 
-    /// One front on AVENTOS HK top: no hinges, the lift mechanism holds it.
-    fn stay_lift(&mut self, front: Aabb, handle_weight: f64) {
+    /// One front on AVENTOS HK, HS or HL top: no hinges, the lift holds it.
+    fn single_lift(&mut self, kind: LiftKind, front: Aabb, handle_weight: f64) {
         let cab = self.cab;
         let s = &cab.standard;
         self.add(
@@ -1293,16 +1296,25 @@ impl<'a> Builder<'a> {
         );
         let name = self.name(PartRole::LiftFront, Some(1));
         let chosen = lift::reference_density(s.front_core == FrontCore::Mdf).and_then(|density| {
-            lift::hk_top(
-                cab.height,
-                cab.width,
-                self.opening_z.1 - self.opening_z.0,
-                lift::front_weight(front.size.z, front.size.x, front.size.y, density),
-                handle_weight,
+            lift::single_front(
+                kind,
+                &lift::LiftNeed {
+                    cabinet_height: cab.height,
+                    cabinet_width: cab.width,
+                    inside_height: self.opening_z.1 - self.opening_z.0,
+                    inside_depth: self.interior_back - front.max().y.max(0.0),
+                    front_weight: lift::front_weight(
+                        front.size.z,
+                        front.size.x,
+                        front.size.y,
+                        density,
+                    ),
+                    handle_weight,
+                },
             )
         });
-        let hk = match chosen {
-            Ok(h) => h,
+        let lift = match chosen {
+            Ok(l) => l,
             Err(e) => {
                 self.list
                     .warnings
@@ -1310,7 +1322,7 @@ impl<'a> Builder<'a> {
                 return;
             }
         };
-        for w in &hk.warnings {
+        for w in &lift.warnings {
             self.list.warnings.push(format!("{name}: {w}"));
         }
         if s.opening == Opening::Handles && handle_weight == 0.0 {
@@ -1318,7 +1330,7 @@ impl<'a> Builder<'a> {
                 "{name}: the lift is chosen without a handle weight"
             ));
         }
-        for item in [hk.mechanism, hk.cover_caps, hk.front_fixing] {
+        for item in lift.parts {
             self.list.hardware.push(HardwarePlacement {
                 item: item.id.clone(),
                 description: format!("{} {}", item.family, item.variant),
@@ -2820,7 +2832,10 @@ mod tests {
     fn a_stay_lift_wall_cabinet_gets_one_front_and_an_hk_top_mechanism() {
         let mut cab = Cabinet::new("W01", CabinetKind::Wall);
         cab.height = 360.0;
-        cab.fronts = FrontLayout::StayLift { handle_weight: 0.3 };
+        cab.fronts = FrontLayout::Lift {
+            kind: LiftKind::StayLift,
+            handle_weight: 0.3,
+        };
         let list = build_cabinet(&cab).unwrap();
         assert!(list.warnings.is_empty(), "{:?}", list.warnings);
         assert_eq!(list.by_role(PartRole::LiftFront).count(), 1);

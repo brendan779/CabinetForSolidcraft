@@ -1,0 +1,293 @@
+{
+  "brand": "Blum",
+  "website": "https://www.blum.com",
+  "notes": "AVENTOS HS top (up and over, pp. 34-35) and HL top (lift up, pp. 40-41) from the Blum Catalogue and technical manual 2024/2025. HS top's mechanism goes by cabinet height and front weight including twice the handle weight; HL top's mechanism by cabinet height and its lever arm by height and front weight including the handle. Where rows overlap Blum recommends the stronger. Both share the front fixing bracket set 20S4200 with HK top. Mechanism side drilling not recorded yet. Not verified by a person.",
+  "items": [
+    {
+      "id": "blum.aventos.hs-top",
+      "brand": "Blum",
+      "article": "AVENTOS HS top",
+      "family": "AVENTOS HS top",
+      "variant": "up and over lift system, wooden fronts",
+      "kind": "lift_system",
+      "parameters": {
+        "cabinet_height_min": 350,
+        "cabinet_height_max": 800,
+        "cabinet_width_max": 1800,
+        "inside_depth_min": 264,
+        "handle_weight_factor": 2
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.34, web code DQDZPC",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.aventos.hs-top.mechanism.22s2210.a",
+      "brand": "Blum",
+      "article": "22S2210",
+      "family": "AVENTOS HS top",
+      "variant": "lift mechanism set (2), KH 350-450, FG 2.0-11.5 kg, system screws",
+      "kind": "lift_system",
+      "parameters": {
+        "cabinet_height_min": 350,
+        "cabinet_height_max": 450,
+        "front_weight_min_kg": 2.0,
+        "front_weight_max_kg": 11.5
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.34, web code DQDZPC",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.aventos.hs-top.mechanism.22s2210.b",
+      "brand": "Blum",
+      "article": "22S2210",
+      "family": "AVENTOS HS top",
+      "variant": "lift mechanism set (2), KH 450-540, FG 2.5-12.5 kg, system screws",
+      "kind": "lift_system",
+      "parameters": {
+        "cabinet_height_min": 450,
+        "cabinet_height_max": 540,
+        "front_weight_min_kg": 2.5,
+        "front_weight_max_kg": 12.5
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.34, web code DQDZPC",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.aventos.hs-top.mechanism.22s2510.c",
+      "brand": "Blum",
+      "article": "22S2510",
+      "family": "AVENTOS HS top",
+      "variant": "lift mechanism set (2), KH 480-660, FG 2.75-15.25 kg, system screws",
+      "kind": "lift_system",
+      "parameters": {
+        "cabinet_height_min": 480,
+        "cabinet_height_max": 660,
+        "front_weight_min_kg": 2.75,
+        "front_weight_max_kg": 15.25
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.34, web code DQDZPC",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.aventos.hs-top.mechanism.22s2810.d",
+      "brand": "Blum",
+      "article": "22S2810",
+      "family": "AVENTOS HS top",
+      "variant": "lift mechanism set (2), KH 650-800, FG 3.5-18.5 kg, system screws",
+      "kind": "lift_system",
+      "parameters": {
+        "cabinet_height_min": 650,
+        "cabinet_height_max": 800,
+        "front_weight_min_kg": 3.5,
+        "front_weight_max_kg": 18.5
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.34, web code DQDZPC",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.aventos.hs-top.lever-arm",
+      "brand": "Blum",
+      "article": "22S3500",
+      "family": "AVENTOS HS top",
+      "variant": "lever arm set (2, symmetrical), steel",
+      "kind": "lift_system",
+      "parameters": {},
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.34, web code DQDZPC",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.aventos.hl-top",
+      "brand": "Blum",
+      "article": "AVENTOS HL top",
+      "family": "AVENTOS HL top",
+      "variant": "lift up, wooden fronts",
+      "kind": "lift_system",
+      "parameters": {
+        "cabinet_height_min": 300,
+        "cabinet_height_max": 580,
+        "cabinet_width_max": 1800,
+        "inside_depth_min": 264,
+        "handle_weight_factor": 1,
+        "stabiliser_cut_deduction": 113
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.40, web code DQE0EP",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.aventos.hl-top.mechanism.22l2210",
+      "brand": "Blum",
+      "article": "22L2210",
+      "family": "AVENTOS HL top",
+      "variant": "lift mechanism set (2), KH 300-389, system screws",
+      "kind": "lift_system",
+      "parameters": {
+        "cabinet_height_min": 300,
+        "cabinet_height_max": 389
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.40, web code DQE0EP",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.aventos.hl-top.mechanism.22l2510",
+      "brand": "Blum",
+      "article": "22L2510",
+      "family": "AVENTOS HL top",
+      "variant": "lift mechanism set (2), KH 390-580, system screws",
+      "kind": "lift_system",
+      "parameters": {
+        "cabinet_height_min": 390,
+        "cabinet_height_max": 580
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.40, web code DQE0EP",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.aventos.hl-top.lever-arm.22l3200",
+      "brand": "Blum",
+      "article": "22L3200",
+      "family": "AVENTOS HL top",
+      "variant": "lever arm set (2), KH 300-339, FG 1.5-9.0 kg incl. handle",
+      "kind": "lift_system",
+      "parameters": {
+        "cabinet_height_min": 300,
+        "cabinet_height_max": 339,
+        "front_weight_min_kg": 1.5,
+        "front_weight_max_kg": 9.0
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.40, web code DQE0EP",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.aventos.hl-top.lever-arm.22l3500",
+      "brand": "Blum",
+      "article": "22L3500",
+      "family": "AVENTOS HL top",
+      "variant": "lever arm set (2), KH 340-389, FG 1.75-10.0 kg incl. handle",
+      "kind": "lift_system",
+      "parameters": {
+        "cabinet_height_min": 340,
+        "cabinet_height_max": 389,
+        "front_weight_min_kg": 1.75,
+        "front_weight_max_kg": 10.0
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.40, web code DQE0EP",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.aventos.hl-top.lever-arm.22l3800",
+      "brand": "Blum",
+      "article": "22L3800",
+      "family": "AVENTOS HL top",
+      "variant": "lever arm set (2), KH 390-540, FG 2.0-12.25 kg incl. handle",
+      "kind": "lift_system",
+      "parameters": {
+        "cabinet_height_min": 390,
+        "cabinet_height_max": 540,
+        "front_weight_min_kg": 2.0,
+        "front_weight_max_kg": 12.25
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.40, web code DQE0EP",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.aventos.hl-top.lever-arm.22l3900",
+      "brand": "Blum",
+      "article": "22L3900",
+      "family": "AVENTOS HL top",
+      "variant": "lever arm set (2), KH 480-580, FG 2.5-14.0 kg incl. handle",
+      "kind": "lift_system",
+      "parameters": {
+        "cabinet_height_min": 480,
+        "cabinet_height_max": 580,
+        "front_weight_min_kg": 2.5,
+        "front_weight_max_kg": 14.0
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.40, web code DQE0EP",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.aventos.hl-top.stabiliser",
+      "brand": "Blum",
+      "article": "22Q1076U",
+      "family": "AVENTOS HL top",
+      "variant": "cross stabiliser rod, round, 1076 mm (cut to LW - 113)",
+      "kind": "lift_system",
+      "parameters": {
+        "length": 1076
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.40, web code DQE0EP",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.aventos.cover-caps",
+      "brand": "Blum",
+      "article": "22.8000",
+      "family": "AVENTOS",
+      "variant": "cover cap set (HF top, HS top, HL top)",
+      "kind": "lift_system",
+      "parameters": {},
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.34, web code DQDZPC",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    }
+  ]
+}
