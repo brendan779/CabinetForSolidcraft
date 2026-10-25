@@ -2857,6 +2857,17 @@ expression: list
       "quantity": 1
     },
     {
+      "item": "shelf-support.5mm",
+      "description": "Shelf support for 5 mm holes",
+      "at": {
+        "x": 300.0,
+        "y": 154.0,
+        "z": 376.0
+      },
+      "part": "C01.Shelf1",
+      "quantity": 4
+    },
+    {
       "item": "blum.wall-hanging-bracket.left",
       "description": "Blum wall hanging bracket, screw-on, left",
       "at": {

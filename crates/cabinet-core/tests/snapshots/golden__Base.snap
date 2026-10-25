@@ -2401,6 +2401,17 @@ expression: list
       "quantity": 1
     },
     {
+      "item": "shelf-support.5mm",
+      "description": "Shelf support for 5 mm holes",
+      "at": {
+        "x": 300.0,
+        "y": 279.0,
+        "z": 526.0
+      },
+      "part": "C01.Shelf1",
+      "quantity": 4
+    },
+    {
       "item": "hafele.leg.adjustable",
       "description": "Adjustable cabinet leg with plinth clip",
       "at": {

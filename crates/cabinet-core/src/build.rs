@@ -47,6 +47,8 @@ const SYSTEM32_SETBACK: f64 = 37.0;
 const SYSTEM32_PITCH: f64 = 32.0;
 const SHELF_PIN_DIAMETER: f64 = 5.0;
 const SHELF_PIN_DEPTH: f64 = 10.0;
+/// Generic until a supplier's shelf support is catalogued (HAF-3).
+const SHELF_SUPPORT: &str = "shelf-support.5mm";
 /// Our choice, not Blum's: the end hinges sit this far in from the door's top and bottom. The
 /// hinge itself, its cup and plate come from the hardware catalog (see `hinges`).
 const HINGE_END_OFFSET: f64 = 100.0;
@@ -901,6 +903,15 @@ impl<'a> Builder<'a> {
                     );
                     self.joint_parts(&left, &shelf, Dir::new(Axis::X, true), Axis::Y);
                     self.joint_parts(&right, &shelf, Dir::new(Axis::X, false), Axis::Y);
+                } else {
+                    // One in each front and back pin row, both sides.
+                    self.list.hardware.push(HardwarePlacement {
+                        item: SHELF_SUPPORT.into(),
+                        description: "Shelf support for 5 mm holes".into(),
+                        at: bounds.center(),
+                        part: self.name(PartRole::Shelf, Some(i)),
+                        quantity: 4,
+                    });
                 }
             }
             if fixed_z.len() < n {
@@ -3111,6 +3122,22 @@ mod tests {
         );
         let back = list.part("D01.DrawerBack1").unwrap();
         assert_eq!(back.bounds.size.z, 212.0);
+    }
+
+    /// HAF-3: four supports per adjustable shelf, none for fixed ones.
+    #[test]
+    fn adjustable_shelves_get_four_supports_and_fixed_ones_none() {
+        let mut cab = Cabinet::new("T01", CabinetKind::Tall);
+        cab.fixed_shelves = vec![2];
+        let list = build_cabinet(&cab).unwrap();
+        let supports: Vec<_> = list
+            .hardware
+            .iter()
+            .filter(|h| h.item == "shelf-support.5mm")
+            .collect();
+        assert_eq!(supports.len(), 3);
+        assert!(supports.iter().all(|h| h.quantity == 4));
+        assert!(!supports.iter().any(|h| h.part == "T01.Shelf2"));
     }
 
     /// HAF-5: each light gets its strip and a Ø10 cable hole through the panel between it and
