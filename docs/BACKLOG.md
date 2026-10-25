@@ -168,7 +168,7 @@ committed: they are the brands' copyright. `preview_colour` is an approximation.
 | UI-7 | todo | M | Room planner: wall lengths, run along a wall, appliances as placeholders | split |
 | UI-8 | needs-human (built in 8c867b5; drag in the run strip; say whether a strip is acceptable instead of dragging the 3D cabinets) | M | Drag to reorder and resize cabinets in the viewport (width handles snap to presets) | drag changes width |
 | UI-9 | needs-human (built in 9fd31d0; try the keys) | S | Keyboard: ⌘1–4 workspaces, arrows to step through cabinets, ⌫ delete | works |
-| UI-10 | todo | M | Onboarding: first launch connects to SolidCraft, explains Design vs Manufacturing detail | first-run sheet |
+| UI-10 | needs-human (built in 94108a4; not seen on screen here: launch once with defaults reset, or Help › Welcome to Cabinet Studio) | M | Onboarding: first launch connects to SolidCraft, explains Design vs Manufacturing detail | first-run sheet |
 | UI-11 | done (bae6fe6) | S | App icon and accent colour | icon in Dock |
 | UI-12 | needs-human (built in 983d877; open Settings (⌘,) and change each) | M | Preferences: SolidCraft port, default standard, units, catalog folder, vendor-cad folder | Settings scene |
 | UI-13 | needs-human (built in 6ac857e; save a standard, start a new job, apply it) | M | Construction standard editor: save/load named standards ("My shop") as visual presets | standards menu |
@@ -305,3 +305,4 @@ Agents append one line per session: date, items touched, outcome.
 - 2026-10-26 (night) — BLUM-7 HS/HL top done: the single-front layout is `lift { kind }` (stay lift = HK top, up and over = HS top, lift up = HL top); `lift::single_front` reads each family's height/weight/power-factor ranges and takes the stronger where they overlap.
 - 2026-10-26 (night) — BLUM-13 finished: TIP-ON BLUMOTION units for MERIVOBOX (T60H) and TANDEMBOX (T60B) with their synchronisation; BLUM-13b: SERVO-DRIVE for MOVENTO/TANDEM uses the same parts as the box systems (p.464), no generic rows left.
 - 2026-10-26 (night) — OUT-4 built (f557f9b): ordinate dimensions from the reference corner for every bore row and column, hole table grouped by kind with counts; needs the owner's look.
+- 2026-10-26 (night) — UI-10 built (94108a4): first-run welcome sheet (connect SolidCraft, pick detail with drawn tiles, start); Help › Welcome to Cabinet Studio reopens it.
