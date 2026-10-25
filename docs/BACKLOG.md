@@ -134,11 +134,11 @@ committed: they are the brands' copyright. `preview_colour` is an approximation.
 | DATA-5b | todo | M | Plywood (Hoop pine, birch), compact laminate, HMR, thermolaminates, high-gloss acrylic, from each brand's documents (the Laminex guide's plywood and compact pages first) | records with `kind` set |
 | DATA-6 | split → DATA-6a, DATA-6b | M | Linings: Polytec wall linings / Steccawood / Easycraft, Laminex Surround: profile, module width, length, thickness (`kind: lining`) | records + a lining picker stub |
 | DATA-6a | done (d6e2505) | S | Laminex Surround (MDF Primed Panels) from the Laminex guide, and a Boards / Linings switch in the board picker | records + picker stub |
-| DATA-6b | todo | M | Polytec wall linings, Steccawood, Easycraft and Laminex Architectural Panels (decorated battens and VGroove: pack and module sizes need reading) | records with sources |
+| DATA-6b | todo (polytec's routed Easycraft panels, guide p.28, done in DATA-10; the Ikara/Contours mouldings and timber lining boards of pp. 30-31 are left) | M | Polytec wall linings, Steccawood, Easycraft and Laminex Architectural Panels (decorated battens and VGroove: pack and module sizes need reading) | records with sources |
 | DATA-7 | done (3e69102) | S | Catalog validation in CI: ids unique, tapes resolve, each brand file has a source | part of check.sh (already partly) |
 | DATA-8 | needs-human (built in 670db45; pick an oak for Fronts in the inspector and check the viewport and cut list) | M | Board picker in the app: brand → range → decor grid with grain and finish filters; assign to carcass/fronts/backs | picking a decor updates the 3D colour and the cut list |
 | DATA-9 | 👤 needs-human | S | Owner verifies a sample of rows per brand; flip `verified: true` | — |
-| DATA-10 | todo | M | Polytec guide, the rest: COMMERCIAL board + edge tape (guide p14-17), Internal Carcass tape widths (the table prints "1mm Rigid" without a width), wall linings (DATA-6) | records with sources; parse_polytec.py tests |
+| DATA-10 | done (285ce80) | M | Polytec guide, the rest: COMMERCIAL board + edge tape (guide p14-17), Internal Carcass tape widths (the table prints "1mm Rigid" without a width), wall linings (DATA-6) | records with sources; parse_polytec.py tests |
 
 ### Outputs
 
@@ -323,3 +323,4 @@ Agents append one line per session: date, items touched, outcome.
   13. Blum CAD: the owner will download the shopping list into `vendor-cad/blum/` soon.
   14. Sink cabinet: keep "no back rail" (CORE-5 done).
 - 2026-10-26b (night) — CORE-4c done: `corner_wall` kind (600 × 600 × 330 × 720 by default): the L-corner's legs built as wall cabinets with the bi-fold pair; three Blum wall hanging brackets (main leg both ends, second leg its outer end, its open end carried by the main leg's corner bracket), a rail behind each leg; a right-hand corner swaps the brackets' hands. Headless SolidCraft 0.20 builds it with every part's bounds as the core put them.
+- 2026-10-26b (night) — DATA-10 done: parse_polytec.py reads COMMERCIAL boards (guide pp. 14-15) and tapes (pp. 16-17) from word positions: 252 boards (16-33 mm; MR particleboard, MR MDF, new `ldf` / `moisture_resistant_ldf` substrates), every printed board code (243/243) and every tape whose decor has a board (249/249) cross-checked against `pdftotext -raw`. Internal Carcass tapes take the width of the sized tape with the same item code (12 of 20; 8 stay width-less). 10 routed Easycraft lining panels from p. 28. Fixed on the way: the Internal Carcass SOLID MATT rows had been read as Texture (the heading shares a line with the margin title); 3 wrong ids replaced. Pack quantities not recorded (no field).
