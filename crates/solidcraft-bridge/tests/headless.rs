@@ -364,9 +364,17 @@ fn the_new_cabinets_build_every_part_where_the_core_puts_it() {
     let corner = Cabinet::new("C01", CabinetKind::CornerBase);
     let mut right = Cabinet::new("C02", CabinetKind::CornerBase);
     right.corner.side = HingeSide::Right;
-    let corner_wall = Cabinet::new("C03", CabinetKind::CornerWall);
+    use cabinet_core::model::{Light, LightZone, Voltage};
+    let light = |zone| Light {
+        zone,
+        voltage: Voltage::V24,
+        watts_per_metre: 10.0,
+    };
+    let mut corner_wall = Cabinet::new("C03", CabinetKind::CornerWall);
+    corner_wall.lights = vec![light(LightZone::UnderCabinet), light(LightZone::InCabinet)];
     let mut inner = Cabinet::new("B01", CabinetKind::Base);
     inner.inner_drawers = 2;
+    inner.lights = vec![light(LightZone::Plinth)];
     let mut high = Cabinet::new("D04", CabinetKind::DrawerBank);
     high.fronts = FrontLayout::Drawers {
         ratios: vec![1.0, 1.0],

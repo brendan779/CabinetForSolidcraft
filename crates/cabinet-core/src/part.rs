@@ -228,6 +228,8 @@ pub enum BorePurpose {
     Dowel,
     /// A drawer system's front fixing (LEGRABOX EXPANDO bracket), in the back of a drawer front.
     FrontFixing,
+    /// A light's cable, through a panel.
+    CableHole,
 }
 
 fn default_biscuit() -> BiscuitSize {

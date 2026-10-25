@@ -40,6 +40,9 @@ pub struct Cabinet {
     /// the shelves' place.
     #[serde(default, skip_serializing_if = "is_zero")]
     pub inner_drawers: u32,
+    /// LED strips: under the cabinet, inside it, or in its plinth.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub lights: Vec<Light>,
     /// The blind part of a blind corner cabinet (ignored by other kinds).
     #[serde(default)]
     pub blind: Blind,
@@ -52,6 +55,43 @@ pub struct Cabinet {
     /// Sides seen from the room (the end of a run without an end panel): no screws through them.
     #[serde(default, skip_serializing_if = "Exposed::is_none")]
     pub exposed: Exposed,
+}
+
+/// An LED strip light on a cabinet (see `lighting`).
+#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
+pub struct Light {
+    pub zone: LightZone,
+    pub voltage: Voltage,
+    /// The strip's power per metre, from its data sheet.
+    pub watts_per_metre: f64,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum LightZone {
+    /// Under a wall cabinet, lighting the bench.
+    UnderCabinet,
+    /// Under the top, inside the cabinet.
+    InCabinet,
+    /// In the plinth, lighting the floor.
+    Plinth,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
+pub enum Voltage {
+    #[serde(rename = "12v")]
+    V12,
+    #[serde(rename = "24v")]
+    V24,
+}
+
+impl Voltage {
+    pub fn label(self) -> &'static str {
+        match self {
+            Voltage::V12 => "12 V",
+            Voltage::V24 => "24 V",
+        }
+    }
 }
 
 fn is_zero(n: &u32) -> bool {
@@ -164,6 +204,7 @@ impl Cabinet {
             adjustable_shelves: kind.default_shelves(),
             fixed_shelves: Vec::new(),
             inner_drawers: 0,
+            lights: Vec::new(),
             blind: Blind::default(),
             sink: Sink::default(),
             corner: Corner::for_kind(kind),

@@ -8,7 +8,8 @@ use crate::joinery::ButtJoint;
 use crate::lift;
 use crate::model::{
     BackStyle, BottomJoint, Cabinet, CabinetKind, DoorOverlay, DrawerSides, DrawerSystem, Exposed,
-    FrontCore, FrontLayout, HingeSide, LiftKind, Opening, ToeKick, TopJoint, WallHanging,
+    FrontCore, FrontLayout, HingeSide, LiftKind, LightZone, Opening, ToeKick, TopJoint,
+    WallHanging,
 };
 use crate::part::{
     BorePurpose, Dir, EdgeBanding, HardwarePlacement, Operation, Part, PartList, PartRole,
@@ -49,6 +50,11 @@ const SHELF_PIN_DEPTH: f64 = 10.0;
 /// Our choice, not Blum's: the end hinges sit this far in from the door's top and bottom. The
 /// hinge itself, its cup and plate come from the hardware catalog (see `hinges`).
 const HINGE_END_OFFSET: f64 = 100.0;
+/// Our choice: a light's cable hole, its diameter and how far it sits in from the side and in
+/// front of the back (clear of the side joint's screws and the back's groove).
+const CABLE_HOLE_DIAMETER: f64 = 10.0;
+const CABLE_HOLE_SIDE_INSET: f64 = 60.0;
+const CABLE_HOLE_BACK_INSET: f64 = 25.0;
 /// Blum's 155° hinge, 0-protrusion: for doors in front of inner drawers.
 const INNER_DRAWER_HINGE: &str = "blum.clip-top-blumotion.155.overlay";
 
@@ -66,6 +72,7 @@ pub fn build_cabinet(cab: &Cabinet) -> Result<PartList> {
         b.plinth();
         b.wall_hanging();
         b.sink();
+        b.lights();
         b.cover_caps();
         b.opening();
         b.list
@@ -1860,6 +1867,78 @@ impl<'a> Builder<'a> {
         });
     }
 
+    /// Each light's strip, and a cable hole through the panel between it and the void behind
+    /// the back: down through the bottom for under-cabinet and plinth lights, up through the
+    /// top (or back rail) for lights inside.
+    fn lights(&mut self) {
+        let cab = self.cab;
+        let t = cab.standard.carcass_thickness;
+        for l in cab
+            .lights
+            .iter()
+            .filter(|l| !crate::lighting::zone_fits(cab, l.zone))
+        {
+            self.list.warnings.push(format!(
+                "a {:?} light does not fit a {:?} cabinet; left out",
+                l.zone, cab.kind
+            ));
+        }
+        let fitting = cab
+            .lights
+            .iter()
+            .filter(|l| crate::lighting::zone_fits(cab, l.zone));
+        for (light, strip) in fitting.zip(crate::lighting::strips(cab)) {
+            let x = t + CABLE_HOLE_SIDE_INSET;
+            let y = self.interior_back - CABLE_HOLE_BACK_INSET;
+            let roles: &[PartRole] = match light.zone {
+                LightZone::InCabinet => &[PartRole::Top, PartRole::BackRail],
+                _ => &[PartRole::Bottom],
+            };
+            let through = self
+                .list
+                .parts
+                .iter()
+                .filter(|p| roles.contains(&p.role) && p.thickness_axis == Axis::Z)
+                .find(|p| {
+                    let b = &p.bounds;
+                    (b.min.x..=b.max().x).contains(&x) && (b.min.y..=b.max().y).contains(&y)
+                })
+                .cloned();
+            let Some(panel) = through else {
+                self.list.warnings.push(format!(
+                    "no panel to take the {:?} light's cable; drill it on site",
+                    light.zone
+                ));
+                continue;
+            };
+            let b = panel.bounds;
+            // Drilled from the inside face.
+            let (z, down) = match light.zone {
+                LightZone::InCabinet => (b.min.z, false),
+                _ => (b.max().z, true),
+            };
+            self.list.operations.push(Operation::Bore {
+                part: panel.name.clone(),
+                at: Vec3::new(x, y, z),
+                direction: Dir::new(Axis::Z, !down),
+                diameter: CABLE_HOLE_DIAMETER,
+                depth: b.size.z,
+                purpose: BorePurpose::CableHole,
+            });
+            let v = light.voltage.label();
+            self.list.hardware.push(HardwarePlacement {
+                item: format!("lighting.strip.{}", v.replace(' ', "").to_lowercase()),
+                description: format!(
+                    "LED strip {v}, {:.0} mm, {:.1} W ({} W/m)",
+                    strip.length, strip.watts, light.watts_per_metre
+                ),
+                at: Vec3::new(cab.width / 2.0, y, z),
+                part: panel.name,
+                quantity: 1,
+            });
+        }
+    }
+
     /// A sink cabinet's pipe cut-out in the back and its waterproof liner.
     fn sink(&mut self) {
         let cab = self.cab;
@@ -3032,6 +3111,95 @@ mod tests {
         );
         let back = list.part("D01.DrawerBack1").unwrap();
         assert_eq!(back.bounds.size.z, 212.0);
+    }
+
+    /// HAF-5: each light gets its strip and a Ø10 cable hole through the panel between it and
+    /// the void behind the back.
+    #[test]
+    fn lights_bore_a_cable_hole_through_the_panel_toward_the_back_void() {
+        use crate::model::{Light, LightZone, Voltage};
+        let light = |zone| Light {
+            zone,
+            voltage: Voltage::V24,
+            watts_per_metre: 10.0,
+        };
+        let cases = [
+            (
+                CabinetKind::Wall,
+                TopJoint::Rails,
+                LightZone::UnderCabinet,
+                "W01.Bottom",
+                false,
+            ),
+            (
+                CabinetKind::Wall,
+                TopJoint::Rails,
+                LightZone::InCabinet,
+                "W01.BackRail",
+                true,
+            ),
+            (
+                CabinetKind::Wall,
+                TopJoint::BetweenSides,
+                LightZone::InCabinet,
+                "W01.Top",
+                true,
+            ),
+            (
+                CabinetKind::Base,
+                TopJoint::Rails,
+                LightZone::Plinth,
+                "W01.Bottom",
+                false,
+            ),
+        ];
+        for (kind, top, zone, panel, up) in cases {
+            let mut cab = Cabinet::new("W01", kind);
+            cab.standard.top_joint = top;
+            cab.lights = vec![light(zone)];
+            let list = build_cabinet(&cab).unwrap();
+            assert!(
+                list.warnings.iter().all(|w| w.contains("shelf-pin")),
+                "{zone:?}: {:?}",
+                list.warnings
+            );
+            let holes: Vec<_> = list
+                .operations
+                .iter()
+                .filter_map(|o| match o {
+                    Operation::Bore {
+                        part,
+                        direction,
+                        diameter,
+                        depth,
+                        purpose: BorePurpose::CableHole,
+                        ..
+                    } => Some((part.as_str(), direction.positive, *diameter, *depth)),
+                    _ => None,
+                })
+                .collect();
+            assert_eq!(holes, [(panel, up, 10.0, 16.0)], "{zone:?}");
+            assert!(list.hardware.iter().any(|h| h.item == "lighting.strip.24v"));
+        }
+    }
+
+    #[test]
+    fn a_light_in_a_zone_the_cabinet_lacks_is_left_out_with_a_warning() {
+        use crate::model::{Light, LightZone, Voltage};
+        let mut cab = Cabinet::new("B01", CabinetKind::Base);
+        cab.lights = vec![Light {
+            zone: LightZone::UnderCabinet,
+            voltage: Voltage::V12,
+            watts_per_metre: 4.8,
+        }];
+        let list = build_cabinet(&cab).unwrap();
+        assert!(list.warnings.iter().any(|w| w.contains("does not fit")));
+        assert!(
+            !list
+                .hardware
+                .iter()
+                .any(|h| h.item.starts_with("lighting."))
+        );
     }
 
     /// JOIN-8: DOMINO fixings: a mortise in each part per tenon, no screws, nothing clashing.
