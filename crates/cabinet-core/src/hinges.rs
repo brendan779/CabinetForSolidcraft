@@ -152,6 +152,25 @@ pub fn select_hinge(id: &str, need: &HingeNeed) -> Result<HingeChoice, String> {
     })
 }
 
+/// How many hinges a door `height` mm high weighing `weight` kg needs: Blum's chart (p.718),
+/// the fewest whose height and weight limits both hold. Past the chart, five and a warning.
+pub fn hinge_count(height: f64, weight: f64) -> Result<(u32, Option<String>), String> {
+    let plan = hardware::item("blum.clip-top.hinge-count")?;
+    for n in 2..=5 {
+        let h = plan.param(&format!("hinges_{n}_height_max"))?;
+        let w = plan.param(&format!("hinges_{n}_weight_max_kg"))?;
+        if height <= h && weight <= w {
+            return Ok((n, None));
+        }
+    }
+    Ok((
+        5,
+        Some(format!(
+            "a {height:.0} mm, {weight:.1} kg door is past Blum's hinge chart: five hinges, check"
+        )),
+    ))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -261,5 +280,16 @@ mod tests {
     fn the_cup_centre_is_the_boring_distance_plus_half_the_cup() {
         let c = select(&need(DoorOverlay::Full, 15.0, 16.0)).unwrap();
         assert_eq!(c.cup_inset(), Ok(4.0 + 17.5));
+    }
+
+    #[test]
+    fn hinge_count_follows_blums_chart_by_height_and_weight() {
+        let n = |h, w| hinge_count(h, w).unwrap().0;
+        assert_eq!(n(720.0, 4.0), 2);
+        assert_eq!(n(800.0, 4.0), 3);
+        assert_eq!(n(720.0, 7.0), 3);
+        assert_eq!(n(1900.0, 14.0), 4);
+        assert_eq!(n(2200.0, 14.0), 5);
+        assert!(hinge_count(2600.0, 30.0).unwrap().1.is_some());
     }
 }

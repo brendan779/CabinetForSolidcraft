@@ -2236,8 +2236,8 @@ expression: list
       "quantity": 1
     },
     {
-      "item": "wall-hanger.concealed",
-      "description": "Concealed adjustable wall cabinet hanger",
+      "item": "blum.wall-hanging-bracket.left",
+      "description": "Blum wall hanging bracket, screw-on, left",
       "at": {
         "x": 16.0,
         "y": 314.0,
@@ -2247,8 +2247,8 @@ expression: list
       "quantity": 1
     },
     {
-      "item": "wall-hanger.concealed",
-      "description": "Concealed adjustable wall cabinet hanger",
+      "item": "blum.wall-hanging-bracket.right",
+      "description": "Blum wall hanging bracket, screw-on, right",
       "at": {
         "x": 584.0,
         "y": 314.0,

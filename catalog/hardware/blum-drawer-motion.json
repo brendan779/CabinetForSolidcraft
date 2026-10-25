@@ -1,0 +1,668 @@
+{
+  "brand": "Blum",
+  "website": "https://www.blum.com",
+  "notes": "Drawer motion: TIP-ON BLUMOTION for LEGRABOX (p.396) and MOVENTO (p.504), TANDEM with TIP-ON (p.512), SERVO-DRIVE for LEGRABOX (pp. 364-366), from the Blum Catalogue and technical manual 2024/2025. TIP-ON BLUMOTION units are chosen by nominal length and the pull-out's total weight (Blum's recommended ranges). SERVO-DRIVE for MOVENTO/TANDEM (p.462 on) is not entered yet. The power supply is the Australian market/English article. Not verified by a person.",
+  "items": [
+    {
+      "id": "blum.tip-on-blumotion.legrabox",
+      "brand": "Blum",
+      "article": "TIP-ON BLUMOTION for LEGRABOX",
+      "family": "TIP-ON BLUMOTION",
+      "variant": "planning: units by nominal length and pull-out weight, synchronisation by inside width",
+      "kind": "other",
+      "parameters": {
+        "short_nl_max": 300,
+        "square_sync_lw_min": 245,
+        "square_sync_lw_max": 293,
+        "square_sync_cut_deduction": 221,
+        "round_sync_cut_deduction": 247,
+        "round_sync_lw_max": 1372
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.396",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.tip-on-blumotion.movento",
+      "brand": "Blum",
+      "article": "TIP-ON BLUMOTION for MOVENTO",
+      "family": "TIP-ON BLUMOTION",
+      "variant": "planning: units by nominal length and pull-out weight, synchronisation by inside width",
+      "kind": "other",
+      "parameters": {
+        "short_nl_max": 320,
+        "square_sync_lw_min": 265,
+        "square_sync_lw_max": 313,
+        "square_sync_cut_deduction": 241,
+        "round_sync_cut_deduction": 267,
+        "round_sync_lw_max": 1392
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.504, web code DQD0IM",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.tip-on-blumotion.s0",
+      "brand": "Blum",
+      "article": "T60L7040",
+      "family": "TIP-ON BLUMOTION",
+      "variant": "TIP-ON BLUMOTION set S0 (unit and latch left/right), pull-out 0-10 kg",
+      "kind": "other",
+      "parameters": {
+        "nominal_length_min": 270,
+        "nominal_length_max": 320,
+        "weight_min_kg": 0,
+        "weight_max_kg": 10,
+        "heavy_runner": 0
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.396",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.tip-on-blumotion.s1",
+      "brand": "Blum",
+      "article": "T60L7140",
+      "family": "TIP-ON BLUMOTION",
+      "variant": "TIP-ON BLUMOTION set S1 (unit and latch left/right), pull-out 10-20 kg",
+      "kind": "other",
+      "parameters": {
+        "nominal_length_min": 270,
+        "nominal_length_max": 320,
+        "weight_min_kg": 10,
+        "weight_max_kg": 20,
+        "heavy_runner": 0
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.396",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.tip-on-blumotion.l1",
+      "brand": "Blum",
+      "article": "T60L7340",
+      "family": "TIP-ON BLUMOTION",
+      "variant": "TIP-ON BLUMOTION set L1 (unit and latch left/right), pull-out 0-20 kg",
+      "kind": "other",
+      "parameters": {
+        "nominal_length_min": 350,
+        "nominal_length_max": 600,
+        "weight_min_kg": 0,
+        "weight_max_kg": 20,
+        "heavy_runner": 0
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.396",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.tip-on-blumotion.l3",
+      "brand": "Blum",
+      "article": "T60L7540",
+      "family": "TIP-ON BLUMOTION",
+      "variant": "TIP-ON BLUMOTION set L3 (unit and latch left/right), pull-out 15-40 kg",
+      "kind": "other",
+      "parameters": {
+        "nominal_length_min": 350,
+        "nominal_length_max": 600,
+        "weight_min_kg": 15,
+        "weight_max_kg": 40,
+        "heavy_runner": 0
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.396",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.tip-on-blumotion.l5",
+      "brand": "Blum",
+      "article": "T60L7570",
+      "family": "TIP-ON BLUMOTION",
+      "variant": "TIP-ON BLUMOTION set L5 (unit and latch left/right), pull-out 35-70 kg",
+      "kind": "other",
+      "parameters": {
+        "nominal_length_min": 450,
+        "nominal_length_max": 750,
+        "weight_min_kg": 35,
+        "weight_max_kg": 70,
+        "heavy_runner": 1
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.396",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.tip-on-blumotion.sync-square",
+      "brand": "Blum",
+      "article": "T60.300D",
+      "family": "TIP-ON BLUMOTION",
+      "variant": "synchronisation, square, light grey (cut to size)",
+      "kind": "other",
+      "parameters": {},
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.396",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.tip-on-blumotion.sync-round",
+      "brand": "Blum",
+      "article": "T60.1125W",
+      "family": "TIP-ON BLUMOTION",
+      "variant": "synchronisation linkage, round, grey (cut to size)",
+      "kind": "other",
+      "parameters": {},
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.396",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.tip-on-blumotion.sync-adapter",
+      "brand": "Blum",
+      "article": "T60.000D",
+      "family": "TIP-ON BLUMOTION",
+      "variant": "synchronisation adapter, symmetrical (2 per drawer with the round linkage)",
+      "kind": "other",
+      "parameters": {},
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.396",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.tandem.560h-tip-on.250",
+      "brand": "Blum",
+      "article": "560H2500T",
+      "family": "TANDEM",
+      "variant": "560H runners left/right with TIP-ON, full extension, NL 250, 30 kg",
+      "kind": "runner",
+      "parameters": {
+        "nominal_length": 250,
+        "max_load_kg": 30
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.512, web code DQEEHC",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.tandem.560h-tip-on.270",
+      "brand": "Blum",
+      "article": "560H2700T",
+      "family": "TANDEM",
+      "variant": "560H runners left/right with TIP-ON, full extension, NL 270, 30 kg",
+      "kind": "runner",
+      "parameters": {
+        "nominal_length": 270,
+        "max_load_kg": 30
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.512, web code DQEEHC",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.tandem.560h-tip-on.300",
+      "brand": "Blum",
+      "article": "560H3000T",
+      "family": "TANDEM",
+      "variant": "560H runners left/right with TIP-ON, full extension, NL 300, 30 kg",
+      "kind": "runner",
+      "parameters": {
+        "nominal_length": 300,
+        "max_load_kg": 30
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.512, web code DQEEHC",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.tandem.560h-tip-on.320",
+      "brand": "Blum",
+      "article": "560H3200T",
+      "family": "TANDEM",
+      "variant": "560H runners left/right with TIP-ON, full extension, NL 320, 30 kg",
+      "kind": "runner",
+      "parameters": {
+        "nominal_length": 320,
+        "max_load_kg": 30
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.512, web code DQEEHC",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.tandem.560h-tip-on.350",
+      "brand": "Blum",
+      "article": "560H3500T",
+      "family": "TANDEM",
+      "variant": "560H runners left/right with TIP-ON, full extension, NL 350, 30 kg",
+      "kind": "runner",
+      "parameters": {
+        "nominal_length": 350,
+        "max_load_kg": 30
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.512, web code DQEEHC",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.tandem.560h-tip-on.380",
+      "brand": "Blum",
+      "article": "560H3800T",
+      "family": "TANDEM",
+      "variant": "560H runners left/right with TIP-ON, full extension, NL 380, 30 kg",
+      "kind": "runner",
+      "parameters": {
+        "nominal_length": 380,
+        "max_load_kg": 30
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.512, web code DQEEHC",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.tandem.560h-tip-on.400",
+      "brand": "Blum",
+      "article": "560H4000T",
+      "family": "TANDEM",
+      "variant": "560H runners left/right with TIP-ON, full extension, NL 400, 30 kg",
+      "kind": "runner",
+      "parameters": {
+        "nominal_length": 400,
+        "max_load_kg": 30
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.512, web code DQEEHC",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.tandem.560h-tip-on.420",
+      "brand": "Blum",
+      "article": "560H4200T",
+      "family": "TANDEM",
+      "variant": "560H runners left/right with TIP-ON, full extension, NL 420, 30 kg",
+      "kind": "runner",
+      "parameters": {
+        "nominal_length": 420,
+        "max_load_kg": 30
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.512, web code DQEEHC",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.tandem.560h-tip-on.450",
+      "brand": "Blum",
+      "article": "560H4500T",
+      "family": "TANDEM",
+      "variant": "560H runners left/right with TIP-ON, full extension, NL 450, 30 kg",
+      "kind": "runner",
+      "parameters": {
+        "nominal_length": 450,
+        "max_load_kg": 30
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.512, web code DQEEHC",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.tandem.560h-tip-on.480",
+      "brand": "Blum",
+      "article": "560H4800T",
+      "family": "TANDEM",
+      "variant": "560H runners left/right with TIP-ON, full extension, NL 480, 30 kg",
+      "kind": "runner",
+      "parameters": {
+        "nominal_length": 480,
+        "max_load_kg": 30
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.512, web code DQEEHC",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.tandem.560h-tip-on.500",
+      "brand": "Blum",
+      "article": "560H5000T",
+      "family": "TANDEM",
+      "variant": "560H runners left/right with TIP-ON, full extension, NL 500, 30 kg",
+      "kind": "runner",
+      "parameters": {
+        "nominal_length": 500,
+        "max_load_kg": 30
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.512, web code DQEEHC",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.tandem.560h-tip-on.520",
+      "brand": "Blum",
+      "article": "560H5200T",
+      "family": "TANDEM",
+      "variant": "560H runners left/right with TIP-ON, full extension, NL 520, 30 kg",
+      "kind": "runner",
+      "parameters": {
+        "nominal_length": 520,
+        "max_load_kg": 30
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.512, web code DQEEHC",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.tandem.560h-tip-on.550",
+      "brand": "Blum",
+      "article": "560H5500T",
+      "family": "TANDEM",
+      "variant": "560H runners left/right with TIP-ON, full extension, NL 550, 30 kg",
+      "kind": "runner",
+      "parameters": {
+        "nominal_length": 550,
+        "max_load_kg": 30
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.512, web code DQEEHC",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.tandem.560h-tip-on.600",
+      "brand": "Blum",
+      "article": "560H6000T",
+      "family": "TANDEM",
+      "variant": "560H runners left/right with TIP-ON, full extension, NL 600, 30 kg",
+      "kind": "runner",
+      "parameters": {
+        "nominal_length": 600,
+        "max_load_kg": 30
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.512, web code DQEEHC",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.tandem.tip-on-sync",
+      "brand": "Blum",
+      "article": "T57.1140S",
+      "family": "TANDEM",
+      "variant": "TIP-ON synchronisation linkage, profile, grey (cut to LW - 31)",
+      "kind": "other",
+      "parameters": {
+        "cut_deduction": 31,
+        "lw_max": 1171
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.512, web code DQEEHC",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.servo-drive.legrabox",
+      "brand": "Blum",
+      "article": "SERVO-DRIVE for LEGRABOX | MERIVOBOX | TANDEMBOX",
+      "family": "SERVO-DRIVE",
+      "variant": "planning: bracket profile length PL = LH - 10, distance bumpers by front height",
+      "kind": "other",
+      "parameters": {
+        "bracket_deduction": 10,
+        "bumpers_low_front": 2,
+        "bumpers_high_front": 4,
+        "low_front_max": 300
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.364",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.servo-drive.drive-unit",
+      "brand": "Blum",
+      "article": "Z10A3000.04",
+      "family": "SERVO-DRIVE",
+      "variant": "drive unit, dark grey, with lever extension (one per drawer)",
+      "kind": "other",
+      "parameters": {},
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.364",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.servo-drive.bracket-profile.650",
+      "brand": "Blum",
+      "article": "Z10T650AA",
+      "family": "SERVO-DRIVE",
+      "variant": "bracket profile 650 mm (cut to size)",
+      "kind": "other",
+      "parameters": {
+        "length": 650
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.364",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.servo-drive.bracket-profile.700",
+      "brand": "Blum",
+      "article": "Z10T700AA",
+      "family": "SERVO-DRIVE",
+      "variant": "bracket profile 700 mm (cut to size)",
+      "kind": "other",
+      "parameters": {
+        "length": 700
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.364",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.servo-drive.bracket-profile.750",
+      "brand": "Blum",
+      "article": "Z10T750AA",
+      "family": "SERVO-DRIVE",
+      "variant": "bracket profile 750 mm (cut to size)",
+      "kind": "other",
+      "parameters": {
+        "length": 750
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.364",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.servo-drive.bracket-profile.800",
+      "brand": "Blum",
+      "article": "Z10T800AA",
+      "family": "SERVO-DRIVE",
+      "variant": "bracket profile 800 mm (cut to size)",
+      "kind": "other",
+      "parameters": {
+        "length": 800
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.364",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.servo-drive.bracket-profile.1170",
+      "brand": "Blum",
+      "article": "Z10T1170A",
+      "family": "SERVO-DRIVE",
+      "variant": "bracket profile 1170 mm (cut to size)",
+      "kind": "other",
+      "parameters": {
+        "length": 1170
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.364",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.servo-drive.bracket-attachment",
+      "brand": "Blum",
+      "article": "Z10D01E0.01",
+      "family": "SERVO-DRIVE",
+      "variant": "bracket profile attachment top/bottom, cross bar construction",
+      "kind": "other",
+      "parameters": {},
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.364",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.servo-drive.distribution-cable",
+      "brand": "Blum",
+      "article": "Z10K800AE",
+      "family": "SERVO-DRIVE",
+      "variant": "distribution cable set, 8 m (cut to size)",
+      "kind": "other",
+      "parameters": {},
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.364",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.servo-drive.connecting-node",
+      "brand": "Blum",
+      "article": "Z10V100E.01",
+      "family": "SERVO-DRIVE",
+      "variant": "connecting node set",
+      "kind": "other",
+      "parameters": {},
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.364",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.servo-drive.power-supply.au",
+      "brand": "Blum",
+      "article": "Z10NE04KI",
+      "family": "SERVO-DRIVE",
+      "variant": "power supply unit and flex, market AU, English",
+      "kind": "other",
+      "parameters": {},
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.364",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.servo-drive.distance-bumper",
+      "brand": "Blum",
+      "article": "993.0530",
+      "family": "SERVO-DRIVE",
+      "variant": "Blum distance bumper Ø 5 mm",
+      "kind": "other",
+      "parameters": {
+        "diameter": 5
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.364",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    }
+  ]
+}

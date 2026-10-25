@@ -1,7 +1,7 @@
 {
   "brand": "Blum",
   "website": "https://www.blum.com",
-  "notes": "CLIP top BLUMOTION / CLIP top 110° hinges and CLIP cruciform mounting plates, from the Blum Catalogue and technical manual 2024/2025 (printed pages 76-77, 150-153, 718-721). Boring distance TB = front overlay FA - boss overlay TO (11) + arm cranking + plate spacing MD; checked against the TB tables on p.77 for every MD row. cup_depth is printed as 'min 13' and hole_depth_min as 'min 11.5'. INSERTA dowel depth is not printed, so INSERTA hinges carry no dowel drilling yet. Not verified by a person. The 155° hinge (pp. 84-85) and the corner cabinet bi-fold hinge (pp. 116-117) serve the L-shaped corner base's bi-fold doors.",
+  "notes": "CLIP top BLUMOTION / CLIP top 110° hinges and CLIP cruciform mounting plates, from the Blum Catalogue and technical manual 2024/2025 (printed pages 76-77, 150-153, 718-721). Boring distance TB = front overlay FA - boss overlay TO (11) + arm cranking + plate spacing MD; checked against the TB tables on p.77 for every MD row. cup_depth is printed as 'min 13' and hole_depth_min as 'min 11.5'. INSERTA dowel depth is not printed, so INSERTA hinges carry no dowel drilling yet. Not verified by a person. The 155° hinge (pp. 84-85) and the corner cabinet bi-fold hinge (pp. 116-117) serve the L-shaped corner base's bi-fold doors. The hinge count limits are read from the bar chart on p.718: bar tops at about 750, 1500, 2100 and 2500 mm, weights 4-6, 6-12, 12-17 and 17-22 kg.",
   "items": [
     {
       "id": "blum.clip-top-blumotion.110.overlay",
@@ -1896,6 +1896,30 @@
       },
       "source": {
         "url": "Blum Catalogue and technical manual 2024/2025, p.153",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.clip-top.hinge-count",
+      "brand": "Blum",
+      "article": "CLIP top planning",
+      "family": "CLIP top",
+      "variant": "number of hinges by front height and weight (fronts 600 wide)",
+      "kind": "other",
+      "parameters": {
+        "hinges_2_height_max": 750,
+        "hinges_2_weight_max_kg": 6,
+        "hinges_3_height_max": 1500,
+        "hinges_3_weight_max_kg": 12,
+        "hinges_4_height_max": 2100,
+        "hinges_4_weight_max_kg": 17,
+        "hinges_5_height_max": 2500,
+        "hinges_5_weight_max_kg": 22
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.718 (also p.75)",
         "document_date": "2024/2025",
         "retrieved": "2026-10-26",
         "verified": false

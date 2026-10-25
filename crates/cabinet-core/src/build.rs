@@ -31,6 +31,9 @@ const SINK_CUTOUT_HEIGHT: f64 = 400.0;
 const SINK_CUTOUT_SIDE_MARGIN: f64 = 50.0;
 /// Doors taller than this (mm) get a TIP-ON unit near each end so they open square.
 const TALL_DOOR: f64 = 1200.0;
+/// Our call, not Blum's: a wooden drawer with sides at least this high is a deep drawer for pots
+/// and gets the TIP-ON BLUMOTION unit for 15–40 kg.
+const DEEP_WOOD_DRAWER: f64 = 150.0;
 /// Screw centres along each edge an applied back is screwed to.
 const BACK_SCREW_SPACING: f64 = 150.0;
 /// Pilot for a 4 × 20 screw through a 6 mm back: short enough to stay clear of the shelf-pin row
@@ -260,6 +263,21 @@ struct Builder<'a> {
     opening_z: (f64, f64),
     /// Where the interior ends at the back (front face of the back panel).
     interior_back: f64,
+    /// The drawer box behind each drawer front, for the opening hardware.
+    drawer_fits: Vec<DrawerFit>,
+}
+
+/// What the opening hardware needs to know about a drawer's box.
+struct DrawerFit {
+    front: String,
+    /// `legrabox`, `movento` or `tandem`.
+    system: &'static str,
+    nominal_length: f64,
+    /// On the 70 kg LEGRABOX profile or 60/70 kg MOVENTO runner.
+    heavy_runner: bool,
+    /// A deep box (LEGRABOX K, wooden sides 150 mm or more): Blum's 15–40 kg TIP-ON unit.
+    heavy_load: bool,
+    front_height: f64,
 }
 
 impl<'a> Builder<'a> {
@@ -273,6 +291,7 @@ impl<'a> Builder<'a> {
             carcass_z0: 0.0,
             opening_z: (0.0, 0.0),
             interior_back: 0.0,
+            drawer_fits: Vec::new(),
         }
     }
 
@@ -358,22 +377,34 @@ impl<'a> Builder<'a> {
             .filter(|p| matches!(p.role, PartRole::Door | PartRole::DrawerFront))
             .cloned()
             .collect();
-        let mut servo = 0;
+        let lw = self.cab.width - 2.0 * self.cab.standard.carcass_thickness;
+        let mut servo_legrabox: Vec<f64> = Vec::new();
+        let mut servo_heavy = false;
+        let mut servo_generic = 0;
         for f in &fronts {
-            let rows: Vec<(String, String, u32)> = match (f.role, opening) {
-                (PartRole::DrawerFront, Opening::ServoDrive) => {
-                    servo += 1;
+            let fit = self.drawer_fits.iter().find(|d| d.front == f.name);
+            let rows: Vec<(String, String, u32)> = match (f.role, opening, fit) {
+                (PartRole::DrawerFront, Opening::ServoDrive, Some(d)) if d.system == "legrabox" => {
+                    servo_legrabox.push(d.front_height);
+                    servo_heavy |= d.heavy_runner;
+                    Vec::new()
+                }
+                (PartRole::DrawerFront, Opening::ServoDrive, _) => {
+                    servo_generic += 1;
                     vec![(
                         "blum.servo-drive.drawer".into(),
                         "SERVO-DRIVE drive unit for a drawer".into(),
                         1,
                     )]
                 }
-                (PartRole::DrawerFront, _) => vec![(
-                    "blum.tip-on.drawer".into(),
-                    "TIP-ON BLUMOTION unit set for a drawer".into(),
-                    1,
-                )],
+                (PartRole::DrawerFront, _, Some(d)) => match self.drawer_tip_on(d, lw) {
+                    Ok(items) => items,
+                    Err(e) => {
+                        self.list.warnings.push(format!("{}: {e}", f.name));
+                        Vec::new()
+                    }
+                },
+                (PartRole::DrawerFront, _, None) => Vec::new(),
                 _ => {
                     let n = if f.bounds.size.z > TALL_DOOR { 2 } else { 1 };
                     match self.tip_on_door(f) {
@@ -403,16 +434,69 @@ impl<'a> Builder<'a> {
                 .warnings
                 .push("SERVO-DRIVE does not open hinged doors: they get TIP-ON".into());
         }
-        if servo > 0 {
-            let bottom = self.name(PartRole::Bottom, None);
+        let bottom = self.name(PartRole::Bottom, None);
+        let at = Vec3::new(self.cab.width / 2.0, self.interior_back, self.carcass_z0);
+        if !servo_legrabox.is_empty() {
+            let inside = self.opening_z.1 - self.opening_z.0;
+            match drawers::servo_drive_legrabox(inside, &servo_legrabox, servo_heavy) {
+                Ok(items) => {
+                    for (i, quantity) in items {
+                        self.list.hardware.push(HardwarePlacement {
+                            item: i.id.clone(),
+                            description: format!("{} {}", i.family, i.variant),
+                            at,
+                            part: bottom.clone(),
+                            quantity,
+                        });
+                    }
+                }
+                Err(e) => self.list.warnings.push(e),
+            }
+        }
+        if servo_generic > 0 {
+            self.list
+                .warnings
+                .push("SERVO-DRIVE for wooden drawers is not catalogued yet: generic rows".into());
             self.list.hardware.push(HardwarePlacement {
                 item: "blum.servo-drive.power-supply".into(),
                 description: "SERVO-DRIVE power supply and cable set".into(),
-                at: Vec3::new(self.cab.width / 2.0, self.interior_back, self.carcass_z0),
+                at,
                 part: bottom,
                 quantity: 1,
             });
         }
+    }
+
+    /// TIP-ON for a drawer: a TIP-ON BLUMOTION set and its synchronisation on LEGRABOX and
+    /// MOVENTO; TANDEM has TIP-ON in its runners and takes a synchronisation linkage.
+    fn drawer_tip_on(
+        &self,
+        d: &DrawerFit,
+        lw: f64,
+    ) -> std::result::Result<Vec<(String, String, u32)>, String> {
+        let row = |i: &cabinet_catalog::HardwareItem, n: u32| {
+            (i.id.clone(), format!("{} {}", i.family, i.variant), n)
+        };
+        if d.system == "tandem" {
+            let sync = crate::hardware::item("blum.tandem.tip-on-sync")?;
+            return Ok(if lw <= sync.param("lw_max")? {
+                vec![row(sync, 1)]
+            } else {
+                Vec::new()
+            });
+        }
+        Ok(
+            drawers::tip_on_blumotion(
+                d.system,
+                d.nominal_length,
+                d.heavy_runner,
+                d.heavy_load,
+                lw,
+            )?
+            .into_iter()
+            .map(|(i, n)| row(i, n))
+            .collect(),
+        )
     }
 
     /// A door's TIP-ON unit and its adapter plate: Blum's short version for overlay fronts up to
@@ -996,6 +1080,7 @@ impl<'a> Builder<'a> {
             self.interior_back - fy,
             space,
             s.drawer_board_thickness,
+            s.opening == Opening::TipOn,
         ) {
             Ok(b) => b,
             Err(e) => {
@@ -1005,6 +1090,17 @@ impl<'a> Builder<'a> {
                 return;
             }
         };
+        self.drawer_fits.push(DrawerFit {
+            front: front_name.clone(),
+            system: match runner {
+                WoodRunner::Movento => "movento",
+                WoodRunner::Tandem => "tandem",
+            },
+            nominal_length: b.nominal_length,
+            heavy_runner: b.runner.id.contains(".766h."),
+            heavy_load: b.side_height >= DEEP_WOOD_DRAWER,
+            front_height: front.size.z,
+        });
         let (st, mid) = (b.board, cab.width / 2.0);
         let (x0, x1) = (mid - b.inside_width / 2.0, mid + b.inside_width / 2.0);
         let (y0, y1) = (fy, fy + b.length);
@@ -1079,6 +1175,14 @@ impl<'a> Builder<'a> {
                 .push(format!("{front_name}: {}", numbers.unwrap_err()));
             return;
         };
+        self.drawer_fits.push(DrawerFit {
+            front: front_name.clone(),
+            system: "legrabox",
+            nominal_length: lb.nominal_length,
+            heavy_runner: lb.profile.id.contains(".753."),
+            heavy_load: lb.height == "K",
+            front_height: front.size.z,
+        });
         let bt = lb.board_thickness;
         // Placed for the 3D view and the cut list; the sizes are Blum's.
         let (bw, bl) = lb.base;
@@ -1343,11 +1447,21 @@ impl<'a> Builder<'a> {
         };
         let side = self.name(side_role, None);
         let height = b.size.z;
-        let count = match height {
-            h if h <= 900.0 => 2,
-            h if h <= 1600.0 => 3,
-            h if h <= 2000.0 => 4,
-            _ => 5,
+        let weight = lift::reference_density(s.front_core == FrontCore::Mdf)
+            .map(|density| lift::front_weight(height, b.size.x, b.size.y, density));
+        let count = match weight.and_then(|w| hinges::hinge_count(height, w)) {
+            Ok((n, note)) => {
+                if let Some(note) = note {
+                    self.list.warnings.push(format!("{door}: {note}"));
+                }
+                n as usize
+            }
+            Err(e) => {
+                self.list
+                    .warnings
+                    .push(format!("{door}: {e}; no hinges placed"));
+                return Vec::new();
+            }
         };
         // How far the door covers its hinge side's front edge (negative: inset, its gap).
         let t = s.carcass_thickness;
@@ -1560,10 +1674,13 @@ impl<'a> Builder<'a> {
         }
         let (w, d, h, t) = (cab.width, cab.depth, cab.height, s.carcass_thickness);
         let void_y = d - BACK_INSET;
-        for (role, x) in [(PartRole::LeftSide, t), (PartRole::RightSide, w - t)] {
+        for (role, x, hand) in [
+            (PartRole::LeftSide, t, "left"),
+            (PartRole::RightSide, w - t, "right"),
+        ] {
             self.list.hardware.push(HardwarePlacement {
-                item: "wall-hanger.concealed".into(),
-                description: "Concealed adjustable wall cabinet hanger".into(),
+                item: format!("blum.wall-hanging-bracket.{hand}"),
+                description: format!("Blum wall hanging bracket, screw-on, {hand}"),
                 at: Vec3::new(x, void_y, h),
                 part: self.name(role, None),
                 quantity: 1,
@@ -1904,7 +2021,7 @@ mod tests {
         let hangers: Vec<_> = list
             .hardware
             .iter()
-            .filter(|h| h.item == "wall-hanger.concealed")
+            .filter(|h| h.item.starts_with("blum.wall-hanging-bracket."))
             .collect();
         assert_eq!(hangers.len(), 2);
         assert_eq!(hangers[0].part, "W01.LeftSide");
@@ -1936,12 +2053,7 @@ mod tests {
         wall.standard.wall_hanging = WallHanging::None;
         let wall = build_cabinet(&wall).unwrap();
         for list in [base, wall] {
-            assert!(
-                !list
-                    .hardware
-                    .iter()
-                    .any(|h| h.item.starts_with("wall-hanger"))
-            );
+            assert!(!list.hardware.iter().any(|h| h.item.contains("hang")));
         }
     }
 
@@ -1950,12 +2062,7 @@ mod tests {
         let mut cab = Cabinet::new("W01", CabinetKind::Wall);
         cab.standard.back = BackStyle::Applied;
         let list = build_cabinet(&cab).unwrap();
-        assert!(
-            !list
-                .hardware
-                .iter()
-                .any(|h| h.item.starts_with("wall-hanger"))
-        );
+        assert!(!list.hardware.iter().any(|h| h.item.contains("hang")));
         assert!(list.warnings.iter().any(|w| w.contains("wall hangers")));
     }
 
@@ -2217,12 +2324,31 @@ mod tests {
         let mut bank = Cabinet::new("D01", CabinetKind::DrawerBank);
         bank.standard.opening = Opening::TipOn;
         let list = build_cabinet(&bank).unwrap();
+        // K boxes on NL 550: the 15–40 kg unit, synchronised with the round linkage.
+        let count = |id: &str| {
+            list.hardware
+                .iter()
+                .filter(|h| h.item == id)
+                .map(|h| h.quantity)
+                .sum::<u32>()
+        };
+        assert_eq!(count("blum.tip-on-blumotion.l3"), 3);
+        assert_eq!(count("blum.tip-on-blumotion.sync-round"), 3);
+        assert_eq!(count("blum.tip-on-blumotion.sync-adapter"), 6);
+        // TANDEM drawers take TIP-ON runners and a synchronisation linkage.
+        bank.standard.drawer_system = DrawerSystem::Tandem;
+        let list = build_cabinet(&bank).unwrap();
         assert_eq!(
             list.hardware
                 .iter()
-                .filter(|h| h.item == "blum.tip-on.drawer")
+                .filter(|h| h.item == "blum.tandem.560h-tip-on.550")
                 .count(),
             3
+        );
+        assert!(
+            list.hardware
+                .iter()
+                .any(|h| h.item == "blum.tandem.tip-on-sync")
         );
     }
 
@@ -2244,20 +2370,16 @@ mod tests {
         let mut bank = Cabinet::new("D01", CabinetKind::DrawerBank);
         bank.standard.opening = Opening::ServoDrive;
         let list = build_cabinet(&bank).unwrap();
-        assert_eq!(
+        let count = |id: &str| {
             list.hardware
                 .iter()
-                .filter(|h| h.item == "blum.servo-drive.drawer")
-                .count(),
-            3
-        );
-        assert_eq!(
-            list.hardware
-                .iter()
-                .filter(|h| h.item == "blum.servo-drive.power-supply")
-                .count(),
-            1
-        );
+                .filter(|h| h.item == id)
+                .map(|h| h.quantity)
+                .sum::<u32>()
+        };
+        assert_eq!(count("blum.servo-drive.drive-unit"), 3);
+        assert_eq!(count("blum.servo-drive.power-supply.au"), 1);
+        assert_eq!(count("blum.servo-drive.bracket-attachment"), 2);
         let mut base = Cabinet::new("B01", CabinetKind::Base);
         base.standard.opening = Opening::ServoDrive;
         let list = build_cabinet(&base).unwrap();
