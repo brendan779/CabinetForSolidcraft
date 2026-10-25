@@ -609,6 +609,10 @@ pub enum LiftKind {
     UpAndOver,
     /// Rises parallel to itself (AVENTOS HL top), for small fronts.
     LiftUp,
+    /// A small stay lift (AVENTOS HK-S), for small wall cabinets and over the fridge.
+    SmallStayLift,
+    /// A stay lift on hinges along the top (AVENTOS HK-XS), for the smallest fronts.
+    HingedStayLift,
 }
 
 /// A front's core board, for its weight (Blum's reference densities).

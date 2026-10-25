@@ -631,10 +631,12 @@ struct LiftKindPicker: View {
         ("stay_lift", "Stay lift", "Swings up about its top edge and stays open (AVENTOS HK top)"),
         ("up_and_over", "Up and over", "Rises and tips over the top, for large fronts (AVENTOS HS top)"),
         ("lift_up", "Lift up", "Rises parallel to itself, for small fronts (AVENTOS HL top)"),
+        ("small_stay_lift", "Small stay", "A small stay lift for small wall cabinets and over the fridge (AVENTOS HK-S)"),
+        ("hinged_stay_lift", "On hinges", "A stay lift on hinges along the top, for the smallest fronts (AVENTOS HK-XS)"),
     ]
 
     var body: some View {
-        HStack(spacing: 8) {
+        LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 3), spacing: 8) {
             ForEach(kinds, id: \.id) { kind in
                 Button {
                     withAnimation(.snappy) { var c = cab; c.liftKind = kind.id; project.selected = c }
@@ -676,6 +678,14 @@ struct LiftKindThumbnail: View {
             case "lift_up":
                 open.move(to: CGPoint(x: body.minX - 2, y: 2))
                 open.addLine(to: CGPoint(x: body.minX - 2, y: body.minY - 2))
+            case "small_stay_lift":
+                open.move(to: CGPoint(x: body.minX - 2, y: body.minY))
+                open.addLine(to: CGPoint(x: w * 0.12, y: body.minY - h * 0.15))
+            case "hinged_stay_lift":
+                open.move(to: CGPoint(x: body.minX - 2, y: body.minY))
+                open.addLine(to: CGPoint(x: w * 0.12, y: body.minY - h * 0.15))
+                ctx.fill(Path(ellipseIn: CGRect(x: body.minX - 4, y: body.minY - 2, width: 4, height: 4)),
+                         with: .color(.accentColor))
             default:
                 open.move(to: CGPoint(x: body.minX - 2, y: body.minY))
                 open.addLine(to: CGPoint(x: 2, y: body.minY - h * 0.25))

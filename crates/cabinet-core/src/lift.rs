@@ -171,8 +171,8 @@ pub use crate::model::LiftKind;
 pub struct SingleLift {
     /// LF, where the family selects by it (HK top).
     pub power_factor: Option<f64>,
-    /// The lift mechanism set first, then the rest of the parts, one set each.
-    pub parts: Vec<&'static HardwareItem>,
+    /// The lift mechanism first, then the rest of the parts, each with how many.
+    pub parts: Vec<(&'static HardwareItem, u32)>,
     pub warnings: Vec<String>,
 }
 
@@ -186,6 +186,8 @@ pub struct LiftNeed {
     /// The front alone, kg.
     pub front_weight: f64,
     pub handle_weight: f64,
+    /// Opened by TIP-ON: the families that have them take TIP-ON mechanisms.
+    pub tip_on: bool,
 }
 
 /// Of the items under `prefix`, those whose cabinet height (and front weight, where given)
@@ -212,30 +214,34 @@ fn by_ranges(prefix: &str, kh: f64, fg: f64) -> Option<&'static HardwareItem> {
         })
 }
 
-/// Picks the AVENTOS parts for one front: HK top (stay lift, p.46), HS top (up and over, p.34)
-/// or HL top (lift up, p.40).
+/// Picks the AVENTOS parts for one front: HK top (stay lift, p.46), HS top (up and over, p.34),
+/// HL top (lift up, p.40), HK-S (small stay lift, p.56) or HK-XS (stay lift on hinges, p.62).
 pub fn single_front(kind: LiftKind, need: &LiftNeed) -> Result<SingleLift, String> {
     let family = match kind {
         LiftKind::StayLift => "hk-top",
         LiftKind::UpAndOver => "hs-top",
         LiftKind::LiftUp => "hl-top",
+        LiftKind::SmallStayLift => "hk-s",
+        LiftKind::HingedStayLift => "hk-xs",
     };
     let sys = hardware::item(&format!("blum.aventos.{family}"))?;
     let p = |k: &str| sys.param(k);
     let kh = need.cabinet_height;
-    if !(p("cabinet_height_min")?..=p("cabinet_height_max")?).contains(&kh) {
+    let lowest = p("cabinet_height_min").unwrap_or(0.0);
+    if !(lowest..=p("cabinet_height_max")?).contains(&kh) {
         return Err(format!(
             "{} is for cabinets {}–{} mm high, not {kh:.0}",
             sys.family,
-            p("cabinet_height_min")?,
+            lowest,
             p("cabinet_height_max")?
         ));
     }
-    if need.cabinet_width > p("cabinet_width_max")? {
+    if let Ok(max) = p("cabinet_width_max")
+        && need.cabinet_width > max
+    {
         return Err(format!(
-            "{} is for cabinets up to {} mm wide",
-            sys.family,
-            p("cabinet_width_max")?
+            "{} is for cabinets up to {max} mm wide",
+            sys.family
         ));
     }
     let fg = need.front_weight + p("handle_weight_factor")? * need.handle_weight;
@@ -266,34 +272,87 @@ pub fn single_front(kind: LiftKind, need: &LiftNeed) -> Result<SingleLift, Strin
             ));
         }
     }
-    let mechanism =
-        by_ranges(&format!("blum.aventos.{family}.mechanism."), kh, fg).ok_or_else(|| {
-            format!(
-                "no {} mechanism for KH {kh:.0} and a {fg:.1} kg front",
-                sys.family
+    let tip_on =
+        if need.tip_on && matches!(kind, LiftKind::SmallStayLift | LiftKind::HingedStayLift) {
+            "tip-on."
+        } else {
+            ""
+        };
+    let prefix = format!("blum.aventos.{family}.{tip_on}mechanism.");
+    let no_mechanism = || {
+        format!(
+            "no {} mechanism for KH {kh:.0} and a {fg:.1} kg front (LF {:.0})",
+            sys.family,
+            kh * fg
+        )
+    };
+    // HK-XS: one mechanism, or one each side for twice the power factor.
+    let (mechanism, sides) = match by_ranges(&prefix, kh, fg) {
+        Some(m) => (m, 1),
+        None if kind == LiftKind::HingedStayLift => {
+            let doubled = p("two_sides_factor")?;
+            (
+                by_ranges(&prefix, kh, fg / doubled).ok_or_else(no_mechanism)?,
+                2,
             )
-        })?;
+        }
+        None => return Err(no_mechanism()),
+    };
     let item = hardware::item;
-    let mut parts = vec![mechanism];
+    let mut parts = vec![(mechanism, sides)];
     match kind {
-        LiftKind::StayLift => parts.push(item("blum.aventos.hk-top.cover-caps")?),
+        LiftKind::StayLift => {
+            parts.push((item("blum.aventos.hk-top.cover-caps")?, 1));
+            parts.push((item("blum.aventos.hk-top.front-fixing")?, 1));
+        }
         LiftKind::UpAndOver => {
-            parts.push(item("blum.aventos.hs-top.lever-arm")?);
-            parts.push(item("blum.aventos.cover-caps")?);
+            parts.push((item("blum.aventos.hs-top.lever-arm")?, 1));
+            parts.push((item("blum.aventos.cover-caps")?, 1));
+            parts.push((item("blum.aventos.hk-top.front-fixing")?, 1));
         }
         LiftKind::LiftUp => {
-            parts.push(
+            parts.push((
                 by_ranges("blum.aventos.hl-top.lever-arm.", kh, fg).ok_or_else(|| {
                     format!("no AVENTOS HL top lever arm for KH {kh:.0} and {fg:.1} kg")
                 })?,
+                1,
+            ));
+            parts.push((item("blum.aventos.hl-top.stabiliser")?, 1));
+            parts.push((item("blum.aventos.cover-caps")?, 1));
+            parts.push((item("blum.aventos.hk-top.front-fixing")?, 1));
+        }
+        LiftKind::SmallStayLift => {
+            let plate = item("blum.mounting-plate.175h3100")?;
+            parts.push((plate, plate.param("per_front")? as u32));
+        }
+        LiftKind::HingedStayLift => {
+            parts.push((item("blum.aventos.hk-xs.cabinet-fixing")?, sides));
+            parts.push((item("blum.aventos.hk-xs.front-fixing")?, sides));
+            let lf = kh * fg;
+            let w = need.cabinet_width;
+            let hinges = if w >= p("hinges_4_from_width")? || lf >= p("hinges_4_from_power_factor")?
+            {
+                4
+            } else if w >= p("hinges_3_from_width")? || lf >= p("hinges_3_from_power_factor")? {
+                3
+            } else {
+                2
+            };
+            parts.push((item("blum.clip-top.110.overlay.unsprung")?, hinges));
+            parts.push((item("blum.mounting-plate.175h3100")?, hinges));
+            warnings.push(
+                "AVENTOS HK-XS: its hinges along the top and the mechanism's drilling are not \
+                 drawn yet"
+                    .into(),
             );
-            parts.push(item("blum.aventos.hl-top.stabiliser")?);
-            parts.push(item("blum.aventos.cover-caps")?);
         }
     }
-    parts.push(item("blum.aventos.hk-top.front-fixing")?);
     Ok(SingleLift {
-        power_factor: (kind == LiftKind::StayLift).then_some(kh * fg),
+        power_factor: matches!(
+            kind,
+            LiftKind::StayLift | LiftKind::SmallStayLift | LiftKind::HingedStayLift
+        )
+        .then_some(kh * fg),
         parts,
         warnings,
     })
@@ -388,6 +447,7 @@ mod tests {
                 inside_depth: 300.0,
                 front_weight: fg,
                 handle_weight: handle,
+                tip_on: false,
             },
         )
     }
@@ -397,7 +457,7 @@ mod tests {
     fn hk_top_picks_the_mechanism_by_power_factor_with_double_handle_weight() {
         let pick = |kh: f64, fg: f64, handle: f64| {
             lift(LiftKind::StayLift, kh, fg, handle)
-                .map(|h| (h.parts[0].article.clone(), h.power_factor.unwrap()))
+                .map(|h| (h.parts[0].0.article.clone(), h.power_factor.unwrap()))
         };
         // 360 × (3 + 2 × 0.3) = 1296: in 420–1610 and 930–2800, so the stronger.
         assert_eq!(pick(360.0, 3.0, 0.3), Ok(("22K2510".to_string(), 1296.0)));
@@ -412,7 +472,7 @@ mod tests {
     #[test]
     fn hs_top_follows_blums_example_and_its_overlaps() {
         let mech = |kh: f64, fg: f64| {
-            lift(LiftKind::UpAndOver, kh, fg, 0.0).map(|l| l.parts[0].article.clone())
+            lift(LiftKind::UpAndOver, kh, fg, 0.0).map(|l| l.parts[0].0.article.clone())
         };
         assert_eq!(mech(600.0, 10.0).as_deref(), Ok("22S2510"));
         assert_eq!(mech(400.0, 5.0).as_deref(), Ok("22S2210"));
@@ -430,7 +490,7 @@ mod tests {
                 .unwrap()
                 .parts
                 .iter()
-                .map(|i| i.article.clone())
+                .map(|(i, _)| i.article.clone())
                 .collect::<Vec<_>>()
         };
         let p = parts(360.0, 6.0, 0.5);
@@ -438,5 +498,82 @@ mod tests {
         let p = parts(500.0, 11.0, 0.5);
         assert_eq!(&p[..2], ["22L2510", "22L3900"]);
         assert!(lift(LiftKind::LiftUp, 600.0, 5.0, 0.0).is_err());
+    }
+
+    /// p.56: HK-S by LF = KH × (FG + 2 × handle); its front fixed with two 175H3100 plates;
+    /// TIP-ON takes the T06 sets.
+    #[test]
+    fn hk_s_picks_its_set_by_power_factor_and_tip_on_its_own() {
+        let pick = |kh: f64, fg: f64| {
+            lift(LiftKind::SmallStayLift, kh, fg, 0.0).map(|l| {
+                (
+                    l.parts[0].0.article.clone(),
+                    l.parts[1].0.article.clone(),
+                    l.parts[1].1,
+                )
+            })
+        };
+        assert_eq!(
+            pick(300.0, 1.0),
+            Ok(("20K2B00.06".into(), "175H3100".into(), 2))
+        );
+        // LF 450: 220–500 and 400–1000 overlap: the stronger.
+        assert_eq!(pick(300.0, 1.5).unwrap().0, "20K2C00.06");
+        assert_eq!(pick(500.0, 4.0).unwrap().0, "20K2E00.06");
+        assert!(pick(600.0, 4.0).is_err(), "LF 2400 is over 2215");
+        let tip = single_front(
+            LiftKind::SmallStayLift,
+            &LiftNeed {
+                cabinet_height: 300.0,
+                cabinet_width: 600.0,
+                inside_height: 268.0,
+                inside_depth: 300.0,
+                front_weight: 1.0,
+                handle_weight: 0.0,
+                tip_on: true,
+            },
+        )
+        .unwrap();
+        assert_eq!(tip.parts[0].0.article, "20K2B00T06");
+    }
+
+    /// p.62: HK-XS on one side up to its range, on both sides for twice the LF; hinges 2, 3 from
+    /// KB 900 or LF 1800, 4 from KB 1200 or LF 2700.
+    #[test]
+    fn hk_xs_doubles_up_and_counts_its_hinges() {
+        let parts = |kh: f64, fg: f64, width: f64| {
+            single_front(
+                LiftKind::HingedStayLift,
+                &LiftNeed {
+                    cabinet_height: kh,
+                    cabinet_width: width,
+                    inside_height: kh - 32.0,
+                    inside_depth: 300.0,
+                    front_weight: fg,
+                    handle_weight: 0.0,
+                    tip_on: false,
+                },
+            )
+            .map(|l| {
+                l.parts
+                    .iter()
+                    .map(|(i, n)| (i.article.clone(), *n))
+                    .collect::<Vec<_>>()
+            })
+        };
+        let p = parts(300.0, 2.0, 600.0).unwrap();
+        assert_eq!(p[0], ("20K1301".into(), 1), "LF 600: the stronger of two");
+        assert!(p.contains(&("70T3550.TL".into(), 2)));
+        let p = parts(500.0, 6.0, 600.0).unwrap();
+        assert_eq!(p[0], ("20K1501".into(), 2), "LF 3000: one each side");
+        assert!(p.contains(&("20K5101".into(), 2)));
+        assert!(p.contains(&("70T3550.TL".into(), 4)), "{p:?}");
+        assert!(
+            parts(400.0, 2.0, 1000.0)
+                .unwrap()
+                .contains(&("70T3550.TL".into(), 3))
+        );
+        assert!(parts(220.0, 1.0, 600.0).is_err(), "under 240 high");
+        assert!(parts(600.0, 7.0, 600.0).is_err(), "LF 4200 is over 3600");
     }
 }

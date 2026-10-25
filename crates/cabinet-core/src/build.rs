@@ -1409,6 +1409,7 @@ impl<'a> Builder<'a> {
                         density,
                     ),
                     handle_weight,
+                    tip_on: s.opening != Opening::Handles,
                 },
             )
         });
@@ -1429,13 +1430,13 @@ impl<'a> Builder<'a> {
                 "{name}: the lift is chosen without a handle weight"
             ));
         }
-        for item in lift.parts {
+        for (item, quantity) in lift.parts {
             self.list.hardware.push(HardwarePlacement {
                 item: item.id.clone(),
                 description: format!("{} {}", item.family, item.variant),
                 at: front.center(),
                 part: name.clone(),
-                quantity: 1,
+                quantity,
             });
         }
     }
@@ -3280,6 +3281,43 @@ mod tests {
         );
         let back = list.part("D01.DrawerBack1").unwrap();
         assert_eq!(back.bounds.size.z, 212.0);
+    }
+
+    /// BLUM-7b: a small wall cabinet on HK-S and on HK-XS gets its mechanism and fixings.
+    #[test]
+    fn small_lifts_build_with_their_parts() {
+        use crate::model::LiftKind;
+        for (kind, mechanism, other) in [
+            (
+                LiftKind::SmallStayLift,
+                "blum.aventos.hk-s.mechanism.",
+                "blum.mounting-plate.175h3100",
+            ),
+            (
+                LiftKind::HingedStayLift,
+                "blum.aventos.hk-xs.mechanism.",
+                "blum.clip-top.110.overlay.unsprung",
+            ),
+        ] {
+            let mut cab = Cabinet::new("W01", CabinetKind::Wall);
+            cab.height = 360.0;
+            cab.fronts = FrontLayout::Lift {
+                kind,
+                handle_weight: 0.4,
+            };
+            let list = build_cabinet(&cab).unwrap();
+            assert!(
+                list.hardware.iter().any(|h| h.item.starts_with(mechanism)),
+                "{kind:?}: {:?} {:?}",
+                list.hardware,
+                list.warnings
+            );
+            assert!(
+                list.hardware
+                    .iter()
+                    .any(|h| h.item == other && h.quantity >= 2)
+            );
+        }
     }
 
     fn handle_holes(list: &PartList, part: &str) -> Vec<Vec3> {
