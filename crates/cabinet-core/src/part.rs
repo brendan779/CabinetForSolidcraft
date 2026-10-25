@@ -34,6 +34,8 @@ pub enum PartRole {
     DrawerRightSide,
     /// The front of a wooden drawer box, behind the drawer front.
     DrawerInnerFront,
+    /// The upper (1) and lower (2) front of a bi-fold lift.
+    LiftFront,
 }
 
 impl PartRole {
@@ -57,6 +59,7 @@ impl PartRole {
             PartRole::DrawerBack => "Drawer back",
             PartRole::DrawerLeftSide | PartRole::DrawerRightSide => "Drawer side",
             PartRole::DrawerInnerFront => "Drawer box front",
+            PartRole::LiftFront => "Lift front",
         }
     }
 
@@ -82,6 +85,7 @@ impl PartRole {
             PartRole::DrawerLeftSide => "DrawerLeftSide",
             PartRole::DrawerRightSide => "DrawerRightSide",
             PartRole::DrawerInnerFront => "DrawerInnerFront",
+            PartRole::LiftFront => "LiftFront",
         }
     }
 
@@ -91,6 +95,7 @@ impl PartRole {
             self,
             PartRole::Door
                 | PartRole::DrawerFront
+                | PartRole::LiftFront
                 | PartRole::Plinth
                 | PartRole::BlindPanel
                 | PartRole::Filler

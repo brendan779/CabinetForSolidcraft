@@ -1,0 +1,282 @@
+{
+  "brand": "Blum",
+  "website": "https://www.blum.com",
+  "notes": "AVENTOS HF top bi-fold lift (wooden fronts), from the Blum Catalogue and technical manual 2024/2025, printed pages 22-25 and 716. Power factor LF = cabinet height KH (mm) x combined weight of both fronts FG incl. handle (kg); for asymmetrical fronts KH becomes TKH = 2 x upper front height + gaps. Where two mechanism ranges overlap (LF 10000-13500) Blum recommends the stronger. Front weight FG = FH x FB x FD x density; reference densities chipboard 680, MDF 760 kg/m3 (p.716). Hinge counts: 3 at KB 1200 and/or from FG 12 kg, 4 at KB 1800 and/or from 20 kg. Not verified by a person.",
+  "items": [
+    {
+      "id": "blum.aventos.hf-top",
+      "brand": "Blum",
+      "article": "AVENTOS HF top",
+      "family": "AVENTOS HF top",
+      "variant": "bi-fold lift system, wooden fronts and wide alu frames",
+      "kind": "lift_system",
+      "parameters": {
+        "cabinet_height_min": 480,
+        "cabinet_height_max": 1200,
+        "cabinet_width_max": 1800,
+        "inside_depth_min": 264,
+        "single_mechanism_width_max": 600,
+        "single_mechanism_power_factor_min": 1350,
+        "single_mechanism_power_factor_max": 3000,
+        "third_mechanism_power_factor_gain": 0.5,
+        "density_chipboard_kg_m3": 680,
+        "density_mdf_kg_m3": 760,
+        "mechanism_hole_diameter": 5,
+        "mechanism_hole_depth_min": 11.5,
+        "mechanism_hole_front_setback": 101,
+        "mechanism_hole_pitch_back": 128,
+        "mechanism_hole_pitch_down": 64,
+        "hinges_3_from_width": 1200,
+        "hinges_3_from_weight_kg": 12,
+        "hinges_4_from_width": 1800,
+        "hinges_4_from_weight_kg": 20,
+        "centre_hinge_boss_overlay": 0,
+        "hinge_120_boss_overlay": 11,
+        "hinge_120_special_boss_overlay": 13
+      },
+      "tables": {
+        "mechanism_hole_below_top": {
+          "rows_name": "cabinet_height",
+          "cols_name": "fixing",
+          "rows": [
+            480,
+            520
+          ],
+          "cols": [
+            0
+          ],
+          "values": [
+            [
+              93.5
+            ],
+            [
+              116
+            ]
+          ],
+          "note": "H: from the top of the side down to the upper system-screw hole; rows are the lower ends of KH 480-519 and 520-1200. Read from a perspective drawing (p.24): the second hole is 64 lower and 128 further forward? Check."
+        }
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.24, web code DQDXLC",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.aventos.hf-top.mechanism.22f2510",
+      "brand": "Blum",
+      "article": "22F2510",
+      "family": "AVENTOS HF top",
+      "variant": "lift mechanism set (2, symmetrical), LF 2700-13500, system screws",
+      "kind": "lift_system",
+      "parameters": {
+        "power_factor_min": 2700,
+        "power_factor_max": 13500,
+        "opening_angle_min": 81,
+        "opening_angle_max": 116,
+        "system_screws": 1
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.22, web code DQDXLC",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.aventos.hf-top.mechanism.22f2810",
+      "brand": "Blum",
+      "article": "22F2810",
+      "family": "AVENTOS HF top",
+      "variant": "lift mechanism set (2, symmetrical), LF 10000-19300, system screws",
+      "kind": "lift_system",
+      "parameters": {
+        "power_factor_min": 10000,
+        "power_factor_max": 19300,
+        "opening_angle_min": 81,
+        "opening_angle_max": 116,
+        "system_screws": 1
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.22, web code DQDXLC",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.aventos.hf-top.mechanism.22f2500",
+      "brand": "Blum",
+      "article": "22F2500",
+      "family": "AVENTOS HF top",
+      "variant": "lift mechanism set (2, symmetrical), LF 2700-13500, chipboard screws",
+      "kind": "lift_system",
+      "parameters": {
+        "power_factor_min": 2700,
+        "power_factor_max": 13500,
+        "opening_angle_min": 81,
+        "opening_angle_max": 116,
+        "system_screws": 0
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.22, web code DQDXLC",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.aventos.hf-top.mechanism.22f2800",
+      "brand": "Blum",
+      "article": "22F2800",
+      "family": "AVENTOS HF top",
+      "variant": "lift mechanism set (2, symmetrical), LF 10000-19300, chipboard screws",
+      "kind": "lift_system",
+      "parameters": {
+        "power_factor_min": 10000,
+        "power_factor_max": 19300,
+        "opening_angle_min": 81,
+        "opening_angle_max": 116,
+        "system_screws": 0
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.22, web code DQDXLC",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.aventos.hf-top.lever-arm.22f3200",
+      "brand": "Blum",
+      "article": "22F3200",
+      "family": "AVENTOS HF top",
+      "variant": "lever arm set (2, symmetrical), cabinet height 480-610",
+      "kind": "lift_system",
+      "parameters": {
+        "cabinet_height_min": 480,
+        "cabinet_height_max": 610,
+        "inside_height_min": 443
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.22, web code DQDXLC",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.aventos.hf-top.lever-arm.22f3500",
+      "brand": "Blum",
+      "article": "22F3500",
+      "family": "AVENTOS HF top",
+      "variant": "lever arm set (2, symmetrical), cabinet height 600-910",
+      "kind": "lift_system",
+      "parameters": {
+        "cabinet_height_min": 600,
+        "cabinet_height_max": 910,
+        "inside_height_min": 512
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.22, web code DQDXLC",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.aventos.hf-top.lever-arm.22f3900",
+      "brand": "Blum",
+      "article": "22F3900",
+      "family": "AVENTOS HF top",
+      "variant": "lever arm set (2, symmetrical), cabinet height 840-1200",
+      "kind": "lift_system",
+      "parameters": {
+        "cabinet_height_min": 840,
+        "cabinet_height_max": 1200,
+        "inside_height_min": 632
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.22, web code DQDXLC",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.aventos.hf-top.cover-caps",
+      "brand": "Blum",
+      "article": "22.8000",
+      "family": "AVENTOS HF top",
+      "variant": "cover cap set, silk white / light grey / dark grey",
+      "kind": "lift_system",
+      "parameters": {},
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.22, web code DQDXLC",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.aventos.hf-top.hinge-120",
+      "brand": "Blum",
+      "article": "70T5550.TL",
+      "family": "CLIP top",
+      "variant": "120° hinge, screw-on, unsprung (upper front to cabinet)",
+      "kind": "hinge",
+      "parameters": {
+        "boss_overlay": 11,
+        "cup_diameter": 35,
+        "cup_depth": 13,
+        "boring_distance_min": 3,
+        "boring_distance_max": 6
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.23, web code DQDXLC",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.aventos.hf-top.centre-hinge",
+      "brand": "Blum",
+      "article": "78Z5500T",
+      "family": "CLIP top",
+      "variant": "centre hinge, screw-on, unsprung (between the fronts); TB = 9 - horizontal gap F (F 3-6 mm, p.25)",
+      "kind": "hinge",
+      "parameters": {
+        "cup_diameter": 35,
+        "cup_depth": 13,
+        "gap_min": 3,
+        "gap_max": 6,
+        "boring_distance_plus_gap": 9
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.23, web code DQDXLC",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.aventos.hf-top.hinge-plate",
+      "brand": "Blum",
+      "article": "175H3100",
+      "family": "CLIP mounting plate",
+      "variant": "horizontal cam plate 20/32, 0 mm, screw-on (for the 120° hinge and the lever arm)",
+      "kind": "hinge_plate",
+      "parameters": {
+        "plate_spacing": 0
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.150",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    }
+  ]
+}

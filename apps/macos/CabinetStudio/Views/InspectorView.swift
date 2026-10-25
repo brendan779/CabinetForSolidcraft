@@ -487,7 +487,7 @@ struct FrontsSection: View {
     let cab: CabinetDoc
 
     private let layouts: [(id: String, title: String)] = [
-        ("door", "Door"), ("door_pair", "Pair"), ("drawers", "Drawers"), ("open", "Open"),
+        ("door", "Door"), ("door_pair", "Pair"), ("drawers", "Drawers"), ("bi_fold_lift", "Lift"), ("open", "Open"),
     ]
 
     var body: some View {

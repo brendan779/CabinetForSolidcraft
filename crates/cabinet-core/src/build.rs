@@ -4,9 +4,10 @@ use crate::drawers::{self, WoodRunner};
 use crate::geom::{Aabb, Axis, Vec3};
 use crate::hinges::{self, HingeNeed};
 use crate::joinery::ButtJoint;
+use crate::lift;
 use crate::model::{
-    BackStyle, BottomJoint, Cabinet, CabinetKind, DoorOverlay, DrawerSystem, FrontLayout,
-    HingeSide, Opening, ToeKick, TopJoint, WallHanging,
+    BackStyle, BottomJoint, Cabinet, CabinetKind, DoorOverlay, DrawerSystem, FrontCore,
+    FrontLayout, HingeSide, Opening, ToeKick, TopJoint, WallHanging,
 };
 use crate::part::{
     BorePurpose, Dir, EdgeBanding, HardwarePlacement, Operation, Part, PartList, PartRole,
@@ -804,6 +805,9 @@ impl<'a> Builder<'a> {
                 self.door(1, aabb(x0, y0, z0, mid - g / 2.0, y1, z1), HingeSide::Left);
                 self.door(2, aabb(mid + g / 2.0, y0, z0, x1, y1, z1), HingeSide::Right);
             }
+            FrontLayout::BiFoldLift { handle_weight } => {
+                self.bi_fold_lift(aabb(x0, y0, z0, x1, y1, z1), *handle_weight);
+            }
             FrontLayout::Drawers { ratios } => {
                 let ratios: Vec<f64> = ratios.iter().copied().filter(|r| *r > 0.0).collect();
                 if ratios.is_empty() {
@@ -1029,6 +1033,132 @@ impl<'a> Builder<'a> {
             // Blum's sizes are cut sizes; tape would take them off.
             edges: EdgeBanding::default(),
         });
+    }
+
+    /// Two equal fronts on AVENTOS HF top: the upper hinged to the cabinet top with 120° hinges,
+    /// the lower to the upper with centre hinges, lifted by a mechanism on each side.
+    fn bi_fold_lift(&mut self, region: Aabb, handle_weight: f64) {
+        let cab = self.cab;
+        let s = &cab.standard;
+        let centre = crate::hardware::item("blum.aventos.hf-top.centre-hinge");
+        // Blum's centre hinge works with a 3–6 mm gap between the fronts.
+        let fm = match centre.and_then(|c| Ok((c.param("gap_min")?, c.param("gap_max")?))) {
+            Ok((lo, hi)) => s.front_gap.clamp(lo, hi),
+            Err(_) => s.front_gap,
+        };
+        let fh = (region.size.z - fm) / 2.0;
+        let (x0, y0, x1, y1) = (region.min.x, region.min.y, region.max().x, region.max().y);
+        let top = region.max().z;
+        let upper = aabb(x0, y0, top - fh, x1, y1, top);
+        let lower = aabb(x0, y0, region.min.z, x1, y1, region.min.z + fh);
+        for (n, b) in [(1, upper), (2, lower)] {
+            self.add(
+                PartRole::LiftFront,
+                Some(n),
+                b,
+                Axis::Y,
+                Axis::X,
+                EdgeBanding::all(),
+            );
+        }
+        let upper_name = self.name(PartRole::LiftFront, Some(1));
+        let lower_name = self.name(PartRole::LiftFront, Some(2));
+        let chosen = (|| {
+            let density = lift::reference_density(s.front_core == FrontCore::Mdf)?;
+            let fg =
+                2.0 * lift::front_weight(fh, region.size.x, region.size.y, density) + handle_weight;
+            let hf = lift::hf_top(&lift::BiFoldNeed {
+                cabinet_height: cab.height,
+                cabinet_width: cab.width,
+                inside_height: self.opening_z.1 - self.opening_z.0,
+                inside_depth: self.interior_back - y1.max(0.0),
+                front_weight: fg,
+            })?;
+            let cup = |h: &cabinet_catalog::HardwareItem| {
+                Ok::<_, String>((h.param("cup_diameter")?, h.param("cup_depth")?))
+            };
+            let (hinge_cup, centre_cup) = (cup(hf.hinge)?, cup(hf.centre_hinge)?);
+            // 120° hinge: TB = upper front overlay − boss overlay (plates at 0 mm).
+            let fao = top - self.opening_z.1;
+            let tb = fao - hf.hinge.param("boss_overlay")?;
+            let tb_range =
+                hf.hinge.param("boring_distance_min")?..=hf.hinge.param("boring_distance_max")?;
+            let tb_centre = hf.centre_hinge.param("boring_distance_plus_gap")? - fm;
+            Ok::<_, String>((hf, tb, tb_range, tb_centre, hinge_cup, centre_cup))
+        })();
+        let (hf, tb, tb_range, tb_centre, hinge_cup, centre_cup) = match chosen {
+            Ok(c) => c,
+            Err(e) => {
+                self.list
+                    .warnings
+                    .push(format!("{upper_name}: {e}; no lift fitted"));
+                return;
+            }
+        };
+        for w in &hf.warnings {
+            self.list.warnings.push(format!("{upper_name}: {w}"));
+        }
+        if !tb_range.contains(&tb) {
+            self.list.warnings.push(format!(
+                "{upper_name}: the 120° hinges would need a boring distance of {tb:.1} mm \
+                 (Blum: {}–{})",
+                tb_range.start(),
+                tb_range.end()
+            ));
+        }
+        if s.opening == Opening::Handles && handle_weight == 0.0 {
+            self.list.warnings.push(format!(
+                "{upper_name}: the lift is chosen without a handle weight"
+            ));
+        }
+        // Hinges across the width, as doors space them up the height.
+        let n = hf.hinges as usize;
+        let span = region.size.x - 2.0 * HINGE_END_OFFSET;
+        let xs: Vec<f64> = (0..n)
+            .map(|i| x0 + HINGE_END_OFFSET + span * i as f64 / (n - 1) as f64)
+            .collect();
+        let back = y1;
+        let mut cups = Vec::new();
+        for &x in &xs {
+            let r = hinge_cup.0 / 2.0;
+            cups.push((upper_name.clone(), top - tb - r, hinge_cup));
+            let rc = centre_cup.0 / 2.0;
+            cups.push((upper_name.clone(), upper.min.z + tb_centre + rc, centre_cup));
+            cups.push((
+                lower_name.clone(),
+                lower.max().z - tb_centre - rc,
+                centre_cup,
+            ));
+            for (part, z, (diameter, depth)) in cups.drain(..) {
+                self.list.operations.push(Operation::Bore {
+                    part,
+                    at: Vec3::new(x, back, z),
+                    direction: Dir::new(Axis::Y, false),
+                    diameter,
+                    depth: depth.min(region.size.y - 3.0),
+                    purpose: BorePurpose::HingeCup,
+                });
+            }
+        }
+        let at = upper.center();
+        let hinges = hf.hinges;
+        for (item, quantity) in [
+            (hf.mechanism, hf.mechanisms),
+            (hf.lever_arm, 1),
+            (hf.cover_caps, 1),
+            (hf.hinge, hinges),
+            (hf.centre_hinge, hinges),
+            // One per 120° hinge and one per lever arm.
+            (hf.plate, hinges + 2),
+        ] {
+            self.list.hardware.push(HardwarePlacement {
+                item: item.id.clone(),
+                description: format!("{} {}", item.family, item.variant),
+                at,
+                part: upper_name.clone(),
+                quantity,
+            });
+        }
     }
 
     /// The blind panel and filler of a blind corner cabinet, from its blind side; returns the
@@ -2015,6 +2145,72 @@ mod tests {
         let list = build_cabinet(&cab).unwrap();
         assert!(list.by_role(PartRole::DrawerBottom).next().is_none());
         assert!(list.warnings.iter().any(|w| w.contains("no drawer box")));
+    }
+
+    /// BLUM-7: a wall cabinet with a bi-fold lift gets two equal fronts, Blum's mechanism for
+    /// its power factor, the lever arm for its height, and three cups per hinge position.
+    #[test]
+    fn a_bi_fold_lift_wall_cabinet_gets_two_fronts_and_its_aventos_parts() {
+        let mut cab = Cabinet::new("W01", CabinetKind::Wall);
+        cab.fronts = FrontLayout::BiFoldLift { handle_weight: 0.4 };
+        let list = build_cabinet(&cab).unwrap();
+        assert!(list.warnings.is_empty(), "{:?}", list.warnings);
+        let (up, low) = (
+            list.part("W01.LiftFront1").unwrap(),
+            list.part("W01.LiftFront2").unwrap(),
+        );
+        assert!((up.bounds.size.z - low.bounds.size.z).abs() < 1e-9);
+        // The centre hinge's 3 mm minimum gap between the fronts.
+        assert!((up.bounds.min.z - low.bounds.max().z - 3.0).abs() < 1e-9);
+        let items: Vec<(String, u32)> = list
+            .hardware
+            .iter()
+            .filter_map(|h| {
+                Some((
+                    crate::hardware::item(&h.item).ok()?.article.clone(),
+                    h.quantity,
+                ))
+            })
+            .collect();
+        for expected in [
+            ("22F2510", 2),
+            ("22F3500", 1),
+            ("70T5550.TL", 2),
+            ("78Z5500T", 2),
+        ] {
+            assert!(
+                items.contains(&(expected.0.to_string(), expected.1)),
+                "{expected:?} in {items:?}"
+            );
+        }
+        let cups = list
+            .operations
+            .iter()
+            .filter(|o| {
+                matches!(
+                    o,
+                    Operation::Bore {
+                        purpose: BorePurpose::HingeCup,
+                        ..
+                    }
+                )
+            })
+            .count();
+        assert_eq!(cups, 2 * 3);
+    }
+
+    #[test]
+    fn a_bi_fold_lift_on_a_cabinet_too_low_for_hf_top_warns() {
+        let mut cab = Cabinet::new("W01", CabinetKind::Wall);
+        cab.height = 400.0;
+        cab.fronts = FrontLayout::BiFoldLift { handle_weight: 0.4 };
+        let list = build_cabinet(&cab).unwrap();
+        assert!(
+            list.warnings.iter().any(|w| w.contains("480–1200")),
+            "{:?}",
+            list.warnings
+        );
+        assert_eq!(list.by_role(PartRole::LiftFront).count(), 2);
     }
 
     /// CORE-10: each overlay gets the hinge cranked for it, the cup at Blum's boring distance

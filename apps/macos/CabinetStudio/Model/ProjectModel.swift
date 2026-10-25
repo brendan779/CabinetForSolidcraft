@@ -155,7 +155,7 @@ struct CabinetDoc: Identifiable, Hashable, Codable {
         (object["standard"] as? [String: Any])?["\(slot)_board"] as? String ?? ""
     }
 
-    /// The front layout's type: open, door, door_pair, drawers.
+    /// The front layout's type: open, door, door_pair, drawers, bi_fold_lift.
     var frontType: String {
         get { (object["fronts"] as? [String: Any])?["type"] as? String ?? "open" }
         set {
@@ -164,6 +164,7 @@ struct CabinetDoc: Identifiable, Hashable, Codable {
                 case "door": o["fronts"] = ["type": "door", "hinge_side": "left"]
                 case "door_pair": o["fronts"] = ["type": "door_pair"]
                 case "drawers": o["fronts"] = ["type": "drawers", "ratios": [1.0, 1.0, 1.0]]
+                case "bi_fold_lift": o["fronts"] = ["type": "bi_fold_lift", "handle_weight": 0.0]
                 default: o["fronts"] = ["type": "open"]
                 }
             }

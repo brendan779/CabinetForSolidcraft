@@ -284,6 +284,19 @@ pub fn assign_board(
         .board(&board_id)
         .ok_or_else(|| invalid(format!("no board {board_id} in the catalog")))?;
     cab.standard.set_board(slot, &board.id, board.thickness);
+    // Lift systems weigh fronts by their core (Blum's reference densities).
+    if slot == BoardSlot::Front {
+        use cabinet_catalog::Substrate;
+        match board.substrate {
+            Substrate::Mdf | Substrate::MoistureResistantMdf => {
+                cab.standard.front_core = cabinet_core::model::FrontCore::Mdf
+            }
+            Substrate::Particleboard | Substrate::MoistureResistantParticleboard => {
+                cab.standard.front_core = cabinet_core::model::FrontCore::Chipboard
+            }
+            _ => {}
+        }
+    }
     serde_json::to_string(&cab).map_err(invalid)
 }
 

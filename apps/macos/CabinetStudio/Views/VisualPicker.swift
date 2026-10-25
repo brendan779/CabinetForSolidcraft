@@ -399,6 +399,17 @@ struct FrontThumbnail: View {
                 ctx.stroke(p, with: .color(.primary.opacity(0.75)), lineWidth: 1.2)
                 handle(r.midX - 5, r.minY + 12, vertical: true)
                 handle(r.midX + 5, r.minY + 12, vertical: true)
+            case "bi_fold_lift":
+                // Two fronts folding up at the middle: the fold line and an arrow up.
+                hLine(r.midY)
+                var arrow = Path()
+                arrow.move(to: CGPoint(x: r.midX, y: r.midY - 4))
+                arrow.addLine(to: CGPoint(x: r.midX, y: r.minY + 6))
+                arrow.move(to: CGPoint(x: r.midX - 4, y: r.minY + 10))
+                arrow.addLine(to: CGPoint(x: r.midX, y: r.minY + 6))
+                arrow.addLine(to: CGPoint(x: r.midX + 4, y: r.minY + 10))
+                ctx.stroke(arrow, with: .color(.accentColor), lineWidth: 1.4)
+                handle(r.midX, r.maxY - 6, vertical: false)
             case "drawers":
                 let total = ratios.reduce(0, +)
                 var y = r.minY

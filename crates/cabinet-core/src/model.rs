@@ -243,6 +243,12 @@ pub enum FrontLayout {
     Drawers {
         ratios: Vec<f64>,
     },
+    /// Two equal fronts that fold up together on Blum AVENTOS HF top.
+    BiFoldLift {
+        /// Weight of the handle on the fronts, for the power factor.
+        #[serde(default)]
+        handle_weight: f64,
+    },
 }
 
 impl Default for FrontLayout {
@@ -301,6 +307,8 @@ pub struct ConstructionStandard {
     pub drawer_system: DrawerSystem,
     /// Board thickness of wooden drawer boxes (sides, base, front and back).
     pub drawer_board_thickness: f64,
+    /// What the fronts are made of, for their weight on lift systems.
+    pub front_core: FrontCore,
 }
 
 /// Which boards of a cabinet a catalog board is assigned to.
@@ -355,6 +363,7 @@ impl Default for ConstructionStandard {
             opening: Opening::Handles,
             drawer_system: DrawerSystem::Legrabox,
             drawer_board_thickness: 16.0,
+            front_core: FrontCore::Mdf,
         }
     }
 }
@@ -406,6 +415,14 @@ pub enum Opening {
     /// Handleless, electric: Blum SERVO-DRIVE opens drawers at a touch. Hinged doors cannot
     /// take it and get TIP-ON.
     ServoDrive,
+}
+
+/// A front's core board, for its weight (Blum's reference densities).
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum FrontCore {
+    Mdf,
+    Chipboard,
 }
 
 /// Drawer boxes and their runners.
