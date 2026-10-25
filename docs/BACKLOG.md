@@ -109,7 +109,7 @@ All Blum rows: source = Blum Catalogue and technical manual 2024/2025 in `vendor
 | id | status | size | task | done when |
 |---|---|---|---|---|
 | HAF-1 | todo | M | Adjustable legs + plinth clips (count rule by width), from Häfele data | BOM rows with article numbers |
-| HAF-2 | todo | M | Handles: catalog of CC spacings; placement picker (top corner, centre, edge pull) drawn on the door | handle bores on door sheets |
+| HAF-2 | done (f844e59; handle rows are generic `handle.cc128` etc. until handle articles are chosen; insets 35/50 mm and tall handles at 1050 are our choices) | M | Handles: catalog of CC spacings; placement picker (top corner, centre, edge pull) drawn on the door | handle bores on door sheets |
 | HAF-3 | needs-human (count done in a7d72a0: 4 per adjustable shelf as generic `shelf-support.5mm`; the article needs the owner's pick and the supplier's data, like HAF-4) | M | Shelf supports (5 mm pins) article + count | BOM |
 | HAF-4 | needs-human (Häfele data) | L | Loox5 lighting: profiles (surface, recessed, shelf-edge), 12 V/24 V strips, drivers, distributors, switches/sensors | split |
 | HAF-5 | done (95d183b) | M | Lighting rules: no mixing 12/24 V; ≤ 80 % driver load; ports per distributor; cable holes Ø10 through panels added as ops | unit tests for each rule |
@@ -337,3 +337,4 @@ Agents append one line per session: date, items touched, outcome.
 - 2026-10-26b (night) — OUT-8 done (3a7abbe): exploded isometric assembly page per cabinet with its parts list (docs/images/out8-assembly.png); Cut Sheets › Assembly…. OUT-8b added for a SolidCraft-rendered version.
 - 2026-10-26b (night) — OUT-9 done (4ac9391): R12 DXF per part (and `-back` for a second machined face) with layers OUTLINE, BORE_D<Ø>_Z<depth>/THRU, POCKET_<KIND>_Z<depth>, CUTOUT, EDGE_BORE_…, EDGE_<KIND>; all 11 files of the sample base cabinet audit clean in ezdxf 1.4.5 (in a scratch venv, not a project dependency). Cut Sheets › DXF… writes them into a folder.
 - 2026-10-26b (night) — HAF-3 count done (a7d72a0): four `shelf-support.5mm` per adjustable shelf, none on fixed ones; the article waits for the owner (Häfele data).
+- 2026-10-26b (night) — HAF-2 done (f844e59): `handle_size` (knob, 96–448 centres) and `handle_place` (corner, centre, edge pull) pickers; Ø5 handle screw holes through doors (free edge found from the hinge cups), drawer fronts and lift fronts; handle rows in the hardware list. Every golden with fronts gains them.
