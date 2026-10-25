@@ -1,12 +1,12 @@
 //! Cabinet → parts, machining and hardware.
 
-use crate::drawers;
+use crate::drawers::{self, WoodRunner};
 use crate::geom::{Aabb, Axis, Vec3};
 use crate::hinges::{self, HingeNeed};
 use crate::joinery::ButtJoint;
 use crate::model::{
-    BackStyle, BottomJoint, Cabinet, CabinetKind, DoorOverlay, FrontLayout, HingeSide, Opening,
-    ToeKick, TopJoint, WallHanging,
+    BackStyle, BottomJoint, Cabinet, CabinetKind, DoorOverlay, DrawerSystem, FrontLayout,
+    HingeSide, Opening, ToeKick, TopJoint, WallHanging,
 };
 use crate::part::{
     BorePurpose, Dir, EdgeBanding, HardwarePlacement, Operation, Part, PartList, PartRole,
@@ -851,6 +851,87 @@ impl<'a> Builder<'a> {
     /// The drawer system's box behind drawer front `n`: base and back parts, front fixing bores
     /// and the system's hardware. `datum` is the height its runners stand on.
     fn drawer_box(&mut self, n: usize, front: Aabb, datum: f64, space: f64) {
+        let runner = match self.cab.standard.drawer_system {
+            DrawerSystem::Legrabox => return self.legrabox_box(n, front, datum, space),
+            DrawerSystem::Movento => WoodRunner::Movento,
+            DrawerSystem::Tandem => WoodRunner::Tandem,
+        };
+        self.wood_box(runner, n, front, datum, space);
+    }
+
+    /// A wooden box on MOVENTO or TANDEM runners: two sides, a base between them, and a front and
+    /// back standing on the base.
+    fn wood_box(&mut self, runner: WoodRunner, n: usize, front: Aabb, datum: f64, space: f64) {
+        let cab = self.cab;
+        let s = &cab.standard;
+        let t = s.carcass_thickness;
+        let front_name = self.name(PartRole::DrawerFront, Some(n));
+        let fy = front.max().y;
+        let b = match drawers::wood(
+            runner,
+            cab.width - 2.0 * t,
+            self.interior_back - fy,
+            space,
+            s.drawer_board_thickness,
+        ) {
+            Ok(b) => b,
+            Err(e) => {
+                self.list
+                    .warnings
+                    .push(format!("{front_name}: {e}; no drawer box"));
+                return;
+            }
+        };
+        let (st, mid) = (b.board, cab.width / 2.0);
+        let (x0, x1) = (mid - b.inside_width / 2.0, mid + b.inside_width / 2.0);
+        let (y0, y1) = (fy, fy + b.length);
+        let z0 = datum + b.side_lift;
+        let base_z = z0 + b.base_recess;
+        let top = z0 + b.side_height;
+        self.add_drawer_part(
+            PartRole::DrawerLeftSide,
+            n,
+            aabb(x0 - st, y0, z0, x0, y1, top),
+            Axis::X,
+        );
+        self.add_drawer_part(
+            PartRole::DrawerRightSide,
+            n,
+            aabb(x1, y0, z0, x1 + st, y1, top),
+            Axis::X,
+        );
+        self.add_drawer_part(
+            PartRole::DrawerBottom,
+            n,
+            aabb(x0, y0, base_z, x1, y1, base_z + st),
+            Axis::Z,
+        );
+        self.add_drawer_part(
+            PartRole::DrawerInnerFront,
+            n,
+            aabb(x0, y0, base_z + st, x1, y0 + st, top),
+            Axis::Y,
+        );
+        self.add_drawer_part(
+            PartRole::DrawerBack,
+            n,
+            aabb(x0, y1 - st, base_z + st, x1, y1, top),
+            Axis::Y,
+        );
+        let at = front.center();
+        for (item, quantity) in [(b.runner, 1), (b.locking_device, 2)] {
+            self.list.hardware.push(HardwarePlacement {
+                item: item.id.clone(),
+                description: format!("{} {}", item.family, item.variant),
+                at,
+                part: front_name.clone(),
+                quantity,
+            });
+        }
+    }
+
+    /// A LEGRABOX: Blum's steel sides, with the base and back cut to Blum's sizes.
+    fn legrabox_box(&mut self, n: usize, front: Aabb, datum: f64, space: f64) {
         let cab = self.cab;
         let t = cab.standard.carcass_thickness;
         let front_name = self.name(PartRole::DrawerFront, Some(n));
@@ -1219,7 +1300,7 @@ impl<'a> Builder<'a> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::model::{ConstructionStandard, FixingRecipe};
+    use crate::model::{ConstructionStandard, DrawerSystem, FixingRecipe};
 
     fn base() -> Cabinet {
         Cabinet::new("B01", CabinetKind::Base)
@@ -1866,6 +1947,63 @@ mod tests {
             .count();
         assert_eq!(fixings, 3 * 4);
         assert!(list.warnings.is_empty(), "{:?}", list.warnings);
+    }
+
+    /// CORE-8: a three-drawer bank of wooden boxes on TANDEM runners cuts two sides, a base, a
+    /// box front and a back per drawer, sized by Blum's runner rules.
+    #[test]
+    fn a_wooden_drawer_bank_cuts_sides_base_front_and_back_per_drawer() {
+        let mut cab = Cabinet::new("D01", CabinetKind::DrawerBank);
+        cab.standard.drawer_system = DrawerSystem::Tandem;
+        let list = build_cabinet(&cab).unwrap();
+        assert!(list.warnings.is_empty(), "{:?}", list.warnings);
+        let lw = cab.width - 2.0 * cab.standard.carcass_thickness;
+        let skw = lw - 42.0;
+        for n in 1..=3 {
+            let part = |role: &str| list.part(&format!("D01.{role}{n}")).unwrap();
+            let (l, r) = (part("DrawerLeftSide"), part("DrawerRightSide"));
+            // Inside width between the sides, sides as long as NL − 10.
+            assert!((r.bounds.min.x - l.bounds.max().x - skw).abs() < 1e-9);
+            assert_eq!(l.bounds.size.y, 540.0);
+            assert_eq!(l.thickness(), 16.0);
+            let base = part("DrawerBottom");
+            assert!((base.bounds.size.x - skw).abs() < 1e-9);
+            // The base clears the runners: 27.5 above the runners' datum.
+            let datum = l.bounds.min.z - 15.5;
+            assert!((base.bounds.min.z - datum - 27.5).abs() < 1e-9);
+            for role in ["DrawerInnerFront", "DrawerBack"] {
+                let p = part(role);
+                assert!((p.bounds.min.z - base.bounds.max().z).abs() < 1e-9);
+                assert!((p.bounds.max().z - l.bounds.max().z).abs() < 1e-9);
+            }
+        }
+        let cut = crate::cutlist::cut_list(std::slice::from_ref(&list), "white", 1.0);
+        let drawer_parts: u32 = cut
+            .rows
+            .iter()
+            .filter(|r| r.part.contains(".Drawer") && !r.part.contains("DrawerFront"))
+            .map(|r| r.quantity)
+            .sum();
+        assert_eq!(drawer_parts, 3 * 5);
+        assert!(
+            list.hardware
+                .iter()
+                .any(|h| h.item == "blum.tandem.560h.550")
+        );
+    }
+
+    #[test]
+    fn eighteen_mm_drawer_sides_are_too_thick_for_tandem() {
+        let mut cab = Cabinet::new("D01", CabinetKind::DrawerBank);
+        cab.standard.drawer_system = DrawerSystem::Tandem;
+        cab.standard.drawer_board_thickness = 18.0;
+        let list = build_cabinet(&cab).unwrap();
+        assert!(
+            list.warnings.iter().any(|w| w.contains("11–16 mm")),
+            "{:?}",
+            list.warnings
+        );
+        assert!(list.by_role(PartRole::DrawerLeftSide).next().is_none());
     }
 
     #[test]

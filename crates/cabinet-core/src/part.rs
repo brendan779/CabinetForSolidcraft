@@ -29,6 +29,11 @@ pub enum PartRole {
     DrawerBottom,
     /// The back of a drawer box.
     DrawerBack,
+    /// The sides of a wooden drawer box.
+    DrawerLeftSide,
+    DrawerRightSide,
+    /// The front of a wooden drawer box, behind the drawer front.
+    DrawerInnerFront,
 }
 
 impl PartRole {
@@ -50,6 +55,8 @@ impl PartRole {
             PartRole::EndPanel => "End panel",
             PartRole::DrawerBottom => "Drawer bottom",
             PartRole::DrawerBack => "Drawer back",
+            PartRole::DrawerLeftSide | PartRole::DrawerRightSide => "Drawer side",
+            PartRole::DrawerInnerFront => "Drawer box front",
         }
     }
 
@@ -72,6 +79,9 @@ impl PartRole {
             PartRole::EndPanel => "EndPanel",
             PartRole::DrawerBottom => "DrawerBottom",
             PartRole::DrawerBack => "DrawerBack",
+            PartRole::DrawerLeftSide => "DrawerLeftSide",
+            PartRole::DrawerRightSide => "DrawerRightSide",
+            PartRole::DrawerInnerFront => "DrawerInnerFront",
         }
     }
 

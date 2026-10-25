@@ -299,6 +299,8 @@ pub struct ConstructionStandard {
     pub opening: Opening,
     /// What the drawers are made of and run on.
     pub drawer_system: DrawerSystem,
+    /// Board thickness of wooden drawer boxes (sides, base, front and back).
+    pub drawer_board_thickness: f64,
 }
 
 /// Which boards of a cabinet a catalog board is assigned to.
@@ -352,6 +354,7 @@ impl Default for ConstructionStandard {
             wall_hanging: WallHanging::Hangers,
             opening: Opening::Handles,
             drawer_system: DrawerSystem::Legrabox,
+            drawer_board_thickness: 16.0,
         }
     }
 }
@@ -411,6 +414,10 @@ pub enum Opening {
 pub enum DrawerSystem {
     /// Blum LEGRABOX: steel sides, a cut base and back; N, M or K by the opening's height.
     Legrabox,
+    /// A wooden box on Blum MOVENTO runners (40 kg, 60/70 kg for the longest).
+    Movento,
+    /// A wooden box on Blum TANDEM 560H runners (30 kg).
+    Tandem,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]

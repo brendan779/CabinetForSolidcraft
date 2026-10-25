@@ -108,11 +108,23 @@ pub fn option_groups() -> Vec<OptionGroup> {
         group(
             "drawer_system",
             "Drawers",
-            &[(
-                "legrabox",
-                "LEGRABOX",
-                "Blum steel-sided boxes; N, M or K to suit each drawer's height",
-            )],
+            &[
+                (
+                    "legrabox",
+                    "LEGRABOX",
+                    "Blum steel-sided boxes; N, M or K to suit each drawer's height",
+                ),
+                (
+                    "movento",
+                    "Wood on MOVENTO",
+                    "Wooden boxes on concealed Blum MOVENTO runners, 40–70 kg",
+                ),
+                (
+                    "tandem",
+                    "Wood on TANDEM",
+                    "Wooden boxes on concealed Blum TANDEM runners, 30 kg",
+                ),
+            ],
         ),
         group(
             "wall_hanging",
