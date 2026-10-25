@@ -366,7 +366,9 @@ fn the_new_cabinets_build_every_part_where_the_core_puts_it() {
     let mut wood = Cabinet::new("D01", CabinetKind::DrawerBank);
     wood.standard.drawer_system = DrawerSystem::Tandem;
     let legrabox = Cabinet::new("D02", CabinetKind::DrawerBank);
-    for cab in [corner, right, lift, wood, legrabox] {
+    let mut tandembox = Cabinet::new("D03", CabinetKind::DrawerBank);
+    tandembox.standard.drawer_system = DrawerSystem::Tandembox;
+    for cab in [corner, right, lift, wood, legrabox, tandembox] {
         let list = build_cabinet(&cab).unwrap();
         let built = bounds(
             &cli,

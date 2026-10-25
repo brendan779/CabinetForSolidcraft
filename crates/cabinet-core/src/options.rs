@@ -115,6 +115,16 @@ pub fn option_groups() -> Vec<OptionGroup> {
                     "Blum steel-sided boxes; N, M or K to suit each drawer's height",
                 ),
                 (
+                    "merivobox",
+                    "MERIVOBOX",
+                    "Blum MERIVOBOX steel sides, straight inside; N, M or K",
+                ),
+                (
+                    "tandembox",
+                    "TANDEMBOX",
+                    "Blum TANDEMBOX antaro, curved steel sides; N, M or K",
+                ),
+                (
                     "movento",
                     "Wood on MOVENTO",
                     "Wooden boxes on concealed Blum MOVENTO runners, 40–70 kg",

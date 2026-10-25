@@ -472,6 +472,10 @@ pub enum FrontCore {
 pub enum DrawerSystem {
     /// Blum LEGRABOX: steel sides, a cut base and back; N, M or K by the opening's height.
     Legrabox,
+    /// Blum MERIVOBOX, as LEGRABOX.
+    Merivobox,
+    /// Blum TANDEMBOX antaro, as LEGRABOX.
+    Tandembox,
     /// A wooden box on Blum MOVENTO runners (40 kg, 60/70 kg for the longest).
     Movento,
     /// A wooden box on Blum TANDEM 560H runners (30 kg).

@@ -1,7 +1,7 @@
 //! Cabinet → parts, machining and hardware.
 
 use crate::corner;
-use crate::drawers::{self, WoodRunner};
+use crate::drawers::{self, BoxSystem, WoodRunner};
 use crate::geom::{Aabb, Axis, Vec3};
 use crate::hinges::{self, HingeNeed};
 use crate::joinery::ButtJoint;
@@ -270,7 +270,7 @@ struct Builder<'a> {
 /// What the opening hardware needs to know about a drawer's box.
 struct DrawerFit {
     front: String,
-    /// `legrabox`, `movento` or `tandem`.
+    /// `legrabox`, `merivobox`, `tandembox`, `movento` or `tandem`.
     system: &'static str,
     nominal_length: f64,
     /// On the 70 kg LEGRABOX profile or 60/70 kg MOVENTO runner.
@@ -384,7 +384,10 @@ impl<'a> Builder<'a> {
         for f in &fronts {
             let fit = self.drawer_fits.iter().find(|d| d.front == f.name);
             let rows: Vec<(String, String, u32)> = match (f.role, opening, fit) {
-                (PartRole::DrawerFront, Opening::ServoDrive, Some(d)) if d.system == "legrabox" => {
+                // SERVO-DRIVE is one system for LEGRABOX, MERIVOBOX and TANDEMBOX.
+                (PartRole::DrawerFront, Opening::ServoDrive, Some(d))
+                    if matches!(d.system, "legrabox" | "merivobox" | "tandembox") =>
+                {
                     servo_legrabox.push(d.front_height);
                     servo_heavy |= d.heavy_runner;
                     Vec::new()
@@ -477,6 +480,12 @@ impl<'a> Builder<'a> {
         let row = |i: &cabinet_catalog::HardwareItem, n: u32| {
             (i.id.clone(), format!("{} {}", i.family, i.variant), n)
         };
+        if matches!(d.system, "merivobox" | "tandembox") {
+            return Err(format!(
+                "TIP-ON BLUMOTION for {} is not catalogued yet",
+                d.system.to_uppercase()
+            ));
+        }
         if d.system == "tandem" {
             let sync = crate::hardware::item("blum.tandem.tip-on-sync")?;
             return Ok(if lw <= sync.param("lw_max")? {
@@ -1059,7 +1068,15 @@ impl<'a> Builder<'a> {
     /// and the system's hardware. `datum` is the height its runners stand on.
     fn drawer_box(&mut self, n: usize, front: Aabb, datum: f64, space: f64) {
         let runner = match self.cab.standard.drawer_system {
-            DrawerSystem::Legrabox => return self.legrabox_box(n, front, datum, space),
+            DrawerSystem::Legrabox => {
+                return self.steel_box(BoxSystem::Legrabox, n, front, datum, space);
+            }
+            DrawerSystem::Merivobox => {
+                return self.steel_box(BoxSystem::Merivobox, n, front, datum, space);
+            }
+            DrawerSystem::Tandembox => {
+                return self.steel_box(BoxSystem::Tandembox, n, front, datum, space);
+            }
             DrawerSystem::Movento => WoodRunner::Movento,
             DrawerSystem::Tandem => WoodRunner::Tandem,
         };
@@ -1149,14 +1166,15 @@ impl<'a> Builder<'a> {
         }
     }
 
-    /// A LEGRABOX: Blum's steel sides, with the base and back cut to Blum's sizes.
-    fn legrabox_box(&mut self, n: usize, front: Aabb, datum: f64, space: f64) {
+    /// A LEGRABOX, MERIVOBOX or TANDEMBOX: Blum's steel sides, with the base and back cut to
+    /// Blum's sizes.
+    fn steel_box(&mut self, kind: BoxSystem, n: usize, front: Aabb, datum: f64, space: f64) {
         let cab = self.cab;
         let t = cab.standard.carcass_thickness;
         let front_name = self.name(PartRole::DrawerFront, Some(n));
         let inner_width = cab.width - 2.0 * t;
         let fy = front.max().y;
-        let lb = match drawers::legrabox(inner_width, self.interior_back - fy, space) {
+        let lb = match drawers::steel_box(kind, inner_width, self.interior_back - fy, space) {
             Ok(lb) => lb,
             Err(e) => {
                 self.list
@@ -1177,9 +1195,9 @@ impl<'a> Builder<'a> {
         };
         self.drawer_fits.push(DrawerFit {
             front: front_name.clone(),
-            system: "legrabox",
+            system: kind.key(),
             nominal_length: lb.nominal_length,
-            heavy_runner: lb.profile.id.contains(".753."),
+            heavy_runner: lb.heavy_profile,
             heavy_load: lb.height == "K",
             front_height: front.size.z,
         });

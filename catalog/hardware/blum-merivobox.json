@@ -1,0 +1,781 @@
+{
+  "brand": "Blum",
+  "website": "https://www.blum.com",
+  "notes": "MERIVOBOX drawers N, M and K from the Blum Catalogue and technical manual 2024/2025, printed pages 252-261 (order information and planning). Cut sizes for 16 mm chipboard: base LW - 51 x NL - 26, back LW - 51. Front fixing: INSERTA brackets in two Ø10 x 12 bores 20.5 in from the side at 33.5 and 65.5 above the drawer's datum. 450 profiles 40 kg, 453 70 kg. Not verified by a person.",
+  "items": [
+    {
+      "id": "blum.merivobox.n",
+      "brand": "Blum",
+      "article": "MERIVOBOX N",
+      "family": "MERIVOBOX",
+      "variant": "drawer N, drawer side height 68.5 mm, 16 mm chipboard base and back",
+      "kind": "drawer_system",
+      "parameters": {
+        "side_height": 68.5,
+        "space_height": 85.5,
+        "depth_allowance": 3,
+        "base_width_deduction": 51,
+        "base_length_deduction": 26,
+        "back_width_deduction": 51,
+        "back_height": 60.5,
+        "board_thickness": 16,
+        "base_above_datum": 20,
+        "front_hole_inset": 20.5
+      },
+      "drilling": [
+        {
+          "x": 20.5,
+          "y": 33.5,
+          "diameter": 10,
+          "depth": 12,
+          "note": "front fixing bracket, INSERTA; x in from the side's inner face, y above the drawer's datum"
+        },
+        {
+          "x": 20.5,
+          "y": 65.5,
+          "diameter": 10,
+          "depth": 12,
+          "note": "front fixing bracket, INSERTA; x in from the side's inner face, y above the drawer's datum"
+        }
+      ],
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.255, web code DQJ0JY",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.merivobox.drawer-side.n.400",
+      "brand": "Blum",
+      "article": "470N4002S",
+      "family": "MERIVOBOX",
+      "variant": "drawer side set N, NL 400",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 400,
+        "side_height": 68.5
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.254, web code DQJ0JY",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.merivobox.drawer-side.n.450",
+      "brand": "Blum",
+      "article": "470N4502S",
+      "family": "MERIVOBOX",
+      "variant": "drawer side set N, NL 450",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 450,
+        "side_height": 68.5
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.254, web code DQJ0JY",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.merivobox.drawer-side.n.500",
+      "brand": "Blum",
+      "article": "470N5002S",
+      "family": "MERIVOBOX",
+      "variant": "drawer side set N, NL 500",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 500,
+        "side_height": 68.5
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.254, web code DQJ0JY",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.merivobox.drawer-side.n.550",
+      "brand": "Blum",
+      "article": "470N5502S",
+      "family": "MERIVOBOX",
+      "variant": "drawer side set N, NL 550",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 550,
+        "side_height": 68.5
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.254, web code DQJ0JY",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.merivobox.back-fixing.n",
+      "brand": "Blum",
+      "article": "ZB4N000S",
+      "family": "MERIVOBOX",
+      "variant": "chipboard back fixings left/right N",
+      "kind": "drawer_system",
+      "parameters": {},
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.254, web code DQJ0JY",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.merivobox.front-fixing.n",
+      "brand": "Blum",
+      "article": "ZF4.10I2",
+      "family": "MERIVOBOX",
+      "variant": "front fixing bracket, INSERTA (2 per drawer)",
+      "kind": "drawer_system",
+      "parameters": {},
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.254, web code DQJ0JY",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.merivobox.m",
+      "brand": "Blum",
+      "article": "MERIVOBOX M",
+      "family": "MERIVOBOX",
+      "variant": "drawer M, drawer side height 91 mm, 16 mm chipboard base and back",
+      "kind": "drawer_system",
+      "parameters": {
+        "side_height": 91,
+        "space_height": 108,
+        "depth_allowance": 3,
+        "base_width_deduction": 51,
+        "base_length_deduction": 26,
+        "back_width_deduction": 51,
+        "back_height": 83,
+        "board_thickness": 16,
+        "base_above_datum": 20,
+        "front_hole_inset": 20.5
+      },
+      "drilling": [
+        {
+          "x": 20.5,
+          "y": 33.5,
+          "diameter": 10,
+          "depth": 12,
+          "note": "front fixing bracket, INSERTA; x in from the side's inner face, y above the drawer's datum"
+        },
+        {
+          "x": 20.5,
+          "y": 65.5,
+          "diameter": 10,
+          "depth": 12,
+          "note": "front fixing bracket, INSERTA; x in from the side's inner face, y above the drawer's datum"
+        }
+      ],
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.257, web code DQJ19A",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.merivobox.drawer-side.m.270",
+      "brand": "Blum",
+      "article": "470M2702S",
+      "family": "MERIVOBOX",
+      "variant": "drawer side set M, NL 270",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 270,
+        "side_height": 91
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.256, web code DQJ19A",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.merivobox.drawer-side.m.300",
+      "brand": "Blum",
+      "article": "470M3002S",
+      "family": "MERIVOBOX",
+      "variant": "drawer side set M, NL 300",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 300,
+        "side_height": 91
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.256, web code DQJ19A",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.merivobox.drawer-side.m.350",
+      "brand": "Blum",
+      "article": "470M3502S",
+      "family": "MERIVOBOX",
+      "variant": "drawer side set M, NL 350",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 350,
+        "side_height": 91
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.256, web code DQJ19A",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.merivobox.drawer-side.m.400",
+      "brand": "Blum",
+      "article": "470M4002S",
+      "family": "MERIVOBOX",
+      "variant": "drawer side set M, NL 400",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 400,
+        "side_height": 91
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.256, web code DQJ19A",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.merivobox.drawer-side.m.450",
+      "brand": "Blum",
+      "article": "470M4502S",
+      "family": "MERIVOBOX",
+      "variant": "drawer side set M, NL 450",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 450,
+        "side_height": 91
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.256, web code DQJ19A",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.merivobox.drawer-side.m.500",
+      "brand": "Blum",
+      "article": "470M5002S",
+      "family": "MERIVOBOX",
+      "variant": "drawer side set M, NL 500",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 500,
+        "side_height": 91
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.256, web code DQJ19A",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.merivobox.drawer-side.m.550",
+      "brand": "Blum",
+      "article": "470M5502S",
+      "family": "MERIVOBOX",
+      "variant": "drawer side set M, NL 550",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 550,
+        "side_height": 91
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.256, web code DQJ19A",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.merivobox.drawer-side.m.600",
+      "brand": "Blum",
+      "article": "470M6002S",
+      "family": "MERIVOBOX",
+      "variant": "drawer side set M, NL 600",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 600,
+        "side_height": 91
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.256, web code DQJ19A",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.merivobox.back-fixing.m",
+      "brand": "Blum",
+      "article": "ZB4M000S",
+      "family": "MERIVOBOX",
+      "variant": "chipboard back fixings left/right M",
+      "kind": "drawer_system",
+      "parameters": {},
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.256, web code DQJ19A",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.merivobox.front-fixing.m",
+      "brand": "Blum",
+      "article": "ZF4.10I2",
+      "family": "MERIVOBOX",
+      "variant": "front fixing bracket, INSERTA (2 per drawer)",
+      "kind": "drawer_system",
+      "parameters": {},
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.256, web code DQJ19A",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.merivobox.k",
+      "brand": "Blum",
+      "article": "MERIVOBOX K",
+      "family": "MERIVOBOX",
+      "variant": "drawer K, drawer side height 129 mm, 16 mm chipboard base and back",
+      "kind": "drawer_system",
+      "parameters": {
+        "side_height": 129,
+        "space_height": 146,
+        "depth_allowance": 3,
+        "base_width_deduction": 51,
+        "base_length_deduction": 26,
+        "back_width_deduction": 51,
+        "back_height": 121,
+        "board_thickness": 16,
+        "base_above_datum": 20,
+        "front_hole_inset": 20.5
+      },
+      "drilling": [
+        {
+          "x": 20.5,
+          "y": 33.5,
+          "diameter": 10,
+          "depth": 12,
+          "note": "front fixing bracket, INSERTA; x in from the side's inner face, y above the drawer's datum"
+        },
+        {
+          "x": 20.5,
+          "y": 65.5,
+          "diameter": 10,
+          "depth": 12,
+          "note": "front fixing bracket, INSERTA; x in from the side's inner face, y above the drawer's datum"
+        }
+      ],
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.261, web code DQJ1YM",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.merivobox.drawer-side.k.300",
+      "brand": "Blum",
+      "article": "470K3002S",
+      "family": "MERIVOBOX",
+      "variant": "drawer side set K, NL 300",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 300,
+        "side_height": 129
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.260, web code DQJ1YM",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.merivobox.drawer-side.k.350",
+      "brand": "Blum",
+      "article": "470K3502S",
+      "family": "MERIVOBOX",
+      "variant": "drawer side set K, NL 350",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 350,
+        "side_height": 129
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.260, web code DQJ1YM",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.merivobox.drawer-side.k.400",
+      "brand": "Blum",
+      "article": "470K4002S",
+      "family": "MERIVOBOX",
+      "variant": "drawer side set K, NL 400",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 400,
+        "side_height": 129
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.260, web code DQJ1YM",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.merivobox.drawer-side.k.450",
+      "brand": "Blum",
+      "article": "470K4502S",
+      "family": "MERIVOBOX",
+      "variant": "drawer side set K, NL 450",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 450,
+        "side_height": 129
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.260, web code DQJ1YM",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.merivobox.drawer-side.k.500",
+      "brand": "Blum",
+      "article": "470K5002S",
+      "family": "MERIVOBOX",
+      "variant": "drawer side set K, NL 500",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 500,
+        "side_height": 129
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.260, web code DQJ1YM",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.merivobox.drawer-side.k.550",
+      "brand": "Blum",
+      "article": "470K5502S",
+      "family": "MERIVOBOX",
+      "variant": "drawer side set K, NL 550",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 550,
+        "side_height": 129
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.260, web code DQJ1YM",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.merivobox.drawer-side.k.600",
+      "brand": "Blum",
+      "article": "470K6002S",
+      "family": "MERIVOBOX",
+      "variant": "drawer side set K, NL 600",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 600,
+        "side_height": 129
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.260, web code DQJ1YM",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.merivobox.back-fixing.k",
+      "brand": "Blum",
+      "article": "ZB4K000S",
+      "family": "MERIVOBOX",
+      "variant": "chipboard back fixings left/right K",
+      "kind": "drawer_system",
+      "parameters": {},
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.260, web code DQJ1YM",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.merivobox.front-fixing.k",
+      "brand": "Blum",
+      "article": "ZF4.10I2",
+      "family": "MERIVOBOX",
+      "variant": "front fixing bracket, INSERTA (2 per drawer)",
+      "kind": "drawer_system",
+      "parameters": {},
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.260, web code DQJ1YM",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.merivobox.cabinet-profile.450.270",
+      "brand": "Blum",
+      "article": "450.2701B",
+      "family": "MERIVOBOX",
+      "variant": "cabinet profiles left/right, NL 270, 40 kg",
+      "kind": "runner",
+      "parameters": {
+        "nominal_length": 270,
+        "max_load_kg": 40
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.256",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.merivobox.cabinet-profile.450.300",
+      "brand": "Blum",
+      "article": "450.3001B",
+      "family": "MERIVOBOX",
+      "variant": "cabinet profiles left/right, NL 300, 40 kg",
+      "kind": "runner",
+      "parameters": {
+        "nominal_length": 300,
+        "max_load_kg": 40
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.256",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.merivobox.cabinet-profile.450.350",
+      "brand": "Blum",
+      "article": "450.3501B",
+      "family": "MERIVOBOX",
+      "variant": "cabinet profiles left/right, NL 350, 40 kg",
+      "kind": "runner",
+      "parameters": {
+        "nominal_length": 350,
+        "max_load_kg": 40
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.256",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.merivobox.cabinet-profile.450.400",
+      "brand": "Blum",
+      "article": "450.4001B",
+      "family": "MERIVOBOX",
+      "variant": "cabinet profiles left/right, NL 400, 40 kg",
+      "kind": "runner",
+      "parameters": {
+        "nominal_length": 400,
+        "max_load_kg": 40
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.256",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.merivobox.cabinet-profile.450.450",
+      "brand": "Blum",
+      "article": "450.4501B",
+      "family": "MERIVOBOX",
+      "variant": "cabinet profiles left/right, NL 450, 40 kg",
+      "kind": "runner",
+      "parameters": {
+        "nominal_length": 450,
+        "max_load_kg": 40
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.256",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.merivobox.cabinet-profile.450.500",
+      "brand": "Blum",
+      "article": "450.5001B",
+      "family": "MERIVOBOX",
+      "variant": "cabinet profiles left/right, NL 500, 40 kg",
+      "kind": "runner",
+      "parameters": {
+        "nominal_length": 500,
+        "max_load_kg": 40
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.256",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.merivobox.cabinet-profile.450.550",
+      "brand": "Blum",
+      "article": "450.5501B",
+      "family": "MERIVOBOX",
+      "variant": "cabinet profiles left/right, NL 550, 40 kg",
+      "kind": "runner",
+      "parameters": {
+        "nominal_length": 550,
+        "max_load_kg": 40
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.256",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.merivobox.cabinet-profile.450.600",
+      "brand": "Blum",
+      "article": "450.6001B",
+      "family": "MERIVOBOX",
+      "variant": "cabinet profiles left/right, NL 600, 40 kg",
+      "kind": "runner",
+      "parameters": {
+        "nominal_length": 600,
+        "max_load_kg": 40
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.256",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.merivobox.cabinet-profile.453.450",
+      "brand": "Blum",
+      "article": "453.4501B",
+      "family": "MERIVOBOX",
+      "variant": "cabinet profiles left/right, NL 450, 70 kg",
+      "kind": "runner",
+      "parameters": {
+        "nominal_length": 450,
+        "max_load_kg": 70
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.256",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.merivobox.cabinet-profile.453.500",
+      "brand": "Blum",
+      "article": "453.5001B",
+      "family": "MERIVOBOX",
+      "variant": "cabinet profiles left/right, NL 500, 70 kg",
+      "kind": "runner",
+      "parameters": {
+        "nominal_length": 500,
+        "max_load_kg": 70
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.256",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.merivobox.cabinet-profile.453.550",
+      "brand": "Blum",
+      "article": "453.5501B",
+      "family": "MERIVOBOX",
+      "variant": "cabinet profiles left/right, NL 550, 70 kg",
+      "kind": "runner",
+      "parameters": {
+        "nominal_length": 550,
+        "max_load_kg": 70
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.256",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.merivobox.cabinet-profile.453.600",
+      "brand": "Blum",
+      "article": "453.6001B",
+      "family": "MERIVOBOX",
+      "variant": "cabinet profiles left/right, NL 600, 70 kg",
+      "kind": "runner",
+      "parameters": {
+        "nominal_length": 600,
+        "max_load_kg": 70
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.256",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    }
+  ]
+}

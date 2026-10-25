@@ -5,18 +5,57 @@ use cabinet_catalog::HardwareItem;
 
 use crate::hardware;
 
-/// LEGRABOX heights, tallest first: the box chosen is the tallest whose space requirement fits.
-const LEGRABOX_HEIGHTS: [&str; 3] = ["k", "m", "n"];
+/// Box heights, tallest first: the box chosen is the tallest whose space requirement fits.
+const BOX_HEIGHTS: [&str; 3] = ["k", "m", "n"];
 
-/// A LEGRABOX drawer sized for its opening.
+/// Blum's steel-sided box systems, with their cabinet profile series (lighter first).
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum BoxSystem {
+    Legrabox,
+    Merivobox,
+    Tandembox,
+}
+
+impl BoxSystem {
+    /// The system's key in catalog ids (`blum.legrabox.m`).
+    pub fn key(self) -> &'static str {
+        match self {
+            BoxSystem::Legrabox => "legrabox",
+            BoxSystem::Merivobox => "merivobox",
+            BoxSystem::Tandembox => "tandembox",
+        }
+    }
+
+    fn name(self) -> &'static str {
+        match self {
+            BoxSystem::Legrabox => "LEGRABOX",
+            BoxSystem::Merivobox => "MERIVOBOX",
+            BoxSystem::Tandembox => "TANDEMBOX",
+        }
+    }
+
+    /// Profile series, the standard load first, then the heavy one.
+    fn profiles(self) -> [&'static str; 2] {
+        match self {
+            BoxSystem::Legrabox => ["750", "753"],
+            BoxSystem::Merivobox => ["450", "453"],
+            BoxSystem::Tandembox => ["578", "576"],
+        }
+    }
+}
+
+/// A steel-sided box drawer sized for its opening.
 #[derive(Clone, Debug, PartialEq)]
-pub struct Legrabox {
+pub struct SteelBox {
+    pub kind: BoxSystem,
     /// The planning row (`blum.legrabox.m`): side height, deductions, front drilling.
     pub system: &'static HardwareItem,
     /// N, M or K.
     pub height: String,
     pub nominal_length: f64,
     pub profile: &'static HardwareItem,
+    /// The profile is the heavy series (70 kg LEGRABOX / MERIVOBOX, 65 kg TANDEMBOX).
+    pub heavy_profile: bool,
     pub sides: &'static HardwareItem,
     pub back_fixing: &'static HardwareItem,
     pub front_fixing: &'static HardwareItem,
@@ -26,18 +65,24 @@ pub struct Legrabox {
     pub board_thickness: f64,
 }
 
-/// The tallest LEGRABOX of the longest nominal length that fits an opening `inner_width` (LW)
-/// wide, `inner_depth` (LT) deep from the back of the front, with `space` mm from the drawer's
-/// datum (the surface its profiles stand on) to the next one up.
-pub fn legrabox(inner_width: f64, inner_depth: f64, space: f64) -> Result<Legrabox, String> {
-    let mut last_err = format!("no LEGRABOX drawer fits in {space:.0} mm of height");
-    for h in LEGRABOX_HEIGHTS {
-        let system = hardware::item(&format!("blum.legrabox.{h}"))?;
+/// The tallest box of `kind` of the longest nominal length that fits an opening `inner_width`
+/// (LW) wide, `inner_depth` (LT) deep from the back of the front, with `space` mm from the
+/// drawer's datum (the surface its profiles stand on) to the next one up.
+pub fn steel_box(
+    kind: BoxSystem,
+    inner_width: f64,
+    inner_depth: f64,
+    space: f64,
+) -> Result<SteelBox, String> {
+    let key = kind.key();
+    let mut last_err = format!("no {} drawer fits in {space:.0} mm of height", kind.name());
+    for h in BOX_HEIGHTS {
+        let system = hardware::item(&format!("blum.{key}.{h}"))?;
         if system.param("space_height")? > space + 1e-9 {
             continue;
         }
         let allowance = system.param("depth_allowance")?;
-        let side_prefix = format!("blum.legrabox.drawer-side.{h}.");
+        let side_prefix = format!("blum.{key}.drawer-side.{h}.");
         let mut lengths: Vec<(f64, &HardwareItem)> = hardware::items()
             .iter()
             .filter(|i| i.id.starts_with(&side_prefix))
@@ -47,21 +92,33 @@ pub fn legrabox(inner_width: f64, inner_depth: f64, space: f64) -> Result<Legrab
         lengths.sort_by(|a, b| a.0.total_cmp(&b.0));
         let Some(&(nl, sides)) = lengths.last() else {
             last_err = format!(
-                "no LEGRABOX {} drawer is short enough for {inner_depth:.0} mm inside depth",
+                "no {} {} drawer is short enough for {inner_depth:.0} mm inside depth",
+                kind.name(),
                 h.to_uppercase()
             );
             continue;
         };
-        let profile = profile_for(nl)?;
+        // The standard profile, or the heavy one where only it comes that long.
+        let [light, heavy] = kind.profiles();
+        let (profile, heavy_profile) =
+            match hardware::item(&format!("blum.{key}.cabinet-profile.{light}.{nl}")) {
+                Ok(p) => (p, false),
+                Err(_) => (
+                    hardware::item(&format!("blum.{key}.cabinet-profile.{heavy}.{nl}"))?,
+                    true,
+                ),
+            };
         let p = |name: &str| system.param(name);
-        return Ok(Legrabox {
+        return Ok(SteelBox {
+            kind,
             system,
             height: h.to_uppercase(),
             nominal_length: nl,
             profile,
+            heavy_profile,
             sides,
-            back_fixing: hardware::item(&format!("blum.legrabox.back-fixing.{h}"))?,
-            front_fixing: hardware::item(&format!("blum.legrabox.front-fixing.{h}"))?,
+            back_fixing: hardware::item(&format!("blum.{key}.back-fixing.{h}"))?,
+            front_fixing: hardware::item(&format!("blum.{key}.front-fixing.{h}"))?,
             base: (
                 inner_width - p("base_width_deduction")?,
                 nl - p("base_length_deduction")?,
@@ -71,17 +128,6 @@ pub fn legrabox(inner_width: f64, inner_depth: f64, space: f64) -> Result<Legrab
         });
     }
     Err(last_err)
-}
-
-/// The 40 kg cabinet profile for a nominal length, or the 70 kg one where only it comes that
-/// long.
-fn profile_for(nl: f64) -> Result<&'static HardwareItem, String> {
-    ["750", "753"]
-        .iter()
-        .find_map(|series| {
-            hardware::item(&format!("blum.legrabox.cabinet-profile.{series}.{nl}")).ok()
-        })
-        .ok_or_else(|| format!("no LEGRABOX cabinet profile of nominal length {nl}"))
 }
 
 /// The wooden-drawer runner systems.
@@ -306,7 +352,7 @@ mod tests {
     /// (Blum p.201, 203, 207).
     #[test]
     fn legrabox_cut_sizes_follow_blums_deductions() {
-        let m = legrabox(568.0, 540.0, 120.0).unwrap();
+        let m = steel_box(BoxSystem::Legrabox, 568.0, 540.0, 120.0).unwrap();
         assert_eq!(m.height, "M");
         assert_eq!(m.nominal_length, 500.0);
         assert_eq!(m.base, (533.0, 490.0));
@@ -319,7 +365,7 @@ mod tests {
 
     #[test]
     fn the_tallest_box_whose_space_fits_is_chosen() {
-        let height = |space| legrabox(568.0, 540.0, space).map(|b| b.height);
+        let height = |space| steel_box(BoxSystem::Legrabox, 568.0, 540.0, space).map(|b| b.height);
         assert_eq!(height(80.0).as_deref(), Ok("N"));
         assert_eq!(height(105.9).as_deref(), Ok("N"));
         assert_eq!(height(106.0).as_deref(), Ok("M"));
@@ -330,16 +376,17 @@ mod tests {
 
     #[test]
     fn the_nominal_length_leaves_three_mm_behind_the_box() {
-        let nl = |depth| legrabox(568.0, depth, 150.0).map(|b| b.nominal_length);
+        let nl =
+            |depth| steel_box(BoxSystem::Legrabox, 568.0, depth, 150.0).map(|b| b.nominal_length);
         assert_eq!(nl(503.0), Ok(500.0));
         assert_eq!(nl(502.9), Ok(450.0));
         // Only the 70 kg profile comes in 650.
-        let b = legrabox(568.0, 700.0, 120.0).unwrap();
+        let b = steel_box(BoxSystem::Legrabox, 568.0, 700.0, 120.0).unwrap();
         assert_eq!(
             (b.nominal_length, b.profile.article.as_str()),
             (650.0, "753.6501S")
         );
-        assert!(legrabox(568.0, 250.0, 120.0).is_err());
+        assert!(steel_box(BoxSystem::Legrabox, 568.0, 250.0, 120.0).is_err());
     }
 
     /// Blum p.413 / p.435: SKW = LW − 42, SKL = NL − 10, NL + 3 ≤ LT.
@@ -422,5 +469,27 @@ mod tests {
                 .1,
             4
         );
+    }
+
+    /// BLUM-5: MERIVOBOX (p.257) and TANDEMBOX antaro (p.297) cut sizes and the three heights.
+    #[test]
+    fn merivobox_and_tandembox_follow_their_own_deductions() {
+        let m = steel_box(BoxSystem::Merivobox, 568.0, 540.0, 120.0).unwrap();
+        assert_eq!((m.height.as_str(), m.nominal_length), ("M", 500.0));
+        assert_eq!((m.base, m.back), ((517.0, 474.0), (517.0, 83.0)));
+        assert_eq!(
+            (m.sides.article.as_str(), m.profile.article.as_str()),
+            ("470M5002S", "450.5001B")
+        );
+        let t = steel_box(BoxSystem::Tandembox, 568.0, 540.0, 140.0).unwrap();
+        assert_eq!((t.height.as_str(), t.nominal_length), ("K", 500.0));
+        assert_eq!((t.base, t.back), ((493.0, 476.0), (481.0, 116.0)));
+        assert_eq!(t.system.drilling.len(), 3);
+        assert_eq!(t.profile.article, "578.5001M");
+        let n = steel_box(BoxSystem::Tandembox, 568.0, 540.0, 90.0).unwrap();
+        assert_eq!(n.height, "N");
+        // Only the 65 kg profile comes in 650.
+        let long = steel_box(BoxSystem::Tandembox, 568.0, 660.0, 120.0).unwrap();
+        assert!(long.heavy_profile && long.profile.article == "576.6501M");
     }
 }

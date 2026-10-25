@@ -349,6 +349,8 @@ mod tests {
                 .flat_map(|o| {
                     [
                         DrawerSystem::Legrabox,
+                        DrawerSystem::Merivobox,
+                        DrawerSystem::Tandembox,
                         DrawerSystem::Movento,
                         DrawerSystem::Tandem,
                     ]

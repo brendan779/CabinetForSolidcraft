@@ -215,8 +215,8 @@ private struct Pen {
         board(8, 10, 6, 62)
         board(86, 10, 6, 62)
         switch choice {
-        case "legrabox":
-            // Slim steel sides with the runner hidden under them; a cut base and the back.
+        case "legrabox", "merivobox", "tandembox":
+            // Steel sides with the runner hidden under them; a cut base and the back.
             board(19, 30, 4, 34, hot: true)
             board(77, 30, 4, 34, hot: true)
             board(23, 58, 54, 5)
