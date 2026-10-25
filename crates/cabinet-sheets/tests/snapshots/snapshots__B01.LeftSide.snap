@@ -4,7 +4,7 @@ expression: svg
 ---
 <svg xmlns="http://www.w3.org/2000/svg" width="297mm" height="210mm" viewBox="0 0 297 210" font-family="Helvetica, Arial, sans-serif">
 <rect width="297" height="210" fill="#fff"/>
-<style>.o{fill:#f6f3ec;stroke:#222;stroke-width:0.35}.t{font-size:3px;fill:#222}.s{font-size:2.4px;fill:#555}.d{stroke:#4a6fa5;stroke-width:0.2;fill:none}.e{stroke:#c0392b;stroke-width:1.1}</style>
+<style>.o{fill:#f6f3ec;stroke:#222;stroke-width:0.35}.t{font-size:3px;fill:#222}.s{font-size:2.4px;fill:#555}.d{stroke:#4a6fa5;stroke-width:0.2;fill:none}.e{stroke:#c0392b;stroke-width:1.1}.o2{font-size:1.7px;fill:#4a6fa5}</style>
 <rect class="o" x="34.00" y="60.57" width="113.50" height="91.43"/>
 <line class="e" x1="34.00" y1="152.00" x2="147.50" y2="152.00"/>
 <line class="d" x1="34.00" y1="159.00" x2="147.50" y2="159.00"/>
@@ -55,6 +55,54 @@ expression: svg
 <circle cx="127.32" cy="69.87" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
 <circle cx="132.37" cy="146.17" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
 <circle cx="132.37" cy="69.87" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
+<line class="d" x1="46.61" y1="152.00" x2="46.61" y2="153.50"/>
+<text class="o2" x="46.61" y="154.00" transform="rotate(90 46.61 154.00)">80</text>
+<line class="d" x1="47.24" y1="152.00" x2="47.24" y2="153.50"/>
+<text class="o2" x="47.24" y="157.50" transform="rotate(90 47.24 157.50)">84</text>
+<line class="d" x1="51.66" y1="152.00" x2="51.66" y2="153.50"/>
+<text class="o2" x="51.66" y="154.00" transform="rotate(90 51.66 154.00)">112</text>
+<line class="d" x1="52.29" y1="152.00" x2="52.29" y2="153.50"/>
+<text class="o2" x="52.29" y="157.50" transform="rotate(90 52.29 157.50)">116</text>
+<line class="d" x1="56.70" y1="152.00" x2="56.70" y2="153.50"/>
+<text class="o2" x="56.70" y="154.00" transform="rotate(90 56.70 154.00)">144</text>
+<line class="d" x1="61.74" y1="152.00" x2="61.74" y2="153.50"/>
+<text class="o2" x="61.74" y="154.00" transform="rotate(90 61.74 154.00)">176</text>
+<line class="d" x1="66.79" y1="152.00" x2="66.79" y2="153.50"/>
+<text class="o2" x="66.79" y="154.00" transform="rotate(90 66.79 154.00)">208</text>
+<line class="d" x1="71.83" y1="152.00" x2="71.83" y2="153.50"/>
+<text class="o2" x="71.83" y="154.00" transform="rotate(90 71.83 154.00)">240</text>
+<line class="d" x1="76.88" y1="152.00" x2="76.88" y2="153.50"/>
+<text class="o2" x="76.88" y="154.00" transform="rotate(90 76.88 154.00)">272</text>
+<line class="d" x1="81.92" y1="152.00" x2="81.92" y2="153.50"/>
+<text class="o2" x="81.92" y="154.00" transform="rotate(90 81.92 154.00)">304</text>
+<line class="d" x1="86.97" y1="152.00" x2="86.97" y2="153.50"/>
+<text class="o2" x="86.97" y="154.00" transform="rotate(90 86.97 154.00)">336</text>
+<line class="d" x1="92.01" y1="152.00" x2="92.01" y2="153.50"/>
+<text class="o2" x="92.01" y="154.00" transform="rotate(90 92.01 154.00)">368</text>
+<line class="d" x1="97.06" y1="152.00" x2="97.06" y2="153.50"/>
+<text class="o2" x="97.06" y="154.00" transform="rotate(90 97.06 154.00)">400</text>
+<line class="d" x1="102.10" y1="152.00" x2="102.10" y2="153.50"/>
+<text class="o2" x="102.10" y="154.00" transform="rotate(90 102.10 154.00)">432</text>
+<line class="d" x1="107.14" y1="152.00" x2="107.14" y2="153.50"/>
+<text class="o2" x="107.14" y="154.00" transform="rotate(90 107.14 154.00)">464</text>
+<line class="d" x1="112.19" y1="152.00" x2="112.19" y2="153.50"/>
+<text class="o2" x="112.19" y="154.00" transform="rotate(90 112.19 154.00)">496</text>
+<line class="d" x1="117.23" y1="152.00" x2="117.23" y2="153.50"/>
+<text class="o2" x="117.23" y="154.00" transform="rotate(90 117.23 154.00)">528</text>
+<line class="d" x1="122.28" y1="152.00" x2="122.28" y2="153.50"/>
+<text class="o2" x="122.28" y="154.00" transform="rotate(90 122.28 154.00)">560</text>
+<line class="d" x1="127.32" y1="152.00" x2="127.32" y2="153.50"/>
+<text class="o2" x="127.32" y="154.00" transform="rotate(90 127.32 154.00)">592</text>
+<line class="d" x1="128.90" y1="152.00" x2="128.90" y2="153.50"/>
+<text class="o2" x="128.90" y="157.50" transform="rotate(90 128.90 157.50)">602</text>
+<line class="d" x1="132.37" y1="152.00" x2="132.37" y2="153.50"/>
+<text class="o2" x="132.37" y="154.00" transform="rotate(90 132.37 154.00)">624</text>
+<line class="d" x1="133.94" y1="152.00" x2="133.94" y2="153.50"/>
+<text class="o2" x="133.94" y="157.50" transform="rotate(90 133.94 157.50)">634</text>
+<line class="d" x1="32.50" y1="146.17" x2="34.00" y2="146.17"/>
+<text class="o2" x="32.00" y="146.77" text-anchor="end">37</text>
+<line class="d" x1="32.50" y1="69.87" x2="34.00" y2="69.87"/>
+<text class="o2" x="32.00" y="70.47" text-anchor="end">521</text>
 <text class="s" x="34.00" y="58.57">Inside face</text>
 <rect class="o" x="163.50" y="60.57" width="113.50" height="91.43"/>
 <line class="e" x1="277.00" y1="152.00" x2="163.50" y2="152.00"/>
@@ -77,19 +125,33 @@ expression: svg
 <circle cx="164.76" cy="75.86" r="0.63" fill="none" stroke="#222" stroke-width="0.25"/>
 <circle cx="164.76" cy="67.98" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
 <circle cx="164.76" cy="67.98" r="0.63" fill="none" stroke="#222" stroke-width="0.25"/>
+<line class="d" x1="164.76" y1="152.00" x2="164.76" y2="153.50"/>
+<text class="o2" x="164.76" y="154.00" transform="rotate(90 164.76 154.00)">712</text>
+<line class="d" x1="275.74" y1="152.00" x2="275.74" y2="153.50"/>
+<text class="o2" x="275.74" y="154.00" transform="rotate(90 275.74 154.00)">8</text>
+<line class="d" x1="162.00" y1="148.06" x2="163.50" y2="148.06"/>
+<text class="o2" x="161.50" y="148.66" text-anchor="end">25</text>
+<line class="d" x1="162.00" y1="140.18" x2="163.50" y2="140.18"/>
+<text class="o2" x="161.50" y="140.78" text-anchor="end">75</text>
+<line class="d" x1="162.00" y1="132.08" x2="163.50" y2="132.08"/>
+<text class="o2" x="161.50" y="132.68" text-anchor="end">126.3</text>
+<line class="d" x1="162.00" y1="108.02" x2="163.50" y2="108.02"/>
+<text class="o2" x="161.50" y="108.62" text-anchor="end">279</text>
+<line class="d" x1="162.00" y1="83.95" x2="163.50" y2="83.95"/>
+<text class="o2" x="161.50" y="84.55" text-anchor="end">431.7</text>
+<line class="d" x1="162.00" y1="75.86" x2="163.50" y2="75.86"/>
+<text class="o2" x="161.50" y="76.46" text-anchor="end">483</text>
+<line class="d" x1="162.00" y1="67.98" x2="163.50" y2="67.98"/>
+<text class="o2" x="161.50" y="68.58" text-anchor="end">533</text>
 <text class="s" x="163.50" y="58.57">Outside face, turned over (left and right swap)</text>
 <rect x="12" y="168.00" width="273.00" height="30" fill="none" stroke="#222" stroke-width="0.3"/>
 <text class="t" x="15.00" y="175.00">B01.LeftSide  —  Left side</text>
 <text class="t" x="15.00" y="182.00">Finished 720 × 580 × 16 mm   Board: Polytec Classic White Matt 16 MR MDF</text>
 <text class="t" x="15.00" y="189.00">Job: Snapshot job   Cabinet: B01   Operations: 57   Reference corner ●   Edge tape ▬</text>
-<text class="s" x="158.50" y="172.50">in groove 720 × 6 @ 0, 558</text>
-<text class="s" x="158.50" y="175.40">in biscuit 4 × 66.1 @ 6, 16.9</text>
-<text class="s" x="158.50" y="178.30">in biscuit 4 × 66.1 @ 6, 169.6</text>
-<text class="s" x="158.50" y="181.20">in biscuit 4 × 66.1 @ 6, 322.3</text>
-<text class="s" x="158.50" y="184.10">in biscuit 4 × 66.1 @ 6, 474.9</text>
-<text class="s" x="158.50" y="187.00">in Ø5 × 11.5 HingePlate @ 84, 37</text>
-<text class="s" x="158.50" y="189.90">in Ø5 × 11.5 HingePlate @ 116, 37</text>
-<text class="s" x="158.50" y="192.80">in Ø5 × 11.5 HingePlate @ 602, 37</text>
-<text class="s" x="158.50" y="195.70">in Ø5 × 11.5 HingePlate @ 634, 37</text>
-<text class="s" x="265.00" y="196.00">+48 more</text>
+<text class="s" x="158.50" y="172.50">in groove 720 × 6 ×1  @ 0, 558</text>
+<text class="s" x="158.50" y="175.40">in biscuit 4 × 66.1 ×4  @ 6, 16.9; 6, 169.6; …</text>
+<text class="s" x="158.50" y="178.30">in Ø5 × 11.5 HingePlate ×4  @ 84, 37; 116, 37; …</text>
+<text class="s" x="158.50" y="181.20">in Ø5 × 10 ShelfPin ×34  @ 80, 521; 112, 521; …</text>
+<text class="s" x="158.50" y="184.10">out Ø4.5 × 16 Screw ×7  @ 8, 126.3; 8, 279; …</text>
+<text class="s" x="158.50" y="187.00">out Ø8 × 1.8 Countersink ×7  @ 8, 126.3; 8, 279; …</text>
 </svg>

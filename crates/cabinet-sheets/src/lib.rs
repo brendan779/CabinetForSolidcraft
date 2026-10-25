@@ -239,7 +239,7 @@ pub fn part_sheet(list: &PartList, part: &Part, board: &str, job: &str) -> Strin
         svg,
         r##"<svg xmlns="http://www.w3.org/2000/svg" width="{PAGE_W}mm" height="{PAGE_H}mm" viewBox="0 0 {PAGE_W} {PAGE_H}" font-family="Helvetica, Arial, sans-serif">
 <rect width="{PAGE_W}" height="{PAGE_H}" fill="#fff"/>
-<style>.o{{fill:#f6f3ec;stroke:#222;stroke-width:0.35}}.t{{font-size:3px;fill:#222}}.s{{font-size:2.4px;fill:#555}}.d{{stroke:#4a6fa5;stroke-width:0.2;fill:none}}.e{{stroke:#c0392b;stroke-width:1.1}}</style>
+<style>.o{{fill:#f6f3ec;stroke:#222;stroke-width:0.35}}.t{{font-size:3px;fill:#222}}.s{{font-size:2.4px;fill:#555}}.d{{stroke:#4a6fa5;stroke-width:0.2;fill:none}}.e{{stroke:#c0392b;stroke-width:1.1}}.o2{{font-size:1.7px;fill:#4a6fa5}}</style>
 "##
     );
     // Which face is inside: the one facing the middle of the cabinet.
@@ -500,7 +500,9 @@ fn face_view(
         y(0.0)
     );
 
-    // Machining.
+    // Machining. Face bores, slots and grooves are listed by kind (size, depth, purpose) with a
+    // count; bores are also dimensioned from the reference corner.
+    let mut holes: Vec<(String, f64, f64)> = Vec::new();
     for f in feats {
         if face.is_some() && f.face().is_some_and(|ff| Some(ff) != face) {
             continue;
@@ -521,13 +523,10 @@ fn face_view(
                     x(*u),
                     y(*v)
                 );
-                table.push(format!(
-                    "{tag}Ø{} × {} {:?} @ {}, {}",
-                    fmt(*diameter),
-                    fmt(*depth),
-                    purpose,
-                    fmt(*u),
-                    fmt(*v)
+                holes.push((
+                    format!("{tag}Ø{} × {} {:?}", fmt(*diameter), fmt(*depth), purpose),
+                    *u,
+                    *v,
                 ));
             }
             Feature::EdgeBore {
@@ -588,16 +587,99 @@ fn face_view(
                     || face != Some(Face::High) && face != Some(Face::Low)
                     || tag == "in "
                 {
-                    table.push(format!(
-                        "{tag}{label} {} × {} @ {}, {}",
-                        fmt(*w),
-                        fmt(*h),
-                        fmt(*u),
-                        fmt(*v)
-                    ));
+                    holes.push((format!("{tag}{label} {} × {}", fmt(*w), fmt(*h)), *u, *v));
                 }
             }
         }
+    }
+    let mut kinds: Vec<(String, Vec<(f64, f64)>)> = Vec::new();
+    for (kind, u, v) in &holes {
+        match kinds.iter_mut().find(|(k, _)| k == kind) {
+            Some((_, at)) => at.push((*u, *v)),
+            None => kinds.push((kind.clone(), vec![(*u, *v)])),
+        }
+    }
+    for (kind, at) in &kinds {
+        let first = at
+            .iter()
+            .map(|(u, v)| format!("{}, {}", fmt(*u), fmt(*v)))
+            .take(2)
+            .collect::<Vec<_>>()
+            .join("; ");
+        let more = if at.len() > 2 { "; …" } else { "" };
+        table.push(format!("{kind} ×{}  @ {first}{more}", at.len()));
+    }
+    // Only bores are dimensioned; slots and grooves are in the table.
+    let bores: Vec<(String, f64, f64)> = holes
+        .iter()
+        .filter(|h| h.0.contains('Ø'))
+        .cloned()
+        .collect();
+    ordinates(svg, view, &bores);
+}
+
+/// Ordinate dimensions from the reference corner: every distinct hole position across (u) is
+/// ticked and labelled under the part, every distinct position up (v) to its left, so each hole
+/// row and column reads straight off the sheet.
+fn ordinates(svg: &mut String, view: &View, holes: &[(String, f64, f64)]) {
+    let distinct = |mut vals: Vec<f64>| {
+        vals.sort_by(f64::total_cmp);
+        vals.dedup_by(|a, b| (*a - *b).abs() < 0.05);
+        vals
+    };
+    let us = distinct(holes.iter().map(|h| h.1).collect());
+    let vs = distinct(holes.iter().map(|h| h.2).collect());
+    let left = view.x(0.0).min(view.x(view.lu));
+    let base = view.y(0.0);
+    // Labels closer than a text height to the last one drop to a second line.
+    const ROOM: f64 = 2.2;
+    let mut last = f64::NEG_INFINITY;
+    let mut staggered = false;
+    let mut xs: Vec<f64> = us.iter().map(|u| view.x(*u)).collect();
+    xs.sort_by(f64::total_cmp);
+    for x in xs {
+        let u = if view.mirror {
+            view.lu - (x - view.ox) / view.s
+        } else {
+            (x - view.ox) / view.s
+        };
+        staggered = (x - last).abs() < ROOM && !staggered;
+        if !staggered {
+            last = x;
+        }
+        let y0 = base + if staggered { 5.5 } else { 2.0 };
+        let _ = writeln!(
+            svg,
+            r#"<line class="d" x1="{x:.2}" y1="{:.2}" x2="{x:.2}" y2="{:.2}"/>"#,
+            base,
+            base + 1.5
+        );
+        let _ = writeln!(
+            svg,
+            r#"<text class="o2" x="{x:.2}" y="{y0:.2}" transform="rotate(90 {x:.2} {y0:.2})">{}</text>"#,
+            fmt(u)
+        );
+    }
+    let mut last = f64::NEG_INFINITY;
+    let mut staggered = false;
+    for v in vs {
+        let y = view.y(v);
+        staggered = (y - last).abs() < ROOM && !staggered;
+        if !staggered {
+            last = y;
+        }
+        let x0 = left - if staggered { 9.0 } else { 2.0 };
+        let _ = writeln!(
+            svg,
+            r#"<line class="d" x1="{:.2}" y1="{y:.2}" x2="{left:.2}" y2="{y:.2}"/>"#,
+            left - 1.5
+        );
+        let _ = writeln!(
+            svg,
+            r#"<text class="o2" x="{x0:.2}" y="{:.2}" text-anchor="end">{}</text>"#,
+            y + 0.6,
+            fmt(v)
+        );
     }
 }
 
@@ -774,7 +856,7 @@ mod tests {
                 "{side}"
             );
             let svg = part_sheet(&list, part, "Board", "Job");
-            assert!(svg.contains("notch 150 × 50 @ 0, 0"), "{side}");
+            assert!(svg.contains("notch 150 × 50 ×1  @ 0, 0"), "{side}");
         }
     }
 

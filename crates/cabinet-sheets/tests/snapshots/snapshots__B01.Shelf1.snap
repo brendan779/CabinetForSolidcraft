@@ -4,7 +4,7 @@ expression: svg
 ---
 <svg xmlns="http://www.w3.org/2000/svg" width="297mm" height="210mm" viewBox="0 0 297 210" font-family="Helvetica, Arial, sans-serif">
 <rect width="297" height="210" fill="#fff"/>
-<style>.o{fill:#f6f3ec;stroke:#222;stroke-width:0.35}.t{font-size:3px;fill:#222}.s{font-size:2.4px;fill:#555}.d{stroke:#4a6fa5;stroke-width:0.2;fill:none}.e{stroke:#c0392b;stroke-width:1.1}</style>
+<style>.o{fill:#f6f3ec;stroke:#222;stroke-width:0.35}.t{font-size:3px;fill:#222}.s{font-size:2.4px;fill:#555}.d{stroke:#4a6fa5;stroke-width:0.2;fill:none}.e{stroke:#c0392b;stroke-width:1.1}.o2{font-size:1.7px;fill:#4a6fa5}</style>
 <rect class="o" x="34.00" y="20.00" width="134.86" height="132.00"/>
 <line class="e" x1="34.00" y1="152.00" x2="168.86" y2="152.00"/>
 <line class="d" x1="34.00" y1="159.00" x2="168.86" y2="159.00"/>
