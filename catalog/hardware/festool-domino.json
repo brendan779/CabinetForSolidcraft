@@ -1,0 +1,328 @@
+{
+  "brand": "Festool",
+  "website": "https://www.festool.com",
+  "notes": "DOMINO loose tenons (beech) and the DF 500 / DF 700 joiners, from festool.com product pages read on 2026-10-26: each tenon page gives its dimensions as thickness x nominal length x width (D 8x40: 8 x 40 x 21.9 mm). Festool makes tenons about 2 mm shorter than nominal for glue room, and the manual's guide is a mortise half the tenon long in each part. The tight width setting fits the tenon snugly; medium and wide add 6 and 10 mm (DF 500 manual). Not verified by a person.",
+  "items": [
+    {
+      "id": "festool.domino.d4x20",
+      "brand": "Festool",
+      "article": "495661",
+      "family": "DOMINO tenon",
+      "variant": "D 4x20/450 BU, beech, 4 × 20 × 16.6 mm (DF 500)",
+      "kind": "connector",
+      "parameters": {
+        "thickness": 4,
+        "length": 20,
+        "width": 16.6,
+        "df700": 0
+      },
+      "source": {
+        "url": "https://festool.com/accessory/495661",
+        "document_date": "2026 (web page)",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "festool.domino.d5x30",
+      "brand": "Festool",
+      "article": "494938",
+      "family": "DOMINO tenon",
+      "variant": "D 5x30/300 BU, beech, 5 × 30 × 18.8 mm (DF 500)",
+      "kind": "connector",
+      "parameters": {
+        "thickness": 5,
+        "length": 30,
+        "width": 18.8,
+        "df700": 0
+      },
+      "source": {
+        "url": "https://festool.com/accessory/494938",
+        "document_date": "2026 (web page)",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "festool.domino.d6x40",
+      "brand": "Festool",
+      "article": "494939",
+      "family": "DOMINO tenon",
+      "variant": "D 6x40/190 BU, beech, 6 × 40 × 19.8 mm (DF 500)",
+      "kind": "connector",
+      "parameters": {
+        "thickness": 6,
+        "length": 40,
+        "width": 19.8,
+        "df700": 0
+      },
+      "source": {
+        "url": "https://festool.com/accessory/494939",
+        "document_date": "2026 (web page)",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "festool.domino.d8x40",
+      "brand": "Festool",
+      "article": "494940",
+      "family": "DOMINO tenon",
+      "variant": "D 8x40/130 BU, beech, 8 × 40 × 21.9 mm (DF 500)",
+      "kind": "connector",
+      "parameters": {
+        "thickness": 8,
+        "length": 40,
+        "width": 21.9,
+        "df700": 0
+      },
+      "source": {
+        "url": "https://festool.com/accessory/494940",
+        "document_date": "2026 (web page)",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "festool.domino.d8x50",
+      "brand": "Festool",
+      "article": "494941",
+      "family": "DOMINO tenon",
+      "variant": "D 8x50/100 BU, beech, 8 × 50 × 21.9 mm (DF 500)",
+      "kind": "connector",
+      "parameters": {
+        "thickness": 8,
+        "length": 50,
+        "width": 21.9,
+        "df700": 0
+      },
+      "source": {
+        "url": "https://festool.com/accessory/494941",
+        "document_date": "2026 (web page)",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "festool.domino.d10x50",
+      "brand": "Festool",
+      "article": "494942",
+      "family": "DOMINO tenon",
+      "variant": "D 10x50/85 BU, beech, 10 × 50 × 23.9 mm (DF 500)",
+      "kind": "connector",
+      "parameters": {
+        "thickness": 10,
+        "length": 50,
+        "width": 23.9,
+        "df700": 0
+      },
+      "source": {
+        "url": "https://festool.com/accessory/494942",
+        "document_date": "2026 (web page)",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "festool.domino.d8x80",
+      "brand": "Festool",
+      "article": "498212",
+      "family": "DOMINO tenon",
+      "variant": "D 8x80/190 BU, beech, 8 × 80 × 21.9 mm (DF 700)",
+      "kind": "connector",
+      "parameters": {
+        "thickness": 8,
+        "length": 80,
+        "width": 21.9,
+        "df700": 1
+      },
+      "source": {
+        "url": "https://festool.com/accessory/498212",
+        "document_date": "2026 (web page)",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "festool.domino.d8x100",
+      "brand": "Festool",
+      "article": "498213",
+      "family": "DOMINO tenon",
+      "variant": "D 8x100/150 BU, beech, 8 × 100 × 21.9 mm (DF 700)",
+      "kind": "connector",
+      "parameters": {
+        "thickness": 8,
+        "length": 100,
+        "width": 21.9,
+        "df700": 1
+      },
+      "source": {
+        "url": "https://festool.com/accessory/498213",
+        "document_date": "2026 (web page)",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "festool.domino.d10x80",
+      "brand": "Festool",
+      "article": "498214",
+      "family": "DOMINO tenon",
+      "variant": "D 10x80/150 BU, beech, 10 × 80 × 23.9 mm (DF 700)",
+      "kind": "connector",
+      "parameters": {
+        "thickness": 10,
+        "length": 80,
+        "width": 23.9,
+        "df700": 1
+      },
+      "source": {
+        "url": "https://festool.com/accessory/498214",
+        "document_date": "2026 (web page)",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "festool.domino.d10x100",
+      "brand": "Festool",
+      "article": "498215",
+      "family": "DOMINO tenon",
+      "variant": "D 10x100/120 BU, beech, 10 × 100 × 23.9 mm (DF 700)",
+      "kind": "connector",
+      "parameters": {
+        "thickness": 10,
+        "length": 100,
+        "width": 23.9,
+        "df700": 1
+      },
+      "source": {
+        "url": "https://festool.com/accessory/498215",
+        "document_date": "2026 (web page)",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "festool.domino.d12x100",
+      "brand": "Festool",
+      "article": "498216",
+      "family": "DOMINO tenon",
+      "variant": "D 12x100/100 BU, beech, 12 × 100 × 25.9 mm (DF 700)",
+      "kind": "connector",
+      "parameters": {
+        "thickness": 12,
+        "length": 100,
+        "width": 25.9,
+        "df700": 1
+      },
+      "source": {
+        "url": "https://festool.com/accessory/498216",
+        "document_date": "2026 (web page)",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "festool.domino.d12x140",
+      "brand": "Festool",
+      "article": "498217",
+      "family": "DOMINO tenon",
+      "variant": "D 12x140/90 BU, beech, 12 × 140 × 25.9 mm (DF 700)",
+      "kind": "connector",
+      "parameters": {
+        "thickness": 12,
+        "length": 140,
+        "width": 25.9,
+        "df700": 1
+      },
+      "source": {
+        "url": "https://festool.com/accessory/498217",
+        "document_date": "2026 (web page)",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "festool.domino.d14x100",
+      "brand": "Festool",
+      "article": "498218",
+      "family": "DOMINO tenon",
+      "variant": "D 14x100/80 BU, beech, 14 × 100 × 27.9 mm (DF 700)",
+      "kind": "connector",
+      "parameters": {
+        "thickness": 14,
+        "length": 100,
+        "width": 27.9,
+        "df700": 1
+      },
+      "source": {
+        "url": "https://festool.com/accessory/498218",
+        "document_date": "2026 (web page)",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "festool.domino.d14x140",
+      "brand": "Festool",
+      "article": "498219",
+      "family": "DOMINO tenon",
+      "variant": "D 14x140/70 BU, beech, 14 × 140 × 27.9 mm (DF 700)",
+      "kind": "connector",
+      "parameters": {
+        "thickness": 14,
+        "length": 140,
+        "width": 27.9,
+        "df700": 1
+      },
+      "source": {
+        "url": "https://festool.com/accessory/498219",
+        "document_date": "2026 (web page)",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "festool.domino.df500",
+      "brand": "Festool",
+      "article": "DF 500",
+      "family": "DOMINO joiner",
+      "variant": "DF 500: cutters 4, 5, 6, 8, 10 mm",
+      "kind": "other",
+      "parameters": {
+        "depth_stop_1": 12,
+        "depth_stop_2": 15,
+        "depth_stop_3": 20,
+        "depth_stop_4": 25,
+        "depth_stop_5": 28,
+        "width_medium_extra": 6,
+        "width_wide_extra": 10
+      },
+      "source": {
+        "url": "https://www.festool.com/products/domino-joiners/joinery-machines/576413---df-500-q-plus (depth stops 12, 15, 20, 25, 28 mm); width settings +6 / +10 mm from the DF 500 operating manual, mortise width section",
+        "document_date": "2026 (web page)",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "festool.domino.df700",
+      "brand": "Festool",
+      "article": "DF 700",
+      "family": "DOMINO joiner",
+      "variant": "DF 700 (DOMINO XL): cutters 8, 10, 12, 14 mm",
+      "kind": "other",
+      "parameters": {
+        "depth_min": 15,
+        "depth_max": 70
+      },
+      "source": {
+        "url": "https://www.festool.com/products/domino-joiners/joinery-machines/576426---df-700-eq-plus (depth stop 15-70 mm)",
+        "document_date": "2026 (web page)",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    }
+  ]
+}

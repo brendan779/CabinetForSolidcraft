@@ -183,6 +183,23 @@ pub fn option_groups() -> Vec<OptionGroup> {
                 ("confirmat", "Confirmat", "7 mm confirmat screws"),
                 ("dowel", "Dowels", "8 mm dowels on the 32 mm grid"),
                 ("cam_lock", "Cam lock", "Knock-down cam and bolt fittings"),
+                ("domino", "DOMINO", "Festool DOMINO loose tenons, glued"),
+            ],
+        ),
+        group(
+            "domino",
+            "DOMINO size",
+            &[
+                ("d4x20", "4 × 20", "DF 500, for thin panels"),
+                ("d5x30", "5 × 30", "DF 500, 16 mm carcasses"),
+                ("d6x40", "6 × 40", "DF 500, 18–19 mm panels"),
+                ("d8x40", "8 × 40", "DF 500"),
+                ("d8x50", "8 × 50", "DF 500"),
+                ("d10x50", "10 × 50", "DF 500, heavy panels"),
+                ("d8x80", "8 × 80", "DF 700 (DOMINO XL)"),
+                ("d10x80", "10 × 80", "DF 700 (DOMINO XL)"),
+                ("d12x100", "12 × 100", "DF 700 (DOMINO XL)"),
+                ("d14x100", "14 × 100", "DF 700 (DOMINO XL)"),
             ],
         ),
         group(

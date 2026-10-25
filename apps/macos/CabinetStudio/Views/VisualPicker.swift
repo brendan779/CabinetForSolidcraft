@@ -82,6 +82,7 @@ struct ConstructionThumbnail: View {
             case "overlay": pen.overlayPlan(choice)
             case "fixings": pen.fixing(choice)
             case "biscuit": pen.biscuit(choice)
+            case "domino": pen.domino(choice)
             case "fixing_density": pen.density(choice)
             default: pen.unknown()
             }
@@ -325,7 +326,29 @@ private struct Pen {
             let cam = Path(ellipseIn: r(42, midY - 7, 14, 14))
             ctx.stroke(cam, with: .color(accent), lineWidth: 1.6)
             line(p(18, midY), p(49, midY), colour: accent, width: 1.6)
+        case "domino":
+            // A flat tenon across the joint, shallow in the side and deeper in the bottom.
+            let tenon = Path(roundedRect: r(21, midY - 3, 31, 6), cornerRadius: 3 * s)
+            ctx.fill(tenon, with: .color(accent.opacity(0.55)))
+            ctx.stroke(tenon, with: .color(accent), lineWidth: 1)
         default: break
+        }
+    }
+
+    /// A DOMINO tenon to scale (thickness × length from the choice id, `d8x40`), seen on its
+    /// flat, with the glue grooves along it.
+    func domino(_ choice: String) {
+        let dims = choice.dropFirst().split(separator: "x").compactMap { Double($0) }
+        guard dims.count == 2 else { return unknown() }
+        let (thick, long) = (CGFloat(dims[0]), CGFloat(dims[1]))
+        let k = min(84 / long, 3.2)
+        let w = long * k, h = max(thick * k * 1.6, 6)
+        let body = Path(roundedRect: r(50 - w / 2, 40 - h / 2, w, h), cornerRadius: h / 2 * s)
+        ctx.fill(body, with: .color(accent.opacity(0.35)))
+        ctx.stroke(body, with: .color(accent), lineWidth: 1.2)
+        for dy in [-h / 5, h / 5] {
+            line(p(50 - w / 2 + h / 2, 40 + dy), p(50 + w / 2 - h / 2, 40 + dy),
+                 colour: accent.opacity(0.5), width: 0.7)
         }
     }
 

@@ -1,10 +1,13 @@
-//! Joinery: where biscuits, screws and dowels go along a butt joint.
+//! Joinery: where biscuits, screws, dowels and DOMINO tenons go along a butt joint.
 //!
 //! A butt joint is the end (edge) of one panel, the *end part*, against the face of another, the
 //! *face part*: a bottom between two sides, a rail under a top. Fixings are spread along the line
 //! where they meet, and every fixing becomes machining operations on both parts.
 
+use cabinet_catalog::HardwareItem;
+
 use crate::geom::{Aabb, Axis, Vec3};
+use crate::hardware;
 use crate::model::{ConstructionStandard, FixingRecipe};
 use crate::part::{BorePurpose, Dir, Operation, Part};
 
@@ -154,6 +157,16 @@ impl ButtJoint<'_> {
             }
         }
 
+        if std.fixings == FixingRecipe::Domino {
+            match self.dominos(std, lo, length) {
+                Ok(d) => ops.extend(d),
+                Err(e) => warnings.push(format!(
+                    "{} to {}: {e}",
+                    self.end_part.name, self.face_part.name
+                )),
+            }
+            return ops;
+        }
         let screw_positions = match std.fixings {
             _ if self.hidden => Vec::new(),
             FixingRecipe::BiscuitAndScrew if biscuits => between(&biscuit_positions),
@@ -210,6 +223,63 @@ impl ButtJoint<'_> {
                 )
             })
             .collect()
+    }
+
+    /// DOMINO mortises along the joint, spaced like biscuits: one in each part per tenon, the
+    /// tight width (the tenon's own), as deep as the face part allows and the rest in the end
+    /// part, on the depths the machine can set.
+    fn dominos(
+        &self,
+        std: &ConstructionStandard,
+        lo: f64,
+        length: f64,
+    ) -> Result<Vec<Operation>, String> {
+        let tenon = hardware::item(&std.domino.catalog_id())?;
+        let (thick, wide) = (tenon.param("thickness")?, tenon.param("width")?);
+        let (face_t, end_t) = (self.face_part.thickness(), self.end_part.thickness());
+        if thick > end_t - 2.0 * MIN_SKIN {
+            return Err(format!(
+                "a {thick} mm DOMINO leaves less than {MIN_SKIN} mm each side in {end_t} mm board"
+            ));
+        }
+        let (face_d, end_d) = domino_depths(tenon, face_t - MIN_SKIN)?;
+        let positions = fixing_positions(
+            length,
+            END_SETBACK,
+            std.fixing_density.max_spacing(),
+            wide + 10.0,
+        );
+        if positions.is_empty() {
+            return Err(format!("too short for a {wide} mm wide DOMINO"));
+        }
+        let (t, mid) = self.mid_thickness();
+        let c = self.contact();
+        let sign = self.normal.sign();
+        let mut ops = Vec::new();
+        for p in positions {
+            let at = lo + p;
+            for (part, from, depth) in [
+                (self.face_part, c - sign * face_d, face_d),
+                (self.end_part, c, end_d),
+            ] {
+                let n0 = if sign > 0.0 { from } else { from - depth };
+                ops.push(Operation::Mortise {
+                    part: part.name.clone(),
+                    bounds: Aabb::new(
+                        Vec3::default()
+                            .with(self.normal.axis, n0)
+                            .with(self.along, at - wide / 2.0)
+                            .with(t, mid - thick / 2.0),
+                        Vec3::default()
+                            .with(self.normal.axis, depth)
+                            .with(self.along, wide)
+                            .with(t, thick),
+                    ),
+                    tenon: tenon.id.clone(),
+                });
+            }
+        }
+        Ok(ops)
     }
 
     fn biscuit_slot(&self, std: &ConstructionStandard, at: f64) -> Operation {
@@ -294,6 +364,57 @@ impl ButtJoint<'_> {
     }
 }
 
+/// Material left beside a bore or mortise in a panel's face or across its thickness.
+const MIN_SKIN: f64 = 3.0;
+
+/// Mortise depths in the face and end part for `tenon`, with at most `face_max` in the face part
+/// (its thickness less a skin): half the tenon each where the face part allows (Festool's
+/// guide), on the depths the machine sets: the DF 500 on its stops, the DF 700 anywhere in its
+/// range. Together they hold the tenon's nominal length; Festool's tenons are 2 mm shorter, which
+/// leaves the glue room.
+pub fn domino_depths(tenon: &HardwareItem, face_max: f64) -> Result<(f64, f64), String> {
+    let long = tenon.param("length")?;
+    if tenon.param("df700")? > 0.0 {
+        let m = hardware::item("festool.domino.df700")?;
+        let (lo, hi) = (m.param("depth_min")?, m.param("depth_max")?);
+        let face = face_max.min(long / 2.0).min(hi);
+        let end = (long - face).max(lo);
+        if face < lo || end > hi {
+            return Err(format!(
+                "the DF 700 cuts {lo}–{hi} mm deep: no room for {} in this board",
+                tenon.variant
+            ));
+        }
+        return Ok((face, end));
+    }
+    let m = hardware::item("festool.domino.df500")?;
+    let stops: Vec<f64> = (1..=5)
+        .filter_map(|i| m.param(&format!("depth_stop_{i}")).ok())
+        .collect();
+    let face = stops
+        .iter()
+        .copied()
+        .filter(|s| *s <= face_max + 1e-9)
+        .reduce(f64::max)
+        .ok_or_else(|| {
+            format!(
+                "the face part is too thin for the DF 500's {} mm stop",
+                stops[0]
+            )
+        })?;
+    let end = stops
+        .iter()
+        .copied()
+        .find(|s| *s >= long - face - 1e-9)
+        .ok_or_else(|| {
+            format!(
+                "a {long} mm DOMINO needs {} mm in the end part, past the DF 500's deepest stop",
+                long - face
+            )
+        })?;
+    Ok((face, end))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -316,5 +437,49 @@ mod tests {
     #[test]
     fn screws_sit_between_biscuits() {
         assert_eq!(between(&[50.0, 150.0, 250.0]), vec![100.0, 200.0]);
+    }
+
+    /// JOIN-8: each DOMINO size in 16 mm and 19 mm board: the face and end depths Festool's
+    /// machines can set, or why not.
+    #[test]
+    fn domino_depths_per_size_on_16_and_19_mm_board() {
+        use crate::model::DominoSize::*;
+        let depths = |size: crate::model::DominoSize, board: f64| {
+            domino_depths(
+                hardware::item(&size.catalog_id()).unwrap(),
+                board - MIN_SKIN,
+            )
+            .ok()
+        };
+        let rows = [
+            (D4x20, 16.0, Some((12.0, 12.0))),
+            (D5x30, 16.0, Some((12.0, 20.0))),
+            (D6x40, 16.0, Some((12.0, 28.0))),
+            (D8x40, 16.0, Some((12.0, 28.0))),
+            (D8x50, 16.0, None),
+            (D10x50, 16.0, None),
+            (D8x40, 19.0, Some((15.0, 25.0))),
+            (D10x50, 19.0, None),
+            (D8x80, 16.0, None),
+            (D8x80, 25.0, Some((22.0, 58.0))),
+            // 78 mm in the end part is past the DF 700's 70.
+            (D12x100, 25.0, None),
+            (D12x100, 40.0, Some((37.0, 63.0))),
+            (D14x100, 40.0, Some((37.0, 63.0))),
+        ];
+        for (size, board, want) in rows {
+            assert_eq!(depths(size, board), want, "{size:?} in {board}");
+        }
+    }
+
+    #[test]
+    fn every_domino_size_has_a_tenon_in_the_catalog() {
+        use crate::model::DominoSize::*;
+        for size in [
+            D4x20, D5x30, D6x40, D8x40, D8x50, D10x50, D8x80, D10x80, D12x100, D14x100,
+        ] {
+            let t = hardware::item(&size.catalog_id()).unwrap();
+            assert!(t.param("width").unwrap() > t.param("thickness").unwrap());
+        }
     }
 }

@@ -240,9 +240,9 @@ fn offset_operations(list: &mut PartList, o: Vec3) {
     for op in &mut list.operations {
         match op {
             Operation::Bore { at, .. } => *at = *at + o,
-            Operation::BiscuitSlot { bounds, .. } | Operation::Groove { bounds, .. } => {
-                bounds.min = bounds.min + o
-            }
+            Operation::BiscuitSlot { bounds, .. }
+            | Operation::Groove { bounds, .. }
+            | Operation::Mortise { bounds, .. } => bounds.min = bounds.min + o,
         }
     }
     for h in &mut list.hardware {
@@ -1937,8 +1937,9 @@ mod tests {
         let shelf = list.part("T01.Shelf2").unwrap();
         assert!(!list.operations.iter().any(|o| match o {
             Operation::BiscuitSlot { parts, .. } => parts.contains(&shelf.name),
-            Operation::Bore { part, .. } => *part == shelf.name,
-            Operation::Groove { part, .. } => *part == shelf.name,
+            Operation::Bore { part, .. }
+            | Operation::Groove { part, .. }
+            | Operation::Mortise { part, .. } => *part == shelf.name,
         }));
         assert_eq!(shelf.bounds.min.x, 16.0 + SHELF_SIDE_CLEARANCE);
     }
@@ -2683,6 +2684,63 @@ mod tests {
         let mut cab = Cabinet::new("C01", CabinetKind::CornerBase);
         cab.corner.width = 700.0;
         assert!(matches!(build_cabinet(&cab), Err(Error::TooSmall(_))));
+    }
+
+    /// JOIN-8: DOMINO fixings: a mortise in each part per tenon, no screws, nothing clashing.
+    #[test]
+    fn domino_joints_put_a_mortise_in_each_part_and_no_screws() {
+        let mut cab = Cabinet::new("B01", CabinetKind::Base);
+        cab.standard.fixings = FixingRecipe::Domino;
+        let list = build_cabinet(&cab).unwrap();
+        assert!(
+            list.warnings
+                .iter()
+                .all(|w| w.contains("shelf-pin holes left out")),
+            "{:?}",
+            list.warnings
+        );
+        let in_part = |name: &str| {
+            list.operations
+                .iter()
+                .filter(|o| matches!(o, Operation::Mortise { part, .. } if part == name))
+                .count()
+        };
+        let (side, bottom) = (in_part("B01.LeftSide"), in_part("B01.Bottom"));
+        assert!(bottom >= 4, "{bottom}");
+        assert!(side >= bottom / 2);
+        assert!(!list.operations.iter().any(|o| matches!(o,
+            Operation::Bore { purpose: BorePurpose::Screw | BorePurpose::ScrewPilot, part, .. }
+                if !part.ends_with(".Back"))));
+        // 5 × 30 in 16 mm board: 12 into the side's face, 20 into the bottom's end.
+        let depth = |name: &str, axis: Axis| {
+            list.operations.iter().find_map(|o| match o {
+                Operation::Mortise { part, bounds, .. } if part == name => {
+                    Some(bounds.size.get(axis))
+                }
+                _ => None,
+            })
+        };
+        assert_eq!(depth("B01.LeftSide", Axis::X), Some(12.0));
+        assert_eq!(depth("B01.Bottom", Axis::X), Some(20.0));
+    }
+
+    #[test]
+    fn a_domino_too_long_for_the_board_warns_and_cuts_nothing() {
+        let mut cab = Cabinet::new("B01", CabinetKind::Base);
+        cab.standard.fixings = FixingRecipe::Domino;
+        cab.standard.domino = crate::model::DominoSize::D10x50;
+        let list = build_cabinet(&cab).unwrap();
+        assert!(
+            list.warnings.iter().any(|w| w.contains("DF 500")),
+            "{:?}",
+            list.warnings
+        );
+        assert!(
+            !list
+                .operations
+                .iter()
+                .any(|o| matches!(o, Operation::Mortise { .. }))
+        );
     }
 
     /// CORE-10: each overlay gets the hinge cranked for it, the cup at Blum's boring distance

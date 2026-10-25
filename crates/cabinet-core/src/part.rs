@@ -204,6 +204,13 @@ pub enum Operation {
     },
     /// A rectangular groove or rebate.
     Groove { part: String, bounds: Aabb },
+    /// A mortise for a loose tenon (Festool DOMINO), one part's half of the joint: `bounds` is
+    /// the cutter's slot in that part, `tenon` the tenon's catalog id.
+    Mortise {
+        part: String,
+        bounds: Aabb,
+        tenon: String,
+    },
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]

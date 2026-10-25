@@ -135,6 +135,14 @@ fn cuts_in(list: &PartList, part: &Part) -> Vec<Cut> {
                     label: format!("groove at {}", show(bounds.min)),
                 });
             }
+            Operation::Mortise {
+                part: p, bounds, ..
+            } if *p == part.name => {
+                cuts.push(Cut::Box {
+                    bounds: *bounds,
+                    label: format!("mortise at {}", show(bounds.center())),
+                });
+            }
             _ => {}
         }
     }

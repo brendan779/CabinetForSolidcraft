@@ -28,6 +28,10 @@ const FILES: &[(&str, &str)] = &[
         include_str!("../../../catalog/hardware/blum-drawer-motion.json"),
     ),
     (
+        "festool-domino.json",
+        include_str!("../../../catalog/hardware/festool-domino.json"),
+    ),
+    (
         "blum-tip-on.json",
         include_str!("../../../catalog/hardware/blum-tip-on.json"),
     ),

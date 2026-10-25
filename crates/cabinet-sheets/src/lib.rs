@@ -155,6 +155,11 @@ pub fn features(list: &PartList, part: &Part) -> Vec<Feature> {
                 let label = if through { "notch" } else { "groove" };
                 out.push(rect(part, bounds.min, bounds.size, label));
             }
+            Operation::Mortise {
+                part: name, bounds, ..
+            } if *name == part.name => {
+                out.push(rect(part, bounds.min, bounds.size, "mortise"));
+            }
             _ => {}
         }
     }
@@ -680,6 +685,30 @@ mod tests {
             face_of(BorePurpose::ShelfPin),
             face_of(BorePurpose::HingePlate)
         );
+    }
+
+    #[test]
+    fn domino_mortises_show_on_the_side_and_the_bottom() {
+        let mut cab = Cabinet::new("B01", CabinetKind::Base);
+        cab.standard.fixings = cabinet_core::model::FixingRecipe::Domino;
+        let list = build_cabinet(&cab).unwrap();
+        for part in ["B01.LeftSide", "B01.Bottom"] {
+            let p = list.part(part).unwrap();
+            assert!(
+                features(&list, p).iter().any(|f| matches!(
+                    f,
+                    Feature::Rect {
+                        label: "mortise",
+                        ..
+                    }
+                )),
+                "{part}"
+            );
+            assert!(
+                part_sheet(&list, p, "Board", "Job").contains("mortise"),
+                "{part}"
+            );
+        }
     }
 
     #[test]

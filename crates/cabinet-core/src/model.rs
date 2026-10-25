@@ -326,6 +326,8 @@ pub struct ConstructionStandard {
     pub front_gap: f64,
     pub fixings: FixingRecipe,
     pub biscuit: BiscuitSize,
+    /// The DOMINO tenon when the fixings are DOMINO.
+    pub domino: DominoSize,
     pub fixing_density: Density,
     /// Width of the front and back rails when the top is rails.
     pub rail_width: f64,
@@ -388,6 +390,7 @@ impl Default for ConstructionStandard {
             front_gap: 2.0,
             fixings: FixingRecipe::BiscuitAndScrew,
             biscuit: BiscuitSize::No20,
+            domino: DominoSize::D5x30,
             fixing_density: Density::Normal,
             rail_width: 100.0,
             shelf_front_setback: 2.0,
@@ -513,6 +516,36 @@ pub enum FixingRecipe {
     Dowel,
     /// Cam and bolt (Häfele Minifix style) for flat-pack.
     CamLock,
+    /// Festool DOMINO loose tenons, glued.
+    Domino,
+}
+
+/// Festool DOMINO tenon sizes, thickness × nominal length (the width is in the catalog). The
+/// first six are cut with the DF 500, the rest with the DF 700 (DOMINO XL).
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum DominoSize {
+    D4x20,
+    D5x30,
+    D6x40,
+    D8x40,
+    D8x50,
+    D10x50,
+    D8x80,
+    D10x80,
+    D12x100,
+    D14x100,
+}
+
+impl DominoSize {
+    /// The tenon's id in `catalog/hardware/festool-domino.json`.
+    pub fn catalog_id(self) -> String {
+        let code = serde_json::to_value(self)
+            .ok()
+            .and_then(|v| v.as_str().map(str::to_string))
+            .unwrap_or_default();
+        format!("festool.domino.{code}")
+    }
 }
 
 /// Lamello-style biscuit sizes. Nominal length × width × thickness in mm.
