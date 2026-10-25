@@ -83,7 +83,7 @@ Priorities: **P0** blocks most other work · **P1** MVP · **P2** commercial par
 | BLUM-3 | done (8151121) | M | Hinge selection rule: overlay + door thickness → hinge + plate article | unit test table |
 | BLUM-4 | done (e66f505; drawers N/M/K; inner drawers, C/F pull-outs and the cabinet-profile side drilling are BLUM-4b) | M | LEGRABOX: nominal lengths, side heights (N/M/K/C/F), front fixing drilling, bottom/back cut sizes | drawer bank with LEGRABOX gives bottom and back parts in cut list |
 | BLUM-4b | todo | M | LEGRABOX inner drawers (M/K with inner front piece), high fronted pull-outs C/F, and the cabinet-profile screw positions on the sides (p.248: positions along the profile are printed, their height on the side and which take system screws need reading from the drawings) | inner drawer builds; profile bores on the side sheets |
-| BLUM-5 | done (79eb7d0; METABOX not added; TIP-ON BLUMOTION for MERIVOBOX/TANDEMBOX (pp. 398-401) still to enter) | M | MERIVOBOX and TANDEMBOX as alternatives | picker shows 3 box systems |
+| BLUM-5 | done (79eb7d0, f86d090; METABOX not added) | M | MERIVOBOX and TANDEMBOX as alternatives | picker shows 3 box systems |
 | BLUM-6 | done (f910aaf; runner side drilling is BLUM-6b) | M | MOVENTO/TANDEM runners for wood drawers (see CORE-8) | — |
 | BLUM-6b | todo | S | MOVENTO/TANDEM runner screw positions on the cabinet sides (p.428, p.460: which hole of each length takes the Ø5 system screw), and TANDEM's Ø6 rear hook hole in the drawer back (p.435) | runner bores on side sheets |
 | BLUM-7 | split → BLUM-7a, BLUM-7b | L | AVENTOS lift systems (HK top, HK-S, HK-XS, HF, HS, HL): power factor = f(front height, weight) → article | split |
@@ -95,10 +95,10 @@ Priorities: **P0** blocks most other work · **P1** MVP · **P2** commercial par
 
 | BLUM-11 | done (716fbda) | S | Facts-only `docs/blum/webcodes.csv` (code, product, printed pages); no catalogue text beyond product names | committed |
 | BLUM-12 | done (d33ead6) | M | BLUMOTION for doors (printed 176–189) and TIP-ON for doors (190–193); TIP-ON doors use unsprung hinges (finishes BLUM-8's hinge row) | option + BOM rows with part numbers |
-| BLUM-13 | done (0abec81; SERVO-DRIVE for MOVENTO/TANDEM (p.462 on) still generic: BLUM-13b) | M | SERVO-DRIVE, TIP-ON BLUMOTION and TIP-ON for box systems and runners (printed 362–408, 462–531) | options + BOM rows |
+| BLUM-13 | done (0abec81, f86d090: TIP-ON BLUMOTION for every box system and MOVENTO, TANDEM TIP-ON runners, SERVO-DRIVE) | M | SERVO-DRIVE, TIP-ON BLUMOTION and TIP-ON for box systems and runners (printed 362–408, 462–531) | options + BOM rows |
 | BLUM-14 | done (0abec81; articles only: bracket screw positions and the 22 × 33 back cut-out vs our inset-back void need the owner's look, EXPANDO T not used yet) | S | Wall hanging bracket (598), cabinet connectors (599), EXPANDO T (596) for CORE-3's hangers | part numbers + drilling |
 | BLUM-15 | done (0abec81) | S | General information and System 32 definitions (710–731) as the reference for our constants; record any constant in code that disagrees | list in docs/blum/ |
-| BLUM-13b | todo | S | SERVO-DRIVE for MOVENTO / TANDEM wooden drawers (printed 462 on) in place of the generic rows | BOM rows with part numbers |
+| BLUM-13b | done (d3e54c7) | S | SERVO-DRIVE for MOVENTO / TANDEM wooden drawers (printed 462 on) in place of the generic rows | BOM rows with part numbers |
 | BLUM-16 | todo (later: pocket and interior systems, not cabinet basics; left for after the P1 cabinet systems) | M | Later: REVEGO (534–540), AMBIA-LINE / ORGA-LINE (542–569), SPACE STEP (586), CABLOXX (594) | — |
 | BLUM-CAD-1 | needs-human (list committed in 7943b00: owner downloads the STEP files) | S | `docs/blum/cad-shopping-list.md`: short prioritised list of configurations the app uses (default hinges + plates, LEGRABOX N/M/K, MOVENTO/TANDEM common lengths, AVENTOS HF top): web code, configurator choices, expected part numbers, file name `vendor-cad/blum/<part-no>.step`, for the owner to download from E-SERVICES | list committed; owner downloads |
 
@@ -303,3 +303,4 @@ Agents append one line per session: date, items touched, outcome.
 - 2026-10-26 (night) — BLUM-5 done: MERIVOBOX and TANDEMBOX antaro N/M/K from their planning pages; `drawers::steel_box` serves all three box systems; picker shows five drawer choices. CORE-4c set to needs-human with the hanging question.
 - 2026-10-26 (night) — BLUM-7 HK top done: `stay_lift` front layout (one front, no hinges) on AVENTOS HK top, mechanism by LF = KH × (FG + 2 × handle); the Fronts tiles are a three-column grid now.
 - 2026-10-26 (night) — BLUM-7 HS/HL top done: the single-front layout is `lift { kind }` (stay lift = HK top, up and over = HS top, lift up = HL top); `lift::single_front` reads each family's height/weight/power-factor ranges and takes the stronger where they overlap.
+- 2026-10-26 (night) — BLUM-13 finished: TIP-ON BLUMOTION units for MERIVOBOX (T60H) and TANDEMBOX (T60B) with their synchronisation; BLUM-13b: SERVO-DRIVE for MOVENTO/TANDEM uses the same parts as the box systems (p.464), no generic rows left.
