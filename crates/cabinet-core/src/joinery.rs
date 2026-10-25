@@ -269,9 +269,9 @@ impl ButtJoint<'_> {
             .collect()
     }
 
-    /// DOMINO mortises along the joint, spaced like biscuits: one in each part per tenon, the
-    /// tight width (the tenon's own), as deep as the face part allows and the rest in the end
-    /// part, on the depths the machine can set.
+    /// DOMINO mortises along the joint, spaced like biscuits: one in each part per tenon, tight
+    /// (the tenon's width) in the face part and on the middle setting in the end part, as deep as
+    /// the face part allows and the rest in the end part, on the depths the machine can set.
     fn dominos(
         &self,
         std: &ConstructionStandard,
@@ -302,9 +302,11 @@ impl ButtJoint<'_> {
         let mut ops = Vec::new();
         for p in positions {
             let at = lo + p;
-            for (part, from, depth) in [
-                (self.face_part, c - sign * face_d, face_d),
-                (self.end_part, c, end_d),
+            // The face part holds the tenon tight; the end part's mortise is cut on the middle
+            // width setting for assembly play, as the owner does (2026-10-26).
+            for (part, from, depth, width) in [
+                (self.face_part, c - sign * face_d, face_d, wide),
+                (self.end_part, c, end_d, wide + DOMINO_PLAY),
             ] {
                 let n0 = if sign > 0.0 { from } else { from - depth };
                 ops.push(Operation::Mortise {
@@ -312,11 +314,11 @@ impl ButtJoint<'_> {
                     bounds: Aabb::new(
                         Vec3::default()
                             .with(self.normal.axis, n0)
-                            .with(self.along, at - wide / 2.0)
+                            .with(self.along, at - width / 2.0)
                             .with(t, mid - thick / 2.0),
                         Vec3::default()
                             .with(self.normal.axis, depth)
-                            .with(self.along, wide)
+                            .with(self.along, width)
                             .with(t, thick),
                     ),
                     tenon: tenon.id.clone(),
@@ -411,6 +413,9 @@ impl ButtJoint<'_> {
 
 /// Material left beside a bore or mortise in a panel's face or across its thickness.
 const MIN_SKIN: f64 = 3.0;
+/// How much wider the DOMINO's middle width setting cuts than the tenon (Festool), used on the
+/// end part's mortise so the joint goes together with some play.
+pub const DOMINO_PLAY: f64 = 6.0;
 
 /// Mortise depths in the face and end part for `tenon`, with at most `face_max` in the face part
 /// (its thickness less a skin): half the tenon each where the face part allows (Festool's

@@ -179,6 +179,12 @@ pub fn replace_cabinet(
     }
     cmds.extend(emit_cabinet(list, detail, spec));
     if let Some(m) = existing.and_then(|e| e.moved) {
+        // SolidCraft 0.22 grounds the first part of a design when it is made, and a grounded
+        // placement refuses to move. Unground it explicitly (0.20 accepts this too).
+        cmds.push(json!({
+            "command": "occurrence.ground",
+            "params": { "occurrence": format!("{}:1", list.cabinet), "grounded": false }
+        }));
         // A new component's only placement is `<name>:1`, at identity, so this rigid move puts it
         // where the old one was.
         cmds.push(json!({
@@ -961,6 +967,10 @@ mod tests {
         let mv = cmds.last().unwrap();
         assert_eq!(mv["command"], "occurrence.move");
         assert_eq!(mv["params"]["occurrence"], "B01:1");
+        // Ungrounded first: SolidCraft 0.22 grounds a design's first part and refuses to move it.
+        let ground = &cmds[cmds.len() - 2];
+        assert_eq!(ground["command"], "occurrence.ground");
+        assert_eq!(ground["params"]["grounded"], false);
         assert_eq!(mv["params"]["space"], "world");
         assert_eq!(
             mv["params"]["matrix"],

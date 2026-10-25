@@ -280,16 +280,23 @@ pub enum FrontLayout {
     Lift {
         #[serde(default)]
         kind: LiftKind,
-        /// Weight of the handle on the front, for choosing the mechanism.
-        #[serde(default)]
+        /// Weight of the handle on the front (kg), for choosing the mechanism.
+        #[serde(default = "default_handle_weight")]
         handle_weight: f64,
     },
     /// Two equal fronts that fold up together on Blum AVENTOS HF top.
     BiFoldLift {
-        /// Weight of the handle on the fronts, for the power factor.
-        #[serde(default)]
+        /// Weight of the handle on the fronts (kg), for the power factor.
+        #[serde(default = "default_handle_weight")]
         handle_weight: f64,
     },
+}
+
+/// The owner's typical handle: 400 g (decided 2026-10-26).
+pub const DEFAULT_HANDLE_WEIGHT: f64 = 0.4;
+
+fn default_handle_weight() -> f64 {
+    DEFAULT_HANDLE_WEIGHT
 }
 
 impl Default for FrontLayout {

@@ -67,6 +67,9 @@ fn resending_a_moved_cabinet_keeps_it_where_the_user_moved_it() {
     let list = build_cabinet(&cab).unwrap();
     // The user turns the cabinet a quarter and moves it along the wall.
     let mut built = emit_cabinet(&list, Detail::Design, None);
+    // SolidCraft 0.22 grounds a design's first part; a user ungrounds it to move it.
+    built.push(json!({ "command": "occurrence.ground", "params": {
+        "occurrence": "B01:1", "grounded": false } }));
     built.push(json!({ "command": "occurrence.move", "params": {
         "occurrence": "B01:1", "space": "world", "axis": [0, 0, 1], "angle": "90 deg",
         "origin": [0, 0, 0] } }));

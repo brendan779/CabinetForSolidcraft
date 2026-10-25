@@ -47,9 +47,9 @@ Priorities: **P0** blocks most other work · **P1** MVP · **P2** commercial par
 | CORE-4 | split → CORE-4a, CORE-4b, CORE-4c | L | Corner cabinets: blind corner base, L-corner base, corner wall | split into CORE-4a/b/c |
 | CORE-4a | done (ff4fd55) | M | Blind corner base: a base carcass with a fixed blind panel on the blind side (width = run-in − door), a filler/stile against the neighbouring run, door on the open side; `blind_side` and `blind_width` in the model | a 1000 mm blind corner builds with blind panel + filler + one door; test on the open width |
 | CORE-4b | done (0aaca7c) | M | L-shaped corner base (diagonal or bi-fold door): two carcass legs sharing a corner, parts not axis-aligned to one front; needs a second front direction in the part model | an L-corner 900 × 900 builds; cut list has every panel once |
-| CORE-4d | needs-human (0aaca7c uses Blum's corner bi-fold hinge 79T8500 + 155° 71B7550 from the catalogue, `verified: false`: confirm that system, or name another) | S | Bi-fold corner hinge article and its drilling, replacing the generic placement | hinge row verified against the supplier's document |
-| CORE-4c | needs-human (the second leg of a wall L-corner has no end side at the corner for its second hanger: share the main leg's corner hanger, keep a closed end side (blind corner inside), or hang that leg on the rail alone?) | M | Corner wall cabinet (diagonal front or L): as CORE-4b at wall height with hangers (CORE-3) | builds with two hangers per leg |
-| CORE-5 | needs-human (built 4bc5e17. Question: should a sink cabinet drop its bottom front rail, its back rail, or both? Today it drops only the back top rail, where the bowl sits) | M | Sink cabinet (no bottom rail, back cut-out option, waterproof base liner option) | builds; liner appears in BOM |
+| CORE-4d | done (owner 2026-10-26: keep Blum's corner bi-fold hinge 79T8500 + 155° hinges) | S | Bi-fold corner hinge article and its drilling, replacing the generic placement | hinge row verified against the supplier's document |
+| CORE-4c | todo (owner 2026-10-26: the second leg shares the main leg's corner hanger) | M | Corner wall cabinet (diagonal front or L): as CORE-4b at wall height with hangers (CORE-3) | builds with two hangers per leg |
+| CORE-5 | done (owner 2026-10-26 doesn't know; keep dropping the back rail, as built in 4bc5e17) | M | Sink cabinet (no bottom rail, back cut-out option, waterproof base liner option) | builds; liner appears in BOM |
 | CORE-6 | done (ed3f43a) | M | Fillers, end panels and scribes as parts of a run | a run with an end panel each side builds |
 | CORE-7 | done (43ead80) | M | Runs: shared construction standard per project, per-cabinet overrides only | project JSON stores one standard + overrides |
 | CORE-8 | done (f910aaf) | M | Drawer boxes for wood drawers on runners (sides, front, back, bottom) from Blum MOVENTO/TANDEM rules: inside width = opening − 42, length = NL − 10 (verify against Blum TD) | parts + cut list for a 3-drawer bank |
@@ -82,10 +82,10 @@ Priorities: **P0** blocks most other work · **P1** MVP · **P2** commercial par
 | BLUM-2 | done (8151121; data `verified: false`: owner to check the rows against pp. 76-77, 150-153) | M | CLIP top BLUMOTION 110° data: cup Ø35, depth, boring distance range, plate drilling (cruciform/wing, 0/3/9 mm), overlay tables | rows verified against the Blum document; build.rs constants replaced by catalog data |
 | BLUM-3 | done (8151121) | M | Hinge selection rule: overlay + door thickness → hinge + plate article | unit test table |
 | BLUM-4 | done (e66f505; drawers N/M/K; inner drawers, C/F pull-outs and the cabinet-profile side drilling are BLUM-4b) | M | LEGRABOX: nominal lengths, side heights (N/M/K/C/F), front fixing drilling, bottom/back cut sizes | drawer bank with LEGRABOX gives bottom and back parts in cut list |
-| BLUM-4b | todo | M | LEGRABOX inner drawers (M/K with inner front piece), high fronted pull-outs C/F, and the cabinet-profile screw positions on the sides (p.248: positions along the profile are printed, their height on the side and which take system screws need reading from the drawings) | inner drawer builds; profile bores on the side sheets |
+| BLUM-4b | blocked (owner 2026-10-26: wait for the Blum CAD files for the profile screw positions; the inner drawers and pull-outs can go ahead) | M | LEGRABOX inner drawers (M/K with inner front piece), high fronted pull-outs C/F, and the cabinet-profile screw positions on the sides (p.248: positions along the profile are printed, their height on the side and which take system screws need reading from the drawings) | inner drawer builds; profile bores on the side sheets |
 | BLUM-5 | done (79eb7d0, f86d090; METABOX not added) | M | MERIVOBOX and TANDEMBOX as alternatives | picker shows 3 box systems |
 | BLUM-6 | done (f910aaf; runner side drilling is BLUM-6b) | M | MOVENTO/TANDEM runners for wood drawers (see CORE-8) | — |
-| BLUM-6b | todo | S | MOVENTO/TANDEM runner screw positions on the cabinet sides (p.428, p.460: which hole of each length takes the Ø5 system screw), and TANDEM's Ø6 rear hook hole in the drawer back (p.435) | runner bores on side sheets |
+| BLUM-6b | blocked (owner 2026-10-26: wait for the Blum CAD files) | S | MOVENTO/TANDEM runner screw positions on the cabinet sides (p.428, p.460: which hole of each length takes the Ø5 system screw), and TANDEM's Ø6 rear hook hole in the drawer back (p.435) | runner bores on side sheets |
 | BLUM-7 | split → BLUM-7a, BLUM-7b | L | AVENTOS lift systems (HK top, HK-S, HK-XS, HF, HS, HL): power factor = f(front height, weight) → article | split |
 | BLUM-7a | done (c660427 HF, c3ae68b HK, 8f77c7f HS/HL: `lift` and `bi_fold_lift` layouts; HKi, HK-S, HK-XS not modelled) | M | Lift-system model: a wall cabinet front opening upward (`opening: lift`), front height and weight from the board catalog (density × area), power factor computed per Blum's formula, and the AVENTOS family chosen by front height; picker drawing per family | test: front weight and power factor for a 600 × 360 front |
 | BLUM-7b | split → HF, HK, HS, HL top done (c660427, c3ae68b, 8f77c7f); HK-S (p.56: 20K2B00.06/C00/E00 by LF) and HK-XS (p.62: one-sided mechanism plus hinges) and HKi todo; mechanism side drilling needs reading (pp. 24, 48) | M | AVENTOS HK top, HK-S, HK-XS, HF, HS, HL catalog rows (articles by power-factor range, drilling) | hardware rows with sources; BLUM-7a picks articles from them |
@@ -115,7 +115,7 @@ All Blum rows: source = Blum Catalogue and technical manual 2024/2025 in `vendor
 | HAF-5 | todo | M | Lighting rules: no mixing 12/24 V; ≤ 80 % driver load; ports per distributor; cable holes Ø10 through panels added as ops | unit tests for each rule |
 | HAF-6 | todo | M | Lighting placement UI: click under-cabinet / in-cabinet / plinth zones on a cabinet drawing | picker in inspector |
 | HAF-7 | 👤 needs-human | M | Import the owner's Häfele STEP files (`vendor-cad/hafele/`) like BLUM-9 | — |
-| HAF-8 | todo | S | Wall hanger + wall rail articles for the generic `wall-hanger.concealed` / `wall-hanger.rail` placements (CORE-3): pick a system (Häfele/Camar), its drilling and rail lengths, from the supplier's data | BOM rows with article numbers; hanger drilling ops |
+| HAF-8 | dropped (owner 2026-10-26: use Blum's wall hanging bracket 48N0510 and its back cut-out, as built in BLUM-14) | S | Wall hanger + wall rail articles for the generic `wall-hanger.concealed` / `wall-hanger.rail` placements (CORE-3): pick a system (Häfele/Camar), its drilling and rail lengths, from the supplier's data | BOM rows with article numbers; hanger drilling ops |
 
 ### Board and edge tape data (Australia)
 
@@ -307,3 +307,18 @@ Agents append one line per session: date, items touched, outcome.
 - 2026-10-26 (night) — OUT-4 built (f557f9b): ordinate dimensions from the reference corner for every bore row and column, hole table grouped by kind with counts; needs the owner's look.
 - 2026-10-26 (night) — UI-10 built (94108a4): first-run welcome sheet (connect SolidCraft, pick detail with drawn tiles, start); Help › Welcome to Cabinet Studio reopens it.
 - 2026-10-26 (night) — Run stopped at the usage limit. DATA-10 not started (the Polytec guide downloads fine; COMMERCIAL tables are guide p14-17, wall linings p28). Next: DATA-10, HAF-5, BLUM-4b/6b drilling once the owner confirms the readings.
+- 2026-10-26 — **Owner's answers to PR #3** (applied on main):
+  1. Hinge cup and plate pilot depths: keep Blum's minimums (13 / 11.5 mm).
+  2. Hinges: keep screw-on bosses; no INSERTA.
+  3. Corner bi-fold hinge: Blum 79T8500 + 155° hinges confirmed (CORE-4d done).
+  4. Wooden drawers: bottom between the sides, 12 mm up from the lower edge, as built.
+  5. LEGRABOX / runner screw positions on the cabinet sides: wait for the Blum CAD (BLUM-4b, BLUM-6b blocked).
+  6. TIP-ON BLUMOTION unit by drawer depth: good enough, no load choice.
+  7. Lift handle weight: default 400 g (`DEFAULT_HANDLE_WEIGHT`; the app writes 0.4 kg for new lift fronts).
+  8. HF top cabinet drilling: leave until the CAD arrives.
+  9. Wall cabinets: use Blum's wall hanging bracket settings (HAF-8 dropped).
+  10. Corner wall L: the second leg shares the main leg's corner hanger (CORE-4c todo).
+  11. DOMINO: the end part's mortise is cut on the middle setting, +6 mm (`DOMINO_PLAY`); the face part stays tight.
+  12. SERVO-DRIVE power supply Z10NE04KI: confirmed.
+  13. Blum CAD: the owner will download the shopping list into `vendor-cad/blum/` soon.
+  14. Sink cabinet: keep "no back rail" (CORE-5 done).

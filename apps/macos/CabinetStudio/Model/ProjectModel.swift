@@ -186,8 +186,8 @@ struct CabinetDoc: Identifiable, Hashable, Codable {
                 case "door": o["fronts"] = ["type": "door", "hinge_side": "left"]
                 case "door_pair": o["fronts"] = ["type": "door_pair"]
                 case "drawers": o["fronts"] = ["type": "drawers", "ratios": [1.0, 1.0, 1.0]]
-                case "bi_fold_lift": o["fronts"] = ["type": "bi_fold_lift", "handle_weight": 0.0]
-                case "lift": o["fronts"] = ["type": "lift", "kind": "stay_lift", "handle_weight": 0.0]
+                case "bi_fold_lift": o["fronts"] = ["type": "bi_fold_lift", "handle_weight": Self.handleWeight]
+                case "lift": o["fronts"] = ["type": "lift", "kind": "stay_lift", "handle_weight": Self.handleWeight]
                 default: o["fronts"] = ["type": "open"]
                 }
             }
@@ -202,8 +202,16 @@ struct CabinetDoc: Identifiable, Hashable, Codable {
     /// A lifting front's movement: stay_lift, up_and_over, lift_up.
     var liftKind: String {
         get { (object["fronts"] as? [String: Any])?["kind"] as? String ?? "stay_lift" }
-        set { update { $0["fronts"] = ["type": "lift", "kind": newValue, "handle_weight": 0.0] } }
+        set {
+            update { o in
+                let weight = (o["fronts"] as? [String: Any])?["handle_weight"] as? Double ?? Self.handleWeight
+                o["fronts"] = ["type": "lift", "kind": newValue, "handle_weight": weight]
+            }
+        }
     }
+
+    /// Handle weight (kg) for new lifting fronts: the owner's typical 400 g handle.
+    static let handleWeight = 0.4
 
     var hingeSide: String {
         get { (object["fronts"] as? [String: Any])?["hinge_side"] as? String ?? "left" }

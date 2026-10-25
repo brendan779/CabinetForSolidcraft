@@ -80,4 +80,7 @@ workspace, windowed and full screen (⌃⌘F).
   `occurrence.move` takes `matrix` as rows. A new component's placement is `<name>:1`.
 - Every cut costs more the more features its body has: batch holes into one sketch extrude
   (docs/perf.md).
+- SolidCraft 0.22 (2026-10-26) grounds a design's first part when it is made; a grounded
+  occurrence refuses `occurrence.move`. Send `occurrence.ground {occurrence, grounded: false}`
+  first (works on 0.20 too). This Mac runs 0.22; MacAirServer and CI test with the 0.20 CLI.
 - Preferences › Plugins only lists folders. No plugin code runs yet (issue #1221, draft PR #4980).

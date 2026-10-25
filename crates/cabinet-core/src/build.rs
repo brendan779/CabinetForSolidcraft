@@ -2794,6 +2794,26 @@ mod tests {
         };
         assert_eq!(depth("B01.LeftSide", Axis::X), Some(12.0));
         assert_eq!(depth("B01.Bottom", Axis::X), Some(20.0));
+        // Tight in the face part, the middle setting (+6) in the end part for assembly play.
+        let (tight, loose) = (
+            depth("B01.LeftSide", Axis::Y).unwrap(),
+            depth("B01.Bottom", Axis::Y).unwrap(),
+        );
+        assert!(
+            (loose - tight - crate::joinery::DOMINO_PLAY).abs() < 1e-9,
+            "{tight} vs {loose}"
+        );
+    }
+
+    #[test]
+    fn lift_fronts_without_a_handle_weight_assume_the_owners_400_g_handle() {
+        let lift: FrontLayout =
+            serde_json::from_str(r#"{"type":"lift","kind":"stay_lift"}"#).unwrap();
+        let bi_fold: FrontLayout = serde_json::from_str(r#"{"type":"bi_fold_lift"}"#).unwrap();
+        assert!(matches!(lift, FrontLayout::Lift { handle_weight, .. } if handle_weight == 0.4));
+        assert!(
+            matches!(bi_fold, FrontLayout::BiFoldLift { handle_weight } if handle_weight == 0.4)
+        );
     }
 
     #[test]
