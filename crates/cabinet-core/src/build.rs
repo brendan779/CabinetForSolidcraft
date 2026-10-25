@@ -378,27 +378,18 @@ impl<'a> Builder<'a> {
             .cloned()
             .collect();
         let lw = self.cab.width - 2.0 * self.cab.standard.carcass_thickness;
-        let mut servo_legrabox: Vec<f64> = Vec::new();
+        let mut servo_fronts: Vec<f64> = Vec::new();
         let mut servo_heavy = false;
-        let mut servo_generic = 0;
         for f in &fronts {
             let fit = self.drawer_fits.iter().find(|d| d.front == f.name);
             let rows: Vec<(String, String, u32)> = match (f.role, opening, fit) {
-                // SERVO-DRIVE is one system for LEGRABOX, MERIVOBOX and TANDEMBOX.
-                (PartRole::DrawerFront, Opening::ServoDrive, Some(d))
-                    if matches!(d.system, "legrabox" | "merivobox" | "tandembox") =>
-                {
-                    servo_legrabox.push(d.front_height);
-                    servo_heavy |= d.heavy_runner;
+                // SERVO-DRIVE is one system for the box systems and MOVENTO/TANDEM (p.364, p.464);
+                // only the box systems' heavy profiles take extra bumpers.
+                (PartRole::DrawerFront, Opening::ServoDrive, Some(d)) => {
+                    servo_fronts.push(d.front_height);
+                    servo_heavy |= d.heavy_runner
+                        && matches!(d.system, "legrabox" | "merivobox" | "tandembox");
                     Vec::new()
-                }
-                (PartRole::DrawerFront, Opening::ServoDrive, _) => {
-                    servo_generic += 1;
-                    vec![(
-                        "blum.servo-drive.drawer".into(),
-                        "SERVO-DRIVE drive unit for a drawer".into(),
-                        1,
-                    )]
                 }
                 (PartRole::DrawerFront, _, Some(d)) => match self.drawer_tip_on(d, lw) {
                     Ok(items) => items,
@@ -437,11 +428,11 @@ impl<'a> Builder<'a> {
                 .warnings
                 .push("SERVO-DRIVE does not open hinged doors: they get TIP-ON".into());
         }
-        let bottom = self.name(PartRole::Bottom, None);
-        let at = Vec3::new(self.cab.width / 2.0, self.interior_back, self.carcass_z0);
-        if !servo_legrabox.is_empty() {
+        if !servo_fronts.is_empty() {
+            let bottom = self.name(PartRole::Bottom, None);
+            let at = Vec3::new(self.cab.width / 2.0, self.interior_back, self.carcass_z0);
             let inside = self.opening_z.1 - self.opening_z.0;
-            match drawers::servo_drive_legrabox(inside, &servo_legrabox, servo_heavy) {
+            match drawers::servo_drive(inside, &servo_fronts, servo_heavy) {
                 Ok(items) => {
                     for (i, quantity) in items {
                         self.list.hardware.push(HardwarePlacement {
@@ -455,18 +446,6 @@ impl<'a> Builder<'a> {
                 }
                 Err(e) => self.list.warnings.push(e),
             }
-        }
-        if servo_generic > 0 {
-            self.list
-                .warnings
-                .push("SERVO-DRIVE for wooden drawers is not catalogued yet: generic rows".into());
-            self.list.hardware.push(HardwarePlacement {
-                item: "blum.servo-drive.power-supply".into(),
-                description: "SERVO-DRIVE power supply and cable set".into(),
-                at,
-                part: bottom,
-                quantity: 1,
-            });
         }
     }
 
@@ -2458,6 +2437,22 @@ mod tests {
         assert_eq!(count("blum.servo-drive.drive-unit"), 3);
         assert_eq!(count("blum.servo-drive.power-supply.au"), 1);
         assert_eq!(count("blum.servo-drive.bracket-attachment"), 2);
+        // Wooden drawers on MOVENTO take the same SERVO-DRIVE parts.
+        bank.standard.drawer_system = DrawerSystem::Movento;
+        let wood = build_cabinet(&bank).unwrap();
+        assert_eq!(
+            wood.hardware
+                .iter()
+                .filter(|h| h.item == "blum.servo-drive.drive-unit")
+                .map(|h| h.quantity)
+                .sum::<u32>(),
+            3
+        );
+        assert!(
+            !wood.warnings.iter().any(|w| w.contains("SERVO")),
+            "{:?}",
+            wood.warnings
+        );
         let mut base = Cabinet::new("B01", CabinetKind::Base);
         base.standard.opening = Opening::ServoDrive;
         let list = build_cabinet(&base).unwrap();

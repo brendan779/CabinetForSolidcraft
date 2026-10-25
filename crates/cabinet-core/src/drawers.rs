@@ -300,10 +300,11 @@ pub fn tip_on_blumotion(
     Ok(out)
 }
 
-/// SERVO-DRIVE for a cabinet of LEGRABOX drawers with fronts `front_heights` high: a drive unit
+/// SERVO-DRIVE for a cabinet of drawers (any Blum box system, or MOVENTO/TANDEM, p.464) with
+/// fronts `front_heights` high: a drive unit
 /// and distance bumpers per drawer, and for the cabinet the bracket profile (PL = LH − 10, the
 /// shortest article that cuts to it), its attachments, cabling and the power supply (p.364).
-pub fn servo_drive_legrabox(
+pub fn servo_drive(
     inside_height: f64,
     front_heights: &[f64],
     heavy_runner: bool,
@@ -451,7 +452,7 @@ mod tests {
 
     #[test]
     fn servo_drive_cuts_the_bracket_from_the_shortest_profile_that_reaches() {
-        let parts = servo_drive_legrabox(700.0, &[238.0, 238.0, 238.0], false).unwrap();
+        let parts = servo_drive(700.0, &[238.0, 238.0, 238.0], false).unwrap();
         let get = |art: &str| {
             parts
                 .iter()
@@ -463,7 +464,7 @@ mod tests {
         assert_eq!(get("Z10A3000.04"), Some(3));
         assert_eq!(get("993.0530"), Some(3 * 2));
         assert_eq!(get("Z10NE04KI"), Some(1));
-        let tall = servo_drive_legrabox(700.0, &[400.0], false).unwrap();
+        let tall = servo_drive(700.0, &[400.0], false).unwrap();
         assert_eq!(
             tall.iter()
                 .find(|(i, _)| i.article == "993.0530")
