@@ -11,6 +11,7 @@
 pub mod bom;
 pub mod build;
 pub mod collisions;
+pub mod corner;
 pub mod cutlist;
 pub mod drawers;
 pub mod geom;

@@ -23,7 +23,11 @@ struct InspectorView: View {
                     if cab.kind == "sink" {
                         SinkSection(cab: cab)
                     }
-                    FrontsSection(cab: cab)
+                    if cab.kind == "corner_base" {
+                        CornerSection(cab: cab)
+                    } else {
+                        FrontsSection(cab: cab)
+                    }
                     BoardsSection(cab: cab)
                     ConstructionScope(cab: cab)
                     let overrides = project.overrides(of: cab)
@@ -450,6 +454,77 @@ struct BlindSection: View {
                 .accessibilityLabel("\(title) \(Int(p)) millimetres")
             }
         }
+    }
+}
+
+struct CornerSection: View {
+    @Environment(ProjectModel.self) private var project
+    let cab: CabinetDoc
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            SectionTitle("L-corner")
+            HStack(spacing: 8) {
+                ForEach(["left", "right"], id: \.self) { side in
+                    Button {
+                        withAnimation(.snappy) { var c = cab; c.cornerSide = side; project.selected = c }
+                    } label: {
+                        VStack(spacing: 6) {
+                            CornerThumbnail(side: side)
+                                .frame(width: 56, height: 56)
+                            Text(side == "left" ? "Corner left" : "Corner right").font(.caption)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 8)
+                    }
+                    .buttonStyle(TileStyle(selected: cab.cornerSide == side))
+                    .accessibilityLabel(side == "left" ? "Second leg along the left wall" : "Second leg along the right wall")
+                    .help("The second leg runs along the \(side) wall; bi-fold doors close both fronts.")
+                }
+            }
+            HStack(spacing: 6) {
+                Text("Second leg").foregroundStyle(.secondary)
+                Spacer()
+                ForEach([800.0, 900, 1000, 1100, 1200], id: \.self) { p in
+                    Button("\(Int(p))") {
+                        withAnimation(.snappy) { var c = cab; c.cornerWidth = p; project.selected = c }
+                    }
+                    .buttonStyle(ChipStyle(selected: abs(p - cab.cornerWidth) < 0.5))
+                    .accessibilityLabel("Second leg \(Int(p)) millimetres")
+                }
+            }
+        }
+    }
+}
+
+/// An L-corner from above: both legs against their walls, the bi-fold pair across the inside
+/// corner in the accent colour.
+struct CornerThumbnail: View {
+    let side: String
+
+    var body: some View {
+        Canvas { ctx, size in
+            let s = min(size.width, size.height)
+            let leg = s * 0.42
+            let flip = side == "right"
+            func x(_ v: CGFloat) -> CGFloat { flip ? s - v : v }
+            var body = Path()
+            body.move(to: CGPoint(x: x(0), y: 0))
+            body.addLine(to: CGPoint(x: x(s), y: 0))
+            body.addLine(to: CGPoint(x: x(s), y: leg))
+            body.addLine(to: CGPoint(x: x(leg), y: leg))
+            body.addLine(to: CGPoint(x: x(leg), y: s))
+            body.addLine(to: CGPoint(x: x(0), y: s))
+            body.closeSubpath()
+            ctx.fill(body, with: .color(.primary.opacity(0.10)))
+            ctx.stroke(body, with: .color(.primary.opacity(0.6)), lineWidth: 1)
+            var doors = Path()
+            doors.move(to: CGPoint(x: x(s - 2), y: leg + 2))
+            doors.addLine(to: CGPoint(x: x(leg + 2), y: leg + 2))
+            doors.addLine(to: CGPoint(x: x(leg + 2), y: s - 2))
+            ctx.stroke(doors, with: .color(.accentColor), lineWidth: 2)
+        }
+        .accessibilityHidden(true)
     }
 }
 

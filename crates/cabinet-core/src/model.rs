@@ -42,6 +42,9 @@ pub struct Cabinet {
     /// Sink cabinet options (ignored by other kinds).
     #[serde(default)]
     pub sink: Sink,
+    /// The second leg of an L-shaped corner cabinet (ignored by other kinds).
+    #[serde(default)]
+    pub corner: Corner,
     /// Sides seen from the room (the end of a run without an end panel): no screws through them.
     #[serde(default, skip_serializing_if = "Exposed::is_none")]
     pub exposed: Exposed,
@@ -103,6 +106,27 @@ impl Default for Blind {
     }
 }
 
+/// An L-shaped corner base: its main leg runs `width` along the back wall like any base cabinet
+/// (front at Y = 0); the second leg runs `width` here along the side wall on `side`, coming
+/// forward (to negative Y), both `depth` deep. The legs share one interior behind a bi-fold door
+/// pair. Its envelope therefore reaches `width − depth` in front of the cabinet's origin.
+#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(default)]
+pub struct Corner {
+    pub side: HingeSide,
+    /// Outside length of the second leg, from the back wall.
+    pub width: f64,
+}
+
+impl Default for Corner {
+    fn default() -> Self {
+        Self {
+            side: HingeSide::Left,
+            width: 900.0,
+        }
+    }
+}
+
 impl Cabinet {
     /// A cabinet of `kind` with the kind's usual size and the default standard.
     pub fn new(id: impl Into<String>, kind: CabinetKind) -> Self {
@@ -120,6 +144,7 @@ impl Cabinet {
             fixed_shelves: Vec::new(),
             blind: Blind::default(),
             sink: Sink::default(),
+            corner: Corner::default(),
             exposed: Exposed::default(),
         }
     }
@@ -144,6 +169,7 @@ impl Cabinet {
                 | CabinetKind::Tall
                 | CabinetKind::DrawerBank
                 | CabinetKind::BlindCorner
+                | CabinetKind::CornerBase
                 | CabinetKind::Sink
         ) && self.standard.toe_kick != ToeKick::None
     }
@@ -161,10 +187,12 @@ pub enum CabinetKind {
     BlindCorner,
     /// A base cabinet for a sink: no back rail, a cut-out for pipes and a waterproof liner.
     Sink,
+    /// An L-shaped base cabinet in an inside corner, both legs one interior, with bi-fold doors.
+    CornerBase,
 }
 
 impl CabinetKind {
-    pub const ALL: [CabinetKind; 7] = [
+    pub const ALL: [CabinetKind; 8] = [
         CabinetKind::Base,
         CabinetKind::Wall,
         CabinetKind::Tall,
@@ -172,6 +200,7 @@ impl CabinetKind {
         CabinetKind::OpenShelf,
         CabinetKind::BlindCorner,
         CabinetKind::Sink,
+        CabinetKind::CornerBase,
     ];
 
     /// The kind a drawn box most likely is: as tall as a pantry → tall, hanging off the floor →
@@ -196,12 +225,15 @@ impl CabinetKind {
             CabinetKind::OpenShelf => (600.0, 300.0, 720.0),
             CabinetKind::BlindCorner => (1000.0, 580.0, 870.0),
             CabinetKind::Sink => (900.0, 580.0, 870.0),
+            CabinetKind::CornerBase => (900.0, 580.0, 870.0),
         }
     }
 
     pub fn default_fronts_for(self, width: f64) -> FrontLayout {
         match self {
             CabinetKind::OpenShelf => FrontLayout::Open,
+            // Its bi-fold pair, whatever the layout says.
+            CabinetKind::CornerBase => FrontLayout::DoorPair,
             // One door on the open part, hinged away from the corner.
             CabinetKind::BlindCorner => FrontLayout::Door {
                 hinge_side: HingeSide::Right,
@@ -221,7 +253,8 @@ impl CabinetKind {
             CabinetKind::Base
             | CabinetKind::Wall
             | CabinetKind::OpenShelf
-            | CabinetKind::BlindCorner => 1,
+            | CabinetKind::BlindCorner
+            | CabinetKind::CornerBase => 1,
             // The bowl and pipes take the space.
             CabinetKind::Sink => 0,
             CabinetKind::Tall => 4,

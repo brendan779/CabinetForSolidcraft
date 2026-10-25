@@ -77,7 +77,12 @@ fn plates() -> Vec<&'static HardwareItem> {
 
 /// Picks the hinge and the thinnest plate that brings the boring distance into the hinge's range.
 pub fn select(need: &HingeNeed) -> Result<HingeChoice, String> {
-    let hinge = hardware::item(&hinge_id(need.overlay, need.sprung))?;
+    select_hinge(&hinge_id(need.overlay, need.sprung), need)
+}
+
+/// As [`select`], for a given hinge (a wide-angle hinge, say) instead of the standard 110°.
+pub fn select_hinge(id: &str, need: &HingeNeed) -> Result<HingeChoice, String> {
+    let hinge = hardware::item(id)?;
     let (to, crank) = (hinge.param("boss_overlay")?, hinge.param("arm_cranking")?);
     let (tb_min, tb_max) = (
         hinge.param("boring_distance_min")?,
@@ -110,7 +115,9 @@ pub fn select(need: &HingeNeed) -> Result<HingeChoice, String> {
     if need.overlay != DoorOverlay::Inset {
         let gaps = hinge.table("min_gap")?;
         let last = gaps.cols.last().copied().unwrap_or(0.0);
-        match gaps.upper(tb, fd) {
+        // Below the table's thinnest door the gap only shrinks: read the first column.
+        let fd_read = fd.max(gaps.cols.first().copied().unwrap_or(fd));
+        match gaps.upper(tb, fd_read) {
             Some(f) if need.gap + 1e-9 < f => warnings.push(format!(
                 "a {fd} mm door on {} hinges needs a gap of {f} mm beside its hinged edge; it \
                  has {}",
@@ -126,8 +133,9 @@ pub fn select(need: &HingeNeed) -> Result<HingeChoice, String> {
             Some(_) => {}
         }
     }
-    let max_fd = hinge.table("max_front_thickness")?;
-    if let Some(max) = max_fd.lower(md, need.side_thickness)
+    // Not every hinge page prints the clip-on limit.
+    if let Ok(max_fd) = hinge.table("max_front_thickness")
+        && let Some(max) = max_fd.lower(md, need.side_thickness)
         && fd > max
     {
         warnings.push(format!(
@@ -190,6 +198,19 @@ mod tests {
                 "{overlay:?} FA {fa}"
             );
         }
+    }
+
+    #[test]
+    fn a_wide_angle_hinge_reads_its_own_boring_range_and_gap_table() {
+        // 155°: TB 3–8 (p.85), so FA 19 still fits on a 0 mm plate; 18 mm doors need no gap.
+        let n = need(DoorOverlay::Full, 19.0, 18.0);
+        let c = select_hinge("blum.clip-top-blumotion.155.overlay", &n).unwrap();
+        assert_eq!(
+            (c.hinge.article.as_str(), c.boring_distance),
+            ("71B7550", 8.0)
+        );
+        assert!(c.warnings.is_empty(), "{:?}", c.warnings);
+        assert!(select(&n).is_err());
     }
 
     #[test]

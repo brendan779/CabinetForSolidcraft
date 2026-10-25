@@ -1,12 +1,13 @@
 //! Cabinet → parts, machining and hardware.
 
+use crate::corner;
 use crate::drawers::{self, WoodRunner};
 use crate::geom::{Aabb, Axis, Vec3};
 use crate::hinges::{self, HingeNeed};
 use crate::joinery::ButtJoint;
 use crate::lift;
 use crate::model::{
-    BackStyle, BottomJoint, Cabinet, CabinetKind, DoorOverlay, DrawerSystem, FrontCore,
+    BackStyle, BottomJoint, Cabinet, CabinetKind, DoorOverlay, DrawerSystem, Exposed, FrontCore,
     FrontLayout, HingeSide, Opening, ToeKick, TopJoint, WallHanging,
 };
 use crate::part::{
@@ -21,6 +22,8 @@ const BACK_INSET: f64 = 16.0;
 /// The narrowest door a blind corner may be left with: a hinged door narrower than this has no
 /// room for hinge cups and a handle.
 const MIN_BLIND_DOOR: f64 = 250.0;
+/// The narrowest door either leg of an L-corner may be left with beside the other leg.
+const MIN_CORNER_DOOR: f64 = 250.0;
 /// A sink cabinet's pipe cut-out in the back: how high it reaches above the bottom panel, and how
 /// far it stays in from the sides (room for the back's fixings and stiffness). Wastes and stop
 /// valves sit low, under about 400 mm.
@@ -47,17 +50,21 @@ const HINGE_END_OFFSET: f64 = 100.0;
 /// Builds the part list for one cabinet.
 pub fn build_cabinet(cab: &Cabinet) -> Result<PartList> {
     validate(cab)?;
-    let mut b = Builder::new(cab);
-    b.carcass();
-    b.fronts();
-    // After the fronts, so shelf-pin holes can make way for hinge plates.
-    b.shelves();
-    b.plinth();
-    b.wall_hanging();
-    b.sink();
-    b.cover_caps();
-    b.opening();
-    let mut list = b.list;
+    let mut list = if cab.kind == CabinetKind::CornerBase {
+        l_corner(cab)?
+    } else {
+        let mut b = Builder::new(cab);
+        b.carcass();
+        b.fronts();
+        // After the fronts, so shelf-pin holes can make way for hinge plates.
+        b.shelves();
+        b.plinth();
+        b.wall_hanging();
+        b.sink();
+        b.cover_caps();
+        b.opening();
+        b.list
+    };
     for p in &mut list.parts {
         let o = cab.origin;
         p.bounds.min = p.bounds.min + o;
@@ -67,6 +74,95 @@ pub fn build_cabinet(cab: &Cabinet) -> Result<PartList> {
     let clashes = crate::collisions::check(&list);
     list.warnings
         .extend(clashes.into_iter().map(|c| format!("clash: {c}")));
+    Ok(list)
+}
+
+/// An L-shaped corner base, from two straight legs: the main leg as a base cabinet along X, the
+/// second built the same way, its end against the main leg opened, and turned to face +X in
+/// front of the main leg's end. Bi-fold doors close both fronts.
+fn l_corner(cab: &Cabinet) -> Result<PartList> {
+    let (w, d, w2) = (cab.width, cab.depth, cab.corner.width);
+    for (name, v) in [("width", w), ("corner width", w2)] {
+        if !(v.is_finite() && v >= d + MIN_CORNER_DOOR) {
+            return Err(Error::TooSmall(format!(
+                "an L-corner {name} of {v} leaves less than {MIN_CORNER_DOOR} mm of door beside \
+                 the other leg"
+            )));
+        }
+    }
+    let leg = |width: f64, exposed: Exposed| Cabinet {
+        kind: CabinetKind::Base,
+        width,
+        fronts: FrontLayout::Open,
+        origin: Vec3::default(),
+        exposed,
+        ..cab.clone()
+    };
+    // Built as the left-hand corner; a right-hand one is its mirror.
+    let (out_a, out_b) = match cab.corner.side {
+        HingeSide::Left => (cab.exposed.right, cab.exposed.left),
+        HingeSide::Right => (cab.exposed.left, cab.exposed.right),
+    };
+    let main = leg(
+        w,
+        Exposed {
+            left: false,
+            right: out_a,
+        },
+    );
+    let mut second = leg(
+        w2 - d,
+        Exposed {
+            left: out_b,
+            right: false,
+        },
+    );
+    second.adjustable_shelves = 0;
+    second.fixed_shelves.clear();
+    let mut a = Builder::new(&main);
+    a.carcass();
+    // Before the shelves, so shelf-pin holes make way for the hinge plates.
+    a.corner_doors();
+    a.shelves();
+    a.plinth();
+    let mut b = Builder::new(&second);
+    b.carcass();
+    b.plinth();
+    let mut leg_b = b.list;
+    corner::open_end(&mut leg_b, &format!("{}.RightSide", cab.id), w2 - d);
+    corner::rename(&mut leg_b, |n| format!("{n}2"));
+    corner::turn_to_face_x(&mut leg_b, d, -(w2 - d));
+    // The plinths meet at the inside corner: the main one stops at the second's back face, the
+    // second runs on under the main leg to meet it.
+    let s = &cab.standard;
+    let (sb, ft) = (s.toe_kick_setback, s.front_thickness);
+    for p in a
+        .list
+        .parts
+        .iter_mut()
+        .filter(|p| p.role == PartRole::Plinth)
+    {
+        let end = p.bounds.max().x;
+        p.bounds.min.x = d - sb;
+        p.bounds.size.x = end - p.bounds.min.x;
+    }
+    for p in leg_b
+        .parts
+        .iter_mut()
+        .filter(|p| p.role == PartRole::Plinth)
+    {
+        p.bounds.size.y = sb + ft - p.bounds.min.y;
+    }
+    a.list.parts.extend(leg_b.parts);
+    a.list.operations.extend(leg_b.operations);
+    a.list.hardware.extend(leg_b.hardware);
+    a.list.warnings.extend(leg_b.warnings);
+    a.cover_caps();
+    a.opening();
+    let mut list = a.list;
+    if cab.corner.side == HingeSide::Right {
+        corner::mirror_x(&mut list, w);
+    }
     Ok(list)
 }
 
@@ -1194,8 +1290,6 @@ impl<'a> Builder<'a> {
     }
 
     fn door(&mut self, n: usize, b: Aabb, hinge: HingeSide) {
-        let cab = self.cab;
-        let s = &cab.standard;
         self.add(
             PartRole::Door,
             Some(n),
@@ -1205,6 +1299,21 @@ impl<'a> Builder<'a> {
             EdgeBanding::all(),
         );
         let door = self.name(PartRole::Door, Some(n));
+        self.hang_door(&door, b, hinge, None);
+    }
+
+    /// Hinges `door` (in the plane of the front, bounds `b`) to the side on `hinge`: the
+    /// standard 110° hinge for the overlay, or hinge `hinge_id`. Returns the hinges' heights.
+    fn hang_door(
+        &mut self,
+        door: &str,
+        b: Aabb,
+        hinge: HingeSide,
+        hinge_id: Option<&str>,
+    ) -> Vec<f64> {
+        let cab = self.cab;
+        let s = &cab.standard;
+        let door = door.to_string();
         let side_role = match hinge {
             HingeSide::Left => PartRole::LeftSide,
             HingeSide::Right => PartRole::RightSide,
@@ -1231,13 +1340,17 @@ impl<'a> Builder<'a> {
             gap: s.front_gap,
             sprung: s.opening == Opening::Handles,
         };
-        let choice = match hinges::select(&need) {
+        let chosen = match hinge_id {
+            Some(id) => hinges::select_hinge(id, &need),
+            None => hinges::select(&need),
+        };
+        let choice = match chosen {
             Ok(c) => c,
             Err(e) => {
                 self.list
                     .warnings
                     .push(format!("{door}: {e}; no hinges placed"));
-                return;
+                return Vec::new();
             }
         };
         let numbers = (|| {
@@ -1252,7 +1365,7 @@ impl<'a> Builder<'a> {
             self.list
                 .warnings
                 .push(format!("{door}: {}", numbers.unwrap_err()));
-            return;
+            return Vec::new();
         };
         for w in &choice.warnings {
             self.list.warnings.push(format!("{door}: {w}"));
@@ -1270,8 +1383,10 @@ impl<'a> Builder<'a> {
         // The carcass front is Y = 0 whatever the overlay; the plate is set out from it.
         let plate_y = choice.plate_setback;
         let span = height - 2.0 * HINGE_END_OFFSET;
-        for i in 0..count {
-            let z = b.min.z + HINGE_END_OFFSET + span * i as f64 / (count - 1) as f64;
+        let zs: Vec<f64> = (0..count)
+            .map(|i| b.min.z + HINGE_END_OFFSET + span * i as f64 / (count - 1) as f64)
+            .collect();
+        for &z in &zs {
             self.list.operations.push(Operation::Bore {
                 part: door.clone(),
                 at: Vec3::new(cup_x, back_y, z),
@@ -1305,6 +1420,100 @@ impl<'a> Builder<'a> {
                 part: side.clone(),
                 quantity: 1,
             });
+        }
+        zs
+    }
+
+    /// An L-corner's bi-fold pair: door 1 across the main leg, hung on its end side with 155°
+    /// hinges; door 2 across the second leg, hung on door 1 with Blum's corner bi-fold hinges
+    /// (bosses in door 1, plates on door 2). Full overlay.
+    fn corner_doors(&mut self) {
+        let cab = self.cab;
+        let s = &cab.standard;
+        let (w, d, w2) = (cab.width, cab.depth, cab.corner.width);
+        let (g, ft) = (s.front_gap, s.front_thickness);
+        if s.overlay != DoorOverlay::Full {
+            self.list
+                .warnings
+                .push("an L-corner's bi-fold doors are always full overlay".into());
+        }
+        let (z0, z1) = (self.carcass_z0, cab.height - g);
+        // Door 2 covers the second leg's front up to the corner; door 1 starts a gap past it.
+        let one = aabb(d + ft + g, -ft, z0, w - g / 2.0, 0.0, z1);
+        let two = aabb(d, -(w2 - d) + g / 2.0, z0, d + ft, 0.0, z1);
+        self.add(
+            PartRole::Door,
+            Some(1),
+            one,
+            Axis::Y,
+            Axis::Z,
+            EdgeBanding::all(),
+        );
+        self.add(
+            PartRole::Door,
+            Some(2),
+            two,
+            Axis::X,
+            Axis::Z,
+            EdgeBanding::all(),
+        );
+        let (n1, n2) = (
+            self.name(PartRole::Door, Some(1)),
+            self.name(PartRole::Door, Some(2)),
+        );
+        let zs = self.hang_door(
+            &n1,
+            one,
+            HingeSide::Right,
+            Some("blum.clip-top-blumotion.155.overlay"),
+        );
+        let fold = (|| {
+            let bi = crate::hardware::item("blum.corner-bi-fold-hinge")?;
+            let plate =
+                crate::hardware::item("blum.mounting-plate.cruciform-37-32.chipboard-screw.0")?;
+            let p = |k: &str| bi.param(k);
+            Ok::<_, String>((
+                bi,
+                plate,
+                p("boring_distance")? + p("cup_diameter")? / 2.0,
+                p("cup_diameter")?,
+                p("cup_depth")?,
+                p("front_thickness_min")?..=p("front_thickness_max")?,
+            ))
+        })();
+        let (bi, plate, inset, diameter, depth, thick) = match fold {
+            Ok(f) => f,
+            Err(e) => {
+                self.list.warnings.push(format!("{n2}: {e}; not hung"));
+                return;
+            }
+        };
+        if !thick.contains(&ft) {
+            self.list.warnings.push(format!(
+                "{n2}: Blum's corner bi-fold hinge takes fronts {}–{} mm, not {ft}",
+                thick.start(),
+                thick.end()
+            ));
+        }
+        for z in zs {
+            let at = Vec3::new(one.min.x + inset, 0.0, z);
+            self.list.operations.push(Operation::Bore {
+                part: n1.clone(),
+                at,
+                direction: Dir::new(Axis::Y, false),
+                diameter,
+                depth: depth.min(ft - 3.0),
+                purpose: BorePurpose::HingeCup,
+            });
+            for (item, part, at) in [(bi, &n1, at), (plate, &n2, Vec3::new(d, -inset, z))] {
+                self.list.hardware.push(HardwarePlacement {
+                    item: item.id.clone(),
+                    description: format!("{} {}", item.family, item.variant),
+                    at,
+                    part: part.clone(),
+                    quantity: 1,
+                });
+            }
         }
     }
 
@@ -2211,6 +2420,104 @@ mod tests {
             list.warnings
         );
         assert_eq!(list.by_role(PartRole::LiftFront).count(), 2);
+    }
+
+    /// CORE-4b: a 900 × 900 L-corner: two legs sharing one interior, each panel once, nothing
+    /// overlapping, bi-fold doors on Blum's 155° and corner bi-fold hinges.
+    #[test]
+    fn an_l_corner_900_by_900_builds_with_every_panel_once() {
+        let cab = Cabinet::new("C01", CabinetKind::CornerBase);
+        let list = build_cabinet(&cab).unwrap();
+        assert!(
+            list.warnings
+                .iter()
+                .all(|w| w.contains("shelf-pin holes left out")),
+            "{:?}",
+            list.warnings
+        );
+        // Inset backs sit in grooves in the panels around them.
+        let in_groove = |n: &str| n.ends_with(".Back") || n.ends_with(".Back2");
+        let bad: Vec<_> = overlapping(&list)
+            .into_iter()
+            .filter(|(a, b)| !in_groove(a) && !in_groove(b))
+            .collect();
+        assert_eq!(bad, []);
+        let mut names: Vec<&str> = list.parts.iter().map(|p| p.name.as_str()).collect();
+        names.sort_unstable();
+        let unique = names.len();
+        names.dedup();
+        assert_eq!(names.len(), unique);
+        for name in [
+            "C01.LeftSide",
+            "C01.RightSide",
+            "C01.Bottom",
+            "C01.Back",
+            "C01.Plinth",
+            "C01.LeftSide2",
+            "C01.Bottom2",
+            "C01.Back2",
+            "C01.Plinth2",
+            "C01.Door1",
+            "C01.Door2",
+        ] {
+            assert!(list.part(name).is_some(), "{name} in {names:?}");
+        }
+        // The second leg is open where it meets the main leg.
+        assert!(list.part("C01.RightSide2").is_none());
+        let cut = crate::cutlist::cut_list(std::slice::from_ref(&list), "white", 1.0);
+        assert_eq!(
+            cut.rows.iter().map(|r| r.quantity).sum::<u32>() as usize,
+            list.parts.len()
+        );
+        // The second leg comes forward 900 − 580 from the main leg's front, facing +X.
+        let end = list.part("C01.LeftSide2").unwrap();
+        assert!((end.bounds.min.y + 320.0).abs() < 1e-9);
+        let bottom2 = list.part("C01.Bottom2").unwrap();
+        assert!((bottom2.bounds.max().y - 0.0).abs() < 1e-9);
+        assert!((bottom2.bounds.max().x - 580.0).abs() < 1e-9);
+        let door2 = list.part("C01.Door2").unwrap();
+        assert_eq!(door2.thickness_axis, Axis::X);
+        let count = |id: &str| {
+            list.hardware
+                .iter()
+                .filter(|h| h.item == id)
+                .map(|h| h.quantity)
+                .sum::<u32>()
+        };
+        assert_eq!(count("blum.clip-top-blumotion.155.overlay"), 2);
+        assert_eq!(count("blum.corner-bi-fold-hinge"), 2);
+    }
+
+    #[test]
+    fn a_right_hand_l_corner_mirrors_the_left() {
+        let mut cab = Cabinet::new("C01", CabinetKind::CornerBase);
+        cab.corner.side = HingeSide::Right;
+        let list = build_cabinet(&cab).unwrap();
+        assert!(
+            list.warnings
+                .iter()
+                .all(|w| w.contains("shelf-pin holes left out")),
+            "{:?}",
+            list.warnings
+        );
+        // Inset backs sit in grooves in the panels around them.
+        let in_groove = |n: &str| n.ends_with(".Back") || n.ends_with(".Back2");
+        let bad: Vec<_> = overlapping(&list)
+            .into_iter()
+            .filter(|(a, b)| !in_groove(a) && !in_groove(b))
+            .collect();
+        assert_eq!(bad, []);
+        let leg = list.part("C01.Bottom2").unwrap();
+        assert!((leg.bounds.min.x - (900.0 - 580.0)).abs() < 1e-9);
+        // The second leg's end side is now on its right.
+        assert!(list.part("C01.RightSide2").is_some());
+    }
+
+    #[test]
+    fn an_l_corner_leg_too_short_for_a_door_is_refused() {
+        let mut cab = Cabinet::new("C01", CabinetKind::CornerBase);
+        cab.corner.width = 700.0;
+        assert!(matches!(build_cabinet(&cab), Err(Error::TooSmall(_))));
     }
 
     /// CORE-10: each overlay gets the hinge cranked for it, the cup at Blum's boring distance

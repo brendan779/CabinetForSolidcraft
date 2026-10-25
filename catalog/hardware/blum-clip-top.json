@@ -1,7 +1,7 @@
 {
   "brand": "Blum",
   "website": "https://www.blum.com",
-  "notes": "CLIP top BLUMOTION / CLIP top 110° hinges and CLIP cruciform mounting plates, from the Blum Catalogue and technical manual 2024/2025 (printed pages 76-77, 150-153, 718-721). Boring distance TB = front overlay FA - boss overlay TO (11) + arm cranking + plate spacing MD; checked against the TB tables on p.77 for every MD row. cup_depth is printed as 'min 13' and hole_depth_min as 'min 11.5'. INSERTA dowel depth is not printed, so INSERTA hinges carry no dowel drilling yet. Not verified by a person.",
+  "notes": "CLIP top BLUMOTION / CLIP top 110° hinges and CLIP cruciform mounting plates, from the Blum Catalogue and technical manual 2024/2025 (printed pages 76-77, 150-153, 718-721). Boring distance TB = front overlay FA - boss overlay TO (11) + arm cranking + plate spacing MD; checked against the TB tables on p.77 for every MD row. cup_depth is printed as 'min 13' and hole_depth_min as 'min 11.5'. INSERTA dowel depth is not printed, so INSERTA hinges carry no dowel drilling yet. Not verified by a person. The 155° hinge (pp. 84-85) and the corner cabinet bi-fold hinge (pp. 116-117) serve the L-shaped corner base's bi-fold doors.",
   "items": [
     {
       "id": "blum.clip-top-blumotion.110.overlay",
@@ -1696,6 +1696,206 @@
       ],
       "source": {
         "url": "Blum Catalogue and technical manual 2024/2025, p.152",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.clip-top-blumotion.155.overlay",
+      "brand": "Blum",
+      "article": "71B7550",
+      "family": "CLIP top BLUMOTION",
+      "variant": "155° (0-protrusion), overlay application (straight arm), screw-on boss, nickel",
+      "kind": "hinge",
+      "parameters": {
+        "opening_angle": 155,
+        "cup_diameter": 35,
+        "cup_depth": 11.7,
+        "boring_distance_min": 3,
+        "boring_distance_max": 8,
+        "boss_overlay": 11,
+        "arm_cranking": 0,
+        "front_gap_default": 1.5
+      },
+      "drilling": [
+        {
+          "x": 0,
+          "y": 0,
+          "diameter": 35,
+          "depth": 11.7,
+          "note": "cup; printed as min 11.7"
+        }
+      ],
+      "tables": {
+        "min_gap": {
+          "rows_name": "boring_distance",
+          "cols_name": "front_thickness",
+          "rows": [
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "cols": [
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31
+          ],
+          "values": [
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0.5,
+              0.5,
+              1.0,
+              2.0,
+              2.0,
+              3.0,
+              4.5
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0.5,
+              1.0,
+              2.0,
+              2.0,
+              2.5,
+              4.0,
+              null
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0.5,
+              1.0,
+              2.0,
+              2.0,
+              3.5,
+              null,
+              null
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              1.0,
+              1.5,
+              2.0,
+              3.0,
+              null,
+              null,
+              null
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              1.0,
+              1.5,
+              2.0,
+              2.5,
+              null,
+              null,
+              null
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              1.0,
+              1.5,
+              null,
+              null,
+              null,
+              null,
+              null
+            ]
+          ],
+          "note": "Minimum gap F for fronts with 1 mm radiused edges, 155° hinge, factory setting (p.85). Thinner fronts than 20 mm need no gap."
+        }
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.84, web code DQDHEM",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.corner-bi-fold-hinge",
+      "brand": "Blum",
+      "article": "79T8500",
+      "family": "CLIP top",
+      "variant": "corner cabinet bi-fold hinge, 60°, screw-on boss, with spring; with a 155° or 170° hinge on the same front",
+      "kind": "hinge",
+      "parameters": {
+        "opening_angle": 60,
+        "cup_diameter": 35,
+        "cup_depth": 11,
+        "boring_distance": 12.5,
+        "front_thickness_min": 15,
+        "front_thickness_max": 23
+      },
+      "drilling": [
+        {
+          "x": 0,
+          "y": 0,
+          "diameter": 35,
+          "depth": 11,
+          "note": "cup, 12.5 from the door edge; printed as min 11"
+        }
+      ],
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.116, web code DQDQJY",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.mounting-plate.cruciform-37-32.chipboard-screw.0",
+      "brand": "Blum",
+      "article": "173L6100",
+      "family": "CLIP mounting plate",
+      "variant": "cruciform 37/32, 0 mm spacing, chipboard screws Ø3.5/4, steel",
+      "kind": "hinge_plate",
+      "parameters": {
+        "plate_spacing": 0,
+        "height": 8.5,
+        "setback": 37,
+        "hole_pitch": 32,
+        "height_adjustment": 3
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.153",
         "document_date": "2024/2025",
         "retrieved": "2026-10-26",
         "verified": false
