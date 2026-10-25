@@ -95,7 +95,7 @@ struct PartsListView: View {
     @Environment(ProjectModel.self) private var project
     @AppStorage(LengthUnit.key) private var unit: LengthUnit = .millimetres
     @State private var sort = [KeyPathComparator(\CutRowRecord.part)]
-    @State private var exporting = false
+    @State private var export: (doc: DataDocument, type: UTType, name: String)?
 
     private var rows: [CutRowRecord] {
         ((try? cutListRows(job: project.jobItems)) ?? []).sorted(using: sort)
@@ -121,13 +121,31 @@ struct PartsListView: View {
                 Text("\(rows.count) parts · \(String(format: "%.2f", area)) m² · \(String(format: "%.1f", tape)) m edge tape")
                     .foregroundStyle(.secondary)
                 Spacer()
-                Button("Export CSV…", systemImage: "square.and.arrow.up") { exporting = true }
+                Button("Nesting…", systemImage: "rectangle.split.3x3") { makeNesting() }
+                    .help("The parts laid out on stock sheets for the panel saw (4.4 mm kerf, 10 mm trim), with the offcuts, as a PDF")
+                Button("Export CSV…", systemImage: "square.and.arrow.up") {
+                    export = (DataDocument(data: Data(csv.utf8)), .commaSeparatedText, "\(project.jobName) cut list")
+                }
             }
             .padding(10)
             .background(.bar)
         }
-        .fileExporter(isPresented: $exporting, document: TextDocument(text: csv), contentType: .commaSeparatedText,
-                      defaultFilename: "\(project.jobName) cut list") { _ in }
+        .fileExporter(isPresented: Binding(get: { export != nil }, set: { if !$0 { export = nil } }),
+                      document: export?.doc, contentType: export?.type ?? .data,
+                      defaultFilename: export?.name ?? "") { result in
+            if case .success(let url) = result { project.status = "Saved \(url.lastPathComponent)" }
+        }
+    }
+
+    private func makeNesting() {
+        guard let dir = Preferences.catalogDir?.path else { return }
+        do {
+            let data = try nestingPdf(items: project.jobItems, catalogDir: dir, job: project.jobName,
+                                      kerf: 4.4, trim: 10)
+            export = (DataDocument(data: data), .pdf, "\(project.jobName) nesting")
+        } catch {
+            project.lastError = "Could not nest the parts: \(error)"
+        }
     }
 
     private var csv: String { (try? cutListCsv(job: project.jobItems)) ?? "" }

@@ -529,7 +529,7 @@ fn helvetica_width(b: u8) -> f64 {
 }
 
 /// A PDF file of A4 landscape pages, one content stream each, with Helvetica as `/F1`.
-fn write_pdf(pages: &[String]) -> Vec<u8> {
+pub(crate) fn write_pdf(pages: &[String]) -> Vec<u8> {
     write_pdf_sized(pages, PAGE_W, PAGE_H)
 }
 

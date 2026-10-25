@@ -5,6 +5,7 @@
 use std::fmt::Write;
 
 pub mod labels;
+pub mod nesting;
 pub mod pdf;
 
 use cabinet_core::geom::{Axis, Vec3};

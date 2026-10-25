@@ -568,6 +568,51 @@ pub fn cut_sheets_pdf(items: JobItems, job: String) -> Result<Vec<u8>, CoreError
     Ok(cabinet_sheets::pdf::job_pdf(&lists, board_name, &job))
 }
 
+/// The usual Australian sheet for parts without a catalog board (mm).
+const GENERIC_SHEET: (f64, f64) = (2400.0, 1200.0);
+
+/// The job's parts nested on stock sheets for the panel saw, as a PDF: a summary with the offcuts,
+/// then a page per sheet. Each board's first catalog sheet size is its stock; parts with no board
+/// go on 2400 × 1200 sheets.
+#[uniffi::export]
+pub fn nesting_pdf(
+    items: JobItems,
+    catalog_dir: String,
+    job: String,
+    kerf: f64,
+    trim: f64,
+) -> Result<Vec<u8>, CoreError> {
+    use cabinet_core::nesting::{Settings, Stock, nest};
+    let (lists, tape) = cut_lists(&items)?;
+    let cat =
+        cabinet_catalog::Catalog::load(std::path::Path::new(&catalog_dir)).map_err(invalid)?;
+    let rows = cut_list(&lists, "Generic", tape).rows;
+    let settings = Settings {
+        kerf,
+        trim,
+        ..Settings::default()
+    };
+    let nesting = nest(
+        &rows,
+        |board, _| match cat.board(board) {
+            Some(b) => b.sheets.first().map(|s| Stock {
+                length: s.length,
+                width: s.width,
+                grained: b.grained,
+            }),
+            None => Some(Stock {
+                length: GENERIC_SHEET.0,
+                width: GENERIC_SHEET.1,
+                grained: false,
+            }),
+        },
+        &settings,
+    );
+    Ok(cabinet_sheets::nesting::nesting_pdf(
+        &nesting, &job, &settings,
+    ))
+}
+
 /// One line of the hardware bill.
 #[derive(uniffi::Record)]
 pub struct BomRecord {
