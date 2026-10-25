@@ -1,0 +1,92 @@
+{
+  "brand": "Blum",
+  "website": "https://www.blum.com",
+  "notes": "Wall hanging brackets and cabinet connectors from the Blum Catalogue and technical manual 2024/2025, printed pages 598-599. The bracket screws to the inside of the side in the top back corner (two screws 32 apart) and needs a 22 x 33 mm cut-out in the back; its position from the rear (31-45 mm) depends on the back. Not verified by a person.",
+  "items": [
+    {
+      "id": "blum.wall-hanging-bracket.right",
+      "brand": "Blum",
+      "article": "48N0510.02",
+      "family": "Wall hanging bracket",
+      "variant": "screw-on, right, white",
+      "kind": "hanger",
+      "parameters": {
+        "load_per_pair_kg": 130,
+        "screw_pitch": 32,
+        "back_cutout_width": 22,
+        "back_cutout_height": 33
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.598",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.wall-hanging-bracket.left",
+      "brand": "Blum",
+      "article": "48N0510.03",
+      "family": "Wall hanging bracket",
+      "variant": "screw-on, left, white",
+      "kind": "hanger",
+      "parameters": {
+        "load_per_pair_kg": 130,
+        "screw_pitch": 32,
+        "back_cutout_width": 22,
+        "back_cutout_height": 33
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.598",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.cabinet-connector.screw-on",
+      "brand": "Blum",
+      "article": "40.2000",
+      "family": "Cabinet connector",
+      "variant": "screw-on cabinet connector, white",
+      "kind": "connector",
+      "parameters": {},
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.599",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.cabinet-connector.knock-in.housing",
+      "brand": "Blum",
+      "article": "40.2110",
+      "family": "Cabinet connector",
+      "variant": "knock-in connector housing, white",
+      "kind": "connector",
+      "parameters": {},
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.599",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.cabinet-connector.knock-in.base",
+      "brand": "Blum",
+      "article": "40.2120.02",
+      "family": "Cabinet connector",
+      "variant": "knock-in base connector, natural",
+      "kind": "connector",
+      "parameters": {},
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.599",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    }
+  ]
+}

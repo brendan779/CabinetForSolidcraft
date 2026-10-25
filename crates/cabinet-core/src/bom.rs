@@ -117,8 +117,12 @@ mod tests {
             .find(|r| r.item == "hafele.leg.adjustable")
             .unwrap();
         assert_eq!(legs.cabinets, ["B02"]);
-        let runners = rows.iter().find(|r| r.item.ends_with(".runner")).unwrap();
-        assert_eq!(runners.quantity, 3);
+        let runners: u32 = rows
+            .iter()
+            .filter(|r| r.item.starts_with("blum.legrabox.cabinet-profile."))
+            .map(|r| r.quantity)
+            .sum();
+        assert_eq!(runners, 3);
     }
 
     #[test]

@@ -1,0 +1,73 @@
+{
+  "brand": "Blum",
+  "website": "https://www.blum.com",
+  "notes": "TIP-ON for doors from the Blum Catalogue and technical manual 2024/2025, printed pages 190-193. The short 956. suits overlay fronts up to about 1300 mm high, the long 956A taller overlay fronts and all inset fronts; both with unsprung hinges. Fitted on straight adapter plates (no drilling). BLUMOTION for doors (pp. 176-189) is an add-on damper; CLIP top BLUMOTION hinges have it built in, so the app adds none. Not verified by a person.",
+  "items": [
+    {
+      "id": "blum.tip-on.door.short",
+      "brand": "Blum",
+      "article": "956.1004",
+      "family": "TIP-ON for doors",
+      "variant": "TIP-ON 956. short version with magnet, standard spring, with catch plates; for unsprung hinges",
+      "kind": "other",
+      "parameters": {
+        "front_height_max": 1300,
+        "output_path": 17
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.192",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.tip-on.door.long",
+      "brand": "Blum",
+      "article": "956A1004",
+      "family": "TIP-ON for doors",
+      "variant": "TIP-ON 956A long version with magnet, standard spring, with catch plates; for unsprung hinges",
+      "kind": "other",
+      "parameters": {
+        "front_height_min": 1300,
+        "output_path": 38
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.192",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.tip-on.adapter.short",
+      "brand": "Blum",
+      "article": "956.1201",
+      "family": "TIP-ON for doors",
+      "variant": "straight adapter plate, short version 20/17, for 956.",
+      "kind": "other",
+      "parameters": {},
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.193",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.tip-on.adapter.long",
+      "brand": "Blum",
+      "article": "956A1201",
+      "family": "TIP-ON for doors",
+      "variant": "straight adapter plate, extended version 20/32, for 956A",
+      "kind": "other",
+      "parameters": {},
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.193",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    }
+  ]
+}

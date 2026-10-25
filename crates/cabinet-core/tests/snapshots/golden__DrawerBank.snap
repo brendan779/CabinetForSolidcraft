@@ -249,6 +249,168 @@ expression: list
       }
     },
     {
+      "name": "C01.DrawerBottom1",
+      "role": "drawer_bottom",
+      "bounds": {
+        "min": {
+          "x": 33.5,
+          "y": 0.0,
+          "z": 669.4
+        },
+        "size": {
+          "x": 533.0,
+          "y": 540.0,
+          "z": 16.0
+        }
+      },
+      "thickness_axis": "Z",
+      "grain_axis": "X",
+      "board": "",
+      "edges": {
+        "front": false,
+        "back": false,
+        "top": false,
+        "bottom": false,
+        "left": false,
+        "right": false
+      }
+    },
+    {
+      "name": "C01.DrawerBack1",
+      "role": "drawer_back",
+      "bounds": {
+        "min": {
+          "x": 35.0,
+          "y": 524.0,
+          "z": 685.4
+        },
+        "size": {
+          "x": 530.0,
+          "y": 16.0,
+          "z": 101.0
+        }
+      },
+      "thickness_axis": "Y",
+      "grain_axis": "X",
+      "board": "",
+      "edges": {
+        "front": false,
+        "back": false,
+        "top": false,
+        "bottom": false,
+        "left": false,
+        "right": false
+      }
+    },
+    {
+      "name": "C01.DrawerBottom2",
+      "role": "drawer_bottom",
+      "bounds": {
+        "min": {
+          "x": 33.5,
+          "y": 0.0,
+          "z": 429.4
+        },
+        "size": {
+          "x": 533.0,
+          "y": 540.0,
+          "z": 16.0
+        }
+      },
+      "thickness_axis": "Z",
+      "grain_axis": "X",
+      "board": "",
+      "edges": {
+        "front": false,
+        "back": false,
+        "top": false,
+        "bottom": false,
+        "left": false,
+        "right": false
+      }
+    },
+    {
+      "name": "C01.DrawerBack2",
+      "role": "drawer_back",
+      "bounds": {
+        "min": {
+          "x": 35.0,
+          "y": 524.0,
+          "z": 445.4
+        },
+        "size": {
+          "x": 530.0,
+          "y": 16.0,
+          "z": 101.0
+        }
+      },
+      "thickness_axis": "Y",
+      "grain_axis": "X",
+      "board": "",
+      "edges": {
+        "front": false,
+        "back": false,
+        "top": false,
+        "bottom": false,
+        "left": false,
+        "right": false
+      }
+    },
+    {
+      "name": "C01.DrawerBottom3",
+      "role": "drawer_bottom",
+      "bounds": {
+        "min": {
+          "x": 33.5,
+          "y": 0.0,
+          "z": 189.4
+        },
+        "size": {
+          "x": 533.0,
+          "y": 540.0,
+          "z": 16.0
+        }
+      },
+      "thickness_axis": "Z",
+      "grain_axis": "X",
+      "board": "",
+      "edges": {
+        "front": false,
+        "back": false,
+        "top": false,
+        "bottom": false,
+        "left": false,
+        "right": false
+      }
+    },
+    {
+      "name": "C01.DrawerBack3",
+      "role": "drawer_back",
+      "bounds": {
+        "min": {
+          "x": 35.0,
+          "y": 524.0,
+          "z": 205.4
+        },
+        "size": {
+          "x": 530.0,
+          "y": 16.0,
+          "z": 100.99999999999997
+        }
+      },
+      "thickness_axis": "Y",
+      "grain_axis": "X",
+      "board": "",
+      "edges": {
+        "front": false,
+        "back": false,
+        "top": false,
+        "bottom": false,
+        "left": false,
+        "right": false
+      }
+    },
+    {
       "name": "C01.Plinth",
       "role": "plinth",
       "bounds": {
@@ -1164,12 +1326,204 @@ expression: list
       "diameter": 3.0,
       "depth": 35.0,
       "purpose": "screw_pilot"
+    },
+    {
+      "type": "bore",
+      "part": "C01.DrawerFront1",
+      "at": {
+        "x": 30.0,
+        "y": 0.0,
+        "z": 697.0
+      },
+      "direction": {
+        "axis": "Y",
+        "positive": false
+      },
+      "diameter": 10.0,
+      "depth": 12.0,
+      "purpose": "front_fixing"
+    },
+    {
+      "type": "bore",
+      "part": "C01.DrawerFront1",
+      "at": {
+        "x": 30.0,
+        "y": 0.0,
+        "z": 729.0
+      },
+      "direction": {
+        "axis": "Y",
+        "positive": false
+      },
+      "diameter": 10.0,
+      "depth": 12.0,
+      "purpose": "front_fixing"
+    },
+    {
+      "type": "bore",
+      "part": "C01.DrawerFront1",
+      "at": {
+        "x": 570.0,
+        "y": 0.0,
+        "z": 697.0
+      },
+      "direction": {
+        "axis": "Y",
+        "positive": false
+      },
+      "diameter": 10.0,
+      "depth": 12.0,
+      "purpose": "front_fixing"
+    },
+    {
+      "type": "bore",
+      "part": "C01.DrawerFront1",
+      "at": {
+        "x": 570.0,
+        "y": 0.0,
+        "z": 729.0
+      },
+      "direction": {
+        "axis": "Y",
+        "positive": false
+      },
+      "diameter": 10.0,
+      "depth": 12.0,
+      "purpose": "front_fixing"
+    },
+    {
+      "type": "bore",
+      "part": "C01.DrawerFront2",
+      "at": {
+        "x": 30.0,
+        "y": 0.0,
+        "z": 457.0
+      },
+      "direction": {
+        "axis": "Y",
+        "positive": false
+      },
+      "diameter": 10.0,
+      "depth": 12.0,
+      "purpose": "front_fixing"
+    },
+    {
+      "type": "bore",
+      "part": "C01.DrawerFront2",
+      "at": {
+        "x": 30.0,
+        "y": 0.0,
+        "z": 489.0
+      },
+      "direction": {
+        "axis": "Y",
+        "positive": false
+      },
+      "diameter": 10.0,
+      "depth": 12.0,
+      "purpose": "front_fixing"
+    },
+    {
+      "type": "bore",
+      "part": "C01.DrawerFront2",
+      "at": {
+        "x": 570.0,
+        "y": 0.0,
+        "z": 457.0
+      },
+      "direction": {
+        "axis": "Y",
+        "positive": false
+      },
+      "diameter": 10.0,
+      "depth": 12.0,
+      "purpose": "front_fixing"
+    },
+    {
+      "type": "bore",
+      "part": "C01.DrawerFront2",
+      "at": {
+        "x": 570.0,
+        "y": 0.0,
+        "z": 489.0
+      },
+      "direction": {
+        "axis": "Y",
+        "positive": false
+      },
+      "diameter": 10.0,
+      "depth": 12.0,
+      "purpose": "front_fixing"
+    },
+    {
+      "type": "bore",
+      "part": "C01.DrawerFront3",
+      "at": {
+        "x": 30.0,
+        "y": 0.0,
+        "z": 217.0
+      },
+      "direction": {
+        "axis": "Y",
+        "positive": false
+      },
+      "diameter": 10.0,
+      "depth": 12.0,
+      "purpose": "front_fixing"
+    },
+    {
+      "type": "bore",
+      "part": "C01.DrawerFront3",
+      "at": {
+        "x": 30.0,
+        "y": 0.0,
+        "z": 249.0
+      },
+      "direction": {
+        "axis": "Y",
+        "positive": false
+      },
+      "diameter": 10.0,
+      "depth": 12.0,
+      "purpose": "front_fixing"
+    },
+    {
+      "type": "bore",
+      "part": "C01.DrawerFront3",
+      "at": {
+        "x": 570.0,
+        "y": 0.0,
+        "z": 217.0
+      },
+      "direction": {
+        "axis": "Y",
+        "positive": false
+      },
+      "diameter": 10.0,
+      "depth": 12.0,
+      "purpose": "front_fixing"
+    },
+    {
+      "type": "bore",
+      "part": "C01.DrawerFront3",
+      "at": {
+        "x": 570.0,
+        "y": 0.0,
+        "z": 249.0
+      },
+      "direction": {
+        "axis": "Y",
+        "positive": false
+      },
+      "diameter": 10.0,
+      "depth": 12.0,
+      "purpose": "front_fixing"
     }
   ],
   "hardware": [
     {
-      "item": "blum.legrabox.runner",
-      "description": "Drawer runner set (pair), length to suit",
+      "item": "blum.legrabox.cabinet-profile.750.550",
+      "description": "LEGRABOX cabinet profiles left/right, BLUMOTION S, NL 550, 40 kg",
       "at": {
         "x": 300.0,
         "y": -9.0,
@@ -1179,8 +1533,41 @@ expression: list
       "quantity": 1
     },
     {
-      "item": "blum.legrabox.runner",
-      "description": "Drawer runner set (pair), length to suit",
+      "item": "blum.legrabox.drawer-side.k.550",
+      "description": "LEGRABOX drawer side set K, NL 550, SW-M | OG-M | CS-M",
+      "at": {
+        "x": 300.0,
+        "y": -9.0,
+        "z": 749.0
+      },
+      "part": "C01.DrawerFront1",
+      "quantity": 1
+    },
+    {
+      "item": "blum.legrabox.back-fixing.k",
+      "description": "LEGRABOX chipboard back fixings left/right K, steel",
+      "at": {
+        "x": 300.0,
+        "y": -9.0,
+        "z": 749.0
+      },
+      "part": "C01.DrawerFront1",
+      "quantity": 1
+    },
+    {
+      "item": "blum.legrabox.front-fixing.k",
+      "description": "LEGRABOX front fixing bracket K, EXPANDO (2 per drawer)",
+      "at": {
+        "x": 300.0,
+        "y": -9.0,
+        "z": 749.0
+      },
+      "part": "C01.DrawerFront1",
+      "quantity": 2
+    },
+    {
+      "item": "blum.legrabox.cabinet-profile.750.550",
+      "description": "LEGRABOX cabinet profiles left/right, BLUMOTION S, NL 550, 40 kg",
       "at": {
         "x": 300.0,
         "y": -9.0,
@@ -1190,8 +1577,41 @@ expression: list
       "quantity": 1
     },
     {
-      "item": "blum.legrabox.runner",
-      "description": "Drawer runner set (pair), length to suit",
+      "item": "blum.legrabox.drawer-side.k.550",
+      "description": "LEGRABOX drawer side set K, NL 550, SW-M | OG-M | CS-M",
+      "at": {
+        "x": 300.0,
+        "y": -9.0,
+        "z": 509.0
+      },
+      "part": "C01.DrawerFront2",
+      "quantity": 1
+    },
+    {
+      "item": "blum.legrabox.back-fixing.k",
+      "description": "LEGRABOX chipboard back fixings left/right K, steel",
+      "at": {
+        "x": 300.0,
+        "y": -9.0,
+        "z": 509.0
+      },
+      "part": "C01.DrawerFront2",
+      "quantity": 1
+    },
+    {
+      "item": "blum.legrabox.front-fixing.k",
+      "description": "LEGRABOX front fixing bracket K, EXPANDO (2 per drawer)",
+      "at": {
+        "x": 300.0,
+        "y": -9.0,
+        "z": 509.0
+      },
+      "part": "C01.DrawerFront2",
+      "quantity": 2
+    },
+    {
+      "item": "blum.legrabox.cabinet-profile.750.550",
+      "description": "LEGRABOX cabinet profiles left/right, BLUMOTION S, NL 550, 40 kg",
       "at": {
         "x": 300.0,
         "y": -9.0,
@@ -1199,6 +1619,39 @@ expression: list
       },
       "part": "C01.DrawerFront3",
       "quantity": 1
+    },
+    {
+      "item": "blum.legrabox.drawer-side.k.550",
+      "description": "LEGRABOX drawer side set K, NL 550, SW-M | OG-M | CS-M",
+      "at": {
+        "x": 300.0,
+        "y": -9.0,
+        "z": 269.0
+      },
+      "part": "C01.DrawerFront3",
+      "quantity": 1
+    },
+    {
+      "item": "blum.legrabox.back-fixing.k",
+      "description": "LEGRABOX chipboard back fixings left/right K, steel",
+      "at": {
+        "x": 300.0,
+        "y": -9.0,
+        "z": 269.0
+      },
+      "part": "C01.DrawerFront3",
+      "quantity": 1
+    },
+    {
+      "item": "blum.legrabox.front-fixing.k",
+      "description": "LEGRABOX front fixing bracket K, EXPANDO (2 per drawer)",
+      "at": {
+        "x": 300.0,
+        "y": -9.0,
+        "z": 269.0
+      },
+      "part": "C01.DrawerFront3",
+      "quantity": 2
     },
     {
       "item": "hafele.leg.adjustable",

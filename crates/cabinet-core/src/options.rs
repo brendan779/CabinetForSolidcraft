@@ -106,6 +106,37 @@ pub fn option_groups() -> Vec<OptionGroup> {
             ],
         ),
         group(
+            "drawer_system",
+            "Drawers",
+            &[
+                (
+                    "legrabox",
+                    "LEGRABOX",
+                    "Blum steel-sided boxes; N, M or K to suit each drawer's height",
+                ),
+                (
+                    "merivobox",
+                    "MERIVOBOX",
+                    "Blum MERIVOBOX steel sides, straight inside; N, M or K",
+                ),
+                (
+                    "tandembox",
+                    "TANDEMBOX",
+                    "Blum TANDEMBOX antaro, curved steel sides; N, M or K",
+                ),
+                (
+                    "movento",
+                    "Wood on MOVENTO",
+                    "Wooden boxes on concealed Blum MOVENTO runners, 40–70 kg",
+                ),
+                (
+                    "tandem",
+                    "Wood on TANDEM",
+                    "Wooden boxes on concealed Blum TANDEM runners, 30 kg",
+                ),
+            ],
+        ),
+        group(
             "wall_hanging",
             "Wall hanging",
             &[
@@ -160,8 +191,53 @@ pub fn option_groups() -> Vec<OptionGroup> {
                 ("biscuit_only", "Biscuits", "Glued biscuits only"),
                 ("screw_only", "Screws", "Chipboard screws only"),
                 ("confirmat", "Confirmat", "7 mm confirmat screws"),
-                ("dowel", "Dowels", "8 mm dowels on the 32 mm grid"),
+                ("dowel", "Dowels", "Fluted wooden dowels, glued"),
                 ("cam_lock", "Cam lock", "Knock-down cam and bolt fittings"),
+                ("domino", "DOMINO", "Festool DOMINO loose tenons, glued"),
+            ],
+        ),
+        group(
+            "dowel",
+            "Dowel size",
+            &[
+                ("d6x30", "6 × 30", "For 12–15 mm panels"),
+                ("d8x30", "8 × 30", "16 mm panels, short"),
+                ("d8x35", "8 × 35", "16–18 mm panels"),
+                ("d8x40", "8 × 40", "18 mm panels and up"),
+                ("d10x40", "10 × 40", "Heavy panels, 22 mm and up"),
+                ("d10x50", "10 × 50", "Heavy panels, 25 mm and up"),
+            ],
+        ),
+        group(
+            "dowel_spacing",
+            "Dowel spacing",
+            &[
+                (
+                    "system32",
+                    "32 mm grid",
+                    "On the 32 mm system from the front, like a line borer",
+                ),
+                (
+                    "jig",
+                    "Doweling jig",
+                    "Evenly spread, as a hand jig sets them out",
+                ),
+            ],
+        ),
+        group(
+            "domino",
+            "DOMINO size",
+            &[
+                ("d4x20", "4 × 20", "DF 500, for thin panels"),
+                ("d5x30", "5 × 30", "DF 500, 16 mm carcasses"),
+                ("d6x40", "6 × 40", "DF 500, 18–19 mm panels"),
+                ("d8x40", "8 × 40", "DF 500"),
+                ("d8x50", "8 × 50", "DF 500"),
+                ("d10x50", "10 × 50", "DF 500, heavy panels"),
+                ("d8x80", "8 × 80", "DF 700 (DOMINO XL)"),
+                ("d10x80", "10 × 80", "DF 700 (DOMINO XL)"),
+                ("d12x100", "12 × 100", "DF 700 (DOMINO XL)"),
+                ("d14x100", "14 × 100", "DF 700 (DOMINO XL)"),
             ],
         ),
         group(

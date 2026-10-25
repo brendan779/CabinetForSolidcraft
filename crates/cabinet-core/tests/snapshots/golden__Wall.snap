@@ -1002,7 +1002,7 @@ expression: list
         "positive": false
       },
       "diameter": 5.0,
-      "depth": 13.0,
+      "depth": 11.5,
       "purpose": "hinge_plate"
     },
     {
@@ -1018,7 +1018,7 @@ expression: list
         "positive": false
       },
       "diameter": 5.0,
-      "depth": 13.0,
+      "depth": 11.5,
       "purpose": "hinge_plate"
     },
     {
@@ -1050,7 +1050,7 @@ expression: list
         "positive": false
       },
       "diameter": 5.0,
-      "depth": 13.0,
+      "depth": 11.5,
       "purpose": "hinge_plate"
     },
     {
@@ -1066,7 +1066,7 @@ expression: list
         "positive": false
       },
       "diameter": 5.0,
-      "depth": 13.0,
+      "depth": 11.5,
       "purpose": "hinge_plate"
     },
     {
@@ -2192,8 +2192,8 @@ expression: list
   ],
   "hardware": [
     {
-      "item": "blum.clip-top-blumotion.110.full",
-      "description": "Hinge with soft close and mounting plate",
+      "item": "blum.clip-top-blumotion.110.overlay",
+      "description": "CLIP top BLUMOTION 110°, overlay application (straight arm), screw-on boss, nickel",
       "at": {
         "x": 22.5,
         "y": 0.0,
@@ -2203,8 +2203,19 @@ expression: list
       "quantity": 1
     },
     {
-      "item": "blum.clip-top-blumotion.110.full",
-      "description": "Hinge with soft close and mounting plate",
+      "item": "blum.mounting-plate.cruciform-37-32.system-screw.0",
+      "description": "CLIP mounting plate cruciform 37/32, 0 mm spacing, system screws Ø6 × 14.5, zinc",
+      "at": {
+        "x": 16.0,
+        "y": 37.0,
+        "z": 100.0
+      },
+      "part": "C01.LeftSide",
+      "quantity": 1
+    },
+    {
+      "item": "blum.clip-top-blumotion.110.overlay",
+      "description": "CLIP top BLUMOTION 110°, overlay application (straight arm), screw-on boss, nickel",
       "at": {
         "x": 22.5,
         "y": 0.0,
@@ -2214,8 +2225,19 @@ expression: list
       "quantity": 1
     },
     {
-      "item": "wall-hanger.concealed",
-      "description": "Concealed adjustable wall cabinet hanger",
+      "item": "blum.mounting-plate.cruciform-37-32.system-screw.0",
+      "description": "CLIP mounting plate cruciform 37/32, 0 mm spacing, system screws Ø6 × 14.5, zinc",
+      "at": {
+        "x": 16.0,
+        "y": 37.0,
+        "z": 620.0
+      },
+      "part": "C01.LeftSide",
+      "quantity": 1
+    },
+    {
+      "item": "blum.wall-hanging-bracket.left",
+      "description": "Blum wall hanging bracket, screw-on, left",
       "at": {
         "x": 16.0,
         "y": 314.0,
@@ -2225,8 +2247,8 @@ expression: list
       "quantity": 1
     },
     {
-      "item": "wall-hanger.concealed",
-      "description": "Concealed adjustable wall cabinet hanger",
+      "item": "blum.wall-hanging-bracket.right",
+      "description": "Blum wall hanging bracket, screw-on, right",
       "at": {
         "x": 584.0,
         "y": 314.0,

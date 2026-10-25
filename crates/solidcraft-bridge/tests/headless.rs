@@ -350,3 +350,43 @@ fn hinges_and_runners_show_as_one_stand_in_body_each_where_the_core_puts_them() 
         assert_eq!(names(".Hinge") + names(".Runner"), expected.len(), "{id}");
     }
 }
+
+#[test]
+fn the_new_cabinets_build_every_part_where_the_core_puts_it() {
+    let Some(cli) = cli() else {
+        eprintln!("SOLIDCRAFT_CLI not set: skipped");
+        return;
+    };
+    use cabinet_core::model::{DrawerSystem, FrontLayout, HingeSide};
+    let corner = Cabinet::new("C01", CabinetKind::CornerBase);
+    let mut right = Cabinet::new("C02", CabinetKind::CornerBase);
+    right.corner.side = HingeSide::Right;
+    let mut lift = Cabinet::new("W01", CabinetKind::Wall);
+    lift.fronts = FrontLayout::BiFoldLift { handle_weight: 0.4 };
+    let mut wood = Cabinet::new("D01", CabinetKind::DrawerBank);
+    wood.standard.drawer_system = DrawerSystem::Tandem;
+    let legrabox = Cabinet::new("D02", CabinetKind::DrawerBank);
+    let mut tandembox = Cabinet::new("D03", CabinetKind::DrawerBank);
+    tandembox.standard.drawer_system = DrawerSystem::Tandembox;
+    for cab in [corner, right, lift, wood, legrabox, tandembox] {
+        let list = build_cabinet(&cab).unwrap();
+        let built = bounds(
+            &cli,
+            &format!("new-{}", cab.id),
+            &emit_cabinet(&list, Detail::Manufacturing, None),
+        );
+        let um = |v: f64| (v * 1000.0).round() as i64;
+        for p in &list.parts {
+            let (lo, hi) = (p.bounds.min, p.bounds.max());
+            let want = vec![um(lo.x), um(lo.y), um(lo.z), um(hi.x), um(hi.y), um(hi.z)];
+            let got = &built
+                .iter()
+                .find(|(n, _)| *n == p.name)
+                .unwrap_or_else(|| panic!("{} is not a body", p.name))
+                .1;
+            for (g, w) in got.iter().zip(&want) {
+                assert!((g - w).abs() <= 5, "{}: {got:?} vs {want:?}", p.name);
+            }
+        }
+    }
+}

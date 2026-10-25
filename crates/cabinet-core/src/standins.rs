@@ -23,6 +23,8 @@ const RUNNER_LIFT: f64 = 10.0;
 const RUNNER_BACK_GAP: f64 = 10.0;
 /// The drawer's box side above the runner: thin, and short of the front's top edge.
 const BOX_SIDE_THICKNESS: f64 = 10.0;
+/// A concealed runner under a wooden box, drawn inboard of the box side.
+const WOOD_RUNNER_WIDTH: f64 = 20.0;
 const BOX_SIDE_TOP_GAP: f64 = 40.0;
 const BOX_SIDE_MIN_HEIGHT: f64 = 40.0;
 
@@ -103,7 +105,8 @@ pub fn stand_ins(list: &PartList) -> Vec<StandIn> {
                     shapes,
                 });
             }
-        } else if h.item.ends_with(".runner")
+        } else if crate::hardware::item(&h.item)
+            .is_ok_and(|i| i.kind == cabinet_catalog::HardwareKind::Runner)
             && let Some(sides) = runners(list, h)
         {
             drawers += 1;
@@ -207,6 +210,9 @@ fn hinge(list: &PartList, h: &HardwarePlacement) -> Option<Vec<Shape>> {
 /// standing on it; left then right.
 fn runners(list: &PartList, h: &HardwarePlacement) -> Option<[Vec<Shape>; 2]> {
     let front = list.part(&h.part)?;
+    if let Some(shapes) = wood_runners(list, &h.part) {
+        return Some(shapes);
+    }
     let (l, r) = (
         side(list, PartRole::LeftSide)?,
         side(list, PartRole::RightSide)?,
@@ -253,6 +259,24 @@ fn runners(list: &PartList, h: &HardwarePlacement) -> Option<[Vec<Shape>; 2]> {
     Some([one(l.bounds.max().x, 1.0), one(r.bounds.min.x, -1.0)])
 }
 
+/// Under a wooden box the runners sit in the recess below its base, along each side's inner face.
+fn wood_runners(list: &PartList, front: &str) -> Option<[Vec<Shape>; 2]> {
+    let n = front.rsplit_once(PartRole::DrawerFront.code())?.1;
+    let cab = &list.cabinet;
+    let left = list.part(&format!("{cab}.{}{n}", PartRole::DrawerLeftSide.code()))?;
+    let right = list.part(&format!("{cab}.{}{n}", PartRole::DrawerRightSide.code()))?;
+    let base = list.part(&format!("{cab}.{}{n}", PartRole::DrawerBottom.code()))?;
+    let (z0, z1) = (left.bounds.min.z, base.bounds.min.z);
+    let (y0, y1) = (left.bounds.min.y, left.bounds.max().y);
+    let one = |inner: f64, sign: f64| {
+        vec![Shape::Box(boxed(
+            Vec3::new(inner, y0, z0),
+            Vec3::new(inner + sign * WOOD_RUNNER_WIDTH, y1, z1),
+        ))]
+    };
+    Some([one(left.bounds.max().x, 1.0), one(right.bounds.min.x, -1.0)])
+}
+
 /// The box between two opposite corners, in either order.
 fn boxed(a: Vec3, b: Vec3) -> Aabb {
     let min = Vec3::new(a.x.min(b.x), a.y.min(b.y), a.z.min(b.z));
@@ -263,7 +287,7 @@ fn boxed(a: Vec3, b: Vec3) -> Aabb {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::model::{DoorOverlay, FrontLayout, HingeSide};
+    use crate::model::{DoorOverlay, DrawerSystem, FrontLayout, HingeSide};
     use crate::{Cabinet, CabinetKind, build_cabinet};
 
     #[test]
@@ -320,9 +344,22 @@ mod tests {
     #[test]
     fn stand_ins_stay_out_of_every_panel_except_the_cup_in_its_bore() {
         for kind in CabinetKind::ALL {
-            for overlay in [DoorOverlay::Full, DoorOverlay::Half, DoorOverlay::Inset] {
+            for (overlay, drawers) in [DoorOverlay::Full, DoorOverlay::Half, DoorOverlay::Inset]
+                .into_iter()
+                .flat_map(|o| {
+                    [
+                        DrawerSystem::Legrabox,
+                        DrawerSystem::Merivobox,
+                        DrawerSystem::Tandembox,
+                        DrawerSystem::Movento,
+                        DrawerSystem::Tandem,
+                    ]
+                    .map(|d| (o, d))
+                })
+            {
                 let mut cab = Cabinet::new("C01", kind);
                 cab.standard.overlay = overlay;
+                cab.standard.drawer_system = drawers;
                 let list = build_cabinet(&cab).unwrap();
                 for s in stand_ins(&list) {
                     for shape in &s.shapes {
@@ -330,7 +367,7 @@ mod tests {
                         for p in &list.parts {
                             assert!(
                                 !b.overlaps(&p.bounds),
-                                "{kind:?} {overlay:?}: {} runs into {}",
+                                "{kind:?} {overlay:?} {drawers:?}: {} runs into {}",
                                 s.name,
                                 p.name
                             );

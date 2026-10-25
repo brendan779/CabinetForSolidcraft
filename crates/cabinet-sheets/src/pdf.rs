@@ -309,6 +309,11 @@ impl Attrs {
                 width: 1.1,
                 ..Style::default()
             },
+            Some("o2") => Style {
+                fill: Some("#4a6fa5"),
+                font: 1.7,
+                ..Style::default()
+            },
             _ => Style::default(),
         }
     }
@@ -410,11 +415,12 @@ fn text(ops: &mut String, a: &Attrs, s: Style, content: &str) {
         _ => 0.0,
     };
     // The y flip makes glyphs upside down; the text matrix flips them back. `rotate(-90 x y)` turns
-    // the baseline to run up the page.
-    let rotated = a
-        .get("transform")
-        .is_some_and(|t| t.starts_with("rotate(-90"));
-    let tm = if rotated { "0 -1 -1 0" } else { "1 0 0 -1" };
+    // the baseline to run up the page, `rotate(90 x y)` down it.
+    let tm = match a.get("transform") {
+        Some(t) if t.starts_with("rotate(-90") => "0 -1 -1 0",
+        Some(t) if t.starts_with("rotate(90") => "0 1 1 0",
+        _ => "1 0 0 -1",
+    };
     let (r, g, b) = rgb(a.fill(s).unwrap_or("#000"));
     let _ = writeln!(
         ops,

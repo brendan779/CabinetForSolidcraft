@@ -25,6 +25,17 @@ pub enum PartRole {
     Filler,
     /// A decorative panel on the end of a run.
     EndPanel,
+    /// The base of a drawer box, cut to the drawer system's sizes.
+    DrawerBottom,
+    /// The back of a drawer box.
+    DrawerBack,
+    /// The sides of a wooden drawer box.
+    DrawerLeftSide,
+    DrawerRightSide,
+    /// The front of a wooden drawer box, behind the drawer front.
+    DrawerInnerFront,
+    /// The upper (1) and lower (2) front of a bi-fold lift.
+    LiftFront,
 }
 
 impl PartRole {
@@ -44,6 +55,11 @@ impl PartRole {
             PartRole::BlindPanel => "Blind panel",
             PartRole::Filler => "Filler",
             PartRole::EndPanel => "End panel",
+            PartRole::DrawerBottom => "Drawer bottom",
+            PartRole::DrawerBack => "Drawer back",
+            PartRole::DrawerLeftSide | PartRole::DrawerRightSide => "Drawer side",
+            PartRole::DrawerInnerFront => "Drawer box front",
+            PartRole::LiftFront => "Lift front",
         }
     }
 
@@ -64,6 +80,12 @@ impl PartRole {
             PartRole::BlindPanel => "BlindPanel",
             PartRole::Filler => "Filler",
             PartRole::EndPanel => "EndPanel",
+            PartRole::DrawerBottom => "DrawerBottom",
+            PartRole::DrawerBack => "DrawerBack",
+            PartRole::DrawerLeftSide => "DrawerLeftSide",
+            PartRole::DrawerRightSide => "DrawerRightSide",
+            PartRole::DrawerInnerFront => "DrawerInnerFront",
+            PartRole::LiftFront => "LiftFront",
         }
     }
 
@@ -73,6 +95,7 @@ impl PartRole {
             self,
             PartRole::Door
                 | PartRole::DrawerFront
+                | PartRole::LiftFront
                 | PartRole::Plinth
                 | PartRole::BlindPanel
                 | PartRole::Filler
@@ -181,6 +204,13 @@ pub enum Operation {
     },
     /// A rectangular groove or rebate.
     Groove { part: String, bounds: Aabb },
+    /// A mortise for a loose tenon (Festool DOMINO), one part's half of the joint: `bounds` is
+    /// the cutter's slot in that part, `tenon` the tenon's catalog id.
+    Mortise {
+        part: String,
+        bounds: Aabb,
+        tenon: String,
+    },
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -196,6 +226,8 @@ pub enum BorePurpose {
     HingeCup,
     HingePlate,
     Dowel,
+    /// A drawer system's front fixing (LEGRABOX EXPANDO bracket), in the back of a drawer front.
+    FrontFixing,
 }
 
 fn default_biscuit() -> BiscuitSize {

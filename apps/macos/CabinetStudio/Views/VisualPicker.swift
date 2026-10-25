@@ -78,9 +78,13 @@ struct ConstructionThumbnail: View {
             case "toe_kick": pen.toeKick(choice)
             case "wall_hanging": pen.wallHanging(choice)
             case "opening": pen.opening(choice)
+            case "drawer_system": pen.drawerSystem(choice)
             case "overlay": pen.overlayPlan(choice)
             case "fixings": pen.fixing(choice)
             case "biscuit": pen.biscuit(choice)
+            case "domino": pen.domino(choice)
+            case "dowel": pen.dowel(choice)
+            case "dowel_spacing": pen.dowelSpacing(choice)
             case "fixing_density": pen.density(choice)
             default: pen.unknown()
             }
@@ -204,6 +208,32 @@ private struct Pen {
         }
     }
 
+    // MARK: Drawer system, a drawer box in section from the front
+
+    func drawerSystem(_ choice: String) {
+        // The cabinet's sides, and the drawer box between them on its runners.
+        board(8, 10, 6, 62)
+        board(86, 10, 6, 62)
+        switch choice {
+        case "legrabox", "merivobox", "tandembox":
+            // Steel sides with the runner hidden under them; a cut base and the back.
+            board(19, 30, 4, 34, hot: true)
+            board(77, 30, 4, 34, hot: true)
+            board(23, 58, 54, 5)
+            board(25, 36, 50, 22)
+            line(p(14, 66), p(23, 66), colour: accent, width: 2)
+            line(p(77, 66), p(86, 66), colour: accent, width: 2)
+        default:
+            // Wooden sides standing on runners under the base.
+            board(18, 28, 8, 34, hot: true)
+            board(74, 28, 8, 34, hot: true)
+            board(26, 28, 48, 30)
+            board(18, 58, 64, 5)
+            board(14, 64, 12, 4, hot: true)
+            board(74, 64, 12, 4, hot: true)
+        }
+    }
+
     // MARK: Wall hanging, side section against the wall
 
     func wallHanging(_ choice: String) {
@@ -298,7 +328,62 @@ private struct Pen {
             let cam = Path(ellipseIn: r(42, midY - 7, 14, 14))
             ctx.stroke(cam, with: .color(accent), lineWidth: 1.6)
             line(p(18, midY), p(49, midY), colour: accent, width: 1.6)
+        case "domino":
+            // A flat tenon across the joint, shallow in the side and deeper in the bottom.
+            let tenon = Path(roundedRect: r(21, midY - 3, 31, 6), cornerRadius: 3 * s)
+            ctx.fill(tenon, with: .color(accent.opacity(0.55)))
+            ctx.stroke(tenon, with: .color(accent), lineWidth: 1)
         default: break
+        }
+    }
+
+    /// A fluted dowel to scale (diameter × length from the choice id, `d8x35`), with chamfered
+    /// ends and its flutes.
+    func dowel(_ choice: String) {
+        let dims = choice.dropFirst().split(separator: "x").compactMap { Double($0) }
+        guard dims.count == 2 else { return unknown() }
+        let (dia, long) = (CGFloat(dims[0]), CGFloat(dims[1]))
+        let k: CGFloat = 1.5
+        let w = long * k, h = dia * k * 1.4
+        let body = Path(roundedRect: r(50 - w / 2, 40 - h / 2, w, h), cornerRadius: 2 * s)
+        ctx.fill(body, with: .color(accent.opacity(0.35)))
+        ctx.stroke(body, with: .color(accent), lineWidth: 1.2)
+        for i in 1..<4 {
+            let y = 40 - h / 2 + h * CGFloat(i) / 4
+            line(p(50 - w / 2 + 3, y), p(50 + w / 2 - 3, y), colour: accent.opacity(0.5), width: 0.7)
+        }
+    }
+
+    /// A joint seen from above with its dowels: on the 32 mm grid (ticks) or spread evenly.
+    func dowelSpacing(_ choice: String) {
+        board(6, 34, 88, 12)
+        let xs: [CGFloat] = choice == "jig" ? [14, 38, 62, 86] : [14, 30, 62, 78]
+        if choice != "jig" {
+            for x in stride(from: CGFloat(14), through: 86, by: 8) {
+                line(p(x, 28), p(x, 32), colour: .primary.opacity(0.4), width: 0.7)
+            }
+        }
+        for x in xs {
+            let e = Path(ellipseIn: r(x - 3, 37, 6, 6))
+            ctx.fill(e, with: .color(accent.opacity(0.6)))
+            ctx.stroke(e, with: .color(accent), lineWidth: 1)
+        }
+    }
+
+    /// A DOMINO tenon to scale (thickness × length from the choice id, `d8x40`), seen on its
+    /// flat, with the glue grooves along it.
+    func domino(_ choice: String) {
+        let dims = choice.dropFirst().split(separator: "x").compactMap { Double($0) }
+        guard dims.count == 2 else { return unknown() }
+        let (thick, long) = (CGFloat(dims[0]), CGFloat(dims[1]))
+        let k = min(84 / long, 3.2)
+        let w = long * k, h = max(thick * k * 1.6, 6)
+        let body = Path(roundedRect: r(50 - w / 2, 40 - h / 2, w, h), cornerRadius: h / 2 * s)
+        ctx.fill(body, with: .color(accent.opacity(0.35)))
+        ctx.stroke(body, with: .color(accent), lineWidth: 1.2)
+        for dy in [-h / 5, h / 5] {
+            line(p(50 - w / 2 + h / 2, 40 + dy), p(50 + w / 2 - h / 2, 40 + dy),
+                 colour: accent.opacity(0.5), width: 0.7)
         }
     }
 
@@ -372,6 +457,24 @@ struct FrontThumbnail: View {
                 ctx.stroke(p, with: .color(.primary.opacity(0.75)), lineWidth: 1.2)
                 handle(r.midX - 5, r.minY + 12, vertical: true)
                 handle(r.midX + 5, r.minY + 12, vertical: true)
+            case "lift":
+                // One front swinging up: an arc from its bottom edge.
+                var arc = Path()
+                arc.addArc(center: CGPoint(x: r.midX, y: r.minY + 4), radius: r.height * 0.55,
+                           startAngle: .degrees(100), endAngle: .degrees(160), clockwise: false)
+                ctx.stroke(arc, with: .color(.accentColor), lineWidth: 1.4)
+                handle(r.midX, r.maxY - 6, vertical: false)
+            case "bi_fold_lift":
+                // Two fronts folding up at the middle: the fold line and an arrow up.
+                hLine(r.midY)
+                var arrow = Path()
+                arrow.move(to: CGPoint(x: r.midX, y: r.midY - 4))
+                arrow.addLine(to: CGPoint(x: r.midX, y: r.minY + 6))
+                arrow.move(to: CGPoint(x: r.midX - 4, y: r.minY + 10))
+                arrow.addLine(to: CGPoint(x: r.midX, y: r.minY + 6))
+                arrow.addLine(to: CGPoint(x: r.midX + 4, y: r.minY + 10))
+                ctx.stroke(arrow, with: .color(.accentColor), lineWidth: 1.4)
+                handle(r.midX, r.maxY - 6, vertical: false)
             case "drawers":
                 let total = ratios.reduce(0, +)
                 var y = r.minY

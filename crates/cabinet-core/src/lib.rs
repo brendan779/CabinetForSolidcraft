@@ -11,9 +11,14 @@
 pub mod bom;
 pub mod build;
 pub mod collisions;
+pub mod corner;
 pub mod cutlist;
+pub mod drawers;
 pub mod geom;
+pub mod hardware;
+pub mod hinges;
 pub mod joinery;
+pub mod lift;
 pub mod model;
 pub mod options;
 pub mod part;

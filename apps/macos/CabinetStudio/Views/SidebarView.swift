@@ -118,6 +118,11 @@ struct CabinetGlyph: View {
                 p.move(to: CGPoint(x: r.midX, y: r.minY))
                 p.addLine(to: CGPoint(x: r.midX, y: r.maxY))
                 ctx.stroke(p, with: .color(.primary.opacity(0.6)), lineWidth: 0.8)
+            case "bi_fold_lift":
+                var p = Path()
+                p.move(to: CGPoint(x: r.minX, y: r.midY))
+                p.addLine(to: CGPoint(x: r.maxX, y: r.midY))
+                ctx.stroke(p, with: .color(.primary.opacity(0.6)), lineWidth: 0.8)
             case "drawers":
                 let ratios = doc.drawerRatios
                 let total = ratios.reduce(0, +)

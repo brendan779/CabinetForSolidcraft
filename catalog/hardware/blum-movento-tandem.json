@@ -1,0 +1,750 @@
+{
+  "brand": "Blum",
+  "website": "https://www.blum.com",
+  "notes": "MOVENTO 760H/766H and TANDEM 560H runners for wooden drawers, from the Blum Catalogue and technical manual 2024/2025, printed pages 412-413 and 434-435 (order information and planning). Inside drawer width SKW = LW - 42 (+0/-1.5), drawer length SKL = NL - 10, inside depth at least NL + 3. base_above_datum_min is the 'min 27.5' / 'min 28.5' from the surface the runner stands on to the underside of the drawer base; base_recess is the 12-15 mm the sides reach below the base. The runner attachment positions (pp. 428, 460) are not recorded yet: which hole takes the system screw is hard to read reliably. The 766H rows are '60 | 70 kg' on p.412 without a clear split, so they carry no load. Not verified by a person.",
+  "items": [
+    {
+      "id": "blum.tandem.560h",
+      "brand": "Blum",
+      "article": "TANDEM 560H",
+      "family": "TANDEM",
+      "variant": "full extension with BLUMOTION, locking device, wooden drawers 11-16 mm",
+      "kind": "drawer_system",
+      "parameters": {
+        "inside_width_deduction": 42,
+        "inside_width_tolerance_minus": 1.5,
+        "length_deduction": 10,
+        "depth_allowance": 3,
+        "side_thickness_min": 11,
+        "side_thickness_max": 16,
+        "base_above_datum_min": 27.5,
+        "base_recess_min": 12,
+        "base_recess_max": 15,
+        "min_space_above": 7,
+        "runner_screw_height": 37,
+        "runner_screw_setback": 37,
+        "max_load_kg": 30
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.435, web code DQD1XA",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.tandem.560h.250",
+      "brand": "Blum",
+      "article": "560H2500B",
+      "family": "TANDEM",
+      "variant": "560H runners left/right, full extension, BLUMOTION, NL 250, 30 kg",
+      "kind": "runner",
+      "parameters": {
+        "nominal_length": 250,
+        "max_load_kg": 30
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.434, web code DQD1XA",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.tandem.560h.270",
+      "brand": "Blum",
+      "article": "560H2700B",
+      "family": "TANDEM",
+      "variant": "560H runners left/right, full extension, BLUMOTION, NL 270, 30 kg",
+      "kind": "runner",
+      "parameters": {
+        "nominal_length": 270,
+        "max_load_kg": 30
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.434, web code DQD1XA",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.tandem.560h.300",
+      "brand": "Blum",
+      "article": "560H3000B",
+      "family": "TANDEM",
+      "variant": "560H runners left/right, full extension, BLUMOTION, NL 300, 30 kg",
+      "kind": "runner",
+      "parameters": {
+        "nominal_length": 300,
+        "max_load_kg": 30
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.434, web code DQD1XA",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.tandem.560h.320",
+      "brand": "Blum",
+      "article": "560H3200B",
+      "family": "TANDEM",
+      "variant": "560H runners left/right, full extension, BLUMOTION, NL 320, 30 kg",
+      "kind": "runner",
+      "parameters": {
+        "nominal_length": 320,
+        "max_load_kg": 30
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.434, web code DQD1XA",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.tandem.560h.350",
+      "brand": "Blum",
+      "article": "560H3500B",
+      "family": "TANDEM",
+      "variant": "560H runners left/right, full extension, BLUMOTION, NL 350, 30 kg",
+      "kind": "runner",
+      "parameters": {
+        "nominal_length": 350,
+        "max_load_kg": 30
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.434, web code DQD1XA",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.tandem.560h.380",
+      "brand": "Blum",
+      "article": "560H3800B",
+      "family": "TANDEM",
+      "variant": "560H runners left/right, full extension, BLUMOTION, NL 380, 30 kg",
+      "kind": "runner",
+      "parameters": {
+        "nominal_length": 380,
+        "max_load_kg": 30
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.434, web code DQD1XA",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.tandem.560h.400",
+      "brand": "Blum",
+      "article": "560H4000B",
+      "family": "TANDEM",
+      "variant": "560H runners left/right, full extension, BLUMOTION, NL 400, 30 kg",
+      "kind": "runner",
+      "parameters": {
+        "nominal_length": 400,
+        "max_load_kg": 30
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.434, web code DQD1XA",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.tandem.560h.420",
+      "brand": "Blum",
+      "article": "560H4200B",
+      "family": "TANDEM",
+      "variant": "560H runners left/right, full extension, BLUMOTION, NL 420, 30 kg",
+      "kind": "runner",
+      "parameters": {
+        "nominal_length": 420,
+        "max_load_kg": 30
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.434, web code DQD1XA",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.tandem.560h.450",
+      "brand": "Blum",
+      "article": "560H4500B",
+      "family": "TANDEM",
+      "variant": "560H runners left/right, full extension, BLUMOTION, NL 450, 30 kg",
+      "kind": "runner",
+      "parameters": {
+        "nominal_length": 450,
+        "max_load_kg": 30
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.434, web code DQD1XA",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.tandem.560h.480",
+      "brand": "Blum",
+      "article": "560H4800B",
+      "family": "TANDEM",
+      "variant": "560H runners left/right, full extension, BLUMOTION, NL 480, 30 kg",
+      "kind": "runner",
+      "parameters": {
+        "nominal_length": 480,
+        "max_load_kg": 30
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.434, web code DQD1XA",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.tandem.560h.500",
+      "brand": "Blum",
+      "article": "560H5000B",
+      "family": "TANDEM",
+      "variant": "560H runners left/right, full extension, BLUMOTION, NL 500, 30 kg",
+      "kind": "runner",
+      "parameters": {
+        "nominal_length": 500,
+        "max_load_kg": 30
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.434, web code DQD1XA",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.tandem.560h.520",
+      "brand": "Blum",
+      "article": "560H5200B",
+      "family": "TANDEM",
+      "variant": "560H runners left/right, full extension, BLUMOTION, NL 520, 30 kg",
+      "kind": "runner",
+      "parameters": {
+        "nominal_length": 520,
+        "max_load_kg": 30
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.434, web code DQD1XA",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.tandem.560h.550",
+      "brand": "Blum",
+      "article": "560H5500B",
+      "family": "TANDEM",
+      "variant": "560H runners left/right, full extension, BLUMOTION, NL 550, 30 kg",
+      "kind": "runner",
+      "parameters": {
+        "nominal_length": 550,
+        "max_load_kg": 30
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.434, web code DQD1XA",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.tandem.560h.600",
+      "brand": "Blum",
+      "article": "560H6000B",
+      "family": "TANDEM",
+      "variant": "560H runners left/right, full extension, BLUMOTION, NL 600, 30 kg",
+      "kind": "runner",
+      "parameters": {
+        "nominal_length": 600,
+        "max_load_kg": 30
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.434, web code DQD1XA",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.tandem.locking-device",
+      "brand": "Blum",
+      "article": "T51.1700.04",
+      "family": "TANDEM",
+      "variant": "locking device, orange (order left and right)",
+      "kind": "other",
+      "parameters": {},
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.434, web code DQD1XA",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.movento.760h",
+      "brand": "Blum",
+      "article": "MOVENTO 760H | 766H",
+      "family": "MOVENTO",
+      "variant": "full extension with BLUMOTION S, locking device, wooden drawers up to 16 mm",
+      "kind": "drawer_system",
+      "parameters": {
+        "inside_width_deduction": 42,
+        "inside_width_tolerance_minus": 1.5,
+        "length_deduction": 10,
+        "depth_allowance": 3,
+        "side_thickness_max": 16,
+        "base_above_datum_min": 28.5,
+        "base_recess_min": 12,
+        "base_recess_max": 15,
+        "min_space_above": 7,
+        "runner_screw_height": 38,
+        "runner_screw_setback": 37
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.413, web code DQCZ3Y",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.movento.760h.250",
+      "brand": "Blum",
+      "article": "760H2500S",
+      "family": "MOVENTO",
+      "variant": "760H runners left/right, BLUMOTION S, NL 250, 40 kg",
+      "kind": "runner",
+      "parameters": {
+        "nominal_length": 250,
+        "max_load_kg": 40
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.412, web code DQCZ3Y",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.movento.760h.270",
+      "brand": "Blum",
+      "article": "760H2700S",
+      "family": "MOVENTO",
+      "variant": "760H runners left/right, BLUMOTION S, NL 270, 40 kg",
+      "kind": "runner",
+      "parameters": {
+        "nominal_length": 270,
+        "max_load_kg": 40
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.412, web code DQCZ3Y",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.movento.760h.300",
+      "brand": "Blum",
+      "article": "760H3000S",
+      "family": "MOVENTO",
+      "variant": "760H runners left/right, BLUMOTION S, NL 300, 40 kg",
+      "kind": "runner",
+      "parameters": {
+        "nominal_length": 300,
+        "max_load_kg": 40
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.412, web code DQCZ3Y",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.movento.760h.320",
+      "brand": "Blum",
+      "article": "760H3200S",
+      "family": "MOVENTO",
+      "variant": "760H runners left/right, BLUMOTION S, NL 320, 40 kg",
+      "kind": "runner",
+      "parameters": {
+        "nominal_length": 320,
+        "max_load_kg": 40
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.412, web code DQCZ3Y",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.movento.760h.350",
+      "brand": "Blum",
+      "article": "760H3500S",
+      "family": "MOVENTO",
+      "variant": "760H runners left/right, BLUMOTION S, NL 350, 40 kg",
+      "kind": "runner",
+      "parameters": {
+        "nominal_length": 350,
+        "max_load_kg": 40
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.412, web code DQCZ3Y",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.movento.760h.380",
+      "brand": "Blum",
+      "article": "760H3800S",
+      "family": "MOVENTO",
+      "variant": "760H runners left/right, BLUMOTION S, NL 380, 40 kg",
+      "kind": "runner",
+      "parameters": {
+        "nominal_length": 380,
+        "max_load_kg": 40
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.412, web code DQCZ3Y",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.movento.760h.400",
+      "brand": "Blum",
+      "article": "760H4000S",
+      "family": "MOVENTO",
+      "variant": "760H runners left/right, BLUMOTION S, NL 400, 40 kg",
+      "kind": "runner",
+      "parameters": {
+        "nominal_length": 400,
+        "max_load_kg": 40
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.412, web code DQCZ3Y",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.movento.760h.420",
+      "brand": "Blum",
+      "article": "760H4200S",
+      "family": "MOVENTO",
+      "variant": "760H runners left/right, BLUMOTION S, NL 420, 40 kg",
+      "kind": "runner",
+      "parameters": {
+        "nominal_length": 420,
+        "max_load_kg": 40
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.412, web code DQCZ3Y",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.movento.760h.450",
+      "brand": "Blum",
+      "article": "760H4500S",
+      "family": "MOVENTO",
+      "variant": "760H runners left/right, BLUMOTION S, NL 450, 40 kg",
+      "kind": "runner",
+      "parameters": {
+        "nominal_length": 450,
+        "max_load_kg": 40
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.412, web code DQCZ3Y",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.movento.760h.480",
+      "brand": "Blum",
+      "article": "760H4800S",
+      "family": "MOVENTO",
+      "variant": "760H runners left/right, BLUMOTION S, NL 480, 40 kg",
+      "kind": "runner",
+      "parameters": {
+        "nominal_length": 480,
+        "max_load_kg": 40
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.412, web code DQCZ3Y",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.movento.760h.500",
+      "brand": "Blum",
+      "article": "760H5000S",
+      "family": "MOVENTO",
+      "variant": "760H runners left/right, BLUMOTION S, NL 500, 40 kg",
+      "kind": "runner",
+      "parameters": {
+        "nominal_length": 500,
+        "max_load_kg": 40
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.412, web code DQCZ3Y",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.movento.760h.520",
+      "brand": "Blum",
+      "article": "760H5200S",
+      "family": "MOVENTO",
+      "variant": "760H runners left/right, BLUMOTION S, NL 520, 40 kg",
+      "kind": "runner",
+      "parameters": {
+        "nominal_length": 520,
+        "max_load_kg": 40
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.412, web code DQCZ3Y",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.movento.760h.550",
+      "brand": "Blum",
+      "article": "760H5500S",
+      "family": "MOVENTO",
+      "variant": "760H runners left/right, BLUMOTION S, NL 550, 40 kg",
+      "kind": "runner",
+      "parameters": {
+        "nominal_length": 550,
+        "max_load_kg": 40
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.412, web code DQCZ3Y",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.movento.760h.600",
+      "brand": "Blum",
+      "article": "760H6000S",
+      "family": "MOVENTO",
+      "variant": "760H runners left/right, BLUMOTION S, NL 600, 40 kg",
+      "kind": "runner",
+      "parameters": {
+        "nominal_length": 600,
+        "max_load_kg": 40
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.412, web code DQCZ3Y",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.movento.766h.450",
+      "brand": "Blum",
+      "article": "766H4500S",
+      "family": "MOVENTO",
+      "variant": "766H runners left/right, BLUMOTION S, NL 450, 60/70 kg",
+      "kind": "runner",
+      "parameters": {
+        "nominal_length": 450
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.412, web code DQCZ3Y",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.movento.766h.500",
+      "brand": "Blum",
+      "article": "766H5000S",
+      "family": "MOVENTO",
+      "variant": "766H runners left/right, BLUMOTION S, NL 500, 60/70 kg",
+      "kind": "runner",
+      "parameters": {
+        "nominal_length": 500
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.412, web code DQCZ3Y",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.movento.766h.520",
+      "brand": "Blum",
+      "article": "766H5200S",
+      "family": "MOVENTO",
+      "variant": "766H runners left/right, BLUMOTION S, NL 520, 60/70 kg",
+      "kind": "runner",
+      "parameters": {
+        "nominal_length": 520
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.412, web code DQCZ3Y",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.movento.766h.550",
+      "brand": "Blum",
+      "article": "766H5500S",
+      "family": "MOVENTO",
+      "variant": "766H runners left/right, BLUMOTION S, NL 550, 60/70 kg",
+      "kind": "runner",
+      "parameters": {
+        "nominal_length": 550
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.412, web code DQCZ3Y",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.movento.766h.580",
+      "brand": "Blum",
+      "article": "766H5800S",
+      "family": "MOVENTO",
+      "variant": "766H runners left/right, BLUMOTION S, NL 580, 60/70 kg",
+      "kind": "runner",
+      "parameters": {
+        "nominal_length": 580
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.412, web code DQCZ3Y",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.movento.766h.600",
+      "brand": "Blum",
+      "article": "766H6000S",
+      "family": "MOVENTO",
+      "variant": "766H runners left/right, BLUMOTION S, NL 600, 60/70 kg",
+      "kind": "runner",
+      "parameters": {
+        "nominal_length": 600
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.412, web code DQCZ3Y",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.movento.766h.650",
+      "brand": "Blum",
+      "article": "766H6500S",
+      "family": "MOVENTO",
+      "variant": "766H runners left/right, BLUMOTION S, NL 650, 60/70 kg",
+      "kind": "runner",
+      "parameters": {
+        "nominal_length": 650
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.412, web code DQCZ3Y",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.movento.766h.700",
+      "brand": "Blum",
+      "article": "766H7000S",
+      "family": "MOVENTO",
+      "variant": "766H runners left/right, BLUMOTION S, NL 700, 60/70 kg",
+      "kind": "runner",
+      "parameters": {
+        "nominal_length": 700
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.412, web code DQCZ3Y",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.movento.766h.750",
+      "brand": "Blum",
+      "article": "766H7500S",
+      "family": "MOVENTO",
+      "variant": "766H runners left/right, BLUMOTION S, NL 750, 60/70 kg",
+      "kind": "runner",
+      "parameters": {
+        "nominal_length": 750
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.412, web code DQCZ3Y",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.movento.locking-device",
+      "brand": "Blum",
+      "article": "T51.7601",
+      "family": "MOVENTO",
+      "variant": "locking device, orange (order left and right)",
+      "kind": "other",
+      "parameters": {},
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.412, web code DQCZ3Y",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    }
+  ]
+}

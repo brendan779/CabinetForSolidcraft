@@ -42,6 +42,9 @@ pub struct Cabinet {
     /// Sink cabinet options (ignored by other kinds).
     #[serde(default)]
     pub sink: Sink,
+    /// The second leg of an L-shaped corner cabinet (ignored by other kinds).
+    #[serde(default)]
+    pub corner: Corner,
     /// Sides seen from the room (the end of a run without an end panel): no screws through them.
     #[serde(default, skip_serializing_if = "Exposed::is_none")]
     pub exposed: Exposed,
@@ -103,6 +106,27 @@ impl Default for Blind {
     }
 }
 
+/// An L-shaped corner base: its main leg runs `width` along the back wall like any base cabinet
+/// (front at Y = 0); the second leg runs `width` here along the side wall on `side`, coming
+/// forward (to negative Y), both `depth` deep. The legs share one interior behind a bi-fold door
+/// pair. Its envelope therefore reaches `width − depth` in front of the cabinet's origin.
+#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(default)]
+pub struct Corner {
+    pub side: HingeSide,
+    /// Outside length of the second leg, from the back wall.
+    pub width: f64,
+}
+
+impl Default for Corner {
+    fn default() -> Self {
+        Self {
+            side: HingeSide::Left,
+            width: 900.0,
+        }
+    }
+}
+
 impl Cabinet {
     /// A cabinet of `kind` with the kind's usual size and the default standard.
     pub fn new(id: impl Into<String>, kind: CabinetKind) -> Self {
@@ -120,6 +144,7 @@ impl Cabinet {
             fixed_shelves: Vec::new(),
             blind: Blind::default(),
             sink: Sink::default(),
+            corner: Corner::default(),
             exposed: Exposed::default(),
         }
     }
@@ -144,6 +169,7 @@ impl Cabinet {
                 | CabinetKind::Tall
                 | CabinetKind::DrawerBank
                 | CabinetKind::BlindCorner
+                | CabinetKind::CornerBase
                 | CabinetKind::Sink
         ) && self.standard.toe_kick != ToeKick::None
     }
@@ -161,10 +187,12 @@ pub enum CabinetKind {
     BlindCorner,
     /// A base cabinet for a sink: no back rail, a cut-out for pipes and a waterproof liner.
     Sink,
+    /// An L-shaped base cabinet in an inside corner, both legs one interior, with bi-fold doors.
+    CornerBase,
 }
 
 impl CabinetKind {
-    pub const ALL: [CabinetKind; 7] = [
+    pub const ALL: [CabinetKind; 8] = [
         CabinetKind::Base,
         CabinetKind::Wall,
         CabinetKind::Tall,
@@ -172,6 +200,7 @@ impl CabinetKind {
         CabinetKind::OpenShelf,
         CabinetKind::BlindCorner,
         CabinetKind::Sink,
+        CabinetKind::CornerBase,
     ];
 
     /// The kind a drawn box most likely is: as tall as a pantry → tall, hanging off the floor →
@@ -196,12 +225,15 @@ impl CabinetKind {
             CabinetKind::OpenShelf => (600.0, 300.0, 720.0),
             CabinetKind::BlindCorner => (1000.0, 580.0, 870.0),
             CabinetKind::Sink => (900.0, 580.0, 870.0),
+            CabinetKind::CornerBase => (900.0, 580.0, 870.0),
         }
     }
 
     pub fn default_fronts_for(self, width: f64) -> FrontLayout {
         match self {
             CabinetKind::OpenShelf => FrontLayout::Open,
+            // Its bi-fold pair, whatever the layout says.
+            CabinetKind::CornerBase => FrontLayout::DoorPair,
             // One door on the open part, hinged away from the corner.
             CabinetKind::BlindCorner => FrontLayout::Door {
                 hinge_side: HingeSide::Right,
@@ -221,7 +253,8 @@ impl CabinetKind {
             CabinetKind::Base
             | CabinetKind::Wall
             | CabinetKind::OpenShelf
-            | CabinetKind::BlindCorner => 1,
+            | CabinetKind::BlindCorner
+            | CabinetKind::CornerBase => 1,
             // The bowl and pipes take the space.
             CabinetKind::Sink => 0,
             CabinetKind::Tall => 4,
@@ -242,6 +275,20 @@ pub enum FrontLayout {
     /// Drawer fronts top to bottom, sized in proportion to `ratios`.
     Drawers {
         ratios: Vec<f64>,
+    },
+    /// One front that lifts on Blum AVENTOS: HK top, HS top or HL top.
+    Lift {
+        #[serde(default)]
+        kind: LiftKind,
+        /// Weight of the handle on the front, for choosing the mechanism.
+        #[serde(default)]
+        handle_weight: f64,
+    },
+    /// Two equal fronts that fold up together on Blum AVENTOS HF top.
+    BiFoldLift {
+        /// Weight of the handle on the fronts, for the power factor.
+        #[serde(default)]
+        handle_weight: f64,
     },
 }
 
@@ -287,6 +334,11 @@ pub struct ConstructionStandard {
     pub front_gap: f64,
     pub fixings: FixingRecipe,
     pub biscuit: BiscuitSize,
+    /// The DOMINO tenon when the fixings are DOMINO.
+    pub domino: DominoSize,
+    /// The dowel, and where dowels go, when the fixings are dowels.
+    pub dowel: DowelSize,
+    pub dowel_spacing: DowelSpacing,
     pub fixing_density: Density,
     /// Width of the front and back rails when the top is rails.
     pub rail_width: f64,
@@ -297,6 +349,12 @@ pub struct ConstructionStandard {
     pub wall_hanging: WallHanging,
     /// How doors and drawers are opened.
     pub opening: Opening,
+    /// What the drawers are made of and run on.
+    pub drawer_system: DrawerSystem,
+    /// Board thickness of wooden drawer boxes (sides, base, front and back).
+    pub drawer_board_thickness: f64,
+    /// What the fronts are made of, for their weight on lift systems.
+    pub front_core: FrontCore,
 }
 
 /// Which boards of a cabinet a catalog board is assigned to.
@@ -343,12 +401,18 @@ impl Default for ConstructionStandard {
             front_gap: 2.0,
             fixings: FixingRecipe::BiscuitAndScrew,
             biscuit: BiscuitSize::No20,
+            domino: DominoSize::D5x30,
+            dowel: DowelSize::D8x35,
+            dowel_spacing: DowelSpacing::System32,
             fixing_density: Density::Normal,
             rail_width: 100.0,
             shelf_front_setback: 2.0,
             edge_band_thickness: 1.0,
             wall_hanging: WallHanging::Hangers,
             opening: Opening::Handles,
+            drawer_system: DrawerSystem::Legrabox,
+            drawer_board_thickness: 16.0,
+            front_core: FrontCore::Mdf,
         }
     }
 }
@@ -402,6 +466,43 @@ pub enum Opening {
     ServoDrive,
 }
 
+/// How a single lifting front moves.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum LiftKind {
+    /// Swings up about its top edge and stays (AVENTOS HK top).
+    #[default]
+    StayLift,
+    /// Rises and tips over the cabinet top (AVENTOS HS top), for large fronts.
+    UpAndOver,
+    /// Rises parallel to itself (AVENTOS HL top), for small fronts.
+    LiftUp,
+}
+
+/// A front's core board, for its weight (Blum's reference densities).
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum FrontCore {
+    Mdf,
+    Chipboard,
+}
+
+/// Drawer boxes and their runners.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum DrawerSystem {
+    /// Blum LEGRABOX: steel sides, a cut base and back; N, M or K by the opening's height.
+    Legrabox,
+    /// Blum MERIVOBOX, as LEGRABOX.
+    Merivobox,
+    /// Blum TANDEMBOX antaro, as LEGRABOX.
+    Tandembox,
+    /// A wooden box on Blum MOVENTO runners (40 kg, 60/70 kg for the longest).
+    Movento,
+    /// A wooden box on Blum TANDEM 560H runners (30 kg).
+    Tandem,
+}
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum WallHanging {
@@ -441,10 +542,81 @@ pub enum FixingRecipe {
     ScrewOnly,
     /// 7 mm confirmat screws.
     Confirmat,
-    /// 8 mm dowels on the 32 mm grid.
+    /// Fluted wooden dowels (size and spacing in the standard).
     Dowel,
     /// Cam and bolt (Häfele Minifix style) for flat-pack.
     CamLock,
+    /// Festool DOMINO loose tenons, glued.
+    Domino,
+}
+
+/// Fluted wooden dowels, diameter × length.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum DowelSize {
+    D6x30,
+    D8x30,
+    D8x35,
+    D8x40,
+    D10x40,
+    D10x50,
+}
+
+impl DowelSize {
+    pub fn diameter(self) -> f64 {
+        match self {
+            DowelSize::D6x30 => 6.0,
+            DowelSize::D8x30 | DowelSize::D8x35 | DowelSize::D8x40 => 8.0,
+            DowelSize::D10x40 | DowelSize::D10x50 => 10.0,
+        }
+    }
+
+    pub fn length(self) -> f64 {
+        match self {
+            DowelSize::D6x30 | DowelSize::D8x30 => 30.0,
+            DowelSize::D8x35 => 35.0,
+            DowelSize::D8x40 | DowelSize::D10x40 => 40.0,
+            DowelSize::D10x50 => 50.0,
+        }
+    }
+}
+
+/// Where dowels go along a joint.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum DowelSpacing {
+    /// On the 32 mm grid from the joint's front end, as a line boring machine drills them.
+    System32,
+    /// Evenly spread at the fixing spacing, as a hand doweling jig sets them out.
+    Jig,
+}
+
+/// Festool DOMINO tenon sizes, thickness × nominal length (the width is in the catalog). The
+/// first six are cut with the DF 500, the rest with the DF 700 (DOMINO XL).
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum DominoSize {
+    D4x20,
+    D5x30,
+    D6x40,
+    D8x40,
+    D8x50,
+    D10x50,
+    D8x80,
+    D10x80,
+    D12x100,
+    D14x100,
+}
+
+impl DominoSize {
+    /// The tenon's id in `catalog/hardware/festool-domino.json`.
+    pub fn catalog_id(self) -> String {
+        let code = serde_json::to_value(self)
+            .ok()
+            .and_then(|v| v.as_str().map(str::to_string))
+            .unwrap_or_default();
+        format!("festool.domino.{code}")
+    }
 }
 
 /// Lamello-style biscuit sizes. Nominal length × width × thickness in mm.

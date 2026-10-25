@@ -58,7 +58,66 @@ pub struct HardwareItem {
     pub parameters: BTreeMap<String, f64>,
     #[serde(default)]
     pub drilling: Vec<DrillHole>,
+    /// Named two-way tables the supplier prints (minimum gap by boring distance × door
+    /// thickness...).
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub tables: BTreeMap<String, Table>,
     pub source: Source,
+}
+
+/// A supplier's two-way table: `values[row][col]`, `None` where the document prints no number
+/// (a dash, or "trial recommended").
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct Table {
+    /// What the rows are (`boring_distance`), and the columns (`front_thickness`).
+    pub rows_name: String,
+    pub cols_name: String,
+    pub rows: Vec<f64>,
+    pub cols: Vec<f64>,
+    pub values: Vec<Vec<Option<f64>>>,
+    #[serde(default)]
+    pub note: String,
+}
+
+impl Table {
+    /// Between printed headings, the larger of the surrounding values: the safe reading of a
+    /// minimum (a gap). `None` outside the table or where a surrounding cell prints no number.
+    pub fn upper(&self, row: f64, col: f64) -> Option<f64> {
+        self.around(row, col)?.into_iter().reduce(f64::max)
+    }
+
+    /// Between printed headings, the smaller of the surrounding values: the safe reading of a
+    /// maximum (a door thickness).
+    pub fn lower(&self, row: f64, col: f64) -> Option<f64> {
+        self.around(row, col)?.into_iter().reduce(f64::min)
+    }
+
+    /// The cells at the headings either side of `row` and `col` (one heading when it matches).
+    fn around(&self, row: f64, col: f64) -> Option<Vec<f64>> {
+        fn either_side(heads: &[f64], v: f64) -> Option<Vec<usize>> {
+            if let Some(i) = heads.iter().position(|h| (h - v).abs() < 1e-9) {
+                return Some(vec![i]);
+            }
+            let i = heads.iter().position(|h| *h > v)?;
+            (i > 0).then(|| vec![i - 1, i])
+        }
+        let (rs, cs) = (either_side(&self.rows, row)?, either_side(&self.cols, col)?);
+        let mut out = Vec::new();
+        for r in &rs {
+            for c in &cs {
+                out.push(self.values.get(*r)?.get(*c).copied().flatten()?);
+            }
+        }
+        Some(out)
+    }
+
+    fn problems(&self) -> Option<String> {
+        let sorted = |v: &[f64]| v.windows(2).all(|w| w[0] < w[1]);
+        let shaped = self.values.len() == self.rows.len()
+            && self.values.iter().all(|r| r.len() == self.cols.len());
+        (!(shaped && sorted(&self.rows) && sorted(&self.cols)))
+            .then(|| "headings must rise and the values fit them".to_string())
+    }
 }
 
 impl HardwareItem {
@@ -69,6 +128,13 @@ impl HardwareItem {
             .get(name)
             .copied()
             .ok_or_else(|| format!("{} has no parameter {name}", self.id))
+    }
+
+    /// A named table, or an error naming the item and table.
+    pub fn table(&self, name: &str) -> Result<&Table, String> {
+        self.tables
+            .get(name)
+            .ok_or_else(|| format!("{} has no table {name}", self.id))
     }
 
     pub(crate) fn problems(&self) -> Vec<String> {
@@ -91,6 +157,11 @@ impl HardwareItem {
                     self.id,
                     i + 1
                 ));
+            }
+        }
+        for (name, t) in &self.tables {
+            if let Some(p) = t.problems() {
+                out.push(format!("{}: table {name}: {p}", self.id));
             }
         }
         out

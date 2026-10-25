@@ -3,6 +3,7 @@ import SwiftUI
 struct ContentView: View {
     @Environment(ProjectModel.self) private var project
     @State private var showInspector = true
+    @AppStorage("welcomeShown") private var welcomeShown = false
 
     var body: some View {
         @Bindable var project = project
@@ -51,6 +52,8 @@ struct ContentView: View {
             }
         }
         .safeAreaInset(edge: .bottom) { StatusBar() }
+        .sheet(isPresented: $project.showWelcome) { WelcomeSheet() }
+        .onAppear { if !welcomeShown { project.showWelcome = true } }
     }
 }
 

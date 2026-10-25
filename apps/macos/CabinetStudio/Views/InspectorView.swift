@@ -23,7 +23,11 @@ struct InspectorView: View {
                     if cab.kind == "sink" {
                         SinkSection(cab: cab)
                     }
-                    FrontsSection(cab: cab)
+                    if cab.kind == "corner_base" {
+                        CornerSection(cab: cab)
+                    } else {
+                        FrontsSection(cab: cab)
+                    }
                     BoardsSection(cab: cab)
                     ConstructionScope(cab: cab)
                     let overrides = project.overrides(of: cab)
@@ -453,6 +457,77 @@ struct BlindSection: View {
     }
 }
 
+struct CornerSection: View {
+    @Environment(ProjectModel.self) private var project
+    let cab: CabinetDoc
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            SectionTitle("L-corner")
+            HStack(spacing: 8) {
+                ForEach(["left", "right"], id: \.self) { side in
+                    Button {
+                        withAnimation(.snappy) { var c = cab; c.cornerSide = side; project.selected = c }
+                    } label: {
+                        VStack(spacing: 6) {
+                            CornerThumbnail(side: side)
+                                .frame(width: 56, height: 56)
+                            Text(side == "left" ? "Corner left" : "Corner right").font(.caption)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 8)
+                    }
+                    .buttonStyle(TileStyle(selected: cab.cornerSide == side))
+                    .accessibilityLabel(side == "left" ? "Second leg along the left wall" : "Second leg along the right wall")
+                    .help("The second leg runs along the \(side) wall; bi-fold doors close both fronts.")
+                }
+            }
+            HStack(spacing: 6) {
+                Text("Second leg").foregroundStyle(.secondary)
+                Spacer()
+                ForEach([800.0, 900, 1000, 1100, 1200], id: \.self) { p in
+                    Button("\(Int(p))") {
+                        withAnimation(.snappy) { var c = cab; c.cornerWidth = p; project.selected = c }
+                    }
+                    .buttonStyle(ChipStyle(selected: abs(p - cab.cornerWidth) < 0.5))
+                    .accessibilityLabel("Second leg \(Int(p)) millimetres")
+                }
+            }
+        }
+    }
+}
+
+/// An L-corner from above: both legs against their walls, the bi-fold pair across the inside
+/// corner in the accent colour.
+struct CornerThumbnail: View {
+    let side: String
+
+    var body: some View {
+        Canvas { ctx, size in
+            let s = min(size.width, size.height)
+            let leg = s * 0.42
+            let flip = side == "right"
+            func x(_ v: CGFloat) -> CGFloat { flip ? s - v : v }
+            var body = Path()
+            body.move(to: CGPoint(x: x(0), y: 0))
+            body.addLine(to: CGPoint(x: x(s), y: 0))
+            body.addLine(to: CGPoint(x: x(s), y: leg))
+            body.addLine(to: CGPoint(x: x(leg), y: leg))
+            body.addLine(to: CGPoint(x: x(leg), y: s))
+            body.addLine(to: CGPoint(x: x(0), y: s))
+            body.closeSubpath()
+            ctx.fill(body, with: .color(.primary.opacity(0.10)))
+            ctx.stroke(body, with: .color(.primary.opacity(0.6)), lineWidth: 1)
+            var doors = Path()
+            doors.move(to: CGPoint(x: x(s - 2), y: leg + 2))
+            doors.addLine(to: CGPoint(x: x(leg + 2), y: leg + 2))
+            doors.addLine(to: CGPoint(x: x(leg + 2), y: s - 2))
+            ctx.stroke(doors, with: .color(.accentColor), lineWidth: 2)
+        }
+        .accessibilityHidden(true)
+    }
+}
+
 /// The front of a blind corner: blind panel, filler and door, the blind side shaded.
 struct BlindThumbnail: View {
     let side: String
@@ -487,13 +562,13 @@ struct FrontsSection: View {
     let cab: CabinetDoc
 
     private let layouts: [(id: String, title: String)] = [
-        ("door", "Door"), ("door_pair", "Pair"), ("drawers", "Drawers"), ("open", "Open"),
+        ("door", "Door"), ("door_pair", "Pair"), ("drawers", "Drawers"), ("lift", "Lift"), ("bi_fold_lift", "Bi-fold"), ("open", "Open"),
     ]
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             SectionTitle("Fronts")
-            HStack(spacing: 8) {
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 3), spacing: 8) {
                 ForEach(layouts, id: \.id) { layout in
                     let selected = cab.frontType == layout.id
                     Button {
@@ -522,7 +597,74 @@ struct FrontsSection: View {
             if cab.frontType == "drawers" {
                 DrawerStackPicker(cab: cab)
             }
+            if cab.frontType == "lift" {
+                LiftKindPicker(cab: cab)
+            }
         }
+    }
+}
+
+/// How a lifting front moves, drawn from the side: each picks its AVENTOS family.
+struct LiftKindPicker: View {
+    @Environment(ProjectModel.self) private var project
+    let cab: CabinetDoc
+
+    private let kinds: [(id: String, title: String, help: String)] = [
+        ("stay_lift", "Stay lift", "Swings up about its top edge and stays open (AVENTOS HK top)"),
+        ("up_and_over", "Up and over", "Rises and tips over the top, for large fronts (AVENTOS HS top)"),
+        ("lift_up", "Lift up", "Rises parallel to itself, for small fronts (AVENTOS HL top)"),
+    ]
+
+    var body: some View {
+        HStack(spacing: 8) {
+            ForEach(kinds, id: \.id) { kind in
+                Button {
+                    withAnimation(.snappy) { var c = cab; c.liftKind = kind.id; project.selected = c }
+                } label: {
+                    VStack(spacing: 6) {
+                        LiftKindThumbnail(kind: kind.id).frame(width: 52, height: 44)
+                        Text(kind.title).font(.caption).lineLimit(1).minimumScaleFactor(0.8)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 8)
+                }
+                .buttonStyle(TileStyle(selected: cab.liftKind == kind.id))
+                .help(kind.help)
+                .accessibilityLabel("Lift: \(kind.title)")
+                .accessibilityHint(kind.help)
+            }
+        }
+    }
+}
+
+/// A wall cabinet from the side with its front closed (faint) and open (accent).
+struct LiftKindThumbnail: View {
+    let kind: String
+
+    var body: some View {
+        Canvas { ctx, size in
+            let w = size.width, h = size.height
+            let body = CGRect(x: w * 0.35, y: h * 0.35, width: w * 0.55, height: h * 0.6)
+            ctx.stroke(Path(body), with: .color(.primary.opacity(0.6)), lineWidth: 1)
+            var closed = Path()
+            closed.move(to: CGPoint(x: body.minX - 2, y: body.minY))
+            closed.addLine(to: CGPoint(x: body.minX - 2, y: body.maxY))
+            ctx.stroke(closed, with: .color(.primary.opacity(0.3)), lineWidth: 2)
+            var open = Path()
+            switch kind {
+            case "up_and_over":
+                open.move(to: CGPoint(x: body.minX + 4, y: body.minY - 3))
+                open.addLine(to: CGPoint(x: body.maxX - 2, y: body.minY - 3))
+            case "lift_up":
+                open.move(to: CGPoint(x: body.minX - 2, y: 2))
+                open.addLine(to: CGPoint(x: body.minX - 2, y: body.minY - 2))
+            default:
+                open.move(to: CGPoint(x: body.minX - 2, y: body.minY))
+                open.addLine(to: CGPoint(x: 2, y: body.minY - h * 0.25))
+            }
+            ctx.stroke(open, with: .color(.accentColor), lineWidth: 2.2)
+        }
+        .accessibilityHidden(true)
     }
 }
 

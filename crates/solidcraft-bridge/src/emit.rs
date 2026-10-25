@@ -61,7 +61,7 @@ pub fn emit_cabinet(list: &PartList, detail: Detail, spec: Option<&Value>) -> Ve
     if detail != Detail::Design {
         for op in &list.operations {
             match op {
-                Operation::Groove { part, bounds } => {
+                Operation::Groove { part, bounds } | Operation::Mortise { part, bounds, .. } => {
                     cmds.push(cut_box(bounds.min, bounds.size, std::slice::from_ref(part)))
                 }
                 Operation::BiscuitSlot { parts, bounds, .. } if detail == Detail::Manufacturing => {

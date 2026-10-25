@@ -124,6 +124,28 @@ struct CabinetDoc: Identifiable, Hashable, Codable {
         set { setBlind("filler", newValue) }
     }
 
+    private var corner: [String: Any] { object["corner"] as? [String: Any] ?? [:] }
+
+    private mutating func setCorner(_ key: String, _ value: Any) {
+        update { o in
+            var c = o["corner"] as? [String: Any] ?? [:]
+            c[key] = value
+            o["corner"] = c
+        }
+    }
+
+    /// L-corner: the wall the second leg runs along.
+    var cornerSide: String {
+        get { corner["side"] as? String ?? "left" }
+        set { setCorner("side", newValue) }
+    }
+
+    /// L-corner: outside length of the second leg, from the back wall.
+    var cornerWidth: Double {
+        get { (corner["width"] as? NSNumber)?.doubleValue ?? 900 }
+        set { setCorner("width", newValue) }
+    }
+
     /// Whether the cabinet's `left` or `right` side is seen from the room (no screws through it).
     func exposed(_ side: String) -> Bool {
         ((object["exposed"] as? [String: Any])?[side] as? Bool) ?? false
@@ -155,7 +177,7 @@ struct CabinetDoc: Identifiable, Hashable, Codable {
         (object["standard"] as? [String: Any])?["\(slot)_board"] as? String ?? ""
     }
 
-    /// The front layout's type: open, door, door_pair, drawers.
+    /// The front layout's type: open, door, door_pair, drawers, lift, bi_fold_lift.
     var frontType: String {
         get { (object["fronts"] as? [String: Any])?["type"] as? String ?? "open" }
         set {
@@ -164,6 +186,8 @@ struct CabinetDoc: Identifiable, Hashable, Codable {
                 case "door": o["fronts"] = ["type": "door", "hinge_side": "left"]
                 case "door_pair": o["fronts"] = ["type": "door_pair"]
                 case "drawers": o["fronts"] = ["type": "drawers", "ratios": [1.0, 1.0, 1.0]]
+                case "bi_fold_lift": o["fronts"] = ["type": "bi_fold_lift", "handle_weight": 0.0]
+                case "lift": o["fronts"] = ["type": "lift", "kind": "stay_lift", "handle_weight": 0.0]
                 default: o["fronts"] = ["type": "open"]
                 }
             }
@@ -173,6 +197,12 @@ struct CabinetDoc: Identifiable, Hashable, Codable {
     var drawerRatios: [Double] {
         get { ((object["fronts"] as? [String: Any])?["ratios"] as? [NSNumber])?.map(\.doubleValue) ?? [] }
         set { update { $0["fronts"] = ["type": "drawers", "ratios": newValue] } }
+    }
+
+    /// A lifting front's movement: stay_lift, up_and_over, lift_up.
+    var liftKind: String {
+        get { (object["fronts"] as? [String: Any])?["kind"] as? String ?? "stay_lift" }
+        set { update { $0["fronts"] = ["type": "lift", "kind": newValue, "handle_weight": 0.0] } }
     }
 
     var hingeSide: String {
@@ -219,6 +249,8 @@ final class ProjectModel {
     var selection: CabinetDoc.ID?
     var workspace: Workspace = .design
     var detail: DetailLevel = .design
+    /// The welcome sheet is up (first run, or Help › Welcome to Cabinet Studio).
+    var showWelcome = false
     var connection: ConnectionState = .unknown
     var status: String = ""
     var isSending = false
@@ -788,6 +820,7 @@ extension CabinetDoc {
         case "drawer_bank": "Drawer bank"
         case "open_shelf": "Open shelf"
         case "blind_corner": "Blind corner"
+        case "corner_base": "L-corner"
         case "sink": "Sink"
         case "filler": "Filler"
         case "end_panel": "End panel"
@@ -803,6 +836,7 @@ extension CabinetDoc {
         case "drawer_bank": "square.split.1x2.fill"
         case "open_shelf": "rectangle.split.3x1"
         case "blind_corner": "rectangle.lefthalf.inset.filled"
+        case "corner_base": "l.square"
         case "sink": "drop"
         case "filler": "rectangle.portrait.split.2x1"
         case "end_panel": "rectangle.portrait.lefthalf.filled"

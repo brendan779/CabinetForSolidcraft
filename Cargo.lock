@@ -107,6 +107,7 @@ dependencies = [
 name = "cabinet-core"
 version = "0.1.0"
 dependencies = [
+ "cabinet-catalog",
  "insta",
  "serde",
  "serde_json",
