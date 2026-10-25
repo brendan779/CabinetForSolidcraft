@@ -88,7 +88,7 @@ Priorities: **P0** blocks most other work · **P1** MVP · **P2** commercial par
 | BLUM-6b | todo | S | MOVENTO/TANDEM runner screw positions on the cabinet sides (p.428, p.460: which hole of each length takes the Ø5 system screw), and TANDEM's Ø6 rear hook hole in the drawer back (p.435) | runner bores on side sheets |
 | BLUM-7 | split → BLUM-7a, BLUM-7b | L | AVENTOS lift systems (HK top, HK-S, HK-XS, HF, HS, HL): power factor = f(front height, weight) → article | split |
 | BLUM-7a | done (c660427 HF, c3ae68b HK, 8f77c7f HS/HL: `lift` and `bi_fold_lift` layouts; HKi, HK-S, HK-XS not modelled) | M | Lift-system model: a wall cabinet front opening upward (`opening: lift`), front height and weight from the board catalog (density × area), power factor computed per Blum's formula, and the AVENTOS family chosen by front height; picker drawing per family | test: front weight and power factor for a 600 × 360 front |
-| BLUM-7b | split → HF, HK, HS, HL top done (c660427, c3ae68b, 8f77c7f); HK-S, HK-XS, HKi rows todo; mechanism side drilling needs reading (p.24, 48) | M | AVENTOS HK top, HK-S, HK-XS, HF, HS, HL catalog rows (articles by power-factor range, drilling) | hardware rows with sources; BLUM-7a picks articles from them |
+| BLUM-7b | split → HF, HK, HS, HL top done (c660427, c3ae68b, 8f77c7f); HK-S (p.56: 20K2B00.06/C00/E00 by LF) and HK-XS (p.62: one-sided mechanism plus hinges) and HKi todo; mechanism side drilling needs reading (pp. 24, 48) | M | AVENTOS HK top, HK-S, HK-XS, HF, HS, HL catalog rows (articles by power-factor range, drilling) | hardware rows with sources; BLUM-7a picks articles from them |
 | BLUM-8 | done (05f6929) | S | TIP-ON / SERVO-DRIVE options for handleless fronts | option + BOM |
 | BLUM-9 | 👤 needs-human (until STEP files exist in vendor-cad/blum/; see BLUM-CAD-1) | M | Import the owner's Blum STEP files from `vendor-cad/blum/` as linked components (`component.insert_design` after STEP → .solidcraft conversion) in place of stand-ins | a hinge renders with the real Blum model |
 | BLUM-10 | done (fbb3804) | M | Parametric stand-in models (hinge cup + arm, plate, runner, box side) emitted as bodies | visible in Manufacturing detail |
@@ -147,7 +147,7 @@ committed: they are the brands' copyright. `preview_colour` is an approximation.
 | OUT-1 | done (initial) | M | Cut list rows + CSV; per-part SVG cut sheets | tests |
 | OUT-2 | done (6537e37) | M | Cut sheets as multi-page PDF (one part per page plus cover and index) | PDF opens in Preview with N+2 pages |
 | OUT-3 | done (d29080e) | M | Both faces + edge views on sheets when a part has machining on more than one face | side sheet shows inner face and edges |
-| OUT-4 | todo | M | Sheet quality: dimension chains from the reference corner for every hole row; hole table grouped by diameter/depth | reviewed by owner 👤 |
+| OUT-4 | needs-human (built in f557f9b: look at a side's cut sheet: ordinate dimensions for every hole row, hole table grouped by Ø/depth) | M | Sheet quality: dimension chains from the reference corner for every hole row; hole table grouped by diameter/depth | reviewed by owner 👤 |
 | OUT-5 | todo | L | Guillotine nesting optimiser with grain and kerf (panel saw), sheet diagrams in PDF, offcut list | split |
 | OUT-6 | done (13b9afb) | M | Hardware BOM with supplier article numbers and quantities, CSV + PDF | BOM for the sample run |
 | OUT-7 | done (dee5a94) | M | Part labels (62 mm label printer) with QR code of part id | PDF of labels |
@@ -304,3 +304,4 @@ Agents append one line per session: date, items touched, outcome.
 - 2026-10-26 (night) — BLUM-7 HK top done: `stay_lift` front layout (one front, no hinges) on AVENTOS HK top, mechanism by LF = KH × (FG + 2 × handle); the Fronts tiles are a three-column grid now.
 - 2026-10-26 (night) — BLUM-7 HS/HL top done: the single-front layout is `lift { kind }` (stay lift = HK top, up and over = HS top, lift up = HL top); `lift::single_front` reads each family's height/weight/power-factor ranges and takes the stronger where they overlap.
 - 2026-10-26 (night) — BLUM-13 finished: TIP-ON BLUMOTION units for MERIVOBOX (T60H) and TANDEMBOX (T60B) with their synchronisation; BLUM-13b: SERVO-DRIVE for MOVENTO/TANDEM uses the same parts as the box systems (p.464), no generic rows left.
+- 2026-10-26 (night) — OUT-4 built (f557f9b): ordinate dimensions from the reference corner for every bore row and column, hole table grouped by kind with counts; needs the owner's look.
