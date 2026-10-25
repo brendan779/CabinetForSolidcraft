@@ -158,7 +158,7 @@ committed: they are the brands' copyright. `preview_colour` is an approximation.
 | OUT-7 | done (dee5a94) | M | Part labels (62 mm label printer) with QR code of part id | PDF of labels |
 | OUT-8 | done (3a7abbe; our own exploded isometric, not SolidCraft's `explode.create` + render: that is OUT-8b) | M | Assembly sheet per cabinet: exploded view (SolidCraft exploded view + export view) | image per cabinet |
 | OUT-8b | todo | M | Assembly view from SolidCraft: `explode.create` per cabinet component and a headless render (as OUT-10) into the assembly PDF, if the owner prefers it to the drawn one | image per cabinet from SolidCraft |
-| OUT-9 | todo | L | DXF per part for CNC with layer conventions (outline, bores by Ø/depth, grooves) | split |
+| OUT-9 | done (4ac9391; layer names are ours, see crates/cabinet-sheets/src/dxf.rs: owner to try them in his CAM) | L | DXF per part for CNC with layer conventions (outline, bores by Ø/depth, grooves) | split |
 | OUT-10 | done (e7eeccb) | M | Renders: Render workspace setup (`render.settings.set`, `render.start`, `render.export`) from the app, PNG saved next to the job | "Render" button produces a PNG |
 
 ### macOS app (make it shine)
@@ -335,3 +335,4 @@ Agents append one line per session: date, items touched, outcome.
 - 2026-10-26b (night) — DATA-3 split. DATA-3a done (ffacb39): tools/parse_egger.py reads ForestOne's EGGER Decorative Collection for trades (Nov 2024): decor rows by word positions, the availability dots (drawn, not text) from the page as SVG; 81 decors, 115 boards (73 in 18 mm, 18 in 25 mm, 7 Eurolight 50 mm, 17 compact 13 mm, as the brochure's own counts). No item or edging codes in that document.
 - 2026-10-26b (night) — OUT-5 split. OUT-5a done (382339e): guillotine nesting in the core. OUT-5b done (f73e8d1): nesting PDF (summary with offcuts, a to-scale page per sheet), FFI `nesting_pdf` (each board's first catalog sheet; generic parts on 2400 × 1200) and Cut List › Nesting…. Base + tall sample: 6 sheets, see docs/images/out5-nesting-sheet-4.png. OUT-5c (in-app preview and settings) added. DATA-4 searched: nothing usable published.
 - 2026-10-26b (night) — OUT-8 done (3a7abbe): exploded isometric assembly page per cabinet with its parts list (docs/images/out8-assembly.png); Cut Sheets › Assembly…. OUT-8b added for a SolidCraft-rendered version.
+- 2026-10-26b (night) — OUT-9 done (4ac9391): R12 DXF per part (and `-back` for a second machined face) with layers OUTLINE, BORE_D<Ø>_Z<depth>/THRU, POCKET_<KIND>_Z<depth>, CUTOUT, EDGE_BORE_…, EDGE_<KIND>; all 11 files of the sample base cabinet audit clean in ezdxf 1.4.5 (in a scratch venv, not a project dependency). Cut Sheets › DXF… writes them into a folder.
