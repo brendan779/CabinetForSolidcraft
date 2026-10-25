@@ -249,6 +249,8 @@ final class ProjectModel {
     var selection: CabinetDoc.ID?
     var workspace: Workspace = .design
     var detail: DetailLevel = .design
+    /// The welcome sheet is up (first run, or Help › Welcome to Cabinet Studio).
+    var showWelcome = false
     var connection: ConnectionState = .unknown
     var status: String = ""
     var isSending = false

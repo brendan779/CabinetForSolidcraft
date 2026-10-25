@@ -53,6 +53,10 @@ struct JobCommands: Commands {
                 .disabled(project == nil)
             Divider()
         }
+        CommandGroup(before: .help) {
+            Button("Welcome to Cabinet Studio") { project?.showWelcome = true }
+                .disabled(project == nil)
+        }
         CommandMenu("SolidCraft") {
             Button("Build in SolidCraft") { Task { await project?.sendToSolidCraft() } }
                 .keyboardShortcut("b", modifiers: [.command, .shift])
