@@ -343,9 +343,9 @@ impl<'a> Builder<'a> {
         self.list.operations.extend(ops);
     }
 
-    /// Handleless opening hardware: a TIP-ON unit per door (two on tall doors) and per drawer, or
-    /// a SERVO-DRIVE unit per drawer plus the cabinet's power supply. Generic ids until the
-    /// articles are in the hardware catalog (BLUM-2).
+    /// Handleless opening hardware: a TIP-ON unit on an adapter plate per door (two on tall
+    /// doors) and per drawer, or a SERVO-DRIVE unit per drawer plus the cabinet's power supply.
+    /// Drawer units keep generic ids until BLUM-13 catalogues them.
     fn opening(&mut self) {
         let opening = self.cab.standard.opening;
         if opening == Opening::Handles {
@@ -360,36 +360,43 @@ impl<'a> Builder<'a> {
             .collect();
         let mut servo = 0;
         for f in &fronts {
-            let (item, description, quantity) = match (f.role, opening) {
+            let rows: Vec<(String, String, u32)> = match (f.role, opening) {
                 (PartRole::DrawerFront, Opening::ServoDrive) => {
                     servo += 1;
-                    (
-                        "blum.servo-drive.drawer",
-                        "SERVO-DRIVE drive unit for a drawer",
+                    vec![(
+                        "blum.servo-drive.drawer".into(),
+                        "SERVO-DRIVE drive unit for a drawer".into(),
                         1,
-                    )
+                    )]
                 }
-                (PartRole::DrawerFront, _) => (
-                    "blum.tip-on.drawer",
-                    "TIP-ON BLUMOTION unit set for a drawer",
+                (PartRole::DrawerFront, _) => vec![(
+                    "blum.tip-on.drawer".into(),
+                    "TIP-ON BLUMOTION unit set for a drawer".into(),
                     1,
-                ),
+                )],
                 _ => {
                     let n = if f.bounds.size.z > TALL_DOOR { 2 } else { 1 };
-                    (
-                        "blum.tip-on.door",
-                        "TIP-ON unit for a door (its hinges have no spring)",
-                        n,
-                    )
+                    match self.tip_on_door(f) {
+                        Ok(items) => items
+                            .into_iter()
+                            .map(|i| (i.id.clone(), format!("{} {}", i.family, i.variant), n))
+                            .collect(),
+                        Err(e) => {
+                            self.list.warnings.push(format!("{}: {e}", f.name));
+                            Vec::new()
+                        }
+                    }
                 }
             };
-            self.list.hardware.push(HardwarePlacement {
-                item: item.into(),
-                description: description.into(),
-                at: f.bounds.center(),
-                part: f.name.clone(),
-                quantity,
-            });
+            for (item, description, quantity) in rows {
+                self.list.hardware.push(HardwarePlacement {
+                    item,
+                    description,
+                    at: f.bounds.center(),
+                    part: f.name.clone(),
+                    quantity,
+                });
+            }
         }
         if opening == Opening::ServoDrive && fronts.iter().any(|f| f.role == PartRole::Door) {
             self.list
@@ -406,6 +413,22 @@ impl<'a> Builder<'a> {
                 quantity: 1,
             });
         }
+    }
+
+    /// A door's TIP-ON unit and its adapter plate: Blum's short version for overlay fronts up to
+    /// its height limit, the long one for taller and inset fronts (p.192).
+    fn tip_on_door(
+        &self,
+        door: &Part,
+    ) -> std::result::Result<[&'static cabinet_catalog::HardwareItem; 2], String> {
+        let short = crate::hardware::item("blum.tip-on.door.short")?;
+        let long = self.cab.standard.overlay == DoorOverlay::Inset
+            || door.bounds.size.z > short.param("front_height_max")?;
+        let v = if long { "long" } else { "short" };
+        Ok([
+            crate::hardware::item(&format!("blum.tip-on.door.{v}"))?,
+            crate::hardware::item(&format!("blum.tip-on.adapter.{v}"))?,
+        ])
     }
 
     /// A cover cap for every screw head left showing, per panel.
@@ -2184,10 +2207,13 @@ mod tests {
         let units: u32 = list
             .hardware
             .iter()
-            .filter(|h| h.item == "blum.tip-on.door")
+            .filter(|h| h.item.starts_with("blum.tip-on.door."))
             .map(|h| h.quantity)
             .sum();
         assert_eq!(units, 2, "one tall door, two units");
+        // Over Blum's 1300 mm the long version, on its own adapter plate.
+        let long = |id: &str| list.hardware.iter().any(|h| h.item == id);
+        assert!(long("blum.tip-on.door.long") && long("blum.tip-on.adapter.long"));
         let mut bank = Cabinet::new("D01", CabinetKind::DrawerBank);
         bank.standard.opening = Opening::TipOn;
         let list = build_cabinet(&bank).unwrap();
@@ -2198,6 +2224,19 @@ mod tests {
                 .count(),
             3
         );
+    }
+
+    #[test]
+    fn tip_on_doors_hang_on_unsprung_hinges_and_inset_doors_take_the_long_unit() {
+        let mut base = Cabinet::new("B01", CabinetKind::Base);
+        base.standard.opening = Opening::TipOn;
+        let list = build_cabinet(&base).unwrap();
+        let has = |l: &PartList, id: &str| l.hardware.iter().any(|h| h.item == id);
+        assert!(has(&list, "blum.clip-top.110.overlay.unsprung"));
+        assert!(has(&list, "blum.tip-on.door.short"));
+        base.standard.overlay = DoorOverlay::Inset;
+        let list = build_cabinet(&base).unwrap();
+        assert!(has(&list, "blum.tip-on.door.long"));
     }
 
     #[test]
@@ -2222,7 +2261,11 @@ mod tests {
         let mut base = Cabinet::new("B01", CabinetKind::Base);
         base.standard.opening = Opening::ServoDrive;
         let list = build_cabinet(&base).unwrap();
-        assert!(list.hardware.iter().any(|h| h.item == "blum.tip-on.door"));
+        assert!(
+            list.hardware
+                .iter()
+                .any(|h| h.item == "blum.tip-on.door.short")
+        );
         assert!(
             !list
                 .hardware
