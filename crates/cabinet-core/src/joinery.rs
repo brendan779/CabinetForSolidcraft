@@ -8,7 +8,7 @@ use cabinet_catalog::HardwareItem;
 
 use crate::geom::{Aabb, Axis, Vec3};
 use crate::hardware;
-use crate::model::{ConstructionStandard, FixingRecipe};
+use crate::model::{ConstructionStandard, DowelSize, DowelSpacing, FixingRecipe};
 use crate::part::{BorePurpose, Dir, Operation, Part};
 
 /// Distance from each end of the joint to the first fixing.
@@ -28,9 +28,10 @@ const SCREW_PILOT_DEPTH: f64 = 35.0;
 const CONFIRMAT_CLEARANCE: f64 = 7.0;
 const CONFIRMAT_PILOT: f64 = 5.0;
 const CONFIRMAT_PILOT_DEPTH: f64 = 40.0;
-const DOWEL_DIAMETER: f64 = 8.0;
-const DOWEL_FACE_DEPTH: f64 = 12.0;
-const DOWEL_END_DEPTH: f64 = 25.0;
+/// Room for glue at the bottom of the two dowel holes together, beyond the dowel's length.
+const DOWEL_GLUE_ROOM: f64 = 2.0;
+/// The 32 mm system: dowels on multiples of this from the joint's front end.
+const SYSTEM32: f64 = 32.0;
 
 /// Fixing centres along a joint of `length`, at least `setback` from each end and at most
 /// `max_spacing` apart. Short joints get one fixing in the middle, or none when even that would
@@ -47,6 +48,36 @@ pub fn fixing_positions(length: f64, setback: f64, max_spacing: f64, min_length:
     (0..=gaps)
         .map(|i| setback + span * i as f64 / gaps as f64)
         .collect()
+}
+
+/// Dowel centres on the 32 mm grid from the joint's front end: every whole number of pitches
+/// that keeps them at most `max_spacing` apart, the first and last at least one pitch in. A joint
+/// too short for two gets one in the middle.
+pub fn grid_positions(length: f64, max_spacing: f64) -> Vec<f64> {
+    if length < 2.0 * SYSTEM32 + 1e-9 {
+        return if length >= 20.0 {
+            vec![length / 2.0]
+        } else {
+            Vec::new()
+        };
+    }
+    let step = SYSTEM32 * (max_spacing / SYSTEM32).floor().max(1.0);
+    let last = SYSTEM32 * ((length - SYSTEM32) / SYSTEM32).floor();
+    let mut out = Vec::new();
+    let mut p = SYSTEM32;
+    while p < last - 1e-9 {
+        out.push(p);
+        p += step;
+    }
+    out.push(last);
+    out
+}
+
+/// Hole depths for a dowel in the face part (thickness `face`) and the end part: half the
+/// dowel in the face part where that leaves a skin, the rest in the end part, plus glue room.
+pub fn dowel_depths(size: DowelSize, face: f64) -> (f64, f64) {
+    let face_d = (size.length() / 2.0).min(face - MIN_SKIN);
+    (face_d, size.length() - face_d + DOWEL_GLUE_ROOM)
 }
 
 /// Midpoints between consecutive positions.
@@ -190,8 +221,21 @@ impl ButtJoint<'_> {
         let dowels = std.fixings == FixingRecipe::Dowel || (self.hidden && !biscuits);
         match std.fixings {
             _ if dowels => {
-                for p in fixing_positions(length, 32.0, 96.0, 20.0) {
-                    ops.extend(self.dowel(lo + p));
+                let d = std.dowel.diameter();
+                if d > self.end_part.thickness() - 2.0 * MIN_SKIN {
+                    warnings.push(format!(
+                        "{} to {}: a {d} mm dowel leaves less than {MIN_SKIN} mm each side",
+                        self.end_part.name, self.face_part.name
+                    ));
+                    return ops;
+                }
+                let spacing = std.fixing_density.max_spacing();
+                let at = match std.dowel_spacing {
+                    DowelSpacing::System32 => grid_positions(length, spacing),
+                    DowelSpacing::Jig => fixing_positions(length, SYSTEM32, spacing, 20.0),
+                };
+                for p in at {
+                    ops.extend(self.dowel(std.dowel, lo + p));
                 }
             }
             FixingRecipe::CamLock => warnings.push(format!(
@@ -341,23 +385,24 @@ impl ButtJoint<'_> {
         ]
     }
 
-    fn dowel(&self, at: f64) -> [Operation; 2] {
+    fn dowel(&self, size: DowelSize, at: f64) -> [Operation; 2] {
         let back = Dir::new(self.normal.axis, !self.normal.positive);
+        let (face, end) = dowel_depths(size, self.face_part.thickness());
         [
             Operation::Bore {
                 part: self.face_part.name.clone(),
                 at: self.point(self.contact(), at),
                 direction: back,
-                diameter: DOWEL_DIAMETER,
-                depth: DOWEL_FACE_DEPTH.min(self.face_part.thickness() - 3.0),
+                diameter: size.diameter(),
+                depth: face,
                 purpose: BorePurpose::Dowel,
             },
             Operation::Bore {
                 part: self.end_part.name.clone(),
                 at: self.point(self.contact(), at),
                 direction: self.normal,
-                diameter: DOWEL_DIAMETER,
-                depth: DOWEL_END_DEPTH,
+                diameter: size.diameter(),
+                depth: end,
                 purpose: BorePurpose::Dowel,
             },
         ]
@@ -481,5 +526,37 @@ mod tests {
             let t = hardware::item(&size.catalog_id()).unwrap();
             assert!(t.param("width").unwrap() > t.param("thickness").unwrap());
         }
+    }
+
+    /// JOIN-9: the 32 mm grid keeps every dowel on a multiple of 32 from the front, at most the
+    /// fixing spacing apart; the jig spreads them evenly from 32 in.
+    #[test]
+    fn dowels_sit_on_the_32_mm_grid_or_evenly_for_a_jig() {
+        let grid = grid_positions(544.0, 180.0);
+        assert_eq!(grid, [32.0, 192.0, 352.0, 512.0]);
+        assert!(grid_positions(300.0, 96.0).iter().all(|p| p % 32.0 == 0.0));
+        assert!(
+            grid_positions(300.0, 96.0)
+                .windows(2)
+                .all(|w| w[1] - w[0] <= 96.0)
+        );
+        assert_eq!(grid_positions(50.0, 180.0), [25.0]);
+        let jig = fixing_positions(544.0, SYSTEM32, 180.0, 20.0);
+        assert_eq!((jig[0], *jig.last().unwrap()), (32.0, 512.0));
+        assert!(
+            jig.windows(2)
+                .all(|w| (w[1] - w[0] - (jig[1] - jig[0])).abs() < 1e-9)
+        );
+    }
+
+    /// The face part takes half the dowel where it leaves a 3 mm skin; the end part the rest
+    /// and 2 mm of glue room.
+    #[test]
+    fn dowel_depth_split_between_face_and_end() {
+        use crate::model::DowelSize::*;
+        assert_eq!(dowel_depths(D8x35, 16.0), (13.0, 24.0));
+        assert_eq!(dowel_depths(D8x30, 18.0), (15.0, 17.0));
+        assert_eq!(dowel_depths(D6x30, 25.0), (15.0, 17.0));
+        assert_eq!(dowel_depths(D10x50, 18.0), (15.0, 37.0));
     }
 }

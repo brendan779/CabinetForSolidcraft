@@ -83,6 +83,8 @@ struct ConstructionThumbnail: View {
             case "fixings": pen.fixing(choice)
             case "biscuit": pen.biscuit(choice)
             case "domino": pen.domino(choice)
+            case "dowel": pen.dowel(choice)
+            case "dowel_spacing": pen.dowelSpacing(choice)
             case "fixing_density": pen.density(choice)
             default: pen.unknown()
             }
@@ -332,6 +334,39 @@ private struct Pen {
             ctx.fill(tenon, with: .color(accent.opacity(0.55)))
             ctx.stroke(tenon, with: .color(accent), lineWidth: 1)
         default: break
+        }
+    }
+
+    /// A fluted dowel to scale (diameter × length from the choice id, `d8x35`), with chamfered
+    /// ends and its flutes.
+    func dowel(_ choice: String) {
+        let dims = choice.dropFirst().split(separator: "x").compactMap { Double($0) }
+        guard dims.count == 2 else { return unknown() }
+        let (dia, long) = (CGFloat(dims[0]), CGFloat(dims[1]))
+        let k: CGFloat = 1.5
+        let w = long * k, h = dia * k * 1.4
+        let body = Path(roundedRect: r(50 - w / 2, 40 - h / 2, w, h), cornerRadius: 2 * s)
+        ctx.fill(body, with: .color(accent.opacity(0.35)))
+        ctx.stroke(body, with: .color(accent), lineWidth: 1.2)
+        for i in 1..<4 {
+            let y = 40 - h / 2 + h * CGFloat(i) / 4
+            line(p(50 - w / 2 + 3, y), p(50 + w / 2 - 3, y), colour: accent.opacity(0.5), width: 0.7)
+        }
+    }
+
+    /// A joint seen from above with its dowels: on the 32 mm grid (ticks) or spread evenly.
+    func dowelSpacing(_ choice: String) {
+        board(6, 34, 88, 12)
+        let xs: [CGFloat] = choice == "jig" ? [14, 38, 62, 86] : [14, 30, 62, 78]
+        if choice != "jig" {
+            for x in stride(from: CGFloat(14), through: 86, by: 8) {
+                line(p(x, 28), p(x, 32), colour: .primary.opacity(0.4), width: 0.7)
+            }
+        }
+        for x in xs {
+            let e = Path(ellipseIn: r(x - 3, 37, 6, 6))
+            ctx.fill(e, with: .color(accent.opacity(0.6)))
+            ctx.stroke(e, with: .color(accent), lineWidth: 1)
         }
     }
 

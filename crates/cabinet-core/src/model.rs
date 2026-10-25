@@ -328,6 +328,9 @@ pub struct ConstructionStandard {
     pub biscuit: BiscuitSize,
     /// The DOMINO tenon when the fixings are DOMINO.
     pub domino: DominoSize,
+    /// The dowel, and where dowels go, when the fixings are dowels.
+    pub dowel: DowelSize,
+    pub dowel_spacing: DowelSpacing,
     pub fixing_density: Density,
     /// Width of the front and back rails when the top is rails.
     pub rail_width: f64,
@@ -391,6 +394,8 @@ impl Default for ConstructionStandard {
             fixings: FixingRecipe::BiscuitAndScrew,
             biscuit: BiscuitSize::No20,
             domino: DominoSize::D5x30,
+            dowel: DowelSize::D8x35,
+            dowel_spacing: DowelSpacing::System32,
             fixing_density: Density::Normal,
             rail_width: 100.0,
             shelf_front_setback: 2.0,
@@ -512,12 +517,53 @@ pub enum FixingRecipe {
     ScrewOnly,
     /// 7 mm confirmat screws.
     Confirmat,
-    /// 8 mm dowels on the 32 mm grid.
+    /// Fluted wooden dowels (size and spacing in the standard).
     Dowel,
     /// Cam and bolt (Häfele Minifix style) for flat-pack.
     CamLock,
     /// Festool DOMINO loose tenons, glued.
     Domino,
+}
+
+/// Fluted wooden dowels, diameter × length.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum DowelSize {
+    D6x30,
+    D8x30,
+    D8x35,
+    D8x40,
+    D10x40,
+    D10x50,
+}
+
+impl DowelSize {
+    pub fn diameter(self) -> f64 {
+        match self {
+            DowelSize::D6x30 => 6.0,
+            DowelSize::D8x30 | DowelSize::D8x35 | DowelSize::D8x40 => 8.0,
+            DowelSize::D10x40 | DowelSize::D10x50 => 10.0,
+        }
+    }
+
+    pub fn length(self) -> f64 {
+        match self {
+            DowelSize::D6x30 | DowelSize::D8x30 => 30.0,
+            DowelSize::D8x35 => 35.0,
+            DowelSize::D8x40 | DowelSize::D10x40 => 40.0,
+            DowelSize::D10x50 => 50.0,
+        }
+    }
+}
+
+/// Where dowels go along a joint.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum DowelSpacing {
+    /// On the 32 mm grid from the joint's front end, as a line boring machine drills them.
+    System32,
+    /// Evenly spread at the fixing spacing, as a hand doweling jig sets them out.
+    Jig,
 }
 
 /// Festool DOMINO tenon sizes, thickness × nominal length (the width is in the catalog). The
