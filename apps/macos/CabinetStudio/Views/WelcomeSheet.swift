@@ -1,10 +1,9 @@
 import SwiftUI
 
-/// The first-run sheet: connect SolidCraft, pick how much detail to build, then start. Help ›
+/// The first-run welcome card (shown over the job window, not as an AppKit sheet): connect SolidCraft, pick how much detail to build, then start. Help ›
 /// Welcome to Cabinet Studio shows it again.
 struct WelcomeSheet: View {
     @Environment(ProjectModel.self) private var project
-    @Environment(\.dismiss) private var dismiss
     @AppStorage("welcomeShown") private var welcomeShown = false
 
     var body: some View {
@@ -50,7 +49,7 @@ struct WelcomeSheet: View {
                                     .font(.caption)
                                     .foregroundStyle(.secondary)
                                     .multilineTextAlignment(.center)
-                                    .fixedSize(horizontal: false, vertical: true)
+                                    .lineLimit(3, reservesSpace: true)
                             }
                             .padding(10)
                             .frame(maxWidth: .infinity)
@@ -65,20 +64,20 @@ struct WelcomeSheet: View {
             step(3, "Start") {
                 Text("Add cabinets with + in the sidebar, pick options by their pictures in the inspector, then Build in SolidCraft (⇧⌘B). Cut lists and cut sheets follow every change.")
                     .foregroundStyle(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
+                    .lineLimit(4, reservesSpace: true)
             }
 
             HStack {
                 Spacer()
                 Button("Get Started") {
                     welcomeShown = true
-                    dismiss()
+                    project.showWelcome = false
                 }
                 .keyboardShortcut(.defaultAction)
             }
         }
         .padding(26)
-        .frame(width: 600)
+        .frame(width: 600, height: 540)
         .task { await project.checkConnection() }
     }
 

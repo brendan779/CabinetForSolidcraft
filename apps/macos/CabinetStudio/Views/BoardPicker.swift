@@ -104,6 +104,8 @@ struct BoardPicker<Accessory: View>: View {
     }
 
     private var filters: some View {
+        // Two rows of controls that can shrink: one fixed-width row was wider than the space
+        // between the sidebar and the inspector, and AppKit crashed re-measuring it.
         VStack(alignment: .leading, spacing: 8) {
             HStack(spacing: 8) {
                 if boards.contains(where: { $0.kind == "lining" }) {
@@ -115,25 +117,28 @@ struct BoardPicker<Accessory: View>: View {
                     .fixedSize()
                     .help("Panel boards for cabinets, or wall and ceiling linings")
                 }
-                Picker("Brand", selection: $brand) {
-                    Text("All brands").tag("")
-                    ForEach(brands, id: \.self) { Text($0).tag($0) }
-                }
-                .fixedSize()
-                Picker("Range", selection: $range) {
-                    Text("All ranges").tag("")
-                    ForEach(ranges, id: \.self) { Text($0).tag($0) }
-                }
-                .fixedSize()
                 Picker("Grain", selection: $grain) {
                     ForEach(Grain.allCases) { Text($0.rawValue).tag($0) }
                 }
                 .pickerStyle(.segmented)
-                .labelsHidden()
                 .fixedSize()
                 TextField("Search decors", text: $search)
                     .textFieldStyle(.roundedBorder)
-                    .frame(minWidth: 120)
+                    .frame(minWidth: 80, maxWidth: .infinity)
+            }
+            .labelsHidden()
+            HStack(spacing: 8) {
+                Picker("Brand", selection: $brand) {
+                    Text("All brands").tag("")
+                    ForEach(brands, id: \.self) { Text($0).tag($0) }
+                }
+                .frame(minWidth: 80, maxWidth: 200)
+                Picker("Range", selection: $range) {
+                    Text("All ranges").tag("")
+                    ForEach(ranges, id: \.self) { Text($0).tag($0) }
+                }
+                .frame(minWidth: 80, maxWidth: 260)
+                Spacer(minLength: 0)
             }
             .labelsHidden()
             .onChange(of: brand) { range = "" }

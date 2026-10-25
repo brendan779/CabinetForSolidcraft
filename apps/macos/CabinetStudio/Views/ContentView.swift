@@ -19,14 +19,20 @@ struct ContentView: View {
                 case .boards: BoardLibraryView()
                 }
             }
+            // Fixed size rules for both split view columns, whatever they show. When a column's
+            // minimum followed its content (the Boards grid, or the inspector switching to
+            // "No inspector" without a width), AppKit's split view re-measured endlessly and crashed.
+            .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity)
             .inspector(isPresented: $showInspector) {
-                if project.workspace == .design {
-                    InspectorView()
-                        .inspectorColumnWidth(min: 300, ideal: 340, max: 420)
-                } else {
-                    ContentUnavailableView("No inspector", systemImage: "sidebar.right",
-                                           description: Text("Select the Design workspace to edit cabinets."))
+                Group {
+                    if project.workspace == .design {
+                        InspectorView()
+                    } else {
+                        ContentUnavailableView("No inspector", systemImage: "sidebar.right",
+                                               description: Text("Select the Design workspace to edit cabinets."))
+                    }
                 }
+                .inspectorColumnWidth(min: 300, ideal: 340, max: 420)
             }
         }
         .toolbar {
@@ -52,7 +58,22 @@ struct ContentView: View {
             }
         }
         .safeAreaInset(edge: .bottom) { StatusBar() }
-        .sheet(isPresented: $project.showWelcome) { WelcomeSheet() }
+        // An overlay, not .sheet: dismissing an AppKit sheet over this split view + inspector sent
+        // AppKit into an endless constraint-update loop that crashed the app.
+        .overlay {
+            if project.showWelcome {
+                ZStack {
+                    Color.black.opacity(0.35)
+                        .ignoresSafeArea()
+                        .onTapGesture {}
+                    WelcomeSheet()
+                        .background(.regularMaterial, in: .rect(cornerRadius: 16))
+                        .shadow(color: .black.opacity(0.3), radius: 24, y: 8)
+                }
+                .transition(.opacity)
+            }
+        }
+        .animation(.snappy, value: project.showWelcome)
         .onAppear { if !welcomeShown { project.showWelcome = true } }
     }
 }

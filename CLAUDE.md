@@ -51,6 +51,21 @@ Rust is installed through Homebrew's rustup: `export PATH="$HOME/.cargo/bin:/opt
   controls, Liquid Glass on macOS 26 through `glassBackground()`, and animate changes with
   `.snappy`.
 
+## macOS layout rules (each one crashed the app)
+
+AppKit throws on layout loops and unsatisfiable constraints, and the app dies. Before committing
+UI, launch the Release build under `lldb` with a breakpoint on `objc_exception_throw` and visit every
+workspace, windowed and full screen (⌃⌘F).
+
+- Don't add window toolbar items from workspace views; the toolbar is full. Put controls in a bar
+  inside the view.
+- No `HSplitView` inside the detail column next to the inspector.
+- Window tabbing stays off (`NSWindow.allowsAutomaticWindowTabbing = false`).
+- No AppKit `.sheet` over the job window; use the overlay pattern (see the welcome card).
+- Split view columns must not take their min/max size from their content: the workspace area has
+  `.frame(minWidth: 0, …)` and the inspector always has `inspectorColumnWidth`.
+- Rows of fixed-size controls must fit 420 pt or be allowed to shrink.
+
 ## SolidCraft facts (checked 2026-10-23, v0.20.0)
 
 - Control protocol: JSON lines on `127.0.0.1:7878`, token in
