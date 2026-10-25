@@ -9,7 +9,10 @@ prints two A4 pages per A3 sheet, its columns drift from table to table and avai
 (▲ ● ‡ ♦) sit between the columns, so fixed text columns do not work.
 
 Scope: the DECORATIVE board tables (9, 16, 18, 25 and 32 mm, guide pages 3-13), with their item
-codes per sheet size and the matching edge tapes. Every record keeps `verified: false`; an existing
+codes per sheet size and the matching edge tapes, and the COMMERCIAL range (16-33 mm boards on
+guide pages 14-15, their edge tapes on pages 16-17, matched by decor and finish), and the routed
+wall lining panels on page 28 (`kind: lining`, read from `pdftotext -raw`: those tables are
+plain). Every record keeps `verified: false`; an existing
 record's `preview_colour` and `verified` are carried over. Standard library only.
 """
 
@@ -26,12 +29,15 @@ from pathlib import Path
 URL = "https://www.polytec.com.au/docs/technical/polytec-technical-availability-guide.pdf"
 ROOT = Path(__file__).resolve().parent.parent
 
-MARKS = set("▲●‡♦◆■†*")
+# U+F0DE is the guide's "sold in pack quantities only" glyph.
+MARKS = set("▲●‡♦◆■†*\uf0de")
 CODE = re.compile(r"^\d{3,6}$")
 # Words on a line closer than this (pt) vertically are one line.
 LINE_TOLERANCE = 3.0
 # Taller words in a table row are the page title set up the margin.
 ROW_HEIGHT = 13.0
+# The margin title's words are far taller than any column heading.
+TITLE_HEIGHT = 40.0
 # A code further than this (pt) from every column centre belongs to no column.
 COLUMN_REACH = 40.0
 
@@ -45,6 +51,18 @@ SUBSTRATES = [
 COLLECTIONS = {"SOLID", "TIMBERPRINT", "ABSTRACT", "METALLIC", "SPECIALTY"}
 GRAINED = {"TIMBERPRINT", "SPECIALTY"}
 HEADER_NOISE = {"ITEM", "CODE", "EDGE", "TAPE", "NOTES", "DECORATIVE"}
+# COMMERCIAL column headings name the substrate in short.
+COMMERCIAL_SUBSTRATES = {
+    "MR Particle": "moisture_resistant_particleboard",
+    "MR MDF": "moisture_resistant_mdf",
+    "STD LDF": "ldf",
+    "MR LDF": "moisture_resistant_ldf",
+}
+# Our reading, not the guide's: COMMERCIAL lists oaks and walnuts under MATT too, so a decor named
+# after a timber is grained whatever its section.
+TIMBER = re.compile(r"\b(Oak|Walnut|Ash|Beech|Ply|Wood|Wenge|Native)\b")
+# "ex NSW/VIC/QLD" after a section name: where it is stocked.
+STOCKED = re.compile(r"^(ex|[A-Z]{2,3}(/[A-Z]{2,3})+)$")
 
 
 class Word:
@@ -211,9 +229,13 @@ def section(line):
 def parse(pages, today, source_url):
     boards, tapes, problems = {}, {}, []
     rows_seen = 0
+    commercial = {"boards": [], "tapes": []}
     for number, page in enumerate(pages, start=1):
-        # The DECORATIVE board pages; door, commercial and laminate pages have other tables.
         words = {w.text for line in page for w in line}
+        if {"COMMERCIAL", "Colour"} <= words:
+            rows_seen += commercial_page(page, number, commercial, problems)
+            continue
+        # The DECORATIVE board pages; door and laminate pages have other tables.
         if not {"DECORATIVE", "board"} <= words or words & {"COMMERCIAL", "doors"}:
             continue
         block = None
@@ -225,7 +247,8 @@ def parse(pages, today, source_url):
                 continue
             if block is None:
                 continue
-            sec = section(line)
+            # A section name can share its line with the margin title.
+            sec = section([w for w in line if w.y1 - w.y0 < TITLE_HEIGHT])
             if sec:
                 if block["cols"] is None:
                     block["cols"] = header_columns(block["header"], block["title"][0])
@@ -256,7 +279,149 @@ def parse(pages, today, source_url):
                 problems.append(f"page {number}: cannot place the codes of: {t}")
                 continue
             add_row(boards, tapes, problems, block, " ".join(name), row.values(), today, source_url)
+    add_commercial(boards, tapes, problems, commercial, today, source_url)
+    same_code_widths(boards, tapes)
     return list(boards.values()), list(tapes.values()), rows_seen, problems
+
+
+def same_code_widths(boards, tapes):
+    """A tape printed without its width is the tape another table prints with the same item code
+    and a width (Internal Carcass Black 1mm Rigid 9053 is COMMERCIAL's 1mm x 21mm)."""
+    sized = {}
+    for t in tapes.values():
+        if "width" in t:
+            sized.setdefault(t["code"], t["id"])
+    swap = {tid: sized[t["code"]] for tid, t in tapes.items()
+            if "width" not in t and t["code"] in sized}
+    for tid in swap:
+        del tapes[tid]
+    for b in boards.values():
+        b["edge_tapes"] = list(dict.fromkeys(swap.get(t, t) for t in b["edge_tapes"]))
+
+
+def stacked(words):
+    """A turned heading's words read bottom to top."""
+    return " ".join(w.text for w in sorted(words, key=lambda w: -(w.y0 + w.y1) / 2))
+
+
+def commercial_columns(header):
+    """COMMERCIAL board columns (thickness, then substrate, then sheet size, each turned) or edge
+    tape columns (`1mm x 21mm Rigid` beside `100m Un-glued`)."""
+    # Headings are turned; only short words ("x", "MR") are set level among them.
+    words = [w for line in header for w in line if w.vertical or len(w.text) <= 2]
+    boards, tapes = [], []
+    for r in (w for w in words if w.vertical and re.match(r"^\d+m$", w.text)):
+        near = [w for w in words if r.cx - 20 < w.cx < r.cx - 5]
+        m = re.match(r"^(\d)mm x (\d+)mm\b", stacked(near))
+        if not m or not near:
+            continue
+        glue = [w.text for w in words if abs(w.cx - r.cx) < 3 and "glued" in w.text]
+        tapes.append({
+            "x": sum(w.cx for w in near) / len(near), "thickness": float(m.group(1)),
+            "width": float(m.group(2)), "roll": float(r.text[:-1]),
+            "pre_glued": glue == ["Pre-glued"],
+        })
+    if tapes:
+        return boards, tapes
+    for t in (w for w in words if w.vertical and re.match(r"^\d+mm$", w.text)):
+        # Pack quantities (2-digit numbers) sit under the substrate.
+        near = [w for w in words if t.cx + 4 < w.cx < t.cx + 18 and not re.match(r"^\d{1,3}$", w.text)]
+        far = [w for w in words if t.cx + 18 <= w.cx < t.cx + 32]
+        size = re.match(r"^(\d{4}) x (\d{4})$", stacked(far))
+        name = stacked(near)
+        substrate = next((v for k, v in COMMERCIAL_SUBSTRATES.items() if name.startswith(k)), None)
+        if not (size and substrate and near):
+            continue
+        emission = re.search(r"\b(E-Zero|E0|E1)\b", name)
+        boards.append({
+            "x": sum(w.cx for w in near) / len(near), "thickness": float(t.text[:-2]),
+            "substrate": substrate, "emission": emission.group(1) if emission else "",
+            "size": (float(size.group(1)), float(size.group(2))),
+        })
+    return boards, tapes
+
+
+def commercial_page(page, number, out, problems):
+    """Reads one COMMERCIAL board or edge tape page into `out`; returns the rows read."""
+    header, cols, sec, rows = [], None, None, 0
+    colour = next((w for line in page for w in line if w.text == "Colour"), None)
+    for line in page:
+        line = [w for w in line if not STOCKED.match(w.text)]
+        # Section names are level, under the Colour heading; the column headings are not.
+        s = None
+        if line and line[0].cx < colour.cx + 60 and not any(w.vertical for w in line):
+            s = section(line)
+        if s:
+            if cols is None:
+                cols = commercial_columns(header)
+            sec = s
+            continue
+        if sec is None:
+            header.append(line)
+            continue
+        line = [w for w in line if w.y1 - w.y0 < ROW_HEIGHT]
+        cells = [(w, w.text.rstrip("".join(MARKS))) for w in line]
+        codes = [(w, c) for w, c in cells if CODE.match(c) or c == "na"]
+        name = [c for w, c in cells if c and not (CODE.match(c) or c == "na") and c != "NEW"]
+        if not codes or not name or not re.match(r"^[A-Z]", name[0]):
+            continue
+        rows += 1
+        board_cols, tape_cols = cols
+        placed = {}
+        for w, code in codes:
+            col = nearest(w.cx, board_cols + tape_cols)
+            if col is None or id(col) in placed:
+                problems.append(f"page {number}: cannot place the codes of: {text(line)}")
+                placed = {}
+                break
+            placed[id(col)] = (col, code)
+        collection, finish_words = sec
+        for col, code in placed.values():
+            if code == "na":
+                continue
+            kind = "tapes" if "roll" in col else "boards"
+            out[kind].append((" ".join(name), collection, title_case(finish_words), col, code))
+    return rows
+
+
+def add_commercial(boards, tapes, problems, commercial, today, source_url):
+    """COMMERCIAL boards, each with the tapes its decor and finish has on the tape pages."""
+    source = {"url": source_url, "document_date": today, "retrieved": today, "verified": False}
+    by_decor = {}
+    for decor, _, finish, col, code in commercial["tapes"]:
+        base = f"{slug(decor)}-{slug(finish)}"
+        tid = f"polytec.abs.{base}.{col['thickness']:g}x{col['width']:g}.{col['roll']:g}m"
+        if tid in tapes and tapes[tid]["code"] != code:
+            tid = f"{tid}.{code}"
+        tapes.setdefault(tid, {
+            "id": tid, "brand": "Polytec", "code": code, "decor": decor, "finish": finish,
+            "material": "abs", "thickness": col["thickness"], "width": col["width"],
+            "rolls": [col["roll"]], "pre_glued": col["pre_glued"], "laser": False,
+            "source": source,
+        })
+        by_decor.setdefault(base, []).append(tid)
+    for decor, collection, finish, col, code in commercial["boards"]:
+        base = f"{slug(decor)}-{slug(finish)}"
+        substrate = col["substrate"]
+        short = substrate.replace("moisture_resistant_", "mr-").replace("_", "-")
+        bid = f"polytec.commercial.{base}.{col['thickness']:g}.{short}"
+        board = boards.setdefault(bid, {
+            "id": bid, "brand": "Polytec", "range": "Commercial", "decor": decor,
+            "finish": finish, "kind": "melamine", "substrate": substrate,
+            "thickness": col["thickness"], "sheets": [],
+            "grained": collection in GRAINED or finish == "Woodmatt" or bool(TIMBER.search(decor)),
+            "double_sided": True, "emission": col["emission"],
+            "edge_tapes": by_decor.get(base, []), "preview_colour": "", "item_codes": {},
+            "source": source,
+        })
+        length, width = col["size"]
+        key = f"{length:g}x{width:g}"
+        if board["item_codes"].get(key, code) != code:
+            problems.append(f"{bid}: two item codes for {key}")
+            continue
+        if key not in board["item_codes"]:
+            board["sheets"].append({"length": length, "width": width})
+            board["item_codes"][key] = code
 
 
 def add_row(boards, tapes, problems, block, decor, cells, today, source_url):
@@ -267,19 +432,25 @@ def add_row(boards, tapes, problems, block, decor, cells, today, source_url):
     base = f"{slug(decor)}-{slug(finish)}"
     tape_ids = []
     for col, code in cells:
-        if "roll" not in col or code == "na" or col["width"] is None:
+        if "roll" not in col or code == "na":
+            continue
+        # The Internal Carcass tapes print "1mm Rigid" and no width.
+        if col["width"] is None and rng != "Internal Carcass":
             continue
         roll = col["roll"]
-        tid = f"polytec.abs.{base}.1x{col['width']:g}.{roll:g}m"
+        size = f"1x{col['width']:g}" if col["width"] is not None else "1mm"
+        tid = f"polytec.abs.{base}.{size}.{roll:g}m"
         if tid in tapes and tapes[tid]["code"] != code:
             # The same decor's tape has another code in another table (16 vs 18 mm Classic White
             # Sheen): keep both, the second one named by its code.
             tid = f"{tid}.{code}"
-        tapes.setdefault(tid, {
+        tape = tapes.setdefault(tid, {
             "id": tid, "brand": "Polytec", "code": code, "decor": decor, "finish": finish,
             "material": "abs", "thickness": 1.0, "width": col["width"], "rolls": [roll],
             "pre_glued": col["pre_glued"], "laser": False, "source": source,
         })
+        if tape["width"] is None:
+            del tape["width"]
         tape_ids.append(tid)
     for col, code in cells:
         if "size" not in col or code == "na":
@@ -306,6 +477,51 @@ def add_row(boards, tapes, problems, block, decor, cells, today, source_url):
         for tid in tape_ids:
             if tid not in board["edge_tapes"]:
                 board["edge_tapes"].append(tid)
+
+
+def lining_tables(raw, source):
+    """Routed lining panels: a `Profile` heading over one (thickness, `2400mm x 1200mm`,
+    substrate) group per column, the table title, then a row per profile with an item code per
+    column."""
+    boards, sizes = [], []
+    lines = [line.strip() for line in raw.splitlines()]
+    for i, line in enumerate(lines):
+        if line == "Profile":
+            sizes = []
+        elif m := re.match(r"^(\d{4})mm x (\d{4})mm$", line):
+            sizes.append((float(lines[i - 1][:-2]), float(m.group(1)), float(m.group(2))))
+        elif "ROUTED PANELS" in line and sizes:
+            rng = "Easycraft Panels" + (" (wet area)" if line.startswith("WET AREA") else "")
+            for row in lines[i + 1:]:
+                m = re.match(r"^(\S.*?) ((?:\d{5,6}|na)(?: (?:\d{5,6}|na))*)$", row)
+                if not m:
+                    break
+                codes = m.group(2).split()
+                if len(codes) != len(sizes):
+                    raise ValueError(f"{row!r}: {len(codes)} codes for {len(sizes)} sizes")
+                profile = m.group(1)
+                thickness = sizes[0][0]
+                board = {
+                    "id": f"polytec.{slug(rng)}.{slug(profile)}.{thickness:g}.mr-mdf",
+                    "brand": "Polytec", "range": rng, "decor": "Pre-primed", "finish": profile,
+                    "kind": "lining", "substrate": "moisture_resistant_mdf",
+                    "thickness": thickness, "sheets": [], "grained": False,
+                    "double_sided": False, "emission": "E-Zero", "edge_tapes": [],
+                    "preview_colour": "", "item_codes": {}, "source": source,
+                }
+                for (_, length, width), code in zip(sizes, codes):
+                    if code != "na":
+                        board["sheets"].append({"length": length, "width": width})
+                        board["item_codes"][f"{length:g}x{width:g}"] = code
+                boards.append(board)
+            sizes = []
+    return boards
+
+
+def raw_pages(pdf):
+    out = subprocess.run(["pdftotext", "-raw", str(pdf), "-"], check=True, capture_output=True,
+                         text=True).stdout
+    return out.split("\f")
 
 
 def merge_existing(boards, tapes, existing):
@@ -346,6 +562,9 @@ def main():
     pages = read_pages(pdf)
     date = document_date(pages)
     boards, tapes, rows, problems = parse(pages, date, URL)
+    source = {"url": URL, "document_date": date, "retrieved": date, "verified": False}
+    boards += [b for raw in raw_pages(pdf) if "ROUTED PANELS" in raw
+               for b in lining_tables(raw, source)]
     existing = json.loads(args.out.read_text()) if args.out.exists() else {}
     merge_existing(boards, tapes, existing)
     used = {t for b in boards for t in b["edge_tapes"]}
@@ -354,8 +573,10 @@ def main():
         "brand": "Polytec",
         "website": "https://www.polytec.com.au",
         "notes": f"Generated by tools/parse_polytec.py from the polytec Availability Guide of {date} "
-                 "(DECORATIVE board tables, guide pages 3-13). Item codes are per sheet size. "
-                 "Availability marks (limited stock, made to order, ex NSW) are not recorded. "
+                 "(DECORATIVE board tables, guide pages 3-13; COMMERCIAL boards and edge tapes, "
+                 "pages 14-17; routed wall lining panels, page 28). Item codes are per sheet size. "
+                 "Availability marks (limited stock, made to order, ex NSW) and COMMERCIAL pack "
+                 "quantities are not recorded. "
                  "Do not edit by hand: rerun the tool.",
         "boards": sorted(boards, key=lambda b: b["id"]),
         "edge_tapes": sorted(tapes, key=lambda t: t["id"]),

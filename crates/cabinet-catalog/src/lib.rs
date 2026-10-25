@@ -50,6 +50,9 @@ pub enum Substrate {
     MoistureResistantParticleboard,
     Mdf,
     MoistureResistantMdf,
+    /// Low-density fibreboard (polytec COMMERCIAL "STD LDF").
+    Ldf,
+    MoistureResistantLdf,
     Plywood,
     Hmr,
     Compact,
