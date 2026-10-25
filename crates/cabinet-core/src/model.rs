@@ -36,6 +36,10 @@ pub struct Cabinet {
     /// between the sides like a bottom. The rest sit on shelf pins.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub fixed_shelves: Vec<u32>,
+    /// Blum inner drawers behind the doors, stacked from the bottom of the opening; they take
+    /// the shelves' place.
+    #[serde(default, skip_serializing_if = "is_zero")]
+    pub inner_drawers: u32,
     /// The blind part of a blind corner cabinet (ignored by other kinds).
     #[serde(default)]
     pub blind: Blind,
@@ -48,6 +52,10 @@ pub struct Cabinet {
     /// Sides seen from the room (the end of a run without an end panel): no screws through them.
     #[serde(default, skip_serializing_if = "Exposed::is_none")]
     pub exposed: Exposed,
+}
+
+fn is_zero(n: &u32) -> bool {
+    *n == 0
 }
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
@@ -155,6 +163,7 @@ impl Cabinet {
             fronts: kind.default_fronts_for(w),
             adjustable_shelves: kind.default_shelves(),
             fixed_shelves: Vec::new(),
+            inner_drawers: 0,
             blind: Blind::default(),
             sink: Sink::default(),
             corner: Corner::for_kind(kind),
@@ -376,6 +385,8 @@ pub struct ConstructionStandard {
     pub opening: Opening,
     /// What the drawers are made of and run on.
     pub drawer_system: DrawerSystem,
+    /// Whether deep LEGRABOX drawers may be high fronted pull-outs (C, F).
+    pub drawer_sides: DrawerSides,
     /// Board thickness of wooden drawer boxes (sides, base, front and back).
     pub drawer_board_thickness: f64,
     /// What the fronts are made of, for their weight on lift systems.
@@ -436,6 +447,7 @@ impl Default for ConstructionStandard {
             wall_hanging: WallHanging::Hangers,
             opening: Opening::Handles,
             drawer_system: DrawerSystem::Legrabox,
+            drawer_sides: DrawerSides::Standard,
             drawer_board_thickness: 16.0,
             front_core: FrontCore::Mdf,
         }
@@ -526,6 +538,17 @@ pub enum DrawerSystem {
     Movento,
     /// A wooden box on Blum TANDEM 560H runners (30 kg).
     Tandem,
+}
+
+/// How tall a steel box's sides may be.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum DrawerSides {
+    /// N, M or K: a deep drawer is a K box behind a tall front.
+    #[default]
+    Standard,
+    /// LEGRABOX pure C (177 mm) and F (241 mm) sides for deep drawers, where there is room.
+    HighFronted,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]

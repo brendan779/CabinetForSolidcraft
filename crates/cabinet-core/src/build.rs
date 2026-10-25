@@ -1,14 +1,14 @@
 //! Cabinet → parts, machining and hardware.
 
 use crate::corner;
-use crate::drawers::{self, BoxSystem, WoodRunner};
+use crate::drawers::{self, BoxRange, BoxSystem, SteelBox, WoodRunner};
 use crate::geom::{Aabb, Axis, Vec3};
 use crate::hinges::{self, HingeNeed};
 use crate::joinery::ButtJoint;
 use crate::lift;
 use crate::model::{
-    BackStyle, BottomJoint, Cabinet, CabinetKind, DoorOverlay, DrawerSystem, Exposed, FrontCore,
-    FrontLayout, HingeSide, LiftKind, Opening, ToeKick, TopJoint, WallHanging,
+    BackStyle, BottomJoint, Cabinet, CabinetKind, DoorOverlay, DrawerSides, DrawerSystem, Exposed,
+    FrontCore, FrontLayout, HingeSide, LiftKind, Opening, ToeKick, TopJoint, WallHanging,
 };
 use crate::part::{
     BorePurpose, Dir, EdgeBanding, HardwarePlacement, Operation, Part, PartList, PartRole,
@@ -49,6 +49,8 @@ const SHELF_PIN_DEPTH: f64 = 10.0;
 /// Our choice, not Blum's: the end hinges sit this far in from the door's top and bottom. The
 /// hinge itself, its cup and plate come from the hardware catalog (see `hinges`).
 const HINGE_END_OFFSET: f64 = 100.0;
+/// Blum's 155° hinge, 0-protrusion: for doors in front of inner drawers.
+const INNER_DRAWER_HINGE: &str = "blum.clip-top-blumotion.155.overlay";
 
 /// Builds the part list for one cabinet.
 pub fn build_cabinet(cab: &Cabinet) -> Result<PartList> {
@@ -833,6 +835,15 @@ impl<'a> Builder<'a> {
 
     fn shelves(&mut self) {
         let cab = self.cab;
+        if cab.inner_drawers > 0 {
+            if cab.adjustable_shelves > 0 {
+                self.list
+                    .warnings
+                    .push("shelves left out: the inner drawers take the opening".into());
+            }
+            self.inner_drawers();
+            return;
+        }
         let n = cab.adjustable_shelves as usize;
         let s = &cab.standard;
         let (w, t) = (cab.width, s.carcass_thickness);
@@ -1162,7 +1173,12 @@ impl<'a> Builder<'a> {
         let front_name = self.name(PartRole::DrawerFront, Some(n));
         let inner_width = cab.width - 2.0 * t;
         let fy = front.max().y;
-        let lb = match drawers::steel_box(kind, inner_width, self.interior_back - fy, space) {
+        let range = match cab.standard.drawer_sides {
+            DrawerSides::Standard => BoxRange::Drawers,
+            DrawerSides::HighFronted => BoxRange::HighFronted,
+        };
+        let lb = match drawers::steel_box(kind, range, inner_width, self.interior_back - fy, space)
+        {
             Ok(lb) => lb,
             Err(e) => {
                 self.list
@@ -1186,15 +1202,33 @@ impl<'a> Builder<'a> {
             system: kind.key(),
             nominal_length: lb.nominal_length,
             heavy_runner: lb.heavy_profile,
-            heavy_load: lb.height == "K",
+            heavy_load: matches!(lb.height.as_str(), "K" | "C" | "F"),
             front_height: front.size.z,
         });
+        self.steel_box_parts(n, &lb, fy, datum + base_lift);
+        // Front fixing brackets: their bores in the back of the front, in from each side.
+        for x in [t + hole_inset, cab.width - t - hole_inset] {
+            for hole in &lb.system.drilling {
+                self.list.operations.push(Operation::Bore {
+                    part: front_name.clone(),
+                    at: Vec3::new(x, fy, datum + hole.y),
+                    direction: Dir::new(Axis::Y, false),
+                    diameter: hole.diameter,
+                    depth: hole.depth.min(front.size.y - 3.0),
+                    purpose: BorePurpose::FrontFixing,
+                });
+            }
+        }
+        self.steel_box_hardware(&lb, front.center(), &front_name);
+    }
+
+    /// A steel box's base and back, placed for the 3D view and the cut list (the sizes are
+    /// Blum's), the base's underside at `z`, its front edge at `fy`.
+    fn steel_box_parts(&mut self, n: usize, lb: &SteelBox, fy: f64, z: f64) {
         let bt = lb.board_thickness;
-        // Placed for the 3D view and the cut list; the sizes are Blum's.
         let (bw, bl) = lb.base;
         let (kw, kh) = lb.back;
-        let mid = cab.width / 2.0;
-        let z = datum + base_lift;
+        let mid = self.cab.width / 2.0;
         self.add_drawer_part(
             PartRole::DrawerBottom,
             n,
@@ -1214,33 +1248,89 @@ impl<'a> Builder<'a> {
             ),
             Axis::Y,
         );
-        // Front fixing brackets: their bores in the back of the front, in from each side.
-        for x in [t + hole_inset, cab.width - t - hole_inset] {
-            for hole in &lb.system.drilling {
-                self.list.operations.push(Operation::Bore {
-                    part: front_name.clone(),
-                    at: Vec3::new(x, fy, datum + hole.y),
-                    direction: Dir::new(Axis::Y, false),
-                    diameter: hole.diameter,
-                    depth: hole.depth.min(front.size.y - 3.0),
-                    purpose: BorePurpose::FrontFixing,
-                });
-            }
-        }
-        let at = front.center();
-        for (item, quantity) in [
-            (lb.profile, 1),
-            (lb.sides, 1),
-            (lb.back_fixing, 1),
-            (lb.front_fixing, 2),
-        ] {
+    }
+
+    fn steel_box_hardware(&mut self, lb: &SteelBox, at: Vec3, part: &str) {
+        let mut items = vec![(lb.profile, 1), (lb.sides, 1), (lb.back_fixing, 1)];
+        items.extend(lb.front_fixings.iter().copied());
+        for (item, quantity) in items {
             self.list.hardware.push(HardwarePlacement {
                 item: item.id.clone(),
                 description: format!("{} {}", item.family, item.variant),
                 at,
-                part: front_name.clone(),
+                part: part.to_string(),
                 quantity,
             });
+        }
+        if let Some((piece, length)) = lb.front_piece {
+            self.list.hardware.push(HardwarePlacement {
+                item: piece.id.clone(),
+                description: format!("{} {}; cut to {length:.0} mm", piece.family, piece.variant),
+                at,
+                part: part.to_string(),
+                quantity: 1,
+            });
+        }
+    }
+
+    /// Blum LEGRABOX inner drawers behind the doors: the opening shared evenly from the bottom,
+    /// each the tallest inner drawer (K, else M) its share fits. They have no drawer front, so
+    /// the hardware goes on each one's base.
+    fn inner_drawers(&mut self) {
+        let cab = self.cab;
+        let s = &cab.standard;
+        let n = cab.inner_drawers as usize;
+        match &cab.fronts {
+            FrontLayout::Door { .. } | FrontLayout::DoorPair | FrontLayout::Open => {}
+            _ => {
+                self.list
+                    .warnings
+                    .push("inner drawers go behind doors; left out with these fronts".into());
+                return;
+            }
+        }
+        if s.drawer_system != DrawerSystem::Legrabox {
+            self.list
+                .warnings
+                .push("inner drawers are LEGRABOX only; left out".into());
+            return;
+        }
+        let t = s.carcass_thickness;
+        let (z0, z1) = self.opening_z;
+        let pitch = (z1 - z0) / n as f64;
+        // Inset doors fill the front of the opening; the boxes start behind them.
+        let fy = if s.overlay == DoorOverlay::Inset {
+            s.front_thickness
+        } else {
+            0.0
+        };
+        for i in 0..n {
+            let datum = z0 + pitch * i as f64;
+            let lb = match drawers::steel_box(
+                BoxSystem::Legrabox,
+                BoxRange::Inner,
+                cab.width - 2.0 * t,
+                self.interior_back - fy,
+                pitch,
+            ) {
+                Ok(lb) => lb,
+                Err(e) => {
+                    self.list
+                        .warnings
+                        .push(format!("inner drawer {}: {e}; left out", i + 1));
+                    return;
+                }
+            };
+            let base_lift = match lb.system.param("base_above_datum") {
+                Ok(v) => v,
+                Err(e) => {
+                    self.list.warnings.push(e);
+                    return;
+                }
+            };
+            self.steel_box_parts(i + 1, &lb, fy, datum + base_lift);
+            let base = self.list.parts[self.list.parts.len() - 2].clone();
+            self.steel_box_hardware(&lb, base.bounds.center(), &base.name);
         }
     }
 
@@ -1491,7 +1581,17 @@ impl<'a> Builder<'a> {
             EdgeBanding::all(),
         );
         let door = self.name(PartRole::Door, Some(n));
-        self.hang_door(&door, b, hinge, None);
+        // Blum's 0-protrusion hinge lets inner drawers pass the open door (p.84).
+        let hinge_id = (self.cab.inner_drawers > 0).then_some(INNER_DRAWER_HINGE);
+        if hinge_id.is_some() && self.cab.standard.overlay != DoorOverlay::Full {
+            self.list.warnings.push(format!(
+                "{door}: inner drawers need a 0-protrusion hinge; only the full overlay one is \
+                 catalogued, so the standard hinge may foul them"
+            ));
+            self.hang_door(&door, b, hinge, None);
+        } else {
+            self.hang_door(&door, b, hinge, hinge_id);
+        }
     }
 
     /// Hinges `door` (in the plane of the front, bounds `b`) to the side on `hinge`: the
@@ -2834,6 +2934,104 @@ mod tests {
         let mut cab = Cabinet::new("C01", CabinetKind::CornerBase);
         cab.corner.width = 700.0;
         assert!(matches!(build_cabinet(&cab), Err(Error::TooSmall(_))));
+    }
+
+    /// BLUM-4b: inner drawers share the opening behind the doors, which hang on 0-protrusion
+    /// hinges; no shelves, no drawer fronts.
+    #[test]
+    fn inner_drawers_fill_the_opening_behind_doors_on_zero_protrusion_hinges() {
+        for (count, side) in [(2, "K"), (5, "M")] {
+            let mut cab = Cabinet::new("B01", CabinetKind::Base);
+            cab.inner_drawers = count;
+            let list = build_cabinet(&cab).unwrap();
+            assert!(
+                list.warnings
+                    .iter()
+                    .all(|w| w.contains("shelves left out") || w.contains("shelf-pin")),
+                "{:?}",
+                list.warnings
+            );
+            assert_eq!(list.by_role(PartRole::DrawerBottom).count(), count as usize);
+            assert_eq!(list.by_role(PartRole::DrawerBack).count(), count as usize);
+            assert_eq!(list.by_role(PartRole::Shelf).count(), 0);
+            assert_eq!(list.by_role(PartRole::DrawerFront).count(), 0);
+            let qty = |id: &str| {
+                list.hardware
+                    .iter()
+                    .filter(|h| h.item == id)
+                    .map(|h| h.quantity)
+                    .sum::<u32>()
+            };
+            assert_eq!(qty("blum.clip-top-blumotion.155.overlay"), 2);
+            assert_eq!(qty("blum.legrabox.front-piece"), count);
+            let sides = format!("blum.legrabox.drawer-side.{}.", side.to_lowercase());
+            assert_eq!(
+                list.hardware
+                    .iter()
+                    .filter(|h| h.item.starts_with(&sides))
+                    .count(),
+                count as usize
+            );
+            let piece = list
+                .hardware
+                .iter()
+                .find(|h| h.item == "blum.legrabox.front-piece")
+                .unwrap();
+            assert!(
+                piece.description.ends_with("cut to 442 mm"),
+                "{}",
+                piece.description
+            );
+            // Each box stays inside the carcass, above the bottom and under the next one.
+            let mut bottoms: Vec<_> = list.by_role(PartRole::DrawerBottom).collect();
+            bottoms.sort_by(|a, b| a.bounds.min.z.total_cmp(&b.bounds.min.z));
+            for pair in bottoms.windows(2) {
+                assert!(pair[1].bounds.min.z - pair[0].bounds.min.z >= 104.0);
+            }
+        }
+    }
+
+    #[test]
+    fn inner_drawers_need_doors_and_legrabox() {
+        let mut cab = Cabinet::new("D01", CabinetKind::DrawerBank);
+        cab.inner_drawers = 2;
+        let list = build_cabinet(&cab).unwrap();
+        assert!(list.warnings.iter().any(|w| w.contains("go behind doors")));
+        let mut cab = Cabinet::new("B01", CabinetKind::Base);
+        cab.inner_drawers = 2;
+        cab.standard.drawer_system = DrawerSystem::Tandem;
+        let list = build_cabinet(&cab).unwrap();
+        assert!(list.warnings.iter().any(|w| w.contains("LEGRABOX only")));
+        assert_eq!(list.by_role(PartRole::DrawerBottom).count(), 0);
+    }
+
+    /// BLUM-4b: with high sides, a two-drawer bank's deep drawers are F pull-outs: five Ø10
+    /// front bores a side and two bracket pairs.
+    #[test]
+    fn high_fronted_drawers_get_f_sides_and_their_front_bores() {
+        let mut cab = Cabinet::new("D01", CabinetKind::DrawerBank);
+        cab.fronts = FrontLayout::Drawers {
+            ratios: vec![1.0, 1.0],
+        };
+        cab.standard.drawer_sides = DrawerSides::HighFronted;
+        let list = build_cabinet(&cab).unwrap();
+        assert!(list.warnings.is_empty(), "{:?}", list.warnings);
+        let bores = list
+            .operations
+            .iter()
+            .filter(|o| {
+                matches!(o, Operation::Bore { part, purpose: BorePurpose::FrontFixing, .. }
+                    if part == "D01.DrawerFront1")
+            })
+            .count();
+        assert_eq!(bores, 10);
+        assert!(
+            list.hardware
+                .iter()
+                .any(|h| h.item == "blum.legrabox.front-fixing.f.upper")
+        );
+        let back = list.part("D01.DrawerBack1").unwrap();
+        assert_eq!(back.bounds.size.z, 212.0);
     }
 
     /// JOIN-8: DOMINO fixings: a mortise in each part per tenon, no screws, nothing clashing.

@@ -79,6 +79,7 @@ struct ConstructionThumbnail: View {
             case "wall_hanging": pen.wallHanging(choice)
             case "opening": pen.opening(choice)
             case "drawer_system": pen.drawerSystem(choice)
+            case "drawer_sides": pen.drawerSides(choice)
             case "overlay": pen.overlayPlan(choice)
             case "fixings": pen.fixing(choice)
             case "biscuit": pen.biscuit(choice)
@@ -232,6 +233,15 @@ private struct Pen {
             board(14, 64, 12, 4, hot: true)
             board(74, 64, 12, 4, hot: true)
         }
+    }
+
+    /// A deep drawer from the side: the tall front on the left, the box's steel side behind it.
+    func drawerSides(_ choice: String) {
+        board(12, 10, 6, 62)                          // front
+        board(18, 64, 70, 5)                          // base
+        let top: CGFloat = choice == "high_fronted" ? 14 : 44
+        board(18, top, 66, 64 - top, hot: true)       // steel side
+        line(p(18, 72), p(88, 72), colour: accent, width: 2)
     }
 
     // MARK: Wall hanging, side section against the wall

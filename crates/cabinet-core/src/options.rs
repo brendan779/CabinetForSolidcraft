@@ -137,6 +137,22 @@ pub fn option_groups() -> Vec<OptionGroup> {
             ],
         ),
         group(
+            "drawer_sides",
+            "Drawer sides",
+            &[
+                (
+                    "standard",
+                    "N, M or K",
+                    "Deep drawers are a K box behind a tall front",
+                ),
+                (
+                    "high_fronted",
+                    "High sides C/F",
+                    "LEGRABOX pure high fronted pull-outs, 177 or 241 mm sides, where they fit",
+                ),
+            ],
+        ),
+        group(
             "wall_hanging",
             "Wall hanging",
             &[

@@ -295,6 +295,19 @@ struct SizeSection: View {
                 }), in: 0...8)
                 .monospacedDigit()
             }
+            if ["door", "door_pair", "open"].contains(cab.frontType), cab.kind != "sink" {
+                HStack {
+                    Text("Inner drawers").foregroundStyle(.secondary)
+                    Spacer()
+                    Stepper("\(cab.innerDrawers)", value: Binding(get: { cab.innerDrawers }, set: { v in
+                        withAnimation(.snappy) { var c = cab; c.innerDrawers = v; project.selected = c }
+                    }), in: 0...5)
+                    .monospacedDigit()
+                    .help("Blum LEGRABOX inner drawers behind the doors, sharing the opening from the bottom. They replace the shelves; doors hang on 0-protrusion hinges.")
+                    .accessibilityLabel("Inner drawers")
+                    .accessibilityValue("\(cab.innerDrawers)")
+                }
+            }
             HStack(spacing: 6) {
                 Text("Seen ends").foregroundStyle(.secondary)
                 Spacer()

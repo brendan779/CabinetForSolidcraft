@@ -87,6 +87,12 @@ struct CabinetDoc: Identifiable, Hashable, Codable {
         }
     }
 
+    /// Blum inner drawers behind the doors; they take the shelves' place.
+    var innerDrawers: Int {
+        get { Int(number("inner_drawers")) }
+        set { update { $0["inner_drawers"] = newValue > 0 ? newValue : nil } }
+    }
+
     /// Shelves (numbered from 1 at the bottom) fixed between the sides instead of on pins.
     var fixedShelves: [Int] {
         get { (object["fixed_shelves"] as? [NSNumber])?.map(\.intValue) ?? [] }
