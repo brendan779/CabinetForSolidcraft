@@ -91,7 +91,7 @@ Priorities: **P0** blocks most other work · **P1** MVP · **P2** commercial par
 | BLUM-9 | 👤 needs-human (until STEP files exist in vendor-cad/blum/; see BLUM-CAD-1) | M | Import the owner's Blum STEP files from `vendor-cad/blum/` as linked components (`component.insert_design` after STEP → .solidcraft conversion) in place of stand-ins | a hinge renders with the real Blum model |
 | BLUM-10 | done (fbb3804) | M | Parametric stand-in models (hinge cup + arm, plate, runner, box side) emitted as bodies | visible in Manufacturing detail |
 
-| BLUM-11 | todo | S | Facts-only `docs/blum/webcodes.csv` (code, product, printed pages); no catalogue text beyond product names | committed |
+| BLUM-11 | done (716fbda) | S | Facts-only `docs/blum/webcodes.csv` (code, product, printed pages); no catalogue text beyond product names | committed |
 | BLUM-12 | todo | M | BLUMOTION for doors (printed 176–189) and TIP-ON for doors (190–193); TIP-ON doors use unsprung hinges (finishes BLUM-8's hinge row) | option + BOM rows with part numbers |
 | BLUM-13 | todo | M | SERVO-DRIVE, TIP-ON BLUMOTION and TIP-ON for box systems and runners (printed 362–408, 462–531) | options + BOM rows |
 | BLUM-14 | todo | S | Wall hanging bracket (598), cabinet connectors (599), EXPANDO T (596) for CORE-3's hangers | part numbers + drilling |
@@ -285,3 +285,4 @@ Agents append one line per session: date, items touched, outcome.
 - 2026-10-24 (night) — Owner's answers to PR #1 recorded: CORE-4b unblocked (bi-fold doors; hinge article split to CORE-4d), supplier-number rows stay needs-human, JOIN-2 accepted, CORE-5 question restated, JOIN-8 (Domino) and JOIN-9 (dowels) added. Not built: the run hit its usage limit.
 - 2026-10-24 (night) — Blum catalogue arrived (owner-supplied, local only): BLUM-2/3/4/5/6/7a/7b, CORE-8 and CORE-10 unblocked; BLUM-11..16 and BLUM-CAD-1 added. Order for the next run: BLUM-11, BLUM-2, BLUM-3, CORE-10, BLUM-4, BLUM-6/CORE-8, BLUM-7 HF top, BLUM-CAD-1. Not started: usage limit.
 - 2026-10-24 — owner added the benchtop / Surround / kitchen-style stretch goals (P2 kitchen design), to start after the cabinet systems. **Next run starts at BLUM-11** (suggested order above) and branches from **main** (PRs #1 and #2 were merged on 2026-10-24, plus the Cut Sheets crash fix 6554bbb).
+- 2026-10-26 (night) — BLUM-11 done: docs/blum/webcodes.csv lists the catalogue's 153 web codes with product name, printed pages and our family grouping; no catalogue text.
