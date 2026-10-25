@@ -6,10 +6,16 @@ use std::sync::OnceLock;
 use cabinet_catalog::{HardwareFile, HardwareItem};
 
 /// The hardware files the builders depend on. The app loads the same files for the BOM.
-const FILES: &[(&str, &str)] = &[(
-    "blum-clip-top.json",
-    include_str!("../../../catalog/hardware/blum-clip-top.json"),
-)];
+const FILES: &[(&str, &str)] = &[
+    (
+        "blum-clip-top.json",
+        include_str!("../../../catalog/hardware/blum-clip-top.json"),
+    ),
+    (
+        "blum-legrabox.json",
+        include_str!("../../../catalog/hardware/blum-legrabox.json"),
+    ),
+];
 
 /// Every bundled hardware item. The files are checked by this crate's tests, so a parse failure
 /// here is a broken build, not a user error.

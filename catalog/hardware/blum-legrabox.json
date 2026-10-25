@@ -1,0 +1,844 @@
+{
+  "brand": "Blum",
+  "website": "https://www.blum.com",
+  "notes": "LEGRABOX drawers N, M and K from the Blum Catalogue and technical manual 2024/2025, printed pages 198-207 (order information and planning) and 248. Cut sizes are Blum's for 16 mm chipboard bases and backs. The catalogue lists N only for NL 400-550. Cabinet profile screw positions (p.248) are along the profile, but their height on the side is not printed on these pages, so the side drilling is not recorded yet. The drawer system rows (blum.legrabox.n/m/k) carry the planning numbers; their article is the system name, not an orderable part. Not verified by a person.",
+  "items": [
+    {
+      "id": "blum.legrabox.n",
+      "brand": "Blum",
+      "article": "LEGRABOX N",
+      "family": "LEGRABOX",
+      "variant": "drawer N, drawer side height 66.5 mm, 16 mm chipboard base and back",
+      "kind": "drawer_system",
+      "parameters": {
+        "side_height": 66.5,
+        "side_thickness": 12.8,
+        "space_height": 80,
+        "min_space_below": 38,
+        "min_space_above": 42,
+        "depth_allowance": 3,
+        "base_width_deduction": 35,
+        "base_length_deduction": 10,
+        "back_width_deduction": 38,
+        "back_height": 39,
+        "board_thickness": 16,
+        "base_rebate_width": 38,
+        "base_rebate_depth": 8,
+        "base_above_datum": 23.4,
+        "front_hole_inset": 14,
+        "front_hole_height": 45.5,
+        "front_hole_pitch": 16,
+        "front_hole_diameter": 10,
+        "front_hole_depth_min": 12
+      },
+      "drilling": [
+        {
+          "x": 14,
+          "y": 45.5,
+          "diameter": 10,
+          "depth": 12,
+          "note": "front fixing bracket, EXPANDO; x in from the cabinet side's inner face, y above the drawer's datum (top of the cabinet bottom for the lowest drawer)"
+        },
+        {
+          "x": 14,
+          "y": 61.5,
+          "diameter": 10,
+          "depth": 12,
+          "note": "front fixing bracket, EXPANDO"
+        }
+      ],
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.201, web code DQBMJY",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.legrabox.drawer-side.n.400",
+      "brand": "Blum",
+      "article": "770N4002S",
+      "family": "LEGRABOX",
+      "variant": "drawer side set N, NL 400, SW-M | OG-M | CS-M",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 400,
+        "side_height": 66.5
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.200, web code DQBMJY",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.legrabox.drawer-side.n.450",
+      "brand": "Blum",
+      "article": "770N4502S",
+      "family": "LEGRABOX",
+      "variant": "drawer side set N, NL 450, SW-M | OG-M | CS-M",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 450,
+        "side_height": 66.5
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.200, web code DQBMJY",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.legrabox.drawer-side.n.500",
+      "brand": "Blum",
+      "article": "770N5002S",
+      "family": "LEGRABOX",
+      "variant": "drawer side set N, NL 500, SW-M | OG-M | CS-M",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 500,
+        "side_height": 66.5
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.200, web code DQBMJY",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.legrabox.drawer-side.n.550",
+      "brand": "Blum",
+      "article": "770N5502S",
+      "family": "LEGRABOX",
+      "variant": "drawer side set N, NL 550, SW-M | OG-M | CS-M",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 550,
+        "side_height": 66.5
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.200, web code DQBMJY",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.legrabox.back-fixing.n",
+      "brand": "Blum",
+      "article": "ZB7N000S",
+      "family": "LEGRABOX",
+      "variant": "chipboard back fixings left/right N, steel",
+      "kind": "drawer_system",
+      "parameters": {},
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.200, web code DQBMJY",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.legrabox.front-fixing.n",
+      "brand": "Blum",
+      "article": "ZF7N70E2",
+      "family": "LEGRABOX",
+      "variant": "front fixing bracket N, EXPANDO (2 per drawer)",
+      "kind": "drawer_system",
+      "parameters": {},
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.200, web code DQBMJY",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.legrabox.m",
+      "brand": "Blum",
+      "article": "LEGRABOX M",
+      "family": "LEGRABOX",
+      "variant": "drawer M, drawer side height 90.5 mm, 16 mm chipboard base and back",
+      "kind": "drawer_system",
+      "parameters": {
+        "side_height": 90.5,
+        "side_thickness": 12.8,
+        "space_height": 106,
+        "min_space_below": 38,
+        "min_space_above": 68,
+        "depth_allowance": 3,
+        "base_width_deduction": 35,
+        "base_length_deduction": 10,
+        "back_width_deduction": 38,
+        "back_height": 63,
+        "board_thickness": 16,
+        "base_rebate_width": 38,
+        "base_rebate_depth": 8,
+        "base_above_datum": 23.4,
+        "front_hole_inset": 14,
+        "front_hole_height": 51,
+        "front_hole_pitch": 32,
+        "front_hole_diameter": 10,
+        "front_hole_depth_min": 12
+      },
+      "drilling": [
+        {
+          "x": 14,
+          "y": 51,
+          "diameter": 10,
+          "depth": 12,
+          "note": "front fixing bracket, EXPANDO; x in from the cabinet side's inner face, y above the drawer's datum (top of the cabinet bottom for the lowest drawer)"
+        },
+        {
+          "x": 14,
+          "y": 83,
+          "diameter": 10,
+          "depth": 12,
+          "note": "front fixing bracket, EXPANDO"
+        }
+      ],
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.203, web code DQBN9A",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.legrabox.drawer-side.m.270",
+      "brand": "Blum",
+      "article": "770M2702S",
+      "family": "LEGRABOX",
+      "variant": "drawer side set M, NL 270, SW-M | OG-M | CS-M",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 270,
+        "side_height": 90.5
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.202, web code DQBN9A",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.legrabox.drawer-side.m.300",
+      "brand": "Blum",
+      "article": "770M3002S",
+      "family": "LEGRABOX",
+      "variant": "drawer side set M, NL 300, SW-M | OG-M | CS-M",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 300,
+        "side_height": 90.5
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.202, web code DQBN9A",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.legrabox.drawer-side.m.350",
+      "brand": "Blum",
+      "article": "770M3502S",
+      "family": "LEGRABOX",
+      "variant": "drawer side set M, NL 350, SW-M | OG-M | CS-M",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 350,
+        "side_height": 90.5
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.202, web code DQBN9A",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.legrabox.drawer-side.m.400",
+      "brand": "Blum",
+      "article": "770M4002S",
+      "family": "LEGRABOX",
+      "variant": "drawer side set M, NL 400, SW-M | OG-M | CS-M",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 400,
+        "side_height": 90.5
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.202, web code DQBN9A",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.legrabox.drawer-side.m.450",
+      "brand": "Blum",
+      "article": "770M4502S",
+      "family": "LEGRABOX",
+      "variant": "drawer side set M, NL 450, SW-M | OG-M | CS-M",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 450,
+        "side_height": 90.5
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.202, web code DQBN9A",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.legrabox.drawer-side.m.500",
+      "brand": "Blum",
+      "article": "770M5002S",
+      "family": "LEGRABOX",
+      "variant": "drawer side set M, NL 500, SW-M | OG-M | CS-M",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 500,
+        "side_height": 90.5
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.202, web code DQBN9A",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.legrabox.drawer-side.m.550",
+      "brand": "Blum",
+      "article": "770M5502S",
+      "family": "LEGRABOX",
+      "variant": "drawer side set M, NL 550, SW-M | OG-M | CS-M",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 550,
+        "side_height": 90.5
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.202, web code DQBN9A",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.legrabox.drawer-side.m.600",
+      "brand": "Blum",
+      "article": "770M6002S",
+      "family": "LEGRABOX",
+      "variant": "drawer side set M, NL 600, SW-M | OG-M | CS-M",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 600,
+        "side_height": 90.5
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.202, web code DQBN9A",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.legrabox.drawer-side.m.650",
+      "brand": "Blum",
+      "article": "770M6502S",
+      "family": "LEGRABOX",
+      "variant": "drawer side set M, NL 650, SW-M | OG-M | CS-M",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 650,
+        "side_height": 90.5
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.202, web code DQBN9A",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.legrabox.back-fixing.m",
+      "brand": "Blum",
+      "article": "ZB7M000S",
+      "family": "LEGRABOX",
+      "variant": "chipboard back fixings left/right M, steel",
+      "kind": "drawer_system",
+      "parameters": {},
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.202, web code DQBN9A",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.legrabox.front-fixing.m",
+      "brand": "Blum",
+      "article": "ZF7M70E2",
+      "family": "LEGRABOX",
+      "variant": "front fixing bracket M, EXPANDO (2 per drawer)",
+      "kind": "drawer_system",
+      "parameters": {},
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.202, web code DQBN9A",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.legrabox.k",
+      "brand": "Blum",
+      "article": "LEGRABOX K",
+      "family": "LEGRABOX",
+      "variant": "drawer K, drawer side height 128.5 mm, 16 mm chipboard base and back",
+      "kind": "drawer_system",
+      "parameters": {
+        "side_height": 128.5,
+        "side_thickness": 12.8,
+        "space_height": 144,
+        "min_space_below": 38,
+        "min_space_above": 106,
+        "depth_allowance": 3,
+        "base_width_deduction": 35,
+        "base_length_deduction": 10,
+        "back_width_deduction": 38,
+        "back_height": 101,
+        "board_thickness": 16,
+        "base_rebate_width": 38,
+        "base_rebate_depth": 8,
+        "base_above_datum": 23.4,
+        "front_hole_inset": 14,
+        "front_hole_height": 51,
+        "front_hole_pitch": 32,
+        "front_hole_diameter": 10,
+        "front_hole_depth_min": 12
+      },
+      "drilling": [
+        {
+          "x": 14,
+          "y": 51,
+          "diameter": 10,
+          "depth": 12,
+          "note": "front fixing bracket, EXPANDO; x in from the cabinet side's inner face, y above the drawer's datum (top of the cabinet bottom for the lowest drawer)"
+        },
+        {
+          "x": 14,
+          "y": 83,
+          "diameter": 10,
+          "depth": 12,
+          "note": "front fixing bracket, EXPANDO"
+        }
+      ],
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.207, web code DQBNYM",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.legrabox.drawer-side.k.300",
+      "brand": "Blum",
+      "article": "770K3002S",
+      "family": "LEGRABOX",
+      "variant": "drawer side set K, NL 300, SW-M | OG-M | CS-M",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 300,
+        "side_height": 128.5
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.206, web code DQBNYM",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.legrabox.drawer-side.k.350",
+      "brand": "Blum",
+      "article": "770K3502S",
+      "family": "LEGRABOX",
+      "variant": "drawer side set K, NL 350, SW-M | OG-M | CS-M",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 350,
+        "side_height": 128.5
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.206, web code DQBNYM",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.legrabox.drawer-side.k.400",
+      "brand": "Blum",
+      "article": "770K4002S",
+      "family": "LEGRABOX",
+      "variant": "drawer side set K, NL 400, SW-M | OG-M | CS-M",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 400,
+        "side_height": 128.5
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.206, web code DQBNYM",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.legrabox.drawer-side.k.450",
+      "brand": "Blum",
+      "article": "770K4502S",
+      "family": "LEGRABOX",
+      "variant": "drawer side set K, NL 450, SW-M | OG-M | CS-M",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 450,
+        "side_height": 128.5
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.206, web code DQBNYM",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.legrabox.drawer-side.k.500",
+      "brand": "Blum",
+      "article": "770K5002S",
+      "family": "LEGRABOX",
+      "variant": "drawer side set K, NL 500, SW-M | OG-M | CS-M",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 500,
+        "side_height": 128.5
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.206, web code DQBNYM",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.legrabox.drawer-side.k.550",
+      "brand": "Blum",
+      "article": "770K5502S",
+      "family": "LEGRABOX",
+      "variant": "drawer side set K, NL 550, SW-M | OG-M | CS-M",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 550,
+        "side_height": 128.5
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.206, web code DQBNYM",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.legrabox.drawer-side.k.600",
+      "brand": "Blum",
+      "article": "770K6002S",
+      "family": "LEGRABOX",
+      "variant": "drawer side set K, NL 600, SW-M | OG-M | CS-M",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 600,
+        "side_height": 128.5
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.206, web code DQBNYM",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.legrabox.back-fixing.k",
+      "brand": "Blum",
+      "article": "ZB7K000S",
+      "family": "LEGRABOX",
+      "variant": "chipboard back fixings left/right K, steel",
+      "kind": "drawer_system",
+      "parameters": {},
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.206, web code DQBNYM",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.legrabox.front-fixing.k",
+      "brand": "Blum",
+      "article": "ZF7K70E2",
+      "family": "LEGRABOX",
+      "variant": "front fixing bracket K, EXPANDO (2 per drawer)",
+      "kind": "drawer_system",
+      "parameters": {},
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.206, web code DQBNYM",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.legrabox.cabinet-profile.750.270",
+      "brand": "Blum",
+      "article": "750.2701S",
+      "family": "LEGRABOX",
+      "variant": "cabinet profiles left/right, BLUMOTION S, NL 270, 40 kg",
+      "kind": "runner",
+      "parameters": {
+        "nominal_length": 270,
+        "max_load_kg": 40
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.202, web code DQBN9A",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.legrabox.cabinet-profile.750.300",
+      "brand": "Blum",
+      "article": "750.3001S",
+      "family": "LEGRABOX",
+      "variant": "cabinet profiles left/right, BLUMOTION S, NL 300, 40 kg",
+      "kind": "runner",
+      "parameters": {
+        "nominal_length": 300,
+        "max_load_kg": 40
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.202, web code DQBN9A",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.legrabox.cabinet-profile.750.350",
+      "brand": "Blum",
+      "article": "750.3501S",
+      "family": "LEGRABOX",
+      "variant": "cabinet profiles left/right, BLUMOTION S, NL 350, 40 kg",
+      "kind": "runner",
+      "parameters": {
+        "nominal_length": 350,
+        "max_load_kg": 40
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.202, web code DQBN9A",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.legrabox.cabinet-profile.750.400",
+      "brand": "Blum",
+      "article": "750.4001S",
+      "family": "LEGRABOX",
+      "variant": "cabinet profiles left/right, BLUMOTION S, NL 400, 40 kg",
+      "kind": "runner",
+      "parameters": {
+        "nominal_length": 400,
+        "max_load_kg": 40
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.202, web code DQBN9A",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.legrabox.cabinet-profile.750.450",
+      "brand": "Blum",
+      "article": "750.4501S",
+      "family": "LEGRABOX",
+      "variant": "cabinet profiles left/right, BLUMOTION S, NL 450, 40 kg",
+      "kind": "runner",
+      "parameters": {
+        "nominal_length": 450,
+        "max_load_kg": 40
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.202, web code DQBN9A",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.legrabox.cabinet-profile.750.500",
+      "brand": "Blum",
+      "article": "750.5001S",
+      "family": "LEGRABOX",
+      "variant": "cabinet profiles left/right, BLUMOTION S, NL 500, 40 kg",
+      "kind": "runner",
+      "parameters": {
+        "nominal_length": 500,
+        "max_load_kg": 40
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.202, web code DQBN9A",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.legrabox.cabinet-profile.750.550",
+      "brand": "Blum",
+      "article": "750.5501S",
+      "family": "LEGRABOX",
+      "variant": "cabinet profiles left/right, BLUMOTION S, NL 550, 40 kg",
+      "kind": "runner",
+      "parameters": {
+        "nominal_length": 550,
+        "max_load_kg": 40
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.202, web code DQBN9A",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.legrabox.cabinet-profile.750.600",
+      "brand": "Blum",
+      "article": "750.6001S",
+      "family": "LEGRABOX",
+      "variant": "cabinet profiles left/right, BLUMOTION S, NL 600, 40 kg",
+      "kind": "runner",
+      "parameters": {
+        "nominal_length": 600,
+        "max_load_kg": 40
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.202, web code DQBN9A",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.legrabox.cabinet-profile.753.450",
+      "brand": "Blum",
+      "article": "753.4501S",
+      "family": "LEGRABOX",
+      "variant": "cabinet profiles left/right, BLUMOTION S, NL 450, 70 kg",
+      "kind": "runner",
+      "parameters": {
+        "nominal_length": 450,
+        "max_load_kg": 70
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.202, web code DQBN9A",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.legrabox.cabinet-profile.753.500",
+      "brand": "Blum",
+      "article": "753.5001S",
+      "family": "LEGRABOX",
+      "variant": "cabinet profiles left/right, BLUMOTION S, NL 500, 70 kg",
+      "kind": "runner",
+      "parameters": {
+        "nominal_length": 500,
+        "max_load_kg": 70
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.202, web code DQBN9A",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.legrabox.cabinet-profile.753.550",
+      "brand": "Blum",
+      "article": "753.5501S",
+      "family": "LEGRABOX",
+      "variant": "cabinet profiles left/right, BLUMOTION S, NL 550, 70 kg",
+      "kind": "runner",
+      "parameters": {
+        "nominal_length": 550,
+        "max_load_kg": 70
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.202, web code DQBN9A",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.legrabox.cabinet-profile.753.600",
+      "brand": "Blum",
+      "article": "753.6001S",
+      "family": "LEGRABOX",
+      "variant": "cabinet profiles left/right, BLUMOTION S, NL 600, 70 kg",
+      "kind": "runner",
+      "parameters": {
+        "nominal_length": 600,
+        "max_load_kg": 70
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.202, web code DQBN9A",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.legrabox.cabinet-profile.753.650",
+      "brand": "Blum",
+      "article": "753.6501S",
+      "family": "LEGRABOX",
+      "variant": "cabinet profiles left/right, BLUMOTION S, NL 650, 70 kg",
+      "kind": "runner",
+      "parameters": {
+        "nominal_length": 650,
+        "max_load_kg": 70
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.202, web code DQBN9A",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    }
+  ]
+}

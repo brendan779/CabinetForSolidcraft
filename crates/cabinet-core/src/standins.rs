@@ -103,7 +103,8 @@ pub fn stand_ins(list: &PartList) -> Vec<StandIn> {
                     shapes,
                 });
             }
-        } else if h.item.ends_with(".runner")
+        } else if crate::hardware::item(&h.item)
+            .is_ok_and(|i| i.kind == cabinet_catalog::HardwareKind::Runner)
             && let Some(sides) = runners(list, h)
         {
             drawers += 1;

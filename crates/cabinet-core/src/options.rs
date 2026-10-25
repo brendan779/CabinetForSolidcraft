@@ -106,6 +106,15 @@ pub fn option_groups() -> Vec<OptionGroup> {
             ],
         ),
         group(
+            "drawer_system",
+            "Drawers",
+            &[(
+                "legrabox",
+                "LEGRABOX",
+                "Blum steel-sided boxes; N, M or K to suit each drawer's height",
+            )],
+        ),
+        group(
             "wall_hanging",
             "Wall hanging",
             &[

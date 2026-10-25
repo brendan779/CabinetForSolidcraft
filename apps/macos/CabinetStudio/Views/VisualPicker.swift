@@ -78,6 +78,7 @@ struct ConstructionThumbnail: View {
             case "toe_kick": pen.toeKick(choice)
             case "wall_hanging": pen.wallHanging(choice)
             case "opening": pen.opening(choice)
+            case "drawer_system": pen.drawerSystem(choice)
             case "overlay": pen.overlayPlan(choice)
             case "fixings": pen.fixing(choice)
             case "biscuit": pen.biscuit(choice)
@@ -201,6 +202,32 @@ private struct Pen {
                 bolt.closeSubpath()
                 ctx.fill(bolt, with: .color(accent))
             }
+        }
+    }
+
+    // MARK: Drawer system, a drawer box in section from the front
+
+    func drawerSystem(_ choice: String) {
+        // The cabinet's sides, and the drawer box between them on its runners.
+        board(8, 10, 6, 62)
+        board(86, 10, 6, 62)
+        switch choice {
+        case "legrabox":
+            // Slim steel sides with the runner hidden under them; a cut base and the back.
+            board(19, 30, 4, 34, hot: true)
+            board(77, 30, 4, 34, hot: true)
+            board(23, 58, 54, 5)
+            board(25, 36, 50, 22)
+            line(p(14, 66), p(23, 66), colour: accent, width: 2)
+            line(p(77, 66), p(86, 66), colour: accent, width: 2)
+        default:
+            // Wooden sides standing on runners under the base.
+            board(18, 28, 8, 34, hot: true)
+            board(74, 28, 8, 34, hot: true)
+            board(26, 28, 48, 30)
+            board(18, 58, 64, 5)
+            board(14, 64, 12, 4, hot: true)
+            board(74, 64, 12, 4, hot: true)
         }
     }
 

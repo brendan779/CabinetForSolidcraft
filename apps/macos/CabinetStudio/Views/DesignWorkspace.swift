@@ -516,7 +516,8 @@ final class ViewportScene {
             switch (p.role, p.hinged) {
             case ("Door", "left"): t.rotation = simd_quatf(angle: -.pi * 0.55, axis: [0, 1, 0])
             case ("Door", "right"): t.rotation = simd_quatf(angle: .pi * 0.55, axis: [0, 1, 0])
-            case ("Drawer front", _): t.translation.z += 0.35
+            case ("Drawer front", _), ("Drawer bottom", _), ("Drawer back", _), ("Drawer side", _):
+                t.translation.z += 0.35
             default: break
             }
         }

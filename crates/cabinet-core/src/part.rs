@@ -25,6 +25,10 @@ pub enum PartRole {
     Filler,
     /// A decorative panel on the end of a run.
     EndPanel,
+    /// The base of a drawer box, cut to the drawer system's sizes.
+    DrawerBottom,
+    /// The back of a drawer box.
+    DrawerBack,
 }
 
 impl PartRole {
@@ -44,6 +48,8 @@ impl PartRole {
             PartRole::BlindPanel => "Blind panel",
             PartRole::Filler => "Filler",
             PartRole::EndPanel => "End panel",
+            PartRole::DrawerBottom => "Drawer bottom",
+            PartRole::DrawerBack => "Drawer back",
         }
     }
 
@@ -64,6 +70,8 @@ impl PartRole {
             PartRole::BlindPanel => "BlindPanel",
             PartRole::Filler => "Filler",
             PartRole::EndPanel => "EndPanel",
+            PartRole::DrawerBottom => "DrawerBottom",
+            PartRole::DrawerBack => "DrawerBack",
         }
     }
 
@@ -196,6 +204,8 @@ pub enum BorePurpose {
     HingeCup,
     HingePlate,
     Dowel,
+    /// A drawer system's front fixing (LEGRABOX EXPANDO bracket), in the back of a drawer front.
+    FrontFixing,
 }
 
 fn default_biscuit() -> BiscuitSize {

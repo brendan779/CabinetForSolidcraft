@@ -297,6 +297,8 @@ pub struct ConstructionStandard {
     pub wall_hanging: WallHanging,
     /// How doors and drawers are opened.
     pub opening: Opening,
+    /// What the drawers are made of and run on.
+    pub drawer_system: DrawerSystem,
 }
 
 /// Which boards of a cabinet a catalog board is assigned to.
@@ -349,6 +351,7 @@ impl Default for ConstructionStandard {
             edge_band_thickness: 1.0,
             wall_hanging: WallHanging::Hangers,
             opening: Opening::Handles,
+            drawer_system: DrawerSystem::Legrabox,
         }
     }
 }
@@ -400,6 +403,14 @@ pub enum Opening {
     /// Handleless, electric: Blum SERVO-DRIVE opens drawers at a touch. Hinged doors cannot
     /// take it and get TIP-ON.
     ServoDrive,
+}
+
+/// Drawer boxes and their runners.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum DrawerSystem {
+    /// Blum LEGRABOX: steel sides, a cut base and back; N, M or K by the opening's height.
+    Legrabox,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]

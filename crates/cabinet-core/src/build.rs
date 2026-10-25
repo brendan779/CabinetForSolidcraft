@@ -1,5 +1,6 @@
 //! Cabinet → parts, machining and hardware.
 
+use crate::drawers;
 use crate::geom::{Aabb, Axis, Vec3};
 use crate::hinges::{self, HingeNeed};
 use crate::joinery::ButtJoint;
@@ -815,6 +816,7 @@ impl<'a> Builder<'a> {
                 let usable = (z1 - z0) - g * (ratios.len() - 1) as f64;
                 // Top to bottom.
                 let mut top = z1;
+                let mut fronts = Vec::new();
                 for (i, r) in ratios.iter().enumerate() {
                     let hgt = usable * r / total;
                     let b = aabb(x0, y0, top - hgt, x1, y1, top);
@@ -826,17 +828,126 @@ impl<'a> Builder<'a> {
                         Axis::X,
                         EdgeBanding::all(),
                     );
-                    self.list.hardware.push(HardwarePlacement {
-                        item: "blum.legrabox.runner".into(),
-                        description: "Drawer runner set (pair), length to suit".into(),
-                        at: b.center(),
-                        part: self.name(PartRole::DrawerFront, Some(i + 1)),
-                        quantity: 1,
-                    });
+                    fronts.push(b);
                     top -= hgt + g;
+                }
+                // Each drawer's runners stand where its front's bottom edge meets the carcass
+                // the way the lowest one meets the bottom panel; a drawer has up to the next
+                // drawer's datum (or the underside of the top) for its box.
+                let lift = self.opening_z.0 - z0;
+                let datums: Vec<f64> = fronts.iter().map(|b| b.min.z + lift).collect();
+                for (i, b) in fronts.iter().enumerate() {
+                    let ceiling = if i == 0 {
+                        self.opening_z.1
+                    } else {
+                        datums[i - 1]
+                    };
+                    self.drawer_box(i + 1, *b, datums[i], ceiling - datums[i]);
                 }
             }
         }
+    }
+
+    /// The drawer system's box behind drawer front `n`: base and back parts, front fixing bores
+    /// and the system's hardware. `datum` is the height its runners stand on.
+    fn drawer_box(&mut self, n: usize, front: Aabb, datum: f64, space: f64) {
+        let cab = self.cab;
+        let t = cab.standard.carcass_thickness;
+        let front_name = self.name(PartRole::DrawerFront, Some(n));
+        let inner_width = cab.width - 2.0 * t;
+        let fy = front.max().y;
+        let lb = match drawers::legrabox(inner_width, self.interior_back - fy, space) {
+            Ok(lb) => lb,
+            Err(e) => {
+                self.list
+                    .warnings
+                    .push(format!("{front_name}: {e}; no drawer box"));
+                return;
+            }
+        };
+        let numbers = (|| {
+            let p = |k: &str| lb.system.param(k);
+            Ok::<_, String>((p("base_above_datum")?, p("front_hole_inset")?))
+        })();
+        let Ok((base_lift, hole_inset)) = numbers else {
+            self.list
+                .warnings
+                .push(format!("{front_name}: {}", numbers.unwrap_err()));
+            return;
+        };
+        let bt = lb.board_thickness;
+        // Placed for the 3D view and the cut list; the sizes are Blum's.
+        let (bw, bl) = lb.base;
+        let (kw, kh) = lb.back;
+        let mid = cab.width / 2.0;
+        let z = datum + base_lift;
+        self.add_drawer_part(
+            PartRole::DrawerBottom,
+            n,
+            aabb(mid - bw / 2.0, fy, z, mid + bw / 2.0, fy + bl, z + bt),
+            Axis::Z,
+        );
+        self.add_drawer_part(
+            PartRole::DrawerBack,
+            n,
+            aabb(
+                mid - kw / 2.0,
+                fy + bl - bt,
+                z + bt,
+                mid + kw / 2.0,
+                fy + bl,
+                z + bt + kh,
+            ),
+            Axis::Y,
+        );
+        // Front fixing brackets: their bores in the back of the front, in from each side.
+        for x in [t + hole_inset, cab.width - t - hole_inset] {
+            for hole in &lb.system.drilling {
+                self.list.operations.push(Operation::Bore {
+                    part: front_name.clone(),
+                    at: Vec3::new(x, fy, datum + hole.y),
+                    direction: Dir::new(Axis::Y, false),
+                    diameter: hole.diameter,
+                    depth: hole.depth.min(front.size.y - 3.0),
+                    purpose: BorePurpose::FrontFixing,
+                });
+            }
+        }
+        let at = front.center();
+        for (item, quantity) in [
+            (lb.profile, 1),
+            (lb.sides, 1),
+            (lb.back_fixing, 1),
+            (lb.front_fixing, 2),
+        ] {
+            self.list.hardware.push(HardwarePlacement {
+                item: item.id.clone(),
+                description: format!("{} {}", item.family, item.variant),
+                at,
+                part: front_name.clone(),
+                quantity,
+            });
+        }
+    }
+
+    /// A drawer box part in the carcass board when it is the system's thickness, else generic.
+    fn add_drawer_part(&mut self, role: PartRole, n: usize, b: Aabb, thickness_axis: Axis) {
+        let s = &self.cab.standard;
+        let board = if (b.size.get(thickness_axis) - s.carcass_thickness).abs() < 1e-9 {
+            s.carcass_board.clone()
+        } else {
+            String::new()
+        };
+        self.list.parts.push(Part {
+            name: self.name(role, Some(n)),
+            role,
+            bounds: b,
+            thickness_axis,
+            grain_axis: Some(Axis::X),
+            board,
+            // Blum's sizes are cut sizes; tape would take them off.
+            edges: EdgeBanding::default(),
+        });
     }
 
     /// The blind panel and filler of a blind corner cabinet, from its blind side; returns the
@@ -1723,6 +1834,49 @@ mod tests {
                 .iter()
                 .any(|o| matches!(o, Operation::Bore { part, .. } if part.ends_with("FrontRail")))
         );
+    }
+
+    /// BLUM-4: a LEGRABOX drawer bank puts each drawer's base and back in the cut list at
+    /// Blum's sizes, and drills the front fixing brackets.
+    #[test]
+    fn a_legrabox_drawer_bank_cuts_a_base_and_back_per_drawer() {
+        let cab = Cabinet::new("D01", CabinetKind::DrawerBank);
+        let list = build_cabinet(&cab).unwrap();
+        let cut = crate::cutlist::cut_list(std::slice::from_ref(&list), "white", 1.0);
+        let rd = |v: f64| (v * 1e6).round() / 1e6;
+        let sizes = |role: &str| -> Vec<(f64, f64, f64)> {
+            cut.rows
+                .iter()
+                .filter(|r| r.part.contains(role))
+                .flat_map(|r| {
+                    std::iter::repeat_n(
+                        (rd(r.cut_length), rd(r.cut_width), r.thickness),
+                        r.quantity as usize,
+                    )
+                })
+                .collect()
+        };
+        let lw = cab.width - 2.0 * cab.standard.carcass_thickness;
+        assert_eq!(sizes("DrawerBottom"), vec![(lw - 35.0, 540.0, 16.0); 3]);
+        assert_eq!(sizes("DrawerBack"), vec![(lw - 38.0, 101.0, 16.0); 3]);
+        let fixings = list
+            .operations
+            .iter()
+            .filter(|o| matches!(o, Operation::Bore { purpose: BorePurpose::FrontFixing, diameter, .. } if *diameter == 10.0))
+            .count();
+        assert_eq!(fixings, 3 * 4);
+        assert!(list.warnings.is_empty(), "{:?}", list.warnings);
+    }
+
+    #[test]
+    fn a_drawer_too_low_for_any_legrabox_warns_and_gets_no_box() {
+        let mut cab = Cabinet::new("D01", CabinetKind::DrawerBank);
+        cab.fronts = FrontLayout::Drawers {
+            ratios: vec![1.0; 12],
+        };
+        let list = build_cabinet(&cab).unwrap();
+        assert!(list.by_role(PartRole::DrawerBottom).next().is_none());
+        assert!(list.warnings.iter().any(|w| w.contains("no drawer box")));
     }
 
     /// CORE-10: each overlay gets the hinge cranked for it, the cup at Blum's boring distance
