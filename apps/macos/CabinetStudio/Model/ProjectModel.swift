@@ -178,6 +178,35 @@ struct CabinetDoc: Identifiable, Hashable, Codable {
         }
     }
 
+    /// LED strips (zone, voltage, W/m), as the core's `lights`.
+    var lights: [[String: Any]] {
+        get { object["lights"] as? [[String: Any]] ?? [] }
+        set { update { $0["lights"] = newValue.isEmpty ? nil : newValue } }
+    }
+
+    func hasLight(_ zone: String) -> Bool { lights.contains { $0["zone"] as? String == zone } }
+
+    /// Switches a zone's strip on or off; a new strip takes the cabinet's other strips' voltage and
+    /// power, or 24 V at 9.6 W/m.
+    mutating func toggleLight(_ zone: String) {
+        if hasLight(zone) {
+            lights = lights.filter { $0["zone"] as? String != zone }
+        } else {
+            lights.append(["zone": zone, "voltage": lightVoltage, "watts_per_metre": lightWatts])
+        }
+    }
+
+    /// "12v" or "24v": every strip of the cabinet together.
+    var lightVoltage: String {
+        get { lights.first?["voltage"] as? String ?? "24v" }
+        set { lights = lights.map { var l = $0; l["voltage"] = newValue; return l } }
+    }
+
+    var lightWatts: Double {
+        get { (lights.first?["watts_per_metre"] as? NSNumber)?.doubleValue ?? 9.6 }
+        set { lights = lights.map { var l = $0; l["watts_per_metre"] = newValue; return l } }
+    }
+
     /// The catalog board id the cabinet uses for `slot` (carcass, front, back); empty for generic.
     func board(for slot: String) -> String {
         (object["standard"] as? [String: Any])?["\(slot)_board"] as? String ?? ""

@@ -308,4 +308,16 @@ mod tests {
         assert_eq!(s[0].length, 600.0 - 32.0 - 20.0);
         assert!((s[0].watts - 5.48).abs() < 1e-9);
     }
+
+    /// HAF-6: the app writes lights as `{zone, voltage: "24v", watts_per_metre}`.
+    #[test]
+    fn lights_read_from_the_apps_json() {
+        let cab: Cabinet = serde_json::from_value(serde_json::json!({
+            "id": "W01", "kind": "wall", "width": 600.0, "depth": 330.0, "height": 720.0,
+            "lights": [{"zone": "under_cabinet", "voltage": "24v", "watts_per_metre": 9.6}]
+        }))
+        .unwrap();
+        assert_eq!(cab.lights[0].voltage, Voltage::V24);
+        assert_eq!(strips(&cab).len(), 1);
+    }
 }

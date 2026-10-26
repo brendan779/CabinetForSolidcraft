@@ -28,6 +28,7 @@ struct InspectorView: View {
                     } else {
                         FrontsSection(cab: cab)
                     }
+                    LightsSection(cab: cab)
                     BoardsSection(cab: cab)
                     ConstructionScope(cab: cab)
                     let overrides = project.overrides(of: cab)
@@ -421,6 +422,105 @@ struct SinkSection: View {
                 }
             }
         }
+    }
+}
+
+/// LED strips: tap a zone on the drawn cabinet to light it, then the strips' voltage and power.
+struct LightsSection: View {
+    @Environment(ProjectModel.self) private var project
+    let cab: CabinetDoc
+
+    private var zones: [(id: String, title: String, help: String)] {
+        var z: [(String, String, String)] = []
+        if ["wall", "open_shelf", "corner_wall"].contains(cab.kind) {
+            z.append(("under_cabinet", "Under", "A strip under the cabinet, lighting the bench"))
+        }
+        z.append(("in_cabinet", "Inside", "A strip under the top, inside the cabinet"))
+        if ["base", "tall", "drawer_bank", "blind_corner", "corner_base", "sink"].contains(cab.kind) {
+            z.append(("plinth", "Plinth", "A strip in the plinth, lighting the floor"))
+        }
+        return z
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            SectionTitle("Lights")
+            HStack(spacing: 8) {
+                ForEach(zones, id: \.id) { zone in
+                    let on = cab.hasLight(zone.id)
+                    Button {
+                        withAnimation(.snappy) { var c = cab; c.toggleLight(zone.id); project.selected = c }
+                    } label: {
+                        VStack(spacing: 6) {
+                            LightZoneThumbnail(zone: zone.id, on: on).frame(width: 52, height: 44)
+                            Text(zone.title).font(.caption)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 8)
+                    }
+                    .buttonStyle(TileStyle(selected: on))
+                    .help(zone.help + ". A 10 mm cable hole is drilled for it.")
+                    .accessibilityLabel("\(zone.title) light")
+                    .accessibilityValue(on ? "on" : "off")
+                }
+            }
+            if !cab.lights.isEmpty {
+                HStack(spacing: 6) {
+                    Text("Strip").foregroundStyle(.secondary)
+                    Spacer(minLength: 0)
+                    ForEach(["12v", "24v"], id: \.self) { v in
+                        Button(v == "12v" ? "12 V" : "24 V") {
+                            withAnimation(.snappy) { var c = cab; c.lightVoltage = v; project.selected = c }
+                        }
+                        .buttonStyle(ChipStyle(selected: cab.lightVoltage == v))
+                        .help("Strips of one voltage share a driver; 12 V and 24 V never mix")
+                    }
+                }
+                HStack(spacing: 6) {
+                    Text("Power").foregroundStyle(.secondary)
+                    Spacer(minLength: 0)
+                    ForEach([4.8, 9.6, 14.4], id: \.self) { w in
+                        Button(String(format: "%.1f W/m", w)) {
+                            withAnimation(.snappy) { var c = cab; c.lightWatts = w; project.selected = c }
+                        }
+                        .buttonStyle(ChipStyle(selected: abs(cab.lightWatts - w) < 0.05))
+                        .help("The strip's power per metre, from its data sheet")
+                    }
+                }
+            }
+        }
+    }
+}
+
+/// A cabinet from the front with the zone's strip as a glowing line.
+struct LightZoneThumbnail: View {
+    let zone: String
+    let on: Bool
+
+    var body: some View {
+        Canvas { ctx, size in
+            let w = size.width, h = size.height
+            let body = CGRect(x: w * 0.15, y: h * 0.12, width: w * 0.7, height: h * 0.6)
+            ctx.stroke(Path(body), with: .color(.primary.opacity(0.6)), lineWidth: 1)
+            let y: CGFloat
+            switch zone {
+            case "under_cabinet": y = body.maxY + 3
+            case "plinth":
+                ctx.stroke(Path(CGRect(x: body.minX + 4, y: body.maxY, width: body.width - 8, height: h * 0.18)),
+                           with: .color(.primary.opacity(0.4)), lineWidth: 1)
+                y = body.maxY + h * 0.12
+            default: y = body.minY + 4
+            }
+            var strip = Path()
+            strip.move(to: CGPoint(x: body.minX + 5, y: y))
+            strip.addLine(to: CGPoint(x: body.maxX - 5, y: y))
+            let colour: Color = on ? .yellow : .primary.opacity(0.25)
+            if on {
+                ctx.stroke(strip, with: .color(.yellow.opacity(0.35)), lineWidth: 6)
+            }
+            ctx.stroke(strip, with: .color(colour), lineWidth: 2)
+        }
+        .accessibilityHidden(true)
     }
 }
 
