@@ -23,6 +23,40 @@ pub enum RunItem {
     Cabinet(Box<Cabinet>),
     Filler(Filler),
     EndPanel(EndPanel),
+    /// A benchtop over every stretch of base-height cabinets in the run. It takes no run length.
+    Benchtop(Benchtop),
+}
+
+/// A benchtop: one piece over each stretch of base cabinets (and the fillers and end panels
+/// between and beside them), overhanging the door faces and, if asked, the stretch's ends.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct Benchtop {
+    pub id: String,
+    #[serde(default = "Benchtop::default_thickness")]
+    pub thickness: f64,
+    /// Past the door faces.
+    #[serde(default = "Benchtop::default_front_overhang")]
+    pub front_overhang: f64,
+    /// Past each end of a stretch.
+    #[serde(default)]
+    pub side_overhang: f64,
+    /// Short of the wall at the back.
+    #[serde(default)]
+    pub back_clearance: f64,
+    /// Catalog board id, or empty for generic.
+    #[serde(default)]
+    pub board: String,
+}
+
+impl Benchtop {
+    /// Our defaults: a 33 mm laminate top 20 mm past the doors.
+    fn default_thickness() -> f64 {
+        33.0
+    }
+
+    fn default_front_overhang() -> f64 {
+        20.0
+    }
 }
 
 /// A strip in the plane of the fronts, closing a gap between cabinets or to a wall.
@@ -68,6 +102,26 @@ pub fn build_run(run: &Run) -> Result<Vec<PartList>> {
             RunItem::Cabinet(c) => out.push(build_cabinet(&placed(c, at))?),
             RunItem::Filler(f) => out.push(filler(f, neighbour(i), at)?),
             RunItem::EndPanel(e) => out.push(end_panel(e, neighbour(i), at)),
+            // Built from the rest, below.
+            RunItem::Benchtop(b) => out.push(PartList {
+                cabinet: b.id.clone(),
+                ..PartList::default()
+            }),
+        }
+    }
+    for (i, item) in run.items.iter().enumerate() {
+        if let RunItem::Benchtop(b) = item {
+            let under: Vec<bool> = run
+                .items
+                .iter()
+                .enumerate()
+                .map(|(j, it)| match it {
+                    RunItem::Cabinet(c) => takes_benchtop(c),
+                    RunItem::Filler(_) | RunItem::EndPanel(_) => takes_benchtop(neighbour(j)),
+                    RunItem::Benchtop(_) => false,
+                })
+                .collect();
+            out[i] = benchtop(b, &out, &under);
         }
     }
     Ok(out)
@@ -127,6 +181,7 @@ fn lefts<'a>(run: &Run, neighbour: &dyn Fn(usize) -> &'a Cabinet) -> Vec<Vec3> {
                 RunItem::Cabinet(c) => c.width,
                 RunItem::Filler(f) => f.width,
                 RunItem::EndPanel(_) => neighbour(i).standard.front_thickness,
+                RunItem::Benchtop(_) => 0.0,
             };
             at
         })
@@ -187,6 +242,82 @@ fn end_panel(e: &EndPanel, c: &Cabinet, at: Vec3) -> PartList {
         Axis::Z,
         &c.standard.front_board,
     )
+}
+
+/// Base-height cabinets carry a benchtop.
+fn takes_benchtop(c: &Cabinet) -> bool {
+    use crate::model::CabinetKind as K;
+    matches!(
+        c.kind,
+        K::Base | K::DrawerBank | K::Sink | K::BlindCorner | K::CornerBase
+    )
+}
+
+/// One benchtop part per stretch of consecutive items `under` marks, from their built parts:
+/// across their width (plus the side overhangs), from the door faces less the front overhang to
+/// the back less the clearance, on top.
+fn benchtop(b: &Benchtop, lists: &[PartList], under: &[bool]) -> PartList {
+    let mut out = PartList {
+        cabinet: b.id.clone(),
+        ..PartList::default()
+    };
+    let mut stretches: Vec<Vec<&PartList>> = Vec::new();
+    let mut open = false;
+    for (list, &u) in lists.iter().zip(under) {
+        if u {
+            if !open {
+                stretches.push(Vec::new());
+            }
+            stretches.last_mut().unwrap().push(list);
+        }
+        open = u;
+    }
+    if stretches.is_empty() {
+        out.warnings
+            .push("no base cabinets in the run to put the benchtop on".into());
+    }
+    for (n, stretch) in stretches.iter().enumerate() {
+        let parts: Vec<&Part> = stretch.iter().flat_map(|l| &l.parts).collect();
+        // An L-corner's second leg comes forward of the doors: its own top (BENCH-3).
+        let in_line: Vec<&&Part> = parts.iter().filter(|p| p.bounds.min.y >= -100.0).collect();
+        if in_line.len() < parts.len() {
+            out.warnings.push(
+                "an L-corner's second leg needs its own benchtop piece (BENCH-3); this one covers the main run"
+                    .into(),
+            );
+        }
+        let lo = |f: fn(&Part) -> f64| in_line.iter().map(|p| f(p)).fold(f64::MAX, f64::min);
+        let hi = |f: fn(&Part) -> f64| in_line.iter().map(|p| f(p)).fold(f64::MIN, f64::max);
+        let x0 = lo(|p| p.bounds.min.x) - b.side_overhang;
+        let x1 = hi(|p| p.bounds.max().x) + b.side_overhang;
+        let y0 = lo(|p| p.bounds.min.y) - b.front_overhang;
+        // The cabinets' backs: end panels and fillers carry a scribe allowance.
+        let y1 = in_line
+            .iter()
+            .filter(|p| !matches!(p.role, PartRole::EndPanel | PartRole::Filler))
+            .map(|p| p.bounds.max().y)
+            .fold(f64::MIN, f64::max)
+            - b.back_clearance;
+        let z = hi(|p| p.bounds.max().z);
+        out.parts.push(Part {
+            name: format!("{}.{}{}", b.id, PartRole::Benchtop.code(), n + 1),
+            role: PartRole::Benchtop,
+            bounds: Aabb::new(
+                Vec3::new(x0, y0, z),
+                Vec3::new(x1 - x0, y1 - y0, b.thickness),
+            ),
+            thickness_axis: Axis::Z,
+            grain_axis: Some(Axis::X),
+            board: b.board.clone(),
+            edges: EdgeBanding {
+                front: true,
+                left: b.side_overhang > 0.0,
+                right: b.side_overhang > 0.0,
+                ..EdgeBanding::default()
+            },
+        });
+    }
+    out
 }
 
 fn single(
@@ -317,5 +448,75 @@ mod tests {
             items: vec![end("E01")],
         };
         assert!(build_run(&run).is_err());
+    }
+
+    fn top(id: &str, side: f64) -> RunItem {
+        RunItem::Benchtop(Benchtop {
+            id: id.into(),
+            thickness: 33.0,
+            front_overhang: 20.0,
+            side_overhang: side,
+            back_clearance: 0.0,
+            board: String::new(),
+        })
+    }
+
+    fn cab(id: &str, kind: CabinetKind) -> RunItem {
+        RunItem::Cabinet(Box::new(Cabinet::new(id, kind)))
+    }
+
+    /// BENCH-1: one piece over each stretch of base cabinets (with their end panels), 20 past
+    /// the doors, on top, taking no run length; a tall cabinet splits the stretches.
+    #[test]
+    fn a_benchtop_covers_each_stretch_of_base_cabinets() {
+        let run = Run {
+            origin: Vec3::default(),
+            items: vec![
+                end("E01"),
+                cab("B01", CabinetKind::Base),
+                cab("D01", CabinetKind::DrawerBank),
+                cab("T01", CabinetKind::Tall),
+                cab("B02", CabinetKind::Sink),
+                top("BT1", 10.0),
+            ],
+        };
+        let lists = build_run(&run).unwrap();
+        assert_eq!(lists.len(), 6);
+        let bt = &lists[5];
+        assert!(bt.warnings.is_empty(), "{:?}", bt.warnings);
+        assert_eq!(bt.parts.len(), 2);
+        let (a, b) = (&bt.parts[0].bounds, &bt.parts[1].bounds);
+        let ft = 18.0;
+        // E01 (18) + B01 + D01, plus 10 each end.
+        assert!((a.min.x - (-10.0)).abs() < 1e-9);
+        assert!(
+            (a.size.x - (ft + 1200.0 + 20.0)).abs() < 1e-9,
+            "{}",
+            a.size.x
+        );
+        assert!((a.min.y - (-ft - 20.0)).abs() < 1e-9);
+        assert!((a.max().y - 580.0).abs() < 1e-9);
+        assert!((a.min.z - 870.0).abs() < 1e-9 && (a.size.z - 33.0).abs() < 1e-9);
+        // The sink after the tall cabinet.
+        let sink_x = ft + 1200.0 + 600.0;
+        assert!((b.min.x - (sink_x - 10.0)).abs() < 1e-9);
+        // The run's length is unchanged by the benchtop.
+        let laid = laid_out(&run);
+        let RunItem::Cabinet(sink) = &laid.items[4] else {
+            panic!()
+        };
+        assert!((sink.origin.x - sink_x).abs() < 1e-9);
+        assert!(bt.parts.iter().all(|p| p.role == PartRole::Benchtop));
+    }
+
+    #[test]
+    fn a_benchtop_with_no_base_cabinets_says_so() {
+        let run = Run {
+            origin: Vec3::default(),
+            items: vec![cab("W01", CabinetKind::Wall), top("BT1", 0.0)],
+        };
+        let lists = build_run(&run).unwrap();
+        assert!(lists[1].parts.is_empty());
+        assert!(lists[1].warnings[0].contains("no base cabinets"));
     }
 }

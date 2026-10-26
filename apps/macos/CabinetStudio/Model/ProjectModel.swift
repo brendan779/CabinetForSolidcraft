@@ -43,12 +43,28 @@ struct CabinetDoc: Identifiable, Hashable, Codable {
         set { update { $0["to_floor"] = newValue } }
     }
 
-    /// A new filler or end panel as run item JSON.
+    /// A new filler, end panel or benchtop as run item JSON.
     static func piece(_ type: String, id: String) -> CabinetDoc {
-        let json = type == "filler"
-            ? #"{"id":"\#(id)","scribe":10,"type":"filler","width":50}"#
-            : #"{"id":"\#(id)","scribe":20,"to_floor":true,"type":"end_panel"}"#
+        let json = switch type {
+        case "filler": #"{"id":"\#(id)","scribe":10,"type":"filler","width":50}"#
+        case "benchtop": #"{"id":"\#(id)","type":"benchtop","thickness":33,"front_overhang":20,"side_overhang":0}"#
+        default: #"{"id":"\#(id)","scribe":20,"to_floor":true,"type":"end_panel"}"#
+        }
         return CabinetDoc(id: id, json: json)
+    }
+
+    /// Benchtop: thickness and overhangs.
+    var topThickness: Double {
+        get { (object["thickness"] as? NSNumber)?.doubleValue ?? 33 }
+        set { setNumber("thickness", newValue) }
+    }
+    var frontOverhang: Double {
+        get { (object["front_overhang"] as? NSNumber)?.doubleValue ?? 20 }
+        set { setNumber("front_overhang", newValue) }
+    }
+    var sideOverhang: Double {
+        get { number("side_overhang") }
+        set { setNumber("side_overhang", newValue) }
     }
 
     /// The cabinet's construction standard as JSON values, field by field.
@@ -413,11 +429,18 @@ final class ProjectModel {
     /// Adds a filler or end panel after the selected item (an end panel with nothing selected goes
     /// first, as the run's left end).
     func addPiece(_ type: String) {
-        let prefix = type == "filler" ? "F" : "E"
+        let prefix = switch type {
+        case "filler": "F"
+        case "benchtop": "BT"
+        default: "E"
+        }
         var n = 1
         while cabinets.contains(where: { $0.id == String(format: "%@%02d", prefix, n) }) { n += 1 }
         let piece = CabinetDoc.piece(type, id: String(format: "%@%02d", prefix, n))
-        let at = cabinets.firstIndex { $0.id == selection }.map { $0 + 1 } ?? 0
+        // A benchtop takes no place in the run: it goes last.
+        let at = type == "benchtop"
+            ? cabinets.count
+            : cabinets.firstIndex { $0.id == selection }.map { $0 + 1 } ?? 0
         withAnimation(.snappy) {
             cabinets.insert(piece, at: at)
             selection = piece.id
@@ -875,6 +898,7 @@ extension CabinetDoc {
         case "sink": "Sink"
         case "filler": "Filler"
         case "end_panel": "End panel"
+        case "benchtop": "Benchtop"
         default: kind.capitalized
         }
     }
@@ -893,6 +917,7 @@ extension CabinetDoc {
         case "sink": "drop"
         case "filler": "rectangle.portrait.split.2x1"
         case "end_panel": "rectangle.portrait.lefthalf.filled"
+        case "benchtop": "rectangle.tophalf.filled"
         default: "cube"
         }
     }

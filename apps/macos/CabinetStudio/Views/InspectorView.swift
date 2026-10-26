@@ -79,7 +79,16 @@ struct PieceSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            if cab.kind == "filler" {
+            if cab.kind == "benchtop" {
+                SectionTitle("Benchtop")
+                chips("Thickness", value: cab.topThickness, presets: [20, 33, 40, 60, 80]) { c, v in c.topThickness = v }
+                chips("Front", value: cab.frontOverhang, presets: [0, 10, 20, 30, 40]) { c, v in c.frontOverhang = v }
+                chips("Ends", value: cab.sideOverhang, presets: [0, 10, 20, 40]) { c, v in c.sideOverhang = v }
+                Text("One piece over each stretch of base cabinets in the run, past the door faces by the front overhang and past each end of a stretch by the end overhang.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            } else if cab.kind == "filler" {
                 SectionTitle("Filler")
                 chips("Width", value: cab.width, presets: [25, 38, 50, 75, 100, 150]) { c, v in c.width = v }
             } else {
@@ -102,11 +111,13 @@ struct PieceSection: View {
                     }
                 }
             }
-            chips("Scribe", value: cab.scribe, presets: [0, 10, 20, 30, 40]) { c, v in c.scribe = v }
-            Text("The scribe is extra board, cut off on site to follow the wall. It is not part of the run's length.")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
+            if cab.kind != "benchtop" {
+                chips("Scribe", value: cab.scribe, presets: [0, 10, 20, 30, 40]) { c, v in c.scribe = v }
+                Text("The scribe is extra board, cut off on site to follow the wall. It is not part of the run's length.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
         }
     }
 

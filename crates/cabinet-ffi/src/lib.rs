@@ -109,7 +109,7 @@ pub struct JobItems {
 fn parse_item(json: &str) -> Result<RunItem, CoreError> {
     let v: serde_json::Value = serde_json::from_str(json).map_err(invalid)?;
     match v.get("type").and_then(|t| t.as_str()) {
-        Some("filler" | "end_panel") => serde_json::from_value(v).map_err(invalid),
+        Some("filler" | "end_panel" | "benchtop") => serde_json::from_value(v).map_err(invalid),
         _ => Ok(RunItem::Cabinet(Box::new(
             serde_json::from_value(v).map_err(invalid)?,
         ))),
@@ -122,6 +122,7 @@ fn item_id(item: &RunItem) -> &str {
         RunItem::Cabinet(c) => &c.id,
         RunItem::Filler(f) => &f.id,
         RunItem::EndPanel(e) => &e.id,
+        RunItem::Benchtop(b) => &b.id,
     }
 }
 
@@ -1572,6 +1573,32 @@ mod tests {
                 .iter()
                 .filter(|p| p.role == "Left side")
                 .all(|p| p.hinged.is_empty())
+        );
+    }
+
+    #[test]
+    fn a_benchtop_item_builds_over_the_run_and_keeps_in_the_job_file() {
+        let top = r#"{"type":"benchtop","id":"BT01","thickness":33,"front_overhang":20}"#;
+        let items = vec![
+            new_cabinet("B01".into(), "base".into()).unwrap(),
+            new_cabinet("B02".into(), "base".into()).unwrap(),
+            top.to_string(),
+        ];
+        let built = build_job(job(&items));
+        let panels = &built[2].summary.as_ref().unwrap().panels;
+        assert_eq!(panels.len(), 1);
+        assert_eq!(panels[0].role, "Benchtop");
+        assert!((panels[0].width - 1200.0).abs() < 1e-9);
+        let standard = serde_json::to_string(&parse(&items[0]).unwrap().standard).unwrap();
+        let file = project_json("Kitchen".into(), standard, items.clone(), Vec::new()).unwrap();
+        let back = open_project(file).unwrap();
+        assert_eq!(back.items_json.len(), 3);
+        assert!(back.items_json[2].contains("benchtop"));
+        assert!(
+            cut_list_rows(job(&items))
+                .unwrap()
+                .iter()
+                .any(|r| r.description == "Benchtop")
         );
     }
 }

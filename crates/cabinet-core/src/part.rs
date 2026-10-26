@@ -42,6 +42,8 @@ pub enum PartRole {
     FrameRail,
     /// A shaker front's panel, in the frame's grooves.
     FramePanel,
+    /// A benchtop piece over a stretch of base cabinets.
+    Benchtop,
 }
 
 impl PartRole {
@@ -69,6 +71,7 @@ impl PartRole {
             PartRole::FrameStile => "Frame stile",
             PartRole::FrameRail => "Frame rail",
             PartRole::FramePanel => "Frame panel",
+            PartRole::Benchtop => "Benchtop",
         }
     }
 
@@ -98,6 +101,7 @@ impl PartRole {
             PartRole::FrameStile => "Stile",
             PartRole::FrameRail => "Rail",
             PartRole::FramePanel => "Panel",
+            PartRole::Benchtop => "Benchtop",
         }
     }
 

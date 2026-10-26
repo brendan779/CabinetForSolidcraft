@@ -29,7 +29,7 @@ struct SidebarView: View {
                             }
                         }
                         Divider()
-                        ForEach(["filler", "end_panel"], id: \.self) { type in
+                        ForEach(["filler", "end_panel", "benchtop"], id: \.self) { type in
                             Button {
                                 project.addPiece(type)
                             } label: {
@@ -82,6 +82,7 @@ struct CabinetRow: View {
         switch cab.kind {
         case "filler": "\(unit.format(cab.width)) + \(unit.format(cab.scribe, suffix: false)) scribe"
         case "end_panel": cab.scribe > 0 ? "\(unit.format(cab.scribe)) scribe" : "no scribe"
+        case "benchtop": "\(unit.format(cab.topThickness)) thick, \(unit.format(cab.frontOverhang, suffix: false)) overhang"
         default: [cab.width, cab.height, cab.depth].map { unit.format($0, suffix: false) }.joined(separator: " × ")
         }
     }
@@ -93,6 +94,12 @@ struct CabinetGlyph: View {
 
     var body: some View {
         Canvas { ctx, size in
+            if doc.kind == "benchtop" {
+                let r = CGRect(x: 0, y: size.height * 0.35, width: size.width, height: size.height * 0.2)
+                ctx.fill(Path(roundedRect: r, cornerRadius: 1.5), with: .color(.primary.opacity(0.3)))
+                ctx.stroke(Path(roundedRect: r, cornerRadius: 1.5), with: .color(.primary.opacity(0.8)), lineWidth: 1)
+                return
+            }
             if doc.isPiece {
                 // A narrow upright strip; an end panel's scribe edge hatched.
                 let w = size.width * (doc.kind == "filler" ? 0.3 : 0.22)

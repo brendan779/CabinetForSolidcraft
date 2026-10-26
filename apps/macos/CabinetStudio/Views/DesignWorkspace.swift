@@ -117,7 +117,7 @@ struct RunStrip: View {
     private static let fillerWidths: [Double] = [25, 38, 50, 75, 100, 150, 200]
 
     private var items: [CabinetDoc] {
-        project.cabinets.filter { $0.placed != true && $0.kind != "end_panel" }
+        project.cabinets.filter { $0.placed != true && $0.kind != "end_panel" && $0.kind != "benchtop" }
     }
 
     private func width(_ c: CabinetDoc) -> Double {
