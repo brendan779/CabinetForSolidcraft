@@ -232,8 +232,8 @@ fn summary_pages(nesting: &Nesting, job: &str) -> Vec<String> {
         .collect()
 }
 
-/// The nesting as one PDF: the summary, then a page per sheet.
-pub fn nesting_pdf(nesting: &Nesting, job: &str, settings: &Settings) -> Vec<u8> {
+/// The nesting's pages as SVG: the summary, then a page per sheet.
+pub fn nesting_svgs(nesting: &Nesting, job: &str, settings: &Settings) -> Vec<String> {
     let of = nesting.sheets.len();
     let mut pages = summary_pages(nesting, job);
     pages.extend(
@@ -243,6 +243,12 @@ pub fn nesting_pdf(nesting: &Nesting, job: &str, settings: &Settings) -> Vec<u8>
             .enumerate()
             .map(|(i, s)| sheet_svg(s, i + 1, of, job, settings)),
     );
+    pages
+}
+
+/// The nesting as one PDF: the summary, then a page per sheet.
+pub fn nesting_pdf(nesting: &Nesting, job: &str, settings: &Settings) -> Vec<u8> {
+    let pages = nesting_svgs(nesting, job, settings);
     write_pdf(&pages.iter().map(|svg| svg_to_ops(svg)).collect::<Vec<_>>())
 }
 

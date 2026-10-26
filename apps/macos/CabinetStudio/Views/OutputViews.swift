@@ -13,18 +13,91 @@ struct CutListView: View {
             HStack {
                 Picker("Show", selection: $showing) {
                     Text("Parts").tag("Parts")
+                    Text("Sheets").tag("Sheets")
                     Text("Hardware").tag("Hardware")
                 }
                 .pickerStyle(.segmented)
                 .labelsHidden()
                 .fixedSize()
-                .help("Parts to cut, or hardware to order")
+                .help("Parts to cut, the parts nested on stock sheets, or hardware to order")
                 Spacer()
             }
             .padding(.horizontal, 10)
             .padding(.vertical, 6)
             .background(.bar)
-            if showing == "Parts" { PartsListView() } else { HardwareListView() }
+            switch showing {
+            case "Parts": PartsListView()
+            case "Sheets": NestingView()
+            default: HardwareListView()
+            }
+        }
+    }
+}
+
+/// The parts nested on stock sheets for the panel saw: a summary page, then each sheet to scale.
+struct NestingView: View {
+    @Environment(ProjectModel.self) private var project
+    @AppStorage("nestingKerf") private var kerf = 4.4
+    @AppStorage("nestingTrim") private var trim = 10.0
+    @State private var page = 0
+    @State private var export: DataDocument?
+
+    private var pages: [String] {
+        guard let dir = Preferences.catalogDir?.path else { return [] }
+        return (try? nestingPages(items: project.jobItems, catalogDir: dir, job: project.jobName,
+                                  kerf: kerf, trim: trim)) ?? []
+    }
+
+    var body: some View {
+        let pages = self.pages
+        VStack(spacing: 0) {
+            Group {
+                if pages.isEmpty {
+                    ContentUnavailableView("No parts to nest", systemImage: "rectangle.split.3x3",
+                                           description: Text("Add cabinets to see their parts laid out on sheets."))
+                } else {
+                    SVGView(svg: pages[min(page, pages.count - 1)])
+                }
+            }
+            .frame(minWidth: 0, maxWidth: .infinity, maxHeight: .infinity)
+            HStack(spacing: 10) {
+                Button("Previous", systemImage: "chevron.left") { page = max(0, page - 1) }
+                    .labelStyle(.iconOnly)
+                    .disabled(page == 0)
+                Text(pages.isEmpty ? "" : (page == 0 ? "Summary" : "Sheet \(page) of \(pages.count - 1)"))
+                    .monospacedDigit()
+                    .frame(minWidth: 0)
+                Button("Next", systemImage: "chevron.right") { page = min(pages.count - 1, page + 1) }
+                    .labelStyle(.iconOnly)
+                    .disabled(page >= pages.count - 1)
+                Spacer(minLength: 0)
+                Stepper("Kerf \(String(format: "%.1f", kerf))", value: $kerf, in: 1...8, step: 0.2)
+                    .help("Saw kerf, mm")
+                Stepper("Trim \(Int(trim))", value: $trim, in: 0...25, step: 1)
+                    .help("Taken off every sheet edge before the first cut, mm")
+                Button("Export PDF…", systemImage: "doc.richtext") { makePdf() }
+                    .labelStyle(.iconOnly)
+                    .help("The summary and every sheet as a PDF")
+            }
+            .padding(10)
+            .frame(minWidth: 0, maxWidth: .infinity)
+            .background(.bar)
+        }
+        .onChange(of: pages.count) { page = min(page, max(0, pages.count - 1)) }
+        .fileExporter(isPresented: Binding(get: { export != nil }, set: { if !$0 { export = nil } }),
+                      document: export, contentType: .pdf,
+                      defaultFilename: "\(project.jobName) nesting") { result in
+            if case .success(let url) = result { project.status = "Saved \(url.lastPathComponent)" }
+        }
+    }
+
+    private func makePdf() {
+        guard let dir = Preferences.catalogDir?.path else { return }
+        do {
+            export = DataDocument(data: try nestingPdf(items: project.jobItems, catalogDir: dir,
+                                                      job: project.jobName, kerf: kerf, trim: trim))
+        } catch {
+            project.lastError = "Could not nest the parts: \(error)"
         }
     }
 }

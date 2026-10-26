@@ -571,21 +571,23 @@ pub fn cut_sheets_pdf(items: JobItems, job: String) -> Result<Vec<u8>, CoreError
 /// The usual Australian sheet for parts without a catalog board (mm).
 const GENERIC_SHEET: (f64, f64) = (2400.0, 1200.0);
 
-/// The job's parts nested on stock sheets for the panel saw, as a PDF: a summary with the offcuts,
-/// then a page per sheet. Each board's first catalog sheet size is its stock; parts with no board
-/// go on 2400 × 1200 sheets.
-#[uniffi::export]
-pub fn nesting_pdf(
-    items: JobItems,
-    catalog_dir: String,
-    job: String,
+/// The job's parts nested on stock sheets for the panel saw. Each board's first catalog sheet size
+/// is its stock; parts with no board go on 2400 × 1200 sheets.
+fn job_nesting(
+    items: &JobItems,
+    catalog_dir: &str,
     kerf: f64,
     trim: f64,
-) -> Result<Vec<u8>, CoreError> {
+) -> Result<
+    (
+        cabinet_core::nesting::Nesting,
+        cabinet_core::nesting::Settings,
+    ),
+    CoreError,
+> {
     use cabinet_core::nesting::{Settings, Stock, nest};
-    let (lists, tape) = cut_lists(&items)?;
-    let cat =
-        cabinet_catalog::Catalog::load(std::path::Path::new(&catalog_dir)).map_err(invalid)?;
+    let (lists, tape) = cut_lists(items)?;
+    let cat = cabinet_catalog::Catalog::load(std::path::Path::new(catalog_dir)).map_err(invalid)?;
     let rows = cut_list(&lists, "Generic", tape).rows;
     let settings = Settings {
         kerf,
@@ -608,7 +610,35 @@ pub fn nesting_pdf(
         },
         &settings,
     );
+    Ok((nesting, settings))
+}
+
+/// The nesting as a PDF: a summary with the offcuts, then a page per sheet.
+#[uniffi::export]
+pub fn nesting_pdf(
+    items: JobItems,
+    catalog_dir: String,
+    job: String,
+    kerf: f64,
+    trim: f64,
+) -> Result<Vec<u8>, CoreError> {
+    let (nesting, settings) = job_nesting(&items, &catalog_dir, kerf, trim)?;
     Ok(cabinet_sheets::nesting::nesting_pdf(
+        &nesting, &job, &settings,
+    ))
+}
+
+/// The same pages as SVG documents, for the app to show.
+#[uniffi::export]
+pub fn nesting_pages(
+    items: JobItems,
+    catalog_dir: String,
+    job: String,
+    kerf: f64,
+    trim: f64,
+) -> Result<Vec<String>, CoreError> {
+    let (nesting, settings) = job_nesting(&items, &catalog_dir, kerf, trim)?;
+    Ok(cabinet_sheets::nesting::nesting_svgs(
         &nesting, &job, &settings,
     ))
 }
