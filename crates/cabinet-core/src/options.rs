@@ -156,6 +156,11 @@ pub fn option_groups() -> Vec<OptionGroup> {
                     "Edge pull",
                     "A pull on the top edge (wall doors: the bottom), screwed from behind",
                 ),
+                (
+                    "finger_pull",
+                    "Finger pull",
+                    "Handleless: a grip routed along the back of the top edge (wall: the bottom)",
+                ),
             ],
         ),
         group(

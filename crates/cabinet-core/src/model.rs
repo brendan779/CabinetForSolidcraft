@@ -667,6 +667,9 @@ pub enum HandlePlace {
     /// An edge pull on the top edge (bottom edge of wall doors): screwed from behind, no holes
     /// through the front.
     EdgePull,
+    /// Handleless: a finger grip routed along the back of the top edge (bottom edge of wall
+    /// fronts).
+    FingerPull,
 }
 
 /// How a single lifting front moves.

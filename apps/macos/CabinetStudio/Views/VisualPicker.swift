@@ -280,6 +280,11 @@ private struct Pen {
             board(30, 5, 16, 3, hot: true)
             board(64, 5, 16, 3, hot: true)
             board(64, 35, 16, 3, hot: true)
+        case "finger_pull":
+            // The grip along each front's top edge, shaded.
+            board(12, 8, 36, 4, hot: true)
+            board(56, 8, 32, 4, hot: true)
+            board(56, 38, 32, 4, hot: true)
         case "centre":
             board(41, 32, 2.5, 16, hot: true)
             board(64, 20, 16, 2.5, hot: true)

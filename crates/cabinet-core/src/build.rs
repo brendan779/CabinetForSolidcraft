@@ -55,6 +55,10 @@ const HANDLE_EDGE_INSET: f64 = 35.0;
 const HANDLE_END_INSET: f64 = 50.0;
 const TALL_HANDLE_HEIGHT: f64 = 1050.0;
 const DEEP_FRONT: f64 = 200.0;
+/// Our choices for a routed finger pull: how far down the back of the front it reaches and how
+/// deep into the front it goes.
+const FINGER_PULL_HEIGHT: f64 = 25.0;
+const FINGER_PULL_DEPTH: f64 = 10.0;
 /// Our choices for wardrobes: the hat shelf's top this far under the cabinet top, a rail's centre
 /// this far under the shelf above it, and double hanging's lower shelf at this height from the
 /// floor (rails hang shirts above and trousers below).
@@ -2242,6 +2246,13 @@ impl<'a> Builder<'a> {
             cab.kind,
             CabinetKind::Wall | CabinetKind::CornerWall | CabinetKind::OpenShelf
         );
+        if s.handle_place == HandlePlace::FingerPull && s.door_style != DoorStyle::Slab {
+            self.list.warnings.push(
+                "finger pulls need slab fronts: a frame's grooves run where the grip would be; \
+                 none cut"
+                    .into(),
+            );
+        }
         for f in &fronts {
             let b = f.bounds;
             let ta = f.thickness_axis;
@@ -2340,6 +2351,30 @@ impl<'a> Builder<'a> {
                     None => vec![(c, z)],
                 }
             };
+            if s.handle_place == HandlePlace::FingerPull {
+                // A frame's grooves and tenons run where the grip would be cut.
+                if s.door_style != DoorStyle::Slab {
+                    continue;
+                }
+                // Along the back of the gripping edge, across the front's width.
+                let (zl, zh) = if wall_hung && f.role != PartRole::DrawerFront {
+                    (z0, z0 + FINGER_PULL_HEIGHT)
+                } else {
+                    (z1 - FINGER_PULL_HEIGHT, z1)
+                };
+                let (t_lo, t_hi) = if back_low {
+                    (back, back + FINGER_PULL_DEPTH)
+                } else {
+                    (back - FINGER_PULL_DEPTH, back)
+                };
+                let lo = Vec3::new(0.0, 0.0, zl).with(wa, w0).with(ta, t_lo);
+                let hi = Vec3::new(0.0, 0.0, zh).with(wa, w1).with(ta, t_hi);
+                self.list.operations.push(Operation::Groove {
+                    part: f.name.clone(),
+                    bounds: Aabb::new(lo, Vec3::new(hi.x - lo.x, hi.y - lo.y, hi.z - lo.z)),
+                });
+                continue;
+            }
             let (item, description) = match (s.handle_place, s.handle_size.centres()) {
                 (HandlePlace::EdgePull, _) => ("handle.edge-pull".to_string(), "Edge pull".into()),
                 (_, Some(cc)) => (
@@ -2577,6 +2612,43 @@ impl<'a> Builder<'a> {
                     }
                 }
             }
+            // Grooves on the slab (a finger pull) are cut in each member they cross.
+            let members_now: Vec<(String, Aabb)> = self
+                .list
+                .parts
+                .iter()
+                .filter(|x| x.name.starts_with(&front.name) && x.name != front.name)
+                .map(|x| (x.name.clone(), x.bounds))
+                .collect();
+            let mut split = Vec::new();
+            self.list.operations.retain(|o| match o {
+                Operation::Groove { part, bounds } if *part == front.name => {
+                    for (name, mb) in &members_now {
+                        let lo = Vec3::new(
+                            bounds.min.x.max(mb.min.x),
+                            bounds.min.y.max(mb.min.y),
+                            bounds.min.z.max(mb.min.z),
+                        );
+                        let hi = Vec3::new(
+                            bounds.max().x.min(mb.max().x),
+                            bounds.max().y.min(mb.max().y),
+                            bounds.max().z.min(mb.max().z),
+                        );
+                        if hi.x - lo.x > 1e-6 && hi.y - lo.y > 1e-6 && hi.z - lo.z > 1e-6 {
+                            split.push(Operation::Groove {
+                                part: name.clone(),
+                                bounds: Aabb::new(
+                                    lo,
+                                    Vec3::new(hi.x - lo.x, hi.y - lo.y, hi.z - lo.z),
+                                ),
+                            });
+                        }
+                    }
+                    false
+                }
+                _ => true,
+            });
+            self.list.operations.extend(split);
             for h in &mut self.list.hardware {
                 if h.part == front.name {
                     h.part = member(h.at);
@@ -4155,6 +4227,57 @@ mod tests {
         }
         let list = build_cabinet(&cab).unwrap();
         assert!(list.warnings.iter().any(|w| w.contains("more height")));
+    }
+
+    fn grooves_on<'a>(list: &'a PartList, prefix: &str) -> Vec<(&'a str, Aabb)> {
+        list.operations
+            .iter()
+            .filter_map(|o| match o {
+                Operation::Groove { part, bounds } if part.starts_with(prefix) => {
+                    Some((part.as_str(), *bounds))
+                }
+                _ => None,
+            })
+            .collect()
+    }
+
+    /// STYLE-1: a finger pull is routed along the back of the top edge (wall fronts: the
+    /// bottom); no handle, no holes; shaker fronts cannot take one.
+    #[test]
+    fn finger_pulls_are_routed_along_the_gripping_edge() {
+        let mut base = Cabinet::new("B01", CabinetKind::Base);
+        base.standard.handle_place = HandlePlace::FingerPull;
+        let list = build_cabinet(&base).unwrap();
+        let door = list.part("B01.Door1").unwrap().bounds;
+        let g = grooves_on(&list, "B01.Door1");
+        assert_eq!(g.len(), 1);
+        assert_eq!(g[0].1.max().z, door.max().z);
+        assert_eq!(g[0].1.max().y, door.max().y, "the back face");
+        assert_eq!(g[0].1.size.x, door.size.x);
+        assert!(handle_holes(&list, "B01.Door1").is_empty());
+        assert!(!list.hardware.iter().any(|h| h.item.starts_with("handle.")));
+        let mut wall = Cabinet::new("W01", CabinetKind::Wall);
+        wall.standard.handle_place = HandlePlace::FingerPull;
+        let list = build_cabinet(&wall).unwrap();
+        let door = list.part("W01.Door1").unwrap().bounds;
+        assert_eq!(grooves_on(&list, "W01.Door1")[0].1.min.z, door.min.z);
+        base.standard.door_style = DoorStyle::Shaker;
+        let list = build_cabinet(&base).unwrap();
+        assert!(
+            !list.warnings.iter().any(|w| w.contains("clash")),
+            "{:?}",
+            list.warnings
+        );
+        assert!(
+            list.warnings
+                .iter()
+                .any(|w| w.contains("finger pulls need slab"))
+        );
+        assert!(
+            grooves_on(&list, "B01.Door1")
+                .iter()
+                .all(|(_, b)| b.size.z != FINGER_PULL_HEIGHT)
+        );
     }
 
     fn handle_holes(list: &PartList, part: &str) -> Vec<Vec3> {
