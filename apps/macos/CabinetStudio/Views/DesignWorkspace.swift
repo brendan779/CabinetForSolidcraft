@@ -392,8 +392,10 @@ final class ViewportScene {
             let selected = cab.id == project.selection
             let centre = Self.centre(of: b.panels)
             for p in b.panels {
+                // A handle goes and swings with its front.
+                let isFront = p.isFront || p.board.hasPrefix("handle:")
                 // The kick board stays: without it the run looks as if it floats.
-                guard look.showFronts || !p.isFront || p.role == "Plinth" else { continue }
+                guard look.showFronts || !isFront || p.role == "Plinth" else { continue }
                 var box = p
                 if look.section, let cut = sectionX {
                     if p.x + p.width <= cut { continue }
@@ -421,7 +423,7 @@ final class ViewportScene {
                     let e = entity(for: piece)
                     e.model?.materials = [material(piece, board: board, selected: selected, hovered: p.name == hovered)]
                     let target = Self.transform(piece, centre: centre, look: look)
-                    if animate && p.isFront {
+                    if animate && isFront {
                         e.move(to: target, relativeTo: root, duration: 0.45, timingFunction: .easeInOut)
                     } else {
                         e.transform = target
@@ -431,7 +433,7 @@ final class ViewportScene {
                 maxX = max(maxX, Float(p.x + p.width) / 1000)
             }
         }
-        addHardware(project: project, look: look, seen: &seen)
+        addHardware(project: project, look: look, sectionX: look.section ? sectionX : nil, seen: &seen)
         for e in root.children where !seen.contains(e.name) {
             e.removeFromParent()
             panels[e.name] = nil
@@ -443,34 +445,44 @@ final class ViewportScene {
 
     // MARK: Hardware
 
-    private var meshes: [String: MeshResource] = [:]
+    /// Loaded supplier meshes by file; nil for a file that would not load, so it is not retried
+    /// on every redraw.
+    private var meshes: [String: MeshResource?] = [:]
 
-    /// Supplier models and stand-in shapes. Hinges show only with the fronts closed and in place,
-    /// drawer box sides only with the drawers in; runners, plates and legs stay with the carcass.
-    private func addHardware(project: ProjectModel, look: ViewportLook, seen: inout Set<String>) {
-        guard look.showHardware else { return }
+    /// Supplier models and stand-in shapes. They sit on the carcass, so they are left out of an
+    /// exploded view; hinges show only with the fronts closed, drawer box sides slide out with
+    /// their drawers, and nothing shows on the cut-away side of a section.
+    private func addHardware(project: ProjectModel, look: ViewportLook, sectionX: Double?, seen: inout Set<String>) {
+        guard look.showHardware, look.explode < 0.001 else { return }
         let (models, shapes) = project.hardware()
-        let still = !look.open && look.explode < 0.001
-        func visible(_ name: String) -> Bool {
-            if name.contains(".Hinge") { return look.showFronts && still }
-            if name.contains(".BoxSide") { return still }
+        func visible(_ name: String, x: Double) -> Bool {
+            if let cut = sectionX, x < cut { return false }
+            if name.contains(".Hinge") { return look.showFronts && !look.open }
             return true
+        }
+        func slid(_ t: Transform, _ name: String) -> Transform {
+            guard look.open, name.contains(".BoxSide") else { return t }
+            var t = t
+            t.translation.z += Self.drawerTravel
+            return t
         }
         let selection = project.selection.map { $0 + "." }
         func selected(_ name: String) -> Bool { selection.map { name.hasPrefix($0) } ?? false }
-        for (i, m) in models.enumerated() where visible(m.name) {
+        for (i, m) in models.enumerated() where visible(m.name, x: m.transform[3]) {
             guard let mesh = mesh(m.mesh) else { continue }
-            let key = "hw:\(m.name)#\(i)"
+            // Keyed by its file too, so a changed hinge or runner gets its new model.
+            let key = "hw:\(m.name)#\(i):\(m.mesh)"
             let e = hardwareEntity(key) { ModelEntity(mesh: mesh) }
             e.model?.materials = [Self.metal(selected: selected(m.name))]
-            e.transform = Transform(matrix: Self.matrix(m.transform))
+            e.transform = slid(Transform(matrix: Self.matrix(m.transform)), m.name)
             seen.insert(key)
         }
-        for (i, sh) in shapes.enumerated() where visible(sh.name) {
-            let key = "hw:\(sh.name)#s\(i)"
+        for (i, sh) in shapes.enumerated() where visible(sh.name, x: sh.x) {
+            // Keyed by its size too: the mesh is made once per entity.
+            let key = "hw:\(sh.name)#s\(i):\(sh.cylinder ? [sh.diameter, sh.length] : [sh.width, sh.depth, sh.height])"
             let e = hardwareEntity(key) { ModelEntity(mesh: Self.standInMesh(sh)) }
             e.model?.materials = [Self.metal(selected: selected(sh.name), standIn: true)]
-            e.transform = Self.standInTransform(sh)
+            e.transform = slid(Self.standInTransform(sh), sh.name)
             seen.insert(key)
         }
     }
@@ -486,7 +498,10 @@ final class ViewportScene {
     /// A supplier mesh (STL, model mm), loaded once per file.
     private func mesh(_ path: String) -> MeshResource? {
         if let m = meshes[path] { return m }
-        guard let data = try? loadMesh(path: path), !data.positions.isEmpty else { return nil }
+        guard let data = try? loadMesh(path: path), !data.positions.isEmpty else {
+            meshes[path] = .some(nil)
+            return nil
+        }
         let p = data.positions, n = data.normals
         var positions: [SIMD3<Float>] = [], normals: [SIMD3<Float>] = []
         positions.reserveCapacity(p.count / 3)
@@ -495,7 +510,11 @@ final class ViewportScene {
             let a = SIMD3(p[i], p[i + 1], p[i + 2]), b = SIMD3(p[i + 3], p[i + 4], p[i + 5]), c = SIMD3(p[i + 6], p[i + 7], p[i + 8])
             var normal = SIMD3(n[i], n[i + 1], n[i + 2])
             // Some exporters leave the facet normal empty: work it out from the corners.
-            if simd_length(normal) < 0.5 { normal = simd_normalize(simd_cross(b - a, c - a)) }
+            if simd_length(normal) < 0.5 {
+                let cross = simd_cross(b - a, c - a)
+                // A sliver with no area has no direction; it draws nothing either way.
+                normal = simd_length(cross) > 0 ? simd_normalize(cross) : [0, 0, 1]
+            }
             positions += [a, b, c]
             normals += [normal, normal, normal]
         }
@@ -504,7 +523,7 @@ final class ViewportScene {
         desc.normals = MeshBuffers.Normals(normals)
         desc.primitives = .triangles(Array(0..<UInt32(positions.count)))
         let m = try? MeshResource.generate(from: [desc])
-        meshes[path] = m
+        meshes[path] = .some(m)
         return m
     }
 
@@ -641,6 +660,9 @@ final class ViewportScene {
         return panels.map(mid).reduce(.zero, +) / Float(panels.count)
     }
 
+    /// How far an open drawer slides out, m.
+    private static let drawerTravel: Float = 0.35
+
     private static func transform(_ p: PanelBox, centre: SIMD3<Float>, look: ViewportLook) -> Transform {
         var t = Transform(translation: pivot(p))
         // Exploded: away from the cabinet's centre, as far as 250 mm.
@@ -652,7 +674,7 @@ final class ViewportScene {
             case (_, "left"): t.rotation = simd_quatf(angle: -.pi * 0.55, axis: [0, 1, 0])
             case (_, "right"): t.rotation = simd_quatf(angle: .pi * 0.55, axis: [0, 1, 0])
             case ("Drawer front", _), ("Drawer bottom", _), ("Drawer back", _), ("Drawer side", _), ("Drawer handle", _):
-                t.translation.z += 0.35
+                t.translation.z += Self.drawerTravel
             case ("Lift front", _): t.translation.y += 0.3
             default: break
             }

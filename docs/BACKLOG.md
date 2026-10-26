@@ -394,6 +394,7 @@ Agents append one line per session: date, items touched, outcome.
 - 2026-10-26b (night) — P2-4 (3b4c426): cornice and light rail run items.
 - 2026-10-26b (night) — BENCH-3e (f4458e2): rounded benchtop ends (new Round operation).
 - 2026-10-26b (night) — DATA-6b (baa088b): Easycraft Contours and Ikara lining boards.
+- 2026-10-27 — Viewport polish: hardware keeps up with changed hinges and sizes, leaves the cut-away side of a section and exploded views, and drawer box sides slide out with their drawers; handles hide and swing with their fronts; a supplier mesh that will not load is not retried every redraw; Settings › Prepare Now refreshes open jobs. Crash-tested under lldb, windowed and full screen. Open: only the 500 mm LEGRABOX sides are downloaded (770N5002S, 770M5002S, 770K5502S), so other depths have no steel sides yet.
 - 2026-10-27 — BLUM-9 done: supplier STEP files become meshes in `vendor-cad/<brand>/mesh/` (Settings › Folders › Prepare Now, or on job open); hinges, plates, runners and drawer sides are placed from Blum's frame and drawn in the viewport (new Hardware toggle) and sent to SolidCraft at Manufacturing/Exact detail. Legs + plinth cabinets now stand on leg stand-ins (HAF-1 swaps in the AXILO model once downloaded). Notched sides are drawn notched and get a kick board between the sides; kick boards stay visible with Fronts hidden.
 - 2026-10-26b (night) — BLUM-16 part (05a94e9): AMBIA-LINE wood design.
 - 2026-10-26b (night) — BLUM-16 part (e865068): CABLOXX drawer lock.

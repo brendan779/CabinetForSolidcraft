@@ -65,6 +65,9 @@ struct JobWindow: View {
             .frame(minWidth: 1100, minHeight: 700)
             .task { await project.checkConnection() }
             .task(id: vendorCAD) { await project.prepareSupplierCAD() }
+            .onReceive(NotificationCenter.default.publisher(for: Preferences.supplierCADPrepared)) { _ in
+                Task { await project.prepareSupplierCAD() }
+            }
             .onAppear {
                 project.undoManager = undoManager
                 project.onEdit = { [document] data in document.update(data) }

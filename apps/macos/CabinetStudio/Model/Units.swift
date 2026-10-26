@@ -58,6 +58,8 @@ enum Preferences {
 
     /// SolidCraft's command-line tool, which turns supplier STEP files into meshes.
     static let solidcraftCLI = "/Applications/SolidCraft.app/Contents/MacOS/solidcraft-cli"
+    /// Posted when Settings has converted new supplier files, so open jobs pick them up.
+    static let supplierCADPrepared = Notification.Name("supplierCADPrepared")
 
     /// The board and hardware catalog: the folder chosen in Settings, or the one inside the app.
     static var catalogDir: URL? {
@@ -189,6 +191,7 @@ struct FolderSettings: View {
         switch result {
         case .success(let r):
             report = "\(r.models) models for \(r.articles.count) articles" + (r.converted > 0 ? ", \(r.converted) new" : "")
+            if r.converted > 0 { NotificationCenter.default.post(name: Preferences.supplierCADPrepared, object: nil) }
         case .failure(let e):
             report = "Could not prepare: \(e)"
         }
