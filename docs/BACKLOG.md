@@ -109,7 +109,7 @@ All Blum rows: source = Blum Catalogue and technical manual 2024/2025 in `vendor
 
 | id | status | size | task | done when |
 |---|---|---|---|---|
-| HAF-1 | todo | M | Adjustable legs + plinth clips (count rule by width), from Häfele data | BOM rows with article numbers |
+| HAF-1 | needs-human (Häfele data, like HAF-4: which leg and plinth clip, and Häfele's spacing rule; today every base cabinet gets 4 generic `hafele.leg.adjustable`) | M | Adjustable legs + plinth clips (count rule by width), from Häfele data | BOM rows with article numbers |
 | HAF-2 | done (f844e59; handle rows are generic `handle.cc128` etc. until handle articles are chosen; insets 35/50 mm and tall handles at 1050 are our choices) | M | Handles: catalog of CC spacings; placement picker (top corner, centre, edge pull) drawn on the door | handle bores on door sheets |
 | HAF-3 | needs-human (count done in a7d72a0: 4 per adjustable shelf as generic `shelf-support.5mm`; the article needs the owner's pick and the supplier's data, like HAF-4) | M | Shelf supports (5 mm pins) article + count | BOM |
 | HAF-4 | needs-human (Häfele data) | L | Loox5 lighting: profiles (surface, recessed, shelf-edge), 12 V/24 V strips, drivers, distributors, switches/sensors | split |
@@ -173,7 +173,7 @@ committed: they are the brands' copyright. `preview_colour` is an approximation.
 | UI-4 | needs-human (built in 63a3bff; not seen on screen here: look at the glow, hover tooltip, explode, Section and Open) | M | Viewport: selection outline/glow, hover highlight, part tooltip, exploded slider, section view, door open animation | each item visible in a screenshot |
 | UI-5 | needs-human (built in 665cfe1; assign an oak decor to the fronts and look at the viewport) | M | Viewport materials from board preview colours; woodgrain procedural texture for grained decors | oak fronts look like oak |
 | UI-6 | needs-human (built in 4765cd2; look at the toolbar with SolidCraft open and closed) | S | Status dot visible in the SolidCraft toolbar menu (currently hidden by the menu label) | screenshot |
-| UI-7 | todo | M | Room planner: wall lengths, run along a wall, appliances as placeholders | split |
+| UI-7 | needs-human (design questions in the 2026-10-26b PR: room shapes, runs per wall, wall cabinets over base runs, appliances; it changes the job file, sidebar and viewport) | M | Room planner: wall lengths, run along a wall, appliances as placeholders | split |
 | UI-8 | needs-human (built in 8c867b5; drag in the run strip; say whether a strip is acceptable instead of dragging the 3D cabinets) | M | Drag to reorder and resize cabinets in the viewport (width handles snap to presets) | drag changes width |
 | UI-9 | needs-human (built in 9fd31d0; try the keys) | S | Keyboard: ⌘1–4 workspaces, arrows to step through cabinets, ⌫ delete | works |
 | UI-10 | needs-human (built in 94108a4; not seen on screen here: launch once with defaults reset, or Help › Welcome to Cabinet Studio) | M | Onboarding: first launch connects to SolidCraft, explains Design vs Manufacturing detail | first-run sheet |
@@ -181,7 +181,7 @@ committed: they are the brands' copyright. `preview_colour` is an approximation.
 | UI-12 | needs-human (built in 983d877; open Settings (⌘,) and change each) | M | Preferences: SolidCraft port, default standard, units, catalog folder, vendor-cad folder | Settings scene |
 | UI-13 | needs-human (built in 6ac857e; save a standard, start a new job, apply it) | M | Construction standard editor: save/load named standards ("My shop") as visual presets | standards menu |
 | UI-14 | needs-human (built in a696d89; run Accessibility Inspector over the inspector and sidebar) | S | Accessibility pass: VoiceOver labels on every drawn tile, Dynamic Type sizes | Accessibility Inspector clean |
-| UI-15 | todo | M | UI tests (XCUITest) for add cabinet, change option, export CSV | tests pass in check.sh |
+| UI-15 | blocked (UI tests need macOS UI automation permission; on MacAirServer an AppleEvent to System Events timed out waiting for it. Grant Accessibility/Automation to Xcode's test runner on a Mac that runs check.sh) | M | UI tests (XCUITest) for add cabinet, change option, export CSV | tests pass in check.sh |
 | UI-16 | needs-human (built in 8bfa5ee; not seen on screen here: add an end panel each side and look at the viewport and cut list) | M | Run items in the app: add filler and end panel to the sidebar list (drawn tiles, width/scribe chips), lay out and send the project through `cabinet_core::build_run` (FFI) instead of the Swift layout loop | a run with an end panel each side shows in the viewport, cut list and SolidCraft |
 | UI-17 | needs-human (built in dbc5e9d; not seen on screen here: change the back style for the job, then with "Only B01") | M | Project standard in the app: the construction pickers edit the project standard, with an "Only this cabinet" override switch; save through `cabinet_core::Project` (migrate the old project.json) | changing the back style for the project changes every cabinet without an override |
 
@@ -348,3 +348,4 @@ Agents append one line per session: date, items touched, outcome.
 - 2026-10-26b (night) — OUT-5d built (e4b4446): each board's sheet size chosen by least area among its catalog sizes; kept offcuts nested on first, stored in Application Support, kept/forgotten from the Sheets view.
 - 2026-10-26b (night) — PLG-3 checked: no plugin runtime yet (#1221, draft #4980 open; #5586 replaces #4330); SolidCraft v0.23.0 is out (this Mac's CLI is 0.20.0).
 - 2026-10-26b (night) — BLUM-7b HKi done (f87997e): integrated stay lift with its side pockets cut (265 × 120 × 12, 21 below the top); semi-integrated not offered.
+- 2026-10-26b (night) — HAF-1 and UI-7 set to needs-human (supplier data; room planner design), UI-15 blocked on UI automation permission.
