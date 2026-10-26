@@ -80,6 +80,7 @@ struct ConstructionThumbnail: View {
             case "opening": pen.opening(choice)
             case "drawer_system": pen.drawerSystem(choice)
             case "drawer_sides": pen.drawerSides(choice)
+            case "front_grain": pen.frontGrain(choice)
             case "door_style": pen.doorStyle(choice)
             case "handle_size": pen.handleSize(choice)
             case "handle_place": pen.handlePlace(choice)
@@ -317,6 +318,26 @@ private struct Pen {
         let top: CGFloat = choice == "high_fronted" ? 14 : 44
         board(18, top, 66, 64 - top, hot: true)       // steel side
         line(p(18, 72), p(88, 72), colour: accent, width: 2)
+    }
+
+    /// A door over two drawer fronts, with their grain: upright and running on through all three,
+    /// or upright on the door and across the drawers.
+    func frontGrain(_ choice: String) {
+        let fronts: [(CGFloat, CGFloat)] = [(6, 40), (48, 12), (62, 12)]
+        for (y, h) in fronts { board(30, y, 40, h) }
+        let matched = choice == "matched"
+        for x in stride(from: CGFloat(36), through: 64, by: 7) {
+            for (i, (y, h)) in fronts.enumerated() where matched || i == 0 {
+                line(p(x, y + 2), p(x, y + h - 2), colour: matched ? accent : nil, width: 1)
+            }
+        }
+        if !matched {
+            for (y, h) in fronts.dropFirst() {
+                for dy in stride(from: CGFloat(3), to: h - 1, by: 3) {
+                    line(p(34, y + dy), p(66, y + dy), width: 1)
+                }
+            }
+        }
     }
 
     // MARK: Wall hanging, side section against the wall

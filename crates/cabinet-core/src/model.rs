@@ -555,6 +555,8 @@ pub struct ConstructionStandard {
     pub drawer_system: DrawerSystem,
     /// Whether deep LEGRABOX drawers may be high fronted pull-outs (C, F).
     pub drawer_sides: DrawerSides,
+    /// Whether a cabinet's stacked fronts are cut in sequence so their grain runs on.
+    pub front_grain: FrontGrain,
     /// Board thickness of wooden drawer boxes (sides, base, front and back).
     pub drawer_board_thickness: f64,
     /// What the fronts are made of, for their weight on lift systems.
@@ -620,6 +622,7 @@ impl Default for ConstructionStandard {
             door_style: DoorStyle::Slab,
             drawer_system: DrawerSystem::Legrabox,
             drawer_sides: DrawerSides::Standard,
+            front_grain: FrontGrain::Free,
             drawer_board_thickness: 16.0,
             front_core: FrontCore::Mdf,
         }
@@ -804,6 +807,19 @@ pub enum DrawerSystem {
     Movento,
     /// A wooden box on Blum TANDEM 560H runners (30 kg).
     Tandem,
+}
+
+/// How the grain of a cabinet's fronts lines up.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum FrontGrain {
+    /// Each front cut on its own; drawer fronts' grain runs across.
+    #[default]
+    Free,
+    /// Fronts stacked in a column (an oven tower's doors and drawers, a drawer bank) run their
+    /// grain upright and are cut one after the other from one strip of the sheet, so the grain
+    /// runs on from front to front.
+    Matched,
 }
 
 /// How tall a steel box's sides may be.

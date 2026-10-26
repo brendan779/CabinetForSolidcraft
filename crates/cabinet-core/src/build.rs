@@ -8,8 +8,8 @@ use crate::joinery::ButtJoint;
 use crate::lift;
 use crate::model::{
     BackStyle, BottomJoint, Cabinet, CabinetKind, DoorOverlay, DoorStyle, DrawerSides,
-    DrawerSystem, Exposed, FrontCore, FrontLayout, HandlePlace, Hanging, HingeSide, LiftKind,
-    LightZone, Opening, SectionKind, StackSection, ToeKick, TopJoint, WallHanging,
+    DrawerSystem, Exposed, FrontCore, FrontGrain, FrontLayout, HandlePlace, Hanging, HingeSide,
+    LiftKind, LightZone, Opening, SectionKind, StackSection, ToeKick, TopJoint, WallHanging,
 };
 use crate::part::{
     BorePurpose, Dir, EdgeBanding, HardwarePlacement, Operation, Part, PartList, PartRole,
@@ -118,6 +118,7 @@ pub fn build_cabinet(cab: &Cabinet) -> Result<PartList> {
         b.cover_caps();
         b.opening();
         b.drawer_inserts();
+        b.grain_match();
         // Last: hinges, handles and drawer fixings are placed on the slab, then move to the
         // frame member they fall in.
         b.shaker_fronts();
@@ -2437,6 +2438,53 @@ impl<'a> Builder<'a> {
     /// (full height), two rails between them with stub tenons into the stiles' grooves, and a
     /// panel in the grooves, centred in the front's thickness. Bores and hardware on the slab move
     /// to the member they fall in.
+    /// Continuous grain: each column of two or more slab fronts (the same left and right edges)
+    /// runs its grain upright and is cut as one strip, top first.
+    fn grain_match(&mut self) {
+        let s = &self.cab.standard;
+        if s.front_grain != FrontGrain::Matched {
+            return;
+        }
+        if s.door_style != DoorStyle::Slab {
+            self.list.warnings.push(
+                "continuous grain needs slab fronts: framed fronts are cut piece by piece".into(),
+            );
+            return;
+        }
+        let key = |p: &Part| {
+            (
+                (p.bounds.min.x * 10.0).round() as i64,
+                (p.bounds.max().x * 10.0).round() as i64,
+            )
+        };
+        let mut columns: std::collections::BTreeMap<(i64, i64), Vec<(f64, String)>> =
+            Default::default();
+        for p in self
+            .list
+            .parts
+            .iter()
+            .filter(|p| matches!(p.role, PartRole::Door | PartRole::DrawerFront))
+        {
+            columns
+                .entry(key(p))
+                .or_default()
+                .push((p.bounds.max().z, p.name.clone()));
+        }
+        for mut column in columns.into_values().filter(|c| c.len() > 1) {
+            column.sort_by(|a, b| b.0.total_cmp(&a.0));
+            let names: Vec<String> = column.into_iter().map(|(_, n)| n).collect();
+            for p in self
+                .list
+                .parts
+                .iter_mut()
+                .filter(|p| names.contains(&p.name))
+            {
+                p.grain_axis = Some(Axis::Z);
+            }
+            self.list.grain_matched.push(names);
+        }
+    }
+
     fn shaker_fronts(&mut self) {
         let s = &self.cab.standard;
         if s.door_style == DoorStyle::Slab {
@@ -4409,6 +4457,45 @@ mod tests {
         assert!(top_drawer < s1.bounds.max().z);
         assert!(door.min.z > s2.bounds.min.z - 1e-6);
         assert!(door.max().z <= 2100.0);
+    }
+
+    /// STYLE-1: continuous grain: the oven tower's door and drawer fronts are one column, top
+    /// first, all grained upright; with it off, drawer fronts' grain runs across.
+    #[test]
+    fn stacked_fronts_are_grain_matched_top_first() {
+        let mut cab = oven_tower();
+        let free = build_cabinet(&cab).unwrap();
+        assert!(free.grain_matched.is_empty());
+        assert_eq!(
+            free.part("T01.DrawerFront1").unwrap().grain_axis,
+            Some(Axis::X)
+        );
+        cab.standard.front_grain = FrontGrain::Matched;
+        let list = build_cabinet(&cab).unwrap();
+        assert_eq!(
+            list.grain_matched,
+            vec![vec![
+                "T01.Door1".to_string(),
+                "T01.DrawerFront1".into(),
+                "T01.DrawerFront2".into(),
+            ]]
+        );
+        assert!(
+            list.parts
+                .iter()
+                .filter(|p| matches!(p.role, PartRole::Door | PartRole::DrawerFront))
+                .all(|p| p.grain_axis == Some(Axis::Z))
+        );
+        // A pair of doors side by side are two columns of one: nothing to match.
+        let mut pair = Cabinet::new("B01", CabinetKind::Base);
+        pair.width = 900.0;
+        pair.standard.front_grain = FrontGrain::Matched;
+        assert!(build_cabinet(&pair).unwrap().grain_matched.is_empty());
+        // Framed fronts are cut piece by piece.
+        cab.standard.door_style = DoorStyle::Shaker;
+        let list = build_cabinet(&cab).unwrap();
+        assert!(list.grain_matched.is_empty());
+        assert!(list.warnings.iter().any(|w| w.contains("continuous grain")));
     }
 
     #[test]

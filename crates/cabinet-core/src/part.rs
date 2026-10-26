@@ -314,6 +314,10 @@ pub struct PartList {
     /// What the maker needs to know that is not a size (a benchtop's edge profile).
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub notes: Vec<String>,
+    /// Parts cut in sequence from one piece so the grain runs on across them (a tall cabinet's
+    /// stacked fronts), each group in order from the top.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub grain_matched: Vec<Vec<String>>,
 }
 
 impl PartList {

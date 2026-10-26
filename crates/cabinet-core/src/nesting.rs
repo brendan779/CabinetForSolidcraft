@@ -179,13 +179,27 @@ fn nest_group(
     rows: &[&CutRow],
     settings: &Settings,
 ) -> (Vec<Sheet>, Vec<String>) {
-    // Every part on its own, largest first (by area, then by its longer side).
-    let mut parts: Vec<&CutRow> = rows
-        .iter()
-        .flat_map(|r| std::iter::repeat_n(*r, r.quantity as usize))
-        .collect();
-    parts.sort_by(|a, b| {
-        let key = |r: &CutRow| (r.cut_length * r.cut_width, r.cut_length.max(r.cut_width));
+    // Every part on its own, and each grain-matched group as one strip (its parts end to end
+    // along the grain, a kerf apart); largest first (by area, then by its longer side).
+    let mut pieces: Vec<Piece> = Vec::new();
+    for r in rows {
+        if r.grain_match.is_empty() {
+            pieces.extend(std::iter::repeat_n(Piece::single(r), r.quantity as usize));
+        } else if let Some(p) = pieces
+            .iter_mut()
+            .find(|p| p.rows[0].grain_match == r.grain_match)
+        {
+            p.cut_length += settings.kerf + r.cut_length;
+            p.cut_width = p.cut_width.max(r.cut_width);
+            p.rows.push(r);
+        } else {
+            let mut p = Piece::single(r);
+            p.grain = true;
+            pieces.push(p);
+        }
+    }
+    pieces.sort_by(|a, b| {
+        let key = |r: &Piece| (r.cut_length * r.cut_width, r.cut_length.max(r.cut_width));
         let (ka, kb) = (key(a), key(b));
         kb.0.total_cmp(&ka.0).then(kb.1.total_cmp(&ka.1))
     });
@@ -220,16 +234,21 @@ fn nest_group(
         })
         .collect();
     let mut unplaced = Vec::new();
-    for r in parts {
+    for r in &pieces {
         let fits_blank = |turned: bool| {
             let (l, w) = size(r, turned);
             l <= usable.length + 1e-9 && w <= usable.width + 1e-9
         };
         let may_turn = !(stock.grained && r.grain);
         if !fits_blank(false) && !(may_turn && fits_blank(true)) {
+            let what = if r.rows.len() > 1 {
+                format!("{} (grain-matched)", r.rows[0].grain_match)
+            } else {
+                r.rows[0].part.clone()
+            };
             unplaced.push(format!(
-                "{}: {:.0} × {:.0} is larger than a {:.0} × {:.0} sheet",
-                r.part, r.cut_length, r.cut_width, stock.length, stock.width
+                "{what}: {:.0} × {:.0} is larger than a {:.0} × {:.0} sheet",
+                r.cut_length, r.cut_width, stock.length, stock.width
             ));
             continue;
         }
@@ -268,17 +287,32 @@ fn nest_group(
         let o = &mut open[s];
         let rect = o.free.swap_remove(f);
         let (l, w) = size(r, turned);
-        o.sheet.placements.push(Placement {
-            part: r.part.clone(),
-            cabinet: r.cabinet.clone(),
-            rect: Rect {
-                x: rect.x,
-                y: rect.y,
-                length: l,
-                width: w,
-            },
-            turned,
-        });
+        // A strip's parts one after the other from its start, along the grain.
+        let mut along = 0.0;
+        for m in &r.rows {
+            let (ml, mw) = if turned {
+                (m.cut_width, m.cut_length)
+            } else {
+                (m.cut_length, m.cut_width)
+            };
+            let (x, y) = if turned {
+                (rect.x, rect.y + along)
+            } else {
+                (rect.x + along, rect.y)
+            };
+            o.sheet.placements.push(Placement {
+                part: m.part.clone(),
+                cabinet: m.cabinet.clone(),
+                rect: Rect {
+                    x,
+                    y,
+                    length: ml,
+                    width: mw,
+                },
+                turned,
+            });
+            along += if turned { mw } else { ml } + settings.kerf;
+        }
         o.free.extend(split(rect, l, w, settings.kerf));
     }
     let sheets = open
@@ -325,8 +359,28 @@ pub fn kept_offcuts(n: &Nesting, stored: &[Offcut]) -> Vec<Offcut> {
     left
 }
 
-/// A part's cut size on the sheet, turned or not.
-fn size(r: &CutRow, turned: bool) -> (f64, f64) {
+/// What the saw cuts out in one go: a part, or a grain-matched strip of them.
+#[derive(Clone)]
+struct Piece<'a> {
+    rows: Vec<&'a CutRow>,
+    cut_length: f64,
+    cut_width: f64,
+    grain: bool,
+}
+
+impl<'a> Piece<'a> {
+    fn single(r: &'a CutRow) -> Self {
+        Self {
+            rows: vec![r],
+            cut_length: r.cut_length,
+            cut_width: r.cut_width,
+            grain: r.grain,
+        }
+    }
+}
+
+/// A piece's cut size on the sheet, turned or not.
+fn size(r: &Piece, turned: bool) -> (f64, f64) {
     if turned {
         (r.cut_width, r.cut_length)
     } else {
@@ -399,6 +453,7 @@ mod tests {
             grain,
             quantity,
             templated: false,
+            grain_match: String::new(),
         }
     }
 
@@ -460,6 +515,43 @@ mod tests {
         let placed: usize = n.sheets.iter().map(|s| s.placements.len()).sum();
         assert_eq!(placed, 15);
         assert_valid(&n, &s);
+    }
+
+    /// STYLE-1: a grain-matched group is cut as one strip: its parts end to end along the
+    /// sheet's length, a kerf apart, in order.
+    #[test]
+    fn grain_matched_parts_are_cut_end_to_end_in_order() {
+        let s = Settings::default();
+        let mut rows = vec![row("side", 2000.0, 560.0, 2, true)];
+        for (part, l) in [("door", 900.0), ("drawer1", 300.0), ("drawer2", 200.0)] {
+            let mut r = row(part, l, 596.0, 1, true);
+            r.grain_match = "T01.grain1".into();
+            rows.push(r);
+        }
+        let n = nest(&rows, stock(true), &s);
+        assert!(n.unplaced.is_empty());
+        let sheet = n
+            .sheets
+            .iter()
+            .find(|sh| sh.placements.iter().any(|p| p.part == "door"))
+            .unwrap();
+        let at = |part: &str| {
+            sheet
+                .placements
+                .iter()
+                .find(|p| p.part == part)
+                .unwrap()
+                .rect
+        };
+        let (door, d1, d2) = (at("door"), at("drawer1"), at("drawer2"));
+        assert_eq!((door.y, d1.y, d2.y), (door.y, door.y, door.y));
+        assert!((d1.x - (door.x + 900.0 + s.kerf)).abs() < 1e-9);
+        assert!((d2.x - (d1.x + 300.0 + s.kerf)).abs() < 1e-9);
+        assert_valid(&n, &s);
+        // A strip too long for the sheet is reported by its group.
+        rows[1].cut_length = 2000.0;
+        let n = nest(&rows, stock(true), &s);
+        assert!(n.unplaced.iter().any(|u| u.contains("T01.grain1")));
     }
 
     #[test]

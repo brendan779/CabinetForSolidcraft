@@ -221,6 +221,22 @@ pub fn option_groups() -> Vec<OptionGroup> {
             ],
         ),
         group(
+            "front_grain",
+            "Front grain",
+            &[
+                (
+                    "free",
+                    "Each front",
+                    "Fronts are cut on their own; drawer fronts' grain runs across",
+                ),
+                (
+                    "matched",
+                    "Continuous",
+                    "Stacked fronts run their grain upright, cut in sequence from one strip",
+                ),
+            ],
+        ),
+        group(
             "wall_hanging",
             "Wall hanging",
             &[
