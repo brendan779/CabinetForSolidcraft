@@ -20,6 +20,10 @@ const FILES: &[(&str, &str)] = &[
         include_str!("../../../catalog/hardware/blum-aventos-hk.json"),
     ),
     (
+        "blum-ambia-line.json",
+        include_str!("../../../catalog/hardware/blum-ambia-line.json"),
+    ),
+    (
         "blum-aventos-hki.json",
         include_str!("../../../catalog/hardware/blum-aventos-hki.json"),
     ),

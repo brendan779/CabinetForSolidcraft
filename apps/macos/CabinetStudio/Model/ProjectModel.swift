@@ -165,6 +165,12 @@ struct CabinetDoc: Identifiable, Hashable, Codable {
         }
     }
 
+    /// Blum AMBIA-LINE cutlery insert and frames in the steel-sided drawers.
+    var drawerInserts: Bool {
+        get { object["drawer_inserts"] as? Bool ?? false }
+        set { update { $0["drawer_inserts"] = newValue ? true : nil } }
+    }
+
     /// Blum inner drawers behind the doors; they take the shelves' place.
     var innerDrawers: Int {
         get { Int(number("inner_drawers")) }

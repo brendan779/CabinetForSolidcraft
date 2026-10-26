@@ -40,6 +40,9 @@ pub struct Cabinet {
     /// the shelves' place.
     #[serde(default, skip_serializing_if = "is_zero")]
     pub inner_drawers: u32,
+    /// Blum AMBIA-LINE cutlery insert and drawer frames in the steel-sided drawers.
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub drawer_inserts: bool,
     /// LED strips: under the cabinet, inside it, or in its plinth.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub lights: Vec<Light>,
@@ -275,6 +278,7 @@ impl Cabinet {
             adjustable_shelves: kind.default_shelves(),
             fixed_shelves: Vec::new(),
             inner_drawers: 0,
+            drawer_inserts: false,
             lights: Vec::new(),
             blind: Blind::default(),
             sink: Sink::default(),

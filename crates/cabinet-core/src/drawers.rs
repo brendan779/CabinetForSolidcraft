@@ -179,6 +179,72 @@ pub fn steel_box(
     Err(last_err)
 }
 
+/// What Blum's AMBIA-LINE recommendation (p.546) puts in an M or K drawer of nominal length
+/// `nl` in a cabinet `kb` wide: a cutlery insert set (`cutlery`, from NL 450) or drawer frames;
+/// 242 mm frames for NL 270–400 take an adapter profile to a chipboard back from NL 350.
+pub fn ambia_line(
+    kb: f64,
+    nl: f64,
+    height: &str,
+    cutlery: bool,
+) -> Result<Vec<(&'static HardwareItem, u32)>, String> {
+    if !matches!(height, "M" | "K") {
+        return Err(format!(
+            "AMBIA-LINE needs drawers of height M or K, not {height}"
+        ));
+    }
+    let sys = hardware::item("blum.ambia-line")?;
+    // The printed row at or under `kb`; nothing under the first.
+    let count = |name: &str, col: f64| -> Result<u32, String> {
+        let t = sys.table(name)?;
+        let r = t.rows.iter().rposition(|&r| r <= kb + 1e-6);
+        let c = t.cols.iter().rposition(|&c| c <= col + 1e-6).unwrap_or(0);
+        Ok(r.and_then(|r| t.values[r][c]).unwrap_or(0.0) as u32)
+    };
+    let mut out = Vec::new();
+    let mut add = |id: String, n: u32| -> Result<(), String> {
+        if n > 0 {
+            out.push((hardware::item(&id)?, n));
+        }
+        Ok(())
+    };
+    if nl >= 450.0 {
+        let nl = nl as u32;
+        let (c, f100, f200) = if cutlery {
+            (
+                count("cutlery_set_cutlery_inserts", 0.0)?,
+                count("cutlery_set_frames_100", 0.0)?,
+                count("cutlery_set_frames_200", 0.0)?,
+            )
+        } else {
+            (
+                0,
+                count("long_frames_100", 0.0)?,
+                count("long_frames_200", 0.0)?,
+            )
+        };
+        add(format!("blum.ambia-line.cutlery-insert.{nl}"), c)?;
+        add(format!("blum.ambia-line.frame-100.{nl}"), f100)?;
+        add(format!("blum.ambia-line.frame-200.{nl}"), f200)?;
+    } else if nl >= 270.0 {
+        let n = count("short_frames_242", nl)?;
+        add("blum.ambia-line.frame-242".into(), n)?;
+        let adapter = hardware::item(&format!(
+            "blum.ambia-line.adapter.{}",
+            height.to_lowercase()
+        ))?;
+        if nl >= adapter.param("from_nominal_length")? {
+            add(adapter.id.clone(), n)?;
+        }
+    }
+    if out.is_empty() {
+        return Err(format!(
+            "AMBIA-LINE recommends nothing for a {kb:.0} mm cabinet at NL {nl:.0}"
+        ));
+    }
+    Ok(out)
+}
+
 /// The wooden-drawer runner systems.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum WoodRunner {
@@ -626,5 +692,41 @@ mod tests {
         assert_eq!(unit("legrabox"), "T60L7340");
         let narrow = tip_on_blumotion("tandembox", 500.0, false, false, 280.0).unwrap();
         assert_eq!(narrow[1].0.article, "T60.300D");
+    }
+
+    /// p.546: AMBIA-LINE by cabinet width and nominal length.
+    #[test]
+    fn ambia_line_follows_blums_recommendation() {
+        let arts = |kb, nl, cutlery| {
+            ambia_line(kb, nl, "M", cutlery)
+                .unwrap()
+                .iter()
+                .map(|(i, n)| (i.article.clone(), *n))
+                .collect::<Vec<_>>()
+        };
+        let a = |s: &str, n| (s.to_string(), n);
+        assert_eq!(
+            arts(600.0, 500.0, true),
+            [a("ZC7S500BS3", 1), a("ZC7S500RS1", 1)]
+        );
+        assert_eq!(
+            arts(900.0, 500.0, false),
+            [a("ZC7S500RS1", 2), a("ZC7S500RS2", 2)]
+        );
+        // 700 is not printed: the 600 row.
+        assert_eq!(
+            arts(700.0, 550.0, false),
+            [a("ZC7S550RS1", 2), a("ZC7S550RS2", 1)]
+        );
+        assert_eq!(arts(600.0, 300.0, false), [a("ZC7S300RSU", 2)]);
+        assert_eq!(
+            arts(600.0, 350.0, false),
+            [a("ZC7S300RSU", 2), a("ZC7A0U0M", 2)]
+        );
+        assert!(ambia_line(600.0, 500.0, "N", false).is_err());
+        assert!(
+            ambia_line(300.0, 300.0, "M", false).is_err(),
+            "nothing under 400 at NL 300"
+        );
     }
 }

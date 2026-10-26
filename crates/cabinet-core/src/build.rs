@@ -117,6 +117,7 @@ pub fn build_cabinet(cab: &Cabinet) -> Result<PartList> {
         b.cladding();
         b.cover_caps();
         b.opening();
+        b.drawer_inserts();
         // Last: hinges, handles and drawer fixings are placed on the slab, then move to the
         // frame member they fall in.
         b.shaker_fronts();
@@ -342,6 +343,10 @@ struct DrawerFit {
     /// A deep box (LEGRABOX K, wooden sides 150 mm or more): Blum's 15–40 kg TIP-ON unit.
     heavy_load: bool,
     front_height: f64,
+    /// The steel box's side set (N, M, K, C, F); empty for wooden drawers.
+    height: String,
+    /// The front's top edge: the highest drawer takes the cutlery insert.
+    front_top: f64,
 }
 
 impl<'a> Builder<'a> {
@@ -1336,6 +1341,8 @@ impl<'a> Builder<'a> {
             heavy_runner: b.runner.id.contains(".766h."),
             heavy_load: b.side_height >= DEEP_WOOD_DRAWER,
             front_height: front.size.z,
+            height: String::new(),
+            front_top: front.max().z,
         });
         let (st, mid) = (b.board, cab.width / 2.0);
         let (x0, x1) = (mid - b.inside_width / 2.0, mid + b.inside_width / 2.0);
@@ -1424,6 +1431,8 @@ impl<'a> Builder<'a> {
             heavy_runner: lb.heavy_profile,
             heavy_load: matches!(lb.height.as_str(), "K" | "C" | "F"),
             front_height: front.size.z,
+            height: lb.height.clone(),
+            front_top: front.max().z,
         });
         self.steel_box_parts(n, &lb, fy, datum + base_lift);
         // Front fixing brackets: their bores in the back of the front, in from each side.
@@ -2795,6 +2804,52 @@ impl<'a> Builder<'a> {
                 edges: EdgeBanding::default(),
             });
         }
+    }
+
+    /// AMBIA-LINE in every LEGRABOX / MERIVOBOX M or K drawer: the top one a cutlery insert set,
+    /// the rest drawer frames, as Blum recommends for the cabinet's width (p.546).
+    fn drawer_inserts(&mut self) {
+        let cab = self.cab;
+        if !cab.drawer_inserts {
+            return;
+        }
+        let fits: Vec<&DrawerFit> = self
+            .drawer_fits
+            .iter()
+            .filter(|f| matches!(f.system, "legrabox" | "merivobox"))
+            .collect();
+        if fits.is_empty() {
+            self.list.warnings.push(
+                "AMBIA-LINE goes in LEGRABOX and MERIVOBOX drawers; this cabinet has none".into(),
+            );
+            return;
+        }
+        let top = fits.iter().map(|f| f.front_top).fold(f64::MIN, f64::max);
+        let mut rows = Vec::new();
+        for f in fits {
+            let cutlery = (f.front_top - top).abs() < 1e-6;
+            match drawers::ambia_line(cab.width, f.nominal_length, &f.height, cutlery) {
+                Ok(items) => {
+                    for (item, quantity) in items {
+                        rows.push(HardwarePlacement {
+                            item: item.id.clone(),
+                            description: format!("{} {}", item.family, item.variant),
+                            at: Vec3::default(),
+                            part: f.front.clone(),
+                            quantity,
+                        });
+                    }
+                }
+                Err(e) => self.list.warnings.push(format!("{}: {e}", f.front)),
+            }
+        }
+        // Placed at their drawer front's middle.
+        for r in &mut rows {
+            if let Some(p) = self.list.part(&r.part) {
+                r.at = p.bounds.center();
+            }
+        }
+        self.list.hardware.extend(rows);
     }
 
     /// Each light's strip, and a cable hole through the panel between it and the void behind
@@ -4513,6 +4568,34 @@ mod tests {
                 .warnings
                 .iter()
                 .any(|w| w.contains("does not fit"))
+        );
+    }
+
+    /// BLUM-16: AMBIA-LINE: the top drawer a cutlery set, the others frames.
+    #[test]
+    fn ambia_line_puts_cutlery_in_the_top_drawer_and_frames_below() {
+        let mut cab = Cabinet::new("D01", CabinetKind::DrawerBank);
+        cab.drawer_inserts = true;
+        let list = build_cabinet(&cab).unwrap();
+        assert!(
+            !list.warnings.iter().any(|w| w.contains("AMBIA")),
+            "{:?}",
+            list.warnings
+        );
+        let on = |part: &str, prefix: &str| {
+            list.hardware
+                .iter()
+                .any(|h| h.part == part && h.item.starts_with(prefix))
+        };
+        assert!(on("D01.DrawerFront1", "blum.ambia-line.cutlery-insert."));
+        assert!(!on("D01.DrawerFront2", "blum.ambia-line.cutlery-insert."));
+        assert!(on("D01.DrawerFront2", "blum.ambia-line.frame-"));
+        cab.standard.drawer_system = DrawerSystem::Tandem;
+        let list = build_cabinet(&cab).unwrap();
+        assert!(
+            list.warnings
+                .iter()
+                .any(|w| w.contains("AMBIA-LINE goes in"))
         );
     }
 
