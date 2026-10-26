@@ -535,7 +535,14 @@ final class ViewportScene {
         let colour = board?.displayColour ?? generic
         var m = PhysicallyBasedMaterial()
         let tint = selected ? NSColor.white : NSColor(calibratedWhite: 0.72, alpha: 1)
-        if let board, board.grained, let texture = grainTexture(board.id, colour) {
+        let texture: TextureResource? = if let board, board.profileModule > 0 {
+            profileTexture(board, colour)
+        } else if let board, board.grained {
+            grainTexture(board.id, colour)
+        } else {
+            nil
+        }
+        if let texture {
             let sampler = MTLSamplerDescriptor()
             sampler.sAddressMode = .repeat
             sampler.tAddressMode = .repeat
@@ -558,6 +565,62 @@ final class ViewportScene {
     private var loading: Set<String> = []
     /// Called when a texture has loaded, so the viewport updates with it.
     var onTextureLoaded: (() -> Void)?
+
+    /// A lining's routed profile as stripes along the grain, or nil while it loads.
+    private func profileTexture(_ board: BoardRecord, _ colour: NSColor) -> TextureResource? {
+        let key = "profile:" + board.id
+        if let t = grainTextures[key] { return t }
+        guard !loading.contains(key),
+              let image = Self.flutes(colour, shape: board.profileShape, module: board.profileModule,
+                                      groove: board.profileGroove)
+        else { return nil }
+        loading.insert(key)
+        Task {
+            let t = try? await TextureResource(image: image, options: .init(semantic: .color, mipmapsMode: .allocateAndGenerateAll))
+            grainTextures[key] = t
+            loading.remove(key)
+            onTextureLoaded?()
+        }
+        return nil
+    }
+
+    /// A profile tile: one texture tile spans `grainRepeat` metres across the board, so the
+    /// module repeats a whole number of times in it (rounded, to tile without a seam). Grooves are
+    /// dark bands along the grain (the image's x axis); scallops and rounds shade across each module.
+    static func flutes(_ colour: NSColor, shape: String, module: Double, groove: Double) -> CGImage? {
+        let w = 64, h = 512
+        guard module > 0, let rgb = colour.usingColorSpace(.sRGB),
+              let ctx = CGContext(data: nil, width: w, height: h, bitsPerComponent: 8, bytesPerRow: 0,
+                                  space: CGColorSpace(name: CGColorSpace.sRGB)!,
+                                  bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)
+        else { return nil }
+        ctx.setFillColor(rgb.cgColor)
+        ctx.fill(CGRect(x: 0, y: 0, width: w, height: h))
+        let count = max(1, (Double(grainRepeat) * 1000 / module).rounded())
+        let pitch = CGFloat(h) / CGFloat(count)
+        let band = pitch * CGFloat(min(groove / module, 0.6))
+        for i in 0..<Int(count) {
+            let y0 = CGFloat(i) * pitch
+            switch shape {
+            case "scallop", "round":
+                // Light at one edge of each module, dark at the other: a curved face in light.
+                let steps = 16
+                for s in 0..<steps {
+                    let f = CGFloat(s) / CGFloat(steps)
+                    let shade = shape == "round" ? 0.5 - 0.5 * cos(f * 2 * .pi) : f
+                    ctx.setFillColor(CGColor(gray: 0, alpha: 0.18 * shade))
+                    ctx.fill(CGRect(x: 0, y: y0 + f * pitch, width: CGFloat(w), height: pitch / CGFloat(steps) + 0.5))
+                }
+            default:
+                ctx.setFillColor(CGColor(gray: 0, alpha: 0.35))
+                ctx.fill(CGRect(x: 0, y: y0, width: CGFloat(w), height: max(band, 1)))
+                // A light edge where the face meets the groove.
+                ctx.setFillColor(CGColor(gray: 1, alpha: 0.25))
+                ctx.fill(CGRect(x: 0, y: y0 + max(band, 1), width: CGFloat(w), height: 1))
+            }
+        }
+        return ctx.makeImage()
+    }
 
     /// The decor's woodgrain texture, or nil while it loads.
     private func grainTexture(_ key: String, _ colour: NSColor) -> TextureResource? {

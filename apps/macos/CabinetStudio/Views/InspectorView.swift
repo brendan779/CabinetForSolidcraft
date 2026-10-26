@@ -552,6 +552,22 @@ struct CladdingSection: View {
                 }
             }
             if ["left", "back", "right"].contains(where: cab.clad) {
+                let linings = project.boards.filter { $0.kind == "lining" && $0.profileModule > 0 }
+                if !linings.isEmpty {
+                    Picker("Profile", selection: Binding(get: { cab.cladBoard }, set: { id in
+                        var c = cab
+                        c.cladBoard = id
+                        // The board's own thickness.
+                        if let b = linings.first(where: { $0.id == id }) { c.cladThickness = b.thickness }
+                        withAnimation(.snappy) { project.selected = c }
+                    })) {
+                        Text("Plain").tag("")
+                        ForEach(linings, id: \.id) { b in
+                            Text("\(b.finish), \(Int(b.thickness)) mm, \(b.substrate.replacingOccurrences(of: "_", with: " "))").tag(b.id)
+                        }
+                    }
+                    .help("The lining board and its routed profile (Surround by Laminex)")
+                }
                 HStack(spacing: 6) {
                     Text("Thickness").foregroundStyle(.secondary)
                     Spacer()

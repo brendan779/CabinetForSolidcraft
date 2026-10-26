@@ -94,6 +94,11 @@ pub struct BoardRecord {
     pub verified: bool,
     /// `melamine`, `lining`, `raw`... as the catalog names it.
     pub kind: String,
+    /// A lining's routed profile: its shape (`batten`, `scallop`...), module and groove (mm);
+    /// empty and 0 for other boards.
+    pub profile_shape: String,
+    pub profile_module: f64,
+    pub profile_groove: f64,
 }
 
 /// A job's items in the sidebar's order: cabinets (cabinet JSON) and the fillers and end panels
@@ -1305,10 +1310,26 @@ pub fn hide_bodies(port: u16, bodies: Vec<String>) -> Result<(), CoreError> {
 pub fn load_boards(catalog_dir: String) -> Result<Vec<BoardRecord>, CoreError> {
     let cat =
         cabinet_catalog::Catalog::load(std::path::Path::new(&catalog_dir)).map_err(invalid)?;
+    let profiles: Vec<_> = cat
+        .boards
+        .iter()
+        .map(|b| cat.profile_of(b).cloned())
+        .collect();
     Ok(cat
         .boards
         .into_iter()
-        .map(|b| BoardRecord {
+        .zip(profiles)
+        .map(|(b, profile)| BoardRecord {
+            profile_shape: profile
+                .as_ref()
+                .and_then(|p| serde_json::to_value(p.shape).ok())
+                .and_then(|v| v.as_str().map(String::from))
+                .unwrap_or_default(),
+            profile_module: profile.as_ref().map_or(0.0, |p| p.module),
+            profile_groove: profile
+                .as_ref()
+                .and_then(|p| p.groove.or(p.radius.map(|r| r.min(p.module / 2.0))))
+                .unwrap_or(0.0),
             sheets: b
                 .sheets
                 .iter()

@@ -232,6 +232,12 @@ struct CabinetDoc: Identifiable, Hashable, Codable {
         }
     }
 
+    /// The cladding's lining board id (empty: generic).
+    var cladBoard: String {
+        get { cladding["board"] as? String ?? "" }
+        set { update { o in var c = o["cladding"] as? [String: Any] ?? [:]; c["board"] = newValue; o["cladding"] = c } }
+    }
+
     var cladThickness: Double {
         get { (cladding["thickness"] as? NSNumber)?.doubleValue ?? 12 }
         set { update { o in var c = o["cladding"] as? [String: Any] ?? [:]; c["thickness"] = newValue; o["cladding"] = c } }
