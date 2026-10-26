@@ -81,6 +81,7 @@ struct ConstructionThumbnail: View {
             case "drawer_system": pen.drawerSystem(choice)
             case "drawer_sides": pen.drawerSides(choice)
             case "front_grain": pen.frontGrain(choice)
+            case "insert_design": pen.insertDesign(choice)
             case "door_style": pen.doorStyle(choice)
             case "handle_size": pen.handleSize(choice)
             case "handle_place": pen.handlePlace(choice)
@@ -318,6 +319,23 @@ private struct Pen {
         let top: CGFloat = choice == "high_fronted" ? 14 : 44
         board(18, top, 66, 64 - top, hot: true)       // steel side
         line(p(18, 72), p(88, 72), colour: accent, width: 2)
+    }
+
+    /// A drawer insert from above: a frame with two dividers, in steel lines or wood boards.
+    func insertDesign(_ choice: String) {
+        let (x0, y0, w, h): (CGFloat, CGFloat, CGFloat, CGFloat) = (14, 12, 72, 56)
+        if choice == "wood" {
+            board(x0, y0, w, 5, hot: true)
+            board(x0, y0 + h - 5, w, 5, hot: true)
+            board(x0, y0, 5, h, hot: true)
+            board(x0 + w - 5, y0, 5, h, hot: true)
+            board(x0 + 26, y0 + 5, 4, h - 10, hot: true)
+            board(x0 + 46, y0 + 5, 4, h - 10, hot: true)
+        } else {
+            ctx.stroke(Path(r(x0, y0, w, h)), with: .color(accent), lineWidth: 1.5)
+            line(p(x0 + 28, y0), p(x0 + 28, y0 + h), colour: accent, width: 1.5)
+            line(p(x0 + 48, y0), p(x0 + 48, y0 + h), colour: accent, width: 1.5)
+        }
     }
 
     /// A door over two drawer fronts, with their grain: upright and running on through all three,

@@ -221,6 +221,18 @@ pub fn option_groups() -> Vec<OptionGroup> {
             ],
         ),
         group(
+            "insert_design",
+            "Insert design",
+            &[
+                ("steel", "Steel", "AMBIA-LINE inserts and frames in steel"),
+                (
+                    "wood",
+                    "Wood décor",
+                    "AMBIA-LINE in oak or walnut décor on steel, ordered with a colour code",
+                ),
+            ],
+        ),
+        group(
             "front_grain",
             "Front grain",
             &[

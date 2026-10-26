@@ -180,14 +180,23 @@ pub fn steel_box(
 }
 
 /// What Blum's AMBIA-LINE recommendation (p.546) puts in an M or K drawer of nominal length
-/// `nl` in a cabinet `kb` wide: a cutlery insert set (`cutlery`, from NL 450) or drawer frames;
-/// 242 mm frames for NL 270–400 take an adapter profile to a chipboard back from NL 350.
+/// `nl` in a cabinet `kb` wide: a cutlery insert set (`cutlery`, from NL 450) or drawer frames,
+/// in steel (p.544) or wood design (p.545); steel 242 mm frames for NL 270–400 take an adapter
+/// profile to a chipboard back from NL 350 (p.545 prints none for wood).
 pub fn ambia_line(
     kb: f64,
     nl: f64,
     height: &str,
     cutlery: bool,
+    wood: bool,
 ) -> Result<Vec<(&'static HardwareItem, u32)>, String> {
+    let piece = |name: &str| {
+        if wood {
+            format!("blum.ambia-line.wood.{name}")
+        } else {
+            format!("blum.ambia-line.{name}")
+        }
+    };
     if !matches!(height, "M" | "K") {
         return Err(format!(
             "AMBIA-LINE needs drawers of height M or K, not {height}"
@@ -223,12 +232,15 @@ pub fn ambia_line(
                 count("long_frames_200", 0.0)?,
             )
         };
-        add(format!("blum.ambia-line.cutlery-insert.{nl}"), c)?;
-        add(format!("blum.ambia-line.frame-100.{nl}"), f100)?;
-        add(format!("blum.ambia-line.frame-200.{nl}"), f200)?;
+        add(piece(&format!("cutlery-insert.{nl}")), c)?;
+        add(piece(&format!("frame-100.{nl}")), f100)?;
+        add(piece(&format!("frame-200.{nl}")), f200)?;
     } else if nl >= 270.0 {
         let n = count("short_frames_242", nl)?;
-        add("blum.ambia-line.frame-242".into(), n)?;
+        add(piece("frame-242"), n)?;
+        if wood {
+            return Ok(out);
+        }
         let adapter = hardware::item(&format!(
             "blum.ambia-line.adapter.{}",
             height.to_lowercase()
@@ -796,7 +808,7 @@ mod tests {
     #[test]
     fn ambia_line_follows_blums_recommendation() {
         let arts = |kb, nl, cutlery| {
-            ambia_line(kb, nl, "M", cutlery)
+            ambia_line(kb, nl, "M", cutlery, false)
                 .unwrap()
                 .iter()
                 .map(|(i, n)| (i.article.clone(), *n))
@@ -821,9 +833,22 @@ mod tests {
             arts(600.0, 350.0, false),
             [a("ZC7S300RSU", 2), a("ZC7A0U0M", 2)]
         );
-        assert!(ambia_line(600.0, 500.0, "N", false).is_err());
+        assert!(ambia_line(600.0, 500.0, "N", false, false).is_err());
+        // p.545: the wood design's pieces, no adapter.
+        let wood: Vec<_> = ambia_line(600.0, 350.0, "M", false, true)
+            .unwrap()
+            .iter()
+            .map(|(i, n)| (i.article.clone(), *n))
+            .collect();
+        assert_eq!(wood, [a("ZC7S300RHU", 2)]);
+        let wood: Vec<_> = ambia_line(600.0, 500.0, "M", true, true)
+            .unwrap()
+            .iter()
+            .map(|(i, n)| (i.article.clone(), *n))
+            .collect();
+        assert_eq!(wood, [a("ZC7S500BH3", 1), a("ZC7S500RH1", 1)]);
         assert!(
-            ambia_line(300.0, 300.0, "M", false).is_err(),
+            ambia_line(300.0, 300.0, "M", false, false).is_err(),
             "nothing under 400 at NL 300"
         );
     }

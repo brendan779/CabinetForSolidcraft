@@ -9,7 +9,8 @@ use crate::lift;
 use crate::model::{
     BackStyle, BottomJoint, Cabinet, CabinetKind, DoorOverlay, DoorStyle, DrawerSides,
     DrawerSystem, Exposed, FrontCore, FrontGrain, FrontLayout, HandlePlace, Hanging, HingeSide,
-    LiftKind, LightZone, Opening, SectionKind, StackSection, ToeKick, TopJoint, WallHanging,
+    InsertDesign, LiftKind, LightZone, Opening, SectionKind, StackSection, ToeKick, TopJoint,
+    WallHanging,
 };
 use crate::part::{
     BorePurpose, Dir, EdgeBanding, HardwarePlacement, Operation, Part, PartList, PartRole,
@@ -2888,7 +2889,8 @@ impl<'a> Builder<'a> {
                 };
                 drawers::orga_line(cab.width, f.nominal_length, &f.height, set)
             } else {
-                drawers::ambia_line(cab.width, f.nominal_length, &f.height, cutlery)
+                let wood = cab.standard.insert_design == InsertDesign::Wood;
+                drawers::ambia_line(cab.width, f.nominal_length, &f.height, cutlery, wood)
             };
             match items {
                 Ok(items) => {
@@ -4692,6 +4694,14 @@ mod tests {
         assert!(on("D01.DrawerFront1", "blum.ambia-line.cutlery-insert."));
         assert!(!on("D01.DrawerFront2", "blum.ambia-line.cutlery-insert."));
         assert!(on("D01.DrawerFront2", "blum.ambia-line.frame-"));
+        cab.standard.insert_design = InsertDesign::Wood;
+        let list = build_cabinet(&cab).unwrap();
+        assert!(
+            list.hardware
+                .iter()
+                .filter(|h| h.item.starts_with("blum.ambia-line."))
+                .all(|h| h.item.starts_with("blum.ambia-line.wood."))
+        );
         cab.standard.drawer_system = DrawerSystem::Tandem;
         let list = build_cabinet(&cab).unwrap();
         assert!(

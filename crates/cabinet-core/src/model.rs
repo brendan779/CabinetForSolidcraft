@@ -558,6 +558,8 @@ pub struct ConstructionStandard {
     pub drawer_sides: DrawerSides,
     /// Whether a cabinet's stacked fronts are cut in sequence so their grain runs on.
     pub front_grain: FrontGrain,
+    /// AMBIA-LINE drawer inserts in steel or wood design.
+    pub insert_design: InsertDesign,
     /// Board thickness of wooden drawer boxes (sides, base, front and back).
     pub drawer_board_thickness: f64,
     /// What the fronts are made of, for their weight on lift systems.
@@ -624,6 +626,7 @@ impl Default for ConstructionStandard {
             drawer_system: DrawerSystem::Legrabox,
             drawer_sides: DrawerSides::Standard,
             front_grain: FrontGrain::Free,
+            insert_design: InsertDesign::Steel,
             drawer_board_thickness: 16.0,
             front_core: FrontCore::Mdf,
         }
@@ -808,6 +811,16 @@ pub enum DrawerSystem {
     Movento,
     /// A wooden box on Blum TANDEM 560H runners (30 kg).
     Tandem,
+}
+
+/// The look of Blum AMBIA-LINE inserts.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum InsertDesign {
+    #[default]
+    Steel,
+    /// Wood décor sides on steel (oak or walnut, with a matching steel colour).
+    Wood,
 }
 
 /// How the grain of a cabinet's fronts lines up.
