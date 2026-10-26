@@ -341,14 +341,9 @@ fn benchtop(b: &Benchtop, lists: &[PartList], under: &[bool]) -> PartList {
     }
     for (n, stretch) in stretches.iter().enumerate() {
         let parts: Vec<&Part> = stretch.iter().flat_map(|l| &l.parts).collect();
-        // An L-corner's second leg comes forward of the doors: its own top (BENCH-3).
+        // An L-corner's second leg comes forward of the doors: it gets a piece of its own.
         let in_line: Vec<&&Part> = parts.iter().filter(|p| p.bounds.min.y >= -100.0).collect();
-        if in_line.len() < parts.len() {
-            out.warnings.push(
-                "an L-corner's second leg needs its own benchtop piece (BENCH-3); this one covers the main run"
-                    .into(),
-            );
-        }
+        let leg: Vec<&&Part> = parts.iter().filter(|p| p.bounds.min.y < -100.0).collect();
         let lo = |f: fn(&Part) -> f64| in_line.iter().map(|p| f(p)).fold(f64::MAX, f64::min);
         let hi = |f: fn(&Part) -> f64| in_line.iter().map(|p| f(p)).fold(f64::MIN, f64::max);
         let x0 = lo(|p| p.bounds.min.x) - b.side_overhang;
@@ -383,6 +378,40 @@ fn benchtop(b: &Benchtop, lists: &[PartList], under: &[bool]) -> PartList {
                 ..EdgeBanding::default()
             },
         });
+        // The leg's piece butts against the main top's front edge (the main top runs through the
+        // corner); its front, facing along X, overhangs like the run's.
+        if !leg.is_empty() {
+            let lx0 = leg.iter().map(|p| p.bounds.min.x).fold(f64::MAX, f64::min);
+            let lx1 = leg
+                .iter()
+                .map(|p| p.bounds.max().x)
+                .fold(f64::MIN, f64::max);
+            let ly0 = leg.iter().map(|p| p.bounds.min.y).fold(f64::MAX, f64::min);
+            // A leg on the run's left faces +X, on its right −X.
+            let faces_plus_x = (lx0 + lx1) / 2.0 < (x0 + x1) / 2.0;
+            let (bx0, bx1) = if faces_plus_x {
+                (lx0, lx1 + b.front_overhang)
+            } else {
+                (lx0 - b.front_overhang, lx1)
+            };
+            out.parts.push(Part {
+                name: format!("{}.{}{}Leg", b.id, PartRole::Benchtop.code(), n + 1),
+                role: PartRole::Benchtop,
+                bounds: Aabb::new(
+                    Vec3::new(bx0, ly0 - b.side_overhang, z),
+                    Vec3::new(bx1 - bx0, y0 - (ly0 - b.side_overhang), b.thickness),
+                ),
+                thickness_axis: Axis::Z,
+                grain_axis: Some(Axis::Y),
+                board: b.board.clone(),
+                edges: EdgeBanding {
+                    right: faces_plus_x,
+                    left: !faces_plus_x,
+                    front: b.side_overhang > 0.0,
+                    ..EdgeBanding::default()
+                },
+            });
+        }
         // Waterfall ends: from the floor up the stretch's ends to the top's upper face, the
         // depth of the top. Mitred with the top: both pieces are cut to their outer faces.
         let floor = in_line
@@ -852,5 +881,41 @@ mod tests {
             .find(|h| h.item == "benchtop.support-bracket")
             .unwrap();
         assert_eq!(brackets.quantity, 2);
+    }
+
+    /// BENCH-3b: an L-corner's second leg gets its own piece, butted against the main top's
+    /// front edge, overhanging the leg's doors; both hands.
+    #[test]
+    fn an_l_corner_leg_gets_a_piece_butted_to_the_main_top() {
+        for side in [
+            crate::model::HingeSide::Left,
+            crate::model::HingeSide::Right,
+        ] {
+            let mut corner = Cabinet::new("C01", CabinetKind::CornerBase);
+            corner.corner.side = side;
+            let run = Run {
+                origin: Vec3::default(),
+                items: vec![RunItem::Cabinet(Box::new(corner)), top("BT1", 0.0)],
+            };
+            let lists = build_run(&run).unwrap();
+            let bt = &lists[1];
+            assert!(bt.warnings.is_empty(), "{:?}", bt.warnings);
+            let main = bt.part("BT1.Benchtop1").unwrap().bounds;
+            let leg = bt.part("BT1.Benchtop1Leg").unwrap().bounds;
+            assert!((leg.max().y - main.min.y).abs() < 1e-9, "butted");
+            assert!(!leg.overlaps(&main));
+            // 900 − 580 forward of the main run's front.
+            assert!((leg.min.y - (-320.0)).abs() < 1e-9, "{leg:?}");
+            // The leg's doors face ±X; the top passes them by the overhang.
+            let doors = lists[0].part("C01.Door2").unwrap().bounds;
+            match side {
+                crate::model::HingeSide::Left => {
+                    assert!((leg.max().x - (doors.max().x + 20.0)).abs() < 1e-9)
+                }
+                crate::model::HingeSide::Right => {
+                    assert!((leg.min.x - (doors.min.x - 20.0)).abs() < 1e-9)
+                }
+            }
+        }
     }
 }
