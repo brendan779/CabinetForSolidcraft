@@ -220,7 +220,7 @@ features in words.
 | SURR-4 | todo | M | Clad rangehood / canopy box with rounded front corners, in a Surround profile or paint finish | rangehood part between wall cabinets |
 | SURR-5 | needs-human (built in e5180ed as colour stripes, not normal maps; not seen on screen: clad an island back in Batten 100 and look) | S | Flute and VJ procedural textures in the viewport (normal-mapped grooves) | looks fluted in the app |
 | STYLE-1 | todo (shaker = P2-2a; finger pull done in 04a890b; push-to-open is TIP-ON; arched tops and continuous-grain tall fronts left) | M | Door styles for the look: shaker 5-piece, arched-top tall doors, handleless (J-pull, finger pull, push-to-open), full-height tall fronts with continuous grain | picker tiles |
-| STYLE-2 | todo | M | Open shelving: floating timber shelves (concealed brackets) in niches between wall cabinets, with LED strip (ties to HAF-5) | shelf parts + hardware |
+| STYLE-2 | needs-human (built in c875186: floating shelf run item with brackets and LED; not seen on screen; bracket spacing is our rule) | M | Open shelving: floating timber shelves (concealed brackets) in niches between wall cabinets, with LED strip (ties to HAF-5) | shelf parts + hardware |
 | STYLE-3 | todo | S | Handle finishes: brushed brass, black, stainless; long pulls on tall doors | rendered handle colour |
 | STYLE-4 | needs-human (built in 19b3821: oven tower and fridge housing as stacked fronts; niche sizes are our defaults (oven 600 clear): check with your appliances; SERVO-DRIVE flex for integrated fridges and the rangehood insert not done) | M | Appliance housings: integrated ovens (single/double stacked), integrated fridge with SERVO-DRIVE flex, rangehood insert | tall cabinet variants |
 
@@ -367,3 +367,4 @@ Agents append one line per session: date, items touched, outcome.
 - 2026-10-26b (night) — BENCH-3b built (6c46ef9): an L-corner's second leg gets a butted benchtop piece.
 - 2026-10-26b (night) — BENCH-5 done (84bc576): benchtop schedule PDF, benchtops priced by area and kept out of the nesting; quote quantities priced exactly.
 - 2026-10-26b (night) — BENCH-2 built (086d21a): benchtop edge profiles; mitred apron as a part.
+- 2026-10-26b (night) — STYLE-2 built (c875186): floating shelves with concealed brackets and LED strip.
