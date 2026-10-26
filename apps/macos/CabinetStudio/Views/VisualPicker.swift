@@ -80,6 +80,7 @@ struct ConstructionThumbnail: View {
             case "opening": pen.opening(choice)
             case "drawer_system": pen.drawerSystem(choice)
             case "drawer_sides": pen.drawerSides(choice)
+            case "door_style": pen.doorStyle(choice)
             case "handle_size": pen.handleSize(choice)
             case "handle_place": pen.handlePlace(choice)
             case "overlay": pen.overlayPlan(choice)
@@ -235,6 +236,17 @@ private struct Pen {
             board(14, 64, 12, 4, hot: true)
             board(74, 64, 12, 4, hot: true)
         }
+    }
+
+    /// A door from the front: one board, or a frame round a recessed panel.
+    func doorStyle(_ choice: String) {
+        board(28, 6, 44, 68, hot: choice == "slab")
+        guard choice == "shaker" else { return }
+        board(28, 6, 9, 68, hot: true)        // stiles
+        board(63, 6, 9, 68, hot: true)
+        board(37, 6, 26, 9, hot: true)        // rails
+        board(37, 65, 26, 9, hot: true)
+        ctx.fill(Path(r(38, 16, 24, 48)), with: .color(.primary.opacity(0.18)))
     }
 
     /// A drawer front with the handle to scale against it (a 600 mm front is 80 units).

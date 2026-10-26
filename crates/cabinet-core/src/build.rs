@@ -7,9 +7,9 @@ use crate::hinges::{self, HingeNeed};
 use crate::joinery::ButtJoint;
 use crate::lift;
 use crate::model::{
-    BackStyle, BottomJoint, Cabinet, CabinetKind, DoorOverlay, DrawerSides, DrawerSystem, Exposed,
-    FrontCore, FrontLayout, HandlePlace, HingeSide, LiftKind, LightZone, Opening, ToeKick,
-    TopJoint, WallHanging,
+    BackStyle, BottomJoint, Cabinet, CabinetKind, DoorOverlay, DoorStyle, DrawerSides,
+    DrawerSystem, Exposed, FrontCore, FrontLayout, HandlePlace, HingeSide, LiftKind, LightZone,
+    Opening, ToeKick, TopJoint, WallHanging,
 };
 use crate::part::{
     BorePurpose, Dir, EdgeBanding, HardwarePlacement, Operation, Part, PartList, PartRole,
@@ -55,6 +55,14 @@ const HANDLE_EDGE_INSET: f64 = 35.0;
 const HANDLE_END_INSET: f64 = 50.0;
 const TALL_HANDLE_HEIGHT: f64 = 1050.0;
 const DEEP_FRONT: f64 = 200.0;
+/// Our choices for shaker fronts: frame member width, panel thickness, groove depth (and stub
+/// tenon length), and the panel's play in the groove each side. A front under twice the frame
+/// width plus this much stays slab.
+const SHAKER_FRAME: f64 = 70.0;
+const SHAKER_PANEL: f64 = 9.0;
+const SHAKER_GROOVE: f64 = 10.0;
+const SHAKER_PLAY: f64 = 1.0;
+const SHAKER_MIN_OPENING: f64 = 60.0;
 /// Generic until a supplier's shelf support is catalogued (HAF-3).
 const SHELF_SUPPORT: &str = "shelf-support.5mm";
 /// Our choice, not Blum's: the end hinges sit this far in from the door's top and bottom. The
@@ -85,6 +93,9 @@ pub fn build_cabinet(cab: &Cabinet) -> Result<PartList> {
         b.lights();
         b.cover_caps();
         b.opening();
+        // Last: hinges, handles and drawer fixings are placed on the slab, then move to the
+        // frame member they fall in.
+        b.shaker_fronts();
         b.list
     };
     for p in &mut list.parts {
@@ -190,6 +201,7 @@ fn l_corner(cab: &Cabinet) -> Result<PartList> {
     a.list.warnings.extend(leg_b.warnings);
     a.cover_caps();
     a.opening();
+    a.shaker_fronts();
     let mut list = a.list;
     if cab.corner.side == HingeSide::Right {
         corner::mirror_x(&mut list, w);
@@ -2091,6 +2103,169 @@ impl<'a> Builder<'a> {
         }
     }
 
+    /// Shaker fronts: every door, lift front and drawer front big enough becomes two stiles
+    /// (full height), two rails between them with stub tenons into the stiles' grooves, and a
+    /// panel in the grooves, centred in the front's thickness. Bores and hardware on the slab move
+    /// to the member they fall in.
+    fn shaker_fronts(&mut self) {
+        let s = &self.cab.standard;
+        if s.door_style != DoorStyle::Shaker {
+            return;
+        }
+        let front_board = s.front_board.clone();
+        let (f, p, g, play) = (SHAKER_FRAME, SHAKER_PANEL, SHAKER_GROOVE, SHAKER_PLAY);
+        let fronts: Vec<Part> = self
+            .list
+            .parts
+            .iter()
+            .filter(|p| {
+                matches!(
+                    p.role,
+                    PartRole::Door | PartRole::DrawerFront | PartRole::LiftFront
+                )
+            })
+            .cloned()
+            .collect();
+        for front in fronts {
+            let b = front.bounds;
+            let ta = front.thickness_axis;
+            let wa = if ta == Axis::X { Axis::Y } else { Axis::X };
+            let (w0, w1, z0, z1) = (b.min.get(wa), b.max().get(wa), b.min.z, b.max().z);
+            let min = 2.0 * f + SHAKER_MIN_OPENING;
+            if w1 - w0 < min || z1 - z0 < min {
+                continue;
+            }
+            let (t0, t1) = (b.min.get(ta), b.max().get(ta));
+            let mid = (t0 + t1) / 2.0;
+            // A box from (w, z) ranges, across the thickness range (a, c).
+            let boxed = |wr: (f64, f64), zr: (f64, f64), tr: (f64, f64)| {
+                let lo = Vec3::new(0.0, 0.0, zr.0).with(wa, wr.0).with(ta, tr.0);
+                let hi = Vec3::new(0.0, 0.0, zr.1).with(wa, wr.1).with(ta, tr.1);
+                Aabb::new(lo, Vec3::new(hi.x - lo.x, hi.y - lo.y, hi.z - lo.z))
+            };
+            let full = (t0, t1);
+            let slot = (mid - p / 2.0, mid + p / 2.0);
+            let members = [
+                (
+                    PartRole::FrameStile,
+                    1,
+                    boxed((w0, w0 + f), (z0, z1), full),
+                    Axis::Z,
+                ),
+                (
+                    PartRole::FrameStile,
+                    2,
+                    boxed((w1 - f, w1), (z0, z1), full),
+                    Axis::Z,
+                ),
+                (
+                    PartRole::FrameRail,
+                    1,
+                    boxed((w0 + f - g, w1 - f + g), (z0, z0 + f), full),
+                    wa,
+                ),
+                (
+                    PartRole::FrameRail,
+                    2,
+                    boxed((w0 + f - g, w1 - f + g), (z1 - f, z1), full),
+                    wa,
+                ),
+                (
+                    PartRole::FramePanel,
+                    1,
+                    boxed(
+                        (w0 + f - g + play, w1 - f + g - play),
+                        (z0 + f - g + play, z1 - f + g - play),
+                        slot,
+                    ),
+                    Axis::Z,
+                ),
+            ];
+            let name = |role: PartRole, n: usize| {
+                if role == PartRole::FramePanel {
+                    format!("{}{}", front.name, role.code())
+                } else {
+                    format!("{}{}{n}", front.name, role.code())
+                }
+            };
+            self.list.parts.retain(|x| x.name != front.name);
+            for &(role, n, bounds, grain) in &members {
+                self.list.parts.push(Part {
+                    name: name(role, n),
+                    role,
+                    bounds,
+                    thickness_axis: ta,
+                    grain_axis: Some(grain),
+                    board: if role == PartRole::FramePanel {
+                        String::new()
+                    } else {
+                        front_board.clone()
+                    },
+                    edges: EdgeBanding::default(),
+                });
+            }
+            // The panel's grooves: along each stile's inner edge and each rail's.
+            let grooves = [
+                (
+                    name(PartRole::FrameStile, 1),
+                    boxed((w0 + f - g, w0 + f), (z0, z1), slot),
+                ),
+                (
+                    name(PartRole::FrameStile, 2),
+                    boxed((w1 - f, w1 - f + g), (z0, z1), slot),
+                ),
+                (
+                    name(PartRole::FrameRail, 1),
+                    boxed((w0 + f - g, w1 - f + g), (z0 + f - g, z0 + f), slot),
+                ),
+                (
+                    name(PartRole::FrameRail, 2),
+                    boxed((w0 + f - g, w1 - f + g), (z1 - f, z1 - f + g), slot),
+                ),
+            ];
+            for (part, bounds) in grooves {
+                self.list
+                    .operations
+                    .push(Operation::Groove { part, bounds });
+            }
+            // Which member a point on the slab falls in: stiles take the full height, rails the
+            // rest of the top and bottom, the panel the middle.
+            let member = |at: Vec3| {
+                let (w, z) = (at.get(wa), at.z);
+                if w < w0 + f {
+                    name(PartRole::FrameStile, 1)
+                } else if w > w1 - f {
+                    name(PartRole::FrameStile, 2)
+                } else if z < z0 + f {
+                    name(PartRole::FrameRail, 1)
+                } else if z > z1 - f {
+                    name(PartRole::FrameRail, 2)
+                } else {
+                    name(PartRole::FramePanel, 1)
+                }
+            };
+            let panel = name(PartRole::FramePanel, 1);
+            for op in &mut self.list.operations {
+                if let Operation::Bore {
+                    part, at, depth, ..
+                } = op
+                    && *part == front.name
+                {
+                    *part = member(*at);
+                    // A through hole in the panel goes through the panel only.
+                    if *part == panel {
+                        *depth = depth.min(p);
+                    }
+                }
+            }
+            for h in &mut self.list.hardware {
+                if h.part == front.name {
+                    h.part = member(h.at);
+                }
+            }
+        }
+    }
+
     /// Each light's strip, and a cable hole through the panel between it and the void behind
     /// the back: down through the bottom for under-cabinet and plinth lights, up through the
     /// top (or back rail) for lights inside.
@@ -3416,6 +3591,75 @@ mod tests {
                 .iter()
                 .any(|h| h.item.starts_with("blum.aventos.hki.mechanism."))
         );
+    }
+
+    /// P2-2: a shaker door is two stiles, two tenoned rails and a grooved panel; its hinge cups
+    /// move to the hinge-side stile and its handle to the other; nothing clashes.
+    #[test]
+    fn a_shaker_door_is_a_frame_and_panel_carrying_its_hinges_and_handle() {
+        let mut cab = Cabinet::new("B01", CabinetKind::Base);
+        cab.standard.door_style = DoorStyle::Shaker;
+        let list = build_cabinet(&cab).unwrap();
+        assert!(
+            list.warnings.iter().all(|w| w.contains("shelf-pin")),
+            "{:?}",
+            list.warnings
+        );
+        assert!(list.part("B01.Door1").is_none());
+        let get = |n: &str| list.part(n).unwrap_or_else(|| panic!("{n}"));
+        let (l, r) = (get("B01.Door1Stile1"), get("B01.Door1Stile2"));
+        let (bottom, top) = (get("B01.Door1Rail1"), get("B01.Door1Rail2"));
+        let panel = get("B01.Door1Panel");
+        // Rails reach a groove's depth into each stile.
+        assert!(
+            (bottom.bounds.size.x - (r.bounds.min.x - l.bounds.max().x + 2.0 * SHAKER_GROOVE))
+                .abs()
+                < 1e-9
+        );
+        assert!((panel.thickness() - SHAKER_PANEL).abs() < 1e-9);
+        assert_eq!(l.bounds.size.z, top.bounds.max().z - bottom.bounds.min.z);
+        // A left-hinged door: cups in the left stile, the handle in the right.
+        let on = |part: &str, purpose: BorePurpose| {
+            list.operations
+                .iter()
+                .filter(|o| matches!(o, Operation::Bore { part: p, purpose: q, .. } if p == part && *q == purpose))
+                .count()
+        };
+        assert_eq!(on("B01.Door1Stile1", BorePurpose::HingeCup), 2);
+        assert_eq!(on("B01.Door1Stile2", BorePurpose::HandleScrew), 2);
+        assert!(list.hardware.iter().all(|h| h.part != "B01.Door1"));
+        let grooves = list
+            .operations
+            .iter()
+            .filter(
+                |o| matches!(o, Operation::Groove { part, .. } if part.starts_with("B01.Door1")),
+            )
+            .count();
+        assert_eq!(grooves, 4);
+    }
+
+    #[test]
+    fn shaker_drawer_fronts_keep_their_fixings_and_small_ones_stay_slab() {
+        let mut cab = Cabinet::new("D01", CabinetKind::DrawerBank);
+        cab.standard.door_style = DoorStyle::Shaker;
+        cab.fronts = FrontLayout::Drawers {
+            ratios: vec![1.0, 2.0, 2.0],
+        };
+        let list = build_cabinet(&cab).unwrap();
+        assert!(
+            !list.warnings.iter().any(|w| w.contains("clash")),
+            "{:?}",
+            list.warnings
+        );
+        // The top front is small: one board.
+        assert!(list.part("D01.DrawerFront1").is_some());
+        assert!(list.part("D01.DrawerFront2Stile1").is_some());
+        let fixings = list
+            .operations
+            .iter()
+            .filter(|o| matches!(o, Operation::Bore { part, purpose: BorePurpose::FrontFixing, .. } if part.starts_with("D01.DrawerFront2Stile")))
+            .count();
+        assert_eq!(fixings, 4);
     }
 
     fn handle_holes(list: &PartList, part: &str) -> Vec<Vec3> {

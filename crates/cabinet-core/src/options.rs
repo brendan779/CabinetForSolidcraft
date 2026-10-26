@@ -106,6 +106,18 @@ pub fn option_groups() -> Vec<OptionGroup> {
             ],
         ),
         group(
+            "door_style",
+            "Door style",
+            &[
+                ("slab", "Slab", "Fronts of one board"),
+                (
+                    "shaker",
+                    "Shaker",
+                    "Five-piece fronts: a 70 mm frame round a 9 mm panel; small fronts stay slab",
+                ),
+            ],
+        ),
+        group(
             "handle_size",
             "Handle",
             &[

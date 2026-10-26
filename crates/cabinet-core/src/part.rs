@@ -36,6 +36,12 @@ pub enum PartRole {
     DrawerInnerFront,
     /// The upper (1) and lower (2) front of a bi-fold lift.
     LiftFront,
+    /// A shaker front's upright frame members, left (1) and right (2).
+    FrameStile,
+    /// A shaker front's cross frame members, bottom (1) and top (2), with stub tenons.
+    FrameRail,
+    /// A shaker front's panel, in the frame's grooves.
+    FramePanel,
 }
 
 impl PartRole {
@@ -60,6 +66,9 @@ impl PartRole {
             PartRole::DrawerLeftSide | PartRole::DrawerRightSide => "Drawer side",
             PartRole::DrawerInnerFront => "Drawer box front",
             PartRole::LiftFront => "Lift front",
+            PartRole::FrameStile => "Frame stile",
+            PartRole::FrameRail => "Frame rail",
+            PartRole::FramePanel => "Frame panel",
         }
     }
 
@@ -86,6 +95,9 @@ impl PartRole {
             PartRole::DrawerRightSide => "DrawerRightSide",
             PartRole::DrawerInnerFront => "DrawerInnerFront",
             PartRole::LiftFront => "LiftFront",
+            PartRole::FrameStile => "Stile",
+            PartRole::FrameRail => "Rail",
+            PartRole::FramePanel => "Panel",
         }
     }
 
@@ -96,6 +108,9 @@ impl PartRole {
             PartRole::Door
                 | PartRole::DrawerFront
                 | PartRole::LiftFront
+                | PartRole::FrameStile
+                | PartRole::FrameRail
+                | PartRole::FramePanel
                 | PartRole::Plinth
                 | PartRole::BlindPanel
                 | PartRole::Filler

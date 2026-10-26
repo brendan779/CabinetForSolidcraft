@@ -380,6 +380,8 @@ fn the_new_cabinets_build_every_part_where_the_core_puts_it() {
         ratios: vec![1.0, 1.0],
     };
     high.standard.drawer_sides = cabinet_core::model::DrawerSides::HighFronted;
+    let mut shaker = Cabinet::new("B02", CabinetKind::Base);
+    shaker.standard.door_style = cabinet_core::model::DoorStyle::Shaker;
     let mut hki = Cabinet::new("W02", CabinetKind::Wall);
     hki.height = 450.0;
     hki.fronts = FrontLayout::Lift {
@@ -399,6 +401,7 @@ fn the_new_cabinets_build_every_part_where_the_core_puts_it() {
         corner_wall,
         inner,
         high,
+        shaker,
         hki,
         lift,
         wood,

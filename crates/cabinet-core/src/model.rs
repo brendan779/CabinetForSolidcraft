@@ -428,6 +428,8 @@ pub struct ConstructionStandard {
     pub handle_size: HandleSize,
     /// Where handles go on the fronts.
     pub handle_place: HandlePlace,
+    /// Slab fronts, or shaker (five-piece) frames with a panel.
+    pub door_style: DoorStyle,
     /// What the drawers are made of and run on.
     pub drawer_system: DrawerSystem,
     /// Whether deep LEGRABOX drawers may be high fronted pull-outs (C, F).
@@ -493,6 +495,7 @@ impl Default for ConstructionStandard {
             opening: Opening::Handles,
             handle_size: HandleSize::Cc128,
             handle_place: HandlePlace::Corner,
+            door_style: DoorStyle::Slab,
             drawer_system: DrawerSystem::Legrabox,
             drawer_sides: DrawerSides::Standard,
             drawer_board_thickness: 16.0,
@@ -581,6 +584,18 @@ impl HandleSize {
             HandleSize::Cc448 => Some(448.0),
         }
     }
+}
+
+/// How fronts are made.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum DoorStyle {
+    /// One board.
+    #[default]
+    Slab,
+    /// Two stiles and two rails, stub-tenoned, with a thin panel in their grooves. Fronts too
+    /// small for a frame stay slab.
+    Shaker,
 }
 
 /// Where a front's handle goes.
