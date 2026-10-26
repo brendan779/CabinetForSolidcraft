@@ -213,7 +213,7 @@ features in words.
 | BENCH-3 | todo | L | Transitions: L and U corners (mitre or butt joint, joint position picker), thickness steps, waterfall ends (mitred drop to floor), rounded/radius island ends, breakfast-bar overhang with a support rule | split into BENCH-3a..e |
 | BENCH-4 | needs-human (built in 74fe6c0; sizes are our defaults until appliance templates: which sinks and cooktops do you fit?) | M | Cut-outs: sink (undermount/top mount), cooktop, tap holes, power pop-ups, from appliance templates | cut-outs on the benchtop sheet |
 | BENCH-5 | todo | M | Benchtop outputs: dimensioned template sheet per piece with joins, cut-outs and edge profiles; area and edge metres for quoting | PDF/SVG sheet |
-| BENCH-6 | todo | M | Splashbacks: slab splashback panels matching the benchtop, with a niche/recess for open shelves and power points | splashback part + sheet |
+| BENCH-6 | todo (slab splashback built in 394ac5d; the niche with open shelves and power points is left) | M | Splashbacks: slab splashback panels matching the benchtop, with a niche/recess for open shelves and power points | splashback part + sheet |
 | SURR-1 | todo | M | Laminex Surround profiles as catalog data (`kind: lining`) from Laminex's own current documents: profile names (Classic VJ, Scallop, Demi Round...), module width, flute/groove pitch, thickness, sheet sizes, substrate, flexible/curved variants | catalog rows with sources |
 | SURR-2 | todo | M | Cladding as a cabinet finish: island backs and ends, end panels and kick panels clad in a Surround profile, flutes vertical and aligned across panels | an island back renders fluted |
 | SURR-3 | todo | L | Curved ends: rounded island ends (radius picker) from curved substrate (bending ply / kerfed MDF / flexible Surround), fluting following the curve, benchtop ends to match | split |
@@ -357,3 +357,4 @@ Agents append one line per session: date, items touched, outcome.
 - 2026-10-26b (night) — P2-3b done (5235a38): wardrobe inner drawers at the foot under a fixed shelf.
 - 2026-10-26b (night) — BENCH-1 built (c717de4): benchtop run item, one piece per stretch of base cabinets with front/end overhangs; started the P2 kitchen design section now that the P1 cabinet systems are done apart from rows waiting on the owner.
 - 2026-10-26b (night) — BENCH-4 built (74fe6c0): sink (with tap hole) and cooktop cut-outs over chosen cabinets.
+- 2026-10-26b (night) — BENCH-6 part (394ac5d): slab splashbacks on benchtop pieces; niches left.
