@@ -29,7 +29,7 @@ struct SidebarView: View {
                             }
                         }
                         Divider()
-                        ForEach(["filler", "end_panel", "benchtop"], id: \.self) { type in
+                        ForEach(["filler", "end_panel", "benchtop", "floating_shelf"], id: \.self) { type in
                             Button {
                                 project.addPiece(type)
                             } label: {
@@ -83,6 +83,7 @@ struct CabinetRow: View {
         case "filler": "\(unit.format(cab.width)) + \(unit.format(cab.scribe, suffix: false)) scribe"
         case "end_panel": cab.scribe > 0 ? "\(unit.format(cab.scribe)) scribe" : "no scribe"
         case "benchtop": "\(unit.format(cab.topThickness)) thick, \(unit.format(cab.frontOverhang, suffix: false)) overhang"
+        case "floating_shelf": "\(unit.format(cab.width)) × \(unit.format(cab.shelfDepth, suffix: false))"
         default: [cab.width, cab.height, cab.depth].map { unit.format($0, suffix: false) }.joined(separator: " × ")
         }
     }

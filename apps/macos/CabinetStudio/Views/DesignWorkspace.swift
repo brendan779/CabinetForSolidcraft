@@ -184,7 +184,7 @@ struct RunStrip: View {
                 .accessibilityLabel("\(c.id) width")
                 .accessibilityValue(unit.format(c.width))
                 .accessibilityAdjustableAction { direction in
-                    let list = c.isPiece ? Self.fillerWidths : Self.cabinetWidths
+                    let list = c.kind == "filler" ? Self.fillerWidths : Self.cabinetWidths
                     let next = direction == .increment ? list.first { $0 > c.width } : list.last { $0 < c.width }
                     if let next, let i = project.cabinets.firstIndex(where: { $0.id == c.id }) {
                         project.cabinets[i].width = next
@@ -209,7 +209,7 @@ struct RunStrip: View {
 
     /// The nearest usual width: cabinet sizes for cabinets, filler sizes for fillers.
     private func snap(_ c: CabinetDoc, _ w: Double) -> Double {
-        let list = c.isPiece ? Self.fillerWidths : Self.cabinetWidths
+        let list = c.kind == "filler" ? Self.fillerWidths : Self.cabinetWidths
         return list.min { abs($0 - w) < abs($1 - w) } ?? w
     }
 

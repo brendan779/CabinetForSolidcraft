@@ -25,7 +25,46 @@ pub enum RunItem {
     EndPanel(EndPanel),
     /// A benchtop over every stretch of base-height cabinets in the run. It takes no run length.
     Benchtop(Benchtop),
+    /// An open shelf on concealed brackets, in a gap between wall cabinets.
+    FloatingShelf(FloatingShelf),
 }
+
+/// A floating shelf: `width` of the run, its underside `height` above the floor.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct FloatingShelf {
+    pub id: String,
+    pub width: f64,
+    #[serde(default = "FloatingShelf::default_depth")]
+    pub depth: f64,
+    #[serde(default = "FloatingShelf::default_thickness")]
+    pub thickness: f64,
+    #[serde(default = "FloatingShelf::default_height")]
+    pub height: f64,
+    /// An LED strip under its front edge (24 V, at this power per metre; 0: none).
+    #[serde(default)]
+    pub light_watts_per_metre: f64,
+    /// Catalog board id (a timber), or empty for generic.
+    #[serde(default)]
+    pub board: String,
+}
+
+impl FloatingShelf {
+    /// Our defaults: a 250 deep, 40 thick shelf, its underside at 1500.
+    fn default_depth() -> f64 {
+        250.0
+    }
+
+    fn default_thickness() -> f64 {
+        40.0
+    }
+
+    fn default_height() -> f64 {
+        1500.0
+    }
+}
+
+/// Our choice: a floating shelf has a concealed bracket at most this far apart (at least two).
+const SHELF_BRACKET_SPACING: f64 = 400.0;
 
 /// A benchtop: one piece over each stretch of base cabinets (and the fillers and end panels
 /// between and beside them), overhanging the door faces and, if asked, the stretch's ends.
@@ -198,6 +237,7 @@ pub fn build_run(run: &Run) -> Result<Vec<PartList>> {
                 cabinet: b.id.clone(),
                 ..PartList::default()
             }),
+            RunItem::FloatingShelf(f) => out.push(floating_shelf(f, at, neighbour(i).depth)),
         }
     }
     for (i, item) in run.items.iter().enumerate() {
@@ -209,7 +249,7 @@ pub fn build_run(run: &Run) -> Result<Vec<PartList>> {
                 .map(|(j, it)| match it {
                     RunItem::Cabinet(c) => takes_benchtop(c),
                     RunItem::Filler(_) | RunItem::EndPanel(_) => takes_benchtop(neighbour(j)),
-                    RunItem::Benchtop(_) => false,
+                    RunItem::Benchtop(_) | RunItem::FloatingShelf(_) => false,
                 })
                 .collect();
             let mut top = benchtop(b, &out, &under);
@@ -275,6 +315,7 @@ fn lefts<'a>(run: &Run, neighbour: &dyn Fn(usize) -> &'a Cabinet) -> Vec<Vec3> {
                 RunItem::Filler(f) => f.width,
                 RunItem::EndPanel(_) => neighbour(i).standard.front_thickness,
                 RunItem::Benchtop(_) => 0.0,
+                RunItem::FloatingShelf(f) => f.width,
             };
             at
         })
@@ -606,6 +647,61 @@ fn cutouts(b: &Benchtop, top: &mut PartList, lists: &[PartList]) {
             }
         }
     }
+}
+
+/// A floating shelf against the wall (the wall line is where its neighbouring cabinet's back is),
+/// its brackets in the hardware list, and its strip.
+fn floating_shelf(f: &FloatingShelf, at: Vec3, wall: f64) -> PartList {
+    let back = at.y + wall;
+    let bounds = Aabb::new(
+        Vec3::new(at.x, back - f.depth, at.z + f.height),
+        Vec3::new(f.width, f.depth, f.thickness),
+    );
+    let name = format!("{}.FloatingShelf", f.id);
+    let mut list = PartList {
+        cabinet: f.id.clone(),
+        parts: vec![Part {
+            name: name.clone(),
+            role: PartRole::Shelf,
+            bounds,
+            thickness_axis: Axis::Z,
+            grain_axis: Some(Axis::X),
+            board: f.board.clone(),
+            edges: EdgeBanding {
+                front: true,
+                left: true,
+                right: true,
+                ..EdgeBanding::default()
+            },
+        }],
+        ..PartList::default()
+    };
+    let brackets = ((f.width / SHELF_BRACKET_SPACING).ceil() as u32).max(2);
+    list.hardware.push(crate::part::HardwarePlacement {
+        item: "shelf.floating-bracket".into(),
+        description: format!(
+            "Concealed floating shelf bracket for a {:.0} mm thick shelf",
+            f.thickness
+        ),
+        at: bounds.center(),
+        part: name.clone(),
+        quantity: brackets,
+    });
+    if f.light_watts_per_metre > 0.0 {
+        let length = f.width - 20.0;
+        list.hardware.push(crate::part::HardwarePlacement {
+            item: "lighting.strip.24v".into(),
+            description: format!(
+                "LED strip 24 V, {length:.0} mm, {:.1} W ({} W/m)",
+                f.light_watts_per_metre * length / 1000.0,
+                f.light_watts_per_metre
+            ),
+            at: bounds.center(),
+            part: name,
+            quantity: 1,
+        });
+    }
+    list
 }
 
 fn single(
@@ -1005,5 +1101,56 @@ mod tests {
         assert_eq!(bt.notes, ["Edge profile: mitred apron, 60 mm deep"]);
         // 20 mm overhang takes a 20 mm apron; a 33 mm top's apron would reach the doors.
         assert!(bt.warnings.is_empty(), "{:?}", bt.warnings);
+    }
+
+    /// STYLE-2: a floating shelf takes its width in the run, sits at its height against the
+    /// wall line, with brackets every 400 mm and its strip.
+    #[test]
+    fn a_floating_shelf_sits_in_the_run_on_brackets() {
+        let shelf = RunItem::FloatingShelf(FloatingShelf {
+            id: "FS1".into(),
+            width: 900.0,
+            depth: 250.0,
+            thickness: 40.0,
+            height: 1500.0,
+            light_watts_per_metre: 9.6,
+            board: String::new(),
+        });
+        let run = Run {
+            origin: Vec3::default(),
+            items: vec![
+                cab("W01", CabinetKind::Wall),
+                shelf,
+                cab("W02", CabinetKind::Wall),
+            ],
+        };
+        let lists = build_run(&run).unwrap();
+        let s = lists[1].parts[0].bounds;
+        assert_eq!(
+            (s.min.x, s.size.x, s.min.z, s.size.z),
+            (600.0, 900.0, 1500.0, 40.0)
+        );
+        assert_eq!(
+            s.max().y,
+            330.0,
+            "against the wall, like the wall cabinets' backs"
+        );
+        let laid = laid_out(&run);
+        let RunItem::Cabinet(w2) = &laid.items[2] else {
+            panic!()
+        };
+        assert_eq!(w2.origin.x, 1500.0);
+        let brackets = lists[1]
+            .hardware
+            .iter()
+            .find(|h| h.item == "shelf.floating-bracket")
+            .unwrap();
+        assert_eq!(brackets.quantity, 3);
+        assert!(
+            lists[1]
+                .hardware
+                .iter()
+                .any(|h| h.item == "lighting.strip.24v")
+        );
     }
 }

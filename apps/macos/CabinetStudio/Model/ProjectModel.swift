@@ -48,6 +48,7 @@ struct CabinetDoc: Identifiable, Hashable, Codable {
         let json = switch type {
         case "filler": #"{"id":"\#(id)","scribe":10,"type":"filler","width":50}"#
         case "benchtop": #"{"id":"\#(id)","type":"benchtop","thickness":33,"front_overhang":20,"side_overhang":0}"#
+        case "floating_shelf": #"{"id":"\#(id)","type":"floating_shelf","width":900,"depth":250,"thickness":40,"height":1500}"#
         default: #"{"id":"\#(id)","scribe":20,"to_floor":true,"type":"end_panel"}"#
         }
         return CabinetDoc(id: id, json: json)
@@ -65,6 +66,20 @@ struct CabinetDoc: Identifiable, Hashable, Codable {
     var sideOverhang: Double {
         get { number("side_overhang") }
         set { setNumber("side_overhang", newValue) }
+    }
+
+    /// Floating shelf: depth, height of its underside, LED power per metre (0: none).
+    var shelfDepth: Double {
+        get { (object["depth"] as? NSNumber)?.doubleValue ?? 250 }
+        set { setNumber("depth", newValue) }
+    }
+    var shelfHeight: Double {
+        get { (object["height"] as? NSNumber)?.doubleValue ?? 1500 }
+        set { setNumber("height", newValue) }
+    }
+    var shelfLight: Double {
+        get { number("light_watts_per_metre") }
+        set { setNumber("light_watts_per_metre", newValue) }
     }
 
     /// Benchtop: the edge profile (`square`, `pencil_round`, `bullnose`, `bevel`, `mitred_apron`).
@@ -523,6 +538,7 @@ final class ProjectModel {
         let prefix = switch type {
         case "filler": "F"
         case "benchtop": "BT"
+        case "floating_shelf": "FS"
         default: "E"
         }
         var n = 1
@@ -990,6 +1006,7 @@ extension CabinetDoc {
         case "filler": "Filler"
         case "end_panel": "End panel"
         case "benchtop": "Benchtop"
+        case "floating_shelf": "Floating shelf"
         default: kind.capitalized
         }
     }
@@ -1009,6 +1026,7 @@ extension CabinetDoc {
         case "filler": "rectangle.portrait.split.2x1"
         case "end_panel": "rectangle.portrait.lefthalf.filled"
         case "benchtop": "rectangle.tophalf.filled"
+        case "floating_shelf": "minus.rectangle"
         default: "cube"
         }
     }

@@ -80,7 +80,27 @@ struct PieceSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            if cab.kind == "benchtop" {
+            if cab.kind == "floating_shelf" {
+                SectionTitle("Floating shelf")
+                chips("Width", value: cab.width, presets: [450, 600, 900, 1200]) { c, v in c.width = v }
+                chips("Depth", value: cab.shelfDepth, presets: [200, 250, 300]) { c, v in c.shelfDepth = v }
+                chips("Thick", value: cab.topThickness, presets: [30, 40, 50]) { c, v in c.topThickness = v }
+                chips("Height", value: cab.shelfHeight, presets: [1300, 1400, 1500, 1600]) { c, v in c.shelfHeight = v }
+                HStack(spacing: 6) {
+                    Text("LED").foregroundStyle(.secondary)
+                    Spacer()
+                    ForEach([0.0, 4.8, 9.6], id: \.self) { w in
+                        Button(w == 0 ? "None" : String(format: "%.1f W/m", w)) {
+                            withAnimation(.snappy) { var c = cab; c.shelfLight = w; project.selected = c }
+                        }
+                        .buttonStyle(ChipStyle(selected: abs(cab.shelfLight - w) < 0.05))
+                    }
+                }
+                Text("A shelf on concealed brackets in the run, against the wall; its LED strip is 24 V.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            } else if cab.kind == "benchtop" {
                 SectionTitle("Benchtop")
                 chips("Thickness", value: cab.topThickness, presets: [20, 33, 40, 60, 80]) { c, v in c.topThickness = v }
                 chips("Front", value: cab.frontOverhang, presets: [0, 10, 20, 30, 40]) { c, v in c.frontOverhang = v }
@@ -172,7 +192,7 @@ struct PieceSection: View {
                     }
                 }
             }
-            if cab.kind != "benchtop" {
+            if cab.kind != "benchtop" && cab.kind != "floating_shelf" {
                 chips("Scribe", value: cab.scribe, presets: [0, 10, 20, 30, 40]) { c, v in c.scribe = v }
                 Text("The scribe is extra board, cut off on site to follow the wall. It is not part of the run's length.")
                     .font(.caption)
