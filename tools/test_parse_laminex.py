@@ -2,7 +2,7 @@
 
 import unittest
 
-from parse_laminex import essentials_table, labels_in, lining_table, spans, table
+from parse_laminex import essentials_table, labels_in, lining_table, plywood_table, spans, table
 from parse_polytec import Word
 
 SOURCE = {"url": "u", "document_date": "2025-09", "retrieved": "2026-10-23", "verified": False}
@@ -103,6 +103,25 @@ class ParseLaminex(unittest.TestCase):
         ])
         self.assertEqual({(b["kind"], b["substrate"]) for b in boards}, {("laminated_board", "compact")})
         self.assertEqual({b["_code"] for b in boards}, {"460"})
+
+    def test_plywood_rows_take_their_merged_type_bond_grade_species_and_thickness(self):
+        hx = {"PRODUCT": 65, "BOND": 148, "GRADE": 189, "SPECIES": 216, "THICKNESS": 268,
+              "PROD": 334, "PACK": 359}
+        words = [word(x, 119, k) for k, x in hx.items()]
+        for y, t, prod in ((140, "9", "900001"), (151, "18", "900002")):
+            words += [word(273, y, t), word(290, y, "2440"), word(304, y, "×", 3),
+                      word(308, y, "1220"), word(328, y, prod), word(359, y, "50")]
+        words += [word(65, 140, "Exterior"), word(65, 147, "Hardwood"), word(148, 145, "WBP"),
+                  word(190, 145, "BB/CC"), word(216, 145, "Hoop"), word(236, 145, "Pine")]
+        problems = []
+        boards = plywood_table(words, 10_000, SOURCE, problems)
+        self.assertEqual(problems, [])
+        self.assertEqual(sorted(b["id"] for b in boards), [
+            "trade-essentials.plywood.exterior-hardwood.hoop-pine-bb-cc.18",
+            "trade-essentials.plywood.exterior-hardwood.hoop-pine-bb-cc.9",
+        ])
+        b = boards[0]
+        self.assertEqual((b["kind"], b["substrate"], b["grained"]), ("raw", "plywood", True))
 
     def test_an_essentials_table_reads_merged_thickness_and_a_title_set_on_end(self):
         hx = {"TYPE": 33, "SUBSTRATE": 62, "THICKNESS": 91, "SHEET": 128, "FINISH": 168,
