@@ -200,6 +200,7 @@ struct QuoteView: View {
     @AppStorage("nestingUseOffcuts") private var useOffcuts = true
     @State private var prices = PriceStore.load()
     @State private var export: DataDocument?
+    @State private var showingRates = false
 
     private var quote: QuoteRecord? {
         guard let dir = Preferences.catalogDir?.path else { return nil }
@@ -233,12 +234,16 @@ struct QuoteView: View {
                     }
                 }
                 Spacer(minLength: 0)
-                Stepper("Markup \(Int((number("markup") * 100).rounded())) %",
-                        value: rate("markup"), in: 0...3, step: 0.05)
-                    .fixedSize()
-                Button("Export PDF…", systemImage: "doc.richtext") { makePdf() }
+                Button("Rates…", systemImage: "slider.horizontal.3") { showingRates = true }
                     .labelStyle(.iconOnly)
-                    .help("The quote as a PDF")
+                    .help("Markup, tax and the labour times per part, cabinet and hardware item")
+                    .popover(isPresented: $showingRates, arrowEdge: .top) { rates }
+                Menu("Export", systemImage: "doc.richtext") {
+                    Button("Costing PDF…") { makePdf(customer: false) }
+                    Button("Customer Quote PDF…") { makePdf(customer: true) }
+                }
+                .fixedSize()
+                .help("The costing line by line, or the customer's quote: a price per cabinet, tax included")
             }
             .padding(10)
             .frame(minWidth: 0, maxWidth: .infinity)
@@ -251,12 +256,30 @@ struct QuoteView: View {
         }
     }
 
+    private var rates: some View {
+        Form {
+            Stepper("Markup \(Int((number("markup") * 100).rounded())) %", value: rate("markup"), in: 0...3, step: 0.05)
+            Stepper("Tax \(Int((number("tax", or: 0.1) * 100).rounded())) %", value: rate("tax", or: 0.1), in: 0...0.3, step: 0.01)
+            Stepper("Per part \(Int(number("minutes_per_part", or: 6))) min",
+                    value: rate("minutes_per_part", or: 6), in: 0...60, step: 1)
+            Stepper("Per cabinet \(Int(number("minutes_per_cabinet", or: 30))) min",
+                    value: rate("minutes_per_cabinet", or: 30), in: 0...240, step: 5)
+            Stepper("Per hardware item \(Int(number("minutes_per_hardware_item", or: 2))) min",
+                    value: rate("minutes_per_hardware_item", or: 2), in: 0...30, step: 1)
+        }
+        .padding()
+        .frame(width: 300)
+    }
+
     private func money(_ v: Double) -> String { String(format: "%.2f", v) }
 
-    private func number(_ key: String) -> Double { (prices[key] as? NSNumber)?.doubleValue ?? 0 }
+    /// A rate from the price list, or the core's default when it has none yet.
+    private func number(_ key: String, or fallback: Double = 0) -> Double {
+        (prices[key] as? NSNumber)?.doubleValue ?? fallback
+    }
 
-    private func rate(_ key: String) -> Binding<Double> {
-        Binding(get: { number(key) }, set: { prices[key] = $0; save() })
+    private func rate(_ key: String, or fallback: Double = 0) -> Binding<Double> {
+        Binding(get: { number(key, or: fallback) }, set: { prices[key] = $0; save() })
     }
 
     /// A line's price, kept where the core reads it: per m² by board, each by hardware item, or the
@@ -284,13 +307,16 @@ struct QuoteView: View {
         do { try PriceStore.save(prices) } catch { project.lastError = "Could not save the prices: \(error)" }
     }
 
-    private func makePdf() {
+    private func makePdf(customer: Bool) {
         guard let dir = Preferences.catalogDir?.path else { return }
+        let offcuts = useOffcuts ? OffcutStore.load() : ""
         do {
-            export = DataDocument(data: try quotePdf(items: project.jobItems, catalogDir: dir, job: project.jobName,
-                                                    kerf: kerf, trim: trim,
-                                                    offcutsJson: useOffcuts ? OffcutStore.load() : "",
-                                                    pricesJson: PriceStore.json(prices)))
+            let data = customer
+                ? try customerQuotePdf(items: project.jobItems, catalogDir: dir, job: project.jobName,
+                                       kerf: kerf, trim: trim, offcutsJson: offcuts, pricesJson: PriceStore.json(prices))
+                : try quotePdf(items: project.jobItems, catalogDir: dir, job: project.jobName,
+                               kerf: kerf, trim: trim, offcutsJson: offcuts, pricesJson: PriceStore.json(prices))
+            export = DataDocument(data: data)
         } catch {
             project.lastError = "Could not make the quote: \(error)"
         }

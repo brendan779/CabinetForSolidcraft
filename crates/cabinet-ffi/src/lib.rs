@@ -841,6 +841,80 @@ pub fn quote_pdf(
     ))
 }
 
+/// The quote as the customer sees it: one price per cabinet, filler and end panel, tax included.
+#[uniffi::export]
+pub fn customer_quote_pdf(
+    items: JobItems,
+    catalog_dir: String,
+    job: String,
+    kerf: f64,
+    trim: f64,
+    offcuts_json: String,
+    prices_json: String,
+) -> Result<Vec<u8>, CoreError> {
+    let prices: cabinet_core::quote::PriceList = if prices_json.trim().is_empty() {
+        Default::default()
+    } else {
+        serde_json::from_str(prices_json.as_str()).map_err(invalid)?
+    };
+    let q = job_quote_core(
+        &items,
+        &catalog_dir,
+        kerf,
+        trim,
+        &offcuts_json,
+        &prices_json,
+    )?;
+    let (nesting, _) = job_nesting(&items, &catalog_dir, kerf, trim, &offcuts(&offcuts_json)?)?;
+    let built = job_lists(&items)?;
+    let ids: Vec<String> = built
+        .iter()
+        .filter_map(|(_, c)| c.as_ref().map(|c| c.id.clone()))
+        .collect();
+    let lists: Vec<PartList> = built.iter().map(|(l, _)| l.clone()).collect();
+    let (_, tape) = cut_lists(&items)?;
+    let cut = cut_list(&lists, "Generic", tape);
+    let shares = cabinet_core::quote::per_cabinet(&nesting, &cut, &lists, &ids, &prices);
+    let describe = |id: &str| {
+        built
+            .iter()
+            .find_map(|(_, c)| c.as_ref().filter(|c| c.id == id))
+            .map(|c| {
+                let kind = serde_json::to_value(c.kind)
+                    .ok()
+                    .and_then(|v| v.as_str().map(|s| s.replace('_', " ")))
+                    .unwrap_or_default();
+                format!(
+                    "{id}  {kind}, {:.0} × {:.0} × {:.0} mm",
+                    c.width, c.height, c.depth
+                )
+            })
+            .unwrap_or_else(|| id.to_string())
+    };
+    let mut rows: Vec<Vec<String>> = shares
+        .iter()
+        .map(|c| vec![describe(&c.cabinet), format!("{:.2}#", c.total)])
+        .collect();
+    rows.push(vec![String::new(), String::new()]);
+    rows.push(vec![
+        format!("Total ({}, including {:.2} tax)", q.currency, q.tax),
+        format!("{:.2}#", q.total),
+    ]);
+    if !q.missing.is_empty() {
+        rows.push(vec![
+            "Draft: some prices are still missing".into(),
+            "#".into(),
+        ]);
+    }
+    Ok(cabinet_sheets::pdf::table_pdf(
+        "Quote",
+        &job,
+        &["Item", "Price#"],
+        &[220.0, 47.0],
+        &rows,
+    ))
+}
+
 /// An exploded assembly drawing per cabinet with its parts list, as a PDF.
 #[uniffi::export]
 pub fn assembly_pdf(items: JobItems, job: String) -> Result<Vec<u8>, CoreError> {
@@ -1403,5 +1477,45 @@ mod tests {
         .unwrap();
         assert_eq!(o[0].width, 600.0);
         assert!(offcuts("not json").is_err());
+    }
+
+    #[test]
+    fn a_job_quotes_and_its_customer_quote_has_a_line_per_item() {
+        let catalog = concat!(env!("CARGO_MANIFEST_DIR"), "/../../catalog").to_string();
+        let items = vec![
+            new_cabinet("B01".into(), "base".into()).unwrap(),
+            r#"{"type":"filler","id":"F01","width":50}"#.to_string(),
+            new_cabinet("W01".into(), "wall".into()).unwrap(),
+        ];
+        let prices = r#"{"boards":{"Generic":20.0},"labour_per_hour":70.0,"edge_tape_per_m":1.0}"#;
+        let q = job_quote(
+            job(&items),
+            catalog.clone(),
+            4.4,
+            10.0,
+            String::new(),
+            prices.into(),
+        )
+        .unwrap();
+        assert!(q.total > 0.0);
+        assert!(
+            q.lines
+                .iter()
+                .any(|l| l.section == "board" && l.key == "Generic")
+        );
+        let pdf = customer_quote_pdf(
+            job(&items),
+            catalog,
+            "Kitchen".into(),
+            4.4,
+            10.0,
+            String::new(),
+            prices.into(),
+        )
+        .unwrap();
+        let text = String::from_utf8_lossy(&pdf);
+        for id in ["B01", "F01", "W01"] {
+            assert!(text.contains(id), "{id}");
+        }
     }
 }

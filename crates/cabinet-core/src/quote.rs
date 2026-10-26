@@ -180,6 +180,77 @@ pub fn quote(
     }
 }
 
+/// One cabinet's share of a quote, marked up and taxed like the whole.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct CabinetPrice {
+    pub cabinet: String,
+    pub cost: f64,
+    pub total: f64,
+}
+
+/// The quote split by cabinet (and filler or end panel): board by each one's share of its board
+/// group's part area, tape by its tape metres, hardware by what it carries, labour by its parts
+/// and hardware, plus the per-cabinet time for the ids in `cabinets`. The shares add up to the
+/// quote's cost.
+pub fn per_cabinet(
+    nesting: &Nesting,
+    cut: &CutList,
+    lists: &[crate::part::PartList],
+    cabinets: &[String],
+    prices: &PriceList,
+) -> Vec<CabinetPrice> {
+    let group = |board: &str, t: f64| (board.to_string(), (t * 100.0).round() as i64);
+    // Each board group's priced sheet area, shared out by part area.
+    let mut sheet_cost: BTreeMap<(String, i64), f64> = BTreeMap::new();
+    for s in nesting.sheets.iter().filter(|s| !s.from_offcut) {
+        if let Some(p) = prices.boards.get(&s.board) {
+            *sheet_cost.entry(group(&s.board, s.thickness)).or_default() +=
+                p * s.stock.length * s.stock.width / 1e6;
+        }
+    }
+    let mut part_area: BTreeMap<(String, i64), f64> = BTreeMap::new();
+    for r in &cut.rows {
+        *part_area.entry(group(&r.board, r.thickness)).or_default() += r.area_m2();
+    }
+    let rate = prices.labour_per_hour.unwrap_or(0.0) / 60.0;
+    lists
+        .iter()
+        .map(|l| {
+            let rows = cut.rows.iter().filter(|r| r.cabinet == l.cabinet);
+            let mut cost = 0.0;
+            let mut parts = 0;
+            for r in rows {
+                let g = group(&r.board, r.thickness);
+                if let (Some(c), Some(a)) = (sheet_cost.get(&g), part_area.get(&g)) {
+                    cost += c * r.area_m2() / a;
+                }
+                cost += prices.edge_tape_per_m.unwrap_or(0.0) * r.edge_metres();
+                parts += r.quantity;
+            }
+            let mut items = 0;
+            for h in &l.hardware {
+                items += h.quantity;
+                cost += prices.hardware.get(&h.item).copied().unwrap_or(0.0) * h.quantity as f64;
+            }
+            let own = if cabinets.contains(&l.cabinet) {
+                prices.minutes_per_cabinet
+            } else {
+                0.0
+            };
+            cost += rate
+                * (parts as f64 * prices.minutes_per_part
+                    + items as f64 * prices.minutes_per_hardware_item
+                    + own);
+            let total = cost * (1.0 + prices.markup) * (1.0 + prices.tax);
+            CabinetPrice {
+                cabinet: l.cabinet.clone(),
+                cost: round2(cost),
+                total: round2(total),
+            }
+        })
+        .collect()
+}
+
 fn round2(v: f64) -> f64 {
     (v * 100.0).round() / 100.0
 }
@@ -191,7 +262,15 @@ mod tests {
     use crate::{Cabinet, CabinetKind, build_cabinet};
 
     fn job() -> (Nesting, CutList, Vec<BomRow>) {
-        let lists = vec![build_cabinet(&Cabinet::new("B01", CabinetKind::Base)).unwrap()];
+        let (n, cut, bom, _) = job_lists();
+        (n, cut, bom)
+    }
+
+    fn job_lists() -> (Nesting, CutList, Vec<BomRow>, Vec<crate::part::PartList>) {
+        let lists = vec![
+            build_cabinet(&Cabinet::new("B01", CabinetKind::Base)).unwrap(),
+            build_cabinet(&Cabinet::new("W01", CabinetKind::Wall)).unwrap(),
+        ];
         let cut = crate::cutlist::cut_list(&lists, "Generic", 1.0);
         let n = nest(
             &cut.rows,
@@ -204,7 +283,8 @@ mod tests {
             },
             &Settings::default(),
         );
-        (n, cut, crate::bom::hardware_bom(&lists))
+        let bom = crate::bom::hardware_bom(&lists);
+        (n, cut, bom, lists)
     }
 
     #[test]
@@ -262,5 +342,31 @@ mod tests {
         prices.boards.insert("Generic".into(), 20.0);
         let q = quote(&n, &cut, &bom, 1, &prices);
         assert!(!q.lines.iter().any(|l| l.section == Section::Board));
+    }
+
+    #[test]
+    fn cabinet_shares_add_up_to_the_quote() {
+        let (n, cut, bom, lists) = job_lists();
+        let mut prices = PriceList {
+            edge_tape_per_m: Some(1.5),
+            labour_per_hour: Some(80.0),
+            markup: 0.3,
+            ..PriceList::default()
+        };
+        prices.boards.insert("Generic".into(), 25.0);
+        for r in &bom {
+            prices.hardware.insert(r.item.clone(), 7.0);
+        }
+        let ids = vec!["B01".to_string(), "W01".to_string()];
+        let q = quote(&n, &cut, &bom, 2, &prices);
+        let shares = per_cabinet(&n, &cut, &lists, &ids, &prices);
+        let cost: f64 = shares.iter().map(|c| c.cost).sum();
+        let total: f64 = shares.iter().map(|c| c.total).sum();
+        assert!((cost - q.cost).abs() < 0.05, "{cost} vs {}", q.cost);
+        assert!((total - q.total).abs() < 0.05, "{total} vs {}", q.total);
+        assert!(
+            shares[0].total > shares[1].total,
+            "the base costs more than the wall"
+        );
     }
 }
