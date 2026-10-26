@@ -1084,6 +1084,10 @@ struct FrontsSection: View {
                     withAnimation(.snappy) { var c = cab; c.drawerInserts = v; project.selected = c }
                 }))
                 .help("Blum AMBIA-LINE in LEGRABOX and MERIVOBOX drawers (a cutlery insert on top, frames below), ORGA-LINE in TANDEMBOX (containers on top, utensil dividers below), sized for the cabinet")
+                Toggle("Lock", isOn: Binding(get: { cab.lock }, set: { v in
+                    withAnimation(.snappy) { var c = cab; c.lock = v; project.selected = c }
+                }))
+                .help("Blum CABLOXX: one locking bar locks every drawer (up to five); fit a cylinder lock, bought separately")
             }
             if cab.frontType == "lift" {
                 LiftKindPicker(cab: cab)

@@ -200,6 +200,12 @@ struct CabinetDoc: Identifiable, Hashable, Codable {
         }
     }
 
+    /// A Blum CABLOXX locking bar over all the drawers.
+    var lock: Bool {
+        get { object["lock"] as? Bool ?? false }
+        set { update { $0["lock"] = newValue ? true : nil } }
+    }
+
     /// Blum inner dividing sets (AMBIA-LINE, ORGA-LINE) in the steel-sided drawers.
     var drawerInserts: Bool {
         get { object["drawer_inserts"] as? Bool ?? false }

@@ -44,6 +44,10 @@ pub struct Cabinet {
     /// (LEGRABOX, MERIVOBOX), ORGA-LINE container and utensil sets (TANDEMBOX).
     #[serde(default, skip_serializing_if = "std::ops::Not::not")]
     pub drawer_inserts: bool,
+    /// A Blum CABLOXX locking bar locking every drawer at once (the cylinder lock is bought
+    /// separately).
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub lock: bool,
     /// LED strips: under the cabinet, inside it, or in its plinth.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub lights: Vec<Light>,
@@ -280,6 +284,7 @@ impl Cabinet {
             fixed_shelves: Vec::new(),
             inner_drawers: 0,
             drawer_inserts: false,
+            lock: false,
             lights: Vec::new(),
             blind: Blind::default(),
             sink: Sink::default(),

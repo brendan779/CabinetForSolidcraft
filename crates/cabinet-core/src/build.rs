@@ -119,6 +119,7 @@ pub fn build_cabinet(cab: &Cabinet) -> Result<PartList> {
         b.cover_caps();
         b.opening();
         b.drawer_inserts();
+        b.lock();
         b.grain_match();
         // Last: hinges, handles and drawer fixings are placed on the slab, then move to the
         // frame member they fall in.
@@ -2439,6 +2440,98 @@ impl<'a> Builder<'a> {
     /// (full height), two rails between them with stub tenons into the stiles' grooves, and a
     /// panel in the grooves, centred in the front's thickness. Bores and hardware on the slab move
     /// to the member they fall in.
+    /// CABLOXX (p.594): a locking bar set for the cabinet's height, with a locking unit and a
+    /// front locking bracket set per drawer; past 600 wide a second bar on the left, linked by a
+    /// synchronisation set, as Blum recommends with a closing function (every Blum runner here
+    /// has one).
+    fn lock(&mut self) {
+        let cab = self.cab;
+        if !cab.lock {
+            return;
+        }
+        let fronts: Vec<String> = self.drawer_fits.iter().map(|f| f.front.clone()).collect();
+        if fronts.is_empty() {
+            self.list
+                .warnings
+                .push("a CABLOXX lock needs drawers; this cabinet has none".into());
+            return;
+        }
+        // Blum's limit: up to five pull-outs on one locking bar.
+        if fronts.len() > 5 {
+            self.list.warnings.push(format!(
+                "CABLOXX locks up to five pull-outs on one bar, not {}",
+                fronts.len()
+            ));
+            return;
+        }
+        let kick = if cab.has_toe_kick() {
+            cab.standard.toe_kick_height
+        } else {
+            0.0
+        };
+        let kh = cab.height - kick;
+        let lh = kh - 2.0 * cab.standard.carcass_thickness;
+        let lw = cab.width - 2.0 * cab.standard.carcass_thickness;
+        let Some(bar) = [600, 800, 1300]
+            .into_iter()
+            .find(|&h| kh <= h as f64 + 1e-6)
+            .and_then(|h| crate::hardware::item(&format!("blum.cabloxx.bar-set.{h}")).ok())
+        else {
+            self.list.warnings.push(format!(
+                "CABLOXX has no locking bar for a {kh:.0} mm high cabinet (up to 1300)"
+            ));
+            return;
+        };
+        let synced = cab.width > 600.0;
+        let at = Vec3::new(cab.width / 2.0, 0.0, kick + kh / 2.0);
+        let mut rows = vec![(bar, if synced { 2 } else { 1 }, String::new())];
+        let unit = |side: &str| crate::hardware::item(&format!("blum.cabloxx.locking-unit.{side}"));
+        let n = fronts.len() as u32;
+        for side in if synced {
+            &["right", "left"][..]
+        } else {
+            &["right"][..]
+        } {
+            if let Ok(u) = unit(side) {
+                rows.push((u, n, String::new()));
+            }
+        }
+        if let Ok(b) = crate::hardware::item("blum.cabloxx.front-bracket") {
+            rows.push((b, n, String::new()));
+        }
+        if synced {
+            for id in ["blum.cabloxx.sync-set", "blum.cabloxx.sync-linkage"] {
+                if let Ok(i) = crate::hardware::item(id) {
+                    let cut = if id.ends_with("linkage") {
+                        format!(", cut to {:.0}", lw - 7.0)
+                    } else {
+                        String::new()
+                    };
+                    rows.push((i, 1, cut));
+                }
+            }
+        }
+        for (item, quantity, extra) in rows {
+            let cut = if item.id.starts_with("blum.cabloxx.bar-set.") {
+                format!(", bar cut to {:.0}", lh - 2.0)
+            } else {
+                extra
+            };
+            self.list.hardware.push(HardwarePlacement {
+                item: item.id.clone(),
+                description: format!("{} {}{cut}", item.family, item.variant),
+                at,
+                part: fronts[0].clone(),
+                quantity,
+            });
+        }
+        self.list.notes.push(
+            "CABLOXX: fit a cylinder lock (Ø16.5–22, 28–48 long; not supplied by Blum); the \
+             locking bar's groove and drilling are not machined yet"
+                .into(),
+        );
+    }
+
     /// Continuous grain: each column of two or more slab fronts (the same left and right edges)
     /// runs its grain upright and is cut as one strip, top first.
     fn grain_match(&mut self) {
@@ -4708,6 +4801,42 @@ mod tests {
             list.warnings
                 .iter()
                 .any(|w| w.contains("drawer inserts go in"))
+        );
+    }
+
+    /// BLUM-16: CABLOXX: a 720 high drawer bank takes the 800 bar set, a unit and bracket per
+    /// drawer; a 900 wide one a second bar and the synchronisation.
+    #[test]
+    fn cabloxx_locks_every_drawer_on_one_bar() {
+        let mut cab = Cabinet::new("D01", CabinetKind::DrawerBank);
+        cab.lock = true;
+        let list = build_cabinet(&cab).unwrap();
+        let n = list.by_role(PartRole::DrawerFront).count() as u32;
+        let qty = |id: &str| {
+            list.hardware
+                .iter()
+                .filter(|h| h.item == id)
+                .map(|h| h.quantity)
+                .sum::<u32>()
+        };
+        assert_eq!(qty("blum.cabloxx.bar-set.800"), 1);
+        assert_eq!(qty("blum.cabloxx.locking-unit.right"), n);
+        assert_eq!(qty("blum.cabloxx.front-bracket"), n);
+        assert_eq!(qty("blum.cabloxx.sync-set"), 0);
+        assert!(list.notes.iter().any(|n| n.contains("cylinder")));
+        cab.width = 900.0;
+        let list = build_cabinet(&cab).unwrap();
+        let has = |id: &str| list.hardware.iter().any(|h| h.item == id);
+        assert!(has("blum.cabloxx.sync-set") && has("blum.cabloxx.locking-unit.left"));
+        let base = Cabinet::new("B01", CabinetKind::Base);
+        let mut b = base.clone();
+        b.lock = true;
+        assert!(
+            build_cabinet(&b)
+                .unwrap()
+                .warnings
+                .iter()
+                .any(|w| w.contains("needs drawers"))
         );
     }
 
