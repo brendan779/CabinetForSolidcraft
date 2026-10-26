@@ -492,13 +492,10 @@ final class ViewportScene {
         point(p.x + p.width / 2, p.y + p.depth / 2, p.z + p.height / 2)
     }
 
-    /// A door turns about its hinged edge at the front face; everything else about its middle.
+    /// A door (and each piece of a shaker door) turns about the door's hinge line; everything else
+    /// about its middle.
     private static func pivot(_ p: PanelBox) -> SIMD3<Float> {
-        switch p.hinged {
-        case "left": point(p.x, p.y, p.z + p.height / 2)
-        case "right": point(p.x + p.width, p.y, p.z + p.height / 2)
-        default: mid(p)
-        }
+        p.hinged.isEmpty ? mid(p) : point(p.hingeX, p.hingeY, p.z + p.height / 2)
     }
 
     private static func centre(of panels: [PanelBox]) -> SIMD3<Float> {
@@ -514,8 +511,8 @@ final class ViewportScene {
         if len > 0.0001 { t.translation += away / len * Float(look.explode) * 0.25 }
         if look.open {
             switch (p.role, p.hinged) {
-            case ("Door", "left"): t.rotation = simd_quatf(angle: -.pi * 0.55, axis: [0, 1, 0])
-            case ("Door", "right"): t.rotation = simd_quatf(angle: .pi * 0.55, axis: [0, 1, 0])
+            case (_, "left"): t.rotation = simd_quatf(angle: -.pi * 0.55, axis: [0, 1, 0])
+            case (_, "right"): t.rotation = simd_quatf(angle: .pi * 0.55, axis: [0, 1, 0])
             case ("Drawer front", _), ("Drawer bottom", _), ("Drawer back", _), ("Drawer side", _):
                 t.translation.z += 0.35
             case ("Lift front", _): t.translation.y += 0.3

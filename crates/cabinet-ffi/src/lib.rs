@@ -43,8 +43,12 @@ pub struct PanelBox {
     pub depth: f64,
     pub height: f64,
     pub is_front: bool,
-    /// A door's hinged edge, `left` or `right`; empty for other parts.
+    /// A door's hinged edge, `left` or `right`; empty for other parts. A shaker door's frame
+    /// members and panel all carry their door's.
     pub hinged: String,
+    /// The hinge line (x, y at the front face) the door swings about, when `hinged` is set.
+    pub hinge_x: f64,
+    pub hinge_y: f64,
     /// Catalog board id, or empty for the standard's generic board.
     pub board: String,
     /// The axis the decor's grain runs along in the cabinet frame (`x`, `y`, `z`), or empty.
@@ -364,37 +368,66 @@ pub fn build(cabinet_json: String) -> Result<BuildSummary, CoreError> {
 
 fn summary(list: PartList) -> BuildSummary {
     use cabinet_core::part::{BorePurpose, Operation};
+    // A door, or a shaker door's members (`B01.Door1Stile1`...), by the door's name.
+    let door_of = |p: &cabinet_core::Part| -> String {
+        use cabinet_core::part::PartRole;
+        match p.role {
+            PartRole::FrameStile | PartRole::FrameRail | PartRole::FramePanel => p
+                .name
+                .trim_end_matches(char::is_numeric)
+                .trim_end_matches(p.role.code())
+                .to_string(),
+            _ => p.name.clone(),
+        }
+    };
+    let hinge = |door: &str| -> Option<(String, f64, f64)> {
+        let members: Vec<&cabinet_core::Part> =
+            list.parts.iter().filter(|q| door_of(q) == door).collect();
+        let h = list.hardware.iter().find(|h| {
+            h.item.starts_with("blum.clip-top") && members.iter().any(|m| m.name == h.part)
+        })?;
+        let lo = members
+            .iter()
+            .map(|m| m.bounds.min.x)
+            .fold(f64::MAX, f64::min);
+        let hi = members
+            .iter()
+            .map(|m| m.bounds.max().x)
+            .fold(f64::MIN, f64::max);
+        let front = members
+            .iter()
+            .map(|m| m.bounds.min.y)
+            .fold(f64::MAX, f64::min);
+        Some(if h.at.x < (lo + hi) / 2.0 {
+            ("left".into(), lo, front)
+        } else {
+            ("right".into(), hi, front)
+        })
+    };
     let panels = list
         .parts
         .iter()
-        .map(|p| PanelBox {
-            name: p.name.clone(),
-            role: p.role.label().to_string(),
-            x: p.bounds.min.x,
-            y: p.bounds.min.y,
-            z: p.bounds.min.z,
-            width: p.bounds.size.x,
-            depth: p.bounds.size.y,
-            height: p.bounds.size.z,
-            is_front: p.role.is_front(),
-            hinged: list
-                .hardware
-                .iter()
-                .find(|h| h.part == p.name && h.item.starts_with("blum.clip-top"))
-                .map(|h| {
-                    if h.at.x < p.bounds.center().x {
-                        "left"
-                    } else {
-                        "right"
-                    }
-                })
-                .unwrap_or_default()
-                .to_string(),
-            board: p.board.clone(),
-            grain: p
-                .grain_axis
-                .map(|a| format!("{a:?}").to_lowercase())
-                .unwrap_or_default(),
+        .map(|p| {
+            let (hinged, hinge_x, hinge_y) = hinge(&door_of(p)).unwrap_or_default();
+            PanelBox {
+                name: p.name.clone(),
+                role: p.role.label().to_string(),
+                x: p.bounds.min.x,
+                y: p.bounds.min.y,
+                z: p.bounds.min.z,
+                width: p.bounds.size.x,
+                depth: p.bounds.size.y,
+                height: p.bounds.size.z,
+                is_front: p.role.is_front(),
+                hinged,
+                hinge_x,
+                hinge_y,
+                board: p.board.clone(),
+                grain: p
+                    .grain_axis
+                    .map(|a| format!("{a:?}").to_lowercase())
+                    .unwrap_or_default(),
+            }
         })
         .collect();
     let biscuits = list
@@ -1517,5 +1550,28 @@ mod tests {
         for id in ["B01", "F01", "W01"] {
             assert!(text.contains(id), "{id}");
         }
+    }
+
+    #[test]
+    fn a_shaker_doors_pieces_all_swing_about_its_hinge_line() {
+        let mut cab = Cabinet::new("B01", cabinet_core::CabinetKind::Base);
+        cab.standard.door_style = cabinet_core::model::DoorStyle::Shaker;
+        let sum = summary(cabinet_core::build_cabinet(&cab).unwrap());
+        let door: Vec<&PanelBox> = sum
+            .panels
+            .iter()
+            .filter(|p| p.name.starts_with("B01.Door1"))
+            .collect();
+        assert_eq!(door.len(), 5);
+        let left = door.iter().map(|p| p.x).fold(f64::MAX, f64::min);
+        for p in door {
+            assert_eq!((p.hinged.as_str(), p.hinge_x), ("left", left), "{}", p.name);
+        }
+        assert!(
+            sum.panels
+                .iter()
+                .filter(|p| p.role == "Left side")
+                .all(|p| p.hinged.is_empty())
+        );
     }
 }
