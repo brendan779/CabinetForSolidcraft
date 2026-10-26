@@ -230,7 +230,7 @@ features in words.
 |---|---|---|---|
 | PLG-1 | blocked (SolidCraft has no plugin runtime yet; check #1221/#4980 weekly) | L | Port the bridge to a `command-plugin` WASM component (same commands via `engine.run`) |
 | PLG-2 | blocked (PLG-1) | L | `panel-plugin` with pins; propose an image-choice widget upstream so pickers can live in SolidCraft |
-| PLG-3 | todo | S | Weekly check: has SolidCraft merged plugin runtime work? Update this row and docs/FEASIBILITY_PLAN.md. Last check 2026-10-24: no runtime; #1221 and draft #4980 open, #4330 (install a plugin from a GitHub link) open, latest release v0.20.0 |
+| PLG-3 | todo | S | Weekly check: has SolidCraft merged plugin runtime work? Update this row and docs/FEASIBILITY_PLAN.md. Last check 2026-10-26: no runtime; #1221 and draft #4980 open, #4330 closed in favour of open PR #5586, latest release v0.23.0 |
 
 ## Log
 
@@ -346,3 +346,4 @@ Agents append one line per session: date, items touched, outcome.
 - 2026-10-26b (night) — HAF-6 built (299d534): inspector Lights section with drawn zone tiles and voltage/power chips; not seen on screen.
 - 2026-10-26b (night) — OUT-5c built (96c4edb): Cut List › Sheets shows the nesting pages with kerf and trim steppers and Export PDF; OUT-5d added for sheet size choice and offcut reuse.
 - 2026-10-26b (night) — OUT-5d built (e4b4446): each board's sheet size chosen by least area among its catalog sizes; kept offcuts nested on first, stored in Application Support, kept/forgotten from the Sheets view.
+- 2026-10-26b (night) — PLG-3 checked: no plugin runtime yet (#1221, draft #4980 open; #5586 replaces #4330); SolidCraft v0.23.0 is out (this Mac's CLI is 0.20.0).

@@ -4,7 +4,8 @@ Working name: **CabinetForSolidcraft** (app: Cabinet Studio). First written 2026
 
 ## Revision 2 (2026-10-23, later the same day)
 
-- **Re-checked 2026-10-24:** still no plugin runtime. Issue #1221 and draft PR #4980 are open; #4330 (install a plugin from a GitHub link in Preferences) is open; v0.20.0 is the latest release.
+- **Re-checked 2026-10-26:** still no plugin runtime. Issue #1221 and draft PR #4980 are open; #4330 was closed and its work continues as open PR #5586 (install a plugin from a GitHub link); v0.23.0 (2026-10-25) is the latest release and its notes do not mention plugins.
+- Earlier check 2026-10-24: still no plugin runtime. Issue #1221 and draft PR #4980 are open; #4330 (install a plugin from a GitHub link in Preferences) is open; v0.20.0 is the latest release.
 - **Plugin status re-checked against SolidCraft v0.20.0** (released today, installed here).
   Preferences › Plugins exists, but per its source (`crates/ui-egui/src/plugins.rs`) it only lists
   `plugins/<id>/plugin.json` folders and turns them on or off: "It does not load or run anything".
