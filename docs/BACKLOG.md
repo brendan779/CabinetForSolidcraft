@@ -155,7 +155,7 @@ committed: they are the brands' copyright. `preview_colour` is an approximation.
 | OUT-5a | done (382339e) | M | `cabinet_core::nesting`: guillotine free-rectangle placement (best short side, shorter-leftover split), kerf, trim, grain, offcuts | tests: inside trim, a kerf apart, grain kept |
 | OUT-5b | done (f73e8d1) | M | Nesting PDF: summary + offcut list, a diagram per sheet; Cut List › Nesting… | PDF per job; docs/images/out5-nesting-sheet-4.png |
 | OUT-5c | needs-human (built in 96c4edb: Cut List › Sheets with kerf/trim; not seen on screen here) | M | Nesting in the app: preview the sheets in the Cut List workspace, kerf/trim/sheet size settings (choose among the board's catalog sizes), reuse stored offcuts | sheets shown in the app |
-| OUT-5d | todo | M | Nesting stock choices: pick among a board's catalog sheet sizes (or the cheapest by yield), and keep offcuts from earlier jobs to nest on first | offcut store + test |
+| OUT-5d | needs-human (built in e4b4446; try Cut List › Sheets › Offcuts on screen) | M | Nesting stock choices: pick among a board's catalog sheet sizes (or the cheapest by yield), and keep offcuts from earlier jobs to nest on first | offcut store + test |
 | OUT-6 | done (13b9afb) | M | Hardware BOM with supplier article numbers and quantities, CSV + PDF | BOM for the sample run |
 | OUT-7 | done (dee5a94) | M | Part labels (62 mm label printer) with QR code of part id | PDF of labels |
 | OUT-8 | done (3a7abbe; our own exploded isometric, not SolidCraft's `explode.create` + render: that is OUT-8b) | M | Assembly sheet per cabinet: exploded view (SolidCraft exploded view + export view) | image per cabinet |
@@ -345,3 +345,4 @@ Agents append one line per session: date, items touched, outcome.
 - 2026-10-26b (night) — DATA-5b part (b5092fd): 28 Trade Essentials plywood boards (p.104, decorative and non-structural half); bending ply keeps both grain directions as printed.
 - 2026-10-26b (night) — HAF-6 built (299d534): inspector Lights section with drawn zone tiles and voltage/power chips; not seen on screen.
 - 2026-10-26b (night) — OUT-5c built (96c4edb): Cut List › Sheets shows the nesting pages with kerf and trim steppers and Export PDF; OUT-5d added for sheet size choice and offcut reuse.
+- 2026-10-26b (night) — OUT-5d built (e4b4446): each board's sheet size chosen by least area among its catalog sizes; kept offcuts nested on first, stored in Application Support, kept/forgotten from the Sheets view.
