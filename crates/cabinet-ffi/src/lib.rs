@@ -954,6 +954,13 @@ pub fn customer_quote_pdf(
     ))
 }
 
+/// The benchtop schedule for the benchtop maker: a summary, then each piece's sheet.
+#[uniffi::export]
+pub fn benchtops_pdf(items: JobItems, job: String) -> Result<Vec<u8>, CoreError> {
+    let lists: Vec<PartList> = job_lists(&items)?.into_iter().map(|(l, _)| l).collect();
+    Ok(cabinet_sheets::benchtops::benchtops_pdf(&lists, &job))
+}
+
 /// An exploded assembly drawing per cabinet with its parts list, as a PDF.
 #[uniffi::export]
 pub fn assembly_pdf(items: JobItems, job: String) -> Result<Vec<u8>, CoreError> {

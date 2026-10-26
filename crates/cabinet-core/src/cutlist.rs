@@ -5,7 +5,7 @@ use std::collections::BTreeMap;
 use serde::{Deserialize, Serialize};
 
 use crate::geom::Axis;
-use crate::part::{Part, PartList};
+use crate::part::{Part, PartList, PartRole};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct CutRow {
@@ -24,6 +24,10 @@ pub struct CutRow {
     pub edges: [bool; 4],
     pub grain: bool,
     pub quantity: u32,
+    /// Made to a template by a benchtop maker (benchtops, splashbacks), not cut from stock
+    /// sheets in the shop.
+    #[serde(default)]
+    pub templated: bool,
 }
 
 impl CutRow {
@@ -115,6 +119,7 @@ fn row(cabinet: &str, p: &Part, default_board: &str, tape: f64) -> CutRow {
         edges: [l1, l2, w1, w2],
         grain: p.grain_axis.is_some(),
         quantity: 1,
+        templated: matches!(p.role, PartRole::Benchtop | PartRole::Splashback),
     }
 }
 

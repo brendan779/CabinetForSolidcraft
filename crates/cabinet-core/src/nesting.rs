@@ -128,7 +128,8 @@ pub fn nest_with_offcuts(
     settings: &Settings,
 ) -> Nesting {
     let mut groups: BTreeMap<(String, i64), Vec<&CutRow>> = BTreeMap::new();
-    for r in rows {
+    // Benchtops and splashbacks are made to a template, not cut from the shop's sheets.
+    for r in rows.iter().filter(|r| !r.templated) {
         let key = (r.board.clone(), (r.thickness * 100.0).round() as i64);
         groups.entry(key).or_default().push(r);
     }
@@ -397,6 +398,7 @@ mod tests {
             edges: [false; 4],
             grain,
             quantity,
+            templated: false,
         }
     }
 

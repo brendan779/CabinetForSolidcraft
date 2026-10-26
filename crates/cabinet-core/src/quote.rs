@@ -56,6 +56,8 @@ impl Default for PriceList {
 #[serde(rename_all = "snake_case")]
 pub enum Section {
     Board,
+    /// Benchtops and splashbacks, by the square metre of the pieces.
+    Benchtop,
     EdgeTape,
     Hardware,
     Labour,
@@ -106,7 +108,8 @@ pub fn quote(
                 section,
                 key: key.into(),
                 description,
-                quantity,
+                // Priced exactly; shown to two places.
+                quantity: round2(quantity),
                 unit: unit.into(),
                 unit_price: price,
                 total: price.map_or(0.0, |p| p * quantity),
@@ -126,18 +129,45 @@ pub fn quote(
             Section::Board,
             &board,
             format!("{board}, {thickness} mm ({count} sheets)"),
-            round2(m2),
+            m2,
             "m²",
             prices.boards.get(&board).copied(),
         );
     }
-    let tape: f64 = cut.rows.iter().map(|r| r.edge_metres()).sum();
+    // Templated pieces: their own area, by board and thickness, their finished edges noted.
+    let mut tops: BTreeMap<(String, i64), (f64, f64, f64, u32)> = BTreeMap::new();
+    for r in cut.rows.iter().filter(|r| r.templated) {
+        let e = tops
+            .entry((r.board.clone(), (r.thickness * 100.0).round() as i64))
+            .or_insert((r.thickness, 0.0, 0.0, 0));
+        e.1 += r.area_m2();
+        e.2 += r.edge_metres();
+        e.3 += r.quantity;
+    }
+    for ((board, _), (thickness, m2, edges, count)) in tops {
+        line(
+            Section::Benchtop,
+            &board,
+            format!(
+                "Benchtop {board}, {thickness} mm ({count} pieces, {edges:.1} m finished edge)"
+            ),
+            m2,
+            "m²",
+            prices.boards.get(&board).copied(),
+        );
+    }
+    let tape: f64 = cut
+        .rows
+        .iter()
+        .filter(|r| !r.templated)
+        .map(|r| r.edge_metres())
+        .sum();
     if tape > 0.0 {
         line(
             Section::EdgeTape,
             "edge_tape",
             "Edge tape".into(),
-            round2(tape),
+            tape,
             "m",
             prices.edge_tape_per_m,
         );
@@ -162,7 +192,7 @@ pub fn quote(
         Section::Labour,
         "labour",
         format!("Labour: {parts} parts, {cabinets} cabinets, {items} hardware items"),
-        round2(minutes / 60.0),
+        minutes / 60.0,
         "h",
         prices.labour_per_hour,
     );
@@ -209,7 +239,7 @@ pub fn per_cabinet(
         }
     }
     let mut part_area: BTreeMap<(String, i64), f64> = BTreeMap::new();
-    for r in &cut.rows {
+    for r in cut.rows.iter().filter(|r| !r.templated) {
         *part_area.entry(group(&r.board, r.thickness)).or_default() += r.area_m2();
     }
     let rate = prices.labour_per_hour.unwrap_or(0.0) / 60.0;
@@ -220,6 +250,12 @@ pub fn per_cabinet(
             let mut cost = 0.0;
             let mut parts = 0;
             for r in rows {
+                if r.templated {
+                    // A benchtop's own area at its board's price.
+                    cost += prices.boards.get(&r.board).copied().unwrap_or(0.0) * r.area_m2();
+                    parts += r.quantity;
+                    continue;
+                }
                 let g = group(&r.board, r.thickness);
                 if let (Some(c), Some(a)) = (sheet_cost.get(&g), part_area.get(&g)) {
                     cost += c * r.area_m2() / a;
@@ -368,5 +404,52 @@ mod tests {
             shares[0].total > shares[1].total,
             "the base costs more than the wall"
         );
+    }
+
+    /// BENCH-5: benchtops are priced by their own area, not nested on sheets, and still add up
+    /// per cabinet.
+    #[test]
+    fn benchtops_are_priced_by_their_area() {
+        use crate::run::{Benchtop, Run, RunItem, build_run};
+        let run = Run {
+            origin: Default::default(),
+            items: vec![
+                RunItem::Cabinet(Box::new(Cabinet::new("B01", CabinetKind::Base))),
+                RunItem::Benchtop(
+                    serde_json::from_value::<Benchtop>(serde_json::json!({
+                        "id": "BT1", "board": "stone"
+                    }))
+                    .unwrap(),
+                ),
+            ],
+        };
+        let lists = build_run(&run).unwrap();
+        let cut = crate::cutlist::cut_list(&lists, "Generic", 1.0);
+        let n = nest(
+            &cut.rows,
+            |_, _| {
+                vec![Stock {
+                    length: 2400.0,
+                    width: 1200.0,
+                    grained: false,
+                }]
+            },
+            &Settings::default(),
+        );
+        assert!(n.sheets.iter().all(|s| s.board != "stone"), "not nested");
+        let mut prices = PriceList::default();
+        prices.boards.insert("stone".into(), 500.0);
+        let bom = crate::bom::hardware_bom(&lists);
+        let q = quote(&n, &cut, &bom, 1, &prices);
+        let top = q
+            .lines
+            .iter()
+            .find(|l| l.section == Section::Benchtop)
+            .unwrap();
+        let area = lists[1].parts[0].bounds.size.x * lists[1].parts[0].bounds.size.y / 1e6;
+        assert!((top.quantity - (area * 100.0).round() / 100.0).abs() < 1e-9);
+        let shares = per_cabinet(&n, &cut, &lists, &["B01".into()], &prices);
+        let total: f64 = shares.iter().map(|c| c.cost).sum();
+        assert!((total - q.cost).abs() < 0.05, "{total} vs {}", q.cost);
     }
 }

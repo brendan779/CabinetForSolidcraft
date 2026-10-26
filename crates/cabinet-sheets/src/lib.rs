@@ -5,6 +5,7 @@
 use std::fmt::Write;
 
 pub mod assembly;
+pub mod benchtops;
 pub mod dxf;
 pub mod labels;
 pub mod nesting;

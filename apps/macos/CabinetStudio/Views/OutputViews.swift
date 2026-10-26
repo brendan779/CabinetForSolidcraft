@@ -286,7 +286,7 @@ struct QuoteView: View {
     /// tape and labour rates.
     private func price(_ line: QuoteLineRecord) -> Binding<Double?> {
         let (table, key): (String?, String) = switch line.section {
-        case "board": ("boards", line.key)
+        case "board", "benchtop": ("boards", line.key)
         case "hardware": ("hardware", line.key)
         case "edge_tape": (nil, "edge_tape_per_m")
         default: (nil, "labour_per_hour")
@@ -584,6 +584,17 @@ struct CutSheetsView: View {
                 }
             }
             .help("Each cabinet exploded, with its parts list, one page per cabinet")
+            if project.cabinets.contains(where: { $0.kind == "benchtop" }) {
+                Button("Benchtops…", systemImage: "rectangle.tophalf.filled") {
+                    do {
+                        pdf = (DataDocument(data: try benchtopsPdf(items: project.jobItems, job: project.jobName)),
+                               "\(project.jobName) benchtops")
+                    } catch {
+                        project.lastError = "Could not make the benchtop schedule: \(error)"
+                    }
+                }
+                .help("For the benchtop maker: every piece's size, area, finished edges and cut-outs, then each piece's sheet")
+            }
             Button("DXF…", systemImage: "square.and.arrow.up.on.square") { exportDxf() }
                 .help("A DXF per part for CNC (outline, bores by size and depth, pockets, cut-outs on their own layers) into a folder you choose")
             Button("Export PDF…", systemImage: "doc.richtext") {
