@@ -218,7 +218,7 @@ features in words.
 | SURR-2 | needs-human (built in b3e72a4: cladding parts on chosen faces; the run layout does not yet leave room for a clad end between cabinets; profile choice waits for SURR-1; not seen on screen) | M | Cladding as a cabinet finish: island backs and ends, end panels and kick panels clad in a Surround profile, flutes vertical and aligned across panels | an island back renders fluted |
 | SURR-3 | todo | L | Curved ends: rounded island ends (radius picker) from curved substrate (bending ply / kerfed MDF / flexible Surround), fluting following the curve, benchtop ends to match | split |
 | SURR-4 | todo | M | Clad rangehood / canopy box with rounded front corners, in a Surround profile or paint finish | rangehood part between wall cabinets |
-| SURR-5 | todo | S | Flute and VJ procedural textures in the viewport (normal-mapped grooves) | looks fluted in the app |
+| SURR-5 | needs-human (built in e5180ed as colour stripes, not normal maps; not seen on screen: clad an island back in Batten 100 and look) | S | Flute and VJ procedural textures in the viewport (normal-mapped grooves) | looks fluted in the app |
 | STYLE-1 | todo (shaker = P2-2a; finger pull done in 04a890b; push-to-open is TIP-ON; arched tops and continuous-grain tall fronts left) | M | Door styles for the look: shaker 5-piece, arched-top tall doors, handleless (J-pull, finger pull, push-to-open), full-height tall fronts with continuous grain | picker tiles |
 | STYLE-2 | todo | M | Open shelving: floating timber shelves (concealed brackets) in niches between wall cabinets, with LED strip (ties to HAF-5) | shelf parts + hardware |
 | STYLE-3 | todo | S | Handle finishes: brushed brass, black, stainless; long pulls on tall doors | rendered handle colour |
@@ -362,3 +362,4 @@ Agents append one line per session: date, items touched, outcome.
 - 2026-10-26b (night) — STYLE-1 part (04a890b): finger pulls routed along the gripping edge.
 - 2026-10-26b (night) — SURR-2 built (b3e72a4): cladding parts on a cabinet's left/right/back faces.
 - 2026-10-26b (night) — SURR-1 done (d6e1833): 13 Surround profiles (module, face, groove, depth/radius) from the range brochure, linked to the lining boards by name.
+- 2026-10-26b (night) — SURR-5 built (e5180ed): profile stripes on lining boards in the viewport; cladding picks a Surround profile.
