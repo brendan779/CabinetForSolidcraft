@@ -250,6 +250,14 @@ pub enum Operation {
     /// A corner of the part's face rounded to `radius`, right through the thickness: `at` is the
     /// corner (its coordinate along the thickness is the part's middle).
     Round { part: String, at: Vec3, radius: f64 },
+    /// The top edge of a front cut to a circular arch, right through the thickness: the part
+    /// keeps what lies under the circle of `radius` about `centre` (the centre's coordinate
+    /// along the thickness is the part's middle); nothing below the centre is cut.
+    Arch {
+        part: String,
+        centre: Vec3,
+        radius: f64,
+    },
     /// A mortise for a loose tenon (Festool DOMINO), one part's half of the joint: `bounds` is
     /// the cutter's slot in that part, `tenon` the tenon's catalog id.
     Mortise {

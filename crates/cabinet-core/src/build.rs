@@ -120,6 +120,7 @@ pub fn build_cabinet(cab: &Cabinet) -> Result<PartList> {
         b.opening();
         b.drawer_inserts();
         b.lock();
+        b.arched_top();
         b.grain_match();
         // Last: hinges, handles and drawer fixings are placed on the slab, then move to the
         // frame member they fall in.
@@ -308,6 +309,7 @@ fn offset_operations(list: &mut PartList, o: Vec3) {
     for op in &mut list.operations {
         match op {
             Operation::Bore { at, .. } | Operation::Round { at, .. } => *at = *at + o,
+            Operation::Arch { centre, .. } => *centre = *centre + o,
             Operation::BiscuitSlot { bounds, .. }
             | Operation::Groove { bounds, .. }
             | Operation::Mortise { bounds, .. } => bounds.min = bounds.min + o,
@@ -2532,6 +2534,80 @@ impl<'a> Builder<'a> {
         );
     }
 
+    /// An arched top: the doors whose tops are the highest of the cabinet's fronts get one arch
+    /// across them, `arched_top` high at its middle over the ends. Refused on framed fronts, and
+    /// where the arch would cut through a hole in a door (a hinge cup, a handle).
+    fn arched_top(&mut self) {
+        let rise = self.cab.arched_top;
+        if rise <= 0.0 {
+            return;
+        }
+        if self.cab.standard.door_style != DoorStyle::Slab {
+            self.list
+                .warnings
+                .push("arched tops are cut in slab doors only: the top stays square".into());
+            return;
+        }
+        let doors: Vec<Part> = self.list.by_role(PartRole::Door).cloned().collect();
+        let Some(top) = doors.iter().map(|d| d.bounds.max().z).reduce(f64::max) else {
+            self.list
+                .warnings
+                .push("an arched top needs doors; this cabinet has none".into());
+            return;
+        };
+        let row: Vec<&Part> = doors
+            .iter()
+            .filter(|d| (d.bounds.max().z - top).abs() < 1e-6)
+            .collect();
+        let x0 = row.iter().map(|d| d.bounds.min.x).fold(f64::MAX, f64::min);
+        let x1 = row
+            .iter()
+            .map(|d| d.bounds.max().x)
+            .fold(f64::MIN, f64::max);
+        let chord = x1 - x0;
+        let lowest = row.iter().map(|d| d.bounds.size.z).fold(f64::MAX, f64::min);
+        if rise > chord / 2.0 || rise > lowest / 2.0 {
+            self.list.warnings.push(format!(
+                "a {rise:.0} mm arch is too high for doors {chord:.0} wide: the top stays square"
+            ));
+            return;
+        }
+        // The circle through both ends, `rise` under the top, and the top at the middle.
+        let radius = chord * chord / (8.0 * rise) + rise / 2.0;
+        let (cx, cz) = ((x0 + x1) / 2.0, top - radius);
+        let cut = |p: Vec3| p.z > cz && ((p.x - cx).powi(2) + (p.z - cz).powi(2)).sqrt() > radius;
+        for d in &row {
+            let hit = self.list.operations.iter().find_map(|o| match o {
+                Operation::Bore {
+                    part, at, diameter, ..
+                } if *part == d.name => {
+                    // The hole's edges nearest the arch.
+                    let r = diameter / 2.0;
+                    let up = Vec3::new(at.x, at.y, at.z + r);
+                    let side = Vec3::new(at.x + if at.x < cx { -r } else { r }, at.y, at.z);
+                    (cut(up) || cut(side)).then_some(*at)
+                }
+                _ => None,
+            });
+            if let Some(at) = hit {
+                self.list.warnings.push(format!(
+                    "{}: a {rise:.0} mm arch would cut through the hole {:.0} mm under its top: \
+                     the top stays square",
+                    d.name,
+                    top - at.z
+                ));
+                return;
+            }
+        }
+        for d in row {
+            self.list.operations.push(Operation::Arch {
+                part: d.name.clone(),
+                centre: Vec3::new(cx, d.bounds.center().y, cz),
+                radius,
+            });
+        }
+    }
+
     /// Continuous grain: each column of two or more slab fronts (the same left and right edges)
     /// runs its grain upright and is cut as one strip, top first.
     fn grain_match(&mut self) {
@@ -3326,7 +3402,8 @@ mod tests {
             Operation::Bore { part, .. }
             | Operation::Groove { part, .. }
             | Operation::Mortise { part, .. }
-            | Operation::Round { part, .. } => *part == shelf.name,
+            | Operation::Round { part, .. }
+            | Operation::Arch { part, .. } => *part == shelf.name,
         }));
         assert_eq!(shelf.bounds.min.x, 16.0 + SHELF_SIDE_CLEARANCE);
     }
@@ -4801,6 +4878,60 @@ mod tests {
             list.warnings
                 .iter()
                 .any(|w| w.contains("drawer inserts go in"))
+        );
+    }
+
+    /// STYLE-1: an arched top: one arch across a pair of wall doors, through both ends 80 under
+    /// the top; one so high it would cut the hinge cups is refused.
+    #[test]
+    fn an_arched_top_spans_the_top_row_of_doors() {
+        let mut cab = Cabinet::new("W01", CabinetKind::Wall);
+        cab.width = 900.0;
+        cab.fronts = FrontLayout::DoorPair;
+        cab.arched_top = 80.0;
+        let list = build_cabinet(&cab).unwrap();
+        assert!(
+            !list.warnings.iter().any(|w| w.contains("arch")),
+            "{:?}",
+            list.warnings
+        );
+        let arches: Vec<_> = list
+            .operations
+            .iter()
+            .filter_map(|o| match o {
+                Operation::Arch {
+                    part,
+                    centre,
+                    radius,
+                } => Some((part.clone(), *centre, *radius)),
+                _ => None,
+            })
+            .collect();
+        assert_eq!(arches.len(), 2);
+        let doors: Vec<&Part> = list.by_role(PartRole::Door).collect();
+        let x0 = doors
+            .iter()
+            .map(|d| d.bounds.min.x)
+            .fold(f64::MAX, f64::min);
+        let top = doors[0].bounds.max().z;
+        let (_, c, r) = arches[0];
+        assert_eq!((c.x, c.z), (arches[1].1.x, arches[1].1.z));
+        // Through the top at the middle and 80 under it at the outer edge.
+        assert!((c.z + r - top).abs() < 1e-6);
+        let at_edge = c.z + (r * r - (x0 - c.x).powi(2)).sqrt();
+        assert!((top - at_edge - 80.0).abs() < 1e-6);
+        cab.arched_top = 250.0;
+        let list = build_cabinet(&cab).unwrap();
+        assert!(
+            list.warnings
+                .iter()
+                .any(|w| w.contains("cut through the hole"))
+        );
+        assert!(
+            !list
+                .operations
+                .iter()
+                .any(|o| matches!(o, Operation::Arch { .. }))
         );
     }
 

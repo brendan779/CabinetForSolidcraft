@@ -138,6 +138,73 @@ impl Dxf {
         self.pair(8, layer);
     }
 
+    /// A closed `w` × `h` rectangle from the origin with one side replaced by an arc between two
+    /// ends about `c` (the side across x when `across_x`, else the one across y), anticlockwise.
+    fn arched_rect(
+        &mut self,
+        layer: &str,
+        w: f64,
+        h: f64,
+        [a, b]: [(f64, f64); 2],
+        c: (f64, f64),
+        across_x: bool,
+    ) {
+        // The corners anticlockwise from the bottom left; side k runs from corner k. The arched
+        // side is the one across x (a side at x = 0 or w) or the top or bottom, where the ends are.
+        let corners = [(0.0, 0.0), (w, 0.0), (w, h), (0.0, h)];
+        let side = match (
+            across_x,
+            across_x && a.0 > w / 2.0 || !across_x && a.1 > h / 2.0,
+        ) {
+            (true, true) => 1,
+            (true, false) => 3,
+            (false, true) => 2,
+            (false, false) => 0,
+        };
+        // The arc runs from the end nearer the side's first corner.
+        let d = |p: (f64, f64), q: (f64, f64)| (p.0 - q.0).hypot(p.1 - q.1);
+        let (p0, p1) = if d(a, corners[side]) <= d(b, corners[side]) {
+            (a, b)
+        } else {
+            (b, a)
+        };
+        let angle = |p: (f64, f64)| (p.1 - c.1).atan2(p.0 - c.0);
+        let mut sweep = angle(p1) - angle(p0);
+        while sweep <= -std::f64::consts::PI {
+            sweep += 2.0 * std::f64::consts::PI;
+        }
+        while sweep > std::f64::consts::PI {
+            sweep -= 2.0 * std::f64::consts::PI;
+        }
+        let bulge = (sweep / 4.0).tan();
+        let points: Vec<(f64, f64, f64)> = (0..4)
+            .map(|k| {
+                if k == side {
+                    (p0.0, p0.1, bulge)
+                } else if k == (side + 1) % 4 {
+                    (p1.0, p1.1, 0.0)
+                } else {
+                    (corners[k].0, corners[k].1, 0.0)
+                }
+            })
+            .collect();
+        self.pair(0, "POLYLINE");
+        self.pair(8, layer);
+        self.pair(66, 1);
+        self.pair(70, 1);
+        self.xy(10, 0.0, 0.0);
+        for (px, py, bulge) in points {
+            self.pair(0, "VERTEX");
+            self.pair(8, layer);
+            self.xy(10, px, py);
+            if bulge != 0.0 {
+                self.pair(42, format!("{bulge:.9}"));
+            }
+        }
+        self.pair(0, "SEQEND");
+        self.pair(8, layer);
+    }
+
     fn finish(mut self) -> String {
         self.pair(0, "ENDSEC");
         self.pair(0, "EOF");
@@ -194,7 +261,22 @@ pub fn part_dxfs(list: &PartList, part: &Part) -> Vec<DxfFile> {
                     radii[i] = radius;
                 }
             }
-            if radii.iter().any(|&r| r > 0.0) {
+            let arch = all.iter().find(|f| matches!(f, Feature::Arch { .. }));
+            if let Some(arch) = arch {
+                // The ends in this view's frame, and the arc's centre.
+                let [a, b] = arch.arch_ends(lu, lv).unwrap();
+                let Feature::Arch { cu, cv, up_u, .. } = *arch else {
+                    unreachable!()
+                };
+                d.arched_rect(
+                    "OUTLINE",
+                    lu,
+                    lv,
+                    [(x(a.0), a.1), (x(b.0), b.1)],
+                    (x(cu), cv),
+                    up_u,
+                );
+            } else if radii.iter().any(|&r| r > 0.0) {
                 d.rounded_rect("OUTLINE", lu, lv, radii);
             } else {
                 d.rect("OUTLINE", 0.0, 0.0, lu, lv);
@@ -292,6 +374,28 @@ mod tests {
             .chunks(2)
             .map(|c| (c[0].trim().to_string(), c[1].trim().to_string()))
             .collect()
+    }
+
+    /// STYLE-1: an arched door's outline has its top side as one arc, from the corners less
+    /// the rise; its sheet lists the arch.
+    #[test]
+    fn an_arched_door_has_an_arc_for_its_top() {
+        let mut cab = Cabinet::new("W01", CabinetKind::Wall);
+        cab.arched_top = 60.0;
+        let list = build_cabinet(&cab).unwrap();
+        let door = list.part("W01.Door1").unwrap();
+        let dxf = &part_dxfs(&list, door)[0].contents;
+        let p = pairs(dxf);
+        let bulges: Vec<f64> = p
+            .iter()
+            .filter(|(c, _)| c == "42")
+            .map(|(_, v)| v.parse().unwrap())
+            .collect();
+        assert_eq!(bulges.len(), 1, "{dxf}");
+        // A 598 chord with a 60 rise: bulge = 2 × 60 / 598.
+        assert!((bulges[0].abs() - 120.0 / 598.0).abs() < 1e-6, "{bulges:?}");
+        let sheet = crate::part_sheet(&list, door, "Generic", "Job");
+        assert!(sheet.contains("arched top R"));
     }
 
     fn layers(dxf: &str) -> Vec<String> {

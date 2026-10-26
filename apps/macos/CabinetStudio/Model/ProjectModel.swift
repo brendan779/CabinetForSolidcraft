@@ -200,6 +200,12 @@ struct CabinetDoc: Identifiable, Hashable, Codable {
         }
     }
 
+    /// Doors: the arched top's rise (0: square).
+    var archedTop: Double {
+        get { number("arched_top") }
+        set { setNumber("arched_top", newValue) }
+    }
+
     /// A Blum CABLOXX locking bar over all the drawers.
     var lock: Bool {
         get { object["lock"] as? Bool ?? false }

@@ -44,6 +44,10 @@ pub struct Cabinet {
     /// (LEGRABOX, MERIVOBOX), ORGA-LINE container and utensil sets (TANDEMBOX).
     #[serde(default, skip_serializing_if = "std::ops::Not::not")]
     pub drawer_inserts: bool,
+    /// The top row of doors cut to one arch across them, this high at its middle above its ends
+    /// (0: square).
+    #[serde(default, skip_serializing_if = "is_zero_f64")]
+    pub arched_top: f64,
     /// A Blum CABLOXX locking bar locking every drawer at once (the cylinder lock is bought
     /// separately).
     #[serde(default, skip_serializing_if = "std::ops::Not::not")]
@@ -110,6 +114,10 @@ impl Voltage {
             Voltage::V24 => "24 V",
         }
     }
+}
+
+fn is_zero_f64(n: &f64) -> bool {
+    *n == 0.0
 }
 
 fn is_zero(n: &u32) -> bool {
@@ -285,6 +293,7 @@ impl Cabinet {
             inner_drawers: 0,
             drawer_inserts: false,
             lock: false,
+            arched_top: 0.0,
             lights: Vec::new(),
             blind: Blind::default(),
             sink: Sink::default(),

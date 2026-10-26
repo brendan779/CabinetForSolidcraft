@@ -1076,6 +1076,20 @@ struct FrontsSection: View {
                 }
                 .pickerStyle(.segmented)
             }
+            if ["door", "door_pair"].contains(cab.frontType) {
+                HStack(spacing: 6) {
+                    Text("Arch").foregroundStyle(.secondary)
+                    Spacer()
+                    ForEach([0.0, 40, 60, 80], id: \.self) { rise in
+                        Button(rise == 0 ? "Square" : "\(Int(rise))") {
+                            withAnimation(.snappy) { var c = cab; c.archedTop = rise; project.selected = c }
+                        }
+                        .buttonStyle(ChipStyle(selected: abs(cab.archedTop - rise) < 0.5))
+                        .accessibilityLabel(rise == 0 ? "Square top" : "Arched top, \(Int(rise)) millimetres")
+                    }
+                }
+                .help("An arched top across the doors: this many millimetres higher in the middle than at the sides (slab doors)")
+            }
             if cab.frontType == "drawers" {
                 DrawerStackPicker(cab: cab)
             }

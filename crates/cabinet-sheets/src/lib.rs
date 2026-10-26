@@ -55,6 +55,36 @@ pub enum Feature {
     },
     /// A corner of the outline rounded right through: `(u, v)` is the corner.
     Round { u: f64, v: f64, radius: f64 },
+    /// The top edge cut to an arch: the part keeps what is under the circle about `(cu, cv)`.
+    /// `up_u`: up (the cabinet's Z) runs along u, else along v.
+    Arch {
+        cu: f64,
+        cv: f64,
+        radius: f64,
+        up_u: bool,
+    },
+}
+
+impl Feature {
+    /// An arch's two ends on the part's sides, in (u, v), in the order the arch runs from the
+    /// low end of the side axis.
+    pub fn arch_ends(&self, lu: f64, lv: f64) -> Option<[(f64, f64); 2]> {
+        let Feature::Arch {
+            cu,
+            cv,
+            radius,
+            up_u,
+        } = *self
+        else {
+            return None;
+        };
+        let rise = |d: f64| (radius * radius - d * d).max(0.0).sqrt();
+        Some(if up_u {
+            [(cu + rise(0.0 - cv), 0.0), (cu + rise(lv - cv), lv)]
+        } else {
+            [(0.0, cv + rise(0.0 - cu)), (lu, cv + rise(lu - cu))]
+        })
+    }
 }
 
 /// A part's two big faces: at the low and the high end of its thickness axis.
@@ -70,7 +100,7 @@ impl Feature {
         match self {
             Feature::FaceBore { face, .. } => Some(*face),
             Feature::Rect { face, .. } => *face,
-            Feature::EdgeBore { .. } | Feature::Round { .. } => None,
+            Feature::EdgeBore { .. } | Feature::Round { .. } | Feature::Arch { .. } => None,
         }
     }
 }
@@ -179,6 +209,19 @@ pub fn features(list: &PartList, part: &Part) -> Vec<Feature> {
                 part: name, bounds, ..
             } if *name == part.name => {
                 out.push(rect(part, bounds.min, bounds.size, "mortise"));
+            }
+            Operation::Arch {
+                part: name,
+                centre,
+                radius,
+            } if *name == part.name => {
+                let (cu, cv) = to_uv(part, *centre);
+                out.push(Feature::Arch {
+                    cu,
+                    cv,
+                    radius: *radius,
+                    up_u: ua == Axis::Z,
+                });
             }
             Operation::Round {
                 part: name,
@@ -624,6 +667,34 @@ fn face_view(
                     holes.push((format!("{tag}{label} {} × {}", fmt(*w), fmt(*h)), *u, *v));
                 }
             }
+            arch @ Feature::Arch {
+                cu,
+                cv,
+                radius,
+                up_u,
+            } => {
+                // What the arch cuts away, the paper showing through, up to the top edge.
+                let [a, b] = arch.arch_ends(view.lu, view.lv).unwrap();
+                let top = |(u, v): (f64, f64)| if *up_u { (view.lu, v) } else { (u, view.lv) };
+                let (ta, tb) = (top(a), top(b));
+                let (ax, ay, bx, by) = (x(a.0), y(a.1), x(b.0), y(b.1));
+                // The short way round the centre from one end to the other.
+                let (cx, cy) = (x(*cu), y(*cv));
+                let cross = (ax - cx) * (by - cy) - (ay - cy) * (bx - cx);
+                let sweep = u8::from(cross > 0.0);
+                let rr = radius * s;
+                let _ = writeln!(
+                    svg,
+                    r##"<path d="M{:.2} {:.2} L{ax:.2} {ay:.2} A{rr:.2} {rr:.2} 0 0 {sweep} {bx:.2} {by:.2} L{:.2} {:.2} Z" fill="#ffffff" stroke="#222" stroke-width="0.25"/>"##,
+                    x(ta.0),
+                    y(ta.1),
+                    x(tb.0),
+                    y(tb.1)
+                );
+                if tag != "out " {
+                    holes.push((format!("{tag}arched top R{}", fmt(*radius)), a.0, a.1));
+                }
+            }
             Feature::Round { u, v, radius } => {
                 // The corner cut away, the paper showing through, up to the arc.
                 let du = if *u < view.lu / 2.0 { 1.0 } else { -1.0 };
@@ -935,6 +1006,7 @@ mod tests {
                     | Feature::EdgeBore { u, v, .. }
                     | Feature::Rect { u, v, .. }
                     | Feature::Round { u, v, .. } => (u, v),
+                    Feature::Arch { .. } => continue,
                 };
                 assert!(
                     (-1e-6..=lu + 1e-6).contains(&u) && (-1e-6..=lv + 1e-6).contains(&v),

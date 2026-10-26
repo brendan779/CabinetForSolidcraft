@@ -39,6 +39,7 @@ fn transform(
                 *direction = dir(*direction);
             }
             Operation::Round { at, .. } => *at = point(*at),
+            Operation::Arch { centre, .. } => *centre = point(*centre),
             Operation::BiscuitSlot { bounds, along, .. } => {
                 *bounds = boxed(*bounds);
                 *along = axis(*along);
@@ -136,7 +137,8 @@ pub fn rename(list: &mut PartList, f: impl Fn(&str) -> String) {
             Operation::Bore { part, .. }
             | Operation::Groove { part, .. }
             | Operation::Mortise { part, .. }
-            | Operation::Round { part, .. } => *part = f(part),
+            | Operation::Round { part, .. }
+            | Operation::Arch { part, .. } => *part = f(part),
             Operation::BiscuitSlot { parts, .. } => {
                 for p in parts {
                     *p = f(p);
@@ -168,7 +170,9 @@ pub fn open_end(list: &mut PartList, side: &str, end: f64) {
     list.operations.retain(|op| match op {
         Operation::Bore { part, at, .. } => part != side && !at_point(at),
         Operation::BiscuitSlot { parts, .. } => !parts.iter().any(|p| p == side),
-        Operation::Groove { part, .. } | Operation::Round { part, .. } => part != side,
+        Operation::Groove { part, .. }
+        | Operation::Round { part, .. }
+        | Operation::Arch { part, .. } => part != side,
         Operation::Mortise { part, bounds, .. } => part != side && !touches(bounds),
     });
     list.hardware.retain(|h| h.part != side);

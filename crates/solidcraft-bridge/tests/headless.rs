@@ -545,3 +545,40 @@ fn a_benchtop_with_cut_outs_builds() {
         .unwrap();
     assert_eq!(body["face_types"]["cylinder"], 2, "{body}");
 }
+
+/// STYLE-1: an arched pair of wall doors: SolidCraft cuts each door's top to the arch (a curved
+/// face, less volume than the box) and keeps its bounding box below the top.
+#[test]
+fn an_arched_top_cuts_both_doors() {
+    let Some(cli) = cli() else {
+        eprintln!("SOLIDCRAFT_CLI not set: skipped");
+        return;
+    };
+    let mut cab = Cabinet::new("W01", CabinetKind::Wall);
+    cab.width = 900.0;
+    cab.fronts = cabinet_core::model::FrontLayout::DoorPair;
+    cab.arched_top = 80.0;
+    let list = build_cabinet(&cab).unwrap();
+    let r = run(
+        &cli,
+        "arched",
+        &emit_cabinet(&list, Detail::Design, None),
+        &["eval"],
+    );
+    for door in ["W01.Door1", "W01.Door2"] {
+        let p = list.part(door).unwrap();
+        let body = r["bodies"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|b| b["name"] == door)
+            .unwrap();
+        let full = p.bounds.size.x * p.bounds.size.y * p.bounds.size.z;
+        let volume = body["volume_mm3"].as_f64().unwrap();
+        assert!(volume < full - 1000.0, "{door}: {volume} of {full}");
+        assert!(
+            body["face_types"]["cylinder"].as_u64().unwrap_or(0) >= 1,
+            "{body}"
+        );
+    }
+}
