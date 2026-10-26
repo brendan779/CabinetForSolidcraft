@@ -103,6 +103,19 @@ impl Client {
         )
     }
 
+    /// Runs one engine command that reads files, allowed only inside `paths`.
+    pub fn execute_reading(
+        &mut self,
+        command: &str,
+        params: Value,
+        paths: &[&std::path::Path],
+    ) -> Result<Value> {
+        self.request(
+            "engine.execute",
+            json!({ "command": command, "params": params, "allow_paths": paths }),
+        )
+    }
+
     /// Runs commands as one all-or-nothing batch. A failed step is reported as an error naming it.
     pub fn batch(&mut self, commands: &[Value]) -> Result<Value> {
         let r = self.request(

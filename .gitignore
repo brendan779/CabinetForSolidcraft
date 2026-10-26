@@ -9,3 +9,4 @@ xcuserdata/
 /vendor-cad/*
 !/vendor-cad/README.md
 __pycache__/
+/apps/macos/build/

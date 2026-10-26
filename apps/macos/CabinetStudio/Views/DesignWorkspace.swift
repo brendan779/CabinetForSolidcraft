@@ -57,6 +57,8 @@ struct ViewportLook: Equatable {
     /// A vertical cut across the run at the selected cabinet's middle: what is left of it is cut
     /// away.
     var section = false
+    /// Hinges, runners, legs: the supplier's own models where prepared, stand-ins otherwise.
+    var showHardware = true
 }
 
 struct HoveredPart: Equatable {
@@ -85,6 +87,10 @@ struct ViewportControls: View {
                     Label("Section", systemImage: "square.split.diagonal")
                 }
                 .help("Cut the run through the middle of the selected cabinet")
+                Toggle(isOn: $look.showHardware.animation(.snappy)) {
+                    Label("Hardware", systemImage: "gearshape.2")
+                }
+                .help("Show hinges, runners and legs (Blum's own models where the supplier CAD is prepared)")
             }
             .toggleStyle(.button)
             .labelStyle(.iconOnly)
@@ -386,7 +392,8 @@ final class ViewportScene {
             let selected = cab.id == project.selection
             let centre = Self.centre(of: b.panels)
             for p in b.panels {
-                guard look.showFronts || !p.isFront else { continue }
+                // The kick board stays: without it the run looks as if it floats.
+                guard look.showFronts || !p.isFront || p.role == "Plinth" else { continue }
                 var box = p
                 if look.section, let cut = sectionX {
                     if p.x + p.width <= cut { continue }
@@ -395,21 +402,36 @@ final class ViewportScene {
                         box.x = cut
                     }
                 }
-                seen.insert(p.name)
-                panels[p.name] = p
-                let e = entity(for: box)
+                // A side notched for the toe kick: its upper part, and the foot behind the notch.
+                var pieces = [box]
+                if p.notchHeight > 0 {
+                    var foot = box
+                    foot.name = p.name + "~foot"
+                    foot.y += p.notchDepth
+                    foot.depth -= p.notchDepth
+                    foot.height = p.notchHeight
+                    pieces[0].z += p.notchHeight
+                    pieces[0].height -= p.notchHeight
+                    pieces.append(foot)
+                }
                 let board = project.boardsById[p.board]
-                e.model?.materials = [material(box, board: board, selected: selected, hovered: p.name == hovered)]
-                let target = Self.transform(box, centre: centre, look: look)
-                if animate && p.isFront {
-                    e.move(to: target, relativeTo: root, duration: 0.45, timingFunction: .easeInOut)
-                } else {
-                    e.transform = target
+                for piece in pieces {
+                    seen.insert(piece.name)
+                    panels[piece.name] = p
+                    let e = entity(for: piece)
+                    e.model?.materials = [material(piece, board: board, selected: selected, hovered: p.name == hovered)]
+                    let target = Self.transform(piece, centre: centre, look: look)
+                    if animate && p.isFront {
+                        e.move(to: target, relativeTo: root, duration: 0.45, timingFunction: .easeInOut)
+                    } else {
+                        e.transform = target
+                    }
                 }
                 minX = min(minX, Float(p.x) / 1000)
                 maxX = max(maxX, Float(p.x + p.width) / 1000)
             }
         }
+        addHardware(project: project, look: look, seen: &seen)
         for e in root.children where !seen.contains(e.name) {
             e.removeFromParent()
             panels[e.name] = nil
@@ -417,6 +439,120 @@ final class ViewportScene {
         }
         // Keep the run centred on the origin the camera orbits.
         if minX < maxX { root.position.x = -(minX + maxX) / 2 }
+    }
+
+    // MARK: Hardware
+
+    private var meshes: [String: MeshResource] = [:]
+
+    /// Supplier models and stand-in shapes. Hinges show only with the fronts closed and in place,
+    /// drawer box sides only with the drawers in; runners, plates and legs stay with the carcass.
+    private func addHardware(project: ProjectModel, look: ViewportLook, seen: inout Set<String>) {
+        guard look.showHardware else { return }
+        let (models, shapes) = project.hardware()
+        let still = !look.open && look.explode < 0.001
+        func visible(_ name: String) -> Bool {
+            if name.contains(".Hinge") { return look.showFronts && still }
+            if name.contains(".BoxSide") { return still }
+            return true
+        }
+        let selection = project.selection.map { $0 + "." }
+        func selected(_ name: String) -> Bool { selection.map { name.hasPrefix($0) } ?? false }
+        for (i, m) in models.enumerated() where visible(m.name) {
+            guard let mesh = mesh(m.mesh) else { continue }
+            let key = "hw:\(m.name)#\(i)"
+            let e = hardwareEntity(key) { ModelEntity(mesh: mesh) }
+            e.model?.materials = [Self.metal(selected: selected(m.name))]
+            e.transform = Transform(matrix: Self.matrix(m.transform))
+            seen.insert(key)
+        }
+        for (i, sh) in shapes.enumerated() where visible(sh.name) {
+            let key = "hw:\(sh.name)#s\(i)"
+            let e = hardwareEntity(key) { ModelEntity(mesh: Self.standInMesh(sh)) }
+            e.model?.materials = [Self.metal(selected: selected(sh.name), standIn: true)]
+            e.transform = Self.standInTransform(sh)
+            seen.insert(key)
+        }
+    }
+
+    private func hardwareEntity(_ key: String, make: () -> ModelEntity) -> ModelEntity {
+        if let e = root.findEntity(named: key) as? ModelEntity { return e }
+        let e = make()
+        e.name = key
+        root.addChild(e)
+        return e
+    }
+
+    /// A supplier mesh (STL, model mm), loaded once per file.
+    private func mesh(_ path: String) -> MeshResource? {
+        if let m = meshes[path] { return m }
+        guard let data = try? loadMesh(path: path), !data.positions.isEmpty else { return nil }
+        let p = data.positions, n = data.normals
+        var positions: [SIMD3<Float>] = [], normals: [SIMD3<Float>] = []
+        positions.reserveCapacity(p.count / 3)
+        normals.reserveCapacity(p.count / 3)
+        for i in stride(from: 0, to: p.count, by: 9) {
+            let a = SIMD3(p[i], p[i + 1], p[i + 2]), b = SIMD3(p[i + 3], p[i + 4], p[i + 5]), c = SIMD3(p[i + 6], p[i + 7], p[i + 8])
+            var normal = SIMD3(n[i], n[i + 1], n[i + 2])
+            // Some exporters leave the facet normal empty: work it out from the corners.
+            if simd_length(normal) < 0.5 { normal = simd_normalize(simd_cross(b - a, c - a)) }
+            positions += [a, b, c]
+            normals += [normal, normal, normal]
+        }
+        var desc = MeshDescriptor()
+        desc.positions = MeshBuffers.Positions(positions)
+        desc.normals = MeshBuffers.Normals(normals)
+        desc.primitives = .triangles(Array(0..<UInt32(positions.count)))
+        let m = try? MeshResource.generate(from: [desc])
+        meshes[path] = m
+        return m
+    }
+
+    /// Model mm → cabinet mm (row-major 3 × 4) → RealityKit metres: cabinet (x, y, z) is RealityKit
+    /// (x, z, −y).
+    private static func matrix(_ m: [Double]) -> simd_float4x4 {
+        func rk(_ a: Double, _ b: Double, _ c: Double) -> SIMD3<Float> { SIMD3(Float(a), Float(c), -Float(b)) / 1000 }
+        let x = rk(m[0], m[4], m[8]), y = rk(m[1], m[5], m[9]), z = rk(m[2], m[6], m[10])
+        let t = rk(m[3], m[7], m[11])
+        return simd_float4x4(SIMD4(x, 0), SIMD4(y, 0), SIMD4(z, 0), SIMD4(t, 1))
+    }
+
+    private static func standInMesh(_ s: StandInShape) -> MeshResource {
+        if s.cylinder {
+            return .generateCylinder(height: Float(s.length) / 1000, radius: Float(s.diameter) / 2000)
+        }
+        return .generateBox(size: SIMD3(Float(s.width), Float(s.height), Float(s.depth)) / 1000)
+    }
+
+    private static func standInTransform(_ s: StandInShape) -> Transform {
+        guard s.cylinder else {
+            return Transform(translation: point(s.x + s.width / 2, s.y + s.depth / 2, s.z + s.height / 2))
+        }
+        // RealityKit's cylinder runs along its y, which is the cabinet's z.
+        let sign = s.positive ? 1.0 : -1.0
+        let half = s.length / 2 * sign
+        var t = Transform()
+        switch s.axis {
+        case 0:
+            t.translation = point(s.x + half, s.y, s.z)
+            t.rotation = simd_quatf(angle: .pi / 2, axis: [0, 0, 1])
+        case 1:
+            t.translation = point(s.x, s.y + half, s.z)
+            t.rotation = simd_quatf(angle: .pi / 2, axis: [1, 0, 0])
+        default:
+            t.translation = point(s.x, s.y, s.z + half)
+        }
+        return t
+    }
+
+    /// Nickel for supplier models, a flatter grey for stand-ins; dimmer outside the selection.
+    private static func metal(selected: Bool, standIn: Bool = false) -> PhysicallyBasedMaterial {
+        var m = PhysicallyBasedMaterial()
+        let level: CGFloat = standIn ? 0.55 : 0.78
+        m.baseColor = .init(tint: NSColor(calibratedWhite: selected ? level : level * 0.8, alpha: 1))
+        m.metallic = .init(floatLiteral: standIn ? 0.3 : 0.9)
+        m.roughness = .init(floatLiteral: 0.35)
+        return m
     }
 
     /// The panel's entity, made or remade when its size changes. Its mesh is centred on its hinge

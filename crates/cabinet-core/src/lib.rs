@@ -10,6 +10,7 @@
 
 pub mod bom;
 pub mod build;
+pub mod cad;
 pub mod collisions;
 pub mod corner;
 pub mod cutlist;

@@ -9,9 +9,13 @@ pub mod boxes;
 pub mod client;
 pub mod design;
 pub mod emit;
+pub mod vendor;
 
 pub use client::Client;
-pub use emit::{Detail, Existing, emit_cabinet, find_existing, replace_cabinet};
+pub use emit::{
+    Detail, Existing, emit_cabinet, emit_cabinet_with, find_existing, hardware_inserts,
+    replace_cabinet,
+};
 
 /// The design metadata key this tool stores cabinet specs under (reverse-DNS, as SolidCraft
 /// requires for other tools' data).

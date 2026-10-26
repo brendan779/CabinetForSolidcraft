@@ -40,6 +40,17 @@ fn colour(role: PartRole) -> &'static str {
 /// The commands that build `list` inside a new component named after the cabinet, then return to
 /// the root component. `spec` is stored on the component so the cabinet can be edited later.
 pub fn emit_cabinet(list: &PartList, detail: Detail, spec: Option<&Value>) -> Vec<Value> {
+    emit_cabinet_with(list, detail, spec, &[])
+}
+
+/// [`emit_cabinet`], leaving out the stand-ins named in `real`: the hardware the supplier's own
+/// models replace ([`hardware_inserts`]).
+pub fn emit_cabinet_with(
+    list: &PartList,
+    detail: Detail,
+    spec: Option<&Value>,
+    real: &[String],
+) -> Vec<Value> {
     let mut cmds = vec![json!({
         "command": "component.create",
         "params": { "name": list.cabinet, "activate": true }
@@ -95,11 +106,19 @@ pub fn emit_cabinet(list: &PartList, detail: Detail, spec: Option<&Value>) -> Ve
         }
         cmds.extend(bore_batches(&list.operations));
     }
-    let (biscuits, hardware) = if detail == Detail::Design {
-        (Vec::new(), Vec::new())
-    } else {
-        let biscuits = biscuit_bodies(&list.cabinet, &list.operations, &mut cmds);
-        let hardware = stand_ins(list);
+    // Legs at every detail level, so a cabinet never floats; hinge and runner stand-ins only with
+    // machining. A stand-in is left out where the supplier's own model is put in (`real`).
+    let (biscuits, hardware) = {
+        let biscuits = if detail == Detail::Design {
+            Vec::new()
+        } else {
+            biscuit_bodies(&list.cabinet, &list.operations, &mut cmds)
+        };
+        let hardware: Vec<StandIn> = stand_ins(list)
+            .into_iter()
+            .filter(|s| detail != Detail::Design || s.name.contains(".Leg"))
+            .filter(|s| !real.contains(&s.name))
+            .collect();
         cmds.extend(hardware.iter().flat_map(stand_in));
         (biscuits, hardware)
     };
@@ -190,6 +209,7 @@ pub fn replace_cabinet(
     detail: Detail,
     spec: Option<&Value>,
     existing: Option<&Existing>,
+    real: &[String],
 ) -> Vec<Value> {
     let mut cmds = Vec::new();
     if existing.is_some() {
@@ -197,7 +217,7 @@ pub fn replace_cabinet(
             json!({ "command": "component.delete", "params": { "component": list.cabinet } }),
         );
     }
-    cmds.extend(emit_cabinet(list, detail, spec));
+    cmds.extend(emit_cabinet_with(list, detail, spec, real));
     if let Some(m) = existing.and_then(|e| e.moved) {
         // SolidCraft 0.22 grounds the first part of a design when it is made, and a grounded
         // placement refuses to move. Unground it explicitly (0.20 accepts this too).
@@ -212,6 +232,30 @@ pub fn replace_cabinet(
             "params": { "occurrence": format!("{}:1", list.cabinet), "space": "world", "matrix": m }
         }));
     }
+    cmds
+}
+
+/// The supplier models for a cabinet, inserted into its component in the cabinet's own frame:
+/// one command per model, each loading a file, so they are sent one at a time (a batch refuses
+/// file loads) after the cabinet's batch. Each component is named like the stand-in it
+/// replaces (`B01.Hinge1`).
+pub fn hardware_inserts(cabinet: &str, models: &[crate::vendor::VendorInstance]) -> Vec<Value> {
+    if models.is_empty() {
+        return Vec::new();
+    }
+    let mut cmds =
+        vec![json!({ "command": "component.activate", "params": { "component": cabinet } })];
+    for m in models {
+        cmds.push(json!({
+            "command": "file.insert_step",
+            "params": {
+                "path": m.step,
+                "name": m.name,
+                "matrix": m.transform.iter().map(|v| round(*v)).collect::<Vec<_>>(),
+            }
+        }));
+    }
+    cmds.push(json!({ "command": "component.activate", "params": { "component": "root" } }));
     cmds
 }
 
@@ -725,7 +769,13 @@ mod tests {
         let list = build_cabinet(&Cabinet::new("B01", CabinetKind::Base)).unwrap();
         let cmds = emit_cabinet(&list, Detail::Design, None);
         let boxes = cmds.iter().filter(|c| c["command"] == "solid.box").count();
-        assert_eq!(boxes, list.parts.len());
+        // A box per panel, and each leg's mounting plate: legs come at every detail level.
+        let legs = stand_ins(&list)
+            .iter()
+            .filter(|s| s.name.contains(".Leg"))
+            .count();
+        assert_eq!(legs, 4);
+        assert_eq!(boxes, list.parts.len() + legs);
         assert_eq!(cmds.first().unwrap()["command"], "component.create");
         assert_eq!(cmds.last().unwrap()["command"], "component.activate");
     }
@@ -806,9 +856,40 @@ mod tests {
     }
 
     #[test]
+    fn supplier_models_replace_their_stand_ins_and_go_in_one_insert_each() {
+        let list = build_cabinet(&Cabinet::new("B01", CabinetKind::Base)).unwrap();
+        let real = vec!["B01.Hinge1".to_string()];
+        let cmds = emit_cabinet_with(&list, Detail::Manufacturing, None, &real);
+        let names: Vec<_> = cmds
+            .iter()
+            .filter_map(|c| c["params"]["body_name"].as_str())
+            .collect();
+        assert!(!names.contains(&"B01.Hinge1"));
+        assert!(names.contains(&"B01.Hinge2"));
+        let model = crate::vendor::VendorInstance {
+            name: "B01.Hinge1".into(),
+            article: "71B3550".into(),
+            step: "/cad/71B3550.step".into(),
+            stl: "/cad/mesh/71B3550.stl".into(),
+            transform: [
+                1.0, 0.0, 0.0, 16.0, 0.0, 0.0, -1.0, 38.3, 0.0, 1.0, 0.0, 250.0,
+            ],
+        };
+        let ins = hardware_inserts("B01", &[model]);
+        assert_eq!(ins.len(), 3);
+        assert_eq!(ins[0]["params"]["component"], "B01");
+        assert_eq!(ins[1]["command"], "file.insert_step");
+        assert_eq!(ins[1]["params"]["name"], "B01.Hinge1");
+        assert_eq!(ins[2]["params"]["component"], "root");
+    }
+
+    #[test]
     fn manufacturing_detail_adds_a_named_grey_stand_in_per_hinge_and_runner() {
         let list = build_cabinet(&Cabinet::new("D01", CabinetKind::DrawerBank)).unwrap();
-        let expected = stand_ins(&list);
+        let expected: Vec<_> = stand_ins(&list)
+            .into_iter()
+            .filter(|s| !s.name.contains(".Leg"))
+            .collect();
         assert!(!expected.is_empty());
         let named = |cmds: &[Value]| {
             cmds.iter()
@@ -826,7 +907,8 @@ mod tests {
             .iter()
             .filter(|c| c["params"]["operation"] == "join")
             .count();
-        let shapes: usize = expected.iter().map(|s| s.shapes.len() - 1).sum();
+        // Every stand-in's extra shapes join onto its first, the legs' included.
+        let shapes: usize = stand_ins(&list).iter().map(|s| s.shapes.len() - 1).sum();
         assert_eq!(joins, shapes);
         assert!(cmds.iter().any(
             |c| c["command"] == "appearance.assign" && c["params"]["color"] == HARDWARE_COLOUR
@@ -1005,7 +1087,7 @@ mod tests {
         );
         let existing = find_existing(&l, "B01");
         assert_eq!(existing, None);
-        let cmds = replace_cabinet(&list, Detail::Design, None, existing.as_ref());
+        let cmds = replace_cabinet(&list, Detail::Design, None, existing.as_ref(), &[]);
         assert_eq!(cmds, emit_cabinet(&list, Detail::Design, None));
     }
 
@@ -1018,7 +1100,7 @@ mod tests {
         );
         let existing = find_existing(&l, "B01").unwrap();
         assert_eq!(existing.moved, None);
-        let cmds = replace_cabinet(&list, Detail::Design, None, Some(&existing));
+        let cmds = replace_cabinet(&list, Detail::Design, None, Some(&existing), &[]);
         assert_eq!(cmds[0]["command"], "component.delete");
         assert_eq!(cmds[0]["params"]["component"], "B01");
         assert_eq!(count(&cmds, "occurrence.move"), 0);
@@ -1033,7 +1115,7 @@ mod tests {
             json!([[0, 1, 0, 0], [-1, 0, 0, 0], [0, 0, 1, 0], [500, 10, 0, 1]]),
         );
         let existing = find_existing(&l, "B01").unwrap();
-        let cmds = replace_cabinet(&list, Detail::Design, None, Some(&existing));
+        let cmds = replace_cabinet(&list, Detail::Design, None, Some(&existing), &[]);
         let mv = cmds.last().unwrap();
         assert_eq!(mv["command"], "occurrence.move");
         assert_eq!(mv["params"]["occurrence"], "B01:1");

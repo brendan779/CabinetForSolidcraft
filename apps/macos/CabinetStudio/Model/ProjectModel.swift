@@ -757,6 +757,50 @@ final class ProjectModel {
         connection = ok ? .connected : .offline
     }
 
+    // MARK: Supplier hardware
+
+    /// What the supplier CAD folder holds, after `prepareSupplierCAD` (nil before, or without a
+    /// folder).
+    var supplierCAD: SupplierCadReport?
+    var isPreparingCAD = false
+    @ObservationIgnored private var hardwareCache: (key: [String], models: [HardwareModel], shapes: [StandInShape])?
+
+    /// Turns new supplier STEP files into meshes (once; later runs only check dates).
+    func prepareSupplierCAD() async {
+        guard let dir = Preferences.vendorCADDir?.path,
+              FileManager.default.isExecutableFile(atPath: Preferences.solidcraftCLI) else {
+            supplierCAD = nil
+            return
+        }
+        isPreparingCAD = true
+        let cli = Preferences.solidcraftCLI
+        let result = await Task.detached { () -> Result<SupplierCadReport, Error> in
+            Result { try prepareSupplierCad(vendorDir: dir, cli: cli) }
+        }.value
+        isPreparingCAD = false
+        switch result {
+        case .success(let r):
+            supplierCAD = r
+            hardwareCache = nil
+            if r.converted > 0 { status = "Prepared \(r.converted) supplier models" }
+        case .failure(let e):
+            lastError = "Supplier CAD: \(e)"
+        }
+    }
+
+    /// The job's hardware to draw: the supplier's own models where they are prepared, and stand-in
+    /// shapes (legs, and hinges or runners without a model).
+    func hardware() -> (models: [HardwareModel], shapes: [StandInShape]) {
+        let job = jobItems
+        let dir = Preferences.vendorCADDir?.path ?? ""
+        let key = job.itemsJson + ["placed"] + job.placed + [dir, "\(supplierCAD?.models ?? 0)"]
+        if let c = hardwareCache, c.key == key { return (c.models, c.shapes) }
+        let models = (try? hardwareModels(job: job, vendorDir: dir)) ?? []
+        let shapes = (try? standInShapes(job: job, vendorDir: dir)) ?? []
+        hardwareCache = (key, models, shapes)
+        return (models, shapes)
+    }
+
     func sendToSolidCraft() async {
         isSending = true
         lastError = nil
@@ -764,8 +808,9 @@ final class ProjectModel {
         let job = jobItems
         let level = detail.core
         let port = self.port
+        let vendor = Preferences.vendorCADDir?.path ?? ""
         let result = await Task.detached { () -> Result<String, Error> in
-            Result { try sendToSolidcraft(job: job, detail: level, port: port) }
+            Result { try sendToSolidcraft(job: job, detail: level, port: port, vendorDir: vendor) }
         }.value
         isSending = false
         switch result {

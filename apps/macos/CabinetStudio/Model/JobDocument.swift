@@ -50,6 +50,7 @@ struct JobWindow: View {
     let fileURL: URL?
     @State private var project: ProjectModel
     @Environment(\.undoManager) private var undoManager
+    @AppStorage(Preferences.vendorCADKey) private var vendorCAD = ""
 
     init(document: JobDocument, fileURL: URL?) {
         self.document = document
@@ -63,6 +64,7 @@ struct JobWindow: View {
             .focusedSceneValue(\.project, project)
             .frame(minWidth: 1100, minHeight: 700)
             .task { await project.checkConnection() }
+            .task(id: vendorCAD) { await project.prepareSupplierCAD() }
             .onAppear {
                 project.undoManager = undoManager
                 project.onEdit = { [document] data in document.update(data) }

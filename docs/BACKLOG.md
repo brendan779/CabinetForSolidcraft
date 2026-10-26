@@ -91,7 +91,7 @@ Priorities: **P0** blocks most other work · **P1** MVP · **P2** commercial par
 | BLUM-7b | split → HF, HK, HS, HL top done (c660427, c3ae68b, 8f77c7f); HK-S and HK-XS done (1b0e81f: parts and BOM; HK-XS's top hinges and every mechanism's side drilling are BLUM-7c); HKi done (f87997e, fully integrated) | M | AVENTOS HK top, HK-S, HK-XS, HF, HS, HL catalog rows (articles by power-factor range, drilling) | hardware rows with sources; BLUM-7a picks articles from them |
 | BLUM-7c | blocked (owner 2026-10-26: drilling waits for the Blum CAD, like HF top) | M | AVENTOS drilling: mechanism side holes (HK top p.48, HK-S p.57, HK-XS p.64, HF p.24) and HK-XS's hinges along the top (cups in the front, plates under the top panel) | holes on side and front sheets |
 | BLUM-8 | done (05f6929) | S | TIP-ON / SERVO-DRIVE options for handleless fronts | option + BOM |
-| BLUM-9 | 👤 needs-human (until STEP files exist in vendor-cad/blum/; see BLUM-CAD-1) | M | Import the owner's Blum STEP files from `vendor-cad/blum/` as linked components (`component.insert_design` after STEP → .solidcraft conversion) in place of stand-ins | a hinge renders with the real Blum model |
+| BLUM-9 | done (this commit) | M | Import the owner's Blum STEP files from `vendor-cad/blum/`: converted once to meshes (`solidcraft-cli`), matched by article, drawn in the viewport and inserted into SolidCraft (`file.insert_step`) in place of stand-ins | a hinge renders with the real Blum model |
 | BLUM-10 | done (fbb3804) | M | Parametric stand-in models (hinge cup + arm, plate, runner, box side) emitted as bodies | visible in Manufacturing detail |
 
 | BLUM-11 | done (716fbda) | S | Facts-only `docs/blum/webcodes.csv` (code, product, printed pages); no catalogue text beyond product names | committed |
@@ -394,6 +394,7 @@ Agents append one line per session: date, items touched, outcome.
 - 2026-10-26b (night) — P2-4 (3b4c426): cornice and light rail run items.
 - 2026-10-26b (night) — BENCH-3e (f4458e2): rounded benchtop ends (new Round operation).
 - 2026-10-26b (night) — DATA-6b (baa088b): Easycraft Contours and Ikara lining boards.
+- 2026-10-27 — BLUM-9 done: supplier STEP files become meshes in `vendor-cad/<brand>/mesh/` (Settings › Folders › Prepare Now, or on job open); hinges, plates, runners and drawer sides are placed from Blum's frame and drawn in the viewport (new Hardware toggle) and sent to SolidCraft at Manufacturing/Exact detail. Legs + plinth cabinets now stand on leg stand-ins (HAF-1 swaps in the AXILO model once downloaded). Notched sides are drawn notched and get a kick board between the sides; kick boards stay visible with Fronts hidden.
 - 2026-10-26b (night) — BLUM-16 part (05a94e9): AMBIA-LINE wood design.
 - 2026-10-26b (night) — BLUM-16 part (e865068): CABLOXX drawer lock.
 - 2026-10-26b (night) — STYLE-1 part (73fa4bc): arched tops on slab doors (new Arch operation).

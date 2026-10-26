@@ -1,6 +1,7 @@
 //! The macOS app's view of the Rust core. Cabinets cross the boundary as JSON (the same JSON
 //! stored in SolidCraft designs), results as small typed records the SwiftUI views draw directly.
 
+use cabinet_core::cad::cad_placements;
 use cabinet_core::cutlist::{cut_list, to_csv};
 use cabinet_core::model::BoardSlot;
 use cabinet_core::project::Piece;
@@ -9,7 +10,8 @@ use cabinet_core::{
     build_run, laid_out,
 };
 use solidcraft_bridge::boxes::{cuboid, selected_bodies};
-use solidcraft_bridge::{Client, Detail, find_existing, replace_cabinet};
+use solidcraft_bridge::{Client, Detail, find_existing, hardware_inserts, replace_cabinet, vendor};
+use std::path::Path;
 
 uniffi::setup_scaffolding!();
 
@@ -53,6 +55,10 @@ pub struct PanelBox {
     pub board: String,
     /// The axis the decor's grain runs along in the cabinet frame (`x`, `y`, `z`), or empty.
     pub grain: String,
+    /// A toe-kick notch cut through the front-bottom corner (a side running to the floor): how
+    /// deep from the front and how high from the bottom. Zero without one.
+    pub notch_depth: f64,
+    pub notch_height: f64,
 }
 
 #[derive(uniffi::Record)]
@@ -420,11 +426,30 @@ fn summary(list: PartList) -> BuildSummary {
             ("right".into(), hi, front)
         })
     };
+    // A toe-kick notch cut right through a part's front-bottom corner, as (back y, top z).
+    let notch = |p: &cabinet_core::Part| {
+        list.operations.iter().find_map(|o| match o {
+            Operation::Groove { part, bounds }
+                if *part == p.name
+                    && bounds.size.x >= p.bounds.size.x - 1e-6
+                    && (bounds.min.y - p.bounds.min.y).abs() < 1e-6
+                    && (bounds.min.z - p.bounds.min.z).abs() < 1e-6
+                    && bounds.max().z < p.bounds.max().z
+                    && bounds.max().y < p.bounds.max().y =>
+            {
+                Some((bounds.max().y, bounds.max().z))
+            }
+            _ => None,
+        })
+    };
     let mut panels: Vec<PanelBox> = list
         .parts
         .iter()
         .map(|p| {
             let (hinged, hinge_x, hinge_y) = hinge(&door_of(p)).unwrap_or_default();
+            let (notch_depth, notch_height) = notch(p)
+                .map(|(y, z)| (y - p.bounds.min.y, z - p.bounds.min.z))
+                .unwrap_or_default();
             PanelBox {
                 name: p.name.clone(),
                 role: p.role.label().to_string(),
@@ -443,6 +468,8 @@ fn summary(list: PartList) -> BuildSummary {
                     .grain_axis
                     .map(|a| format!("{a:?}").to_lowercase())
                     .unwrap_or_default(),
+                notch_depth,
+                notch_height,
             }
         })
         .collect();
@@ -555,6 +582,8 @@ fn summary(list: PartList) -> BuildSummary {
             hinge_y,
             board: format!("handle:{finish}"),
             grain: String::new(),
+            notch_depth: 0.0,
+            notch_height: 0.0,
         });
     }
     BuildSummary {
@@ -1324,10 +1353,173 @@ pub fn solidcraft_reachable(port: u16) -> bool {
         .is_ok()
 }
 
-/// Builds the cabinets in the running SolidCraft. Blocking: call it off the main thread.
-/// Cabinets already in the design (same component name) are replaced in place.
+/// What [`prepare_supplier_cad`] found and did.
+#[derive(uniffi::Record)]
+pub struct SupplierCadReport {
+    pub models: u32,
+    pub converted: u32,
+    /// Articles with a model, sorted.
+    pub articles: Vec<String>,
+}
+
+/// Turns the STEP files under `vendor_dir` into meshes the app can draw, with SolidCraft's
+/// command-line tool at `cli`. Converts only new or changed files. Blocking.
 #[uniffi::export]
-pub fn send_to_solidcraft(job: JobItems, detail: String, port: u16) -> Result<String, CoreError> {
+pub fn prepare_supplier_cad(
+    vendor_dir: String,
+    cli: String,
+) -> Result<SupplierCadReport, CoreError> {
+    let (models, converted) = vendor::prepare(Path::new(&vendor_dir), Path::new(&cli))
+        .map_err(|e| invalid(e.to_string()))?;
+    let mut articles: Vec<String> = models.iter().map(|m| m.article.clone()).collect();
+    articles.sort();
+    articles.dedup();
+    Ok(SupplierCadReport {
+        models: models.len() as u32,
+        converted: converted as u32,
+        articles,
+    })
+}
+
+/// A supplier model to draw: its mesh file and where it goes, model mm → design mm, row-major
+/// 3 × 4.
+#[derive(uniffi::Record)]
+pub struct HardwareModel {
+    pub name: String,
+    pub article: String,
+    pub mesh: String,
+    pub transform: Vec<f64>,
+}
+
+/// The supplier models for every item of the job that has one prepared under `vendor_dir`.
+#[uniffi::export]
+pub fn hardware_models(job: JobItems, vendor_dir: String) -> Result<Vec<HardwareModel>, CoreError> {
+    let Some(index) = vendor::load_index(Path::new(&vendor_dir)) else {
+        return Ok(Vec::new());
+    };
+    let mut out = Vec::new();
+    for (list, _) in job_lists(&job)? {
+        for m in vendor::resolve(&cad_placements(&list), &index) {
+            out.push(HardwareModel {
+                name: m.name,
+                article: m.article,
+                mesh: m.stl.display().to_string(),
+                transform: m.transform.to_vec(),
+            });
+        }
+    }
+    Ok(out)
+}
+
+/// A triangle mesh in model mm: three positions and three normals per triangle.
+#[derive(uniffi::Record)]
+pub struct MeshData {
+    pub positions: Vec<f32>,
+    pub normals: Vec<f32>,
+}
+
+#[uniffi::export]
+pub fn load_mesh(path: String) -> Result<MeshData, CoreError> {
+    let m = vendor::load_stl(Path::new(&path)).map_err(|e| invalid(e.to_string()))?;
+    Ok(MeshData {
+        positions: m.positions,
+        normals: m.normals,
+    })
+}
+
+/// One solid of a stand-in, for the viewport: a box, or a cylinder from `base` along `axis`
+/// (0 = x, 1 = y, 2 = z) towards + when `positive`.
+#[derive(uniffi::Record)]
+pub struct StandInShape {
+    pub name: String,
+    pub item: String,
+    pub cylinder: bool,
+    pub x: f64,
+    pub y: f64,
+    pub z: f64,
+    pub width: f64,
+    pub depth: f64,
+    pub height: f64,
+    pub axis: u8,
+    pub positive: bool,
+    pub diameter: f64,
+    pub length: f64,
+}
+
+/// The stand-in shapes of the job's hardware (legs, and hinges and runners), except those whose
+/// supplier model `hardware_models` returns for `vendor_dir`.
+#[uniffi::export]
+pub fn stand_in_shapes(job: JobItems, vendor_dir: String) -> Result<Vec<StandInShape>, CoreError> {
+    use cabinet_core::geom::Axis;
+    use cabinet_core::standins::{Shape, stand_ins};
+    let index = vendor::load_index(Path::new(&vendor_dir)).unwrap_or_default();
+    let mut out = Vec::new();
+    for (list, _) in job_lists(&job)? {
+        let real: std::collections::HashSet<String> =
+            vendor::resolve(&cad_placements(&list), &index)
+                .into_iter()
+                .map(|m| m.name)
+                .collect();
+        for s in stand_ins(&list) {
+            // A stand-in hinge also covers its plate; runners are named per hand.
+            if real.contains(&s.name) {
+                continue;
+            }
+            for shape in &s.shapes {
+                let mut r = StandInShape {
+                    name: s.name.clone(),
+                    item: s.item.clone(),
+                    cylinder: false,
+                    x: 0.0,
+                    y: 0.0,
+                    z: 0.0,
+                    width: 0.0,
+                    depth: 0.0,
+                    height: 0.0,
+                    axis: 2,
+                    positive: true,
+                    diameter: 0.0,
+                    length: 0.0,
+                };
+                match shape {
+                    Shape::Box(b) => {
+                        (r.x, r.y, r.z) = (b.min.x, b.min.y, b.min.z);
+                        (r.width, r.depth, r.height) = (b.size.x, b.size.y, b.size.z);
+                    }
+                    Shape::Cylinder {
+                        base,
+                        axis,
+                        diameter,
+                        height,
+                    } => {
+                        r.cylinder = true;
+                        (r.x, r.y, r.z) = (base.x, base.y, base.z);
+                        r.axis = match axis.axis {
+                            Axis::X => 0,
+                            Axis::Y => 1,
+                            Axis::Z => 2,
+                        };
+                        r.positive = axis.positive;
+                        (r.diameter, r.length) = (*diameter, *height);
+                    }
+                }
+                out.push(r);
+            }
+        }
+    }
+    Ok(out)
+}
+
+/// Builds the cabinets in the running SolidCraft. Blocking: call it off the main thread.
+/// Cabinets already in the design (same component name) are replaced in place. Beyond Design
+/// detail, hardware with a prepared supplier model under `vendor_dir` goes in as that model.
+#[uniffi::export]
+pub fn send_to_solidcraft(
+    job: JobItems,
+    detail: String,
+    port: u16,
+    vendor_dir: String,
+) -> Result<String, CoreError> {
     let sc = |e: solidcraft_bridge::Error| CoreError::SolidCraft {
         message: e.to_string(),
     };
@@ -1338,6 +1530,8 @@ pub fn send_to_solidcraft(job: JobItems, detail: String, port: u16) -> Result<St
         other => return Err(invalid(format!("unknown detail level {other}"))),
     };
     let mut client = Client::connect(port).map_err(sc)?;
+    let vendor_path = Path::new(&vendor_dir);
+    let index = vendor::load_index(vendor_path);
     let mut report = Vec::new();
     for (list, cab) in job_lists(&job)? {
         // One batch replaces an earlier build of this item and keeps it where the user moved it
@@ -1346,13 +1540,35 @@ pub fn send_to_solidcraft(job: JobItems, detail: String, port: u16) -> Result<St
         let spec = cab
             .map(|c| serde_json::to_value(&c).map_err(invalid))
             .transpose()?;
-        let cmds = replace_cabinet(&list, detail, spec.as_ref(), existing.as_ref());
+        let models = match (&index, detail) {
+            (Some(index), Detail::Manufacturing | Detail::Exact) => {
+                vendor::resolve(&cad_placements(&list), index)
+            }
+            _ => Vec::new(),
+        };
+        let real: Vec<String> = models.iter().map(|m| m.name.clone()).collect();
+        let cmds = replace_cabinet(&list, detail, spec.as_ref(), existing.as_ref(), &real);
         let r = client.batch(&cmds).map_err(sc)?;
+        // Supplier models load files, which a batch refuses: one request each.
+        for c in hardware_inserts(&list.cabinet, &models) {
+            client
+                .execute_reading(
+                    c["command"].as_str().unwrap_or_default(),
+                    c["params"].clone(),
+                    &[vendor_path],
+                )
+                .map_err(sc)?;
+        }
         report.push(format!(
-            "{}: {} commands in {:.1} s",
+            "{}: {} commands in {:.1} s{}",
             list.cabinet,
             cmds.len(),
-            r["total_ms"].as_f64().unwrap_or(0.0) / 1000.0
+            r["total_ms"].as_f64().unwrap_or(0.0) / 1000.0,
+            if models.is_empty() {
+                String::new()
+            } else {
+                format!(", {} supplier models", models.len())
+            }
         ));
     }
     Ok(report.join("\n"))
@@ -1749,6 +1965,30 @@ mod tests {
                 .iter()
                 .filter(|p| p.role == "Left side")
                 .all(|p| p.hinged.is_empty())
+        );
+    }
+
+    #[test]
+    fn notched_sides_carry_their_notch_once_each() {
+        let mut cab = Cabinet::new("B01", cabinet_core::CabinetKind::Base);
+        cab.standard.toe_kick = cabinet_core::model::ToeKick::IntegratedNotch;
+        let sum = summary(cabinet_core::build_cabinet(&cab).unwrap());
+        let sides: Vec<&PanelBox> = sum
+            .panels
+            .iter()
+            .filter(|p| p.role.ends_with("side"))
+            .collect();
+        assert_eq!(sides.len(), 2);
+        for p in sides {
+            assert_eq!(p.z, 0.0);
+            assert_eq!(p.notch_depth, cab.standard.toe_kick_setback);
+            assert_eq!(p.notch_height, cab.standard.toe_kick_height);
+        }
+        assert!(
+            sum.panels
+                .iter()
+                .filter(|p| !p.role.ends_with("side"))
+                .all(|p| p.notch_height == 0.0)
         );
     }
 

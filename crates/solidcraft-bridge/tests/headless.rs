@@ -90,9 +90,11 @@ fn resending_a_moved_cabinet_keeps_it_where_the_user_moved_it() {
         Detail::Design,
         None,
         Some(&existing),
+        &[],
     ));
     let after = bounds(&cli, "resent", &resent);
-    assert_eq!(before.len(), list.parts.len());
+    // Every panel, plus the legs it stands on.
+    assert!(before.len() >= list.parts.len());
     assert_eq!(after, before);
 }
 
@@ -350,7 +352,11 @@ fn hinges_and_runners_show_as_one_stand_in_body_each_where_the_core_puts_them() 
             }
         }
         let names = |prefix: &str| built.iter().filter(|(n, _)| n.contains(prefix)).count();
-        assert_eq!(names(".Hinge") + names(".Runner"), expected.len(), "{id}");
+        assert_eq!(
+            names(".Hinge") + names(".Runner") + names(".Leg"),
+            expected.len(),
+            "{id}"
+        );
     }
 }
 

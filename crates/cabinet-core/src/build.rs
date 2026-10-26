@@ -3200,15 +3200,21 @@ impl<'a> Builder<'a> {
     fn plinth(&mut self) {
         let cab = self.cab;
         let s = &cab.standard;
-        if !cab.has_toe_kick() || s.toe_kick == ToeKick::IntegratedNotch {
+        if !cab.has_toe_kick() {
             return;
         }
         let ft = s.front_thickness;
         let (w, kick, sb) = (cab.width, s.toe_kick_height, s.toe_kick_setback);
+        // With notched sides the kick board fits between the sides, behind the notch.
+        let (x0, x1) = if s.toe_kick == ToeKick::IntegratedNotch {
+            (s.carcass_thickness, w - s.carcass_thickness)
+        } else {
+            (0.0, w)
+        };
         self.add(
             PartRole::Plinth,
             None,
-            aabb(0.0, sb, 0.0, w, sb + ft, kick),
+            aabb(x0, sb, 0.0, x1, sb + ft, kick),
             Axis::Y,
             Axis::X,
             EdgeBanding {
@@ -3245,6 +3251,27 @@ mod tests {
 
     fn base() -> Cabinet {
         Cabinet::new("B01", CabinetKind::Base)
+    }
+
+    #[test]
+    fn notched_sides_get_a_kick_board_between_them_behind_the_notch() {
+        let mut cab = base();
+        cab.standard.toe_kick = ToeKick::IntegratedNotch;
+        let list = build_cabinet(&cab).unwrap();
+        let t = cab.standard.carcass_thickness;
+        let kick = list
+            .parts
+            .iter()
+            .find(|p| p.role == PartRole::Plinth)
+            .expect("a kick board");
+        assert_eq!(kick.bounds.min.x, t);
+        assert_eq!(kick.bounds.max().x, cab.width - t);
+        assert_eq!(kick.bounds.min.y, cab.standard.toe_kick_setback);
+        let clashes: Vec<_> = overlapping(&list)
+            .into_iter()
+            .filter(|(a, b)| *a == kick.name || *b == kick.name)
+            .collect();
+        assert!(clashes.is_empty(), "{clashes:?}");
     }
 
     fn overlapping(list: &PartList) -> Vec<(String, String)> {

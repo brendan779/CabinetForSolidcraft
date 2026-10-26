@@ -49,6 +49,16 @@ enum Preferences {
         return UInt16(exactly: p == 0 ? defaultPort : p) ?? UInt16(defaultPort)
     }
 
+    /// The supplier CAD folder chosen in Settings (Blum and Häfele STEP files), if it exists.
+    static var vendorCADDir: URL? {
+        guard let path = UserDefaults.standard.string(forKey: vendorCADKey), !path.isEmpty,
+              FileManager.default.fileExists(atPath: path) else { return nil }
+        return URL(fileURLWithPath: path, isDirectory: true)
+    }
+
+    /// SolidCraft's command-line tool, which turns supplier STEP files into meshes.
+    static let solidcraftCLI = "/Applications/SolidCraft.app/Contents/MacOS/solidcraft-cli"
+
     /// The board and hardware catalog: the folder chosen in Settings, or the one inside the app.
     static var catalogDir: URL? {
         if let path = UserDefaults.standard.string(forKey: catalogKey), !path.isEmpty,
@@ -137,6 +147,8 @@ struct JobSettings: View {
 struct FolderSettings: View {
     @AppStorage(Preferences.catalogKey) private var catalog = ""
     @AppStorage(Preferences.vendorCADKey) private var vendorCAD = ""
+    @State private var preparing = false
+    @State private var report = ""
 
     var body: some View {
         Form {
@@ -144,8 +156,42 @@ struct FolderSettings: View {
                    note: "A folder with boards/ and hardware/ like the repository's catalog. Jobs opened after a change use it.")
             folder("Supplier CAD", path: $vendorCAD, empty: "Not set",
                    note: "Blum and Häfele STEP files you downloaded (vendor-cad/). Used to replace stand-in hardware with the real models.")
+            if !vendorCAD.isEmpty {
+                LabeledContent("Models") {
+                    HStack {
+                        if preparing {
+                            ProgressView().controlSize(.small)
+                            Text("Preparing…").foregroundStyle(.secondary)
+                        } else {
+                            Text(report).foregroundStyle(.secondary)
+                        }
+                        Button("Prepare Now") { Task { await prepare() } }
+                            .disabled(preparing)
+                            .help("Convert new STEP files into meshes for the viewport (SolidCraft's command-line tool)")
+                    }
+                }
+            }
         }
+        .task(id: vendorCAD) { await prepare() }
         .padding(20)
+    }
+
+    private func prepare() async {
+        guard !vendorCAD.isEmpty else { return }
+        guard FileManager.default.isExecutableFile(atPath: Preferences.solidcraftCLI) else {
+            report = "Needs SolidCraft in Applications"
+            return
+        }
+        preparing = true
+        let dir = vendorCAD, cli = Preferences.solidcraftCLI
+        let result = await Task.detached { Result { try prepareSupplierCad(vendorDir: dir, cli: cli) } }.value
+        preparing = false
+        switch result {
+        case .success(let r):
+            report = "\(r.models) models for \(r.articles.count) articles" + (r.converted > 0 ? ", \(r.converted) new" : "")
+        case .failure(let e):
+            report = "Could not prepare: \(e)"
+        }
     }
 
     private func folder(_ title: String, path: Binding<String>, empty: String, note: String) -> some View {

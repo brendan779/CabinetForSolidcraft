@@ -27,6 +27,13 @@ const BOX_SIDE_THICKNESS: f64 = 10.0;
 const WOOD_RUNNER_WIDTH: f64 = 20.0;
 const BOX_SIDE_TOP_GAP: f64 = 40.0;
 const BOX_SIDE_MIN_HEIGHT: f64 = 40.0;
+/// An adjustable plinth leg (Häfele AXILO 78 class): foot, column and mounting plate. Drawn, not
+/// ordered: the owner's Häfele documents give the real sizes (HAF-1).
+const LEG_FOOT_DIAMETER: f64 = 50.0;
+const LEG_FOOT_HEIGHT: f64 = 8.0;
+const LEG_COLUMN_DIAMETER: f64 = 30.0;
+const LEG_PLATE: f64 = 60.0;
+const LEG_PLATE_THICKNESS: f64 = 4.0;
 
 /// One solid of a stand-in.
 #[derive(Clone, Debug, PartialEq)]
@@ -94,13 +101,22 @@ impl StandIn {
 /// Stand-ins for the hinges and drawer runners in `list`, in the order of its hardware.
 pub fn stand_ins(list: &PartList) -> Vec<StandIn> {
     let mut out = Vec::new();
-    let (mut hinges, mut drawers) = (0, 0);
+    let (mut hinges, mut drawers, mut legs) = (0, 0, 0);
     for h in &list.hardware {
         if h.item.starts_with("blum.clip-top") {
             if let Some(shapes) = hinge(list, h) {
                 hinges += 1;
                 out.push(StandIn {
                     name: format!("{}.Hinge{hinges}", list.cabinet),
+                    item: h.item.clone(),
+                    shapes,
+                });
+            }
+        } else if h.item.starts_with("hafele.leg") {
+            if let Some(shapes) = leg(list, h) {
+                legs += 1;
+                out.push(StandIn {
+                    name: format!("{}.Leg{legs}", list.cabinet),
                     item: h.item.clone(),
                     shapes,
                 });
@@ -120,6 +136,39 @@ pub fn stand_ins(list: &PartList) -> Vec<StandIn> {
         }
     }
     out
+}
+
+/// An adjustable leg from the floor to the carcass bottom: a foot, a column and a mounting plate
+/// under the bottom panel.
+fn leg(list: &PartList, h: &HardwarePlacement) -> Option<Vec<Shape>> {
+    let bottom = list.part(&h.part)?.bounds.min.z;
+    if bottom <= LEG_FOOT_HEIGHT + LEG_PLATE_THICKNESS {
+        return None;
+    }
+    let (x, y) = (h.at.x, h.at.y);
+    let up = Dir::new(Axis::Z, true);
+    Some(vec![
+        Shape::Cylinder {
+            base: Vec3::new(x, y, 0.0),
+            axis: up,
+            diameter: LEG_FOOT_DIAMETER,
+            height: LEG_FOOT_HEIGHT,
+        },
+        Shape::Cylinder {
+            base: Vec3::new(x, y, LEG_FOOT_HEIGHT),
+            axis: up,
+            diameter: LEG_COLUMN_DIAMETER,
+            height: bottom - LEG_FOOT_HEIGHT - LEG_PLATE_THICKNESS,
+        },
+        Shape::Box(boxed(
+            Vec3::new(
+                x - LEG_PLATE / 2.0,
+                y - LEG_PLATE / 2.0,
+                bottom - LEG_PLATE_THICKNESS,
+            ),
+            Vec3::new(x + LEG_PLATE / 2.0, y + LEG_PLATE / 2.0, bottom),
+        )),
+    ])
 }
 
 fn side(list: &PartList, role: PartRole) -> Option<&Part> {
@@ -302,7 +351,10 @@ mod tests {
             .iter()
             .filter(|h| h.item.starts_with("blum.clip-top"))
             .count();
-        let s = stand_ins(&list);
+        let s: Vec<_> = stand_ins(&list)
+            .into_iter()
+            .filter(|s| s.name.contains("Hinge"))
+            .collect();
         assert_eq!(s.len(), hinges);
         assert_eq!(s[0].name, "B01.Hinge1");
         let side = list.part("B01.RightSide").unwrap();
@@ -325,7 +377,10 @@ mod tests {
     fn a_drawer_bank_gets_a_runner_each_side_of_every_drawer_inside_the_carcass() {
         let list = build_cabinet(&Cabinet::new("D01", CabinetKind::DrawerBank)).unwrap();
         let drawers = list.by_role(PartRole::DrawerFront).count();
-        let s = stand_ins(&list);
+        let s: Vec<_> = stand_ins(&list)
+            .into_iter()
+            .filter(|s| s.name.contains("Runner"))
+            .collect();
         assert_eq!(s.len(), 2 * drawers);
         assert_eq!(s[1].name, "D01.Runner1R");
         let (l, r) = (
@@ -382,6 +437,33 @@ mod tests {
     fn an_open_cabinet_has_no_stand_ins() {
         let mut cab = Cabinet::new("B01", CabinetKind::Base);
         cab.fronts = FrontLayout::Open;
-        assert!(stand_ins(&build_cabinet(&cab).unwrap()).is_empty());
+        assert!(
+            stand_ins(&build_cabinet(&cab).unwrap())
+                .iter()
+                .all(|s| s.name.contains("Leg"))
+        );
+    }
+
+    #[test]
+    fn base_cabinets_on_legs_stand_on_the_floor_and_reach_the_carcass_bottom() {
+        let list = build_cabinet(&Cabinet::new("B01", CabinetKind::Base)).unwrap();
+        let bottom = list.part("B01.Bottom").unwrap().bounds.min.z;
+        let legs: Vec<_> = stand_ins(&list)
+            .into_iter()
+            .filter(|s| s.name.contains("Leg"))
+            .collect();
+        assert_eq!(legs.len(), 4);
+        for l in &legs {
+            let b = l.bounds();
+            assert!(b.min.z.abs() < 1e-9, "{} starts at the floor", l.name);
+            assert!(
+                (b.max().z - bottom).abs() < 1e-9,
+                "{} reaches the bottom",
+                l.name
+            );
+        }
+        // Wall cabinets hang: no legs.
+        let wall = build_cabinet(&Cabinet::new("W01", CabinetKind::Wall)).unwrap();
+        assert!(!stand_ins(&wall).iter().any(|s| s.name.contains("Leg")));
     }
 }

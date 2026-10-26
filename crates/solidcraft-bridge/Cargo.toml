@@ -19,3 +19,6 @@ name = "perf_probe"
 
 [lints]
 workspace = true
+
+[[example]]
+name = "cad_preview"
