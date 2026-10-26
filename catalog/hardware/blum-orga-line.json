@@ -1,0 +1,2112 @@
+{
+  "brand": "Blum",
+  "website": "https://www.blum.com",
+  "notes": "ORGA-LINE for TANDEMBOX antaro drawers (heights M and K) from the Blum Catalogue and technical manual 2024/2025, printed pages 556 (container sets), 557 (utensil divider sets) and 558 (combo sets): the sets Blum lists by cabinet width KB (275-1200) and nominal length NL (450, 500, 550). Each table gives how many of one piece go in a cabinet from its row's width up to the next row's. Individual sets, high fronted pull-outs, SPACE CORNER and kitchen accessories are not recorded. Not verified by a person.",
+  "items": [
+    {
+      "id": "blum.orga-line",
+      "brand": "Blum",
+      "article": "ORGA-LINE",
+      "family": "ORGA-LINE",
+      "variant": "inner dividing system for TANDEMBOX antaro drawers and inner pull-outs, heights M and K",
+      "kind": "drawer_system",
+      "parameters": {
+        "min_cabinet_width": 275,
+        "max_cabinet_width": 1200
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.556, short URL www.blum.com/a530",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      },
+      "tables": {
+        "container_bi1": {
+          "rows_name": "cabinet_width",
+          "cols_name": "any",
+          "rows": [
+            275,
+            300,
+            400,
+            550,
+            600,
+            601,
+            700,
+            800,
+            900,
+            901,
+            1000,
+            1100,
+            1200,
+            1201
+          ],
+          "cols": [
+            0
+          ],
+          "values": [
+            [
+              1.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              1.0
+            ],
+            [
+              0.0
+            ],
+            [
+              1.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ]
+          ],
+          "note": "p.556: container sets, BI1 pieces from this cabinet width up to the next row"
+        },
+        "container_bi2": {
+          "rows_name": "cabinet_width",
+          "cols_name": "any",
+          "rows": [
+            275,
+            300,
+            400,
+            550,
+            600,
+            601,
+            700,
+            800,
+            900,
+            901,
+            1000,
+            1100,
+            1200,
+            1201
+          ],
+          "cols": [
+            0
+          ],
+          "values": [
+            [
+              0.0
+            ],
+            [
+              1.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              1.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ]
+          ],
+          "note": "p.556: container sets, BI2 pieces from this cabinet width up to the next row"
+        },
+        "container_bi3": {
+          "rows_name": "cabinet_width",
+          "cols_name": "any",
+          "rows": [
+            275,
+            300,
+            400,
+            550,
+            600,
+            601,
+            700,
+            800,
+            900,
+            901,
+            1000,
+            1100,
+            1200,
+            1201
+          ],
+          "cols": [
+            0
+          ],
+          "values": [
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              1.0
+            ],
+            [
+              1.0
+            ],
+            [
+              0.0
+            ],
+            [
+              1.0
+            ],
+            [
+              1.0
+            ],
+            [
+              2.0
+            ],
+            [
+              0.0
+            ],
+            [
+              1.0
+            ],
+            [
+              0.0
+            ],
+            [
+              2.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ]
+          ],
+          "note": "p.556: container sets, BI3 pieces from this cabinet width up to the next row"
+        },
+        "container_fi2": {
+          "rows_name": "cabinet_width",
+          "cols_name": "any",
+          "rows": [
+            275,
+            300,
+            400,
+            550,
+            600,
+            601,
+            700,
+            800,
+            900,
+            901,
+            1000,
+            1100,
+            1200,
+            1201
+          ],
+          "cols": [
+            0
+          ],
+          "values": [
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              1.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ]
+          ],
+          "note": "p.556: container sets, FI2 pieces from this cabinet width up to the next row"
+        },
+        "container_ki4": {
+          "rows_name": "cabinet_width",
+          "cols_name": "any",
+          "rows": [
+            275,
+            300,
+            400,
+            550,
+            600,
+            601,
+            700,
+            800,
+            900,
+            901,
+            1000,
+            1100,
+            1200,
+            1201
+          ],
+          "cols": [
+            0
+          ],
+          "values": [
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              1.0
+            ],
+            [
+              2.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ]
+          ],
+          "note": "p.556: container sets, KI4 pieces from this cabinet width up to the next row"
+        },
+        "container_ve12": {
+          "rows_name": "cabinet_width",
+          "cols_name": "any",
+          "rows": [
+            275,
+            300,
+            400,
+            550,
+            600,
+            601,
+            700,
+            800,
+            900,
+            901,
+            1000,
+            1100,
+            1200,
+            1201
+          ],
+          "cols": [
+            0
+          ],
+          "values": [
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              1.0
+            ],
+            [
+              0.0
+            ]
+          ],
+          "note": "p.556: container sets, VE12 pieces from this cabinet width up to the next row"
+        },
+        "container_ve60": {
+          "rows_name": "cabinet_width",
+          "cols_name": "any",
+          "rows": [
+            275,
+            300,
+            400,
+            550,
+            600,
+            601,
+            700,
+            800,
+            900,
+            901,
+            1000,
+            1100,
+            1200,
+            1201
+          ],
+          "cols": [
+            0
+          ],
+          "values": [
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              1.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ]
+          ],
+          "note": "p.556: container sets, VE60 pieces from this cabinet width up to the next row"
+        },
+        "container_ve90": {
+          "rows_name": "cabinet_width",
+          "cols_name": "any",
+          "rows": [
+            275,
+            300,
+            400,
+            550,
+            600,
+            601,
+            700,
+            800,
+            900,
+            901,
+            1000,
+            1100,
+            1200,
+            1201
+          ],
+          "cols": [
+            0
+          ],
+          "values": [
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              1.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ]
+          ],
+          "note": "p.556: container sets, VE90 pieces from this cabinet width up to the next row"
+        },
+        "utensil_bi1": {
+          "rows_name": "cabinet_width",
+          "cols_name": "any",
+          "rows": [
+            275,
+            350,
+            450,
+            600,
+            601,
+            700,
+            800,
+            900,
+            901,
+            1000,
+            1100,
+            1200,
+            1201
+          ],
+          "cols": [
+            0
+          ],
+          "values": [
+            [
+              1.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              1.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ]
+          ],
+          "note": "p.557: utensil sets, BI1 pieces from this cabinet width up to the next row"
+        },
+        "utensil_fi2": {
+          "rows_name": "cabinet_width",
+          "cols_name": "any",
+          "rows": [
+            275,
+            350,
+            450,
+            600,
+            601,
+            700,
+            800,
+            900,
+            901,
+            1000,
+            1100,
+            1200,
+            1201
+          ],
+          "cols": [
+            0
+          ],
+          "values": [
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              1.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              1.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ]
+          ],
+          "note": "p.557: utensil sets, FI2 pieces from this cabinet width up to the next row"
+        },
+        "utensil_fi3": {
+          "rows_name": "cabinet_width",
+          "cols_name": "any",
+          "rows": [
+            275,
+            350,
+            450,
+            600,
+            601,
+            700,
+            800,
+            900,
+            901,
+            1000,
+            1100,
+            1200,
+            1201
+          ],
+          "cols": [
+            0
+          ],
+          "values": [
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              1.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ]
+          ],
+          "note": "p.557: utensil sets, FI3 pieces from this cabinet width up to the next row"
+        },
+        "utensil_ki2": {
+          "rows_name": "cabinet_width",
+          "cols_name": "any",
+          "rows": [
+            275,
+            350,
+            450,
+            600,
+            601,
+            700,
+            800,
+            900,
+            901,
+            1000,
+            1100,
+            1200,
+            1201
+          ],
+          "cols": [
+            0
+          ],
+          "values": [
+            [
+              0.0
+            ],
+            [
+              1.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              1.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              2.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ]
+          ],
+          "note": "p.557: utensil sets, KI2 pieces from this cabinet width up to the next row"
+        },
+        "utensil_ki3": {
+          "rows_name": "cabinet_width",
+          "cols_name": "any",
+          "rows": [
+            275,
+            350,
+            450,
+            600,
+            601,
+            700,
+            800,
+            900,
+            901,
+            1000,
+            1100,
+            1200,
+            1201
+          ],
+          "cols": [
+            0
+          ],
+          "values": [
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              1.0
+            ],
+            [
+              1.0
+            ],
+            [
+              2.0
+            ],
+            [
+              0.0
+            ],
+            [
+              2.0
+            ],
+            [
+              0.0
+            ],
+            [
+              2.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ]
+          ],
+          "note": "p.557: utensil sets, KI3 pieces from this cabinet width up to the next row"
+        },
+        "utensil_vu12": {
+          "rows_name": "cabinet_width",
+          "cols_name": "any",
+          "rows": [
+            275,
+            350,
+            450,
+            600,
+            601,
+            700,
+            800,
+            900,
+            901,
+            1000,
+            1100,
+            1200,
+            1201
+          ],
+          "cols": [
+            0
+          ],
+          "values": [
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              1.0
+            ],
+            [
+              0.0
+            ]
+          ],
+          "note": "p.557: utensil sets, VU12 pieces from this cabinet width up to the next row"
+        },
+        "utensil_vu60": {
+          "rows_name": "cabinet_width",
+          "cols_name": "any",
+          "rows": [
+            275,
+            350,
+            450,
+            600,
+            601,
+            700,
+            800,
+            900,
+            901,
+            1000,
+            1100,
+            1200,
+            1201
+          ],
+          "cols": [
+            0
+          ],
+          "values": [
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              1.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ]
+          ],
+          "note": "p.557: utensil sets, VU60 pieces from this cabinet width up to the next row"
+        },
+        "utensil_vu90": {
+          "rows_name": "cabinet_width",
+          "cols_name": "any",
+          "rows": [
+            275,
+            350,
+            450,
+            600,
+            601,
+            700,
+            800,
+            900,
+            901,
+            1000,
+            1100,
+            1200,
+            1201
+          ],
+          "cols": [
+            0
+          ],
+          "values": [
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              1.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ]
+          ],
+          "note": "p.557: utensil sets, VU90 pieces from this cabinet width up to the next row"
+        },
+        "combo_bi1": {
+          "rows_name": "cabinet_width",
+          "cols_name": "any",
+          "rows": [
+            275,
+            350,
+            450,
+            601,
+            650,
+            751,
+            900,
+            1201
+          ],
+          "cols": [
+            0
+          ],
+          "values": [
+            [
+              1.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              1.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ]
+          ],
+          "note": "p.558: combo sets, BI1 pieces from this cabinet width up to the next row"
+        },
+        "combo_bi3": {
+          "rows_name": "cabinet_width",
+          "cols_name": "any",
+          "rows": [
+            275,
+            350,
+            450,
+            601,
+            650,
+            751,
+            900,
+            1201
+          ],
+          "cols": [
+            0
+          ],
+          "values": [
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              1.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ]
+          ],
+          "note": "p.558: combo sets, BI3 pieces from this cabinet width up to the next row"
+        },
+        "combo_ki2": {
+          "rows_name": "cabinet_width",
+          "cols_name": "any",
+          "rows": [
+            275,
+            350,
+            450,
+            601,
+            650,
+            751,
+            900,
+            1201
+          ],
+          "cols": [
+            0
+          ],
+          "values": [
+            [
+              0.0
+            ],
+            [
+              1.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              1.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ]
+          ],
+          "note": "p.558: combo sets, KI2 pieces from this cabinet width up to the next row"
+        },
+        "combo_ki3": {
+          "rows_name": "cabinet_width",
+          "cols_name": "any",
+          "rows": [
+            275,
+            350,
+            450,
+            601,
+            650,
+            751,
+            900,
+            1201
+          ],
+          "cols": [
+            0
+          ],
+          "values": [
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              1.0
+            ],
+            [
+              1.0
+            ],
+            [
+              0.0
+            ]
+          ],
+          "note": "p.558: combo sets, KI3 pieces from this cabinet width up to the next row"
+        },
+        "combo_ki4": {
+          "rows_name": "cabinet_width",
+          "cols_name": "any",
+          "rows": [
+            275,
+            350,
+            450,
+            601,
+            650,
+            751,
+            900,
+            1201
+          ],
+          "cols": [
+            0
+          ],
+          "values": [
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              1.0
+            ],
+            [
+              0.0
+            ]
+          ],
+          "note": "p.558: combo sets, KI4 pieces from this cabinet width up to the next row"
+        },
+        "combo_mi3": {
+          "rows_name": "cabinet_width",
+          "cols_name": "any",
+          "rows": [
+            275,
+            350,
+            450,
+            601,
+            650,
+            751,
+            900,
+            1201
+          ],
+          "cols": [
+            0
+          ],
+          "values": [
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              1.0
+            ],
+            [
+              1.0
+            ],
+            [
+              1.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ]
+          ],
+          "note": "p.558: combo sets, MI3 pieces from this cabinet width up to the next row"
+        }
+      }
+    },
+    {
+      "id": "blum.orga-line.bi1.450",
+      "brand": "Blum",
+      "article": "ZSI.450BI1N",
+      "family": "ORGA-LINE",
+      "variant": "BI1 insert set, NL 450",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 450
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.556, short URL www.blum.com/a530",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.orga-line.bi1.500",
+      "brand": "Blum",
+      "article": "ZSI.500BI1N",
+      "family": "ORGA-LINE",
+      "variant": "BI1 insert set, NL 500",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 500
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.556, short URL www.blum.com/a530",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.orga-line.bi1.550",
+      "brand": "Blum",
+      "article": "ZSI.550BI1N",
+      "family": "ORGA-LINE",
+      "variant": "BI1 insert set, NL 550",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 550
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.556, short URL www.blum.com/a530",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.orga-line.bi2.450",
+      "brand": "Blum",
+      "article": "ZSI.450BI2N",
+      "family": "ORGA-LINE",
+      "variant": "BI2 insert set, NL 450",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 450
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.556, short URL www.blum.com/a530",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.orga-line.bi2.500",
+      "brand": "Blum",
+      "article": "ZSI.500BI2N",
+      "family": "ORGA-LINE",
+      "variant": "BI2 insert set, NL 500",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 500
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.556, short URL www.blum.com/a530",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.orga-line.bi2.550",
+      "brand": "Blum",
+      "article": "ZSI.550BI2N",
+      "family": "ORGA-LINE",
+      "variant": "BI2 insert set, NL 550",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 550
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.556, short URL www.blum.com/a530",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.orga-line.bi3.450",
+      "brand": "Blum",
+      "article": "ZSI.450BI3N",
+      "family": "ORGA-LINE",
+      "variant": "BI3 insert set, NL 450",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 450
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.556, short URL www.blum.com/a530",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.orga-line.bi3.500",
+      "brand": "Blum",
+      "article": "ZSI.500BI3",
+      "family": "ORGA-LINE",
+      "variant": "BI3 insert set, NL 500",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 500
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.556, short URL www.blum.com/a530",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.orga-line.bi3.550",
+      "brand": "Blum",
+      "article": "ZSI.550BI3",
+      "family": "ORGA-LINE",
+      "variant": "BI3 insert set, NL 550",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 550
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.556, short URL www.blum.com/a530",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.orga-line.ki2.450",
+      "brand": "Blum",
+      "article": "ZSI.450KI2N",
+      "family": "ORGA-LINE",
+      "variant": "KI2 insert set, NL 450",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 450
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.557, short URL www.blum.com/a530",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.orga-line.ki2.500",
+      "brand": "Blum",
+      "article": "ZSI.500KI2N",
+      "family": "ORGA-LINE",
+      "variant": "KI2 insert set, NL 500",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 500
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.557, short URL www.blum.com/a530",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.orga-line.ki2.550",
+      "brand": "Blum",
+      "article": "ZSI.550KI2N",
+      "family": "ORGA-LINE",
+      "variant": "KI2 insert set, NL 550",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 550
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.557, short URL www.blum.com/a530",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.orga-line.ki3.450",
+      "brand": "Blum",
+      "article": "ZSI.450KI3N",
+      "family": "ORGA-LINE",
+      "variant": "KI3 insert set, NL 450",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 450
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.557, short URL www.blum.com/a530",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.orga-line.ki3.500",
+      "brand": "Blum",
+      "article": "ZSI.500KI3N",
+      "family": "ORGA-LINE",
+      "variant": "KI3 insert set, NL 500",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 500
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.557, short URL www.blum.com/a530",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.orga-line.ki3.550",
+      "brand": "Blum",
+      "article": "ZSI.550KI3N",
+      "family": "ORGA-LINE",
+      "variant": "KI3 insert set, NL 550",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 550
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.557, short URL www.blum.com/a530",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.orga-line.ki4.450",
+      "brand": "Blum",
+      "article": "ZSI.450KI4N",
+      "family": "ORGA-LINE",
+      "variant": "KI4 insert set, NL 450",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 450
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.556, short URL www.blum.com/a530",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.orga-line.ki4.500",
+      "brand": "Blum",
+      "article": "ZSI.500KI4",
+      "family": "ORGA-LINE",
+      "variant": "KI4 insert set, NL 500",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 500
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.556, short URL www.blum.com/a530",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.orga-line.ki4.550",
+      "brand": "Blum",
+      "article": "ZSI.550KI4",
+      "family": "ORGA-LINE",
+      "variant": "KI4 insert set, NL 550",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 550
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.556, short URL www.blum.com/a530",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.orga-line.fi2.450",
+      "brand": "Blum",
+      "article": "ZSI.450FI2N",
+      "family": "ORGA-LINE",
+      "variant": "FI2 insert set, NL 450",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 450
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.556, short URL www.blum.com/a530",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.orga-line.fi2.500",
+      "brand": "Blum",
+      "article": "ZSI.500FI2N",
+      "family": "ORGA-LINE",
+      "variant": "FI2 insert set, NL 500",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 500
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.556, short URL www.blum.com/a530",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.orga-line.fi2.550",
+      "brand": "Blum",
+      "article": "ZSI.550FI2N",
+      "family": "ORGA-LINE",
+      "variant": "FI2 insert set, NL 550",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 550
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.556, short URL www.blum.com/a530",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.orga-line.fi3.450",
+      "brand": "Blum",
+      "article": "ZSI.450FI3",
+      "family": "ORGA-LINE",
+      "variant": "FI3 insert set, NL 450",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 450
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.557, short URL www.blum.com/a530",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.orga-line.fi3.500",
+      "brand": "Blum",
+      "article": "ZSI.500FI3",
+      "family": "ORGA-LINE",
+      "variant": "FI3 insert set, NL 500",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 500
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.557, short URL www.blum.com/a530",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.orga-line.fi3.550",
+      "brand": "Blum",
+      "article": "ZSI.550FI3",
+      "family": "ORGA-LINE",
+      "variant": "FI3 insert set, NL 550",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 550
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.557, short URL www.blum.com/a530",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.orga-line.mi3.450",
+      "brand": "Blum",
+      "article": "ZSI.450MI3",
+      "family": "ORGA-LINE",
+      "variant": "MI3 insert set, NL 450",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 450
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.558, short URL www.blum.com/a530",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.orga-line.mi3.500",
+      "brand": "Blum",
+      "article": "ZSI.500MI3",
+      "family": "ORGA-LINE",
+      "variant": "MI3 insert set, NL 500",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 500
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.558, short URL www.blum.com/a530",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.orga-line.mi3.550",
+      "brand": "Blum",
+      "article": "ZSI.550MI3",
+      "family": "ORGA-LINE",
+      "variant": "MI3 insert set, NL 550",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 550
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.558, short URL www.blum.com/a530",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.orga-line.ve60.450",
+      "brand": "Blum",
+      "article": "ZSI.60VEI4",
+      "family": "ORGA-LINE",
+      "variant": "full width container set for a 600 mm cabinet, NL 450",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 450
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.556, short URL www.blum.com/a530",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.orga-line.ve60.500",
+      "brand": "Blum",
+      "article": "ZSI.60VEI6",
+      "family": "ORGA-LINE",
+      "variant": "full width container set for a 600 mm cabinet, NL 500",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 500
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.556, short URL www.blum.com/a530",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.orga-line.ve60.550",
+      "brand": "Blum",
+      "article": "ZSI.60VEI7",
+      "family": "ORGA-LINE",
+      "variant": "full width container set for a 600 mm cabinet, NL 550",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 550
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.556, short URL www.blum.com/a530",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.orga-line.ve90.450",
+      "brand": "Blum",
+      "article": "ZSI.90VEI4",
+      "family": "ORGA-LINE",
+      "variant": "full width container set for a 900 mm cabinet, NL 450",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 450
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.556, short URL www.blum.com/a530",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.orga-line.ve90.500",
+      "brand": "Blum",
+      "article": "ZSI.90VEI6",
+      "family": "ORGA-LINE",
+      "variant": "full width container set for a 900 mm cabinet, NL 500",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 500
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.556, short URL www.blum.com/a530",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.orga-line.ve90.550",
+      "brand": "Blum",
+      "article": "ZSI.90VEI7",
+      "family": "ORGA-LINE",
+      "variant": "full width container set for a 900 mm cabinet, NL 550",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 550
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.556, short URL www.blum.com/a530",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.orga-line.ve12.450",
+      "brand": "Blum",
+      "article": "ZSI.12VEI4",
+      "family": "ORGA-LINE",
+      "variant": "full width container set for a 1200 mm cabinet, NL 450",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 450
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.556, short URL www.blum.com/a530",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.orga-line.ve12.500",
+      "brand": "Blum",
+      "article": "ZSI.12VEI6",
+      "family": "ORGA-LINE",
+      "variant": "full width container set for a 1200 mm cabinet, NL 500",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 500
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.556, short URL www.blum.com/a530",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.orga-line.ve12.550",
+      "brand": "Blum",
+      "article": "ZSI.12VEI7",
+      "family": "ORGA-LINE",
+      "variant": "full width container set for a 1200 mm cabinet, NL 550",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 550
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.556, short URL www.blum.com/a530",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.orga-line.vu60.450",
+      "brand": "Blum",
+      "article": "ZSI.60VUI4",
+      "family": "ORGA-LINE",
+      "variant": "full width utensil divider set for a 600 mm cabinet, NL 450",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 450
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.557, short URL www.blum.com/a530",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.orga-line.vu60.500",
+      "brand": "Blum",
+      "article": "ZSI.60VUI6",
+      "family": "ORGA-LINE",
+      "variant": "full width utensil divider set for a 600 mm cabinet, NL 500",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 500
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.557, short URL www.blum.com/a530",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.orga-line.vu60.550",
+      "brand": "Blum",
+      "article": "ZSI.60VUI7",
+      "family": "ORGA-LINE",
+      "variant": "full width utensil divider set for a 600 mm cabinet, NL 550",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 550
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.557, short URL www.blum.com/a530",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.orga-line.vu90.450",
+      "brand": "Blum",
+      "article": "ZSI.90VUI4",
+      "family": "ORGA-LINE",
+      "variant": "full width utensil divider set for a 900 mm cabinet, NL 450",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 450
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.557, short URL www.blum.com/a530",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.orga-line.vu90.500",
+      "brand": "Blum",
+      "article": "ZSI.90VUI6",
+      "family": "ORGA-LINE",
+      "variant": "full width utensil divider set for a 900 mm cabinet, NL 500",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 500
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.557, short URL www.blum.com/a530",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.orga-line.vu90.550",
+      "brand": "Blum",
+      "article": "ZSI.90VUI7",
+      "family": "ORGA-LINE",
+      "variant": "full width utensil divider set for a 900 mm cabinet, NL 550",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 550
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.557, short URL www.blum.com/a530",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.orga-line.vu12.450",
+      "brand": "Blum",
+      "article": "ZSI.12VUI4",
+      "family": "ORGA-LINE",
+      "variant": "full width utensil divider set for a 1200 mm cabinet, NL 450",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 450
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.557, short URL www.blum.com/a530",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.orga-line.vu12.500",
+      "brand": "Blum",
+      "article": "ZSI.12VUI6",
+      "family": "ORGA-LINE",
+      "variant": "full width utensil divider set for a 1200 mm cabinet, NL 500",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 500
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.557, short URL www.blum.com/a530",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.orga-line.vu12.550",
+      "brand": "Blum",
+      "article": "ZSI.12VUI7",
+      "family": "ORGA-LINE",
+      "variant": "full width utensil divider set for a 1200 mm cabinet, NL 550",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 550
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.557, short URL www.blum.com/a530",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    }
+  ]
+}

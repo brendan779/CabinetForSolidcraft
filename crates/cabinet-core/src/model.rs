@@ -40,7 +40,8 @@ pub struct Cabinet {
     /// the shelves' place.
     #[serde(default, skip_serializing_if = "is_zero")]
     pub inner_drawers: u32,
-    /// Blum AMBIA-LINE cutlery insert and drawer frames in the steel-sided drawers.
+    /// Blum inner dividing sets in the steel-sided drawers: AMBIA-LINE cutlery insert and frames
+    /// (LEGRABOX, MERIVOBOX), ORGA-LINE container and utensil sets (TANDEMBOX).
     #[serde(default, skip_serializing_if = "std::ops::Not::not")]
     pub drawer_inserts: bool,
     /// LED strips: under the cabinet, inside it, or in its plinth.

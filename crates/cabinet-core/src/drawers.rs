@@ -245,6 +245,71 @@ pub fn ambia_line(
     Ok(out)
 }
 
+/// ORGA-LINE set kinds Blum lists for TANDEMBOX drawers (pp. 556-558).
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum OrgaSet {
+    /// Containers, well suited to cutlery.
+    Container,
+    /// Utensil dividers.
+    Utensil,
+    /// Containers with dividers.
+    Combo,
+}
+
+impl OrgaSet {
+    fn key(self) -> &'static str {
+        match self {
+            OrgaSet::Container => "container",
+            OrgaSet::Utensil => "utensil",
+            OrgaSet::Combo => "combo",
+        }
+    }
+}
+
+/// The ORGA-LINE set Blum lists (pp. 556-558) for an M or K TANDEMBOX drawer of nominal length
+/// `nl` (450, 500 or 550) in a cabinet `kb` wide: each piece and how many.
+pub fn orga_line(
+    kb: f64,
+    nl: f64,
+    height: &str,
+    set: OrgaSet,
+) -> Result<Vec<(&'static HardwareItem, u32)>, String> {
+    if !matches!(height, "M" | "K") {
+        return Err(format!(
+            "ORGA-LINE needs drawers of height M or K, not {height}"
+        ));
+    }
+    let nl = nl.round() as u32;
+    if ![450, 500, 550].contains(&nl) {
+        return Err(format!(
+            "ORGA-LINE sets come for NL 450, 500 and 550, not {nl}"
+        ));
+    }
+    let sys = hardware::item("blum.orga-line")?;
+    let prefix = format!("{}_", set.key());
+    let mut out = Vec::new();
+    for (name, t) in sys.tables.iter().filter(|(n, _)| n.starts_with(&prefix)) {
+        // The printed range `kb` falls in: the last row starting at or under it.
+        let n = t
+            .rows
+            .iter()
+            .rposition(|&r| r <= kb + 1e-6)
+            .and_then(|r| t.values[r][0])
+            .unwrap_or(0.0) as u32;
+        if n > 0 {
+            let piece = &name[prefix.len()..];
+            out.push((hardware::item(&format!("blum.orga-line.{piece}.{nl}"))?, n));
+        }
+    }
+    if out.is_empty() {
+        return Err(format!(
+            "ORGA-LINE lists no {} set for a {kb:.0} mm cabinet",
+            set.key()
+        ));
+    }
+    Ok(out)
+}
+
 /// The wooden-drawer runner systems.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum WoodRunner {
@@ -692,6 +757,39 @@ mod tests {
         assert_eq!(unit("legrabox"), "T60L7340");
         let narrow = tip_on_blumotion("tandembox", 500.0, false, false, 280.0).unwrap();
         assert_eq!(narrow[1].0.article, "T60.300D");
+    }
+
+    /// pp. 556-557: ORGA-LINE sets by cabinet width, the article by nominal length.
+    #[test]
+    fn orga_line_follows_blums_set_lists() {
+        let arts = |kb, nl, set| {
+            let mut v: Vec<_> = orga_line(kb, nl, "M", set)
+                .unwrap()
+                .iter()
+                .map(|(i, n)| (i.article.clone(), *n))
+                .collect();
+            v.sort();
+            v
+        };
+        let a = |s: &str, n| (s.to_string(), n);
+        assert_eq!(arts(600.0, 500.0, OrgaSet::Container), [a("ZSI.60VEI6", 1)]);
+        // 650 falls in 601-699: BI1 + BI3.
+        assert_eq!(
+            arts(650.0, 450.0, OrgaSet::Container),
+            [a("ZSI.450BI1N", 1), a("ZSI.450BI3N", 1)]
+        );
+        assert_eq!(
+            arts(1100.0, 550.0, OrgaSet::Utensil),
+            [a("ZSI.550FI2N", 1), a("ZSI.550KI3N", 2)]
+        );
+        assert_eq!(
+            arts(800.0, 500.0, OrgaSet::Combo),
+            [a("ZSI.500BI3", 1), a("ZSI.500KI3N", 1)]
+        );
+        assert!(orga_line(250.0, 500.0, "M", OrgaSet::Container).is_err());
+        assert!(orga_line(1300.0, 500.0, "M", OrgaSet::Container).is_err());
+        assert!(orga_line(600.0, 600.0, "M", OrgaSet::Container).is_err());
+        assert!(orga_line(600.0, 500.0, "N", OrgaSet::Container).is_err());
     }
 
     /// p.546: AMBIA-LINE by cabinet width and nominal length.

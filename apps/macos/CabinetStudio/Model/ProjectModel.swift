@@ -183,7 +183,7 @@ struct CabinetDoc: Identifiable, Hashable, Codable {
         }
     }
 
-    /// Blum AMBIA-LINE cutlery insert and frames in the steel-sided drawers.
+    /// Blum inner dividing sets (AMBIA-LINE, ORGA-LINE) in the steel-sided drawers.
     var drawerInserts: Bool {
         get { object["drawer_inserts"] as? Bool ?? false }
         set { update { $0["drawer_inserts"] = newValue ? true : nil } }

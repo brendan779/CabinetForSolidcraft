@@ -2854,8 +2854,10 @@ impl<'a> Builder<'a> {
         }
     }
 
-    /// AMBIA-LINE in every LEGRABOX / MERIVOBOX M or K drawer: the top one a cutlery insert set,
-    /// the rest drawer frames, as Blum recommends for the cabinet's width (p.546).
+    /// Blum's inner dividing sets in every M or K steel drawer, as Blum recommends for the
+    /// cabinet's width: in LEGRABOX / MERIVOBOX, AMBIA-LINE (the top drawer a cutlery insert set,
+    /// the rest drawer frames, p.546); in TANDEMBOX, ORGA-LINE (the top drawer a container set,
+    /// the rest utensil divider sets, pp. 556-557).
     fn drawer_inserts(&mut self) {
         let cab = self.cab;
         if !cab.drawer_inserts {
@@ -2864,11 +2866,13 @@ impl<'a> Builder<'a> {
         let fits: Vec<&DrawerFit> = self
             .drawer_fits
             .iter()
-            .filter(|f| matches!(f.system, "legrabox" | "merivobox"))
+            .filter(|f| matches!(f.system, "legrabox" | "merivobox" | "tandembox"))
             .collect();
         if fits.is_empty() {
             self.list.warnings.push(
-                "AMBIA-LINE goes in LEGRABOX and MERIVOBOX drawers; this cabinet has none".into(),
+                "drawer inserts go in LEGRABOX, MERIVOBOX and TANDEMBOX drawers; this cabinet has \
+                 none"
+                    .into(),
             );
             return;
         }
@@ -2876,7 +2880,17 @@ impl<'a> Builder<'a> {
         let mut rows = Vec::new();
         for f in fits {
             let cutlery = (f.front_top - top).abs() < 1e-6;
-            match drawers::ambia_line(cab.width, f.nominal_length, &f.height, cutlery) {
+            let items = if f.system == "tandembox" {
+                let set = if cutlery {
+                    drawers::OrgaSet::Container
+                } else {
+                    drawers::OrgaSet::Utensil
+                };
+                drawers::orga_line(cab.width, f.nominal_length, &f.height, set)
+            } else {
+                drawers::ambia_line(cab.width, f.nominal_length, &f.height, cutlery)
+            };
+            match items {
                 Ok(items) => {
                     for (item, quantity) in items {
                         rows.push(HardwarePlacement {
@@ -4682,8 +4696,30 @@ mod tests {
         assert!(
             list.warnings
                 .iter()
-                .any(|w| w.contains("AMBIA-LINE goes in"))
+                .any(|w| w.contains("drawer inserts go in"))
         );
+    }
+
+    /// BLUM-16: ORGA-LINE in TANDEMBOX drawers: a container set on top, utensil dividers below.
+    #[test]
+    fn orga_line_puts_containers_in_the_top_tandembox_drawer() {
+        let mut cab = Cabinet::new("D01", CabinetKind::DrawerBank);
+        cab.drawer_inserts = true;
+        cab.standard.drawer_system = DrawerSystem::Tandembox;
+        let list = build_cabinet(&cab).unwrap();
+        assert!(
+            !list.warnings.iter().any(|w| w.contains("ORGA")),
+            "{:?}",
+            list.warnings
+        );
+        let on = |part: &str, item: &str| {
+            list.hardware
+                .iter()
+                .any(|h| h.part == part && h.item.starts_with(item))
+        };
+        // A 600 cabinet: full width sets.
+        assert!(on("D01.DrawerFront1", "blum.orga-line.ve60."));
+        assert!(on("D01.DrawerFront2", "blum.orga-line.vu60."));
     }
 
     fn handle_holes(list: &PartList, part: &str) -> Vec<Vec3> {

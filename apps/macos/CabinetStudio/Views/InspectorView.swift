@@ -1058,10 +1058,10 @@ struct FrontsSection: View {
                 DrawerStackPicker(cab: cab)
             }
             if ["drawers", "oven_tower"].contains(cab.frontType) {
-                Toggle("AMBIA-LINE inserts", isOn: Binding(get: { cab.drawerInserts }, set: { v in
+                Toggle("Drawer inserts", isOn: Binding(get: { cab.drawerInserts }, set: { v in
                     withAnimation(.snappy) { var c = cab; c.drawerInserts = v; project.selected = c }
                 }))
-                .help("Blum AMBIA-LINE in LEGRABOX and MERIVOBOX drawers: a cutlery insert in the top drawer, frames in the rest, sized for the cabinet")
+                .help("Blum AMBIA-LINE in LEGRABOX and MERIVOBOX drawers (a cutlery insert on top, frames below), ORGA-LINE in TANDEMBOX (containers on top, utensil dividers below), sized for the cabinet")
             }
             if cab.frontType == "lift" {
                 LiftKindPicker(cab: cab)
