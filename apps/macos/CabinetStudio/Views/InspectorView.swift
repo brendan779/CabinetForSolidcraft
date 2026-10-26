@@ -733,6 +733,7 @@ struct LiftKindPicker: View {
         ("lift_up", "Lift up", "Rises parallel to itself, for small fronts (AVENTOS HL top)"),
         ("small_stay_lift", "Small stay", "A small stay lift for small wall cabinets and over the fridge (AVENTOS HK-S)"),
         ("hinged_stay_lift", "On hinges", "A stay lift on hinges along the top, for the smallest fronts (AVENTOS HK-XS)"),
+        ("integrated_stay_lift", "Integrated", "A stay lift hidden in pockets in the cabinet sides (AVENTOS HKi)"),
     ]
 
     var body: some View {
@@ -781,6 +782,11 @@ struct LiftKindThumbnail: View {
             case "small_stay_lift":
                 open.move(to: CGPoint(x: body.minX - 2, y: body.minY))
                 open.addLine(to: CGPoint(x: w * 0.12, y: body.minY - h * 0.15))
+            case "integrated_stay_lift":
+                open.move(to: CGPoint(x: body.minX - 2, y: body.minY))
+                open.addLine(to: CGPoint(x: 2, y: body.minY - h * 0.25))
+                ctx.fill(Path(CGRect(x: body.minX + 2, y: body.minY + 3, width: body.width * 0.45, height: 5)),
+                         with: .color(.accentColor.opacity(0.5)))
             case "hinged_stay_lift":
                 open.move(to: CGPoint(x: body.minX - 2, y: body.minY))
                 open.addLine(to: CGPoint(x: w * 0.12, y: body.minY - h * 0.15))

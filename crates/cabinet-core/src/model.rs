@@ -613,6 +613,8 @@ pub enum LiftKind {
     SmallStayLift,
     /// A stay lift on hinges along the top (AVENTOS HK-XS), for the smallest fronts.
     HingedStayLift,
+    /// A stay lift set into pockets in the cabinet sides (AVENTOS HKi, fully integrated).
+    IntegratedStayLift,
 }
 
 /// A front's core board, for its weight (Blum's reference densities).

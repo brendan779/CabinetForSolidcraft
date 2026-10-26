@@ -380,6 +380,12 @@ fn the_new_cabinets_build_every_part_where_the_core_puts_it() {
         ratios: vec![1.0, 1.0],
     };
     high.standard.drawer_sides = cabinet_core::model::DrawerSides::HighFronted;
+    let mut hki = Cabinet::new("W02", CabinetKind::Wall);
+    hki.height = 450.0;
+    hki.fronts = FrontLayout::Lift {
+        kind: cabinet_core::model::LiftKind::IntegratedStayLift,
+        handle_weight: 0.4,
+    };
     let mut lift = Cabinet::new("W01", CabinetKind::Wall);
     lift.fronts = FrontLayout::BiFoldLift { handle_weight: 0.4 };
     let mut wood = Cabinet::new("D01", CabinetKind::DrawerBank);
@@ -393,6 +399,7 @@ fn the_new_cabinets_build_every_part_where_the_core_puts_it() {
         corner_wall,
         inner,
         high,
+        hki,
         lift,
         wood,
         legrabox,

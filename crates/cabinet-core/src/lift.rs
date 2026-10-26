@@ -223,6 +223,7 @@ pub fn single_front(kind: LiftKind, need: &LiftNeed) -> Result<SingleLift, Strin
         LiftKind::LiftUp => "hl-top",
         LiftKind::SmallStayLift => "hk-s",
         LiftKind::HingedStayLift => "hk-xs",
+        LiftKind::IntegratedStayLift => "hki",
     };
     let sys = hardware::item(&format!("blum.aventos.{family}"))?;
     let p = |k: &str| sys.param(k);
@@ -321,6 +322,10 @@ pub fn single_front(kind: LiftKind, need: &LiftNeed) -> Result<SingleLift, Strin
             parts.push((item("blum.aventos.cover-caps")?, 1));
             parts.push((item("blum.aventos.hk-top.front-fixing")?, 1));
         }
+        LiftKind::IntegratedStayLift => {
+            let fixing = item("blum.aventos.hki.front-fixing")?;
+            parts.push((fixing, fixing.param("per_front")? as u32));
+        }
         LiftKind::SmallStayLift => {
             let plate = item("blum.mounting-plate.175h3100")?;
             parts.push((plate, plate.param("per_front")? as u32));
@@ -350,7 +355,10 @@ pub fn single_front(kind: LiftKind, need: &LiftNeed) -> Result<SingleLift, Strin
     Ok(SingleLift {
         power_factor: matches!(
             kind,
-            LiftKind::StayLift | LiftKind::SmallStayLift | LiftKind::HingedStayLift
+            LiftKind::StayLift
+                | LiftKind::SmallStayLift
+                | LiftKind::HingedStayLift
+                | LiftKind::IntegratedStayLift
         )
         .then_some(kh * fg),
         parts,
@@ -575,5 +583,25 @@ mod tests {
         );
         assert!(parts(220.0, 1.0, 600.0).is_err(), "under 240 high");
         assert!(parts(600.0, 7.0, 600.0).is_err(), "LF 4200 is over 3600");
+    }
+
+    /// p.14: HKi by power factor up to 18 kg; two EXPANDO front brackets.
+    #[test]
+    fn hki_picks_its_set_by_power_factor() {
+        let pick = |kh: f64, fg: f64| {
+            lift(LiftKind::IntegratedStayLift, kh, fg, 0.0).map(|l| {
+                l.parts
+                    .iter()
+                    .map(|(i, n)| (i.article.clone(), *n))
+                    .collect::<Vec<_>>()
+            })
+        };
+        assert_eq!(
+            pick(400.0, 2.0).unwrap(),
+            [("24K2300".to_string(), 1), ("24K42E1".to_string(), 2)]
+        );
+        // LF 6000: only the strongest set.
+        assert_eq!(pick(500.0, 12.0).unwrap()[0].0, "24K2800");
+        assert!(pick(600.0, 19.0).is_err(), "over 18 kg");
     }
 }

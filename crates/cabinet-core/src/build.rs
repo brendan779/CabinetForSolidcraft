@@ -986,6 +986,13 @@ impl<'a> Builder<'a> {
                     ((at.x - o.x).powi(2) + (at.y - o.y).powi(2) + (at.z - o.z).powi(2)).sqrt();
                 dist < (diameter + d) / 2.0 + WALL
             }
+            // A pocket in the part (AVENTOS HKi's): no hole in or beside it.
+            Operation::Groove { part: p, bounds } if p == part => {
+                let reach = diameter / 2.0 + WALL;
+                Axis::ALL.iter().all(|&a| {
+                    at.get(a) > bounds.min.get(a) - reach && at.get(a) < bounds.max().get(a) + reach
+                })
+            }
             _ => false,
         })
     }
@@ -1437,6 +1444,53 @@ impl<'a> Builder<'a> {
                 at: front.center(),
                 part: name.clone(),
                 quantity,
+            });
+        }
+        if kind == LiftKind::IntegratedStayLift {
+            self.hki_recesses();
+        }
+    }
+
+    /// AVENTOS HKi's pockets: one in each side's inside face, open at the front edge, below the
+    /// cabinet top (p.15). Cut as a box: the R25 at the pocket's back lower corner is left to the
+    /// router.
+    fn hki_recesses(&mut self) {
+        let cab = self.cab;
+        let t = cab.standard.carcass_thickness;
+        let numbers = (|| {
+            let sys = crate::hardware::item("blum.aventos.hki")?;
+            let p = |k: &str| sys.param(k);
+            Ok::<_, String>((
+                p("recess_depth")?,
+                p("recess_height")?,
+                p("recess_length")?,
+                p("recess_below_top")?,
+                p("side_thickness_min")?..=p("side_thickness_max")?,
+            ))
+        })();
+        let (depth, height, length, below, sides) = match numbers {
+            Ok(n) => n,
+            Err(e) => {
+                self.list.warnings.push(e);
+                return;
+            }
+        };
+        if !sides.contains(&t) {
+            self.list.warnings.push(format!(
+                "AVENTOS HKi needs sides {}–{} mm thick, not {t}",
+                sides.start(),
+                sides.end()
+            ));
+            return;
+        }
+        let z1 = cab.height - below;
+        for (role, x0) in [
+            (PartRole::LeftSide, t - depth),
+            (PartRole::RightSide, cab.width - t),
+        ] {
+            self.list.operations.push(Operation::Groove {
+                part: self.name(role, None),
+                bounds: aabb(x0, 0.0, z1 - height, x0 + depth, length, z1),
             });
         }
     }
@@ -3318,6 +3372,50 @@ mod tests {
                     .any(|h| h.item == other && h.quantity >= 2)
             );
         }
+    }
+
+    /// BLUM-7b: AVENTOS HKi sits in a 265 × 120 pocket, 12 deep, in each side, 21 below the
+    /// top; shelf pins keep clear of it and nothing clashes.
+    #[test]
+    fn hki_cuts_a_pocket_in_each_side_and_pins_keep_clear() {
+        use crate::model::LiftKind;
+        let mut cab = Cabinet::new("W01", CabinetKind::Wall);
+        cab.height = 450.0;
+        cab.fronts = FrontLayout::Lift {
+            kind: LiftKind::IntegratedStayLift,
+            handle_weight: 0.4,
+        };
+        let list = build_cabinet(&cab).unwrap();
+        assert!(
+            !list.warnings.iter().any(|w| w.contains("clash")),
+            "{:?}",
+            list.warnings
+        );
+        let pockets: Vec<Aabb> = list
+            .operations
+            .iter()
+            .filter_map(|o| match o {
+                Operation::Groove { part, bounds }
+                    if part.ends_with("Side") && bounds.size.x == 12.0 =>
+                {
+                    Some(*bounds)
+                }
+                _ => None,
+            })
+            .collect();
+        assert_eq!(pockets.len(), 2);
+        for p in &pockets {
+            assert_eq!(
+                (p.size.y, p.size.z, p.max().z),
+                (265.0, 120.0, 450.0 - 21.0)
+            );
+            assert_eq!(p.min.y, 0.0, "open at the front edge");
+        }
+        assert!(
+            list.hardware
+                .iter()
+                .any(|h| h.item.starts_with("blum.aventos.hki.mechanism."))
+        );
     }
 
     fn handle_holes(list: &PartList, part: &str) -> Vec<Vec3> {
