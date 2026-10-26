@@ -91,6 +91,53 @@ impl Dxf {
         self.pair(8, layer);
     }
 
+    /// A closed `w` × `h` rectangle from the origin with its corners rounded (bottom left,
+    /// bottom right, top right, top left; 0: square), drawn anticlockwise with arc bulges.
+    fn rounded_rect(&mut self, layer: &str, w: f64, h: f64, r: [f64; 4]) {
+        // tan(90° / 4): a quarter arc, anticlockwise.
+        const QUARTER: f64 = 0.414_213_562;
+        let [bl, br, tr, tl] = r;
+        let mut points: Vec<(f64, f64, f64)> = vec![
+            (bl, 0.0, 0.0),
+            (w - br, 0.0, QUARTER),
+            (w, br, 0.0),
+            (w, h - tr, QUARTER),
+            (w - tr, h, 0.0),
+            (tl, h, QUARTER),
+            (0.0, h - tl, 0.0),
+            (0.0, bl, QUARTER),
+        ];
+        // A square corner's two points are one, taking the bulge of the segment after it.
+        points.dedup_by(|b, a| {
+            let same = (a.0 - b.0).abs() < 1e-9 && (a.1 - b.1).abs() < 1e-9;
+            if same {
+                a.2 = b.2;
+            }
+            same
+        });
+        if points.len() > 1 {
+            let (f, l) = (points[0], points[points.len() - 1]);
+            if (f.0 - l.0).abs() < 1e-9 && (f.1 - l.1).abs() < 1e-9 {
+                points.pop();
+            }
+        }
+        self.pair(0, "POLYLINE");
+        self.pair(8, layer);
+        self.pair(66, 1);
+        self.pair(70, 1);
+        self.xy(10, 0.0, 0.0);
+        for (px, py, bulge) in points {
+            self.pair(0, "VERTEX");
+            self.pair(8, layer);
+            self.xy(10, px, py);
+            if bulge != 0.0 {
+                self.pair(42, format!("{bulge:.9}"));
+            }
+        }
+        self.pair(0, "SEQEND");
+        self.pair(8, layer);
+    }
+
     fn finish(mut self) -> String {
         self.pair(0, "ENDSEC");
         self.pair(0, "EOF");
@@ -133,7 +180,25 @@ pub fn part_dxfs(list: &PartList, part: &Part) -> Vec<DxfFile> {
             let mirror = face == Face::Low;
             let x = |u: f64| if mirror { lu - u } else { u };
             let mut d = Dxf::new();
-            d.rect("OUTLINE", 0.0, 0.0, lu, lv);
+            // Rounded corners, in this view's frame (turned over, left and right swap).
+            let mut radii = [0.0; 4];
+            for f in &all {
+                if let Feature::Round { u, v, radius } = *f {
+                    let left = (x(u) < lu / 2.0) as usize;
+                    let i = match (v < lv / 2.0, left == 1) {
+                        (true, true) => 0,
+                        (true, false) => 1,
+                        (false, false) => 2,
+                        (false, true) => 3,
+                    };
+                    radii[i] = radius;
+                }
+            }
+            if radii.iter().any(|&r| r > 0.0) {
+                d.rounded_rect("OUTLINE", lu, lv, radii);
+            } else {
+                d.rect("OUTLINE", 0.0, 0.0, lu, lv);
+            }
             for f in &all {
                 match *f {
                     Feature::FaceBore {

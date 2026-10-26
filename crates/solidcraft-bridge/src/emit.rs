@@ -58,6 +58,15 @@ pub fn emit_cabinet(list: &PartList, detail: Detail, spec: Option<&Value>) -> Ve
             }
         }));
     }
+    // Rounded corners are part of the shape: every detail level has them, before any cut.
+    for op in &list.operations {
+        if let Operation::Round { part, at, radius } = op {
+            cmds.push(json!({
+                "command": "solid.fillet",
+                "params": { "body": part, "edges": [arr(*at)], "radius": round(*radius) }
+            }));
+        }
+    }
     if detail != Detail::Design {
         for op in &list.operations {
             match op {

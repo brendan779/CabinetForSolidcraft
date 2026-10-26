@@ -149,6 +149,14 @@ pub struct Benchtop {
     /// Cut-outs in the splashback for double power points, each centred over a cabinet.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub power_points: Vec<PowerPoint>,
+    /// The free corners of each piece's ends rounded to this radius (0: square): the front
+    /// corners, and the back ones too past a seating overhang. Not at a waterfall or a leg piece.
+    #[serde(default, skip_serializing_if = "is_zero")]
+    pub end_radius: f64,
+}
+
+fn is_zero(v: &f64) -> bool {
+    *v == 0.0
 }
 
 /// An open recess in the splashback, centred over a cabinet: an opening through the slab, lined
@@ -362,6 +370,7 @@ pub fn build_run(run: &Run) -> Result<Vec<PartList>> {
             let mut top = benchtop(b, &out, &under);
             cutouts(b, &mut top, &out);
             splashback_openings(b, &mut top, &out);
+            round_ends(b, &mut top);
             out[i] = top;
         }
     }
@@ -913,6 +922,62 @@ fn cutouts(b: &Benchtop, top: &mut PartList, lists: &[PartList]) {
     }
 }
 
+/// Rounds the free corners of each in-line piece's ends.
+fn round_ends(b: &Benchtop, top: &mut PartList) {
+    let r = b.end_radius;
+    if r <= 0.0 {
+        return;
+    }
+    if matches!(b.edge, EdgeProfile::MitredApron { .. }) {
+        top.warnings
+            .push("rounded ends do not go with a mitred apron: the ends stay square".into());
+        return;
+    }
+    let pieces: Vec<Part> = top
+        .parts
+        .iter()
+        .filter(|p| {
+            p.role == PartRole::Benchtop
+                && p.name
+                    .strip_prefix(&format!("{}.{}", b.id, PartRole::Benchtop.code()))
+                    .is_some_and(|n| n.chars().all(|c| c.is_ascii_digit()))
+        })
+        .cloned()
+        .collect();
+    for p in pieces {
+        let pb = p.bounds;
+        if 2.0 * r > pb.size.x.min(pb.size.y) + 1e-6 {
+            top.warnings.push(format!(
+                "{}: a {r:.0} mm radius is more than half the piece",
+                p.name
+            ));
+            continue;
+        }
+        let leg = top
+            .part(&format!("{}Leg", p.name))
+            .map(|l| l.bounds.center().x < pb.center().x);
+        let mut ys = vec![pb.min.y];
+        if b.back_overhang > 0.0 {
+            ys.push(pb.max().y);
+        }
+        for (x, waterfall, left) in [
+            (pb.min.x, b.waterfall_left, true),
+            (pb.max().x, b.waterfall_right, false),
+        ] {
+            if waterfall || leg == Some(left) {
+                continue;
+            }
+            for &y in &ys {
+                top.operations.push(crate::part::Operation::Round {
+                    part: p.name.clone(),
+                    at: Vec3::new(x, y, pb.center().z),
+                    radius: r,
+                });
+            }
+        }
+    }
+}
+
 /// From the left to the right of a cabinet's parts.
 fn span_x(cab: &PartList) -> (f64, f64) {
     let x0 = cab
@@ -1274,6 +1339,7 @@ mod tests {
             splashback_thickness: 20.0,
             niches: Vec::new(),
             power_points: Vec::new(),
+            end_radius: 0.0,
         })
     }
 
@@ -1355,6 +1421,7 @@ mod tests {
             splashback_thickness: 20.0,
             niches: Vec::new(),
             power_points: Vec::new(),
+            end_radius: 0.0,
             cutouts: vec![
                 Cutout {
                     over: "S01".into(),
@@ -1500,6 +1567,56 @@ mod tests {
         let lists = build_run(&run(&item)).unwrap();
         assert!(lists[2].warnings.iter().any(|w| w.contains("does not fit")));
         assert!(lists[2].part("BT1.Niche1Back").is_none());
+    }
+
+    /// BENCH-3e: rounded ends: an island's four corners; with a waterfall on the left, only the
+    /// right end's; a radius over half the piece is refused.
+    #[test]
+    fn rounded_ends_round_the_free_corners() {
+        let mut item = top("BT1", 0.0);
+        if let RunItem::Benchtop(b) = &mut item {
+            b.end_radius = 100.0;
+            b.back_overhang = 300.0;
+        }
+        let run = |item: &RunItem| Run {
+            origin: Vec3::default(),
+            items: vec![
+                cab("B01", CabinetKind::Base),
+                cab("B02", CabinetKind::Base),
+                item.clone(),
+            ],
+        };
+        let rounds = |item: &RunItem| -> Vec<Vec3> {
+            build_run(&run(item)).unwrap()[2]
+                .operations
+                .iter()
+                .filter_map(|o| match o {
+                    crate::part::Operation::Round { part, at, radius } => {
+                        assert_eq!((part.as_str(), *radius), ("BT1.Benchtop1", 100.0));
+                        Some(*at)
+                    }
+                    _ => None,
+                })
+                .collect()
+        };
+        let all = rounds(&item);
+        assert_eq!(all.len(), 4);
+        assert!(all.iter().any(|a| a.x == 0.0 && a.y == -38.0));
+        assert!(all.iter().any(|a| a.x == 1200.0 && a.y == 880.0));
+        if let RunItem::Benchtop(b) = &mut item {
+            b.waterfall_left = true;
+        }
+        assert!(rounds(&item).iter().all(|a| a.x == 1200.0));
+        if let RunItem::Benchtop(b) = &mut item {
+            b.end_radius = 600.0;
+        }
+        let lists = build_run(&run(&item)).unwrap();
+        assert!(
+            lists[2]
+                .warnings
+                .iter()
+                .any(|w| w.contains("more than half"))
+        );
     }
 
     /// P2-4: a cornice over a tall cabinet and two wall cabinets with the same top, returned at

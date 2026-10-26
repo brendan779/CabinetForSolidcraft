@@ -42,8 +42,16 @@ fn line(list: &PartList, p: &Part) -> String {
         .iter()
         .filter(|o| matches!(o, Operation::Groove { part, .. } if *part == p.name))
         .count();
+    let rounds: Vec<f64> = list
+        .operations
+        .iter()
+        .filter_map(|o| match o {
+            Operation::Round { part, radius, .. } if *part == p.name => Some(*radius),
+            _ => None,
+        })
+        .collect();
     format!(
-        "{}  {}  {:.0} × {:.0} × {:.0} mm  {:.2} m²  {:.2} m finished edge  {}{}",
+        "{}  {}  {:.0} × {:.0} × {:.0} mm  {:.2} m²  {:.2} m finished edge  {}{}{}",
         p.name,
         p.role.label(),
         l,
@@ -55,6 +63,10 @@ fn line(list: &PartList, p: &Part) -> String {
             0 => String::new(),
             1 => "1 cut-out  ".to_string(),
             n => format!("{n} cut-outs  "),
+        },
+        match rounds.first() {
+            None => String::new(),
+            Some(r) => format!("{} corners R{r:.0}  ", rounds.len()),
         },
         if p.board.is_empty() {
             "generic".to_string()
@@ -174,13 +186,21 @@ mod tests {
                     splashback_thickness: 20.0,
                     niches: Vec::new(),
                     power_points: Vec::new(),
+                    end_radius: 100.0,
                 }),
             ],
         };
         let lists = build_run(&run).unwrap();
         let p = pieces(&lists);
         assert_eq!(p.len(), 2);
-        assert!(line(p[0].0, p[0].1).contains("1 cut-out "));
+        let summary = line(p[0].0, p[0].1);
+        assert!(summary.contains("1 cut-out "));
+        // BENCH-3e: both front corners rounded, on the summary, the sheet and the DXF outline.
+        assert!(summary.contains("2 corners R100"), "{summary}");
+        let sheet = part_sheet(p[0].0, p[0].1, "Generic", "Job");
+        assert!(sheet.contains("corner R100"));
+        let dxf = &crate::dxf::part_dxfs(p[0].0, p[0].1)[0].contents;
+        assert_eq!(dxf.matches("\n42\n0.414213562\n").count(), 2, "{dxf}");
         let pdf = benchtops_pdf(&lists, "Job");
         assert_eq!(
             String::from_utf8_lossy(&pdf)

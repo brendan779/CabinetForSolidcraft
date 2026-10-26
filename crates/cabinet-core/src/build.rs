@@ -305,7 +305,7 @@ fn positive(v: f64) -> bool {
 fn offset_operations(list: &mut PartList, o: Vec3) {
     for op in &mut list.operations {
         match op {
-            Operation::Bore { at, .. } => *at = *at + o,
+            Operation::Bore { at, .. } | Operation::Round { at, .. } => *at = *at + o,
             Operation::BiscuitSlot { bounds, .. }
             | Operation::Groove { bounds, .. }
             | Operation::Mortise { bounds, .. } => bounds.min = bounds.min + o,
@@ -3230,7 +3230,8 @@ mod tests {
             Operation::BiscuitSlot { parts, .. } => parts.contains(&shelf.name),
             Operation::Bore { part, .. }
             | Operation::Groove { part, .. }
-            | Operation::Mortise { part, .. } => *part == shelf.name,
+            | Operation::Mortise { part, .. }
+            | Operation::Round { part, .. } => *part == shelf.name,
         }));
         assert_eq!(shelf.bounds.min.x, 16.0 + SHELF_SIDE_CLEARANCE);
     }

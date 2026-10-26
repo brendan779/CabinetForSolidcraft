@@ -130,6 +130,7 @@ struct PieceSection: View {
                 chips("Ends", value: cab.sideOverhang, presets: [0, 10, 20, 40]) { c, v in c.sideOverhang = v }
                 chips("Splashback", value: cab.splashback, presets: [0, 100, 300, 600, 650]) { c, v in c.splashback = v }
                 chips("Seating", value: cab.backOverhang, presets: [0, 300, 400, 600]) { c, v in c.backOverhang = v }
+                chips("Corners", value: cab.endRadius, presets: [0, 25, 100, 300]) { c, v in c.endRadius = v }
                 LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 3), spacing: 8) {
                     ForEach([("square", "Square"), ("pencil_round", "Pencil"), ("bullnose", "Bullnose"),
                              ("bevel", "Bevel"), ("mitred_apron", "Apron")], id: \.0) { id, title in

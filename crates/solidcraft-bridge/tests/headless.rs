@@ -506,6 +506,7 @@ fn a_benchtop_with_cut_outs_builds() {
                     over: "B01".into(),
                     height: 150.0,
                 }],
+                end_radius: 60.0,
                 cutouts: vec![
                     cutout("S01", CutoutKind::Sink, 760.0, 440.0),
                     cutout("B01", CutoutKind::Cooktop, 560.0, 490.0),
@@ -528,4 +529,19 @@ fn a_benchtop_with_cut_outs_builds() {
     for (g, w) in got.iter().zip(want) {
         assert!((g - w).abs() <= 5, "{got:?} vs {want:?}");
     }
+    // BENCH-3e: the free front corner (the left end is a waterfall) is filleted: a curved face
+    // besides the tap hole's.
+    let r = crate::run(
+        &cli,
+        "benchtop",
+        &emit_cabinet(top, Detail::Manufacturing, None),
+        &["eval"],
+    );
+    let body = r["bodies"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|b| b["name"] == p.name.as_str())
+        .unwrap();
+    assert_eq!(body["face_types"]["cylinder"], 2, "{body}");
 }

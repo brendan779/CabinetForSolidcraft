@@ -53,6 +53,8 @@ pub enum Feature {
         label: &'static str,
         face: Option<Face>,
     },
+    /// A corner of the outline rounded right through: `(u, v)` is the corner.
+    Round { u: f64, v: f64, radius: f64 },
 }
 
 /// A part's two big faces: at the low and the high end of its thickness axis.
@@ -68,7 +70,7 @@ impl Feature {
         match self {
             Feature::FaceBore { face, .. } => Some(*face),
             Feature::Rect { face, .. } => *face,
-            Feature::EdgeBore { .. } => None,
+            Feature::EdgeBore { .. } | Feature::Round { .. } => None,
         }
     }
 }
@@ -177,6 +179,18 @@ pub fn features(list: &PartList, part: &Part) -> Vec<Feature> {
                 part: name, bounds, ..
             } if *name == part.name => {
                 out.push(rect(part, bounds.min, bounds.size, "mortise"));
+            }
+            Operation::Round {
+                part: name,
+                at,
+                radius,
+            } if *name == part.name => {
+                let (u, v) = to_uv(part, *at);
+                out.push(Feature::Round {
+                    u: u.clamp(0.0, lu),
+                    v: v.clamp(0.0, lv),
+                    radius: *radius,
+                });
             }
             _ => {}
         }
@@ -610,6 +624,26 @@ fn face_view(
                     holes.push((format!("{tag}{label} {} × {}", fmt(*w), fmt(*h)), *u, *v));
                 }
             }
+            Feature::Round { u, v, radius } => {
+                // The corner cut away, the paper showing through, up to the arc.
+                let du = if *u < view.lu / 2.0 { 1.0 } else { -1.0 };
+                let dv = if *v < view.lv / 2.0 { 1.0 } else { -1.0 };
+                let (cx, cy) = (x(u + du * radius), y(v + dv * radius));
+                let (ax, ay) = (x(u + du * radius), y(*v));
+                let (bx, by) = (x(*u), y(v + dv * radius));
+                let cross = (ax - cx) * (by - cy) - (ay - cy) * (bx - cx);
+                let sweep = u8::from(cross > 0.0);
+                let rr = radius * s;
+                let _ = writeln!(
+                    svg,
+                    r##"<path d="M{:.2} {:.2} L{ax:.2} {ay:.2} A{rr:.2} {rr:.2} 0 0 {sweep} {bx:.2} {by:.2} Z" fill="#ffffff" stroke="#222" stroke-width="0.25"/>"##,
+                    x(*u),
+                    y(*v)
+                );
+                if tag != "out " {
+                    holes.push((format!("{tag}corner R{}", fmt(*radius)), *u, *v));
+                }
+            }
         }
     }
     let mut kinds: Vec<(String, Vec<(f64, f64)>)> = Vec::new();
@@ -899,7 +933,8 @@ mod tests {
                 let (u, v) = match f {
                     Feature::FaceBore { u, v, .. }
                     | Feature::EdgeBore { u, v, .. }
-                    | Feature::Rect { u, v, .. } => (u, v),
+                    | Feature::Rect { u, v, .. }
+                    | Feature::Round { u, v, .. } => (u, v),
                 };
                 assert!(
                     (-1e-6..=lu + 1e-6).contains(&u) && (-1e-6..=lv + 1e-6).contains(&v),

@@ -116,6 +116,12 @@ struct CabinetDoc: Identifiable, Hashable, Codable {
 
     mutating func setWaterfall(_ side: String, _ on: Bool) { update { $0["waterfall_\(side)"] = on } }
 
+    /// Benchtop: the radius of the free corners at each piece's ends (0: square).
+    var endRadius: Double {
+        get { number("end_radius") }
+        set { setNumber("end_radius", newValue) }
+    }
+
     /// Benchtop: a slab splashback's height on the top (0: none).
     var splashback: Double {
         get { number("splashback") }
