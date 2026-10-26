@@ -195,7 +195,7 @@ committed: they are the brands' copyright. `preview_colour` is an approximation.
 | P2-4 | needs-human (benchtops = BENCH-1..6; cornices and light rails built in 3b4c426: flat boards with returns, not profiled mouldings; scribes on fillers and end panels exist; not seen on screen. Light rails need wall cabinets lifted off the floor, which the app cannot do yet (UI-7): until then, at what height should wall cabinets hang by default?) | L | Benchtops, cornices, light rails, panels with scribes |
 | P2-5 | split → P2-5a done (ab3f118: core quote, PDF, Cut List › Quote with prices typed per line; not seen on screen), P2-5b built (76cdcbf: rates popover, per-cabinet customer quote; price per sheet left: per m² of sheet is the same thing for one sheet size) | L | Quoting: material + hardware + labour rates |
 | P2-6 | todo | L | CNC post-processors (MPR, CIX), BXF exchange with Blum (needs Blum spec 👤) |
-| P2-7 | todo | L | True-shape nesting for CNC |
+| P2-7 | needs-human (CNC router nesting built in fbdc0ec: MaxRects with the cutter between parts, never worse than the saw layout; not seen on screen. True-shape packing is left: every part is still a rectangle (rounded and arched ones by their box), so it would gain nothing until parts with real shapes exist. Which cutter diameter and sheet hold-down margin does your router use?) | L | True-shape nesting for CNC |
 
 ## P2 — Kitchen design: benchtops, Surround linings and curved details
 
@@ -381,3 +381,4 @@ Agents append one line per session: date, items touched, outcome.
 - 2026-10-26b (night) — BLUM-16 part (05a94e9): AMBIA-LINE wood design.
 - 2026-10-26b (night) — BLUM-16 part (e865068): CABLOXX drawer lock.
 - 2026-10-26b (night) — STYLE-1 part (73fa4bc): arched tops on slab doors (new Arch operation).
+- 2026-10-26b (night) — P2-7 (fbdc0ec): CNC router nesting (MaxRects).
