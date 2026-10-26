@@ -2385,12 +2385,21 @@ impl<'a> Builder<'a> {
                 continue;
             }
             let (item, description) = match (s.handle_place, s.handle_size.centres()) {
-                (HandlePlace::EdgePull, _) => ("handle.edge-pull".to_string(), "Edge pull".into()),
+                (HandlePlace::EdgePull, _) => (
+                    "handle.edge-pull".to_string(),
+                    format!("Edge pull, {}", s.handle_finish.label()),
+                ),
                 (_, Some(cc)) => (
                     format!("handle.cc{cc:.0}"),
-                    format!("Handle, {cc:.0} mm hole centres"),
+                    format!(
+                        "Handle, {cc:.0} mm hole centres, {}",
+                        s.handle_finish.label()
+                    ),
                 ),
-                (_, None) => ("handle.knob".to_string(), "Knob".to_string()),
+                (_, None) => (
+                    "handle.knob".to_string(),
+                    format!("Knob, {}", s.handle_finish.label()),
+                ),
             };
             if s.handle_place != HandlePlace::EdgePull {
                 for (w, z) in &holes {

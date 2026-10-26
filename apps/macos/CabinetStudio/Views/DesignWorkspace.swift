@@ -513,7 +513,7 @@ final class ViewportScene {
             switch (p.role, p.hinged) {
             case (_, "left"): t.rotation = simd_quatf(angle: -.pi * 0.55, axis: [0, 1, 0])
             case (_, "right"): t.rotation = simd_quatf(angle: .pi * 0.55, axis: [0, 1, 0])
-            case ("Drawer front", _), ("Drawer bottom", _), ("Drawer back", _), ("Drawer side", _):
+            case ("Drawer front", _), ("Drawer bottom", _), ("Drawer back", _), ("Drawer side", _), ("Drawer handle", _):
                 t.translation.z += 0.35
             case ("Lift front", _): t.translation.y += 0.3
             default: break
@@ -532,6 +532,9 @@ final class ViewportScene {
         let generic: NSColor = p.isFront
             ? NSColor(calibratedRed: 0.78, green: 0.65, blue: 0.48, alpha: 1)
             : NSColor(calibratedWhite: p.role == "Back" ? 0.78 : 0.93, alpha: 1)
+        if p.board.hasPrefix("handle:") {
+            return Self.handleMaterial(p.board.dropFirst("handle:".count), selected: selected)
+        }
         let colour = board?.displayColour ?? generic
         var m = PhysicallyBasedMaterial()
         let tint = selected ? NSColor.white : NSColor(calibratedWhite: 0.72, alpha: 1)
@@ -559,6 +562,21 @@ final class ViewportScene {
             m.emissiveColor = .init(color: .controlAccentColor)
             m.emissiveIntensity = hovered ? 0.6 : 0.12
         }
+        return m
+    }
+
+    /// A handle's metal, by its finish's name.
+    private static func handleMaterial(_ finish: Substring, selected: Bool) -> PhysicallyBasedMaterial {
+        let colour: NSColor = switch finish {
+        case "matt black": NSColor(calibratedWhite: 0.08, alpha: 1)
+        case "brushed brass": NSColor(calibratedRed: 0.76, green: 0.6, blue: 0.33, alpha: 1)
+        case "brushed nickel": NSColor(calibratedRed: 0.72, green: 0.71, blue: 0.67, alpha: 1)
+        default: NSColor(calibratedWhite: 0.8, alpha: 1)
+        }
+        var m = PhysicallyBasedMaterial()
+        m.baseColor = .init(tint: selected ? colour : colour.blended(withFraction: 0.3, of: .gray) ?? colour)
+        m.metallic = .init(floatLiteral: finish == "matt black" ? 0.2 : 1)
+        m.roughness = .init(floatLiteral: finish.hasPrefix("brushed") ? 0.45 : 0.3)
         return m
     }
 

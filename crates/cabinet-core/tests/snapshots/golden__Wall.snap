@@ -2335,7 +2335,7 @@ expression: list
     },
     {
       "item": "handle.cc128",
-      "description": "Handle, 128 mm hole centres",
+      "description": "Handle, 128 mm hole centres, stainless steel",
       "at": {
         "x": 300.0,
         "y": -9.0,

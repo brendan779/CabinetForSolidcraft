@@ -138,6 +138,16 @@ pub fn option_groups() -> Vec<OptionGroup> {
             ],
         ),
         group(
+            "handle_finish",
+            "Handle finish",
+            &[
+                ("stainless", "Stainless", "Stainless steel handles"),
+                ("black", "Black", "Matt black handles"),
+                ("brushed_brass", "Brass", "Brushed brass handles"),
+                ("brushed_nickel", "Nickel", "Brushed nickel handles"),
+            ],
+        ),
+        group(
             "handle_place",
             "Handle place",
             &[

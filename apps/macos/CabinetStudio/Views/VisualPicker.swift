@@ -83,6 +83,7 @@ struct ConstructionThumbnail: View {
             case "door_style": pen.doorStyle(choice)
             case "handle_size": pen.handleSize(choice)
             case "handle_place": pen.handlePlace(choice)
+            case "handle_finish": pen.handleFinish(choice)
             case "overlay": pen.overlayPlan(choice)
             case "fixings": pen.fixing(choice)
             case "biscuit": pen.biscuit(choice)
@@ -268,6 +269,19 @@ private struct Pen {
         for x in [50 - w / 2, 50 + w / 2] {
             ctx.fill(Path(ellipseIn: r(x - 1, 40, 2, 2)), with: .color(accent))
         }
+    }
+
+    /// A handle bar in the finish's colour on a door.
+    func handleFinish(_ choice: String) {
+        board(24, 8, 52, 64)
+        let colour: Color = switch choice {
+        case "black": Color(white: 0.1)
+        case "brushed_brass": Color(red: 0.76, green: 0.6, blue: 0.33)
+        case "brushed_nickel": Color(red: 0.72, green: 0.71, blue: 0.67)
+        default: Color(white: 0.75)
+        }
+        ctx.fill(Path(roundedRect: r(64, 14, 4, 26), cornerRadius: 2 * s), with: .color(colour))
+        ctx.stroke(Path(roundedRect: r(64, 14, 4, 26), cornerRadius: 2 * s), with: .color(.primary.opacity(0.6)), lineWidth: 0.8)
     }
 
     /// A base door hinged on the left and a drawer, with the handles where the choice puts them.

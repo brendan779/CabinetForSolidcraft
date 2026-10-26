@@ -101,6 +101,12 @@ pub struct BoardRecord {
     pub profile_groove: f64,
 }
 
+/// Handles as the viewport draws them (mm): a bar this square, standing this far off the front,
+/// running this far past its end holes.
+const HANDLE_BAR: f64 = 12.0;
+const HANDLE_STANDOFF: f64 = 30.0;
+const HANDLE_END: f64 = 15.0;
+
 /// A job's items in the sidebar's order: cabinets (cabinet JSON) and the fillers and end panels
 /// between them (run item JSON, `type` `filler` or `end_panel`). Cabinets named in `placed` keep
 /// their own position; everything else is one run along X from the origin.
@@ -413,7 +419,7 @@ fn summary(list: PartList) -> BuildSummary {
             ("right".into(), hi, front)
         })
     };
-    let panels = list
+    let mut panels: Vec<PanelBox> = list
         .parts
         .iter()
         .map(|p| {
@@ -457,6 +463,99 @@ fn summary(list: PartList) -> BuildSummary {
             )
         })
         .count() as u32;
+    // Handles, from their screw holes: a bar standing off the front face (a knob a square),
+    // swinging or sliding with their front.
+    let finish = list
+        .hardware
+        .iter()
+        .find(|h| h.item.starts_with("handle."))
+        .map(|h| {
+            h.description
+                .rsplit(", ")
+                .next()
+                .unwrap_or_default()
+                .to_string()
+        })
+        .unwrap_or_default();
+    for p in &list.parts {
+        let holes: Vec<_> = list
+            .operations
+            .iter()
+            .filter_map(|o| match o {
+                Operation::Bore {
+                    part,
+                    at,
+                    direction,
+                    depth,
+                    purpose: BorePurpose::HandleScrew,
+                    ..
+                } if *part == p.name => Some((*at, *direction, *depth)),
+                _ => None,
+            })
+            .collect();
+        let Some(&(first, dir, depth)) = holes.first() else {
+            continue;
+        };
+        let last = holes.last().unwrap().0;
+        let sign = if dir.positive { 1.0 } else { -1.0 };
+        // The front face, and outwards from it.
+        let face = first.get(dir.axis) + sign * depth;
+        let (lo, hi) = (
+            cabinet_core::geom::Vec3::new(
+                first.x.min(last.x),
+                first.y.min(last.y),
+                first.z.min(last.z),
+            ),
+            cabinet_core::geom::Vec3::new(
+                first.x.max(last.x),
+                first.y.max(last.y),
+                first.z.max(last.z),
+            ),
+        );
+        let reach = |v: f64, axis| {
+            if axis == dir.axis {
+                (
+                    face.min(face + sign * HANDLE_STANDOFF),
+                    face.max(face + sign * HANDLE_STANDOFF),
+                )
+            } else {
+                (v - HANDLE_BAR / 2.0, v + HANDLE_BAR / 2.0)
+            }
+        };
+        use cabinet_core::geom::Axis;
+        let span = |a: Axis| {
+            let (l, h) = (lo.get(a), hi.get(a));
+            if a == dir.axis {
+                reach(l, a)
+            } else if h - l > 1.0 {
+                (l - HANDLE_END, h + HANDLE_END)
+            } else {
+                reach(l, a)
+            }
+        };
+        let (x, y, z) = (span(Axis::X), span(Axis::Y), span(Axis::Z));
+        let front = panels.iter().find(|b| b.name == p.name);
+        let (hinged, hinge_x, hinge_y) = front
+            .map(|b| (b.hinged.clone(), b.hinge_x, b.hinge_y))
+            .unwrap_or_default();
+        let on_drawer = p.role == cabinet_core::part::PartRole::DrawerFront;
+        panels.push(PanelBox {
+            name: format!("{}.Handle", p.name),
+            role: if on_drawer { "Drawer handle" } else { "Handle" }.into(),
+            x: x.0,
+            y: y.0,
+            z: z.0,
+            width: x.1 - x.0,
+            depth: y.1 - y.0,
+            height: z.1 - z.0,
+            is_front: false,
+            hinged,
+            hinge_x,
+            hinge_y,
+            board: format!("handle:{finish}"),
+            grain: String::new(),
+        });
+    }
     BuildSummary {
         panels,
         operations: list.operations.len() as u32,
@@ -1594,7 +1693,8 @@ mod tests {
             .iter()
             .filter(|p| p.name.starts_with("B01.Door1"))
             .collect();
-        assert_eq!(door.len(), 5);
+        // Five pieces and the handle.
+        assert_eq!(door.len(), 6);
         let left = door.iter().map(|p| p.x).fold(f64::MAX, f64::min);
         for p in door {
             assert_eq!((p.hinged.as_str(), p.hinge_x), ("left", left), "{}", p.name);
@@ -1653,5 +1753,27 @@ mod tests {
             2
         );
         assert_eq!(sum.panels.iter().filter(|p| p.role == "Door").count(), 1);
+    }
+
+    /// STYLE-3: a door's handle is drawn standing off its front face, swinging with the door.
+    #[test]
+    fn handles_are_drawn_off_the_front_and_swing_with_it() {
+        let mut cab = Cabinet::new("B01", cabinet_core::CabinetKind::Base);
+        cab.standard.handle_finish = cabinet_core::model::HandleFinish::Black;
+        let sum = summary(cabinet_core::build_cabinet(&cab).unwrap());
+        let door = sum.panels.iter().find(|p| p.name == "B01.Door1").unwrap();
+        let h = sum
+            .panels
+            .iter()
+            .find(|p| p.name == "B01.Door1.Handle")
+            .unwrap();
+        assert_eq!(h.role, "Handle");
+        assert_eq!(h.board, "handle:matt black");
+        assert_eq!(
+            (h.hinged.as_str(), h.hinge_x),
+            (door.hinged.as_str(), door.hinge_x)
+        );
+        assert!((h.y + h.depth - door.y).abs() < 1e-9, "on the front face");
+        assert!((h.height - (128.0 + 30.0)).abs() < 1e-9);
     }
 }
