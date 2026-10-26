@@ -32,6 +32,7 @@ struct InspectorView: View {
                         FrontsSection(cab: cab)
                     }
                     LightsSection(cab: cab)
+                    CladdingSection(cab: cab)
                     BoardsSection(cab: cab)
                     ConstructionScope(cab: cab)
                     let overrides = project.overrides(of: cab)
@@ -517,6 +518,71 @@ struct HangingThumbnail: View {
                     ctx.fill(Path(CGRect(x: x - 1.5, y: y + 6, width: 3, height: drop)), with: .color(.accentColor.opacity(0.25)))
                 }
             }
+        }
+        .accessibilityHidden(true)
+    }
+}
+
+/// Lining boards on the faces seen from the room (an island's back and ends), drawn from above.
+struct CladdingSection: View {
+    @Environment(ProjectModel.self) private var project
+    @AppStorage(LengthUnit.key) private var unit: LengthUnit = .millimetres
+    let cab: CabinetDoc
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            SectionTitle("Cladding")
+            HStack(spacing: 8) {
+                ForEach([("left", "Left"), ("back", "Back"), ("right", "Right")], id: \.0) { face, title in
+                    let on = cab.clad(face)
+                    Button {
+                        withAnimation(.snappy) { var c = cab; c.setClad(face, !on); project.selected = c }
+                    } label: {
+                        VStack(spacing: 6) {
+                            CladThumbnail(face: face, on: on).frame(width: 48, height: 40)
+                            Text(title).font(.caption)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 8)
+                    }
+                    .buttonStyle(TileStyle(selected: on))
+                    .help("Clad the \(title.lowercased()) face in a lining board, flutes upright")
+                    .accessibilityLabel("Clad \(title.lowercased())")
+                    .accessibilityValue(on ? "on" : "off")
+                }
+            }
+            if ["left", "back", "right"].contains(where: cab.clad) {
+                HStack(spacing: 6) {
+                    Text("Thickness").foregroundStyle(.secondary)
+                    Spacer()
+                    ForEach([9.0, 12.0, 16.0], id: \.self) { t in
+                        Button(unit.format(t, suffix: false)) {
+                            withAnimation(.snappy) { var c = cab; c.cladThickness = t; project.selected = c }
+                        }
+                        .buttonStyle(ChipStyle(selected: abs(cab.cladThickness - t) < 0.5))
+                    }
+                }
+            }
+        }
+    }
+}
+
+/// A cabinet from above, its front at the bottom, with the clad face fluted.
+struct CladThumbnail: View {
+    let face: String
+    let on: Bool
+
+    var body: some View {
+        Canvas { ctx, size in
+            let w = size.width, h = size.height
+            let body = CGRect(x: w * 0.2, y: h * 0.25, width: w * 0.6, height: h * 0.5)
+            ctx.stroke(Path(body), with: .color(.primary.opacity(0.6)), lineWidth: 1)
+            let strip: CGRect = switch face {
+            case "left": CGRect(x: body.minX - 5, y: body.minY, width: 4, height: body.height + 4)
+            case "right": CGRect(x: body.maxX + 1, y: body.minY, width: 4, height: body.height + 4)
+            default: CGRect(x: body.minX, y: body.minY - 5, width: body.width, height: 4)
+            }
+            ctx.fill(Path(strip), with: .color(on ? Color.accentColor : Color.primary.opacity(0.2)))
         }
         .accessibilityHidden(true)
     }

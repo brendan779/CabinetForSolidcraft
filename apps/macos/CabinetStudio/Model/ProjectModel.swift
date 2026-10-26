@@ -218,6 +218,25 @@ struct CabinetDoc: Identifiable, Hashable, Codable {
         }
     }
 
+    private var cladding: [String: Any] { object["cladding"] as? [String: Any] ?? [:] }
+
+    /// Whether face `left`, `right` or `back` is clad.
+    func clad(_ face: String) -> Bool { cladding[face] as? Bool ?? false }
+
+    mutating func setClad(_ face: String, _ on: Bool) {
+        update { o in
+            var c = o["cladding"] as? [String: Any] ?? ["thickness": 12.0]
+            c[face] = on
+            let any = ["left", "right", "back"].contains { c[$0] as? Bool ?? false }
+            o["cladding"] = any ? c : nil
+        }
+    }
+
+    var cladThickness: Double {
+        get { (cladding["thickness"] as? NSNumber)?.doubleValue ?? 12 }
+        set { update { o in var c = o["cladding"] as? [String: Any] ?? [:]; c["thickness"] = newValue; o["cladding"] = c } }
+    }
+
     /// A wardrobe's hanging: `long` or `double`.
     var hanging: String {
         get { object["wardrobe"] as? String ?? "long" }

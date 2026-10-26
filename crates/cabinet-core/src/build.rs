@@ -106,6 +106,7 @@ pub fn build_cabinet(cab: &Cabinet) -> Result<PartList> {
         b.wall_hanging();
         b.sink();
         b.lights();
+        b.cladding();
         b.cover_caps();
         b.opening();
         // Last: hinges, handles and drawer fixings are placed on the slab, then move to the
@@ -2660,6 +2661,42 @@ impl<'a> Builder<'a> {
         }
     }
 
+    /// Lining boards on the clad faces, standing proud of the carcass: the ends from the door
+    /// faces to the back (and over the back's cladding), the back across the width; floor to top
+    /// with the grain (the flutes) upright. Glued and pinned on site: no machining.
+    fn cladding(&mut self) {
+        let cab = self.cab;
+        let c = &cab.cladding;
+        if c.is_none() {
+            return;
+        }
+        let (w, d, h) = (cab.width, cab.depth, cab.height);
+        let ct = c.thickness;
+        let ft = cab.standard.front_thickness;
+        let back_t = if c.back { ct } else { 0.0 };
+        let mut pieces = Vec::new();
+        if c.left {
+            pieces.push(("Left", aabb(-ct, -ft, 0.0, 0.0, d + back_t, h), Axis::X));
+        }
+        if c.right {
+            pieces.push(("Right", aabb(w, -ft, 0.0, w + ct, d + back_t, h), Axis::X));
+        }
+        if c.back {
+            pieces.push(("Back", aabb(0.0, d, 0.0, w, d + ct, h), Axis::Y));
+        }
+        for (side, bounds, axis) in pieces {
+            self.list.parts.push(Part {
+                name: format!("{}.{}{side}", cab.id, PartRole::Cladding.code()),
+                role: PartRole::Cladding,
+                bounds,
+                thickness_axis: axis,
+                grain_axis: Some(Axis::Z),
+                board: c.board.clone(),
+                edges: EdgeBanding::default(),
+            });
+        }
+    }
+
     /// Each light's strip, and a cable hole through the panel between it and the void behind
     /// the back: down through the bottom for under-cabinet and plinth lights, up through the
     /// top (or back rail) for lights inside.
@@ -4278,6 +4315,54 @@ mod tests {
                 .iter()
                 .all(|(_, b)| b.size.z != FINGER_PULL_HEIGHT)
         );
+    }
+
+    /// SURR-2: an island cabinet clad on its back and ends: the ends run from the door faces
+    /// over the back cladding's edges, floor to top, flutes upright; nothing overlaps the carcass.
+    #[test]
+    fn cladding_stands_proud_of_the_clad_faces() {
+        let mut cab = Cabinet::new("B01", CabinetKind::Base);
+        cab.cladding = crate::model::Cladding {
+            left: true,
+            right: true,
+            back: true,
+            ..Default::default()
+        };
+        let list = build_cabinet(&cab).unwrap();
+        let get = |n: &str| list.part(n).unwrap_or_else(|| panic!("{n}")).bounds;
+        let (l, r, b) = (
+            get("B01.CladLeft"),
+            get("B01.CladRight"),
+            get("B01.CladBack"),
+        );
+        assert_eq!((l.max().x, r.min.x, b.min.y), (0.0, 600.0, 580.0));
+        assert_eq!(
+            l.max().y,
+            b.max().y,
+            "the end covers the back cladding's edge"
+        );
+        assert_eq!((l.min.z, l.max().z), (0.0, 870.0));
+        assert!(
+            list.parts
+                .iter()
+                .filter(|p| p.role == PartRole::Cladding)
+                .all(|p| p.grain_axis == Some(Axis::Z))
+        );
+        let carcass: Vec<_> = list
+            .parts
+            .iter()
+            .filter(|p| p.role != PartRole::Cladding)
+            .collect();
+        for c in list.parts.iter().filter(|p| p.role == PartRole::Cladding) {
+            for p in &carcass {
+                assert!(
+                    !c.bounds.overlaps(&p.bounds),
+                    "{} overlaps {}",
+                    c.name,
+                    p.name
+                );
+            }
+        }
     }
 
     fn handle_holes(list: &PartList, part: &str) -> Vec<Vec3> {

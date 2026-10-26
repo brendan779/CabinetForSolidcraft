@@ -52,6 +52,10 @@ pub struct Cabinet {
     /// How a wardrobe hangs clothes (ignored by other kinds).
     #[serde(default)]
     pub wardrobe: Hanging,
+    /// Lining boards (a Surround profile) on the faces seen from the room: an island's back
+    /// and ends.
+    #[serde(default, skip_serializing_if = "Cladding::is_none")]
+    pub cladding: Cladding,
     /// The second leg of an L-shaped corner cabinet (ignored by other kinds).
     #[serde(default)]
     pub corner: Corner,
@@ -130,6 +134,37 @@ impl Default for Sink {
             back_cutout: true,
             liner: true,
         }
+    }
+}
+
+/// Which faces are clad, and in what.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(default)]
+pub struct Cladding {
+    pub left: bool,
+    pub right: bool,
+    pub back: bool,
+    /// Catalog lining board id, or empty for generic.
+    pub board: String,
+    pub thickness: f64,
+}
+
+impl Default for Cladding {
+    /// Nothing clad; 12 mm, a common Surround thickness, when something is.
+    fn default() -> Self {
+        Self {
+            left: false,
+            right: false,
+            back: false,
+            board: String::new(),
+            thickness: 12.0,
+        }
+    }
+}
+
+impl Cladding {
+    pub fn is_none(&self) -> bool {
+        !(self.left || self.right || self.back)
     }
 }
 
@@ -223,6 +258,7 @@ impl Cabinet {
             blind: Blind::default(),
             sink: Sink::default(),
             wardrobe: Hanging::default(),
+            cladding: Cladding::default(),
             corner: Corner::for_kind(kind),
             exposed: Exposed::default(),
         }

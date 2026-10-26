@@ -46,6 +46,8 @@ pub enum PartRole {
     Benchtop,
     /// A slab splashback standing on a benchtop piece.
     Splashback,
+    /// A lining board on a face seen from the room: `CladLeft`, `CladRight`, `CladBack`.
+    Cladding,
 }
 
 impl PartRole {
@@ -75,6 +77,7 @@ impl PartRole {
             PartRole::FramePanel => "Frame panel",
             PartRole::Benchtop => "Benchtop",
             PartRole::Splashback => "Splashback",
+            PartRole::Cladding => "Cladding",
         }
     }
 
@@ -106,6 +109,7 @@ impl PartRole {
             PartRole::FramePanel => "Panel",
             PartRole::Benchtop => "Benchtop",
             PartRole::Splashback => "Splashback",
+            PartRole::Cladding => "Clad",
         }
     }
 
@@ -123,6 +127,7 @@ impl PartRole {
                 | PartRole::BlindPanel
                 | PartRole::Filler
                 | PartRole::EndPanel
+                | PartRole::Cladding
         )
     }
 }
