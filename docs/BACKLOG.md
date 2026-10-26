@@ -208,7 +208,7 @@ features in words.
 
 | id | status | size | task | done when |
 |---|---|---|---|---|
-| BENCH-1 | todo | M | Benchtop model per run: thickness presets (20, 33, 40, 60, 80+ mm built-up), front/side overhangs, back and end clearances, material from catalog (laminate, compact, stone, timber) | a run gets a benchtop part that follows the run and overhangs |
+| BENCH-1 | needs-human (built in c717de4: the run item, pieces per stretch, inspector chips; not seen on screen; material picker beyond the board slot and stone/compact kinds left to BENCH-5's quoting) | M | Benchtop model per run: thickness presets (20, 33, 40, 60, 80+ mm built-up), front/side overhangs, back and end clearances, material from catalog (laminate, compact, stone, timber) | a run gets a benchtop part that follows the run and overhangs |
 | BENCH-2 | todo | M | Edge profiles as a visual picker: square, pencil round, bullnose, bevel, mitred apron (thick look) | profile shown in the 3D view and on sheets |
 | BENCH-3 | todo | L | Transitions: L and U corners (mitre or butt joint, joint position picker), thickness steps, waterfall ends (mitred drop to floor), rounded/radius island ends, breakfast-bar overhang with a support rule | split into BENCH-3a..e |
 | BENCH-4 | todo | M | Cut-outs: sink (undermount/top mount), cooktop, tap holes, power pop-ups, from appliance templates | cut-outs on the benchtop sheet |
@@ -355,3 +355,4 @@ Agents append one line per session: date, items touched, outcome.
 - 2026-10-26b (night) — P2-2b done (e88b3c7): glass frame fronts.
 - 2026-10-26b (night) — P2-3 split; P2-3a done (29a1648): wardrobe kind with hat shelf and rails.
 - 2026-10-26b (night) — P2-3b done (5235a38): wardrobe inner drawers at the foot under a fixed shelf.
+- 2026-10-26b (night) — BENCH-1 built (c717de4): benchtop run item, one piece per stretch of base cabinets with front/end overhangs; started the P2 kitchen design section now that the P1 cabinet systems are done apart from rows waiting on the owner.
