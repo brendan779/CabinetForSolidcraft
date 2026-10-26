@@ -114,7 +114,7 @@ All Blum rows: source = Blum Catalogue and technical manual 2024/2025 in `vendor
 | HAF-3 | needs-human (count done in a7d72a0: 4 per adjustable shelf as generic `shelf-support.5mm`; the article needs the owner's pick and the supplier's data, like HAF-4) | M | Shelf supports (5 mm pins) article + count | BOM |
 | HAF-4 | needs-human (Häfele data) | L | Loox5 lighting: profiles (surface, recessed, shelf-edge), 12 V/24 V strips, drivers, distributors, switches/sensors | split |
 | HAF-5 | done (95d183b) | M | Lighting rules: no mixing 12/24 V; ≤ 80 % driver load; ports per distributor; cable holes Ø10 through panels added as ops | unit tests for each rule |
-| HAF-6 | todo | M | Lighting placement UI: click under-cabinet / in-cabinet / plinth zones on a cabinet drawing | picker in inspector |
+| HAF-6 | needs-human (built in 299d534; not seen on screen here: switch on a light in the inspector and look) | M | Lighting placement UI: click under-cabinet / in-cabinet / plinth zones on a cabinet drawing | picker in inspector |
 | HAF-7 | 👤 needs-human | M | Import the owner's Häfele STEP files (`vendor-cad/hafele/`) like BLUM-9 | — |
 | HAF-8 | dropped (owner 2026-10-26: use Blum's wall hanging bracket 48N0510 and its back cut-out, as built in BLUM-14) | S | Wall hanger + wall rail articles for the generic `wall-hanger.concealed` / `wall-hanger.rail` placements (CORE-3): pick a system (Häfele/Camar), its drilling and rail lengths, from the supplier's data | BOM rows with article numbers; hanger drilling ops |
 
@@ -342,3 +342,4 @@ Agents append one line per session: date, items touched, outcome.
 - 2026-10-26b (night) — BLUM-7b HK-S/HK-XS done (1b0e81f): two new lift kinds (small stay lift, stay lift on hinges) with their mechanisms by power factor (TIP-ON sets under TIP-ON), HK-XS doubled on two sides, hinges 2/3/4; drilling left as BLUM-7c (waits for the CAD like HF top).
 - 2026-10-26b (night) — DATA-5b part (99dba8e): 106 Laminex compact laminate boards (guide pp. 76-77, 13/16/18 mm); product lines cross-checked 106/106. Re-run with --retrieved 2026-10-23 (same guide edition, Sep 2025): every earlier record unchanged.
 - 2026-10-26b (night) — DATA-5b part (b5092fd): 28 Trade Essentials plywood boards (p.104, decorative and non-structural half); bending ply keeps both grain directions as printed.
+- 2026-10-26b (night) — HAF-6 built (299d534): inspector Lights section with drawn zone tiles and voltage/power chips; not seen on screen.
