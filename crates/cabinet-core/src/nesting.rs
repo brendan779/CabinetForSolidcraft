@@ -77,6 +77,21 @@ pub struct Sheet {
     pub stock: Stock,
     pub placements: Vec<Placement>,
     pub offcuts: Vec<Rect>,
+    /// A kept offcut from an earlier job, not a new sheet: no trim, and it costs nothing.
+    #[serde(default)]
+    pub from_offcut: bool,
+}
+
+/// A piece kept from an earlier job, to nest on before new sheets.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct Offcut {
+    pub board: String,
+    pub thickness: f64,
+    /// Along the grain of the sheet it came from.
+    pub length: f64,
+    pub width: f64,
+    #[serde(default)]
+    pub grained: bool,
 }
 
 impl Sheet {
@@ -94,11 +109,22 @@ pub struct Nesting {
     pub unplaced: Vec<String>,
 }
 
-/// Nests every cut list row, grouped by board and thickness, on the sheet `stock` gives for that
-/// board and thickness (`None`: the group is reported as unplaced).
+/// Nests every cut list row, grouped by board and thickness, on the sheet sizes `stock` offers
+/// for that board and thickness: each size is tried and the one that places most parts on the
+/// least sheet area wins (none offered: the group is reported as unplaced).
 pub fn nest(
     rows: &[CutRow],
-    stock: impl Fn(&str, f64) -> Option<Stock>,
+    stock: impl Fn(&str, f64) -> Vec<Stock>,
+    settings: &Settings,
+) -> Nesting {
+    nest_with_offcuts(rows, stock, &[], settings)
+}
+
+/// As [`nest`], placing parts on the kept `offcuts` of their board and thickness first.
+pub fn nest_with_offcuts(
+    rows: &[CutRow],
+    stock: impl Fn(&str, f64) -> Vec<Stock>,
+    offcuts: &[Offcut],
     settings: &Settings,
 ) -> Nesting {
     let mut groups: BTreeMap<(String, i64), Vec<&CutRow>> = BTreeMap::new();
@@ -109,7 +135,23 @@ pub fn nest(
     let mut out = Nesting::default();
     for ((board, _), group) in groups {
         let thickness = group[0].thickness;
-        let Some(s) = stock(&board, thickness) else {
+        let mine: Vec<&Offcut> = offcuts
+            .iter()
+            .filter(|o| o.board == board && (o.thickness - thickness).abs() < 1e-6)
+            .collect();
+        let best = stock(&board, thickness)
+            .iter()
+            .map(|s| nest_group(&board, thickness, s, &mine, &group, settings))
+            .min_by(|(a, ua), (b, ub)| {
+                let area = |v: &Vec<Sheet>| -> f64 {
+                    v.iter()
+                        .filter(|s| !s.from_offcut)
+                        .map(|s| s.stock.length * s.stock.width)
+                        .sum()
+                };
+                ua.len().cmp(&ub.len()).then(area(a).total_cmp(&area(b)))
+            });
+        let Some((sheets, unplaced)) = best else {
             out.unplaced.extend(
                 group
                     .iter()
@@ -117,7 +159,6 @@ pub fn nest(
             );
             continue;
         };
-        let (sheets, unplaced) = nest_group(&board, thickness, &s, &group, settings);
         out.sheets.extend(sheets);
         out.unplaced.extend(unplaced);
     }
@@ -133,6 +174,7 @@ fn nest_group(
     board: &str,
     thickness: f64,
     stock: &Stock,
+    offcuts: &[&Offcut],
     rows: &[&CutRow],
     settings: &Settings,
 ) -> (Vec<Sheet>, Vec<String>) {
@@ -152,7 +194,30 @@ fn nest_group(
         length: stock.length - 2.0 * settings.trim,
         width: stock.width - 2.0 * settings.trim,
     };
-    let mut open: Vec<Open> = Vec::new();
+    // Kept offcuts first: cut edges, no trim.
+    let mut open: Vec<Open> = offcuts
+        .iter()
+        .map(|o| Open {
+            sheet: Sheet {
+                board: board.to_string(),
+                thickness,
+                stock: Stock {
+                    length: o.length,
+                    width: o.width,
+                    grained: o.grained,
+                },
+                placements: Vec::new(),
+                offcuts: Vec::new(),
+                from_offcut: true,
+            },
+            free: vec![Rect {
+                x: 0.0,
+                y: 0.0,
+                length: o.length,
+                width: o.width,
+            }],
+        })
+        .collect();
     let mut unplaced = Vec::new();
     for r in parts {
         let fits_blank = |turned: bool| {
@@ -192,6 +257,7 @@ fn nest_group(
                         stock: stock.clone(),
                         placements: Vec::new(),
                         offcuts: Vec::new(),
+                        from_offcut: false,
                     },
                     free: vec![usable],
                 });
@@ -216,6 +282,7 @@ fn nest_group(
     }
     let sheets = open
         .into_iter()
+        .filter(|o| !(o.sheet.from_offcut && o.sheet.placements.is_empty()))
         .map(|mut o| {
             o.sheet.offcuts = o
                 .free
@@ -229,6 +296,32 @@ fn nest_group(
         })
         .collect();
     (sheets, unplaced)
+}
+
+/// The offcuts to keep after cutting a job: the kept ones it did not use, and every usable
+/// leftover of the sheets and offcuts it did.
+pub fn kept_offcuts(n: &Nesting, stored: &[Offcut]) -> Vec<Offcut> {
+    let mut left: Vec<Offcut> = stored.to_vec();
+    for s in n.sheets.iter().filter(|s| s.from_offcut) {
+        if let Some(i) = left.iter().position(|o| {
+            o.board == s.board
+                && (o.thickness - s.thickness).abs() < 1e-6
+                && o.length == s.stock.length
+                && o.width == s.stock.width
+        }) {
+            left.remove(i);
+        }
+    }
+    for s in &n.sheets {
+        left.extend(s.offcuts.iter().map(|r| Offcut {
+            board: s.board.clone(),
+            thickness: s.thickness,
+            length: r.length,
+            width: r.width,
+            grained: s.stock.grained,
+        }));
+    }
+    left
 }
 
 /// A part's cut size on the sheet, turned or not.
@@ -307,13 +400,13 @@ mod tests {
         }
     }
 
-    fn stock(grained: bool) -> impl Fn(&str, f64) -> Option<Stock> {
+    fn stock(grained: bool) -> impl Fn(&str, f64) -> Vec<Stock> {
         move |_, _| {
-            Some(Stock {
+            vec![Stock {
                 length: 2400.0,
                 width: 1200.0,
                 grained,
-            })
+            }]
         }
     }
 
@@ -428,7 +521,7 @@ mod tests {
         assert_eq!(n.sheets.len(), 3);
         let none = nest(
             &[row("x", 10.0, 10.0, 1, false)],
-            |_, _| None,
+            |_, _| Vec::new(),
             &Settings::default(),
         );
         assert!(none.unplaced[0].contains("no 16 mm sheet"));
@@ -454,5 +547,83 @@ mod tests {
         let parts: u32 = cut.rows.iter().map(|r| r.quantity).sum();
         let placed: usize = n.sheets.iter().map(|s| s.placements.len()).sum();
         assert_eq!(placed as u32, parts);
+    }
+
+    /// OUT-5d: of the sizes offered, the one using least sheet area.
+    #[test]
+    fn the_sheet_size_using_least_area_is_chosen() {
+        let sizes = |_: &str, _: f64| {
+            vec![
+                Stock {
+                    length: 2400.0,
+                    width: 1200.0,
+                    grained: false,
+                },
+                Stock {
+                    length: 3600.0,
+                    width: 1800.0,
+                    grained: false,
+                },
+            ]
+        };
+        // Two 1700 × 1100 parts: a big sheet takes both, two small ones are smaller in all.
+        let n = nest(
+            &[row("p", 1700.0, 1100.0, 2, false)],
+            sizes,
+            &Settings::default(),
+        );
+        assert_eq!(n.sheets.len(), 2);
+        assert_eq!(n.sheets[0].stock.length, 2400.0);
+        // A part only the big sheet holds.
+        let n = nest(
+            &[row("p", 3000.0, 1500.0, 1, false)],
+            sizes,
+            &Settings::default(),
+        );
+        assert!(n.unplaced.is_empty());
+        assert_eq!(n.sheets[0].stock.length, 3600.0);
+    }
+
+    /// OUT-5d: a kept offcut takes the parts it can before a new sheet is opened; afterwards it
+    /// is gone from the store and the job's leftovers are in it.
+    #[test]
+    fn kept_offcuts_are_used_first_and_the_store_follows() {
+        let offcut = Offcut {
+            board: "white".into(),
+            thickness: 16.0,
+            length: 900.0,
+            width: 600.0,
+            grained: true,
+        };
+        let other = Offcut {
+            thickness: 18.0,
+            ..offcut.clone()
+        };
+        let stored = [offcut.clone(), other.clone()];
+        let s = Settings::default();
+        let n = nest_with_offcuts(
+            &[row("shelf", 800.0, 500.0, 1, true)],
+            stock(true),
+            &stored,
+            &s,
+        );
+        assert_eq!(n.sheets.len(), 1);
+        assert!(n.sheets[0].from_offcut);
+        assert_eq!(
+            n.sheets[0].placements[0].rect.x, 0.0,
+            "no trim on a cut edge"
+        );
+        let kept = kept_offcuts(&n, &stored);
+        assert!(kept.contains(&other));
+        assert!(!kept.contains(&offcut));
+        // Too big for the offcut: a new sheet, the offcut stays.
+        let n = nest_with_offcuts(
+            &[row("side", 1000.0, 560.0, 1, true)],
+            stock(true),
+            &stored,
+            &s,
+        );
+        assert!(n.sheets.iter().all(|s| !s.from_offcut));
+        assert!(kept_offcuts(&n, &stored).contains(&offcut));
     }
 }

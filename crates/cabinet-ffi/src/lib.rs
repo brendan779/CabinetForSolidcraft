@@ -571,13 +571,14 @@ pub fn cut_sheets_pdf(items: JobItems, job: String) -> Result<Vec<u8>, CoreError
 /// The usual Australian sheet for parts without a catalog board (mm).
 const GENERIC_SHEET: (f64, f64) = (2400.0, 1200.0);
 
-/// The job's parts nested on stock sheets for the panel saw. Each board's first catalog sheet size
-/// is its stock; parts with no board go on 2400 × 1200 sheets.
+/// The job's parts nested on stock sheets for the panel saw, on whichever of each board's catalog
+/// sheet sizes uses least board; parts with no board go on 2400 × 1200 sheets.
 fn job_nesting(
     items: &JobItems,
     catalog_dir: &str,
     kerf: f64,
     trim: f64,
+    offcuts: &[cabinet_core::nesting::Offcut],
 ) -> Result<
     (
         cabinet_core::nesting::Nesting,
@@ -585,7 +586,7 @@ fn job_nesting(
     ),
     CoreError,
 > {
-    use cabinet_core::nesting::{Settings, Stock, nest};
+    use cabinet_core::nesting::{Settings, Stock, nest_with_offcuts};
     let (lists, tape) = cut_lists(items)?;
     let cat = cabinet_catalog::Catalog::load(std::path::Path::new(catalog_dir)).map_err(invalid)?;
     let rows = cut_list(&lists, "Generic", tape).rows;
@@ -594,23 +595,51 @@ fn job_nesting(
         trim,
         ..Settings::default()
     };
-    let nesting = nest(
+    let nesting = nest_with_offcuts(
         &rows,
         |board, _| match cat.board(board) {
-            Some(b) => b.sheets.first().map(|s| Stock {
-                length: s.length,
-                width: s.width,
-                grained: b.grained,
-            }),
-            None => Some(Stock {
+            Some(b) => b
+                .sheets
+                .iter()
+                .map(|s| Stock {
+                    length: s.length,
+                    width: s.width,
+                    grained: b.grained,
+                })
+                .collect(),
+            None => vec![Stock {
                 length: GENERIC_SHEET.0,
                 width: GENERIC_SHEET.1,
                 grained: false,
-            }),
+            }],
         },
+        offcuts,
         &settings,
     );
     Ok((nesting, settings))
+}
+
+/// Kept offcuts as the app stores them (a JSON array; empty text for none).
+fn offcuts(json: &str) -> Result<Vec<cabinet_core::nesting::Offcut>, CoreError> {
+    if json.trim().is_empty() {
+        return Ok(Vec::new());
+    }
+    serde_json::from_str(json).map_err(invalid)
+}
+
+/// The offcuts to keep after cutting the job (as JSON): the kept ones it did not use and its
+/// leftovers.
+#[uniffi::export]
+pub fn nesting_kept_offcuts(
+    items: JobItems,
+    catalog_dir: String,
+    kerf: f64,
+    trim: f64,
+    offcuts_json: String,
+) -> Result<String, CoreError> {
+    let stored = offcuts(&offcuts_json)?;
+    let (nesting, _) = job_nesting(&items, &catalog_dir, kerf, trim, &stored)?;
+    serde_json::to_string(&cabinet_core::nesting::kept_offcuts(&nesting, &stored)).map_err(invalid)
 }
 
 /// The nesting as a PDF: a summary with the offcuts, then a page per sheet.
@@ -621,8 +650,10 @@ pub fn nesting_pdf(
     job: String,
     kerf: f64,
     trim: f64,
+    offcuts_json: String,
 ) -> Result<Vec<u8>, CoreError> {
-    let (nesting, settings) = job_nesting(&items, &catalog_dir, kerf, trim)?;
+    let (nesting, settings) =
+        job_nesting(&items, &catalog_dir, kerf, trim, &offcuts(&offcuts_json)?)?;
     Ok(cabinet_sheets::nesting::nesting_pdf(
         &nesting, &job, &settings,
     ))
@@ -636,8 +667,10 @@ pub fn nesting_pages(
     job: String,
     kerf: f64,
     trim: f64,
+    offcuts_json: String,
 ) -> Result<Vec<String>, CoreError> {
-    let (nesting, settings) = job_nesting(&items, &catalog_dir, kerf, trim)?;
+    let (nesting, settings) =
+        job_nesting(&items, &catalog_dir, kerf, trim, &offcuts(&offcuts_json)?)?;
     Ok(cabinet_sheets::nesting::nesting_svgs(
         &nesting, &job, &settings,
     ))
@@ -1194,5 +1227,16 @@ mod tests {
         assert_eq!(csv.lines().count(), rows.len() + 1);
         let pdf = hardware_bom_pdf(job(&items), catalog(), "Sample".into()).unwrap();
         assert!(pdf.starts_with(b"%PDF"));
+    }
+
+    #[test]
+    fn kept_offcuts_read_from_the_apps_store() {
+        assert!(offcuts("").unwrap().is_empty());
+        let o = offcuts(
+            r#"[{"board":"Generic","thickness":16.0,"length":900.0,"width":600.0,"grained":false}]"#,
+        )
+        .unwrap();
+        assert_eq!(o[0].width, 600.0);
+        assert!(offcuts("not json").is_err());
     }
 }

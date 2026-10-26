@@ -41,7 +41,12 @@ pub fn sheet_svg(sheet: &Sheet, n: usize, of: usize, job: &str, settings: &Setti
     page_start(&mut svg);
     let _ = writeln!(
         svg,
-        r##"<text x="{MARGIN:.2}" y="16.00" font-size="6">Sheet {n} of {of}</text>"##
+        r##"<text x="{MARGIN:.2}" y="16.00" font-size="6">Sheet {n} of {of}{}</text>"##,
+        if sheet.from_offcut {
+            ": a kept offcut"
+        } else {
+            ""
+        }
     );
     let _ = writeln!(
         svg,
@@ -72,12 +77,18 @@ pub fn sheet_svg(sheet: &Sheet, n: usize, of: usize, job: &str, settings: &Setti
         l * scale,
         w * scale
     );
-    let (tx, ty) = at(settings.trim, settings.trim);
+    // A kept offcut has cut edges: no trim.
+    let trim = if sheet.from_offcut {
+        0.0
+    } else {
+        settings.trim
+    };
+    let (tx, ty) = at(trim, trim);
     let _ = writeln!(
         svg,
         r##"<rect x="{tx:.2}" y="{ty:.2}" width="{:.2}" height="{:.2}" fill="#ffffff"/>"##,
-        (l - 2.0 * settings.trim) * scale,
-        (w - 2.0 * settings.trim) * scale
+        (l - 2.0 * trim) * scale,
+        (w - 2.0 * trim) * scale
     );
     for o in &sheet.offcuts {
         let (x, y) = at(o.x, o.y);
@@ -150,8 +161,9 @@ fn summary_lines(nesting: &Nesting) -> Vec<String> {
     let mut lines = vec!["Sheets".to_string()];
     for (i, s) in nesting.sheets.iter().enumerate() {
         lines.push(format!(
-            "  {}. {}, {:.0} mm, {:.0} × {:.0}: {}, {:.0} % used",
+            "  {}. {}{}, {:.0} mm, {:.0} × {:.0}: {}, {:.0} % used",
             i + 1,
+            if s.from_offcut { "kept offcut of " } else { "" },
             s.board,
             s.thickness,
             s.stock.length,
@@ -267,11 +279,11 @@ mod tests {
         nest(
             &cut.rows,
             |_, _| {
-                Some(Stock {
+                vec![Stock {
                     length: 2400.0,
                     width: 1200.0,
                     grained: false,
-                })
+                }]
             },
             &Settings::default(),
         )

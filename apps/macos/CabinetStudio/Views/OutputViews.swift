@@ -34,18 +34,42 @@ struct CutListView: View {
     }
 }
 
+/// Offcuts kept from earlier jobs, as the core's JSON, in Application Support/CabinetStudio.
+enum OffcutStore {
+    static var url: URL {
+        FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+            .appending(path: "CabinetStudio/offcuts.json")
+    }
+
+    static func load() -> String { (try? String(contentsOf: url, encoding: .utf8)) ?? "" }
+
+    static func save(_ json: String) throws {
+        try FileManager.default.createDirectory(at: url.deletingLastPathComponent(),
+                                                withIntermediateDirectories: true)
+        try json.write(to: url, atomically: true, encoding: .utf8)
+    }
+
+    static func count(_ json: String) -> Int {
+        ((try? JSONSerialization.jsonObject(with: Data(json.utf8))) as? [Any])?.count ?? 0
+    }
+}
+
 /// The parts nested on stock sheets for the panel saw: a summary page, then each sheet to scale.
 struct NestingView: View {
     @Environment(ProjectModel.self) private var project
     @AppStorage("nestingKerf") private var kerf = 4.4
     @AppStorage("nestingTrim") private var trim = 10.0
+    @AppStorage("nestingUseOffcuts") private var useOffcuts = true
+    @State private var stored = OffcutStore.load()
     @State private var page = 0
     @State private var export: DataDocument?
+
+    private var offcuts: String { useOffcuts ? stored : "" }
 
     private var pages: [String] {
         guard let dir = Preferences.catalogDir?.path else { return [] }
         return (try? nestingPages(items: project.jobItems, catalogDir: dir, job: project.jobName,
-                                  kerf: kerf, trim: trim)) ?? []
+                                  kerf: kerf, trim: trim, offcutsJson: offcuts)) ?? []
     }
 
     var body: some View {
@@ -60,24 +84,35 @@ struct NestingView: View {
                 }
             }
             .frame(minWidth: 0, maxWidth: .infinity, maxHeight: .infinity)
-            HStack(spacing: 10) {
-                Button("Previous", systemImage: "chevron.left") { page = max(0, page - 1) }
-                    .labelStyle(.iconOnly)
-                    .disabled(page == 0)
-                Text(pages.isEmpty ? "" : (page == 0 ? "Summary" : "Sheet \(page) of \(pages.count - 1)"))
-                    .monospacedDigit()
-                    .frame(minWidth: 0)
-                Button("Next", systemImage: "chevron.right") { page = min(pages.count - 1, page + 1) }
-                    .labelStyle(.iconOnly)
-                    .disabled(page >= pages.count - 1)
-                Spacer(minLength: 0)
-                Stepper("Kerf \(String(format: "%.1f", kerf))", value: $kerf, in: 1...8, step: 0.2)
-                    .help("Saw kerf, mm")
-                Stepper("Trim \(Int(trim))", value: $trim, in: 0...25, step: 1)
-                    .help("Taken off every sheet edge before the first cut, mm")
-                Button("Export PDF…", systemImage: "doc.richtext") { makePdf() }
-                    .labelStyle(.iconOnly)
-                    .help("The summary and every sheet as a PDF")
+            VStack(spacing: 6) {
+                HStack(spacing: 10) {
+                    Button("Previous", systemImage: "chevron.left") { page = max(0, page - 1) }
+                        .labelStyle(.iconOnly)
+                        .disabled(page == 0)
+                    Text(pages.isEmpty ? "" : (page == 0 ? "Summary" : "Sheet \(page) of \(pages.count - 1)"))
+                        .monospacedDigit()
+                    Button("Next", systemImage: "chevron.right") { page = min(pages.count - 1, page + 1) }
+                        .labelStyle(.iconOnly)
+                        .disabled(page >= pages.count - 1)
+                    Spacer(minLength: 0)
+                    Button("Export PDF…", systemImage: "doc.richtext") { makePdf() }
+                        .help("The summary and every sheet as a PDF")
+                }
+                HStack(spacing: 10) {
+                    Stepper("Kerf \(String(format: "%.1f", kerf))", value: $kerf, in: 1...8, step: 0.2)
+                        .help("Saw kerf, mm")
+                    Stepper("Trim \(Int(trim))", value: $trim, in: 0...25, step: 1)
+                        .help("Taken off every new sheet's edges before the first cut, mm")
+                    Spacer(minLength: 0)
+                    Menu("Offcuts (\(OffcutStore.count(stored)))") {
+                        Toggle("Nest on Kept Offcuts First", isOn: $useOffcuts)
+                        Button("Keep This Job's Offcuts") { keepOffcuts() }
+                        Divider()
+                        Button("Forget Kept Offcuts", role: .destructive) { forget() }
+                    }
+                    .fixedSize()
+                    .help("Offcuts kept from earlier jobs: nest on them first, and after cutting this job keep its leftovers (the kept offcuts it used are taken off)")
+                }
             }
             .padding(10)
             .frame(minWidth: 0, maxWidth: .infinity)
@@ -95,10 +130,39 @@ struct NestingView: View {
         guard let dir = Preferences.catalogDir?.path else { return }
         do {
             export = DataDocument(data: try nestingPdf(items: project.jobItems, catalogDir: dir,
-                                                      job: project.jobName, kerf: kerf, trim: trim))
+                                                      job: project.jobName, kerf: kerf, trim: trim,
+                                                      offcutsJson: offcuts))
         } catch {
             project.lastError = "Could not nest the parts: \(error)"
         }
+    }
+
+    /// After cutting this job: its leftovers join the store, the kept offcuts it used leave it.
+    private func keepOffcuts() {
+        guard let dir = Preferences.catalogDir?.path else { return }
+        do {
+            let kept = try nestingKeptOffcuts(items: project.jobItems, catalogDir: dir, kerf: kerf,
+                                              trim: trim, offcutsJson: offcuts)
+            // Offcuts not offered to this nesting stay as they were.
+            let json = useOffcuts ? kept : merge(stored, kept)
+            try OffcutStore.save(json)
+            stored = json
+            project.status = "Keeping \(OffcutStore.count(json)) offcuts"
+        } catch {
+            project.lastError = "Could not keep the offcuts: \(error)"
+        }
+    }
+
+    private func forget() {
+        try? OffcutStore.save("")
+        stored = ""
+    }
+
+    private func merge(_ a: String, _ b: String) -> String {
+        let parse = { (s: String) in ((try? JSONSerialization.jsonObject(with: Data(s.utf8))) as? [Any]) ?? [] }
+        let all = parse(a) + parse(b)
+        let data = (try? JSONSerialization.data(withJSONObject: all)) ?? Data("[]".utf8)
+        return String(decoding: data, as: UTF8.self)
     }
 }
 
@@ -195,7 +259,7 @@ struct PartsListView: View {
                     .foregroundStyle(.secondary)
                 Spacer()
                 Button("Nesting…", systemImage: "rectangle.split.3x3") { makeNesting() }
-                    .help("The parts laid out on stock sheets for the panel saw (4.4 mm kerf, 10 mm trim), with the offcuts, as a PDF")
+                    .help("The parts laid out on stock sheets for the panel saw, with the offcuts, as a PDF (kerf, trim and kept offcuts as set under Sheets)")
                 Button("Export CSV…", systemImage: "square.and.arrow.up") {
                     export = (DataDocument(data: Data(csv.utf8)), .commaSeparatedText, "\(project.jobName) cut list")
                 }
@@ -213,8 +277,13 @@ struct PartsListView: View {
     private func makeNesting() {
         guard let dir = Preferences.catalogDir?.path else { return }
         do {
+            // The Sheets view's settings.
+            let d = UserDefaults.standard
+            let kerf = d.object(forKey: "nestingKerf") as? Double ?? 4.4
+            let trim = d.object(forKey: "nestingTrim") as? Double ?? 10
+            let use = d.object(forKey: "nestingUseOffcuts") as? Bool ?? true
             let data = try nestingPdf(items: project.jobItems, catalogDir: dir, job: project.jobName,
-                                      kerf: 4.4, trim: 10)
+                                      kerf: kerf, trim: trim, offcutsJson: use ? OffcutStore.load() : "")
             export = (DataDocument(data: data), .pdf, "\(project.jobName) nesting")
         } catch {
             project.lastError = "Could not nest the parts: \(error)"
