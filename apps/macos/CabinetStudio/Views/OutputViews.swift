@@ -15,11 +15,12 @@ struct CutListView: View {
                     Text("Parts").tag("Parts")
                     Text("Sheets").tag("Sheets")
                     Text("Hardware").tag("Hardware")
+                    Text("Quote").tag("Quote")
                 }
                 .pickerStyle(.segmented)
                 .labelsHidden()
                 .fixedSize()
-                .help("Parts to cut, the parts nested on stock sheets, or hardware to order")
+                .help("Parts to cut, the parts nested on stock sheets, hardware to order, or what the job costs")
                 Spacer()
             }
             .padding(.horizontal, 10)
@@ -28,6 +29,7 @@ struct CutListView: View {
             switch showing {
             case "Parts": PartsListView()
             case "Sheets": NestingView()
+            case "Quote": QuoteView()
             default: HardwareListView()
             }
         }
@@ -164,6 +166,139 @@ struct NestingView: View {
         let data = (try? JSONSerialization.data(withJSONObject: all)) ?? Data("[]".utf8)
         return String(decoding: data, as: UTF8.self)
     }
+}
+
+/// The shop's price list, as the core's JSON, in Application Support/CabinetStudio.
+enum PriceStore {
+    static var url: URL {
+        FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+            .appending(path: "CabinetStudio/prices.json")
+    }
+
+    static func load() -> [String: Any] {
+        guard let data = try? Data(contentsOf: url) else { return [:] }
+        return (try? JSONSerialization.jsonObject(with: data)) as? [String: Any] ?? [:]
+    }
+
+    static func save(_ prices: [String: Any]) throws {
+        try FileManager.default.createDirectory(at: url.deletingLastPathComponent(),
+                                                withIntermediateDirectories: true)
+        try JSONSerialization.data(withJSONObject: prices, options: [.prettyPrinted, .sortedKeys]).write(to: url)
+    }
+
+    static func json(_ prices: [String: Any]) -> String {
+        String(decoding: (try? JSONSerialization.data(withJSONObject: prices)) ?? Data("{}".utf8), as: UTF8.self)
+    }
+}
+
+/// What the job costs: board by the sheets the nesting opens, edge tape, hardware and labour from
+/// the shop's prices, which are typed in here against each line.
+struct QuoteView: View {
+    @Environment(ProjectModel.self) private var project
+    @AppStorage("nestingKerf") private var kerf = 4.4
+    @AppStorage("nestingTrim") private var trim = 10.0
+    @AppStorage("nestingUseOffcuts") private var useOffcuts = true
+    @State private var prices = PriceStore.load()
+    @State private var export: DataDocument?
+
+    private var quote: QuoteRecord? {
+        guard let dir = Preferences.catalogDir?.path else { return nil }
+        return try? jobQuote(items: project.jobItems, catalogDir: dir, kerf: kerf, trim: trim,
+                             offcutsJson: useOffcuts ? OffcutStore.load() : "",
+                             pricesJson: PriceStore.json(prices))
+    }
+
+    var body: some View {
+        let q = quote
+        VStack(spacing: 0) {
+            Table(q?.lines ?? []) {
+                TableColumn("Description", value: \.description)
+                TableColumn("Qty") { Text(String(format: "%g", $0.quantity)).monospacedDigit() }.width(60)
+                TableColumn("Unit", value: \.unit).width(40)
+                TableColumn("Price") { line in
+                    TextField("Price", value: price(line), format: .number.precision(.fractionLength(0...2)),
+                              prompt: Text("—"))
+                        .multilineTextAlignment(.trailing)
+                        .monospacedDigit()
+                }
+                .width(80)
+                TableColumn("Total") { Text(String(format: "%.2f", $0.total)).monospacedDigit() }.width(80)
+            }
+            HStack(spacing: 12) {
+                if let q {
+                    Text("Cost \(money(q.cost)) · markup \(money(q.markup)) · tax \(money(q.tax)) · **\(q.currency) \(money(q.total))**")
+                        .monospacedDigit()
+                    if !q.missing.isEmpty {
+                        Text("\(q.missing.count) without a price").foregroundStyle(.orange)
+                    }
+                }
+                Spacer(minLength: 0)
+                Stepper("Markup \(Int((number("markup") * 100).rounded())) %",
+                        value: rate("markup"), in: 0...3, step: 0.05)
+                    .fixedSize()
+                Button("Export PDF…", systemImage: "doc.richtext") { makePdf() }
+                    .labelStyle(.iconOnly)
+                    .help("The quote as a PDF")
+            }
+            .padding(10)
+            .frame(minWidth: 0, maxWidth: .infinity)
+            .background(.bar)
+        }
+        .fileExporter(isPresented: Binding(get: { export != nil }, set: { if !$0 { export = nil } }),
+                      document: export, contentType: .pdf,
+                      defaultFilename: "\(project.jobName) quote") { result in
+            if case .success(let url) = result { project.status = "Saved \(url.lastPathComponent)" }
+        }
+    }
+
+    private func money(_ v: Double) -> String { String(format: "%.2f", v) }
+
+    private func number(_ key: String) -> Double { (prices[key] as? NSNumber)?.doubleValue ?? 0 }
+
+    private func rate(_ key: String) -> Binding<Double> {
+        Binding(get: { number(key) }, set: { prices[key] = $0; save() })
+    }
+
+    /// A line's price, kept where the core reads it: per m² by board, each by hardware item, or the
+    /// tape and labour rates.
+    private func price(_ line: QuoteLineRecord) -> Binding<Double?> {
+        let (table, key): (String?, String) = switch line.section {
+        case "board": ("boards", line.key)
+        case "hardware": ("hardware", line.key)
+        case "edge_tape": (nil, "edge_tape_per_m")
+        default: (nil, "labour_per_hour")
+        }
+        return Binding(get: { line.unitPrice }, set: { v in
+            if let table {
+                var t = prices[table] as? [String: Any] ?? [:]
+                t[key] = v
+                prices[table] = t
+            } else {
+                prices[key] = v ?? NSNull()
+            }
+            save()
+        })
+    }
+
+    private func save() {
+        do { try PriceStore.save(prices) } catch { project.lastError = "Could not save the prices: \(error)" }
+    }
+
+    private func makePdf() {
+        guard let dir = Preferences.catalogDir?.path else { return }
+        do {
+            export = DataDocument(data: try quotePdf(items: project.jobItems, catalogDir: dir, job: project.jobName,
+                                                    kerf: kerf, trim: trim,
+                                                    offcutsJson: useOffcuts ? OffcutStore.load() : "",
+                                                    pricesJson: PriceStore.json(prices)))
+        } catch {
+            project.lastError = "Could not make the quote: \(error)"
+        }
+    }
+}
+
+extension QuoteLineRecord: Identifiable {
+    public var id: String { section + "|" + key + "|" + description }
 }
 
 /// Every hardware item of the job, counted, with its supplier article where the catalog has it.

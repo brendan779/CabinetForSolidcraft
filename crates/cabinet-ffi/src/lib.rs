@@ -676,6 +676,171 @@ pub fn nesting_pages(
     ))
 }
 
+/// One line of a quote.
+#[derive(uniffi::Record)]
+pub struct QuoteLineRecord {
+    /// board, edge_tape, hardware or labour.
+    pub section: String,
+    /// The price list key: board or hardware id, `edge_tape` or `labour`.
+    pub key: String,
+    pub description: String,
+    pub quantity: f64,
+    pub unit: String,
+    pub unit_price: Option<f64>,
+    pub total: f64,
+}
+
+#[derive(uniffi::Record)]
+pub struct QuoteRecord {
+    pub currency: String,
+    pub lines: Vec<QuoteLineRecord>,
+    pub cost: f64,
+    pub markup: f64,
+    pub tax: f64,
+    pub total: f64,
+    pub missing: Vec<String>,
+}
+
+fn job_quote_core(
+    items: &JobItems,
+    catalog_dir: &str,
+    kerf: f64,
+    trim: f64,
+    offcuts_json: &str,
+    prices_json: &str,
+) -> Result<cabinet_core::quote::Quote, CoreError> {
+    let prices: cabinet_core::quote::PriceList = if prices_json.trim().is_empty() {
+        Default::default()
+    } else {
+        serde_json::from_str(prices_json).map_err(invalid)?
+    };
+    let (nesting, _) = job_nesting(items, catalog_dir, kerf, trim, &offcuts(offcuts_json)?)?;
+    let (lists, tape) = cut_lists(items)?;
+    let cut = cut_list(&lists, "Generic", tape);
+    let bom = cabinet_core::bom::hardware_bom(&lists);
+    let cabinets = job_lists(items)?
+        .iter()
+        .filter(|(_, c)| c.is_some())
+        .count();
+    Ok(cabinet_core::quote::quote(
+        &nesting, &cut, &bom, cabinets, &prices,
+    ))
+}
+
+/// What the job costs from the shop's price list (JSON, as `cabinet_core::quote::PriceList`).
+#[uniffi::export]
+pub fn job_quote(
+    items: JobItems,
+    catalog_dir: String,
+    kerf: f64,
+    trim: f64,
+    offcuts_json: String,
+    prices_json: String,
+) -> Result<QuoteRecord, CoreError> {
+    let q = job_quote_core(
+        &items,
+        &catalog_dir,
+        kerf,
+        trim,
+        &offcuts_json,
+        &prices_json,
+    )?;
+    Ok(QuoteRecord {
+        currency: q.currency,
+        lines: q
+            .lines
+            .into_iter()
+            .map(|l| QuoteLineRecord {
+                section: serde_json::to_value(l.section)
+                    .ok()
+                    .and_then(|v| v.as_str().map(String::from))
+                    .unwrap_or_default(),
+                key: l.key,
+                description: l.description,
+                quantity: l.quantity,
+                unit: l.unit,
+                unit_price: l.unit_price,
+                total: l.total,
+            })
+            .collect(),
+        cost: q.cost,
+        markup: q.markup,
+        tax: q.tax,
+        total: q.total,
+        missing: q.missing,
+    })
+}
+
+/// The quote as a PDF table.
+#[uniffi::export]
+pub fn quote_pdf(
+    items: JobItems,
+    catalog_dir: String,
+    job: String,
+    kerf: f64,
+    trim: f64,
+    offcuts_json: String,
+    prices_json: String,
+) -> Result<Vec<u8>, CoreError> {
+    let q = job_quote_core(
+        &items,
+        &catalog_dir,
+        kerf,
+        trim,
+        &offcuts_json,
+        &prices_json,
+    )?;
+    let money = |v: f64| format!("{v:.2}#");
+    let mut rows: Vec<Vec<String>> = q
+        .lines
+        .iter()
+        .map(|l| {
+            vec![
+                l.description.clone(),
+                format!("{}#", l.quantity),
+                l.unit.clone(),
+                l.unit_price.map_or("no price#".into(), money),
+                money(l.total),
+            ]
+        })
+        .collect();
+    rows.push(vec![String::new(); 5]);
+    for (label, v) in [
+        ("Cost", q.cost),
+        ("Markup", q.markup),
+        ("Tax", q.tax),
+        ("Total", q.total),
+    ] {
+        rows.push(vec![
+            format!("{label} ({})", q.currency),
+            "#".into(),
+            String::new(),
+            "#".into(),
+            money(v),
+        ]);
+    }
+    if !q.missing.is_empty() {
+        rows.push(vec![String::new(); 5]);
+        rows.push(vec![
+            format!(
+                "No price yet for {} lines: the total is short by them",
+                q.missing.len()
+            ),
+            "#".into(),
+            String::new(),
+            "#".into(),
+            "#".into(),
+        ]);
+    }
+    Ok(cabinet_sheets::pdf::table_pdf(
+        "Quote",
+        &job,
+        &["Description", "Qty#", "Unit", "Price#", "Total#"],
+        &[150.0, 25.0, 20.0, 35.0, 37.0],
+        &rows,
+    ))
+}
+
 /// An exploded assembly drawing per cabinet with its parts list, as a PDF.
 #[uniffi::export]
 pub fn assembly_pdf(items: JobItems, job: String) -> Result<Vec<u8>, CoreError> {

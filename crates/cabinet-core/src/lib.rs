@@ -25,6 +25,7 @@ pub mod nesting;
 pub mod options;
 pub mod part;
 pub mod project;
+pub mod quote;
 pub mod run;
 pub mod standins;
 
