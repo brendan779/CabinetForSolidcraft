@@ -29,7 +29,7 @@ struct SidebarView: View {
                             }
                         }
                         Divider()
-                        ForEach(["filler", "end_panel", "benchtop", "floating_shelf"], id: \.self) { type in
+                        ForEach(["filler", "end_panel", "benchtop", "floating_shelf", "cornice", "light_rail"], id: \.self) { type in
                             Button {
                                 project.addPiece(type)
                             } label: {
@@ -84,6 +84,7 @@ struct CabinetRow: View {
         case "end_panel": cab.scribe > 0 ? "\(unit.format(cab.scribe)) scribe" : "no scribe"
         case "benchtop": "\(unit.format(cab.topThickness)) thick, \(unit.format(cab.frontOverhang, suffix: false)) overhang"
         case "floating_shelf": "\(unit.format(cab.width)) × \(unit.format(cab.shelfDepth, suffix: false))"
+        case "cornice", "light_rail": "\(unit.format(cab.mouldingHeight)) high\(cab.returns ? ", returned" : "")"
         default: [cab.width, cab.height, cab.depth].map { unit.format($0, suffix: false) }.joined(separator: " × ")
         }
     }
@@ -95,8 +96,13 @@ struct CabinetGlyph: View {
 
     var body: some View {
         Canvas { ctx, size in
-            if doc.kind == "benchtop" {
-                let r = CGRect(x: 0, y: size.height * 0.35, width: size.width, height: size.height * 0.2)
+            if ["benchtop", "cornice", "light_rail"].contains(doc.kind) {
+                let y = switch doc.kind {
+                case "cornice": size.height * 0.05
+                case "light_rail": size.height * 0.75
+                default: size.height * 0.35
+                }
+                let r = CGRect(x: 0, y: y, width: size.width, height: size.height * 0.2)
                 ctx.fill(Path(roundedRect: r, cornerRadius: 1.5), with: .color(.primary.opacity(0.3)))
                 ctx.stroke(Path(roundedRect: r, cornerRadius: 1.5), with: .color(.primary.opacity(0.8)), lineWidth: 1)
                 return

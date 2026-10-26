@@ -50,6 +50,10 @@ pub enum PartRole {
     Cladding,
     /// A rangehood canopy's fixed front.
     CanopyFront,
+    /// A cornice board over wall-height cabinets, and its returns.
+    Cornice,
+    /// A light rail under wall cabinets, and its returns.
+    LightRail,
 }
 
 impl PartRole {
@@ -81,6 +85,8 @@ impl PartRole {
             PartRole::Splashback => "Splashback",
             PartRole::Cladding => "Cladding",
             PartRole::CanopyFront => "Canopy front",
+            PartRole::Cornice => "Cornice",
+            PartRole::LightRail => "Light rail",
         }
     }
 
@@ -114,6 +120,8 @@ impl PartRole {
             PartRole::Splashback => "Splashback",
             PartRole::Cladding => "Clad",
             PartRole::CanopyFront => "CanopyFront",
+            PartRole::Cornice => "Cornice",
+            PartRole::LightRail => "LightRail",
         }
     }
 
@@ -133,6 +141,8 @@ impl PartRole {
                 | PartRole::EndPanel
                 | PartRole::Cladding
                 | PartRole::CanopyFront
+                | PartRole::Cornice
+                | PartRole::LightRail
         )
     }
 }

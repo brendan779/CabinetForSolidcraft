@@ -27,6 +27,41 @@ pub enum RunItem {
     Benchtop(Benchtop),
     /// An open shelf on concealed brackets, in a gap between wall cabinets.
     FloatingShelf(FloatingShelf),
+    /// A cornice over, or a light rail under, every stretch of wall-height cabinets. It takes no
+    /// run length.
+    Moulding(Moulding),
+}
+
+/// A flat board moulding along a stretch's door faces: a cornice standing on the cabinets' tops
+/// (wall, tall, wardrobe and rangehood cabinets), or a light rail hanging under the wall
+/// cabinets that hides their lights; returned back to the wall at the stretch's open ends.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct Moulding {
+    pub id: String,
+    pub kind: MouldingKind,
+    /// The face's height, above the tops or below the bottoms.
+    #[serde(default = "Moulding::default_height")]
+    pub height: f64,
+    /// Catalog board id, or empty for the fronts' board.
+    #[serde(default)]
+    pub board: String,
+    /// Return pieces back to the wall at the stretch's ends.
+    #[serde(default = "yes")]
+    pub returns: bool,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum MouldingKind {
+    Cornice,
+    LightRail,
+}
+
+impl Moulding {
+    /// Our default: a 60 mm face.
+    fn default_height() -> f64 {
+        60.0
+    }
 }
 
 /// A floating shelf: `width` of the run, its underside `height` above the floor.
@@ -304,6 +339,10 @@ pub fn build_run(run: &Run) -> Result<Vec<PartList>> {
                 ..PartList::default()
             }),
             RunItem::FloatingShelf(f) => out.push(floating_shelf(f, at, neighbour(i).depth)),
+            RunItem::Moulding(m) => out.push(PartList {
+                cabinet: m.id.clone(),
+                ..PartList::default()
+            }),
         }
     }
     for (i, item) in run.items.iter().enumerate() {
@@ -315,7 +354,9 @@ pub fn build_run(run: &Run) -> Result<Vec<PartList>> {
                 .map(|(j, it)| match it {
                     RunItem::Cabinet(c) => takes_benchtop(c),
                     RunItem::Filler(_) | RunItem::EndPanel(_) => takes_benchtop(neighbour(j)),
-                    RunItem::Benchtop(_) | RunItem::FloatingShelf(_) => false,
+                    RunItem::Benchtop(_) | RunItem::FloatingShelf(_) | RunItem::Moulding(_) => {
+                        false
+                    }
                 })
                 .collect();
             let mut top = benchtop(b, &out, &under);
@@ -324,7 +365,172 @@ pub fn build_run(run: &Run) -> Result<Vec<PartList>> {
             out[i] = top;
         }
     }
+    for (i, item) in run.items.iter().enumerate() {
+        if let RunItem::Moulding(m) = item {
+            // Each item's line: the top (cornice) or bottom (light rail) of the cabinet it is,
+            // or stands against; none for items the moulding does not run along.
+            let line: Vec<Option<f64>> = run
+                .items
+                .iter()
+                .enumerate()
+                .map(|(j, it)| {
+                    let c = match it {
+                        RunItem::Cabinet(c) => c.as_ref(),
+                        RunItem::Filler(_) | RunItem::EndPanel(_) => neighbour(j),
+                        _ => return None,
+                    };
+                    let z = run.origin.z + c.origin.z;
+                    match m.kind {
+                        MouldingKind::Cornice if takes_cornice(c) => Some(z + c.height),
+                        MouldingKind::LightRail if takes_light_rail(c) => Some(z),
+                        _ => None,
+                    }
+                })
+                .collect();
+            // Items that take run length, and so can close a moulding's end.
+            let solid: Vec<bool> = run
+                .items
+                .iter()
+                .map(|it| !matches!(it, RunItem::Benchtop(_) | RunItem::Moulding(_)))
+                .collect();
+            out[i] = moulding(m, &out, &line, &solid, &neighbour);
+        }
+    }
     Ok(out)
+}
+
+fn takes_cornice(c: &Cabinet) -> bool {
+    use crate::model::CabinetKind as K;
+    matches!(
+        c.kind,
+        K::Wall | K::Tall | K::CornerWall | K::Wardrobe | K::Rangehood
+    )
+}
+
+fn takes_light_rail(c: &Cabinet) -> bool {
+    use crate::model::CabinetKind as K;
+    matches!(c.kind, K::Wall | K::CornerWall | K::Rangehood)
+}
+
+/// One moulding per stretch of consecutive items on the same `line`: a face in the plane of the
+/// door faces across the stretch, `height` above the line (cornice) or below it (light rail),
+/// and a return back to the wall at each end that no neighbour closes.
+fn moulding<'a>(
+    m: &Moulding,
+    lists: &[PartList],
+    line: &[Option<f64>],
+    solid: &[bool],
+    neighbour: &dyn Fn(usize) -> &'a Cabinet,
+) -> PartList {
+    let mut out = PartList {
+        cabinet: m.id.clone(),
+        ..PartList::default()
+    };
+    let (role, below) = match m.kind {
+        MouldingKind::Cornice => (PartRole::Cornice, false),
+        MouldingKind::LightRail => (PartRole::LightRail, true),
+    };
+    let mut stretches: Vec<(usize, usize, f64)> = Vec::new();
+    for (j, z) in line.iter().enumerate() {
+        let Some(z) = *z else { continue };
+        match stretches.last_mut() {
+            Some((_, end, at)) if *end + 1 == j && (*at - z).abs() < 0.5 => *end = j,
+            _ => stretches.push((j, j, z)),
+        }
+    }
+    if stretches.is_empty() {
+        out.warnings.push(format!(
+            "no {} cabinets in the run for the {}",
+            if below { "wall" } else { "wall or tall" },
+            role.label().to_lowercase()
+        ));
+    }
+    // An item's parts, less an L-corner's forward leg.
+    let in_line = |j: usize| {
+        lists[j]
+            .parts
+            .iter()
+            .filter(|p| p.bounds.min.y >= -100.0)
+            .collect::<Vec<_>>()
+    };
+    for (n, &(a, b, z)) in stretches.iter().enumerate() {
+        let parts: Vec<&Part> = (a..=b).flat_map(in_line).collect();
+        let lo = |f: fn(&Part) -> f64| parts.iter().map(|p| f(p)).fold(f64::MAX, f64::min);
+        let hi = |f: fn(&Part) -> f64| parts.iter().map(|p| f(p)).fold(f64::MIN, f64::max);
+        let (x0, x1) = (lo(|p| p.bounds.min.x), hi(|p| p.bounds.max().x));
+        let (face, back) = (lo(|p| p.bounds.min.y), hi(|p| p.bounds.max().y));
+        let c = neighbour(a);
+        let t = c.standard.front_thickness;
+        let board = if m.board.is_empty() {
+            c.standard.front_board.clone()
+        } else {
+            m.board.clone()
+        };
+        let (z0, z1) = if below {
+            (z - m.height, z)
+        } else {
+            (z, z + m.height)
+        };
+        if z0 < 0.0 {
+            out.warnings.push(format!(
+                "{} sits on the floor: lift the wall cabinets for a light rail under them",
+                c.id
+            ));
+            continue;
+        }
+        // An end is closed by the next item with width that reaches over the moulding's height.
+        let closed = |from: Option<usize>, step: isize| {
+            let mut k = from?;
+            loop {
+                if solid[k] {
+                    let ps = in_line(k);
+                    let bottom = ps.iter().map(|p| p.bounds.min.z).fold(f64::MAX, f64::min);
+                    let top = ps.iter().map(|p| p.bounds.max().z).fold(f64::MIN, f64::max);
+                    return Some(bottom <= z0 + 1e-6 && top >= z1 - 1e-6);
+                }
+                k = k.checked_add_signed(step).filter(|&k| k < lists.len())?;
+            }
+        };
+        let left_open = !closed(a.checked_sub(1), -1).unwrap_or(false);
+        let right_open = !closed(Some(b + 1).filter(|&k| k < lists.len()), 1).unwrap_or(false);
+        let name = format!("{}.{}{}", m.id, role.code(), n + 1);
+        out.parts.push(Part {
+            name: name.clone(),
+            role,
+            bounds: Aabb::new(Vec3::new(x0, face - t, z0), Vec3::new(x1 - x0, t, z1 - z0)),
+            thickness_axis: Axis::Y,
+            grain_axis: Some(Axis::X),
+            board: board.clone(),
+            edges: EdgeBanding {
+                top: !below,
+                bottom: below,
+                left: left_open && !m.returns,
+                right: right_open && !m.returns,
+                ..EdgeBanding::default()
+            },
+        });
+        for (open, side, rx) in [(left_open, "L", x0 - t), (right_open, "R", x1)] {
+            if open && m.returns {
+                out.parts.push(Part {
+                    name: format!("{name}Return{side}"),
+                    role,
+                    bounds: Aabb::new(
+                        Vec3::new(rx, face - t, z0),
+                        Vec3::new(t, back - (face - t), z1 - z0),
+                    ),
+                    thickness_axis: Axis::X,
+                    grain_axis: Some(Axis::Y),
+                    board: board.clone(),
+                    edges: EdgeBanding {
+                        top: !below,
+                        bottom: below,
+                        ..EdgeBanding::default()
+                    },
+                });
+            }
+        }
+    }
+    out
 }
 
 /// The run with each cabinet's origin where the run puts it, as [`build_run`] builds it.
@@ -381,7 +587,7 @@ fn lefts<'a>(run: &Run, neighbour: &dyn Fn(usize) -> &'a Cabinet) -> Vec<Vec3> {
                 RunItem::Cabinet(c) => c.width,
                 RunItem::Filler(f) => f.width,
                 RunItem::EndPanel(_) => neighbour(i).standard.front_thickness,
-                RunItem::Benchtop(_) => 0.0,
+                RunItem::Benchtop(_) | RunItem::Moulding(_) => 0.0,
                 RunItem::FloatingShelf(f) => f.width,
             };
             at
@@ -1294,6 +1500,61 @@ mod tests {
         let lists = build_run(&run(&item)).unwrap();
         assert!(lists[2].warnings.iter().any(|w| w.contains("does not fit")));
         assert!(lists[2].part("BT1.Niche1Back").is_none());
+    }
+
+    /// P2-4: a cornice over a tall cabinet and two wall cabinets with the same top, returned at
+    /// both open ends; a light rail under the wall cabinets, closed by the tall cabinet's side.
+    #[test]
+    fn cornice_and_light_rail_run_along_the_wall_cabinets() {
+        let wall = |id: &str| {
+            let mut c = Cabinet::new(id, CabinetKind::Wall);
+            c.origin.z = 1380.0;
+            RunItem::Cabinet(Box::new(c))
+        };
+        let moulding = |kind| {
+            RunItem::Moulding(Moulding {
+                id: "M1".into(),
+                kind,
+                height: 60.0,
+                board: String::new(),
+                returns: true,
+            })
+        };
+        let run = |m| Run {
+            origin: Vec3::default(),
+            items: vec![
+                cab("T01", CabinetKind::Tall),
+                wall("W01"),
+                wall("W02"),
+                cab("B01", CabinetKind::Base),
+                m,
+            ],
+        };
+        let lists = build_run(&run(moulding(MouldingKind::Cornice))).unwrap();
+        let c = &lists[4];
+        assert!(c.warnings.is_empty(), "{:?}", c.warnings);
+        let names: Vec<_> = c.parts.iter().map(|p| p.name.as_str()).collect();
+        assert_eq!(
+            names,
+            ["M1.Cornice1", "M1.Cornice1ReturnL", "M1.Cornice1ReturnR"]
+        );
+        let face = c.part("M1.Cornice1").unwrap().bounds;
+        // Across T01, W01 and W02, on their 2100 tops, in front of the doors.
+        assert_eq!((face.min.x, face.size.x), (0.0, 1800.0));
+        assert_eq!((face.min.z, face.size.z), (2100.0, 60.0));
+        assert_eq!(face.max().y, -18.0);
+        // The left return goes back to the tall cabinet's back.
+        let ret = c.part("M1.Cornice1ReturnL").unwrap().bounds;
+        assert_eq!((ret.min.x, ret.max().x), (-18.0, 0.0));
+        assert_eq!(ret.max().y, 580.0);
+
+        let lists = build_run(&run(moulding(MouldingKind::LightRail))).unwrap();
+        let l = &lists[4];
+        let names: Vec<_> = l.parts.iter().map(|p| p.name.as_str()).collect();
+        assert_eq!(names, ["M1.LightRail1", "M1.LightRail1ReturnR"]);
+        let rail = l.part("M1.LightRail1").unwrap().bounds;
+        assert_eq!((rail.min.x, rail.size.x), (600.0, 1200.0));
+        assert_eq!((rail.min.z, rail.max().z), (1320.0, 1380.0));
     }
 
     /// BENCH-3a/3c: an island top: waterfall ends down to the floor and a 400 mm seating

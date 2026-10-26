@@ -82,7 +82,28 @@ struct PieceSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            if cab.kind == "floating_shelf" {
+            if ["cornice", "light_rail"].contains(cab.kind) {
+                let cornice = cab.kind == "cornice"
+                SectionTitle(cornice ? "Cornice" : "Light rail")
+                chips("Height", value: cab.mouldingHeight, presets: [40, 60, 80, 100]) { c, v in c.mouldingHeight = v }
+                HStack(spacing: 6) {
+                    Text("Ends").foregroundStyle(.secondary)
+                    Spacer()
+                    ForEach([true, false], id: \.self) { on in
+                        Button(on ? "Returned" : "Square") {
+                            withAnimation(.snappy) { var c = cab; c.returns = on; project.selected = c }
+                        }
+                        .buttonStyle(ChipStyle(selected: cab.returns == on))
+                        .help(on ? "A return piece back to the wall at each open end" : "The face stops square at the ends, its end edges taped")
+                    }
+                }
+                Text(cornice
+                     ? "A board in the plane of the door faces on top of each stretch of wall, tall, wardrobe and rangehood cabinets with the same top, in the front board."
+                     : "A board in the plane of the door faces under each stretch of wall cabinets, hiding their lights, in the front board.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            } else if cab.kind == "floating_shelf" {
                 SectionTitle("Floating shelf")
                 chips("Width", value: cab.width, presets: [450, 600, 900, 1200]) { c, v in c.width = v }
                 chips("Depth", value: cab.shelfDepth, presets: [200, 250, 300]) { c, v in c.shelfDepth = v }
@@ -220,7 +241,7 @@ struct PieceSection: View {
                     }
                 }
             }
-            if cab.kind != "benchtop" && cab.kind != "floating_shelf" {
+            if !["benchtop", "floating_shelf", "cornice", "light_rail"].contains(cab.kind) {
                 chips("Scribe", value: cab.scribe, presets: [0, 10, 20, 30, 40]) { c, v in c.scribe = v }
                 Text("The scribe is extra board, cut off on site to follow the wall. It is not part of the run's length.")
                     .font(.caption)

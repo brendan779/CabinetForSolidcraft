@@ -43,12 +43,13 @@ struct CabinetDoc: Identifiable, Hashable, Codable {
         set { update { $0["to_floor"] = newValue } }
     }
 
-    /// A new filler, end panel or benchtop as run item JSON.
+    /// A new filler, end panel, benchtop, shelf or moulding as run item JSON.
     static func piece(_ type: String, id: String) -> CabinetDoc {
         let json = switch type {
         case "filler": #"{"id":"\#(id)","scribe":10,"type":"filler","width":50}"#
         case "benchtop": #"{"id":"\#(id)","type":"benchtop","thickness":33,"front_overhang":20,"side_overhang":0}"#
         case "floating_shelf": #"{"id":"\#(id)","type":"floating_shelf","width":900,"depth":250,"thickness":40,"height":1500}"#
+        case "cornice", "light_rail": #"{"id":"\#(id)","type":"moulding","kind":"\#(type)","height":60,"returns":true}"#
         default: #"{"id":"\#(id)","scribe":20,"to_floor":true,"type":"end_panel"}"#
         }
         return CabinetDoc(id: id, json: json)
@@ -66,6 +67,16 @@ struct CabinetDoc: Identifiable, Hashable, Codable {
     var sideOverhang: Double {
         get { number("side_overhang") }
         set { setNumber("side_overhang", newValue) }
+    }
+
+    /// Cornice or light rail: its face's height, and whether it returns to the wall at open ends.
+    var mouldingHeight: Double {
+        get { (object["height"] as? NSNumber)?.doubleValue ?? 60 }
+        set { setNumber("height", newValue) }
+    }
+    var returns: Bool {
+        get { object["returns"] as? Bool ?? true }
+        set { update { $0["returns"] = newValue } }
     }
 
     /// Floating shelf: depth, height of its underside, LED power per metre (0: none).
@@ -573,13 +584,15 @@ final class ProjectModel {
         case "filler": "F"
         case "benchtop": "BT"
         case "floating_shelf": "FS"
+        case "cornice": "CO"
+        case "light_rail": "LR"
         default: "E"
         }
         var n = 1
         while cabinets.contains(where: { $0.id == String(format: "%@%02d", prefix, n) }) { n += 1 }
         let piece = CabinetDoc.piece(type, id: String(format: "%@%02d", prefix, n))
-        // A benchtop takes no place in the run: it goes last.
-        let at = type == "benchtop"
+        // A benchtop or moulding takes no place in the run: it goes last.
+        let at = ["benchtop", "cornice", "light_rail"].contains(type)
             ? cabinets.count
             : cabinets.firstIndex { $0.id == selection }.map { $0 + 1 } ?? 0
         withAnimation(.snappy) {
@@ -1042,6 +1055,8 @@ extension CabinetDoc {
         case "end_panel": "End panel"
         case "benchtop": "Benchtop"
         case "floating_shelf": "Floating shelf"
+        case "cornice": "Cornice"
+        case "light_rail": "Light rail"
         default: kind.capitalized
         }
     }
@@ -1063,6 +1078,8 @@ extension CabinetDoc {
         case "end_panel": "rectangle.portrait.lefthalf.filled"
         case "benchtop": "rectangle.tophalf.filled"
         case "floating_shelf": "minus.rectangle"
+        case "cornice": "rectangle.topthird.inset.filled"
+        case "light_rail": "rectangle.bottomthird.inset.filled"
         default: "cube"
         }
     }

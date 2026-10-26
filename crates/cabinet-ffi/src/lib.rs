@@ -120,7 +120,7 @@ pub struct JobItems {
 fn parse_item(json: &str) -> Result<RunItem, CoreError> {
     let v: serde_json::Value = serde_json::from_str(json).map_err(invalid)?;
     match v.get("type").and_then(|t| t.as_str()) {
-        Some("filler" | "end_panel" | "benchtop" | "floating_shelf") => {
+        Some("filler" | "end_panel" | "benchtop" | "floating_shelf" | "moulding") => {
             serde_json::from_value(v).map_err(invalid)
         }
         _ => Ok(RunItem::Cabinet(Box::new(
@@ -137,6 +137,7 @@ fn item_id(item: &RunItem) -> &str {
         RunItem::EndPanel(e) => &e.id,
         RunItem::Benchtop(b) => &b.id,
         RunItem::FloatingShelf(f) => &f.id,
+        RunItem::Moulding(m) => &m.id,
     }
 }
 
@@ -1731,6 +1732,26 @@ mod tests {
                 .iter()
                 .any(|r| r.description == "Benchtop")
         );
+    }
+
+    /// The app writes a cornice like this; it keeps in the job file.
+    #[test]
+    fn a_cornice_item_builds_over_the_tall_cabinets() {
+        let cornice =
+            r#"{"id":"CO01","type":"moulding","kind":"cornice","height":60,"returns":true}"#;
+        let items = vec![
+            new_cabinet("T01".into(), "tall".into()).unwrap(),
+            new_cabinet("T02".into(), "tall".into()).unwrap(),
+            cornice.to_string(),
+        ];
+        let built = build_job(job(&items));
+        let panels = &built[2].summary.as_ref().unwrap().panels;
+        assert_eq!(panels.len(), 3);
+        assert!(panels.iter().all(|p| p.role == "Cornice"));
+        let standard = serde_json::to_string(&parse(&items[0]).unwrap().standard).unwrap();
+        let file = project_json("Kitchen".into(), standard, items.clone(), Vec::new()).unwrap();
+        let back = open_project(file).unwrap();
+        assert!(back.items_json[2].contains("moulding"));
     }
 
     /// The app writes an oven tower's stacked fronts like this.
