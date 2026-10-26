@@ -222,7 +222,7 @@ features in words.
 | STYLE-1 | todo | M | Door styles for the look: shaker 5-piece, arched-top tall doors, handleless (J-pull, finger pull, push-to-open), full-height tall fronts with continuous grain | picker tiles |
 | STYLE-2 | todo | M | Open shelving: floating timber shelves (concealed brackets) in niches between wall cabinets, with LED strip (ties to HAF-5) | shelf parts + hardware |
 | STYLE-3 | todo | S | Handle finishes: brushed brass, black, stainless; long pulls on tall doors | rendered handle colour |
-| STYLE-4 | todo | M | Appliance housings: integrated ovens (single/double stacked), integrated fridge with SERVO-DRIVE flex, rangehood insert | tall cabinet variants |
+| STYLE-4 | needs-human (built in 19b3821: oven tower and fridge housing as stacked fronts; niche sizes are our defaults (oven 600 clear): check with your appliances; SERVO-DRIVE flex for integrated fridges and the rangehood insert not done) | M | Appliance housings: integrated ovens (single/double stacked), integrated fridge with SERVO-DRIVE flex, rangehood insert | tall cabinet variants |
 
 ## P3 — SolidCraft plugin
 
@@ -358,3 +358,4 @@ Agents append one line per session: date, items touched, outcome.
 - 2026-10-26b (night) — BENCH-1 built (c717de4): benchtop run item, one piece per stretch of base cabinets with front/end overhangs; started the P2 kitchen design section now that the P1 cabinet systems are done apart from rows waiting on the owner.
 - 2026-10-26b (night) — BENCH-4 built (74fe6c0): sink (with tap hole) and cooktop cut-outs over chosen cabinets.
 - 2026-10-26b (night) — BENCH-6 part (394ac5d): slab splashbacks on benchtop pieces; niches left.
+- 2026-10-26b (night) — STYLE-4 built (19b3821): stacked front layout (drawers / door / niche sections with fixed shelves); oven tower and fridge presets for tall cabinets.
