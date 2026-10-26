@@ -260,7 +260,14 @@ struct CabinetDoc: Identifiable, Hashable, Codable {
 
     /// The front layout's type: open, door, door_pair, drawers, lift, bi_fold_lift.
     var frontType: String {
-        get { (object["fronts"] as? [String: Any])?["type"] as? String ?? "open" }
+        get {
+            let fronts = object["fronts"] as? [String: Any]
+            let type = fronts?["type"] as? String ?? "open"
+            guard type == "stack" else { return type }
+            // A stack is one of the app's presets: drawers in it make an oven tower.
+            let sections = fronts?["sections"] as? [[String: Any]] ?? []
+            return sections.contains { $0["type"] as? String == "drawers" } ? "oven_tower" : "fridge"
+        }
         set {
             update { o in
                 switch newValue {
@@ -269,8 +276,20 @@ struct CabinetDoc: Identifiable, Hashable, Codable {
                 case "drawers": o["fronts"] = ["type": "drawers", "ratios": [1.0, 1.0, 1.0]]
                 case "bi_fold_lift": o["fronts"] = ["type": "bi_fold_lift", "handle_weight": Self.handleWeight]
                 case "lift": o["fronts"] = ["type": "lift", "kind": "stay_lift", "handle_weight": Self.handleWeight]
+                // Two drawers, a 600 mm oven niche, a door above; a fridge niche under a door.
+                case "oven_tower": o["fronts"] = ["type": "stack", "sections": [
+                    ["type": "drawers", "count": 2, "height": 0],
+                    ["type": "niche", "height": 600],
+                    ["type": "door", "hinge_side": "left", "height": 0],
+                ] as [[String: Any]]]
+                case "fridge": o["fronts"] = ["type": "stack", "sections": [
+                    ["type": "niche", "height": 0],
+                    ["type": "door", "hinge_side": "left", "height": 350],
+                ] as [[String: Any]]]
                 default: o["fronts"] = ["type": "open"]
                 }
+                // The stacked sections bring their own fixed shelves.
+                if ["oven_tower", "fridge"].contains(newValue) { o["adjustable_shelves"] = 0 }
             }
         }
     }

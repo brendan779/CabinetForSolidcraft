@@ -381,6 +381,36 @@ pub enum FrontLayout {
         #[serde(default = "default_handle_weight")]
         handle_weight: f64,
     },
+    /// Sections one above the other, bottom first, each with a fixed shelf between it and the
+    /// next: drawers, a door or an open niche for an appliance (an oven tower, a fridge housing).
+    Stack {
+        sections: Vec<StackSection>,
+    },
+}
+
+/// One section of a stacked front.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct StackSection {
+    /// For drawers and doors, the height of the section's fronts; for a niche, its clear
+    /// opening between the shelves. 0 takes what the others leave.
+    #[serde(default)]
+    pub height: f64,
+    #[serde(flatten)]
+    pub kind: SectionKind,
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case", tag = "type")]
+pub enum SectionKind {
+    Drawers {
+        count: u32,
+    },
+    Door {
+        hinge_side: HingeSide,
+    },
+    DoorPair,
+    /// No front: an oven, microwave or fridge goes in.
+    Niche,
 }
 
 /// The owner's typical handle: 400 g (decided 2026-10-26).

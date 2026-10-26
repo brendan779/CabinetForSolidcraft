@@ -1601,4 +1601,26 @@ mod tests {
                 .any(|r| r.description == "Benchtop")
         );
     }
+
+    /// The app writes an oven tower's stacked fronts like this.
+    #[test]
+    fn a_stacked_front_reads_from_the_apps_json() {
+        let mut cab: serde_json::Value =
+            serde_json::from_str(&new_cabinet("T01".into(), "tall".into()).unwrap()).unwrap();
+        cab["adjustable_shelves"] = 0.into();
+        cab["fronts"] = serde_json::json!({"type": "stack", "sections": [
+            {"type": "drawers", "count": 2, "height": 0},
+            {"type": "niche", "height": 600},
+            {"type": "door", "hinge_side": "left", "height": 0}
+        ]});
+        let sum = build(cab.to_string()).unwrap();
+        assert_eq!(
+            sum.panels
+                .iter()
+                .filter(|p| p.role == "Drawer front")
+                .count(),
+            2
+        );
+        assert_eq!(sum.panels.iter().filter(|p| p.role == "Door").count(), 1);
+    }
 }

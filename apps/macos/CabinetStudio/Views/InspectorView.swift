@@ -776,9 +776,15 @@ struct FrontsSection: View {
     @Environment(ProjectModel.self) private var project
     let cab: CabinetDoc
 
-    private let layouts: [(id: String, title: String)] = [
-        ("door", "Door"), ("door_pair", "Pair"), ("drawers", "Drawers"), ("lift", "Lift"), ("bi_fold_lift", "Bi-fold"), ("open", "Open"),
-    ]
+    private var layouts: [(id: String, title: String)] {
+        var l: [(String, String)] = [
+            ("door", "Door"), ("door_pair", "Pair"), ("drawers", "Drawers"), ("lift", "Lift"), ("bi_fold_lift", "Bi-fold"), ("open", "Open"),
+        ]
+        if cab.kind == "tall" {
+            l += [("oven_tower", "Oven"), ("fridge", "Fridge")]
+        }
+        return l
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {

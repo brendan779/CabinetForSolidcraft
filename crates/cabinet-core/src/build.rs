@@ -9,7 +9,7 @@ use crate::lift;
 use crate::model::{
     BackStyle, BottomJoint, Cabinet, CabinetKind, DoorOverlay, DoorStyle, DrawerSides,
     DrawerSystem, Exposed, FrontCore, FrontLayout, HandlePlace, Hanging, HingeSide, LiftKind,
-    LightZone, Opening, ToeKick, TopJoint, WallHanging,
+    LightZone, Opening, SectionKind, StackSection, ToeKick, TopJoint, WallHanging,
 };
 use crate::part::{
     BorePurpose, Dir, EdgeBanding, HardwarePlacement, Operation, Part, PartList, PartRole,
@@ -880,6 +880,15 @@ impl<'a> Builder<'a> {
             self.wardrobe();
             return;
         }
+        // A stacked front's sections bring their own fixed shelves.
+        if matches!(cab.fronts, FrontLayout::Stack { .. }) {
+            if cab.adjustable_shelves > 0 {
+                self.list
+                    .warnings
+                    .push("shelves left out: the stacked sections have their own".into());
+            }
+            return;
+        }
         if cab.inner_drawers > 0 {
             if cab.adjustable_shelves > 0 {
                 self.list
@@ -1081,46 +1090,183 @@ impl<'a> Builder<'a> {
                 self.single_lift(*kind, aabb(x0, y0, z0, x1, y1, z1), *handle_weight);
             }
             FrontLayout::Drawers { ratios } => {
-                let ratios: Vec<f64> = ratios.iter().copied().filter(|r| *r > 0.0).collect();
-                if ratios.is_empty() {
-                    self.list
-                        .warnings
-                        .push("drawer layout has no drawers".into());
-                    return;
-                }
-                let total: f64 = ratios.iter().sum();
-                let usable = (z1 - z0) - g * (ratios.len() - 1) as f64;
-                // Top to bottom.
-                let mut top = z1;
-                let mut fronts = Vec::new();
-                for (i, r) in ratios.iter().enumerate() {
-                    let hgt = usable * r / total;
-                    let b = aabb(x0, y0, top - hgt, x1, y1, top);
-                    self.add(
-                        PartRole::DrawerFront,
-                        Some(i + 1),
-                        b,
-                        Axis::Y,
-                        Axis::X,
-                        EdgeBanding::all(),
-                    );
-                    fronts.push(b);
-                    top -= hgt + g;
-                }
-                // Each drawer's runners stand where its front's bottom edge meets the carcass
-                // the way the lowest one meets the bottom panel; a drawer has up to the next
-                // drawer's datum (or the underside of the top) for its box.
-                let lift = self.opening_z.0 - z0;
-                let datums: Vec<f64> = fronts.iter().map(|b| b.min.z + lift).collect();
-                for (i, b) in fronts.iter().enumerate() {
-                    let ceiling = if i == 0 {
-                        self.opening_z.1
-                    } else {
-                        datums[i - 1]
-                    };
-                    self.drawer_box(i + 1, *b, datums[i], ceiling - datums[i]);
+                let (floor, ceiling) = self.opening_z;
+                self.drawer_fronts(1, ratios, (x0, x1, y0, y1), (z0, z1), (floor, ceiling));
+            }
+            FrontLayout::Stack { sections } => {
+                self.stack_fronts(sections, (x0, x1, y0, y1), (z0, z1));
+            }
+        }
+    }
+
+    /// Drawer fronts `first`, `first + 1`... top to bottom in proportion to `ratios`, filling the
+    /// fronts' height range `fz` with gaps between, and their boxes: each drawer's runners stand
+    /// where its front's bottom edge meets the carcass the way the lowest one meets `inside.0`
+    /// (the panel under it); a drawer has up to the next drawer's datum (or `inside.1`, the
+    /// underside of the panel above) for its box. Returns how many it made.
+    fn drawer_fronts(
+        &mut self,
+        first: usize,
+        ratios: &[f64],
+        (x0, x1, y0, y1): (f64, f64, f64, f64),
+        (z0, z1): (f64, f64),
+        (floor, ceiling): (f64, f64),
+    ) -> usize {
+        let g = self.cab.standard.front_gap;
+        let ratios: Vec<f64> = ratios.iter().copied().filter(|r| *r > 0.0).collect();
+        if ratios.is_empty() {
+            self.list
+                .warnings
+                .push("drawer layout has no drawers".into());
+            return 0;
+        }
+        let total: f64 = ratios.iter().sum();
+        let usable = (z1 - z0) - g * (ratios.len() - 1) as f64;
+        // Top to bottom.
+        let mut top = z1;
+        let mut fronts = Vec::new();
+        for (i, r) in ratios.iter().enumerate() {
+            let hgt = usable * r / total;
+            let b = aabb(x0, y0, top - hgt, x1, y1, top);
+            self.add(
+                PartRole::DrawerFront,
+                Some(first + i),
+                b,
+                Axis::Y,
+                Axis::X,
+                EdgeBanding::all(),
+            );
+            fronts.push(b);
+            top -= hgt + g;
+        }
+        let lift = floor - z0;
+        let datums: Vec<f64> = fronts.iter().map(|b| b.min.z + lift).collect();
+        for (i, b) in fronts.iter().enumerate() {
+            let above = if i == 0 { ceiling } else { datums[i - 1] };
+            self.drawer_box(first + i, *b, datums[i], above - datums[i]);
+        }
+        fronts.len()
+    }
+
+    /// A stacked front: sections bottom to top, each over the fronts' width, with a fixed shelf
+    /// between one section and the next. A niche's height is its clear opening; other sections'
+    /// heights are their fronts'; one section of height 0 takes what is left.
+    fn stack_fronts(
+        &mut self,
+        sections: &[StackSection],
+        (x0, x1, y0, y1): (f64, f64, f64, f64),
+        (z0, z1): (f64, f64),
+    ) {
+        let cab = self.cab;
+        let s = &cab.standard;
+        let (g, t) = (s.front_gap, s.carcass_thickness);
+        if sections.is_empty() {
+            return;
+        }
+        // A section's share of the front height: a niche's clear opening plus the shelf under
+        // it, less the gap the fronts would have.
+        let zone = |sec: &StackSection| match sec.kind {
+            SectionKind::Niche if sec.height > 0.0 => sec.height + t - g,
+            _ => sec.height,
+        };
+        let fixed: f64 = sections.iter().map(zone).sum();
+        let gaps = g * (sections.len() - 1) as f64;
+        let rest = (z1 - z0) - gaps - fixed;
+        if rest < -1e-6 {
+            self.list.warnings.push(format!(
+                "the stacked sections need {:.0} mm more height than the cabinet has",
+                -rest
+            ));
+            return;
+        }
+        // Sections of height 0 share what is left; with none, the top one stretches.
+        let free = sections.iter().filter(|x| x.height <= 0.0).count();
+        let mut heights: Vec<f64> = sections.iter().map(zone).collect();
+        if free > 0 {
+            for (h, sec) in heights.iter_mut().zip(sections) {
+                if sec.height <= 0.0 {
+                    *h = rest / free as f64;
                 }
             }
+        } else {
+            *heights.last_mut().unwrap() += rest;
+        }
+        let lift = self.opening_z.0 - z0;
+        let (left, right) = match (
+            self.part(PartRole::LeftSide),
+            self.part(PartRole::RightSide),
+        ) {
+            (Some(l), Some(r)) => (l, r),
+            _ => return,
+        };
+        let mut fz0 = z0;
+        let mut floor = self.opening_z.0;
+        let (mut doors, mut drawers, mut shelves) = (0, 0, 0);
+        for (i, (sec, h)) in sections.iter().zip(&heights).enumerate() {
+            let fz1 = fz0 + h;
+            let last = i + 1 == sections.len();
+            // The shelf over this section: its top where the next section's fronts start, as
+            // the bottom panel sits under the lowest front.
+            let ceiling = if last {
+                self.opening_z.1
+            } else {
+                fz1 + g + lift - t
+            };
+            match &sec.kind {
+                SectionKind::Drawers { count } => {
+                    let ratios = vec![1.0; *count as usize];
+                    drawers += self.drawer_fronts(
+                        drawers + 1,
+                        &ratios,
+                        (x0, x1, y0, y1),
+                        (fz0, fz1),
+                        (floor, ceiling),
+                    );
+                }
+                SectionKind::Door { hinge_side } => {
+                    doors += 1;
+                    self.door(doors, aabb(x0, y0, fz0, x1, y1, fz1), *hinge_side);
+                }
+                SectionKind::DoorPair => {
+                    let mid = (x0 + x1) / 2.0;
+                    self.door(
+                        doors + 1,
+                        aabb(x0, y0, fz0, mid - g / 2.0, y1, fz1),
+                        HingeSide::Left,
+                    );
+                    self.door(
+                        doors + 2,
+                        aabb(mid + g / 2.0, y0, fz0, x1, y1, fz1),
+                        HingeSide::Right,
+                    );
+                    doors += 2;
+                }
+                SectionKind::Niche => {}
+            }
+            if !last {
+                shelves += 1;
+                let bounds = aabb(
+                    t,
+                    0.0,
+                    ceiling,
+                    cab.width - t,
+                    self.interior_back,
+                    ceiling + t,
+                );
+                self.add(
+                    PartRole::Shelf,
+                    Some(shelves),
+                    bounds,
+                    Axis::Z,
+                    Axis::X,
+                    EdgeBanding::front_only(),
+                );
+                let shelf = self.list.parts.last().cloned().unwrap();
+                self.joint_parts(&left, &shelf, Dir::new(Axis::X, true), Axis::Y);
+                self.joint_parts(&right, &shelf, Dir::new(Axis::X, false), Axis::Y);
+                floor = ceiling + t;
+            }
+            fz0 = fz1 + g;
         }
     }
 
@@ -2159,7 +2305,10 @@ impl<'a> Builder<'a> {
                     }
                     _ if wall_hung => (z0 + HANDLE_END_INSET, z0 + HANDLE_END_INSET + span),
                     _ if matches!(cab.kind, CabinetKind::Tall | CabinetKind::Wardrobe) => {
-                        let c = TALL_HANDLE_HEIGHT.clamp(z0 + span / 2.0, z1 - span / 2.0);
+                        let c = TALL_HANDLE_HEIGHT.clamp(
+                            z0 + HANDLE_END_INSET + span / 2.0,
+                            z1 - HANDLE_END_INSET - span / 2.0,
+                        );
                         (c - span / 2.0, c + span / 2.0)
                     }
                     _ => (z1 - HANDLE_END_INSET - span, z1 - HANDLE_END_INSET),
@@ -3939,6 +4088,73 @@ mod tests {
         cab.inner_drawers = 4;
         let list = build_cabinet(&cab).unwrap();
         assert!(list.warnings.iter().any(|w| w.contains("no room")));
+    }
+
+    fn oven_tower() -> Cabinet {
+        let mut cab = Cabinet::new("T01", CabinetKind::Tall);
+        cab.adjustable_shelves = 0;
+        cab.fronts = FrontLayout::Stack {
+            sections: vec![
+                StackSection {
+                    height: 0.0,
+                    kind: SectionKind::Drawers { count: 2 },
+                },
+                StackSection {
+                    height: 600.0,
+                    kind: SectionKind::Niche,
+                },
+                StackSection {
+                    height: 0.0,
+                    kind: SectionKind::Door {
+                        hinge_side: HingeSide::Left,
+                    },
+                },
+            ],
+        };
+        cab
+    }
+
+    /// STYLE-4: an oven tower: two drawers, a 600 mm clear niche between fixed shelves, a door
+    /// above; nothing clashes.
+    #[test]
+    fn an_oven_tower_stacks_drawers_a_niche_and_a_door() {
+        let list = build_cabinet(&oven_tower()).unwrap();
+        assert!(
+            !list
+                .warnings
+                .iter()
+                .any(|w| w.contains("clash") || w.contains("need")),
+            "{:?}",
+            list.warnings
+        );
+        assert_eq!(list.by_role(PartRole::DrawerFront).count(), 2);
+        assert_eq!(list.by_role(PartRole::DrawerBottom).count(), 2);
+        assert_eq!(list.by_role(PartRole::Door).count(), 1);
+        let (s1, s2) = (
+            list.part("T01.Shelf1").unwrap(),
+            list.part("T01.Shelf2").unwrap(),
+        );
+        assert!((s2.bounds.min.z - s1.bounds.max().z - 600.0).abs() < 1e-6);
+        // The door starts a gap above the niche's top shelf's front edge line, and the drawers
+        // end under the niche.
+        let door = list.part("T01.Door1").unwrap().bounds;
+        let top_drawer = list
+            .by_role(PartRole::DrawerFront)
+            .map(|p| p.bounds.max().z)
+            .fold(f64::MIN, f64::max);
+        assert!(top_drawer < s1.bounds.max().z);
+        assert!(door.min.z > s2.bounds.min.z - 1e-6);
+        assert!(door.max().z <= 2100.0);
+    }
+
+    #[test]
+    fn a_stack_too_tall_for_its_cabinet_is_refused() {
+        let mut cab = oven_tower();
+        if let FrontLayout::Stack { sections } = &mut cab.fronts {
+            sections[1].height = 2500.0;
+        }
+        let list = build_cabinet(&cab).unwrap();
+        assert!(list.warnings.iter().any(|w| w.contains("more height")));
     }
 
     fn handle_holes(list: &PartList, part: &str) -> Vec<Vec3> {

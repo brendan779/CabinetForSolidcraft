@@ -550,6 +550,19 @@ struct FrontThumbnail: View {
                     y += h
                     if i < ratios.count - 1 { hLine(y) }
                 }
+            case "oven_tower":
+                // A door at the top, the oven's dark glass, two drawers.
+                hLine(r.minY + r.height * 0.4)
+                hLine(r.minY + r.height * 0.7)
+                hLine(r.minY + r.height * 0.85)
+                ctx.fill(Path(CGRect(x: r.minX + 3, y: r.minY + r.height * 0.43, width: r.width - 6, height: r.height * 0.24)),
+                         with: .color(.primary.opacity(0.55)))
+                handle(r.maxX - 6, r.minY + r.height * 0.32, vertical: true)
+            case "fridge":
+                hLine(r.minY + r.height * 0.2)
+                ctx.fill(Path(CGRect(x: r.minX + 3, y: r.minY + r.height * 0.24, width: r.width - 6, height: r.height * 0.72)),
+                         with: .color(.primary.opacity(0.18)))
+                handle(r.maxX - 6, r.minY + r.height * 0.12, vertical: false)
             default:
                 for i in 1..<3 { hLine(r.minY + r.height * CGFloat(i) / 3) }
             }

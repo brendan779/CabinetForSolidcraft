@@ -380,6 +380,27 @@ fn the_new_cabinets_build_every_part_where_the_core_puts_it() {
         ratios: vec![1.0, 1.0],
     };
     high.standard.drawer_sides = cabinet_core::model::DrawerSides::HighFronted;
+    use cabinet_core::model::{SectionKind, StackSection};
+    let mut oven = Cabinet::new("T02", CabinetKind::Tall);
+    oven.adjustable_shelves = 0;
+    oven.fronts = FrontLayout::Stack {
+        sections: vec![
+            StackSection {
+                height: 0.0,
+                kind: SectionKind::Drawers { count: 2 },
+            },
+            StackSection {
+                height: 600.0,
+                kind: SectionKind::Niche,
+            },
+            StackSection {
+                height: 0.0,
+                kind: SectionKind::Door {
+                    hinge_side: HingeSide::Left,
+                },
+            },
+        ],
+    };
     let mut wardrobe = Cabinet::new("R01", CabinetKind::Wardrobe);
     wardrobe.wardrobe = cabinet_core::model::Hanging::Double;
     let mut shaker = Cabinet::new("B02", CabinetKind::Base);
@@ -405,6 +426,7 @@ fn the_new_cabinets_build_every_part_where_the_core_puts_it() {
         high,
         shaker,
         wardrobe,
+        oven,
         hki,
         lift,
         wood,
