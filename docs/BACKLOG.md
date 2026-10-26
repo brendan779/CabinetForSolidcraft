@@ -219,7 +219,7 @@ features in words.
 | SURR-3 | todo | L | Curved ends: rounded island ends (radius picker) from curved substrate (bending ply / kerfed MDF / flexible Surround), fluting following the curve, benchtop ends to match | split |
 | SURR-4 | todo | M | Clad rangehood / canopy box with rounded front corners, in a Surround profile or paint finish | rangehood part between wall cabinets |
 | SURR-5 | todo | S | Flute and VJ procedural textures in the viewport (normal-mapped grooves) | looks fluted in the app |
-| STYLE-1 | todo | M | Door styles for the look: shaker 5-piece, arched-top tall doors, handleless (J-pull, finger pull, push-to-open), full-height tall fronts with continuous grain | picker tiles |
+| STYLE-1 | todo (shaker = P2-2a; finger pull done in 04a890b; push-to-open is TIP-ON; arched tops and continuous-grain tall fronts left) | M | Door styles for the look: shaker 5-piece, arched-top tall doors, handleless (J-pull, finger pull, push-to-open), full-height tall fronts with continuous grain | picker tiles |
 | STYLE-2 | todo | M | Open shelving: floating timber shelves (concealed brackets) in niches between wall cabinets, with LED strip (ties to HAF-5) | shelf parts + hardware |
 | STYLE-3 | todo | S | Handle finishes: brushed brass, black, stainless; long pulls on tall doors | rendered handle colour |
 | STYLE-4 | needs-human (built in 19b3821: oven tower and fridge housing as stacked fronts; niche sizes are our defaults (oven 600 clear): check with your appliances; SERVO-DRIVE flex for integrated fridges and the rangehood insert not done) | M | Appliance housings: integrated ovens (single/double stacked), integrated fridge with SERVO-DRIVE flex, rangehood insert | tall cabinet variants |
@@ -359,3 +359,4 @@ Agents append one line per session: date, items touched, outcome.
 - 2026-10-26b (night) — BENCH-4 built (74fe6c0): sink (with tap hole) and cooktop cut-outs over chosen cabinets.
 - 2026-10-26b (night) — BENCH-6 part (394ac5d): slab splashbacks on benchtop pieces; niches left.
 - 2026-10-26b (night) — STYLE-4 built (19b3821): stacked front layout (drawers / door / niche sections with fixed shelves); oven tower and fridge presets for tall cabinets.
+- 2026-10-26b (night) — STYLE-1 part (04a890b): finger pulls routed along the gripping edge.
