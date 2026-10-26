@@ -67,6 +67,12 @@ struct CabinetDoc: Identifiable, Hashable, Codable {
         set { setNumber("side_overhang", newValue) }
     }
 
+    /// Benchtop: a slab splashback's height on the top (0: none).
+    var splashback: Double {
+        get { number("splashback") }
+        set { setNumber("splashback", newValue) }
+    }
+
     /// Benchtop: the kind of cut-out over cabinet `id` (`sink`, `cooktop`), if any.
     func cutout(over id: String) -> String? {
         (object["cutouts"] as? [[String: Any]])?.first { $0["over"] as? String == id }?["kind"] as? String

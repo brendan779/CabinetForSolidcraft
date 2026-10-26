@@ -49,6 +49,12 @@ pub struct Benchtop {
     /// Holes through the top for a sink or a cooktop, each centred over a cabinet.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub cutouts: Vec<Cutout>,
+    /// A slab splashback this high standing on each piece against the wall (0: none), in the
+    /// benchtop's board.
+    #[serde(default)]
+    pub splashback: f64,
+    #[serde(default = "Benchtop::default_splashback_thickness")]
+    pub splashback_thickness: f64,
 }
 
 /// A hole through a benchtop, centred across the cabinet it sits over.
@@ -91,6 +97,11 @@ impl Benchtop {
     }
 
     fn default_front_overhang() -> f64 {
+        20.0
+    }
+
+    /// Our default: a 20 mm slab.
+    fn default_splashback_thickness() -> f64 {
         20.0
     }
 }
@@ -354,6 +365,24 @@ fn benchtop(b: &Benchtop, lists: &[PartList], under: &[bool]) -> PartList {
                 ..EdgeBanding::default()
             },
         });
+        if b.splashback > 0.0 {
+            let t = b.splashback_thickness;
+            out.parts.push(Part {
+                name: format!("{}.{}{}", b.id, PartRole::Splashback.code(), n + 1),
+                role: PartRole::Splashback,
+                bounds: Aabb::new(
+                    Vec3::new(x0, y1 - t, z + b.thickness),
+                    Vec3::new(x1 - x0, t, b.splashback),
+                ),
+                thickness_axis: Axis::Y,
+                grain_axis: Some(Axis::X),
+                board: b.board.clone(),
+                edges: EdgeBanding {
+                    top: true,
+                    ..EdgeBanding::default()
+                },
+            });
+        }
     }
     out
 }
@@ -567,6 +596,8 @@ mod tests {
             back_clearance: 0.0,
             board: String::new(),
             cutouts: Vec::new(),
+            splashback: 0.0,
+            splashback_thickness: 20.0,
         })
     }
 
@@ -640,6 +671,8 @@ mod tests {
             side_overhang: 0.0,
             back_clearance: 0.0,
             board: String::new(),
+            splashback: 600.0,
+            splashback_thickness: 20.0,
             cutouts: vec![
                 Cutout {
                     over: "S01".into(),
@@ -692,5 +725,27 @@ mod tests {
         bt.cutouts[1].width = 2000.0;
         let lists = build_run(&run(&bt)).unwrap();
         assert!(lists[2].warnings.iter().any(|w| w.contains("does not fit")));
+    }
+
+    /// BENCH-6: a splashback stands on each piece at the back, across the same length.
+    #[test]
+    fn a_splashback_stands_on_the_top_against_the_wall() {
+        let mut item = top("BT1", 0.0);
+        if let RunItem::Benchtop(b) = &mut item {
+            b.splashback = 600.0;
+        }
+        let run = Run {
+            origin: Vec3::default(),
+            items: vec![cab("B01", CabinetKind::Base), item],
+        };
+        let lists = build_run(&run).unwrap();
+        let top = lists[1].part("BT1.Benchtop1").unwrap().bounds;
+        let back = lists[1].part("BT1.Splashback1").unwrap().bounds;
+        assert_eq!(back.min.z, top.max().z);
+        assert_eq!(back.max().y, top.max().y);
+        assert_eq!(
+            (back.size.x, back.size.y, back.size.z),
+            (top.size.x, 20.0, 600.0)
+        );
     }
 }

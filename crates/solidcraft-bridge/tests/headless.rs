@@ -461,6 +461,8 @@ fn a_benchtop_with_cut_outs_builds() {
                 side_overhang: 0.0,
                 back_clearance: 0.0,
                 board: String::new(),
+                splashback: 600.0,
+                splashback_thickness: 20.0,
                 cutouts: vec![
                     cutout("S01", CutoutKind::Sink, 760.0, 440.0),
                     cutout("B01", CutoutKind::Cooktop, 560.0, 490.0),

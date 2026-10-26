@@ -44,6 +44,8 @@ pub enum PartRole {
     FramePanel,
     /// A benchtop piece over a stretch of base cabinets.
     Benchtop,
+    /// A slab splashback standing on a benchtop piece.
+    Splashback,
 }
 
 impl PartRole {
@@ -72,6 +74,7 @@ impl PartRole {
             PartRole::FrameRail => "Frame rail",
             PartRole::FramePanel => "Frame panel",
             PartRole::Benchtop => "Benchtop",
+            PartRole::Splashback => "Splashback",
         }
     }
 
@@ -102,6 +105,7 @@ impl PartRole {
             PartRole::FrameRail => "Rail",
             PartRole::FramePanel => "Panel",
             PartRole::Benchtop => "Benchtop",
+            PartRole::Splashback => "Splashback",
         }
     }
 
