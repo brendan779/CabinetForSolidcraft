@@ -63,6 +63,9 @@ const SHAKER_PANEL: f64 = 9.0;
 const SHAKER_GROOVE: f64 = 10.0;
 const SHAKER_PLAY: f64 = 1.0;
 const SHAKER_MIN_OPENING: f64 = 60.0;
+/// Glass frames: the glass, and the rebate at the frame's back that takes it and its bead.
+const GLASS_THICKNESS: f64 = 4.0;
+const GLASS_REBATE_DEPTH: f64 = 12.0;
 /// Generic until a supplier's shelf support is catalogued (HAF-3).
 const SHELF_SUPPORT: &str = "shelf-support.5mm";
 /// Our choice, not Blum's: the end hinges sit this far in from the door's top and bottom. The
@@ -2109,9 +2112,10 @@ impl<'a> Builder<'a> {
     /// to the member they fall in.
     fn shaker_fronts(&mut self) {
         let s = &self.cab.standard;
-        if s.door_style != DoorStyle::Shaker {
+        if s.door_style == DoorStyle::Slab {
             return;
         }
+        let glass_style = s.door_style == DoorStyle::GlassFrame;
         let front_board = s.front_board.clone();
         let (f, p, g, play) = (SHAKER_FRAME, SHAKER_PANEL, SHAKER_GROOVE, SHAKER_PLAY);
         let fronts: Vec<Part> = self
@@ -2137,6 +2141,14 @@ impl<'a> Builder<'a> {
             }
             let (t0, t1) = (b.min.get(ta), b.max().get(ta));
             let mid = (t0 + t1) / 2.0;
+            let glass = glass_style && front.role != PartRole::DrawerFront;
+            // The back face: towards the cabinet's inside.
+            let inside = Vec3::new(self.cab.width / 2.0, self.cab.depth / 2.0, 0.0).get(ta);
+            let back = if (t0 - inside).abs() < (t1 - inside).abs() {
+                (t0, t0 + GLASS_REBATE_DEPTH)
+            } else {
+                (t1 - GLASS_REBATE_DEPTH, t1)
+            };
             // A box from (w, z) ranges, across the thickness range (a, c).
             let boxed = |wr: (f64, f64), zr: (f64, f64), tr: (f64, f64)| {
                 let lo = Vec3::new(0.0, 0.0, zr.0).with(wa, wr.0).with(ta, tr.0);
@@ -2145,7 +2157,7 @@ impl<'a> Builder<'a> {
             };
             let full = (t0, t1);
             let slot = (mid - p / 2.0, mid + p / 2.0);
-            let members = [
+            let mut members = vec![
                 (
                     PartRole::FrameStile,
                     1,
@@ -2181,6 +2193,9 @@ impl<'a> Builder<'a> {
                     Axis::Z,
                 ),
             ];
+            if glass {
+                members.retain(|m| m.0 != PartRole::FramePanel);
+            }
             let name = |role: PartRole, n: usize| {
                 if role == PartRole::FramePanel {
                     format!("{}{}", front.name, role.code())
@@ -2205,6 +2220,8 @@ impl<'a> Builder<'a> {
                 });
             }
             // The panel's grooves: along each stile's inner edge and each rail's.
+            // Glass sits in rebates from the back face instead of the panel's grooves.
+            let slot = if glass { back } else { slot };
             let grooves = [
                 (
                     name(PartRole::FrameStile, 1),
@@ -2228,6 +2245,30 @@ impl<'a> Builder<'a> {
                     .operations
                     .push(Operation::Groove { part, bounds });
             }
+            if glass {
+                let (gw, gh) = (
+                    w1 - w0 - 2.0 * (f - g + play),
+                    z1 - z0 - 2.0 * (f - g + play),
+                );
+                for (item, description) in [
+                    (
+                        "glass.4mm",
+                        format!("Glass {GLASS_THICKNESS:.0} mm, cut to {gw:.0} × {gh:.0}"),
+                    ),
+                    (
+                        "glass.bead",
+                        format!("Glazing bead, {:.0} mm in all", 2.0 * (gw + gh)),
+                    ),
+                ] {
+                    self.list.hardware.push(HardwarePlacement {
+                        item: item.into(),
+                        description,
+                        at: b.center(),
+                        part: name(PartRole::FrameStile, 1),
+                        quantity: 1,
+                    });
+                }
+            }
             // Which member a point on the slab falls in: stiles take the full height, rails the
             // rest of the top and bottom, the panel the middle.
             let member = |at: Vec3| {
@@ -2245,6 +2286,19 @@ impl<'a> Builder<'a> {
                 }
             };
             let panel = name(PartRole::FramePanel, 1);
+            if glass {
+                // Nothing is fixed through glass: holes that fell there are left out.
+                let before = self.list.operations.len();
+                self.list.operations.retain(|o| {
+                    !matches!(o, Operation::Bore { part, at, .. }
+                        if *part == front.name && member(*at) == panel)
+                });
+                if self.list.operations.len() < before {
+                    self.list
+                        .warnings
+                        .push(format!("{}: holes in the glass left out", front.name));
+                }
+            }
             for op in &mut self.list.operations {
                 if let Operation::Bore {
                     part, at, depth, ..
@@ -2261,6 +2315,9 @@ impl<'a> Builder<'a> {
             for h in &mut self.list.hardware {
                 if h.part == front.name {
                     h.part = member(h.at);
+                    if glass && h.part == panel {
+                        h.part = name(PartRole::FrameStile, 1);
+                    }
                 }
             }
         }
@@ -3660,6 +3717,44 @@ mod tests {
             .filter(|o| matches!(o, Operation::Bore { part, purpose: BorePurpose::FrontFixing, .. } if part.starts_with("D01.DrawerFront2Stile")))
             .count();
         assert_eq!(fixings, 4);
+    }
+
+    /// P2-2b: a glass door: the frame without a panel, rebated at the back, with glass and beads
+    /// in the hardware list; drawer fronts in the same cabinet stay panelled.
+    #[test]
+    fn a_glass_door_has_a_rebated_frame_and_its_glass_listed() {
+        let mut cab = Cabinet::new("W01", CabinetKind::Wall);
+        cab.standard.door_style = DoorStyle::GlassFrame;
+        let list = build_cabinet(&cab).unwrap();
+        assert!(
+            !list.warnings.iter().any(|w| w.contains("clash")),
+            "{:?}",
+            list.warnings
+        );
+        assert!(list.part("W01.Door1Panel").is_none());
+        let stile = list.part("W01.Door1Stile1").unwrap();
+        let rebate = list
+            .operations
+            .iter()
+            .find_map(|o| match o {
+                Operation::Groove { part, bounds } if *part == stile.name => Some(*bounds),
+                _ => None,
+            })
+            .unwrap();
+        // From the back face (towards the cabinet), 12 deep.
+        assert_eq!(rebate.max().y, stile.bounds.max().y);
+        assert_eq!(rebate.size.y, GLASS_REBATE_DEPTH);
+        let glass = list
+            .hardware
+            .iter()
+            .find(|h| h.item == "glass.4mm")
+            .unwrap();
+        assert!(
+            glass.description.contains("cut to"),
+            "{}",
+            glass.description
+        );
+        assert!(list.hardware.iter().all(|h| list.part(&h.part).is_some()));
     }
 
     fn handle_holes(list: &PartList, part: &str) -> Vec<Vec3> {

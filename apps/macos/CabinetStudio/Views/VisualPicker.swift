@@ -241,12 +241,18 @@ private struct Pen {
     /// A door from the front: one board, or a frame round a recessed panel.
     func doorStyle(_ choice: String) {
         board(28, 6, 44, 68, hot: choice == "slab")
-        guard choice == "shaker" else { return }
+        guard choice != "slab" else { return }
         board(28, 6, 9, 68, hot: true)        // stiles
         board(63, 6, 9, 68, hot: true)
         board(37, 6, 26, 9, hot: true)        // rails
         board(37, 65, 26, 9, hot: true)
-        ctx.fill(Path(r(38, 16, 24, 48)), with: .color(.primary.opacity(0.18)))
+        if choice == "glass_frame" {
+            // Glass: pale, with a glint.
+            ctx.fill(Path(r(37, 15, 26, 50)), with: .color(.cyan.opacity(0.15)))
+            line(p(42, 22), p(52, 34), colour: .white.opacity(0.9), width: 1.2)
+        } else {
+            ctx.fill(Path(r(38, 16, 24, 48)), with: .color(.primary.opacity(0.18)))
+        }
     }
 
     /// A drawer front with the handle to scale against it (a 600 mm front is 80 units).

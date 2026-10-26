@@ -596,6 +596,9 @@ pub enum DoorStyle {
     /// Two stiles and two rails, stub-tenoned, with a thin panel in their grooves. Fronts too
     /// small for a frame stay slab.
     Shaker,
+    /// The shaker frame rebated at the back for glass held by beads (doors and lift fronts;
+    /// drawer fronts get a shaker panel).
+    GlassFrame,
 }
 
 /// Where a front's handle goes.
