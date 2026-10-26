@@ -190,7 +190,7 @@ committed: they are the brands' copyright. `preview_colour` is an approximation.
 | id | status | size | task |
 |---|---|---|---|
 | P2-1 | todo | L | Face-frame construction (US style) |
-| P2-2 | split → P2-2a done (0a5ea06: shaker frames; member width, panel and groove are our defaults, not yet options), P2-2b todo (glass frames: rebate and beads instead of a panel), P2-2c todo (Polytec aluminium frame doors: needs their profile data) | L | Shaker / 5-piece doors, glass frames, aluminium frame doors (Polytec Alu frames) |
+| P2-2 | split → P2-2a done (0a5ea06: shaker frames; member width, panel and groove are our defaults, not yet options), P2-2b done (e88b3c7: glass frames, rebate + glass and bead rows), P2-2c todo (Polytec aluminium frame doors: needs their profile data) | L | Shaker / 5-piece doors, glass frames, aluminium frame doors (Polytec Alu frames) |
 | P2-3 | todo | L | Wardrobes: hanging rails, drawers, shoe shelves, sliding doors |
 | P2-4 | todo | L | Benchtops, cornices, light rails, panels with scribes |
 | P2-5 | split → P2-5a done (ab3f118: core quote, PDF, Cut List › Quote with prices typed per line; not seen on screen), P2-5b built (76cdcbf: rates popover, per-cabinet customer quote; price per sheet left: per m² of sheet is the same thing for one sheet size) | L | Quoting: material + hardware + labour rates |
@@ -352,3 +352,4 @@ Agents append one line per session: date, items touched, outcome.
 - 2026-10-26b (night) — P2-5 split; P2-5a built (ab3f118): quote from a price list the owner types in (board per m² of nested sheets, tape, hardware, labour, markup, GST); missing prices listed.
 - 2026-10-26b (night) — P2-5b built (76cdcbf): customer quote PDF (price per cabinet, tax included), rates popover.
 - 2026-10-26b (night) — P2-2 split; P2-2a done (0a5ea06): shaker fronts (stiles, tenoned rails, grooved panel), machining moved to the members.
+- 2026-10-26b (night) — P2-2b done (e88b3c7): glass frame fronts.
