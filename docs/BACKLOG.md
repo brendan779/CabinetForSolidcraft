@@ -109,7 +109,7 @@ All Blum rows: source = Blum Catalogue and technical manual 2024/2025 in `vendor
 
 | id | status | size | task | done when |
 |---|---|---|---|---|
-| HAF-1 | needs-human (Häfele data, like HAF-4: which leg and plinth clip, and Häfele's spacing rule; today every base cabinet gets 4 generic `hafele.leg.adjustable`) | M | Adjustable legs + plinth clips (count rule by width), from Häfele data | BOM rows with article numbers |
+| HAF-1 | todo (owner 2026-10-26: Häfele AXILO 78 legs, see docs/benchtops.md; AU article numbers, plate drilling and clip still from the owner's Häfele documents, so keep them `verified: false`; legs per cabinet editable) | M | Adjustable legs + plinth clips (count rule by width), from Häfele data | BOM rows with article numbers |
 | HAF-2 | done (f844e59; handle rows are generic `handle.cc128` etc. until handle articles are chosen; insets 35/50 mm and tall handles at 1050 are our choices) | M | Handles: catalog of CC spacings; placement picker (top corner, centre, edge pull) drawn on the door | handle bores on door sheets |
 | HAF-3 | needs-human (count done in a7d72a0: 4 per adjustable shelf as generic `shelf-support.5mm`; the article needs the owner's pick and the supplier's data, like HAF-4) | M | Shelf supports (5 mm pins) article + count | BOM |
 | HAF-4 | needs-human (Häfele data) | L | Loox5 lighting: profiles (surface, recessed, shelf-edge), 12 V/24 V strips, drivers, distributors, switches/sensors | split |
@@ -173,7 +173,7 @@ committed: they are the brands' copyright. `preview_colour` is an approximation.
 | UI-4 | needs-human (built in 63a3bff; not seen on screen here: look at the glow, hover tooltip, explode, Section and Open) | M | Viewport: selection outline/glow, hover highlight, part tooltip, exploded slider, section view, door open animation | each item visible in a screenshot |
 | UI-5 | needs-human (built in 665cfe1; assign an oak decor to the fronts and look at the viewport) | M | Viewport materials from board preview colours; woodgrain procedural texture for grained decors | oak fronts look like oak |
 | UI-6 | needs-human (built in 4765cd2; look at the toolbar with SolidCraft open and closed) | S | Status dot visible in the SolidCraft toolbar menu (currently hidden by the menu label) | screenshot |
-| UI-7 | needs-human (design questions in the 2026-10-26b PR: room shapes, runs per wall, wall cabinets over base runs, appliances; it changes the job file, sidebar and viewport) | M | Room planner: wall lengths, run along a wall, appliances as placeholders | split |
+| UI-7 | todo (owner 2026-10-26: the room is fully customisable: walls of any length and angle, with door and window openings as gaps in runs; see ROOM-1) | M | Room planner: wall lengths, run along a wall, appliances as placeholders | split |
 | UI-8 | needs-human (built in 8c867b5; drag in the run strip; say whether a strip is acceptable instead of dragging the 3D cabinets) | M | Drag to reorder and resize cabinets in the viewport (width handles snap to presets) | drag changes width |
 | UI-9 | needs-human (built in 9fd31d0; try the keys) | S | Keyboard: ⌘1–4 workspaces, arrows to step through cabinets, ⌫ delete | works |
 | UI-10 | needs-human (built in 94108a4; not seen on screen here: launch once with defaults reset, or Help › Welcome to Cabinet Studio) | M | Onboarding: first launch connects to SolidCraft, explains Design vs Manufacturing detail | first-run sheet |
@@ -211,9 +211,9 @@ features in words.
 | BENCH-1 | needs-human (built in c717de4: the run item, pieces per stretch, inspector chips; not seen on screen; material picker beyond the board slot and stone/compact kinds left to BENCH-5's quoting) | M | Benchtop model per run: thickness presets (20, 33, 40, 60, 80+ mm built-up), front/side overhangs, back and end clearances, material from catalog (laminate, compact, stone, timber) | a run gets a benchtop part that follows the run and overhangs |
 | BENCH-2 | needs-human (built in 086d21a: profile tiles, apron part, note on the schedule; the 3D view draws square edges: rounded profiles are not modelled) | M | Edge profiles as a visual picker: square, pencil round, bullnose, bevel, mitred apron (thick look) | profile shown in the 3D view and on sheets |
 | BENCH-3 | split → BENCH-3a waterfall ends and BENCH-3c breakfast-bar overhang with support rule built (6646df4; 300 mm unsupported and 600 mm bracket spacing are our rules of thumb); BENCH-3b L-corner leg piece built (6c46ef9: butt joint, main top through; a mitre or a joint-position choice and U shapes left), BENCH-3e rounded ends built (f4458e2: corner radius on free corners, filleted in SolidCraft, arcs in DXF; not seen on screen); BENCH-3d thickness steps needs-human (what is a step: an island top thicker than the run top, or one top changing thickness along its length, and how is the joint made?) | L | Transitions: L and U corners (mitre or butt joint, joint position picker), thickness steps, waterfall ends (mitred drop to floor), rounded/radius island ends, breakfast-bar overhang with a support rule | split into BENCH-3a..e |
-| BENCH-4 | needs-human (built in 74fe6c0; sizes are our defaults until appliance templates: which sinks and cooktops do you fit?) | M | Cut-outs: sink (undermount/top mount), cooktop, tap holes, power pop-ups, from appliance templates | cut-outs on the benchtop sheet |
+| BENCH-4 | todo (owner 2026-10-26: templates must be customisable, rectangular and radius-corner shapes; see BENCH-9) | M | Cut-outs: sink (undermount/top mount), cooktop, tap holes, power pop-ups, from appliance templates | cut-outs on the benchtop sheet |
 | BENCH-5 | done (84bc576; edge profiles wait for BENCH-2) | M | Benchtop outputs: dimensioned template sheet per piece with joins, cut-outs and edge profiles; area and edge metres for quoting | PDF/SVG sheet |
-| BENCH-6 | needs-human (slab splashback built in 394ac5d; niches with shelves and power point cut-outs built in b439ab6: sizes are our defaults, the 100 × 60 power point cut-out needs checking with an electrician; not seen on screen) | M | Splashbacks: slab splashback panels matching the benchtop, with a niche/recess for open shelves and power points | splashback part + sheet |
+| BENCH-6 | todo (owner 2026-10-26: power point cut-outs default to the Clipsal Iconic double outlet, see BENCH-8; niche sizes stay editable defaults) | M | Splashbacks: slab splashback panels matching the benchtop, with a niche/recess for open shelves and power points | splashback part + sheet |
 | SURR-1 | done (d6e1833; flexible/curved variants are not in that brochure; VJ, Heritage and Scallop 135 groove depths not printed) | M | Laminex Surround profiles as catalog data (`kind: lining`) from Laminex's own current documents: profile names (Classic VJ, Scallop, Demi Round...), module width, flute/groove pitch, thickness, sheet sizes, substrate, flexible/curved variants | catalog rows with sources |
 | SURR-2 | needs-human (built in b3e72a4: cladding parts on chosen faces; the run layout does not yet leave room for a clad end between cabinets; profile choice waits for SURR-1; not seen on screen) | M | Cladding as a cabinet finish: island backs and ends, end panels and kick panels clad in a Surround profile, flutes vertical and aligned across panels | an island back renders fluted |
 | SURR-3 | needs-human (2026-10-26b: needs curved parts, which the part model (boxes, with the new Round and Arch operations) does not have yet; benchtop rounded ends are done (BENCH-3e). How do you build a curved end: bending ply on formers, kerfed MDF, or flexible Surround over a frame? Which radii?) | L | Curved ends: rounded island ends (radius picker) from curved substrate (bending ply / kerfed MDF / flexible Surround), fluting following the curve, benchtop ends to match | split |
@@ -223,6 +223,22 @@ features in words.
 | STYLE-2 | needs-human (built in c875186: floating shelf run item with brackets and LED; not seen on screen; bracket spacing is our rule) | M | Open shelving: floating timber shelves (concealed brackets) in niches between wall cabinets, with LED strip (ties to HAF-5) | shelf parts + hardware |
 | STYLE-3 | needs-human (built in dd2d290: finishes, handles drawn in the viewport; not seen on screen; long pulls on tall doors = choose 320/448 centres) | S | Handle finishes: brushed brass, black, stainless; long pulls on tall doors | rendered handle colour |
 | STYLE-4 | needs-human (built in 19b3821: oven tower and fridge housing as stacked fronts; niche sizes are our defaults (oven 600 clear): check with your appliances; SERVO-DRIVE flex for integrated fridges and the rangehood insert not done) | M | Appliance housings: integrated ovens (single/double stacked), integrated fridge with SERVO-DRIVE flex, rangehood insert | tall cabinet variants |
+
+## P2 — Owner's answers to PR #4 (2026-10-26): to build
+
+Every number below is a **default the user can change** in the app. The owner wants it all
+customisable. Facts and sources are in [docs/benchtops.md](benchtops.md); keep each with its
+source and `verified: false`.
+
+| id | status | size | task | done when |
+|---|---|---|---|---|
+| BENCH-7 | todo | M | Benchtop material rules as catalog data: material (natural stone incl. quartzite, porcelain/sintered incl. Zenith Surfaces, Dekton, laminate, compact, timber; no engineered stone, banned in AU since 1 Jul 2024) × thickness → max unsupported overhang, substrate needed, support spacing, ⅓-depth rule, cut-out clearances (≥ 80 front, ≥ 50 rear, ≥ 35 sink↔tap, electrical ≥ 150 from an edge). Supports placed from these; a picker per benchtop; each value overridable | changing the material of a 400 mm island overhang changes the bracket count; tests per material |
+| BENCH-8 | todo | S | Power point cut-outs default to the Schneider Electric Clipsal Iconic horizontal double outlet (plate 120 × 78, cut-out 110 × 68, 84 mm centres), editable per job; a range picker so other Clipsal plates (Saturn, quad) can be added as data | cut-out on the splashback sheet and in SolidCraft matches the data |
+| BENCH-9 | todo | M | Sink and cooktop templates: a user library of appliances with rectangular or radius-corner cut-outs (width, depth, corner radius, tap hole Ø and offset, setback), stored with the job/standard; defaults for a typical undermount sink and 600/900 cooktops | add a custom sink in the app and it cuts the benchtop |
+| WARD-1 | todo | M | Wardrobe dimensions all editable: hat shelf drop, rail drop under its shelf, double-hanging shelf height, shoe shelf, drawer stack; presets as defaults | inspector fields with drawn tiles; tests |
+| WARD-2 | todo | M | Sliding wardrobe doors (P2-3c): track systems as catalog data with a generic default, track and door overlap editable | sliding doors on a wardrobe |
+| SHAK-1 | todo | S | Shaker sizes editable: stile/rail width, panel thickness, groove depth, the slab threshold (default 70 / 9 / 10 / 200 mm), frame and panel boards | inspector fields; cut list follows |
+| ROOM-1 | todo | L | Room planner (UI-7): walls of any length and angle, ceiling height, door and window openings (width, height, sill) that runs stop at, runs along walls, islands, wall cabinets over base runs. Split into ROOM-1a..e before building | a room with a door and window gap lays out its runs |
 
 ## P3 — SolidCraft plugin
 
@@ -383,3 +399,11 @@ Agents append one line per session: date, items touched, outcome.
 - 2026-10-26b (night) — STYLE-1 part (73fa4bc): arched tops on slab doors (new Arch operation).
 - 2026-10-26b (night) — P2-7 (fbdc0ec): CNC router nesting (MaxRects).
 - 2026-10-26b (night) — P2-1, P2-6, SURR-3, OUT-8b, DATA-4, DATA-5b set to needs-human with their questions: no row left that needs no input from the owner (PLG-3 checked today).
+- 2026-10-26 — **Owner's answers to PR #4** (research and defaults in docs/benchtops.md):
+  1. Overhangs: use the stone and porcelain conventions, with quartzite and Zenith Surfaces specifically. Researched; no single AU standard. Defaults: natural stone 20 mm → 150 mm, 30–40 mm → 300 mm, supports ≤ 600 mm apart past 300; Zenith porcelain → 300 mm (AU distributor); ⅓-depth rule. All editable (BENCH-7).
+  2. Sink/cooktop templates: customisable, rectangular and radius-corner options (BENCH-9).
+  3. Wardrobe heights and the track: customisable (WARD-1, WARD-2).
+  4. Shaker sizes: as built, but customisable (SHAK-1).
+  5. Room planner: doors and gaps; the room fully customisable (ROOM-1 / UI-7).
+  6. Legs: Häfele AXILO 78 (HAF-1).
+  7. Splashback "niche" means a recessed open shelf alcove in the splashback (as in the owner's reference photo): sizes stay editable defaults. Power points: Schneider Electric (Clipsal Iconic) double outlet (BENCH-8).
