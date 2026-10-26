@@ -172,6 +172,8 @@ mod tests {
                     waterfall_right: false,
                     splashback: 600.0,
                     splashback_thickness: 20.0,
+                    niches: Vec::new(),
+                    power_points: Vec::new(),
                 }),
             ],
         };

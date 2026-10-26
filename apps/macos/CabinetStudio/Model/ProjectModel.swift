@@ -129,6 +129,24 @@ struct CabinetDoc: Identifiable, Hashable, Codable {
         }
     }
 
+    /// Benchtop: whether the splashback has an opening of `field` (`niches`, `power_points`)
+    /// over cabinet `id`.
+    func hasOpening(_ field: String, over id: String) -> Bool {
+        (object[field] as? [[String: Any]])?.contains { $0["over"] as? String == id } ?? false
+    }
+
+    /// Adds or removes a splashback opening over a cabinet, at the core's default sizes (a niche
+    /// with one shelf; a double power point).
+    mutating func setOpening(_ field: String, over id: String, _ on: Bool) {
+        update { o in
+            var list = (o[field] as? [[String: Any]] ?? []).filter { $0["over"] as? String != id }
+            if on {
+                list.append(field == "niches" ? ["over": id, "shelves": 1] : ["over": id])
+            }
+            o[field] = list.isEmpty ? nil : list
+        }
+    }
+
     /// The cabinet's construction standard as JSON values, field by field.
     var standard: [String: Any] {
         get { object["standard"] as? [String: Any] ?? [:] }

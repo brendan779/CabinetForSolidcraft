@@ -466,7 +466,9 @@ fn a_benchtop_with_cut_outs_builds() {
         eprintln!("SOLIDCRAFT_CLI not set: skipped");
         return;
     };
-    use cabinet_core::run::{Benchtop, Cutout, CutoutKind, Run, RunItem, build_run};
+    use cabinet_core::run::{
+        Benchtop, Cutout, CutoutKind, Niche, PowerPoint, Run, RunItem, build_run,
+    };
     let cutout = |over: &str, kind, width, depth| Cutout {
         over: over.into(),
         kind,
@@ -492,6 +494,18 @@ fn a_benchtop_with_cut_outs_builds() {
                 waterfall_right: false,
                 splashback: 600.0,
                 splashback_thickness: 20.0,
+                niches: vec![Niche {
+                    over: "S01".into(),
+                    width: 0.0,
+                    height: 400.0,
+                    depth: 110.0,
+                    sill: 150.0,
+                    shelves: 1,
+                }],
+                power_points: vec![PowerPoint {
+                    over: "B01".into(),
+                    height: 150.0,
+                }],
                 cutouts: vec![
                     cutout("S01", CutoutKind::Sink, 760.0, 440.0),
                     cutout("B01", CutoutKind::Cooktop, 560.0, 490.0),

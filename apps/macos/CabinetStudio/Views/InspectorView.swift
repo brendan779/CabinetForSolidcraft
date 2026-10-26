@@ -171,6 +171,32 @@ struct PieceSection: View {
                         }
                     }
                 }
+                if cab.splashback > 0 && cab.backOverhang == 0 {
+                    SectionTitle("Splashback")
+                    ForEach(bases, id: \.id) { base in
+                        HStack(spacing: 6) {
+                            Text(base.id).monospaced()
+                            Spacer()
+                            ForEach([("niches", "Niche", "square.split.1x2"), ("power_points", "Power", "powerplug")],
+                                    id: \.0) { field, title, symbol in
+                                let on = cab.hasOpening(field, over: base.id)
+                                Button {
+                                    withAnimation(.snappy) {
+                                        var c = cab
+                                        c.setOpening(field, over: base.id, !on)
+                                        project.selected = c
+                                    }
+                                } label: {
+                                    Label(title, systemImage: symbol)
+                                }
+                                .buttonStyle(ChipStyle(selected: on))
+                                .help(field == "niches"
+                                      ? "An open niche in the splashback over \(base.id): lined in the benchtop's board, one shelf"
+                                      : "A cut-out for a double power point in the splashback over \(base.id)")
+                            }
+                        }
+                    }
+                }
             } else if cab.kind == "filler" {
                 SectionTitle("Filler")
                 chips("Width", value: cab.width, presets: [25, 38, 50, 75, 100, 150]) { c, v in c.width = v }

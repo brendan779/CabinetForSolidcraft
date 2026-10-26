@@ -107,7 +107,73 @@ pub struct Benchtop {
     pub splashback: f64,
     #[serde(default = "Benchtop::default_splashback_thickness")]
     pub splashback_thickness: f64,
+    /// Recesses through the splashback into the wall, each over a cabinet, lined in the
+    /// splashback's board.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub niches: Vec<Niche>,
+    /// Cut-outs in the splashback for double power points, each centred over a cabinet.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub power_points: Vec<PowerPoint>,
 }
+
+/// An open recess in the splashback, centred over a cabinet: an opening through the slab, lined
+/// (top, bottom, sides, back) and with shelves, set into the wall cavity.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct Niche {
+    /// The cabinet's id.
+    pub over: String,
+    /// The opening's outside size; 0 wide: the cabinet's width less a margin each side.
+    #[serde(default)]
+    pub width: f64,
+    #[serde(default = "Niche::default_height")]
+    pub height: f64,
+    /// From the splashback's face to the back of the lining.
+    #[serde(default = "Niche::default_depth")]
+    pub depth: f64,
+    /// From the benchtop to the opening.
+    #[serde(default = "Niche::default_sill")]
+    pub sill: f64,
+    #[serde(default)]
+    pub shelves: u32,
+}
+
+impl Niche {
+    /// Our defaults: 400 high, 150 above the top, 110 deep (a 90 mm stud wall behind a 20 mm
+    /// slab).
+    fn default_height() -> f64 {
+        400.0
+    }
+
+    fn default_depth() -> f64 {
+        110.0
+    }
+
+    fn default_sill() -> f64 {
+        150.0
+    }
+}
+
+/// A double power point's cut-out in the splashback.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct PowerPoint {
+    /// The cabinet's id.
+    pub over: String,
+    /// The cut-out's centre above the benchtop.
+    #[serde(default = "PowerPoint::default_height")]
+    pub height: f64,
+}
+
+impl PowerPoint {
+    /// Our default: centred 150 above the top.
+    fn default_height() -> f64 {
+        150.0
+    }
+}
+
+/// Our choices, VERIFY with the electrician: the cut-out for a double power point's mounting
+/// block (it is covered by the plate, 116 × 73), and the niche's margin to its cabinet's sides.
+const POWER_POINT_CUTOUT: (f64, f64) = (100.0, 60.0);
+const NICHE_MARGIN: f64 = 50.0;
 
 /// A benchtop's edge.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Serialize, Deserialize)]
@@ -254,6 +320,7 @@ pub fn build_run(run: &Run) -> Result<Vec<PartList>> {
                 .collect();
             let mut top = benchtop(b, &out, &under);
             cutouts(b, &mut top, &out);
+            splashback_openings(b, &mut top, &out);
             out[i] = top;
         }
     }
@@ -590,16 +657,7 @@ fn cutouts(b: &Benchtop, top: &mut PartList, lists: &[PartList]) {
             ));
             continue;
         };
-        let x0 = cab
-            .parts
-            .iter()
-            .map(|p| p.bounds.min.x)
-            .fold(f64::MAX, f64::min);
-        let x1 = cab
-            .parts
-            .iter()
-            .map(|p| p.bounds.max().x)
-            .fold(f64::MIN, f64::max);
+        let (x0, x1) = span_x(cab);
         let mid = (x0 + x1) / 2.0;
         let Some(piece) = top
             .parts
@@ -645,6 +703,165 @@ fn cutouts(b: &Benchtop, top: &mut PartList, lists: &[PartList]) {
                     c.over
                 ));
             }
+        }
+    }
+}
+
+/// From the left to the right of a cabinet's parts.
+fn span_x(cab: &PartList) -> (f64, f64) {
+    let x0 = cab
+        .parts
+        .iter()
+        .map(|p| p.bounds.min.x)
+        .fold(f64::MAX, f64::min);
+    let x1 = cab
+        .parts
+        .iter()
+        .map(|p| p.bounds.max().x)
+        .fold(f64::MIN, f64::max);
+    (x0, x1)
+}
+
+/// Cuts each niche and power point through the splashback over its cabinet, and lines each
+/// niche: top and bottom across, sides between them, a back behind them all, shelves inside.
+fn splashback_openings(b: &Benchtop, top: &mut PartList, lists: &[PartList]) {
+    let t = b.splashback_thickness;
+    let openings = b
+        .niches
+        .iter()
+        .map(|n| (&n.over, Some(n)))
+        .chain(b.power_points.iter().map(|p| (&p.over, None)));
+    for (k, (over, niche)) in openings.enumerate() {
+        let what = if niche.is_some() {
+            "niche"
+        } else {
+            "power point"
+        };
+        let Some(cab) = lists.iter().find(|l| &l.cabinet == over) else {
+            top.warnings
+                .push(format!("{what}: no cabinet {over} in the run"));
+            continue;
+        };
+        let (x0, x1) = span_x(cab);
+        let mid = (x0 + x1) / 2.0;
+        let Some(back) = top
+            .parts
+            .iter()
+            .find(|p| {
+                p.role == PartRole::Splashback && p.bounds.min.x <= mid && mid <= p.bounds.max().x
+            })
+            .cloned()
+        else {
+            top.warnings
+                .push(format!("{what} over {over}: no splashback there"));
+            continue;
+        };
+        let sb = back.bounds;
+        let (w, h, z) = match niche {
+            Some(n) => {
+                let w = if n.width > 0.0 {
+                    n.width
+                } else {
+                    x1 - x0 - 2.0 * NICHE_MARGIN
+                };
+                (w, n.height, sb.min.z + n.sill)
+            }
+            None => {
+                let p = &b.power_points[k - b.niches.len()];
+                let (w, h) = POWER_POINT_CUTOUT;
+                (w, h, sb.min.z + p.height - h / 2.0)
+            }
+        };
+        let hole = Aabb::new(
+            Vec3::new(mid - w / 2.0, sb.min.y, z),
+            Vec3::new(w, sb.size.y, h),
+        );
+        if hole.min.x < sb.min.x || hole.max().x > sb.max().x || hole.max().z > sb.max().z {
+            top.warnings
+                .push(format!("{what} over {over} does not fit the splashback"));
+            continue;
+        }
+        top.operations.push(crate::part::Operation::Groove {
+            part: back.name.clone(),
+            bounds: hole,
+        });
+        let Some(n) = niche else { continue };
+        if n.depth <= 2.0 * t || w <= 2.0 * t || h <= 2.0 * t {
+            top.warnings
+                .push(format!("niche over {over} is too small to line"));
+            continue;
+        }
+        // The linings start at the slab's face; the back closes them at the niche's depth.
+        let (y0, deep) = (sb.min.y, n.depth - t);
+        let name = |what: &str| format!("{}.Niche{}{what}", b.id, k + 1);
+        let lining = |name: String, min: Vec3, size: Vec3, axis: Axis, grain: Axis| Part {
+            name,
+            role: PartRole::Splashback,
+            bounds: Aabb::new(min, size),
+            thickness_axis: axis,
+            grain_axis: Some(grain),
+            board: b.board.clone(),
+            edges: EdgeBanding {
+                front: axis != Axis::Y,
+                ..EdgeBanding::default()
+            },
+        };
+        let (hx, hz) = (hole.min.x, hole.min.z);
+        top.parts.extend([
+            lining(
+                name("Bottom"),
+                Vec3::new(hx, y0, hz),
+                Vec3::new(w, deep, t),
+                Axis::Z,
+                Axis::X,
+            ),
+            lining(
+                name("Top"),
+                Vec3::new(hx, y0, hz + h - t),
+                Vec3::new(w, deep, t),
+                Axis::Z,
+                Axis::X,
+            ),
+            lining(
+                name("SideL"),
+                Vec3::new(hx, y0, hz + t),
+                Vec3::new(t, deep, h - 2.0 * t),
+                Axis::X,
+                Axis::Z,
+            ),
+            lining(
+                name("SideR"),
+                Vec3::new(hx + w - t, y0, hz + t),
+                Vec3::new(t, deep, h - 2.0 * t),
+                Axis::X,
+                Axis::Z,
+            ),
+            lining(
+                name("Back"),
+                Vec3::new(hx, y0 + deep, hz),
+                Vec3::new(w, t, h),
+                Axis::Y,
+                Axis::X,
+            ),
+        ]);
+        // Shelves share the clear height evenly.
+        let clear = h - 2.0 * t;
+        let gap = (clear - n.shelves as f64 * t) / (n.shelves + 1) as f64;
+        if n.shelves > 0 && gap < 60.0 {
+            top.warnings.push(format!(
+                "niche over {over}: {} shelves leave {gap:.0} mm between them",
+                n.shelves
+            ));
+        }
+        for s in 0..n.shelves {
+            let sz = hz + t + gap * (s + 1) as f64 + t * s as f64;
+            top.parts.push(lining(
+                name(&format!("Shelf{}", s + 1)),
+                Vec3::new(hx + t, y0, sz),
+                Vec3::new(w - 2.0 * t, deep, t),
+                Axis::Z,
+                Axis::X,
+            ));
         }
     }
 }
@@ -849,6 +1066,8 @@ mod tests {
             waterfall_right: false,
             splashback: 0.0,
             splashback_thickness: 20.0,
+            niches: Vec::new(),
+            power_points: Vec::new(),
         })
     }
 
@@ -928,6 +1147,8 @@ mod tests {
             waterfall_right: false,
             splashback: 600.0,
             splashback_thickness: 20.0,
+            niches: Vec::new(),
+            power_points: Vec::new(),
             cutouts: vec![
                 Cutout {
                     over: "S01".into(),
@@ -1002,6 +1223,77 @@ mod tests {
             (back.size.x, back.size.y, back.size.z),
             (top.size.x, 20.0, 600.0)
         );
+    }
+
+    /// BENCH-6: a niche through the splashback over its cabinet, lined and shelved, and a power
+    /// point cut-out beside it; one that does not fit says so.
+    #[test]
+    fn a_niche_is_cut_through_the_splashback_and_lined() {
+        let mut item = top("BT1", 0.0);
+        if let RunItem::Benchtop(b) = &mut item {
+            b.splashback = 600.0;
+            b.niches.push(Niche {
+                over: "B02".into(),
+                width: 0.0,
+                height: 400.0,
+                depth: 110.0,
+                sill: 150.0,
+                shelves: 1,
+            });
+            b.power_points.push(PowerPoint {
+                over: "B01".into(),
+                height: 150.0,
+            });
+        }
+        let run = |item: &RunItem| Run {
+            origin: Vec3::default(),
+            items: vec![
+                cab("B01", CabinetKind::Base),
+                cab("B02", CabinetKind::Base),
+                item.clone(),
+            ],
+        };
+        let lists = build_run(&run(&item)).unwrap();
+        let bt = &lists[2];
+        assert!(bt.warnings.is_empty(), "{:?}", bt.warnings);
+        let holes: Vec<_> = bt
+            .operations
+            .iter()
+            .filter_map(|o| match o {
+                crate::part::Operation::Groove { part, bounds } => Some((part.as_str(), *bounds)),
+                _ => None,
+            })
+            .collect();
+        assert_eq!(holes.len(), 2);
+        assert!(holes.iter().all(|(p, _)| *p == "BT1.Splashback1"));
+        // Over B02 (600..1200), 50 in from each side, 150 above the 33 mm top at 870.
+        let (_, niche) = holes[0];
+        assert_eq!((niche.min.x, niche.size.x), (650.0, 500.0));
+        assert_eq!((niche.min.z, niche.size.z), (870.0 + 33.0 + 150.0, 400.0));
+        let (_, power) = holes[1];
+        assert_eq!(power.center().x, 300.0);
+        assert_eq!(power.center().z, 870.0 + 33.0 + 150.0);
+        let names: Vec<_> = bt.parts.iter().map(|p| p.name.as_str()).collect();
+        for n in ["Bottom", "Top", "SideL", "SideR", "Back", "Shelf1"] {
+            assert!(
+                names.contains(&format!("BT1.Niche1{n}").as_str()),
+                "{names:?}"
+            );
+        }
+        // The back closes the lining 110 behind the slab's face; the shelf is halfway up.
+        let face = bt.part("BT1.Splashback1").unwrap().bounds.min.y;
+        let back = bt.part("BT1.Niche1Back").unwrap().bounds;
+        assert_eq!(back.max().y - face, 110.0);
+        let shelf = bt.part("BT1.Niche1Shelf1").unwrap().bounds;
+        assert_eq!(shelf.center().z, niche.center().z);
+        assert!(crate::collisions::check(bt).is_empty());
+        // Taller than the splashback.
+        if let RunItem::Benchtop(b) = &mut item {
+            b.niches[0].height = 600.0;
+        }
+        let lists = build_run(&run(&item)).unwrap();
+        assert!(lists[2].warnings.iter().any(|w| w.contains("does not fit")));
+        assert!(lists[2].part("BT1.Niche1Back").is_none());
     }
 
     /// BENCH-3a/3c: an island top: waterfall ends down to the floor and a 400 mm seating
