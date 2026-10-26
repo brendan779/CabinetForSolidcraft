@@ -67,6 +67,18 @@ struct CabinetDoc: Identifiable, Hashable, Codable {
         set { setNumber("side_overhang", newValue) }
     }
 
+    /// Benchtop: the edge profile (`square`, `pencil_round`, `bullnose`, `bevel`, `mitred_apron`).
+    var edgeProfile: String {
+        get { (object["edge"] as? [String: Any])?["type"] as? String ?? "square" }
+        set {
+            update { o in
+                o["edge"] = newValue == "mitred_apron"
+                    ? ["type": newValue, "depth": 60.0] as [String: Any]
+                    : ["type": newValue]
+            }
+        }
+    }
+
     /// Benchtop: seating overhang past the cabinets' backs (0: to the wall).
     var backOverhang: Double {
         get { number("back_overhang") }

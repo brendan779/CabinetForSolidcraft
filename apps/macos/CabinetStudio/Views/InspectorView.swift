@@ -87,6 +87,25 @@ struct PieceSection: View {
                 chips("Ends", value: cab.sideOverhang, presets: [0, 10, 20, 40]) { c, v in c.sideOverhang = v }
                 chips("Splashback", value: cab.splashback, presets: [0, 100, 300, 600, 650]) { c, v in c.splashback = v }
                 chips("Seating", value: cab.backOverhang, presets: [0, 300, 400, 600]) { c, v in c.backOverhang = v }
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 3), spacing: 8) {
+                    ForEach([("square", "Square"), ("pencil_round", "Pencil"), ("bullnose", "Bullnose"),
+                             ("bevel", "Bevel"), ("mitred_apron", "Apron")], id: \.0) { id, title in
+                        Button {
+                            withAnimation(.snappy) { var c = cab; c.edgeProfile = id; project.selected = c }
+                        } label: {
+                            VStack(spacing: 6) {
+                                EdgeProfileThumbnail(profile: id).frame(width: 44, height: 30)
+                                Text(title).font(.caption)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 6)
+                        }
+                        .buttonStyle(TileStyle(selected: cab.edgeProfile == id))
+                        .help(id == "mitred_apron" ? "A strip mitred under the front edge: the top looks 60 mm thick"
+                                                   : "The front edge's profile, for the benchtop maker")
+                        .accessibilityLabel("Edge: \(title)")
+                    }
+                }
                 HStack(spacing: 6) {
                     Text("Waterfall").foregroundStyle(.secondary)
                     Spacer()
@@ -533,6 +552,48 @@ struct HangingThumbnail: View {
                     ctx.fill(Path(CGRect(x: x - 1.5, y: y + 6, width: 3, height: drop)), with: .color(.accentColor.opacity(0.25)))
                 }
             }
+        }
+        .accessibilityHidden(true)
+    }
+}
+
+/// A benchtop's front edge in section: the top's end on the right.
+struct EdgeProfileThumbnail: View {
+    let profile: String
+
+    var body: some View {
+        Canvas { ctx, size in
+            let w = size.width, h = size.height
+            let t: CGFloat = h * 0.3, top: CGFloat = h * 0.25
+            var p = Path()
+            p.move(to: CGPoint(x: 2, y: top))
+            switch profile {
+            case "pencil_round":
+                p.addLine(to: CGPoint(x: w - 8, y: top))
+                p.addQuadCurve(to: CGPoint(x: w - 4, y: top + 4), control: CGPoint(x: w - 4, y: top))
+                p.addLine(to: CGPoint(x: w - 4, y: top + t - 4))
+                p.addQuadCurve(to: CGPoint(x: w - 8, y: top + t), control: CGPoint(x: w - 4, y: top + t))
+            case "bullnose":
+                p.addLine(to: CGPoint(x: w - 4 - t / 2, y: top))
+                p.addArc(center: CGPoint(x: w - 4 - t / 2, y: top + t / 2), radius: t / 2,
+                         startAngle: .degrees(-90), endAngle: .degrees(90), clockwise: false)
+            case "bevel":
+                p.addLine(to: CGPoint(x: w - 10, y: top))
+                p.addLine(to: CGPoint(x: w - 4, y: top + 6))
+                p.addLine(to: CGPoint(x: w - 4, y: top + t))
+            case "mitred_apron":
+                p.addLine(to: CGPoint(x: w - 4, y: top))
+                p.addLine(to: CGPoint(x: w - 4, y: h - 2))
+                p.addLine(to: CGPoint(x: w - 4 - t * 0.6, y: h - 2))
+                p.addLine(to: CGPoint(x: w - 4 - t * 0.6, y: top + t))
+            default:
+                p.addLine(to: CGPoint(x: w - 4, y: top))
+                p.addLine(to: CGPoint(x: w - 4, y: top + t))
+            }
+            p.addLine(to: CGPoint(x: 2, y: top + t))
+            p.closeSubpath()
+            ctx.fill(p, with: .color(.primary.opacity(0.15)))
+            ctx.stroke(p, with: .color(.primary.opacity(0.75)), lineWidth: 1.2)
         }
         .accessibilityHidden(true)
     }

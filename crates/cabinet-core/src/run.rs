@@ -46,6 +46,9 @@ pub struct Benchtop {
     /// Catalog board id, or empty for generic.
     #[serde(default)]
     pub board: String,
+    /// The profile of the front edge (and ends, where they show).
+    #[serde(default)]
+    pub edge: EdgeProfile,
     /// Holes through the top for a sink or a cooktop, each centred over a cabinet.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub cutouts: Vec<Cutout>,
@@ -65,6 +68,33 @@ pub struct Benchtop {
     pub splashback: f64,
     #[serde(default = "Benchtop::default_splashback_thickness")]
     pub splashback_thickness: f64,
+}
+
+/// A benchtop's edge.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case", tag = "type")]
+pub enum EdgeProfile {
+    #[default]
+    Square,
+    PencilRound,
+    Bullnose,
+    Bevel,
+    /// A strip mitred under the front edge so the top looks `depth` thick.
+    MitredApron {
+        depth: f64,
+    },
+}
+
+impl EdgeProfile {
+    fn label(self) -> String {
+        match self {
+            EdgeProfile::Square => "square".into(),
+            EdgeProfile::PencilRound => "pencil round".into(),
+            EdgeProfile::Bullnose => "bullnose".into(),
+            EdgeProfile::Bevel => "bevel".into(),
+            EdgeProfile::MitredApron { depth } => format!("mitred apron, {depth:.0} mm deep"),
+        }
+    }
 }
 
 /// A hole through a benchtop, centred across the cabinet it sits over.
@@ -339,6 +369,7 @@ fn benchtop(b: &Benchtop, lists: &[PartList], under: &[bool]) -> PartList {
         out.warnings
             .push("no base cabinets in the run to put the benchtop on".into());
     }
+    out.notes.push(format!("Edge profile: {}", b.edge.label()));
     for (n, stretch) in stretches.iter().enumerate() {
         let parts: Vec<&Part> = stretch.iter().flat_map(|l| &l.parts).collect();
         // An L-corner's second leg comes forward of the doors: it gets a piece of its own.
@@ -411,6 +442,37 @@ fn benchtop(b: &Benchtop, lists: &[PartList], under: &[bool]) -> PartList {
                     ..EdgeBanding::default()
                 },
             });
+        }
+        // A mitred apron under the front edge, the top's thickness deep, down to the apron's
+        // depth below the top's upper face.
+        if let EdgeProfile::MitredApron { depth } = b.edge {
+            let drop = depth - b.thickness;
+            if drop > 0.0 && b.thickness > b.front_overhang {
+                out.warnings.push(format!(
+                    "the apron reaches back past the door faces: give the top at least {:.0} mm \
+                     front overhang, or shorten the fronts by {drop:.0} mm",
+                    b.thickness
+                ));
+            }
+            if drop > 0.0 {
+                out.parts.push(Part {
+                    name: format!("{}.Apron{}", b.id, n + 1),
+                    role: PartRole::Benchtop,
+                    bounds: Aabb::new(
+                        Vec3::new(x0, y0, z - drop),
+                        Vec3::new(x1 - x0, b.thickness, drop),
+                    ),
+                    thickness_axis: Axis::Y,
+                    grain_axis: Some(Axis::X),
+                    board: b.board.clone(),
+                    edges: EdgeBanding::default(),
+                });
+            } else {
+                out.warnings.push(format!(
+                    "a {depth:.0} mm apron is no deeper than the {:.0} mm top",
+                    b.thickness
+                ));
+            }
         }
         // Waterfall ends: from the floor up the stretch's ends to the top's upper face, the
         // depth of the top. Mitred with the top: both pieces are cut to their outer faces.
@@ -684,6 +746,7 @@ mod tests {
             side_overhang: side,
             back_clearance: 0.0,
             board: String::new(),
+            edge: EdgeProfile::Square,
             cutouts: Vec::new(),
             back_overhang: 0.0,
             waterfall_left: false,
@@ -763,6 +826,7 @@ mod tests {
             side_overhang: 0.0,
             back_clearance: 0.0,
             board: String::new(),
+            edge: EdgeProfile::Square,
             back_overhang: 0.0,
             waterfall_left: false,
             waterfall_right: false,
@@ -917,5 +981,29 @@ mod tests {
                 }
             }
         }
+    }
+
+    /// BENCH-2: the edge profile is noted for the maker; a mitred apron adds a strip under the
+    /// front edge to the look's depth.
+    #[test]
+    fn a_mitred_apron_hangs_under_the_front_edge() {
+        let mut item = top("BT1", 0.0);
+        if let RunItem::Benchtop(b) = &mut item {
+            b.thickness = 20.0;
+            b.edge = EdgeProfile::MitredApron { depth: 60.0 };
+        }
+        let run = Run {
+            origin: Vec3::default(),
+            items: vec![cab("B01", CabinetKind::Base), item],
+        };
+        let lists = build_run(&run).unwrap();
+        let bt = &lists[1];
+        let top = bt.part("BT1.Benchtop1").unwrap().bounds;
+        let apron = bt.part("BT1.Apron1").unwrap().bounds;
+        assert_eq!((apron.min.y, apron.size.y), (top.min.y, 20.0));
+        assert_eq!((apron.min.z, apron.max().z), (top.min.z - 40.0, top.min.z));
+        assert_eq!(bt.notes, ["Edge profile: mitred apron, 60 mm deep"]);
+        // 20 mm overhang takes a 20 mm apron; a 33 mm top's apron would reach the doors.
+        assert!(bt.warnings.is_empty(), "{:?}", bt.warnings);
     }
 }

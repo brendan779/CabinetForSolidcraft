@@ -483,6 +483,7 @@ fn a_benchtop_with_cut_outs_builds() {
                 side_overhang: 0.0,
                 back_clearance: 0.0,
                 board: String::new(),
+                edge: Default::default(),
                 back_overhang: 0.0,
                 waterfall_left: true,
                 waterfall_right: false,

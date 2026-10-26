@@ -306,6 +306,9 @@ pub struct PartList {
     pub hardware: Vec<HardwarePlacement>,
     /// Problems the builder worked around (moved fixings, skipped biscuits...).
     pub warnings: Vec<String>,
+    /// What the maker needs to know that is not a size (a benchtop's edge profile).
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub notes: Vec<String>,
 }
 
 impl PartList {

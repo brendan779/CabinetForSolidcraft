@@ -67,7 +67,14 @@ fn line(list: &PartList, p: &Part) -> String {
 /// Every benchtop piece: summary pages, then a sheet per piece. Empty when the job has none.
 pub fn benchtops_pdf(lists: &[PartList], job: &str) -> Vec<u8> {
     let pieces = pieces(lists);
-    let lines: Vec<String> = pieces.iter().map(|(l, p)| line(l, p)).collect();
+    let mut lines: Vec<String> = pieces.iter().map(|(l, p)| line(l, p)).collect();
+    // The maker's notes (the edge profile), once per benchtop.
+    for l in lists
+        .iter()
+        .filter(|l| pieces.iter().any(|(pl, _)| pl.cabinet == l.cabinet))
+    {
+        lines.extend(l.notes.iter().map(|n| format!("{}: {n}", l.cabinet)));
+    }
     let total: f64 = pieces
         .iter()
         .map(|(_, p)| {
@@ -152,6 +159,7 @@ mod tests {
                     side_overhang: 0.0,
                     back_clearance: 0.0,
                     board: String::new(),
+                    edge: Default::default(),
                     cutouts: vec![Cutout {
                         over: "S01".into(),
                         kind: CutoutKind::Sink,
