@@ -61,6 +61,8 @@ const DEEP_FRONT: f64 = 200.0;
 const HAT_SHELF_DROP: f64 = 300.0;
 const RAIL_DROP: f64 = 60.0;
 const DOUBLE_HANG_SHELF: f64 = 1050.0;
+/// Our choice: each inner drawer at a wardrobe's foot takes this much height.
+const WARDROBE_DRAWER_PITCH: f64 = 200.0;
 /// Our choices for shaker fronts: frame member width, panel thickness, groove depth (and stub
 /// tenon length), and the panel's play in the groove each side. A front under twice the frame
 /// width plus this much stays slab.
@@ -874,6 +876,10 @@ impl<'a> Builder<'a> {
 
     fn shelves(&mut self) {
         let cab = self.cab;
+        if cab.kind == CabinetKind::Wardrobe {
+            self.wardrobe();
+            return;
+        }
         if cab.inner_drawers > 0 {
             if cab.adjustable_shelves > 0 {
                 self.list
@@ -881,10 +887,6 @@ impl<'a> Builder<'a> {
                     .push("shelves left out: the inner drawers take the opening".into());
             }
             self.inner_drawers();
-            return;
-        }
-        if cab.kind == CabinetKind::Wardrobe {
-            self.wardrobe();
             return;
         }
         let n = cab.adjustable_shelves as usize;
@@ -1339,8 +1341,22 @@ impl<'a> Builder<'a> {
         let s = &cab.standard;
         let (w, h, t) = (cab.width, cab.height, s.carcass_thickness);
         let mut shelves = vec![h - HAT_SHELF_DROP - t];
+        // Inner drawers at the foot, under a fixed shelf: the hanging above it.
+        let mut drawers_top = None;
+        if cab.inner_drawers > 0 {
+            let z0 = self.opening_z.0;
+            let top = z0 + cab.inner_drawers as f64 * WARDROBE_DRAWER_PITCH;
+            self.inner_drawers_in(z0, top);
+            drawers_top = Some(top);
+        }
         if cab.wardrobe == Hanging::Double {
-            shelves.push(DOUBLE_HANG_SHELF);
+            if drawers_top.is_some_and(|top| top + t > DOUBLE_HANG_SHELF - RAIL_DROP - 300.0) {
+                self.list
+                    .warnings
+                    .push("the drawers leave no room for a lower rail; long hanging only".into());
+            } else {
+                shelves.push(DOUBLE_HANG_SHELF);
+            }
         }
         let (left, right) = match (
             self.part(PartRole::LeftSide),
@@ -1393,12 +1409,40 @@ impl<'a> Builder<'a> {
                 });
             }
         }
+        if let Some(top) = drawers_top {
+            let n = shelves.len() + 1;
+            let bounds = aabb(
+                t,
+                s.shelf_front_setback,
+                top,
+                w - t,
+                self.interior_back,
+                top + t,
+            );
+            self.add(
+                PartRole::Shelf,
+                Some(n),
+                bounds,
+                Axis::Z,
+                Axis::X,
+                EdgeBanding::front_only(),
+            );
+            let shelf = self.list.parts.last().cloned().unwrap();
+            self.joint_parts(&left, &shelf, Dir::new(Axis::X, true), Axis::Y);
+            self.joint_parts(&right, &shelf, Dir::new(Axis::X, false), Axis::Y);
+        }
     }
 
     /// Blum LEGRABOX inner drawers behind the doors: the opening shared evenly from the bottom,
     /// each the tallest inner drawer (K, else M) its share fits. They have no drawer front, so
     /// the hardware goes on each one's base.
     fn inner_drawers(&mut self) {
+        let (z0, z1) = self.opening_z;
+        self.inner_drawers_in(z0, z1);
+    }
+
+    /// `inner_drawers` sharing the height from `z0` to `z1`.
+    fn inner_drawers_in(&mut self, z0: f64, z1: f64) {
         let cab = self.cab;
         let s = &cab.standard;
         let n = cab.inner_drawers as usize;
@@ -1418,7 +1462,6 @@ impl<'a> Builder<'a> {
             return;
         }
         let t = s.carcass_thickness;
-        let (z0, z1) = self.opening_z;
         let pitch = (z1 - z0) / n as f64;
         // Inset doors fill the front of the opening; the boxes start behind them.
         let fy = if s.overlay == DoorOverlay::Inset {
@@ -3861,6 +3904,41 @@ mod tests {
             assert!(list.operations.iter().any(|o| matches!(o,
                 Operation::BiscuitSlot { parts, .. } if parts.iter().any(|p| p == "R01.Shelf1"))));
         }
+    }
+
+    /// P2-3b: inner drawers at a wardrobe's foot under a fixed shelf; double hanging keeps its
+    /// lower rail while there is room.
+    #[test]
+    fn a_wardrobe_takes_inner_drawers_at_its_foot() {
+        let mut cab = Cabinet::new("R01", CabinetKind::Wardrobe);
+        cab.inner_drawers = 2;
+        cab.wardrobe = Hanging::Double;
+        let list = build_cabinet(&cab).unwrap();
+        assert!(
+            !list
+                .warnings
+                .iter()
+                .any(|w| w.contains("clash") || w.contains("no room")),
+            "{:?}",
+            list.warnings
+        );
+        assert_eq!(list.by_role(PartRole::DrawerBottom).count(), 2);
+        assert_eq!(list.by_role(PartRole::Shelf).count(), 3);
+        let top_of_drawers = list
+            .by_role(PartRole::DrawerBack)
+            .map(|p| p.bounds.max().z)
+            .fold(f64::MIN, f64::max);
+        let shelf = list.part("R01.Shelf3").unwrap();
+        assert!(shelf.bounds.min.z > top_of_drawers);
+        // Doors in front of inner drawers hang on 0-protrusion hinges.
+        assert!(
+            list.hardware
+                .iter()
+                .any(|h| h.item == "blum.clip-top-blumotion.155.overlay")
+        );
+        cab.inner_drawers = 4;
+        let list = build_cabinet(&cab).unwrap();
+        assert!(list.warnings.iter().any(|w| w.contains("no room")));
     }
 
     fn handle_holes(list: &PartList, part: &str) -> Vec<Vec3> {
