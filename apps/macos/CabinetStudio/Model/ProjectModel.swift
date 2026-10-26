@@ -281,6 +281,16 @@ struct CabinetDoc: Identifiable, Hashable, Codable {
         set { update { o in var c = o["cladding"] as? [String: Any] ?? [:]; c["thickness"] = newValue; o["cladding"] = c } }
     }
 
+    /// A rangehood canopy's insert cut-out.
+    var insertWidth: Double {
+        get { ((object["insert"] as? [String: Any])?["width"] as? NSNumber)?.doubleValue ?? 520 }
+        set { update { o in var i = o["insert"] as? [String: Any] ?? ["depth": 260.0]; i["width"] = newValue; o["insert"] = i } }
+    }
+    var insertDepth: Double {
+        get { ((object["insert"] as? [String: Any])?["depth"] as? NSNumber)?.doubleValue ?? 260 }
+        set { update { o in var i = o["insert"] as? [String: Any] ?? ["width": 520.0]; i["depth"] = newValue; o["insert"] = i } }
+    }
+
     /// A wardrobe's hanging: `long` or `double`.
     var hanging: String {
         get { object["wardrobe"] as? String ?? "long" }
@@ -1002,6 +1012,7 @@ extension CabinetDoc {
         case "corner_base": "L-corner"
         case "corner_wall": "Corner wall"
         case "wardrobe": "Wardrobe"
+        case "rangehood": "Rangehood canopy"
         case "sink": "Sink"
         case "filler": "Filler"
         case "end_panel": "End panel"
@@ -1022,6 +1033,7 @@ extension CabinetDoc {
         case "corner_base": "l.square"
         case "corner_wall": "l.square.fill"
         case "wardrobe": "cabinet"
+        case "rangehood": "wind"
         case "sink": "drop"
         case "filler": "rectangle.portrait.split.2x1"
         case "end_panel": "rectangle.portrait.lefthalf.filled"

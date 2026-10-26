@@ -48,6 +48,8 @@ pub enum PartRole {
     Splashback,
     /// A lining board on a face seen from the room: `CladLeft`, `CladRight`, `CladBack`.
     Cladding,
+    /// A rangehood canopy's fixed front.
+    CanopyFront,
 }
 
 impl PartRole {
@@ -78,6 +80,7 @@ impl PartRole {
             PartRole::Benchtop => "Benchtop",
             PartRole::Splashback => "Splashback",
             PartRole::Cladding => "Cladding",
+            PartRole::CanopyFront => "Canopy front",
         }
     }
 
@@ -110,6 +113,7 @@ impl PartRole {
             PartRole::Benchtop => "Benchtop",
             PartRole::Splashback => "Splashback",
             PartRole::Cladding => "Clad",
+            PartRole::CanopyFront => "CanopyFront",
         }
     }
 
@@ -128,6 +132,7 @@ impl PartRole {
                 | PartRole::Filler
                 | PartRole::EndPanel
                 | PartRole::Cladding
+                | PartRole::CanopyFront
         )
     }
 }

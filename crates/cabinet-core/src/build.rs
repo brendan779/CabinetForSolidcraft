@@ -55,6 +55,8 @@ const HANDLE_EDGE_INSET: f64 = 35.0;
 const HANDLE_END_INSET: f64 = 50.0;
 const TALL_HANDLE_HEIGHT: f64 = 1050.0;
 const DEEP_FRONT: f64 = 200.0;
+/// Our choice: a canopy bottom keeps at least this much board round the insert's cut-out.
+const CANOPY_CUTOUT_MARGIN: f64 = 20.0;
 /// Our choices for a routed finger pull: how far down the back of the front it reaches and how
 /// deep into the front it goes.
 const FINGER_PULL_HEIGHT: f64 = 25.0;
@@ -96,6 +98,12 @@ pub fn build_cabinet(cab: &Cabinet) -> Result<PartList> {
     validate(cab)?;
     let mut list = if matches!(cab.kind, CabinetKind::CornerBase | CabinetKind::CornerWall) {
         l_corner(cab)?
+    } else if cab.kind == CabinetKind::Rangehood {
+        let mut b = Builder::new(cab);
+        b.canopy();
+        b.cladding();
+        b.cover_caps();
+        b.list
     } else {
         let mut b = Builder::new(cab);
         b.carcass();
@@ -2661,6 +2669,89 @@ impl<'a> Builder<'a> {
         }
     }
 
+    /// A rangehood canopy: two sides, a top between them, a bottom with the insert's cut-out, a
+    /// fixed front over all of them; open at the back (the wall). Sides butt-jointed like a
+    /// carcass, the front screwed from inside (left to site).
+    fn canopy(&mut self) {
+        let cab = self.cab;
+        let s = &cab.standard;
+        let (w, d, h, t, ft) = (
+            cab.width,
+            cab.depth,
+            cab.height,
+            s.carcass_thickness,
+            s.front_thickness,
+        );
+        // No back: joints run the full depth.
+        self.interior_back = d;
+        let sides = [(PartRole::LeftSide, 0.0), (PartRole::RightSide, w - t)];
+        for (role, x) in sides {
+            self.add(
+                role,
+                None,
+                aabb(x, 0.0, 0.0, x + t, d, h),
+                Axis::X,
+                Axis::Z,
+                EdgeBanding::front_only(),
+            );
+        }
+        self.add(
+            PartRole::Top,
+            None,
+            aabb(t, 0.0, h - t, w - t, d, h),
+            Axis::Z,
+            Axis::X,
+            EdgeBanding::default(),
+        );
+        self.add(
+            PartRole::Bottom,
+            None,
+            aabb(t, 0.0, 0.0, w - t, d, t),
+            Axis::Z,
+            Axis::X,
+            EdgeBanding::front_only(),
+        );
+        self.add(
+            PartRole::CanopyFront,
+            None,
+            aabb(0.0, -ft, 0.0, w, 0.0, h),
+            Axis::Y,
+            Axis::Z,
+            EdgeBanding::all(),
+        );
+        let (left, right) = (
+            self.part(PartRole::LeftSide).unwrap(),
+            self.part(PartRole::RightSide).unwrap(),
+        );
+        for role in [PartRole::Top, PartRole::Bottom] {
+            let panel = self.part(role).unwrap();
+            self.joint_parts(&left, &panel, Dir::new(Axis::X, true), Axis::Y);
+            self.joint_parts(&right, &panel, Dir::new(Axis::X, false), Axis::Y);
+        }
+        // The insert's cut-out, centred across, from the front.
+        let ins = cab.insert;
+        let inner = w - 2.0 * t;
+        if ins.width > inner - 2.0 * CANOPY_CUTOUT_MARGIN
+            || ins.depth > d - 2.0 * CANOPY_CUTOUT_MARGIN
+        {
+            self.list.warnings.push(format!(
+                "a {:.0} × {:.0} insert does not fit this canopy's bottom",
+                ins.width, ins.depth
+            ));
+            return;
+        }
+        let x0 = (w - ins.width) / 2.0;
+        let y0 = (d - ins.depth) / 2.0;
+        self.list.operations.push(Operation::Groove {
+            part: self.name(PartRole::Bottom, None),
+            bounds: aabb(x0, y0, 0.0, x0 + ins.width, y0 + ins.depth, t),
+        });
+        self.list.notes.push(format!(
+            "Rangehood insert cut-out {:.0} × {:.0}: check it against the insert's installation drawing",
+            ins.width, ins.depth
+        ));
+    }
+
     /// Lining boards on the clad faces, standing proud of the carcass: the ends from the door
     /// faces to the back (and over the back's cladding), the back across the width; floor to top
     /// with the grain (the flutes) upright. Glued and pinned on site: no machining.
@@ -4363,6 +4454,57 @@ mod tests {
                 );
             }
         }
+    }
+
+    /// SURR-4: a canopy box: sides, top and bottom jointed, a fixed front, the insert's cut-out
+    /// through the bottom; clad ends work as on any cabinet.
+    #[test]
+    fn a_rangehood_canopy_houses_its_insert() {
+        let mut cab = Cabinet::new("H01", CabinetKind::Rangehood);
+        cab.cladding.left = true;
+        cab.cladding.right = true;
+        let list = build_cabinet(&cab).unwrap();
+        assert!(
+            !list.warnings.iter().any(|w| w.contains("clash")),
+            "{:?}",
+            list.warnings
+        );
+        for n in [
+            "H01.LeftSide",
+            "H01.RightSide",
+            "H01.Top",
+            "H01.Bottom",
+            "H01.CanopyFront",
+            "H01.CladLeft",
+        ] {
+            assert!(list.part(n).is_some(), "{n}");
+        }
+        assert!(list.part("H01.Back").is_none());
+        let cut = list
+            .operations
+            .iter()
+            .find_map(|o| match o {
+                Operation::Groove { part, bounds } if part == "H01.Bottom" => Some(*bounds),
+                _ => None,
+            })
+            .unwrap();
+        assert_eq!(
+            (cut.size.x, cut.size.y, cut.center().x),
+            (520.0, 260.0, 450.0)
+        );
+        assert!(
+            list.operations
+                .iter()
+                .any(|o| matches!(o, Operation::BiscuitSlot { .. }))
+        );
+        cab.insert.width = 900.0;
+        assert!(
+            build_cabinet(&cab)
+                .unwrap()
+                .warnings
+                .iter()
+                .any(|w| w.contains("does not fit"))
+        );
     }
 
     fn handle_holes(list: &PartList, part: &str) -> Vec<Vec3> {

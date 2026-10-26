@@ -28,6 +28,8 @@ struct InspectorView: View {
                     }
                     if cab.kind == "corner_base" || cab.kind == "corner_wall" {
                         CornerSection(cab: cab)
+                    } else if cab.kind == "rangehood" {
+                        InsertSection(cab: cab)
                     } else {
                         FrontsSection(cab: cab)
                     }
@@ -515,6 +517,39 @@ struct SinkSection: View {
                     .help(o.help)
                     .accessibilityValue(on ? "on" : "off")
                 }
+            }
+        }
+    }
+}
+
+/// A rangehood canopy's insert cut-out, from the insert maker's drawing.
+struct InsertSection: View {
+    @Environment(ProjectModel.self) private var project
+    @AppStorage(LengthUnit.key) private var unit: LengthUnit = .millimetres
+    let cab: CabinetDoc
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            SectionTitle("Rangehood insert")
+            row("Width", cab.insertWidth, [480, 520, 560, 700, 800]) { c, v in c.insertWidth = v }
+            row("Depth", cab.insertDepth, [240, 260, 280, 300]) { c, v in c.insertDepth = v }
+            Text("The cut-out in the canopy's bottom. Take it from the insert's installation drawing.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    private func row(_ title: String, _ value: Double, _ presets: [Double],
+                     set: @escaping (inout CabinetDoc, Double) -> Void) -> some View {
+        HStack(spacing: 6) {
+            Text(title).foregroundStyle(.secondary)
+            Spacer()
+            ForEach(presets, id: \.self) { p in
+                Button(unit.format(p, suffix: false)) {
+                    withAnimation(.snappy) { var c = cab; set(&c, p); project.selected = c }
+                }
+                .buttonStyle(ChipStyle(selected: abs(p - value) < 0.5))
             }
         }
     }

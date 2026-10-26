@@ -49,6 +49,9 @@ pub struct Cabinet {
     /// Sink cabinet options (ignored by other kinds).
     #[serde(default)]
     pub sink: Sink,
+    /// The rangehood insert a canopy houses (ignored by other kinds).
+    #[serde(default)]
+    pub insert: Insert,
     /// How a wardrobe hangs clothes (ignored by other kinds).
     #[serde(default)]
     pub wardrobe: Hanging,
@@ -133,6 +136,24 @@ impl Default for Sink {
         Self {
             back_cutout: true,
             liner: true,
+        }
+    }
+}
+
+/// A rangehood insert's cut-out in the canopy's bottom: from the insert maker's drawing.
+#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(default)]
+pub struct Insert {
+    pub width: f64,
+    pub depth: f64,
+}
+
+impl Default for Insert {
+    /// Our placeholder until the insert is chosen: a common 520 × 260 cut-out.
+    fn default() -> Self {
+        Self {
+            width: 520.0,
+            depth: 260.0,
         }
     }
 }
@@ -258,6 +279,7 @@ impl Cabinet {
             blind: Blind::default(),
             sink: Sink::default(),
             wardrobe: Hanging::default(),
+            insert: Insert::default(),
             cladding: Cladding::default(),
             corner: Corner::for_kind(kind),
             exposed: Exposed::default(),
@@ -309,10 +331,12 @@ pub enum CabinetKind {
     CornerWall,
     /// A full-height wardrobe with a hat shelf and hanging rails.
     Wardrobe,
+    /// A canopy box between wall cabinets housing a rangehood insert.
+    Rangehood,
 }
 
 impl CabinetKind {
-    pub const ALL: [CabinetKind; 10] = [
+    pub const ALL: [CabinetKind; 11] = [
         CabinetKind::Base,
         CabinetKind::Wall,
         CabinetKind::Tall,
@@ -323,6 +347,7 @@ impl CabinetKind {
         CabinetKind::CornerBase,
         CabinetKind::CornerWall,
         CabinetKind::Wardrobe,
+        CabinetKind::Rangehood,
     ];
 
     /// The kind a drawn box most likely is: as tall as a pantry → tall, hanging off the floor →
@@ -350,6 +375,7 @@ impl CabinetKind {
             CabinetKind::CornerBase => (900.0, 580.0, 870.0),
             CabinetKind::CornerWall => (600.0, 330.0, 720.0),
             CabinetKind::Wardrobe => (900.0, 600.0, 2100.0),
+            CabinetKind::Rangehood => (900.0, 330.0, 720.0),
         }
     }
 
@@ -380,8 +406,8 @@ impl CabinetKind {
             | CabinetKind::BlindCorner
             | CabinetKind::CornerBase
             | CabinetKind::CornerWall => 1,
-            // The hat shelf and rails are its own.
-            CabinetKind::Wardrobe => 0,
+            // The hat shelf and rails are its own; a canopy holds an extractor.
+            CabinetKind::Wardrobe | CabinetKind::Rangehood => 0,
             // The bowl and pipes take the space.
             CabinetKind::Sink => 0,
             CabinetKind::Tall => 4,

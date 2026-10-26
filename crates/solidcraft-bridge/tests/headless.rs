@@ -401,6 +401,8 @@ fn the_new_cabinets_build_every_part_where_the_core_puts_it() {
             },
         ],
     };
+    let mut canopy = Cabinet::new("H01", CabinetKind::Rangehood);
+    canopy.cladding.left = true;
     let mut wardrobe = Cabinet::new("R01", CabinetKind::Wardrobe);
     wardrobe.wardrobe = cabinet_core::model::Hanging::Double;
     let mut shaker = Cabinet::new("B02", CabinetKind::Base);
@@ -427,6 +429,7 @@ fn the_new_cabinets_build_every_part_where_the_core_puts_it() {
         shaker,
         wardrobe,
         oven,
+        canopy,
         hki,
         lift,
         wood,
