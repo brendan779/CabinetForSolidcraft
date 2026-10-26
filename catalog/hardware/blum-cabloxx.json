@@ -1,0 +1,141 @@
+{
+  "brand": "Blum",
+  "website": "https://www.blum.com",
+  "notes": "CABLOXX locking system for pull-outs from the Blum Catalogue and technical manual 2024/2025, printed page 594 (order information). Up to five pull-outs per locking bar; the cylinder lock is not part of the delivery. The ready-made M|M|M and C|M sets (LH 544 only) and the planning dimensions of p.595 (bar groove, drilling) are not recorded. Not verified by a person.",
+  "items": [
+    {
+      "id": "blum.cabloxx.bar-set.600",
+      "brand": "Blum",
+      "article": "Z80S0560",
+      "family": "CABLOXX",
+      "variant": "locking bar set, steel, for cabinet height KH up to 600: bar (cut to LH - 2), spacer to cut, end cap, attachment for the lock",
+      "kind": "drawer_system",
+      "parameters": {
+        "max_cabinet_height": 600,
+        "bar_less_than_internal_height": 2
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.594, short URL www.blum.com/a710",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.cabloxx.bar-set.800",
+      "brand": "Blum",
+      "article": "Z80S0760",
+      "family": "CABLOXX",
+      "variant": "locking bar set, steel, for cabinet height KH up to 800: bar (cut to LH - 2), spacer to cut, end cap, attachment for the lock",
+      "kind": "drawer_system",
+      "parameters": {
+        "max_cabinet_height": 800,
+        "bar_less_than_internal_height": 2
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.594, short URL www.blum.com/a710",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.cabloxx.bar-set.1300",
+      "brand": "Blum",
+      "article": "Z80S1260",
+      "family": "CABLOXX",
+      "variant": "locking bar set, steel, for cabinet height KH up to 1300: bar (cut to LH - 2), spacer to cut, end cap, attachment for the lock",
+      "kind": "drawer_system",
+      "parameters": {
+        "max_cabinet_height": 1300,
+        "bar_less_than_internal_height": 2
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.594, short URL www.blum.com/a710",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.cabloxx.locking-unit.right",
+      "brand": "Blum",
+      "article": "Z80.000V",
+      "family": "CABLOXX",
+      "variant": "locking unit, right, black (SZ): one per pull-out on the locking bar",
+      "kind": "drawer_system",
+      "parameters": {},
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.594, short URL www.blum.com/a710",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.cabloxx.locking-unit.left",
+      "brand": "Blum",
+      "article": "Z80.000V",
+      "family": "CABLOXX",
+      "variant": "locking unit, left, black (SZ): one per pull-out on the locking bar",
+      "kind": "drawer_system",
+      "parameters": {},
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.594, short URL www.blum.com/a710",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.cabloxx.front-bracket",
+      "brand": "Blum",
+      "article": "Z80.000S",
+      "family": "CABLOXX",
+      "variant": "front locking bracket set (bracket, front piece, cover cap), nylon/zinc, colours SW-M | WGR | OG-M | TS-M: one per pull-out",
+      "kind": "drawer_system",
+      "parameters": {},
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.594, short URL www.blum.com/a710",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.cabloxx.sync-set",
+      "brand": "Blum",
+      "article": "Z80V000A",
+      "family": "CABLOXX",
+      "variant": "synchronisation set, black nylon (2 attachments, 2 levers): recommended over KB 600 with a closing function; needs two locking bar sets",
+      "kind": "drawer_system",
+      "parameters": {
+        "from_cabinet_width": 600
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.594, short URL www.blum.com/a710",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.cabloxx.sync-linkage",
+      "brand": "Blum",
+      "article": "Z80V1163W",
+      "family": "CABLOXX",
+      "variant": "synchronisation linkage, aluminium, 1163 long, cut to LW - 7",
+      "kind": "drawer_system",
+      "parameters": {
+        "length": 1163,
+        "less_than_internal_width": 7
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.594, short URL www.blum.com/a710",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    }
+  ]
+}

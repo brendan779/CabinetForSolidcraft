@@ -1963,6 +1963,17 @@ expression: list
   ],
   "hardware": [
     {
+      "item": "shelf-support.5mm",
+      "description": "Shelf support for 5 mm holes",
+      "at": {
+        "x": 300.0,
+        "y": 139.0,
+        "z": 376.0
+      },
+      "part": "C01.Shelf1",
+      "quantity": 4
+    },
+    {
       "item": "screw-cover-cap",
       "description": "Screw cover cap, colour to match the carcass",
       "at": {

@@ -29,7 +29,10 @@ from parse_polytec import ROOT, Word, lines, merge_existing, slug
 
 URL = "https://www.laminex.com.au/documents/Laminex-National-Availability-Guide-Master"
 
-TITLES = {"Decorated MDF": "Decorated MDF", "Decorated Particleboard": "Decorated Particleboard"}
+TITLES = {"Decorated MDF": "Decorated MDF", "Decorated Particleboard": "Decorated Particleboard",
+          "Compact Laminate": "Compact Laminate"}
+# Tables with no SUBSTRATE column: what every row of them is (DATA-5b).
+NO_SUBSTRATE = {"Compact Laminate": "Compact"}
 # Trade Essentials pages: raw boards, and white melamine boards for carcasses (DATA-5).
 ESSENTIALS = {"Raw Particleboard": "raw", "Raw MDF": "raw", "White Particleboard": "melamine",
               "White MDF": "melamine"}
@@ -75,6 +78,8 @@ def substrate(text):
         return ("moisture_resistant_mdf" if mr else "mdf"), emission
     if words and words[0] in ("PB", "Particleboard"):
         return ("moisture_resistant_particleboard" if mr else "particleboard"), emission
+    if words == ["Compact"]:
+        return "compact", emission
     return None, emission
 
 
@@ -206,6 +211,9 @@ def table(words, title, brand, legend_y, finishes, grained, source, problems):
         return []
     header = [w for w in words if w.y0 < 150 and w.text in HEADINGS]
     cols = {n: header_x(header, n) for n in ("TYPE", "SUBSTRATE", "THICKNESS", "FINISH", "PROD", "PACK")}
+    fixed_substrate = NO_SUBSTRATE.get(title)
+    if fixed_substrate:
+        cols.pop("SUBSTRATE")
     edging_x = sorted(w.x0 for w in header if w.text in ("25MT", "100MT"))
     if None in cols.values():
         problems.append(f"{title}: table header not found ({cols})")
@@ -242,11 +250,16 @@ def table(words, title, brand, legend_y, finishes, grained, source, problems):
     fin_x = cols["FINISH"] - 6
     sub_x = cols["FINISH"] + 14
     # The TYPE column holds the table's name set on end; colours start past it.
-    colour = labels_in(body, cols["TYPE"] + 12, fin_x - 22, lambda w: not NUMBER.match(w.text) and w.text[0].isalpha())
-    code = labels_in(body, fin_x - 22, fin_x, lambda w: COLOUR_CODE.match(w.text))
+    # The colour codes of tables without a substrate column start a little further left.
+    code_x = fin_x - (26 if fixed_substrate else 22)
+    colour = labels_in(body, cols["TYPE"] + 12, code_x, lambda w: not NUMBER.match(w.text) and w.text[0].isalpha())
+    code = labels_in(body, code_x, fin_x, lambda w: COLOUR_CODE.match(w.text))
     finish = labels_in(body, fin_x, sub_x, lambda w: FINISH.match(w.text))
-    subst = labels_in(body, sub_x, cols["THICKNESS"] - 3, lambda w: w.text.isalnum())
-    thick = labels_in(body, cols["THICKNESS"] - 3, cols["THICKNESS"] + 8, lambda w: THICKNESS.match(w.text))
+    subst = [] if fixed_substrate else labels_in(body, sub_x, cols["THICKNESS"] - 3,
+                                                 lambda w: w.text.isalnum())
+    # Without a substrate column the thickness sits centred under its wider heading.
+    thick_end = cols["THICKNESS"] + (16 if fixed_substrate else 8)
+    thick = labels_in(body, cols["THICKNESS"] - 3, thick_end, lambda w: THICKNESS.match(w.text))
     # Finest first: each coarser column's runs end where a finer one's do.
     rows.sort(key=lambda r: r[0])
     cuts = None
@@ -260,6 +273,8 @@ def table(words, title, brand, legend_y, finishes, grained, source, problems):
             cuts = run_ends(assigned)
     boards = {}
     for _, r in rows:
+        if fixed_substrate:
+            r["substrate"] = fixed_substrate
         if not all(k in r for k in ("colour", "finish", "substrate", "thickness")):
             problems.append(f"{title}: product {r['prod']} is missing a label: {r}")
             continue
@@ -275,7 +290,7 @@ def table(words, title, brand, legend_y, finishes, grained, source, problems):
             rid += ".single-sided"
         b = boards.setdefault(key, {
             "id": rid, "brand": brand, "range": title, "decor": r["colour"], "finish": fin,
-            "kind": "melamine", "substrate": sub, "thickness": float(r["thickness"]), "sheets": [],
+            "kind": "laminated_board" if fixed_substrate else "melamine", "substrate": sub, "thickness": float(r["thickness"]), "sheets": [],
             "grained": r.get("code") in grained, "double_sided": not single, "emission": emission,
             "edge_tapes": [], "preview_colour": "", "item_codes": {}, "source": source,
             # The brand's colour code: kept for checks, not written (the schema has no place).
@@ -448,6 +463,74 @@ def lining_table(words, title, legend_y, source, problems):
     return list(boards.values())
 
 
+def plywood_table(words, legend_y, source, problems):
+    """The Trade Essentials plywood table's decorative and non-structural half (DATA-5b): product
+    type, bond, grade and species as merged cells over thickness and one product per line.
+    Coated plywood (grade Coated: its species cell names the coating) is a laminated board,
+    the rest raw plywood."""
+    hx = {n: header_x([w for w in words if w.y0 < 150], n)
+          for n in ("PRODUCT", "BOND", "GRADE", "SPECIES", "THICKNESS", "PROD", "PACK")}
+    if None in hx.values():
+        problems.append(f"Plywood: table header not found ({hx})")
+        return []
+    top = max(w.y1 for w in words if w.y0 < 150 and w.text in ("PRODUCT", "SPECIES")) + 0.5
+    body = [w for w in words if top <= w.y0 < legend_y - 2]
+    rows = []
+    for w in body:
+        if PROD.match(w.text) and abs(w.x0 - hx["PROD"]) < 12:
+            y = (w.y0 + w.y1) / 2
+            same = [v for v in body if abs((v.y0 + v.y1) / 2 - y) < 3]
+            sheet = re.findall(r"(\d{3,4}) × (\d{3,4})",
+                               " ".join(v.text for v in same if hx["THICKNESS"] + 15 < v.x0 < hx["PROD"] - 2))
+            if not sheet:
+                problems.append(f"Plywood: product {w.text} has no sheet size")
+                continue
+            rows.append((y, {"prod": w.text, "sheet": sheet[0]}))
+    rows.sort(key=lambda r: r[0])
+    columns = [
+        ("thickness", hx["THICKNESS"], hx["THICKNESS"] + 15, lambda w: THICKNESS.match(w.text)),
+        ("species", hx["SPECIES"], hx["THICKNESS"], lambda w: w.text[0].isalpha()),
+        ("grade", hx["GRADE"], hx["SPECIES"], lambda w: True),
+        ("bond", hx["BOND"], hx["GRADE"], lambda w: True),
+        ("type", hx["PRODUCT"], hx["BOND"], lambda w: w.y1 - w.y0 < 10),
+    ]
+    cuts = None
+    for name, x0, x1, accept in columns:
+        assigned = spans(labels_in(body, x0 - 2, x1 - 2, accept), rows, cuts)
+        for label, members in assigned:
+            for _, r in members:
+                r[name] = label[1]
+        cuts = run_ends(assigned)
+    boards = {}
+    for _, r in rows:
+        if not all(k in r for k in ("thickness", "species", "grade", "bond", "type")):
+            problems.append(f"Plywood: product {r['prod']} is missing a label: {r}")
+            continue
+        kind = re.sub(r"\s*Manufactured to \S+", "", r["type"]).replace("Species", "").strip()
+        kind = re.sub(r"\s+", " ", kind)
+        coated = r["grade"] == "Coated"
+        rid = (f"trade-essentials.plywood.{slug(kind)}.{slug(r['species'])}-{slug(r['grade'])}."
+               f"{r['thickness']}")
+        b = boards.setdefault(rid, {
+            "id": rid, "brand": "Trade Essentials", "range": f"Plywood: {kind}",
+            "decor": r["species"], "finish": r["grade"],
+            "kind": "laminated_board" if coated else "raw", "substrate": "plywood",
+            "thickness": float(r["thickness"]), "sheets": [], "grained": not coated,
+            "double_sided": True, "emission": "", "edge_tapes": [], "preview_colour": "",
+            "item_codes": {}, "source": source,
+        })
+        # As printed, grain along the first number: bending plywood comes both ways round.
+        length, width = r["sheet"]
+        size = f"{length}x{width}"
+        if b["item_codes"].get(size, r["prod"]) != r["prod"]:
+            problems.append(f"{rid}: {size} is both {b['item_codes'][size]} and {r['prod']}")
+            continue
+        if size not in b["item_codes"]:
+            b["sheets"].append({"length": float(length), "width": float(width)})
+            b["item_codes"][size] = r["prod"]
+    return list(boards.values())
+
+
 def parse(pages, sources):
     """Boards and edgings per brand: `sources` maps a brand to its source record."""
     finishes = {}
@@ -479,6 +562,12 @@ def parse(pages, sources):
                 part = [w for w in words if a - 3 <= w.x0 < b - 3]
                 boards += essentials_table(part, essentials, legend_y, page_finishes,
                                            sources["Trade Essentials"], problems)
+            continue
+        if top == "Plywood" and n >= formica:
+            mid = max(w.x1 for w in words) / 2
+            # The left half: decorative and non-structural plywood; structural is not cabinet board.
+            boards += plywood_table([w for w in words if w.cx < mid], legend_y,
+                                    sources["Trade Essentials"], problems)
             continue
         title = next((t for t in TITLES if top.endswith(t)), None)
         if title is None or n < 45:
@@ -524,7 +613,8 @@ def notes(brand, date):
     what = {
         "Trade Essentials": "Trade Essentials Raw and White Particleboard and MDF tables (DATA-5); "
                             "`kind` raw for raw boards, melamine for white ones. ",
-    }.get(brand, f"{brand} Decorated MDF and Decorated Particleboard trade tables. Edging records "
+    }.get(brand, f"{brand} Decorated MDF, Decorated Particleboard and Compact Laminate trade "
+                 "tables (compact: `kind` laminated_board, substrate compact). Edging records "
                  "carry only what the tables print (code, thickness, roll): width and material are "
                  "not printed there, and the suggested (not exact match) edgings of some tables "
                  "print no thickness, so they are left out. ")

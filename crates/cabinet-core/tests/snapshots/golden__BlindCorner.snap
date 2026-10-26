@@ -2407,6 +2407,38 @@ expression: list
       "diameter": 5.0,
       "depth": 10.0,
       "purpose": "shelf_pin"
+    },
+    {
+      "type": "bore",
+      "part": "C01.Door1",
+      "at": {
+        "x": 667.0,
+        "y": 0.0,
+        "z": 690.0
+      },
+      "direction": {
+        "axis": "Y",
+        "positive": false
+      },
+      "diameter": 5.0,
+      "depth": 18.0,
+      "purpose": "handle_screw"
+    },
+    {
+      "type": "bore",
+      "part": "C01.Door1",
+      "at": {
+        "x": 667.0,
+        "y": 0.0,
+        "z": 818.0
+      },
+      "direction": {
+        "axis": "Y",
+        "positive": false
+      },
+      "diameter": 5.0,
+      "depth": 18.0,
+      "purpose": "handle_screw"
     }
   ],
   "hardware": [
@@ -2453,6 +2485,17 @@ expression: list
       },
       "part": "C01.RightSide",
       "quantity": 1
+    },
+    {
+      "item": "shelf-support.5mm",
+      "description": "Shelf support for 5 mm holes",
+      "at": {
+        "x": 500.0,
+        "y": 279.0,
+        "z": 526.0
+      },
+      "part": "C01.Shelf1",
+      "quantity": 4
     },
     {
       "item": "hafele.leg.adjustable",
@@ -2541,6 +2584,17 @@ expression: list
       },
       "part": "C01.RightSide",
       "quantity": 7
+    },
+    {
+      "item": "handle.cc128",
+      "description": "Handle, 128 mm hole centres, stainless steel",
+      "at": {
+        "x": 815.5,
+        "y": -9.0,
+        "z": 509.0
+      },
+      "part": "C01.Door1",
+      "quantity": 1
     }
   ],
   "warnings": [

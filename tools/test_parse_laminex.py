@@ -2,7 +2,7 @@
 
 import unittest
 
-from parse_laminex import essentials_table, labels_in, lining_table, spans, table
+from parse_laminex import essentials_table, labels_in, lining_table, plywood_table, spans, table
 from parse_polytec import Word
 
 SOURCE = {"url": "u", "document_date": "2025-09", "retrieved": "2026-10-23", "verified": False}
@@ -84,6 +84,44 @@ class ParseLaminex(unittest.TestCase):
         self.assertEqual(single["substrate"], "mdf")
         self.assertFalse(single["double_sided"])
 
+
+    def test_a_table_without_a_substrate_column_is_compact_laminate(self):
+        words = [w for w in header() if w.text != "SUBSTRATE"]
+        # The thickness sits centred under its heading, past where the decorated tables put it.
+        words += row(150, "100004", thickness=None)
+        words += row(161, "100005", size="3600 × 1500", thickness=None)
+        words += [word(X["THICKNESS"] + 12, 150, "13"), word(X["THICKNESS"] + 12, 161, "18"),
+                  word(X["colour"], 155, "Black"), word(X["code"] - 3, 155, "460"),
+                  word(X["FINISH"] + 2, 155, "AM")]
+        problems = []
+        boards = table(words, "Compact Laminate", "Laminex", 10_000, {"AM": "AbsoluteMatte"},
+                       set(), SOURCE, problems)
+        self.assertEqual(problems, [])
+        self.assertEqual(sorted(b["id"] for b in boards), [
+            "laminex.compact-laminate.black-absolutematte.13.compact",
+            "laminex.compact-laminate.black-absolutematte.18.compact",
+        ])
+        self.assertEqual({(b["kind"], b["substrate"]) for b in boards}, {("laminated_board", "compact")})
+        self.assertEqual({b["_code"] for b in boards}, {"460"})
+
+    def test_plywood_rows_take_their_merged_type_bond_grade_species_and_thickness(self):
+        hx = {"PRODUCT": 65, "BOND": 148, "GRADE": 189, "SPECIES": 216, "THICKNESS": 268,
+              "PROD": 334, "PACK": 359}
+        words = [word(x, 119, k) for k, x in hx.items()]
+        for y, t, prod in ((140, "9", "900001"), (151, "18", "900002")):
+            words += [word(273, y, t), word(290, y, "2440"), word(304, y, "×", 3),
+                      word(308, y, "1220"), word(328, y, prod), word(359, y, "50")]
+        words += [word(65, 140, "Exterior"), word(65, 147, "Hardwood"), word(148, 145, "WBP"),
+                  word(190, 145, "BB/CC"), word(216, 145, "Hoop"), word(236, 145, "Pine")]
+        problems = []
+        boards = plywood_table(words, 10_000, SOURCE, problems)
+        self.assertEqual(problems, [])
+        self.assertEqual(sorted(b["id"] for b in boards), [
+            "trade-essentials.plywood.exterior-hardwood.hoop-pine-bb-cc.18",
+            "trade-essentials.plywood.exterior-hardwood.hoop-pine-bb-cc.9",
+        ])
+        b = boards[0]
+        self.assertEqual((b["kind"], b["substrate"], b["grained"]), ("raw", "plywood", True))
 
     def test_an_essentials_table_reads_merged_thickness_and_a_title_set_on_end(self):
         hx = {"TYPE": 33, "SUBSTRATE": 62, "THICKNESS": 91, "SHEET": 128, "FINISH": 168,

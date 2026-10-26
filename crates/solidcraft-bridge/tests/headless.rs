@@ -364,6 +364,55 @@ fn the_new_cabinets_build_every_part_where_the_core_puts_it() {
     let corner = Cabinet::new("C01", CabinetKind::CornerBase);
     let mut right = Cabinet::new("C02", CabinetKind::CornerBase);
     right.corner.side = HingeSide::Right;
+    use cabinet_core::model::{Light, LightZone, Voltage};
+    let light = |zone| Light {
+        zone,
+        voltage: Voltage::V24,
+        watts_per_metre: 10.0,
+    };
+    let mut corner_wall = Cabinet::new("C03", CabinetKind::CornerWall);
+    corner_wall.lights = vec![light(LightZone::UnderCabinet), light(LightZone::InCabinet)];
+    let mut inner = Cabinet::new("B01", CabinetKind::Base);
+    inner.inner_drawers = 2;
+    inner.lights = vec![light(LightZone::Plinth)];
+    let mut high = Cabinet::new("D04", CabinetKind::DrawerBank);
+    high.fronts = FrontLayout::Drawers {
+        ratios: vec![1.0, 1.0],
+    };
+    high.standard.drawer_sides = cabinet_core::model::DrawerSides::HighFronted;
+    use cabinet_core::model::{SectionKind, StackSection};
+    let mut oven = Cabinet::new("T02", CabinetKind::Tall);
+    oven.adjustable_shelves = 0;
+    oven.fronts = FrontLayout::Stack {
+        sections: vec![
+            StackSection {
+                height: 0.0,
+                kind: SectionKind::Drawers { count: 2 },
+            },
+            StackSection {
+                height: 600.0,
+                kind: SectionKind::Niche,
+            },
+            StackSection {
+                height: 0.0,
+                kind: SectionKind::Door {
+                    hinge_side: HingeSide::Left,
+                },
+            },
+        ],
+    };
+    let mut canopy = Cabinet::new("H01", CabinetKind::Rangehood);
+    canopy.cladding.left = true;
+    let mut wardrobe = Cabinet::new("R01", CabinetKind::Wardrobe);
+    wardrobe.wardrobe = cabinet_core::model::Hanging::Double;
+    let mut shaker = Cabinet::new("B02", CabinetKind::Base);
+    shaker.standard.door_style = cabinet_core::model::DoorStyle::Shaker;
+    let mut hki = Cabinet::new("W02", CabinetKind::Wall);
+    hki.height = 450.0;
+    hki.fronts = FrontLayout::Lift {
+        kind: cabinet_core::model::LiftKind::IntegratedStayLift,
+        handle_weight: 0.4,
+    };
     let mut lift = Cabinet::new("W01", CabinetKind::Wall);
     lift.fronts = FrontLayout::BiFoldLift { handle_weight: 0.4 };
     let mut wood = Cabinet::new("D01", CabinetKind::DrawerBank);
@@ -371,7 +420,22 @@ fn the_new_cabinets_build_every_part_where_the_core_puts_it() {
     let legrabox = Cabinet::new("D02", CabinetKind::DrawerBank);
     let mut tandembox = Cabinet::new("D03", CabinetKind::DrawerBank);
     tandembox.standard.drawer_system = DrawerSystem::Tandembox;
-    for cab in [corner, right, lift, wood, legrabox, tandembox] {
+    for cab in [
+        corner,
+        right,
+        corner_wall,
+        inner,
+        high,
+        shaker,
+        wardrobe,
+        oven,
+        canopy,
+        hki,
+        lift,
+        wood,
+        legrabox,
+        tandembox,
+    ] {
         let list = build_cabinet(&cab).unwrap();
         let built = bounds(
             &cli,
@@ -391,5 +455,130 @@ fn the_new_cabinets_build_every_part_where_the_core_puts_it() {
                 assert!((g - w).abs() <= 5, "{}: {got:?} vs {want:?}", p.name);
             }
         }
+    }
+}
+
+/// BENCH-4: a benchtop's sink and cooktop cut-outs and tap hole cut through in SolidCraft: the
+/// piece keeps its outline.
+#[test]
+fn a_benchtop_with_cut_outs_builds() {
+    let Some(cli) = cli() else {
+        eprintln!("SOLIDCRAFT_CLI not set: skipped");
+        return;
+    };
+    use cabinet_core::run::{
+        Benchtop, Cutout, CutoutKind, Niche, PowerPoint, Run, RunItem, build_run,
+    };
+    let cutout = |over: &str, kind, width, depth| Cutout {
+        over: over.into(),
+        kind,
+        width,
+        depth,
+        setback: 70.0,
+    };
+    let run = Run {
+        origin: Default::default(),
+        items: vec![
+            RunItem::Cabinet(Box::new(Cabinet::new("B01", CabinetKind::Base))),
+            RunItem::Cabinet(Box::new(Cabinet::new("S01", CabinetKind::Sink))),
+            RunItem::Benchtop(Benchtop {
+                id: "BT1".into(),
+                thickness: 33.0,
+                front_overhang: 20.0,
+                side_overhang: 0.0,
+                back_clearance: 0.0,
+                board: String::new(),
+                edge: Default::default(),
+                back_overhang: 0.0,
+                waterfall_left: true,
+                waterfall_right: false,
+                splashback: 600.0,
+                splashback_thickness: 20.0,
+                niches: vec![Niche {
+                    over: "S01".into(),
+                    width: 0.0,
+                    height: 400.0,
+                    depth: 110.0,
+                    sill: 150.0,
+                    shelves: 1,
+                }],
+                power_points: vec![PowerPoint {
+                    over: "B01".into(),
+                    height: 150.0,
+                }],
+                end_radius: 60.0,
+                cutouts: vec![
+                    cutout("S01", CutoutKind::Sink, 760.0, 440.0),
+                    cutout("B01", CutoutKind::Cooktop, 560.0, 490.0),
+                ],
+            }),
+        ],
+    };
+    let lists = build_run(&run).unwrap();
+    let top = &lists[2];
+    let built = bounds(
+        &cli,
+        "benchtop",
+        &emit_cabinet(top, Detail::Manufacturing, None),
+    );
+    let p = &top.parts[0];
+    let um = |v: f64| (v * 1000.0).round() as i64;
+    let (lo, hi) = (p.bounds.min, p.bounds.max());
+    let want = [um(lo.x), um(lo.y), um(lo.z), um(hi.x), um(hi.y), um(hi.z)];
+    let got = &built.iter().find(|(n, _)| *n == p.name).unwrap().1;
+    for (g, w) in got.iter().zip(want) {
+        assert!((g - w).abs() <= 5, "{got:?} vs {want:?}");
+    }
+    // BENCH-3e: the free front corner (the left end is a waterfall) is filleted: a curved face
+    // besides the tap hole's.
+    let r = crate::run(
+        &cli,
+        "benchtop",
+        &emit_cabinet(top, Detail::Manufacturing, None),
+        &["eval"],
+    );
+    let body = r["bodies"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|b| b["name"] == p.name.as_str())
+        .unwrap();
+    assert_eq!(body["face_types"]["cylinder"], 2, "{body}");
+}
+
+/// STYLE-1: an arched pair of wall doors: SolidCraft cuts each door's top to the arch (a curved
+/// face, less volume than the box) and keeps its bounding box below the top.
+#[test]
+fn an_arched_top_cuts_both_doors() {
+    let Some(cli) = cli() else {
+        eprintln!("SOLIDCRAFT_CLI not set: skipped");
+        return;
+    };
+    let mut cab = Cabinet::new("W01", CabinetKind::Wall);
+    cab.width = 900.0;
+    cab.fronts = cabinet_core::model::FrontLayout::DoorPair;
+    cab.arched_top = 80.0;
+    let list = build_cabinet(&cab).unwrap();
+    let r = run(
+        &cli,
+        "arched",
+        &emit_cabinet(&list, Detail::Design, None),
+        &["eval"],
+    );
+    for door in ["W01.Door1", "W01.Door2"] {
+        let p = list.part(door).unwrap();
+        let body = r["bodies"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|b| b["name"] == door)
+            .unwrap();
+        let full = p.bounds.size.x * p.bounds.size.y * p.bounds.size.z;
+        let volume = body["volume_mm3"].as_f64().unwrap();
+        assert!(volume < full - 1000.0, "{door}: {volume} of {full}");
+        assert!(
+            body["face_types"]["cylinder"].as_u64().unwrap_or(0) >= 1,
+            "{body}"
+        );
     }
 }

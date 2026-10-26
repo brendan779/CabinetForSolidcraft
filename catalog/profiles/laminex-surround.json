@@ -1,0 +1,218 @@
+{
+  "brand": "Laminex",
+  "notes": "Surround by Laminex profiles from the Surround range brochure (LMX2133, Nov 2022), linked as the range brochure from laminex.com.au product pages in Oct 2026: each profile's drawing prints its module, the face and groove widths, groove depth or radius where given. Not printed: the VJ and Heritage groove depths, Scallop 135's depth (its 5 mm is the ridge between scallops). Sheet sizes are on the lining boards (catalog/boards/laminex.json, DATA-6a). Names match those boards' finish. Not verified by a person.",
+  "profiles": [
+    {
+      "id": "laminex.surround.batten-25",
+      "brand": "Laminex",
+      "name": "Batten 25",
+      "shape": "batten",
+      "module": 25,
+      "thickness": 12,
+      "face": 17,
+      "groove": 8,
+      "groove_depth": 5.1,
+      "source": {
+        "url": "https://www.laminex.com.au/medias/Surround-Combined-Brochure-Update-LMX2133.pdf",
+        "document_date": "2022-11",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.surround.batten-75",
+      "brand": "Laminex",
+      "name": "Batten 75",
+      "shape": "batten",
+      "module": 75,
+      "thickness": 12,
+      "face": 67,
+      "groove": 8,
+      "groove_depth": 5.1,
+      "source": {
+        "url": "https://www.laminex.com.au/medias/Surround-Combined-Brochure-Update-LMX2133.pdf",
+        "document_date": "2022-11",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.surround.batten-100",
+      "brand": "Laminex",
+      "name": "Batten 100",
+      "shape": "batten",
+      "module": 100,
+      "thickness": 12,
+      "face": 92,
+      "groove": 8,
+      "groove_depth": 5.1,
+      "source": {
+        "url": "https://www.laminex.com.au/medias/Surround-Combined-Brochure-Update-LMX2133.pdf",
+        "document_date": "2022-11",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.surround.batten-300",
+      "brand": "Laminex",
+      "name": "Batten 300",
+      "shape": "batten",
+      "module": 300,
+      "thickness": 12,
+      "face": 292,
+      "groove": 8,
+      "groove_depth": 5.1,
+      "source": {
+        "url": "https://www.laminex.com.au/medias/Surround-Combined-Brochure-Update-LMX2133.pdf",
+        "document_date": "2022-11",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.surround.classic-vj-100",
+      "brand": "Laminex",
+      "name": "Classic VJ 100",
+      "shape": "vj",
+      "module": 100,
+      "thickness": 9,
+      "groove": 7,
+      "source": {
+        "url": "https://www.laminex.com.au/medias/Surround-Combined-Brochure-Update-LMX2133.pdf",
+        "document_date": "2022-11",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.surround.classic-vj-200",
+      "brand": "Laminex",
+      "name": "Classic VJ 200",
+      "shape": "vj",
+      "module": 200,
+      "thickness": 12,
+      "groove": 7,
+      "source": {
+        "url": "https://www.laminex.com.au/medias/Surround-Combined-Brochure-Update-LMX2133.pdf",
+        "document_date": "2022-11",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.surround.demi-round-20",
+      "brand": "Laminex",
+      "name": "Demi Round 20",
+      "shape": "round",
+      "module": 20,
+      "thickness": 12,
+      "groove_depth": 4.61,
+      "radius": 10,
+      "source": {
+        "url": "https://www.laminex.com.au/medias/Surround-Combined-Brochure-Update-LMX2133.pdf",
+        "document_date": "2022-11",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.surround.demi-round-40",
+      "brand": "Laminex",
+      "name": "Demi Round 40",
+      "shape": "round",
+      "module": 40,
+      "thickness": 12,
+      "groove_depth": 5.63,
+      "radius": 36.33,
+      "source": {
+        "url": "https://www.laminex.com.au/medias/Surround-Combined-Brochure-Update-LMX2133.pdf",
+        "document_date": "2022-11",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.surround.french-stripe-30",
+      "brand": "Laminex",
+      "name": "French Stripe 30",
+      "shape": "stripe",
+      "module": 60,
+      "thickness": 12,
+      "face": 30,
+      "groove": 30,
+      "groove_depth": 5.1,
+      "source": {
+        "url": "https://www.laminex.com.au/medias/Surround-Combined-Brochure-Update-LMX2133.pdf",
+        "document_date": "2022-11",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.surround.heritage-150",
+      "brand": "Laminex",
+      "name": "Heritage 150",
+      "shape": "heritage",
+      "module": 150,
+      "thickness": 9,
+      "groove": 14.5,
+      "source": {
+        "url": "https://www.laminex.com.au/medias/Surround-Combined-Brochure-Update-LMX2133.pdf",
+        "document_date": "2022-11",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.surround.scallop-22-5",
+      "brand": "Laminex",
+      "name": "Scallop 22.5",
+      "shape": "scallop",
+      "module": 22.5,
+      "thickness": 12,
+      "face": 19.5,
+      "groove": 3,
+      "groove_depth": 3,
+      "source": {
+        "url": "https://www.laminex.com.au/medias/Surround-Combined-Brochure-Update-LMX2133.pdf",
+        "document_date": "2022-11",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.surround.scallop-45",
+      "brand": "Laminex",
+      "name": "Scallop 45",
+      "shape": "scallop",
+      "module": 45,
+      "thickness": 12,
+      "face": 42,
+      "groove": 3,
+      "groove_depth": 5,
+      "source": {
+        "url": "https://www.laminex.com.au/medias/Surround-Combined-Brochure-Update-LMX2133.pdf",
+        "document_date": "2022-11",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.surround.scallop-135",
+      "brand": "Laminex",
+      "name": "Scallop 135",
+      "shape": "scallop",
+      "module": 135,
+      "thickness": 12,
+      "face": 130,
+      "groove": 5,
+      "source": {
+        "url": "https://www.laminex.com.au/medias/Surround-Combined-Brochure-Update-LMX2133.pdf",
+        "document_date": "2022-11",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    }
+  ]
+}

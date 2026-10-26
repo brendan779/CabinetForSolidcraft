@@ -1,7 +1,7 @@
 {
   "brand": "Blum",
   "website": "https://www.blum.com",
-  "notes": "LEGRABOX drawers N, M and K from the Blum Catalogue and technical manual 2024/2025, printed pages 198-207 (order information and planning) and 248. Cut sizes are Blum's for 16 mm chipboard bases and backs. The catalogue lists N only for NL 400-550. Cabinet profile screw positions (p.248) are along the profile, but their height on the side is not printed on these pages, so the side drilling is not recorded yet. The drawer system rows (blum.legrabox.n/m/k) carry the planning numbers; their article is the system name, not an orderable part. Not verified by a person.",
+  "notes": "LEGRABOX drawers N, M and K, inner drawers M and K (pp. 204-205, 208-209) and high fronted pull-outs C and F for LEGRABOX pure (pp. 210-211, 216-217) from the Blum Catalogue and technical manual 2024/2025, printed pages 198-207 (order information and planning) and 248. Cut sizes are Blum's for 16 mm chipboard bases and backs. The catalogue lists N only for NL 400-550. Cabinet profile screw positions (p.248) are along the profile, but their height on the side is not printed on these pages, so the side drilling is not recorded yet. The drawer system rows (blum.legrabox.n/m/k) carry the planning numbers; their article is the system name, not an orderable part. Not verified by a person. C and F: base_above_datum 24.4 and the front hole chains (C 51/+32/+96, F 51/+32/+96/+32/+32) are read from the drawings; F's front takes an M bracket pair below a C pair. Inner drawers take the M or K side sets and have a steel front piece, no front holes; their base height above the datum is taken from the M/K drawer drawings (the inner drawer pages do not print it).",
   "items": [
     {
       "id": "blum.legrabox.n",
@@ -835,6 +835,602 @@
       },
       "source": {
         "url": "Blum Catalogue and technical manual 2024/2025, p.202, web code DQBN9A",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.legrabox.c",
+      "brand": "Blum",
+      "article": "LEGRABOX C",
+      "family": "LEGRABOX",
+      "variant": "high fronted pull-out C, drawer side height 177 mm, 16 mm chipboard base and back",
+      "kind": "drawer_system",
+      "parameters": {
+        "side_height": 177,
+        "side_thickness": 12.8,
+        "space_height": 193,
+        "min_space_below": 38,
+        "min_space_above": 155,
+        "depth_allowance": 3,
+        "base_width_deduction": 35,
+        "base_length_deduction": 10,
+        "back_width_deduction": 38,
+        "back_height": 148,
+        "board_thickness": 16,
+        "base_rebate_width": 38,
+        "base_rebate_depth": 8,
+        "base_above_datum": 24.4,
+        "front_hole_inset": 14,
+        "front_hole_height": 51,
+        "front_hole_pitch": 32,
+        "front_hole_diameter": 10,
+        "front_hole_depth_min": 12
+      },
+      "drilling": [
+        {
+          "x": 14,
+          "y": 51,
+          "diameter": 10,
+          "depth": 12,
+          "note": "front fixing bracket, EXPANDO; x in from the cabinet side's inner face, y above the drawer's datum (top of the cabinet bottom for the lowest drawer)"
+        },
+        {
+          "x": 14,
+          "y": 83,
+          "diameter": 10,
+          "depth": 12,
+          "note": "front fixing bracket, EXPANDO"
+        },
+        {
+          "x": 14,
+          "y": 179,
+          "diameter": 10,
+          "depth": 12,
+          "note": "front fixing bracket, EXPANDO"
+        }
+      ],
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.211, web code DQBQ2M",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.legrabox.drawer-side.c.270",
+      "brand": "Blum",
+      "article": "770C2702S",
+      "family": "LEGRABOX",
+      "variant": "drawer side set C, NL 270, SW-M | OG-M | CS-M",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 270,
+        "side_height": 177
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.210, web code DQBQ2M",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.legrabox.drawer-side.c.300",
+      "brand": "Blum",
+      "article": "770C3002S",
+      "family": "LEGRABOX",
+      "variant": "drawer side set C, NL 300, SW-M | OG-M | CS-M",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 300,
+        "side_height": 177
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.210, web code DQBQ2M",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.legrabox.drawer-side.c.350",
+      "brand": "Blum",
+      "article": "770C3502S",
+      "family": "LEGRABOX",
+      "variant": "drawer side set C, NL 350, SW-M | OG-M | CS-M",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 350,
+        "side_height": 177
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.210, web code DQBQ2M",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.legrabox.drawer-side.c.400",
+      "brand": "Blum",
+      "article": "770C4002S",
+      "family": "LEGRABOX",
+      "variant": "drawer side set C, NL 400, SW-M | OG-M | CS-M",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 400,
+        "side_height": 177
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.210, web code DQBQ2M",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.legrabox.drawer-side.c.450",
+      "brand": "Blum",
+      "article": "770C4502S",
+      "family": "LEGRABOX",
+      "variant": "drawer side set C, NL 450, SW-M | OG-M | CS-M",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 450,
+        "side_height": 177
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.210, web code DQBQ2M",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.legrabox.drawer-side.c.500",
+      "brand": "Blum",
+      "article": "770C5002S",
+      "family": "LEGRABOX",
+      "variant": "drawer side set C, NL 500, SW-M | OG-M | CS-M",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 500,
+        "side_height": 177
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.210, web code DQBQ2M",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.legrabox.drawer-side.c.550",
+      "brand": "Blum",
+      "article": "770C5502S",
+      "family": "LEGRABOX",
+      "variant": "drawer side set C, NL 550, SW-M | OG-M | CS-M",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 550,
+        "side_height": 177
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.210, web code DQBQ2M",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.legrabox.drawer-side.c.600",
+      "brand": "Blum",
+      "article": "770C6002S",
+      "family": "LEGRABOX",
+      "variant": "drawer side set C, NL 600, SW-M | OG-M | CS-M",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 600,
+        "side_height": 177
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.210, web code DQBQ2M",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.legrabox.drawer-side.c.650",
+      "brand": "Blum",
+      "article": "770C6502S",
+      "family": "LEGRABOX",
+      "variant": "drawer side set C, NL 650, SW-M | OG-M | CS-M",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 650,
+        "side_height": 177
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.210, web code DQBQ2M",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.legrabox.back-fixing.c",
+      "brand": "Blum",
+      "article": "ZB7C000S",
+      "family": "LEGRABOX",
+      "variant": "chipboard back fixings left/right C, steel",
+      "kind": "drawer_system",
+      "parameters": {},
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.210, web code DQBQ2M",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.legrabox.front-fixing.c",
+      "brand": "Blum",
+      "article": "ZF7C70E2",
+      "family": "LEGRABOX",
+      "variant": "front fixing bracket C, EXPANDO (2 per drawer)",
+      "kind": "drawer_system",
+      "parameters": {
+        "per_drawer": 2
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.210, web code DQBQ2M",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.legrabox.f",
+      "brand": "Blum",
+      "article": "LEGRABOX F",
+      "family": "LEGRABOX",
+      "variant": "high fronted pull-out F, drawer side height 241 mm, 16 mm chipboard base and back",
+      "kind": "drawer_system",
+      "parameters": {
+        "side_height": 241,
+        "side_thickness": 12.8,
+        "space_height": 257,
+        "min_space_below": 38,
+        "min_space_above": 219,
+        "depth_allowance": 3,
+        "base_width_deduction": 35,
+        "base_length_deduction": 10,
+        "back_width_deduction": 38,
+        "back_height": 212,
+        "board_thickness": 16,
+        "base_rebate_width": 38,
+        "base_rebate_depth": 8,
+        "base_above_datum": 24.4,
+        "front_hole_inset": 14,
+        "front_hole_height": 51,
+        "front_hole_pitch": 32,
+        "front_hole_diameter": 10,
+        "front_hole_depth_min": 12
+      },
+      "drilling": [
+        {
+          "x": 14,
+          "y": 51,
+          "diameter": 10,
+          "depth": 12,
+          "note": "front fixing bracket, EXPANDO; x in from the cabinet side's inner face, y above the drawer's datum (top of the cabinet bottom for the lowest drawer)"
+        },
+        {
+          "x": 14,
+          "y": 83,
+          "diameter": 10,
+          "depth": 12,
+          "note": "front fixing bracket, EXPANDO"
+        },
+        {
+          "x": 14,
+          "y": 179,
+          "diameter": 10,
+          "depth": 12,
+          "note": "front fixing bracket, EXPANDO"
+        },
+        {
+          "x": 14,
+          "y": 211,
+          "diameter": 10,
+          "depth": 12,
+          "note": "front fixing bracket, EXPANDO"
+        },
+        {
+          "x": 14,
+          "y": 243,
+          "diameter": 10,
+          "depth": 12,
+          "note": "front fixing bracket, EXPANDO"
+        }
+      ],
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.217, web code DQBRHA",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.legrabox.drawer-side.f.400",
+      "brand": "Blum",
+      "article": "770F4002S",
+      "family": "LEGRABOX",
+      "variant": "drawer side set F, NL 400, SW-M | OG-M | CS-M",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 400,
+        "side_height": 241
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.216, web code DQBRHA",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.legrabox.drawer-side.f.450",
+      "brand": "Blum",
+      "article": "770F4502S",
+      "family": "LEGRABOX",
+      "variant": "drawer side set F, NL 450, SW-M | OG-M | CS-M",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 450,
+        "side_height": 241
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.216, web code DQBRHA",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.legrabox.drawer-side.f.500",
+      "brand": "Blum",
+      "article": "770F5002S",
+      "family": "LEGRABOX",
+      "variant": "drawer side set F, NL 500, SW-M | OG-M | CS-M",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 500,
+        "side_height": 241
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.216, web code DQBRHA",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.legrabox.drawer-side.f.550",
+      "brand": "Blum",
+      "article": "770F5502S",
+      "family": "LEGRABOX",
+      "variant": "drawer side set F, NL 550, SW-M | OG-M | CS-M",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 550,
+        "side_height": 241
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.216, web code DQBRHA",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.legrabox.drawer-side.f.600",
+      "brand": "Blum",
+      "article": "770F6002S",
+      "family": "LEGRABOX",
+      "variant": "drawer side set F, NL 600, SW-M | OG-M | CS-M",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 600,
+        "side_height": 241
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.216, web code DQBRHA",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.legrabox.drawer-side.f.650",
+      "brand": "Blum",
+      "article": "770F6502S",
+      "family": "LEGRABOX",
+      "variant": "drawer side set F, NL 650, SW-M | OG-M | CS-M",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 650,
+        "side_height": 241
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.216, web code DQBRHA",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.legrabox.back-fixing.f",
+      "brand": "Blum",
+      "article": "ZB7F000S",
+      "family": "LEGRABOX",
+      "variant": "chipboard back fixings left/right F, steel",
+      "kind": "drawer_system",
+      "parameters": {},
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.216, web code DQBRHA",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.legrabox.front-fixing.f.lower",
+      "brand": "Blum",
+      "article": "ZF7M70E2",
+      "family": "LEGRABOX",
+      "variant": "front fixing bracket M, EXPANDO, lower pair on F (2 per drawer)",
+      "kind": "drawer_system",
+      "parameters": {
+        "per_drawer": 2
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.216, web code DQBRHA",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.legrabox.front-fixing.f.upper",
+      "brand": "Blum",
+      "article": "ZF7C70E2",
+      "family": "LEGRABOX",
+      "variant": "front fixing bracket C, EXPANDO, upper pair on F (2 per drawer)",
+      "kind": "drawer_system",
+      "parameters": {
+        "per_drawer": 2
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.216, web code DQBRHA",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.legrabox.inner-m",
+      "brand": "Blum",
+      "article": "LEGRABOX inner drawer M",
+      "family": "LEGRABOX",
+      "variant": "inner drawer M, drawer side height 90.5 mm, steel front piece, 16 mm chipboard base and back",
+      "kind": "drawer_system",
+      "parameters": {
+        "side_height": 90.5,
+        "side_thickness": 12.8,
+        "space_height": 104,
+        "min_space_below": 38,
+        "min_space_above": 66,
+        "depth_allowance": 3,
+        "base_width_deduction": 35,
+        "base_length_deduction": 10,
+        "back_width_deduction": 38,
+        "back_height": 63,
+        "board_thickness": 16,
+        "base_rebate_width": 38,
+        "base_rebate_depth": 8,
+        "base_above_datum": 23.4,
+        "front_piece_deduction": 126
+      },
+      "drilling": [],
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.205, web code DQBPDA",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.legrabox.front-fixing.inner-m",
+      "brand": "Blum",
+      "article": "ZI7.0MS0",
+      "family": "LEGRABOX",
+      "variant": "front fixing set M for the inner drawer front piece, steel (1 per drawer)",
+      "kind": "drawer_system",
+      "parameters": {
+        "per_drawer": 1
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.204, web code DQBPDA",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.legrabox.inner-k",
+      "brand": "Blum",
+      "article": "LEGRABOX inner drawer K",
+      "family": "LEGRABOX",
+      "variant": "inner drawer K, drawer side height 128.5 mm, steel front piece, 16 mm chipboard base and back",
+      "kind": "drawer_system",
+      "parameters": {
+        "side_height": 128.5,
+        "side_thickness": 12.8,
+        "space_height": 142,
+        "min_space_below": 38,
+        "min_space_above": 104,
+        "depth_allowance": 3,
+        "base_width_deduction": 35,
+        "base_length_deduction": 10,
+        "back_width_deduction": 38,
+        "back_height": 101,
+        "board_thickness": 16,
+        "base_rebate_width": 38,
+        "base_rebate_depth": 8,
+        "base_above_datum": 23.4,
+        "front_piece_deduction": 126
+      },
+      "drilling": [],
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.209, web code DQGPIM",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.legrabox.front-fixing.inner-k",
+      "brand": "Blum",
+      "article": "ZI7.0KS0",
+      "family": "LEGRABOX",
+      "variant": "front fixing set K for the inner drawer front piece, steel (1 per drawer)",
+      "kind": "drawer_system",
+      "parameters": {
+        "per_drawer": 1
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.208, web code DQGPIM",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.legrabox.front-piece",
+      "brand": "Blum",
+      "article": "ZV7.1043C01",
+      "family": "LEGRABOX",
+      "variant": "front piece without groove, 1043 mm, SW-M | OG-M | CS-M | ELEO, cut to LW − 126 mm",
+      "kind": "drawer_system",
+      "parameters": {
+        "length": 1043
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.204, web code DQBPDA",
         "document_date": "2024/2025",
         "retrieved": "2026-10-26",
         "verified": false

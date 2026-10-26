@@ -19,10 +19,13 @@ pub mod hardware;
 pub mod hinges;
 pub mod joinery;
 pub mod lift;
+pub mod lighting;
 pub mod model;
+pub mod nesting;
 pub mod options;
 pub mod part;
 pub mod project;
+pub mod quote;
 pub mod run;
 pub mod standins;
 

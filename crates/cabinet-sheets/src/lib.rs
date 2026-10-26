@@ -4,7 +4,11 @@
 
 use std::fmt::Write;
 
+pub mod assembly;
+pub mod benchtops;
+pub mod dxf;
 pub mod labels;
+pub mod nesting;
 pub mod pdf;
 
 use cabinet_core::geom::{Axis, Vec3};
@@ -44,9 +48,43 @@ pub enum Feature {
         v: f64,
         w: f64,
         h: f64,
+        /// How deep it goes into the part, across its thickness.
+        depth: f64,
         label: &'static str,
         face: Option<Face>,
     },
+    /// A corner of the outline rounded right through: `(u, v)` is the corner.
+    Round { u: f64, v: f64, radius: f64 },
+    /// The top edge cut to an arch: the part keeps what is under the circle about `(cu, cv)`.
+    /// `up_u`: up (the cabinet's Z) runs along u, else along v.
+    Arch {
+        cu: f64,
+        cv: f64,
+        radius: f64,
+        up_u: bool,
+    },
+}
+
+impl Feature {
+    /// An arch's two ends on the part's sides, in (u, v), in the order the arch runs from the
+    /// low end of the side axis.
+    pub fn arch_ends(&self, lu: f64, lv: f64) -> Option<[(f64, f64); 2]> {
+        let Feature::Arch {
+            cu,
+            cv,
+            radius,
+            up_u,
+        } = *self
+        else {
+            return None;
+        };
+        let rise = |d: f64| (radius * radius - d * d).max(0.0).sqrt();
+        Some(if up_u {
+            [(cu + rise(0.0 - cv), 0.0), (cu + rise(lv - cv), lv)]
+        } else {
+            [(0.0, cv + rise(0.0 - cu)), (lu, cv + rise(lu - cu))]
+        })
+    }
 }
 
 /// A part's two big faces: at the low and the high end of its thickness axis.
@@ -62,7 +100,7 @@ impl Feature {
         match self {
             Feature::FaceBore { face, .. } => Some(*face),
             Feature::Rect { face, .. } => *face,
-            Feature::EdgeBore { .. } => None,
+            Feature::EdgeBore { .. } | Feature::Round { .. } | Feature::Arch { .. } => None,
         }
     }
 }
@@ -76,7 +114,7 @@ pub enum Edge {
 }
 
 /// The drawing frame for a part: which cabinet axes map to u and v.
-fn frame(p: &Part) -> (Axis, Axis) {
+pub(crate) fn frame(p: &Part) -> (Axis, Axis) {
     let [a, b] = p.thickness_axis.others();
     let (len, _) = p.finished_size();
     if (p.bounds.size.get(a) - len).abs() < 1e-9 && p.grain_axis != Some(b) {
@@ -150,15 +188,52 @@ pub fn features(list: &PartList, part: &Part) -> Vec<Feature> {
                 out.push(rect(part, bounds.min, bounds.size, "biscuit"));
             }
             Operation::Groove { part: name, bounds } if *name == part.name => {
-                // A groove through the whole thickness takes material away: a notch.
+                // A groove through the whole thickness takes material away: a notch at an edge, a
+                // cut-out (a sink's, a cooktop's) inside the part.
                 let through = bounds.size.get(part.thickness_axis) >= part.thickness() - 1e-6;
-                let label = if through { "notch" } else { "groove" };
+                let inside = Axis::ALL
+                    .iter()
+                    .filter(|&&a| a != part.thickness_axis)
+                    .all(|&a| {
+                        bounds.min.get(a) > part.bounds.min.get(a) + 1e-6
+                            && bounds.max().get(a) < part.bounds.max().get(a) - 1e-6
+                    });
+                let label = match (through, inside) {
+                    (true, true) => "cutout",
+                    (true, false) => "notch",
+                    _ => "groove",
+                };
                 out.push(rect(part, bounds.min, bounds.size, label));
             }
             Operation::Mortise {
                 part: name, bounds, ..
             } if *name == part.name => {
                 out.push(rect(part, bounds.min, bounds.size, "mortise"));
+            }
+            Operation::Arch {
+                part: name,
+                centre,
+                radius,
+            } if *name == part.name => {
+                let (cu, cv) = to_uv(part, *centre);
+                out.push(Feature::Arch {
+                    cu,
+                    cv,
+                    radius: *radius,
+                    up_u: ua == Axis::Z,
+                });
+            }
+            Operation::Round {
+                part: name,
+                at,
+                radius,
+            } if *name == part.name => {
+                let (u, v) = to_uv(part, *at);
+                out.push(Feature::Round {
+                    u: u.clamp(0.0, lu),
+                    v: v.clamp(0.0, lv),
+                    radius: *radius,
+                });
             }
             _ => {}
         }
@@ -186,6 +261,7 @@ fn rect(part: &Part, min: Vec3, size: Vec3, label: &'static str) -> Feature {
         v: v0,
         w: u1 - u0,
         h: v1 - v0,
+        depth: r1.min(hi) - r0.max(lo),
         label,
         face,
     }
@@ -567,11 +643,12 @@ fn face_view(
                 h,
                 label,
                 face: on,
+                ..
             } => {
                 // A notch is drawn as the paper showing through: no board there.
                 let fill = match *label {
                     "biscuit" => "#e8c27a",
-                    "notch" => "#ffffff",
+                    "notch" | "cutout" => "#ffffff",
                     _ => "#9bb7d4",
                 };
                 let (xa, xb) = (x(*u), x(u + w));
@@ -588,6 +665,54 @@ fn face_view(
                     || tag == "in "
                 {
                     holes.push((format!("{tag}{label} {} × {}", fmt(*w), fmt(*h)), *u, *v));
+                }
+            }
+            arch @ Feature::Arch {
+                cu,
+                cv,
+                radius,
+                up_u,
+            } => {
+                // What the arch cuts away, the paper showing through, up to the top edge.
+                let [a, b] = arch.arch_ends(view.lu, view.lv).unwrap();
+                let top = |(u, v): (f64, f64)| if *up_u { (view.lu, v) } else { (u, view.lv) };
+                let (ta, tb) = (top(a), top(b));
+                let (ax, ay, bx, by) = (x(a.0), y(a.1), x(b.0), y(b.1));
+                // The short way round the centre from one end to the other.
+                let (cx, cy) = (x(*cu), y(*cv));
+                let cross = (ax - cx) * (by - cy) - (ay - cy) * (bx - cx);
+                let sweep = u8::from(cross > 0.0);
+                let rr = radius * s;
+                let _ = writeln!(
+                    svg,
+                    r##"<path d="M{:.2} {:.2} L{ax:.2} {ay:.2} A{rr:.2} {rr:.2} 0 0 {sweep} {bx:.2} {by:.2} L{:.2} {:.2} Z" fill="#ffffff" stroke="#222" stroke-width="0.25"/>"##,
+                    x(ta.0),
+                    y(ta.1),
+                    x(tb.0),
+                    y(tb.1)
+                );
+                if tag != "out " {
+                    holes.push((format!("{tag}arched top R{}", fmt(*radius)), a.0, a.1));
+                }
+            }
+            Feature::Round { u, v, radius } => {
+                // The corner cut away, the paper showing through, up to the arc.
+                let du = if *u < view.lu / 2.0 { 1.0 } else { -1.0 };
+                let dv = if *v < view.lv / 2.0 { 1.0 } else { -1.0 };
+                let (cx, cy) = (x(u + du * radius), y(v + dv * radius));
+                let (ax, ay) = (x(u + du * radius), y(*v));
+                let (bx, by) = (x(*u), y(v + dv * radius));
+                let cross = (ax - cx) * (by - cy) - (ay - cy) * (bx - cx);
+                let sweep = u8::from(cross > 0.0);
+                let rr = radius * s;
+                let _ = writeln!(
+                    svg,
+                    r##"<path d="M{:.2} {:.2} L{ax:.2} {ay:.2} A{rr:.2} {rr:.2} 0 0 {sweep} {bx:.2} {by:.2} Z" fill="#ffffff" stroke="#222" stroke-width="0.25"/>"##,
+                    x(*u),
+                    y(*v)
+                );
+                if tag != "out " {
+                    holes.push((format!("{tag}corner R{}", fmt(*radius)), *u, *v));
                 }
             }
         }
@@ -850,6 +975,7 @@ mod tests {
                     // The side is drawn with its height along u and its depth along v.
                     w: s.toe_kick_height,
                     h: s.toe_kick_setback,
+                    depth: s.carcass_thickness,
                     label: "notch",
                     face: None,
                 }],
@@ -878,7 +1004,9 @@ mod tests {
                 let (u, v) = match f {
                     Feature::FaceBore { u, v, .. }
                     | Feature::EdgeBore { u, v, .. }
-                    | Feature::Rect { u, v, .. } => (u, v),
+                    | Feature::Rect { u, v, .. }
+                    | Feature::Round { u, v, .. } => (u, v),
+                    Feature::Arch { .. } => continue,
                 };
                 assert!(
                     (-1e-6..=lu + 1e-6).contains(&u) && (-1e-6..=lv + 1e-6).contains(&v),

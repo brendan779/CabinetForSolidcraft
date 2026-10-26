@@ -36,18 +36,92 @@ pub struct Cabinet {
     /// between the sides like a bottom. The rest sit on shelf pins.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub fixed_shelves: Vec<u32>,
+    /// Blum inner drawers behind the doors, stacked from the bottom of the opening; they take
+    /// the shelves' place.
+    #[serde(default, skip_serializing_if = "is_zero")]
+    pub inner_drawers: u32,
+    /// Blum inner dividing sets in the steel-sided drawers: AMBIA-LINE cutlery insert and frames
+    /// (LEGRABOX, MERIVOBOX), ORGA-LINE container and utensil sets (TANDEMBOX).
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub drawer_inserts: bool,
+    /// The top row of doors cut to one arch across them, this high at its middle above its ends
+    /// (0: square).
+    #[serde(default, skip_serializing_if = "is_zero_f64")]
+    pub arched_top: f64,
+    /// A Blum CABLOXX locking bar locking every drawer at once (the cylinder lock is bought
+    /// separately).
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub lock: bool,
+    /// LED strips: under the cabinet, inside it, or in its plinth.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub lights: Vec<Light>,
     /// The blind part of a blind corner cabinet (ignored by other kinds).
     #[serde(default)]
     pub blind: Blind,
     /// Sink cabinet options (ignored by other kinds).
     #[serde(default)]
     pub sink: Sink,
+    /// The rangehood insert a canopy houses (ignored by other kinds).
+    #[serde(default)]
+    pub insert: Insert,
+    /// How a wardrobe hangs clothes (ignored by other kinds).
+    #[serde(default)]
+    pub wardrobe: Hanging,
+    /// Lining boards (a Surround profile) on the faces seen from the room: an island's back
+    /// and ends.
+    #[serde(default, skip_serializing_if = "Cladding::is_none")]
+    pub cladding: Cladding,
     /// The second leg of an L-shaped corner cabinet (ignored by other kinds).
     #[serde(default)]
     pub corner: Corner,
     /// Sides seen from the room (the end of a run without an end panel): no screws through them.
     #[serde(default, skip_serializing_if = "Exposed::is_none")]
     pub exposed: Exposed,
+}
+
+/// An LED strip light on a cabinet (see `lighting`).
+#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
+pub struct Light {
+    pub zone: LightZone,
+    pub voltage: Voltage,
+    /// The strip's power per metre, from its data sheet.
+    pub watts_per_metre: f64,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum LightZone {
+    /// Under a wall cabinet, lighting the bench.
+    UnderCabinet,
+    /// Under the top, inside the cabinet.
+    InCabinet,
+    /// In the plinth, lighting the floor.
+    Plinth,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
+pub enum Voltage {
+    #[serde(rename = "12v")]
+    V12,
+    #[serde(rename = "24v")]
+    V24,
+}
+
+impl Voltage {
+    pub fn label(self) -> &'static str {
+        match self {
+            Voltage::V12 => "12 V",
+            Voltage::V24 => "24 V",
+        }
+    }
+}
+
+fn is_zero_f64(n: &f64) -> bool {
+    *n == 0.0
+}
+
+fn is_zero(n: &u32) -> bool {
+    *n == 0
 }
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
@@ -82,6 +156,67 @@ impl Default for Sink {
     }
 }
 
+/// A rangehood insert's cut-out in the canopy's bottom: from the insert maker's drawing.
+#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(default)]
+pub struct Insert {
+    pub width: f64,
+    pub depth: f64,
+}
+
+impl Default for Insert {
+    /// Our placeholder until the insert is chosen: a common 520 × 260 cut-out.
+    fn default() -> Self {
+        Self {
+            width: 520.0,
+            depth: 260.0,
+        }
+    }
+}
+
+/// Which faces are clad, and in what.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(default)]
+pub struct Cladding {
+    pub left: bool,
+    pub right: bool,
+    pub back: bool,
+    /// Catalog lining board id, or empty for generic.
+    pub board: String,
+    pub thickness: f64,
+}
+
+impl Default for Cladding {
+    /// Nothing clad; 12 mm, a common Surround thickness, when something is.
+    fn default() -> Self {
+        Self {
+            left: false,
+            right: false,
+            back: false,
+            board: String::new(),
+            thickness: 12.0,
+        }
+    }
+}
+
+impl Cladding {
+    pub fn is_none(&self) -> bool {
+        !(self.left || self.right || self.back)
+    }
+}
+
+/// A wardrobe's interior: a fixed hat shelf near the top with a rail under it, and for double
+/// hanging a second fixed shelf and rail halfway down.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum Hanging {
+    /// Long hanging: coats and dresses.
+    #[default]
+    Long,
+    /// Two rails, one above the other: shirts and trousers.
+    Double,
+}
+
 /// A blind corner cabinet's front: from its blind side, a fixed blind panel and a filler cover
 /// `width` (where the other run of cabinets meets it); one door covers the rest.
 #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
@@ -106,8 +241,8 @@ impl Default for Blind {
     }
 }
 
-/// An L-shaped corner base: its main leg runs `width` along the back wall like any base cabinet
-/// (front at Y = 0); the second leg runs `width` here along the side wall on `side`, coming
+/// An L-shaped corner base or corner wall: its main leg runs `width` along the back wall like any
+/// straight cabinet (front at Y = 0); the second leg runs `width` here along the side wall on `side`, coming
 /// forward (to negative Y), both `depth` deep. The legs share one interior behind a bi-fold door
 /// pair. Its envelope therefore reaches `width − depth` in front of the cabinet's origin.
 #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
@@ -127,6 +262,19 @@ impl Default for Corner {
     }
 }
 
+impl Corner {
+    /// Square by default: a corner wall's second leg is as long as its usual width.
+    pub fn for_kind(kind: CabinetKind) -> Self {
+        match kind {
+            CabinetKind::CornerWall => Self {
+                width: kind.default_size().0,
+                ..Self::default()
+            },
+            _ => Self::default(),
+        }
+    }
+}
+
 impl Cabinet {
     /// A cabinet of `kind` with the kind's usual size and the default standard.
     pub fn new(id: impl Into<String>, kind: CabinetKind) -> Self {
@@ -142,9 +290,17 @@ impl Cabinet {
             fronts: kind.default_fronts_for(w),
             adjustable_shelves: kind.default_shelves(),
             fixed_shelves: Vec::new(),
+            inner_drawers: 0,
+            drawer_inserts: false,
+            lock: false,
+            arched_top: 0.0,
+            lights: Vec::new(),
             blind: Blind::default(),
             sink: Sink::default(),
-            corner: Corner::default(),
+            wardrobe: Hanging::default(),
+            insert: Insert::default(),
+            cladding: Cladding::default(),
+            corner: Corner::for_kind(kind),
             exposed: Exposed::default(),
         }
     }
@@ -171,6 +327,7 @@ impl Cabinet {
                 | CabinetKind::BlindCorner
                 | CabinetKind::CornerBase
                 | CabinetKind::Sink
+                | CabinetKind::Wardrobe
         ) && self.standard.toe_kick != ToeKick::None
     }
 }
@@ -189,10 +346,16 @@ pub enum CabinetKind {
     Sink,
     /// An L-shaped base cabinet in an inside corner, both legs one interior, with bi-fold doors.
     CornerBase,
+    /// The wall-height L-corner: the corner base's legs and bi-fold doors, hung on hangers.
+    CornerWall,
+    /// A full-height wardrobe with a hat shelf and hanging rails.
+    Wardrobe,
+    /// A canopy box between wall cabinets housing a rangehood insert.
+    Rangehood,
 }
 
 impl CabinetKind {
-    pub const ALL: [CabinetKind; 8] = [
+    pub const ALL: [CabinetKind; 11] = [
         CabinetKind::Base,
         CabinetKind::Wall,
         CabinetKind::Tall,
@@ -201,6 +364,9 @@ impl CabinetKind {
         CabinetKind::BlindCorner,
         CabinetKind::Sink,
         CabinetKind::CornerBase,
+        CabinetKind::CornerWall,
+        CabinetKind::Wardrobe,
+        CabinetKind::Rangehood,
     ];
 
     /// The kind a drawn box most likely is: as tall as a pantry → tall, hanging off the floor →
@@ -226,6 +392,9 @@ impl CabinetKind {
             CabinetKind::BlindCorner => (1000.0, 580.0, 870.0),
             CabinetKind::Sink => (900.0, 580.0, 870.0),
             CabinetKind::CornerBase => (900.0, 580.0, 870.0),
+            CabinetKind::CornerWall => (600.0, 330.0, 720.0),
+            CabinetKind::Wardrobe => (900.0, 600.0, 2100.0),
+            CabinetKind::Rangehood => (900.0, 330.0, 720.0),
         }
     }
 
@@ -233,7 +402,7 @@ impl CabinetKind {
         match self {
             CabinetKind::OpenShelf => FrontLayout::Open,
             // Its bi-fold pair, whatever the layout says.
-            CabinetKind::CornerBase => FrontLayout::DoorPair,
+            CabinetKind::CornerBase | CabinetKind::CornerWall => FrontLayout::DoorPair,
             // One door on the open part, hinged away from the corner.
             CabinetKind::BlindCorner => FrontLayout::Door {
                 hinge_side: HingeSide::Right,
@@ -254,7 +423,10 @@ impl CabinetKind {
             | CabinetKind::Wall
             | CabinetKind::OpenShelf
             | CabinetKind::BlindCorner
-            | CabinetKind::CornerBase => 1,
+            | CabinetKind::CornerBase
+            | CabinetKind::CornerWall => 1,
+            // The hat shelf and rails are its own; a canopy holds an extractor.
+            CabinetKind::Wardrobe | CabinetKind::Rangehood => 0,
             // The bowl and pipes take the space.
             CabinetKind::Sink => 0,
             CabinetKind::Tall => 4,
@@ -290,6 +462,36 @@ pub enum FrontLayout {
         #[serde(default = "default_handle_weight")]
         handle_weight: f64,
     },
+    /// Sections one above the other, bottom first, each with a fixed shelf between it and the
+    /// next: drawers, a door or an open niche for an appliance (an oven tower, a fridge housing).
+    Stack {
+        sections: Vec<StackSection>,
+    },
+}
+
+/// One section of a stacked front.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct StackSection {
+    /// For drawers and doors, the height of the section's fronts; for a niche, its clear
+    /// opening between the shelves. 0 takes what the others leave.
+    #[serde(default)]
+    pub height: f64,
+    #[serde(flatten)]
+    pub kind: SectionKind,
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case", tag = "type")]
+pub enum SectionKind {
+    Drawers {
+        count: u32,
+    },
+    Door {
+        hinge_side: HingeSide,
+    },
+    DoorPair,
+    /// No front: an oven, microwave or fridge goes in.
+    Niche,
 }
 
 /// The owner's typical handle: 400 g (decided 2026-10-26).
@@ -356,8 +558,22 @@ pub struct ConstructionStandard {
     pub wall_hanging: WallHanging,
     /// How doors and drawers are opened.
     pub opening: Opening,
+    /// The handle's hole centres, or a knob, when the fronts have handles.
+    pub handle_size: HandleSize,
+    /// Where handles go on the fronts.
+    pub handle_place: HandlePlace,
+    /// The handles' finish.
+    pub handle_finish: HandleFinish,
+    /// Slab fronts, or shaker (five-piece) frames with a panel.
+    pub door_style: DoorStyle,
     /// What the drawers are made of and run on.
     pub drawer_system: DrawerSystem,
+    /// Whether deep LEGRABOX drawers may be high fronted pull-outs (C, F).
+    pub drawer_sides: DrawerSides,
+    /// Whether a cabinet's stacked fronts are cut in sequence so their grain runs on.
+    pub front_grain: FrontGrain,
+    /// AMBIA-LINE drawer inserts in steel or wood design.
+    pub insert_design: InsertDesign,
     /// Board thickness of wooden drawer boxes (sides, base, front and back).
     pub drawer_board_thickness: f64,
     /// What the fronts are made of, for their weight on lift systems.
@@ -417,7 +633,14 @@ impl Default for ConstructionStandard {
             edge_band_thickness: 1.0,
             wall_hanging: WallHanging::Hangers,
             opening: Opening::Handles,
+            handle_size: HandleSize::Cc128,
+            handle_place: HandlePlace::Corner,
+            handle_finish: HandleFinish::Stainless,
+            door_style: DoorStyle::Slab,
             drawer_system: DrawerSystem::Legrabox,
+            drawer_sides: DrawerSides::Standard,
+            front_grain: FrontGrain::Free,
+            insert_design: InsertDesign::Steel,
             drawer_board_thickness: 16.0,
             front_core: FrontCore::Mdf,
         }
@@ -473,6 +696,94 @@ pub enum Opening {
     ServoDrive,
 }
 
+/// A handle's hole centres (the common sizes, as handle makers list them), or a knob.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum HandleSize {
+    Knob,
+    Cc96,
+    #[default]
+    Cc128,
+    Cc160,
+    Cc192,
+    Cc224,
+    Cc256,
+    Cc320,
+    Cc448,
+}
+
+impl HandleSize {
+    /// Hole centres (mm); `None` for a knob's single hole.
+    pub fn centres(self) -> Option<f64> {
+        match self {
+            HandleSize::Knob => None,
+            HandleSize::Cc96 => Some(96.0),
+            HandleSize::Cc128 => Some(128.0),
+            HandleSize::Cc160 => Some(160.0),
+            HandleSize::Cc192 => Some(192.0),
+            HandleSize::Cc224 => Some(224.0),
+            HandleSize::Cc256 => Some(256.0),
+            HandleSize::Cc320 => Some(320.0),
+            HandleSize::Cc448 => Some(448.0),
+        }
+    }
+}
+
+/// How fronts are made.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum DoorStyle {
+    /// One board.
+    #[default]
+    Slab,
+    /// Two stiles and two rails, stub-tenoned, with a thin panel in their grooves. Fronts too
+    /// small for a frame stay slab.
+    Shaker,
+    /// The shaker frame rebated at the back for glass held by beads (doors and lift fronts;
+    /// drawer fronts get a shaker panel).
+    GlassFrame,
+}
+
+/// A handle's finish.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum HandleFinish {
+    #[default]
+    Stainless,
+    Black,
+    BrushedBrass,
+    BrushedNickel,
+}
+
+impl HandleFinish {
+    pub fn label(self) -> &'static str {
+        match self {
+            HandleFinish::Stainless => "stainless steel",
+            HandleFinish::Black => "matt black",
+            HandleFinish::BrushedBrass => "brushed brass",
+            HandleFinish::BrushedNickel => "brushed nickel",
+        }
+    }
+}
+
+/// Where a front's handle goes.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum HandlePlace {
+    /// Doors: upright, by the free edge near the top (base), bottom (wall) or at hand height
+    /// (tall). Drawers: across the middle of the front, near the top of deep ones.
+    #[default]
+    Corner,
+    /// Doors: upright, by the free edge, halfway up. Drawers: across the middle of the front.
+    Centre,
+    /// An edge pull on the top edge (bottom edge of wall doors): screwed from behind, no holes
+    /// through the front.
+    EdgePull,
+    /// Handleless: a finger grip routed along the back of the top edge (bottom edge of wall
+    /// fronts).
+    FingerPull,
+}
+
 /// How a single lifting front moves.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
@@ -484,6 +795,12 @@ pub enum LiftKind {
     UpAndOver,
     /// Rises parallel to itself (AVENTOS HL top), for small fronts.
     LiftUp,
+    /// A small stay lift (AVENTOS HK-S), for small wall cabinets and over the fridge.
+    SmallStayLift,
+    /// A stay lift on hinges along the top (AVENTOS HK-XS), for the smallest fronts.
+    HingedStayLift,
+    /// A stay lift set into pockets in the cabinet sides (AVENTOS HKi, fully integrated).
+    IntegratedStayLift,
 }
 
 /// A front's core board, for its weight (Blum's reference densities).
@@ -508,6 +825,40 @@ pub enum DrawerSystem {
     Movento,
     /// A wooden box on Blum TANDEM 560H runners (30 kg).
     Tandem,
+}
+
+/// The look of Blum AMBIA-LINE inserts.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum InsertDesign {
+    #[default]
+    Steel,
+    /// Wood décor sides on steel (oak or walnut, with a matching steel colour).
+    Wood,
+}
+
+/// How the grain of a cabinet's fronts lines up.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum FrontGrain {
+    /// Each front cut on its own; drawer fronts' grain runs across.
+    #[default]
+    Free,
+    /// Fronts stacked in a column (an oven tower's doors and drawers, a drawer bank) run their
+    /// grain upright and are cut one after the other from one strip of the sheet, so the grain
+    /// runs on from front to front.
+    Matched,
+}
+
+/// How tall a steel box's sides may be.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum DrawerSides {
+    /// N, M or K: a deep drawer is a K box behind a tall front.
+    #[default]
+    Standard,
+    /// LEGRABOX pure C (177 mm) and F (241 mm) sides for deep drawers, where there is room.
+    HighFronted,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]

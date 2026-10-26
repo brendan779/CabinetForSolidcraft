@@ -50,9 +50,14 @@ pub enum Substrate {
     MoistureResistantParticleboard,
     Mdf,
     MoistureResistantMdf,
+    /// Low-density fibreboard (polytec COMMERCIAL "STD LDF").
+    Ldf,
+    MoistureResistantLdf,
     Plywood,
     Hmr,
     Compact,
+    /// Solid timber (dressed lining boards).
+    Timber,
     Other,
 }
 
@@ -177,6 +182,58 @@ pub struct BrandFile {
     pub edge_tapes: Vec<EdgeTape>,
 }
 
+/// A routed lining profile (Surround by Laminex and the like): what a lining board's face looks
+/// like, by the name its boards carry as their finish.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct LiningProfile {
+    pub id: String,
+    pub brand: String,
+    /// As the brand prints it and its lining boards' `finish` reads ("Batten 100").
+    pub name: String,
+    pub shape: ProfileShape,
+    /// The pattern's repeat across the board.
+    pub module: f64,
+    /// The raised part of each module (a batten's face, a scallop), where printed.
+    #[serde(default)]
+    pub face: Option<f64>,
+    /// The groove (or joint, or ridge) between faces, where printed.
+    #[serde(default)]
+    pub groove: Option<f64>,
+    #[serde(default)]
+    pub groove_depth: Option<f64>,
+    /// A rounded profile's radius, where printed.
+    #[serde(default)]
+    pub radius: Option<f64>,
+    pub thickness: f64,
+    pub source: Source,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum ProfileShape {
+    /// Square battens between square grooves.
+    Batten,
+    /// Boards with V joints.
+    Vj,
+    /// Half-round rods.
+    Round,
+    /// Concave scallops between ridges.
+    Scallop,
+    /// Equal battens and grooves.
+    Stripe,
+    /// Wide boards with curved joints.
+    Heritage,
+}
+
+/// A brand's profile file: `catalog/profiles/<brand>.json`.
+#[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
+pub struct ProfileFile {
+    pub brand: String,
+    #[serde(default)]
+    pub notes: String,
+    pub profiles: Vec<LiningProfile>,
+}
+
 /// Every `*.json` in `dir`, in name order, parsed as `T`. A missing folder holds nothing.
 fn read_dir<T: serde::de::DeserializeOwned>(dir: &Path) -> Result<Vec<T>, Error> {
     let Ok(entries) = std::fs::read_dir(dir) else {
@@ -214,6 +271,7 @@ pub struct Catalog {
     pub boards: Vec<Board>,
     pub edge_tapes: Vec<EdgeTape>,
     pub hardware: Vec<HardwareItem>,
+    pub profiles: Vec<LiningProfile>,
 }
 
 impl Catalog {
@@ -229,6 +287,9 @@ impl Catalog {
         }
         for file in read_dir::<HardwareFile>(&root.join("hardware"))? {
             cat.hardware.extend(file.items);
+        }
+        for file in read_dir::<ProfileFile>(&root.join("profiles"))? {
+            cat.profiles.extend(file.profiles);
         }
         cat.validate()?;
         Ok(cat)
@@ -292,6 +353,27 @@ impl Catalog {
                 }
             }
         }
+        let mut profile_ids = HashSet::new();
+        for p in &self.profiles {
+            sourced(&p.id, &p.source, &mut problems);
+            if !profile_ids.insert(p.id.as_str()) {
+                problems.push(format!("duplicate profile id {}", p.id));
+            }
+            let sizes = [
+                Some(p.module),
+                Some(p.thickness),
+                p.face,
+                p.groove,
+                p.groove_depth,
+                p.radius,
+            ];
+            if !sizes.iter().flatten().all(|&v| positive(v)) {
+                problems.push(format!("{}: sizes must be positive", p.id));
+            }
+            if p.groove_depth.is_some_and(|d| d >= p.thickness) {
+                problems.push(format!("{}: grooves deeper than the board", p.id));
+            }
+        }
         let mut hw_ids = HashSet::new();
         for h in &self.hardware {
             if !hw_ids.insert(h.id.as_str()) {
@@ -308,6 +390,16 @@ impl Catalog {
 
     pub fn board(&self, id: &str) -> Option<&Board> {
         self.boards.iter().find(|b| b.id == id)
+    }
+
+    /// The profile a lining board's face is routed to, by its brand and finish.
+    pub fn profile_of(&self, board: &Board) -> Option<&LiningProfile> {
+        if board.kind != BoardKind::Lining {
+            return None;
+        }
+        self.profiles
+            .iter()
+            .find(|p| p.brand == board.brand && p.name == board.finish)
     }
 
     /// Edge tapes for `board` known to be at least as wide as the board is thick.
@@ -471,6 +563,24 @@ mod tests {
                 "{}",
                 b.id
             );
+        }
+    }
+
+    /// SURR-1: every Surround lining board names a profile the catalog has.
+    #[test]
+    fn surround_linings_have_their_profiles() {
+        let cat = Catalog::load(&repo_catalog()).unwrap();
+        let linings: Vec<&Board> = cat
+            .boards
+            .iter()
+            .filter(|b| b.brand == "Laminex" && b.kind == BoardKind::Lining)
+            .collect();
+        assert!(!linings.is_empty());
+        for b in linings {
+            let p = cat
+                .profile_of(b)
+                .unwrap_or_else(|| panic!("{}: no profile", b.id));
+            assert!(p.module > 0.0);
         }
     }
 }

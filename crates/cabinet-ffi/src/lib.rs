@@ -43,8 +43,12 @@ pub struct PanelBox {
     pub depth: f64,
     pub height: f64,
     pub is_front: bool,
-    /// A door's hinged edge, `left` or `right`; empty for other parts.
+    /// A door's hinged edge, `left` or `right`; empty for other parts. A shaker door's frame
+    /// members and panel all carry their door's.
     pub hinged: String,
+    /// The hinge line (x, y at the front face) the door swings about, when `hinged` is set.
+    pub hinge_x: f64,
+    pub hinge_y: f64,
     /// Catalog board id, or empty for the standard's generic board.
     pub board: String,
     /// The axis the decor's grain runs along in the cabinet frame (`x`, `y`, `z`), or empty.
@@ -90,7 +94,18 @@ pub struct BoardRecord {
     pub verified: bool,
     /// `melamine`, `lining`, `raw`... as the catalog names it.
     pub kind: String,
+    /// A lining's routed profile: its shape (`batten`, `scallop`...), module and groove (mm);
+    /// empty and 0 for other boards.
+    pub profile_shape: String,
+    pub profile_module: f64,
+    pub profile_groove: f64,
 }
+
+/// Handles as the viewport draws them (mm): a bar this square, standing this far off the front,
+/// running this far past its end holes.
+const HANDLE_BAR: f64 = 12.0;
+const HANDLE_STANDOFF: f64 = 30.0;
+const HANDLE_END: f64 = 15.0;
 
 /// A job's items in the sidebar's order: cabinets (cabinet JSON) and the fillers and end panels
 /// between them (run item JSON, `type` `filler` or `end_panel`). Cabinets named in `placed` keep
@@ -105,7 +120,9 @@ pub struct JobItems {
 fn parse_item(json: &str) -> Result<RunItem, CoreError> {
     let v: serde_json::Value = serde_json::from_str(json).map_err(invalid)?;
     match v.get("type").and_then(|t| t.as_str()) {
-        Some("filler" | "end_panel") => serde_json::from_value(v).map_err(invalid),
+        Some("filler" | "end_panel" | "benchtop" | "floating_shelf" | "moulding") => {
+            serde_json::from_value(v).map_err(invalid)
+        }
         _ => Ok(RunItem::Cabinet(Box::new(
             serde_json::from_value(v).map_err(invalid)?,
         ))),
@@ -118,6 +135,9 @@ fn item_id(item: &RunItem) -> &str {
         RunItem::Cabinet(c) => &c.id,
         RunItem::Filler(f) => &f.id,
         RunItem::EndPanel(e) => &e.id,
+        RunItem::Benchtop(b) => &b.id,
+        RunItem::FloatingShelf(f) => &f.id,
+        RunItem::Moulding(m) => &m.id,
     }
 }
 
@@ -364,37 +384,66 @@ pub fn build(cabinet_json: String) -> Result<BuildSummary, CoreError> {
 
 fn summary(list: PartList) -> BuildSummary {
     use cabinet_core::part::{BorePurpose, Operation};
-    let panels = list
+    // A door, or a shaker door's members (`B01.Door1Stile1`...), by the door's name.
+    let door_of = |p: &cabinet_core::Part| -> String {
+        use cabinet_core::part::PartRole;
+        match p.role {
+            PartRole::FrameStile | PartRole::FrameRail | PartRole::FramePanel => p
+                .name
+                .trim_end_matches(char::is_numeric)
+                .trim_end_matches(p.role.code())
+                .to_string(),
+            _ => p.name.clone(),
+        }
+    };
+    let hinge = |door: &str| -> Option<(String, f64, f64)> {
+        let members: Vec<&cabinet_core::Part> =
+            list.parts.iter().filter(|q| door_of(q) == door).collect();
+        let h = list.hardware.iter().find(|h| {
+            h.item.starts_with("blum.clip-top") && members.iter().any(|m| m.name == h.part)
+        })?;
+        let lo = members
+            .iter()
+            .map(|m| m.bounds.min.x)
+            .fold(f64::MAX, f64::min);
+        let hi = members
+            .iter()
+            .map(|m| m.bounds.max().x)
+            .fold(f64::MIN, f64::max);
+        let front = members
+            .iter()
+            .map(|m| m.bounds.min.y)
+            .fold(f64::MAX, f64::min);
+        Some(if h.at.x < (lo + hi) / 2.0 {
+            ("left".into(), lo, front)
+        } else {
+            ("right".into(), hi, front)
+        })
+    };
+    let mut panels: Vec<PanelBox> = list
         .parts
         .iter()
-        .map(|p| PanelBox {
-            name: p.name.clone(),
-            role: p.role.label().to_string(),
-            x: p.bounds.min.x,
-            y: p.bounds.min.y,
-            z: p.bounds.min.z,
-            width: p.bounds.size.x,
-            depth: p.bounds.size.y,
-            height: p.bounds.size.z,
-            is_front: p.role.is_front(),
-            hinged: list
-                .hardware
-                .iter()
-                .find(|h| h.part == p.name && h.item.starts_with("blum.clip-top"))
-                .map(|h| {
-                    if h.at.x < p.bounds.center().x {
-                        "left"
-                    } else {
-                        "right"
-                    }
-                })
-                .unwrap_or_default()
-                .to_string(),
-            board: p.board.clone(),
-            grain: p
-                .grain_axis
-                .map(|a| format!("{a:?}").to_lowercase())
-                .unwrap_or_default(),
+        .map(|p| {
+            let (hinged, hinge_x, hinge_y) = hinge(&door_of(p)).unwrap_or_default();
+            PanelBox {
+                name: p.name.clone(),
+                role: p.role.label().to_string(),
+                x: p.bounds.min.x,
+                y: p.bounds.min.y,
+                z: p.bounds.min.z,
+                width: p.bounds.size.x,
+                depth: p.bounds.size.y,
+                height: p.bounds.size.z,
+                is_front: p.role.is_front(),
+                hinged,
+                hinge_x,
+                hinge_y,
+                board: p.board.clone(),
+                grain: p
+                    .grain_axis
+                    .map(|a| format!("{a:?}").to_lowercase())
+                    .unwrap_or_default(),
+            }
         })
         .collect();
     let biscuits = list
@@ -415,6 +464,99 @@ fn summary(list: PartList) -> BuildSummary {
             )
         })
         .count() as u32;
+    // Handles, from their screw holes: a bar standing off the front face (a knob a square),
+    // swinging or sliding with their front.
+    let finish = list
+        .hardware
+        .iter()
+        .find(|h| h.item.starts_with("handle."))
+        .map(|h| {
+            h.description
+                .rsplit(", ")
+                .next()
+                .unwrap_or_default()
+                .to_string()
+        })
+        .unwrap_or_default();
+    for p in &list.parts {
+        let holes: Vec<_> = list
+            .operations
+            .iter()
+            .filter_map(|o| match o {
+                Operation::Bore {
+                    part,
+                    at,
+                    direction,
+                    depth,
+                    purpose: BorePurpose::HandleScrew,
+                    ..
+                } if *part == p.name => Some((*at, *direction, *depth)),
+                _ => None,
+            })
+            .collect();
+        let Some(&(first, dir, depth)) = holes.first() else {
+            continue;
+        };
+        let last = holes.last().unwrap().0;
+        let sign = if dir.positive { 1.0 } else { -1.0 };
+        // The front face, and outwards from it.
+        let face = first.get(dir.axis) + sign * depth;
+        let (lo, hi) = (
+            cabinet_core::geom::Vec3::new(
+                first.x.min(last.x),
+                first.y.min(last.y),
+                first.z.min(last.z),
+            ),
+            cabinet_core::geom::Vec3::new(
+                first.x.max(last.x),
+                first.y.max(last.y),
+                first.z.max(last.z),
+            ),
+        );
+        let reach = |v: f64, axis| {
+            if axis == dir.axis {
+                (
+                    face.min(face + sign * HANDLE_STANDOFF),
+                    face.max(face + sign * HANDLE_STANDOFF),
+                )
+            } else {
+                (v - HANDLE_BAR / 2.0, v + HANDLE_BAR / 2.0)
+            }
+        };
+        use cabinet_core::geom::Axis;
+        let span = |a: Axis| {
+            let (l, h) = (lo.get(a), hi.get(a));
+            if a == dir.axis {
+                reach(l, a)
+            } else if h - l > 1.0 {
+                (l - HANDLE_END, h + HANDLE_END)
+            } else {
+                reach(l, a)
+            }
+        };
+        let (x, y, z) = (span(Axis::X), span(Axis::Y), span(Axis::Z));
+        let front = panels.iter().find(|b| b.name == p.name);
+        let (hinged, hinge_x, hinge_y) = front
+            .map(|b| (b.hinged.clone(), b.hinge_x, b.hinge_y))
+            .unwrap_or_default();
+        let on_drawer = p.role == cabinet_core::part::PartRole::DrawerFront;
+        panels.push(PanelBox {
+            name: format!("{}.Handle", p.name),
+            role: if on_drawer { "Drawer handle" } else { "Handle" }.into(),
+            x: x.0,
+            y: y.0,
+            z: z.0,
+            width: x.1 - x.0,
+            depth: y.1 - y.0,
+            height: z.1 - z.0,
+            is_front: false,
+            hinged,
+            hinge_x,
+            hinge_y,
+            board: format!("handle:{finish}"),
+            grain: String::new(),
+        });
+    }
     BuildSummary {
         panels,
         operations: list.operations.len() as u32,
@@ -566,6 +708,430 @@ fn board_name(p: &cabinet_core::Part) -> String {
 pub fn cut_sheets_pdf(items: JobItems, job: String) -> Result<Vec<u8>, CoreError> {
     let lists: Vec<PartList> = job_lists(&items)?.into_iter().map(|(l, _)| l).collect();
     Ok(cabinet_sheets::pdf::job_pdf(&lists, board_name, &job))
+}
+
+/// The usual Australian sheet for parts without a catalog board (mm).
+const GENERIC_SHEET: (f64, f64) = (2400.0, 1200.0);
+
+/// The job's parts nested on stock sheets for the panel saw (or a CNC router), on whichever of each board's catalog
+/// sheet sizes uses least board; parts with no board go on 2400 × 1200 sheets.
+fn job_nesting(
+    items: &JobItems,
+    catalog_dir: &str,
+    kerf: f64,
+    trim: f64,
+    router: bool,
+    offcuts: &[cabinet_core::nesting::Offcut],
+) -> Result<
+    (
+        cabinet_core::nesting::Nesting,
+        cabinet_core::nesting::Settings,
+    ),
+    CoreError,
+> {
+    use cabinet_core::nesting::{Settings, Stock, nest_with_offcuts};
+    let (lists, tape) = cut_lists(items)?;
+    let cat = cabinet_catalog::Catalog::load(std::path::Path::new(catalog_dir)).map_err(invalid)?;
+    let rows = cut_list(&lists, "Generic", tape).rows;
+    let settings = Settings {
+        kerf,
+        trim,
+        router,
+        ..Settings::default()
+    };
+    let nesting = nest_with_offcuts(
+        &rows,
+        |board, _| match cat.board(board) {
+            Some(b) => b
+                .sheets
+                .iter()
+                .map(|s| Stock {
+                    length: s.length,
+                    width: s.width,
+                    grained: b.grained,
+                })
+                .collect(),
+            None => vec![Stock {
+                length: GENERIC_SHEET.0,
+                width: GENERIC_SHEET.1,
+                grained: false,
+            }],
+        },
+        offcuts,
+        &settings,
+    );
+    Ok((nesting, settings))
+}
+
+/// Kept offcuts as the app stores them (a JSON array; empty text for none).
+fn offcuts(json: &str) -> Result<Vec<cabinet_core::nesting::Offcut>, CoreError> {
+    if json.trim().is_empty() {
+        return Ok(Vec::new());
+    }
+    serde_json::from_str(json).map_err(invalid)
+}
+
+/// The offcuts to keep after cutting the job (as JSON): the kept ones it did not use and its
+/// leftovers.
+#[uniffi::export]
+pub fn nesting_kept_offcuts(
+    items: JobItems,
+    catalog_dir: String,
+    kerf: f64,
+    trim: f64,
+    router: bool,
+    offcuts_json: String,
+) -> Result<String, CoreError> {
+    let stored = offcuts(&offcuts_json)?;
+    let (nesting, _) = job_nesting(&items, &catalog_dir, kerf, trim, router, &stored)?;
+    serde_json::to_string(&cabinet_core::nesting::kept_offcuts(&nesting, &stored)).map_err(invalid)
+}
+
+/// The nesting as a PDF: a summary with the offcuts, then a page per sheet.
+#[uniffi::export]
+pub fn nesting_pdf(
+    items: JobItems,
+    catalog_dir: String,
+    job: String,
+    kerf: f64,
+    trim: f64,
+    router: bool,
+    offcuts_json: String,
+) -> Result<Vec<u8>, CoreError> {
+    let (nesting, settings) = job_nesting(
+        &items,
+        &catalog_dir,
+        kerf,
+        trim,
+        router,
+        &offcuts(&offcuts_json)?,
+    )?;
+    Ok(cabinet_sheets::nesting::nesting_pdf(
+        &nesting, &job, &settings,
+    ))
+}
+
+/// The same pages as SVG documents, for the app to show.
+#[uniffi::export]
+pub fn nesting_pages(
+    items: JobItems,
+    catalog_dir: String,
+    job: String,
+    kerf: f64,
+    trim: f64,
+    router: bool,
+    offcuts_json: String,
+) -> Result<Vec<String>, CoreError> {
+    let (nesting, settings) = job_nesting(
+        &items,
+        &catalog_dir,
+        kerf,
+        trim,
+        router,
+        &offcuts(&offcuts_json)?,
+    )?;
+    Ok(cabinet_sheets::nesting::nesting_svgs(
+        &nesting, &job, &settings,
+    ))
+}
+
+/// One line of a quote.
+#[derive(uniffi::Record)]
+pub struct QuoteLineRecord {
+    /// board, edge_tape, hardware or labour.
+    pub section: String,
+    /// The price list key: board or hardware id, `edge_tape` or `labour`.
+    pub key: String,
+    pub description: String,
+    pub quantity: f64,
+    pub unit: String,
+    pub unit_price: Option<f64>,
+    pub total: f64,
+}
+
+#[derive(uniffi::Record)]
+pub struct QuoteRecord {
+    pub currency: String,
+    pub lines: Vec<QuoteLineRecord>,
+    pub cost: f64,
+    pub markup: f64,
+    pub tax: f64,
+    pub total: f64,
+    pub missing: Vec<String>,
+}
+
+fn job_quote_core(
+    items: &JobItems,
+    catalog_dir: &str,
+    kerf: f64,
+    trim: f64,
+    router: bool,
+    offcuts_json: &str,
+    prices_json: &str,
+) -> Result<cabinet_core::quote::Quote, CoreError> {
+    let prices: cabinet_core::quote::PriceList = if prices_json.trim().is_empty() {
+        Default::default()
+    } else {
+        serde_json::from_str(prices_json).map_err(invalid)?
+    };
+    let (nesting, _) = job_nesting(
+        items,
+        catalog_dir,
+        kerf,
+        trim,
+        router,
+        &offcuts(offcuts_json)?,
+    )?;
+    let (lists, tape) = cut_lists(items)?;
+    let cut = cut_list(&lists, "Generic", tape);
+    let bom = cabinet_core::bom::hardware_bom(&lists);
+    let cabinets = job_lists(items)?
+        .iter()
+        .filter(|(_, c)| c.is_some())
+        .count();
+    Ok(cabinet_core::quote::quote(
+        &nesting, &cut, &bom, cabinets, &prices,
+    ))
+}
+
+/// What the job costs from the shop's price list (JSON, as `cabinet_core::quote::PriceList`).
+#[uniffi::export]
+pub fn job_quote(
+    items: JobItems,
+    catalog_dir: String,
+    kerf: f64,
+    trim: f64,
+    router: bool,
+    offcuts_json: String,
+    prices_json: String,
+) -> Result<QuoteRecord, CoreError> {
+    let q = job_quote_core(
+        &items,
+        &catalog_dir,
+        kerf,
+        trim,
+        router,
+        &offcuts_json,
+        &prices_json,
+    )?;
+    Ok(QuoteRecord {
+        currency: q.currency,
+        lines: q
+            .lines
+            .into_iter()
+            .map(|l| QuoteLineRecord {
+                section: serde_json::to_value(l.section)
+                    .ok()
+                    .and_then(|v| v.as_str().map(String::from))
+                    .unwrap_or_default(),
+                key: l.key,
+                description: l.description,
+                quantity: l.quantity,
+                unit: l.unit,
+                unit_price: l.unit_price,
+                total: l.total,
+            })
+            .collect(),
+        cost: q.cost,
+        markup: q.markup,
+        tax: q.tax,
+        total: q.total,
+        missing: q.missing,
+    })
+}
+
+/// The quote as a PDF table.
+#[uniffi::export]
+// Swift calls it with named arguments; a settings record would only wrap the same values.
+#[allow(clippy::too_many_arguments)]
+pub fn quote_pdf(
+    items: JobItems,
+    catalog_dir: String,
+    job: String,
+    kerf: f64,
+    trim: f64,
+    router: bool,
+    offcuts_json: String,
+    prices_json: String,
+) -> Result<Vec<u8>, CoreError> {
+    let q = job_quote_core(
+        &items,
+        &catalog_dir,
+        kerf,
+        trim,
+        router,
+        &offcuts_json,
+        &prices_json,
+    )?;
+    let money = |v: f64| format!("{v:.2}#");
+    let mut rows: Vec<Vec<String>> = q
+        .lines
+        .iter()
+        .map(|l| {
+            vec![
+                l.description.clone(),
+                format!("{}#", l.quantity),
+                l.unit.clone(),
+                l.unit_price.map_or("no price#".into(), money),
+                money(l.total),
+            ]
+        })
+        .collect();
+    rows.push(vec![String::new(); 5]);
+    for (label, v) in [
+        ("Cost", q.cost),
+        ("Markup", q.markup),
+        ("Tax", q.tax),
+        ("Total", q.total),
+    ] {
+        rows.push(vec![
+            format!("{label} ({})", q.currency),
+            "#".into(),
+            String::new(),
+            "#".into(),
+            money(v),
+        ]);
+    }
+    if !q.missing.is_empty() {
+        rows.push(vec![String::new(); 5]);
+        rows.push(vec![
+            format!(
+                "No price yet for {} lines: the total is short by them",
+                q.missing.len()
+            ),
+            "#".into(),
+            String::new(),
+            "#".into(),
+            "#".into(),
+        ]);
+    }
+    Ok(cabinet_sheets::pdf::table_pdf(
+        "Quote",
+        &job,
+        &["Description", "Qty#", "Unit", "Price#", "Total#"],
+        &[150.0, 25.0, 20.0, 35.0, 37.0],
+        &rows,
+    ))
+}
+
+/// The quote as the customer sees it: one price per cabinet, filler and end panel, tax included.
+#[uniffi::export]
+// Swift calls it with named arguments; a settings record would only wrap the same values.
+#[allow(clippy::too_many_arguments)]
+pub fn customer_quote_pdf(
+    items: JobItems,
+    catalog_dir: String,
+    job: String,
+    kerf: f64,
+    trim: f64,
+    router: bool,
+    offcuts_json: String,
+    prices_json: String,
+) -> Result<Vec<u8>, CoreError> {
+    let prices: cabinet_core::quote::PriceList = if prices_json.trim().is_empty() {
+        Default::default()
+    } else {
+        serde_json::from_str(prices_json.as_str()).map_err(invalid)?
+    };
+    let q = job_quote_core(
+        &items,
+        &catalog_dir,
+        kerf,
+        trim,
+        router,
+        &offcuts_json,
+        &prices_json,
+    )?;
+    let (nesting, _) = job_nesting(
+        &items,
+        &catalog_dir,
+        kerf,
+        trim,
+        router,
+        &offcuts(&offcuts_json)?,
+    )?;
+    let built = job_lists(&items)?;
+    let ids: Vec<String> = built
+        .iter()
+        .filter_map(|(_, c)| c.as_ref().map(|c| c.id.clone()))
+        .collect();
+    let lists: Vec<PartList> = built.iter().map(|(l, _)| l.clone()).collect();
+    let (_, tape) = cut_lists(&items)?;
+    let cut = cut_list(&lists, "Generic", tape);
+    let shares = cabinet_core::quote::per_cabinet(&nesting, &cut, &lists, &ids, &prices);
+    let describe = |id: &str| {
+        built
+            .iter()
+            .find_map(|(_, c)| c.as_ref().filter(|c| c.id == id))
+            .map(|c| {
+                let kind = serde_json::to_value(c.kind)
+                    .ok()
+                    .and_then(|v| v.as_str().map(|s| s.replace('_', " ")))
+                    .unwrap_or_default();
+                format!(
+                    "{id}  {kind}, {:.0} × {:.0} × {:.0} mm",
+                    c.width, c.height, c.depth
+                )
+            })
+            .unwrap_or_else(|| id.to_string())
+    };
+    let mut rows: Vec<Vec<String>> = shares
+        .iter()
+        .map(|c| vec![describe(&c.cabinet), format!("{:.2}#", c.total)])
+        .collect();
+    rows.push(vec![String::new(), String::new()]);
+    rows.push(vec![
+        format!("Total ({}, including {:.2} tax)", q.currency, q.tax),
+        format!("{:.2}#", q.total),
+    ]);
+    if !q.missing.is_empty() {
+        rows.push(vec![
+            "Draft: some prices are still missing".into(),
+            "#".into(),
+        ]);
+    }
+    Ok(cabinet_sheets::pdf::table_pdf(
+        "Quote",
+        &job,
+        &["Item", "Price#"],
+        &[220.0, 47.0],
+        &rows,
+    ))
+}
+
+/// The benchtop schedule for the benchtop maker: a summary, then each piece's sheet.
+#[uniffi::export]
+pub fn benchtops_pdf(items: JobItems, job: String) -> Result<Vec<u8>, CoreError> {
+    let lists: Vec<PartList> = job_lists(&items)?.into_iter().map(|(l, _)| l).collect();
+    Ok(cabinet_sheets::benchtops::benchtops_pdf(&lists, &job))
+}
+
+/// An exploded assembly drawing per cabinet with its parts list, as a PDF.
+#[uniffi::export]
+pub fn assembly_pdf(items: JobItems, job: String) -> Result<Vec<u8>, CoreError> {
+    let lists: Vec<PartList> = job_lists(&items)?.into_iter().map(|(l, _)| l).collect();
+    Ok(cabinet_sheets::assembly::assembly_pdf(&lists, &job))
+}
+
+/// One part's DXF file for CNC (see `cabinet_sheets::dxf` for the layers).
+#[derive(uniffi::Record)]
+pub struct DxfRecord {
+    /// The part name, `-back` for its second face; no extension.
+    pub name: String,
+    pub contents: String,
+}
+
+/// Every part's DXF files.
+#[uniffi::export]
+pub fn job_dxfs(items: JobItems) -> Result<Vec<DxfRecord>, CoreError> {
+    let lists: Vec<PartList> = job_lists(&items)?.into_iter().map(|(l, _)| l).collect();
+    Ok(cabinet_sheets::dxf::job_dxfs(&lists)
+        .into_iter()
+        .map(|f| DxfRecord {
+            name: f.name,
+            contents: f.contents,
+        })
+        .collect())
 }
 
 /// One line of the hardware bill.
@@ -896,10 +1462,26 @@ pub fn hide_bodies(port: u16, bodies: Vec<String>) -> Result<(), CoreError> {
 pub fn load_boards(catalog_dir: String) -> Result<Vec<BoardRecord>, CoreError> {
     let cat =
         cabinet_catalog::Catalog::load(std::path::Path::new(&catalog_dir)).map_err(invalid)?;
+    let profiles: Vec<_> = cat
+        .boards
+        .iter()
+        .map(|b| cat.profile_of(b).cloned())
+        .collect();
     Ok(cat
         .boards
         .into_iter()
-        .map(|b| BoardRecord {
+        .zip(profiles)
+        .map(|(b, profile)| BoardRecord {
+            profile_shape: profile
+                .as_ref()
+                .and_then(|p| serde_json::to_value(p.shape).ok())
+                .and_then(|v| v.as_str().map(String::from))
+                .unwrap_or_default(),
+            profile_module: profile.as_ref().map_or(0.0, |p| p.module),
+            profile_groove: profile
+                .as_ref()
+                .and_then(|p| p.groove.or(p.radius.map(|r| r.min(p.module / 2.0))))
+                .unwrap_or(0.0),
             sheets: b
                 .sheets
                 .iter()
@@ -1091,5 +1673,172 @@ mod tests {
         assert_eq!(csv.lines().count(), rows.len() + 1);
         let pdf = hardware_bom_pdf(job(&items), catalog(), "Sample".into()).unwrap();
         assert!(pdf.starts_with(b"%PDF"));
+    }
+
+    #[test]
+    fn kept_offcuts_read_from_the_apps_store() {
+        assert!(offcuts("").unwrap().is_empty());
+        let o = offcuts(
+            r#"[{"board":"Generic","thickness":16.0,"length":900.0,"width":600.0,"grained":false}]"#,
+        )
+        .unwrap();
+        assert_eq!(o[0].width, 600.0);
+        assert!(offcuts("not json").is_err());
+    }
+
+    #[test]
+    fn a_job_quotes_and_its_customer_quote_has_a_line_per_item() {
+        let catalog = concat!(env!("CARGO_MANIFEST_DIR"), "/../../catalog").to_string();
+        let items = vec![
+            new_cabinet("B01".into(), "base".into()).unwrap(),
+            r#"{"type":"filler","id":"F01","width":50}"#.to_string(),
+            new_cabinet("W01".into(), "wall".into()).unwrap(),
+        ];
+        let prices = r#"{"boards":{"Generic":20.0},"labour_per_hour":70.0,"edge_tape_per_m":1.0}"#;
+        let q = job_quote(
+            job(&items),
+            catalog.clone(),
+            4.4,
+            10.0,
+            false,
+            String::new(),
+            prices.into(),
+        )
+        .unwrap();
+        assert!(q.total > 0.0);
+        assert!(
+            q.lines
+                .iter()
+                .any(|l| l.section == "board" && l.key == "Generic")
+        );
+        let pdf = customer_quote_pdf(
+            job(&items),
+            catalog,
+            "Kitchen".into(),
+            4.4,
+            10.0,
+            false,
+            String::new(),
+            prices.into(),
+        )
+        .unwrap();
+        let text = String::from_utf8_lossy(&pdf);
+        for id in ["B01", "F01", "W01"] {
+            assert!(text.contains(id), "{id}");
+        }
+    }
+
+    #[test]
+    fn a_shaker_doors_pieces_all_swing_about_its_hinge_line() {
+        let mut cab = Cabinet::new("B01", cabinet_core::CabinetKind::Base);
+        cab.standard.door_style = cabinet_core::model::DoorStyle::Shaker;
+        let sum = summary(cabinet_core::build_cabinet(&cab).unwrap());
+        let door: Vec<&PanelBox> = sum
+            .panels
+            .iter()
+            .filter(|p| p.name.starts_with("B01.Door1"))
+            .collect();
+        // Five pieces and the handle.
+        assert_eq!(door.len(), 6);
+        let left = door.iter().map(|p| p.x).fold(f64::MAX, f64::min);
+        for p in door {
+            assert_eq!((p.hinged.as_str(), p.hinge_x), ("left", left), "{}", p.name);
+        }
+        assert!(
+            sum.panels
+                .iter()
+                .filter(|p| p.role == "Left side")
+                .all(|p| p.hinged.is_empty())
+        );
+    }
+
+    #[test]
+    fn a_benchtop_item_builds_over_the_run_and_keeps_in_the_job_file() {
+        let top = r#"{"type":"benchtop","id":"BT01","thickness":33,"front_overhang":20}"#;
+        let items = vec![
+            new_cabinet("B01".into(), "base".into()).unwrap(),
+            new_cabinet("B02".into(), "base".into()).unwrap(),
+            top.to_string(),
+        ];
+        let built = build_job(job(&items));
+        let panels = &built[2].summary.as_ref().unwrap().panels;
+        assert_eq!(panels.len(), 1);
+        assert_eq!(panels[0].role, "Benchtop");
+        assert!((panels[0].width - 1200.0).abs() < 1e-9);
+        let standard = serde_json::to_string(&parse(&items[0]).unwrap().standard).unwrap();
+        let file = project_json("Kitchen".into(), standard, items.clone(), Vec::new()).unwrap();
+        let back = open_project(file).unwrap();
+        assert_eq!(back.items_json.len(), 3);
+        assert!(back.items_json[2].contains("benchtop"));
+        assert!(
+            cut_list_rows(job(&items))
+                .unwrap()
+                .iter()
+                .any(|r| r.description == "Benchtop")
+        );
+    }
+
+    /// The app writes a cornice like this; it keeps in the job file.
+    #[test]
+    fn a_cornice_item_builds_over_the_tall_cabinets() {
+        let cornice =
+            r#"{"id":"CO01","type":"moulding","kind":"cornice","height":60,"returns":true}"#;
+        let items = vec![
+            new_cabinet("T01".into(), "tall".into()).unwrap(),
+            new_cabinet("T02".into(), "tall".into()).unwrap(),
+            cornice.to_string(),
+        ];
+        let built = build_job(job(&items));
+        let panels = &built[2].summary.as_ref().unwrap().panels;
+        assert_eq!(panels.len(), 3);
+        assert!(panels.iter().all(|p| p.role == "Cornice"));
+        let standard = serde_json::to_string(&parse(&items[0]).unwrap().standard).unwrap();
+        let file = project_json("Kitchen".into(), standard, items.clone(), Vec::new()).unwrap();
+        let back = open_project(file).unwrap();
+        assert!(back.items_json[2].contains("moulding"));
+    }
+
+    /// The app writes an oven tower's stacked fronts like this.
+    #[test]
+    fn a_stacked_front_reads_from_the_apps_json() {
+        let mut cab: serde_json::Value =
+            serde_json::from_str(&new_cabinet("T01".into(), "tall".into()).unwrap()).unwrap();
+        cab["adjustable_shelves"] = 0.into();
+        cab["fronts"] = serde_json::json!({"type": "stack", "sections": [
+            {"type": "drawers", "count": 2, "height": 0},
+            {"type": "niche", "height": 600},
+            {"type": "door", "hinge_side": "left", "height": 0}
+        ]});
+        let sum = build(cab.to_string()).unwrap();
+        assert_eq!(
+            sum.panels
+                .iter()
+                .filter(|p| p.role == "Drawer front")
+                .count(),
+            2
+        );
+        assert_eq!(sum.panels.iter().filter(|p| p.role == "Door").count(), 1);
+    }
+
+    /// STYLE-3: a door's handle is drawn standing off its front face, swinging with the door.
+    #[test]
+    fn handles_are_drawn_off_the_front_and_swing_with_it() {
+        let mut cab = Cabinet::new("B01", cabinet_core::CabinetKind::Base);
+        cab.standard.handle_finish = cabinet_core::model::HandleFinish::Black;
+        let sum = summary(cabinet_core::build_cabinet(&cab).unwrap());
+        let door = sum.panels.iter().find(|p| p.name == "B01.Door1").unwrap();
+        let h = sum
+            .panels
+            .iter()
+            .find(|p| p.name == "B01.Door1.Handle")
+            .unwrap();
+        assert_eq!(h.role, "Handle");
+        assert_eq!(h.board, "handle:matt black");
+        assert_eq!(
+            (h.hinged.as_str(), h.hinge_x),
+            (door.hinged.as_str(), door.hinge_x)
+        );
+        assert!((h.y + h.depth - door.y).abs() < 1e-9, "on the front face");
+        assert!((h.height - (128.0 + 30.0)).abs() < 1e-9);
     }
 }

@@ -106,6 +106,74 @@ pub fn option_groups() -> Vec<OptionGroup> {
             ],
         ),
         group(
+            "door_style",
+            "Door style",
+            &[
+                ("slab", "Slab", "Fronts of one board"),
+                (
+                    "shaker",
+                    "Shaker",
+                    "Five-piece fronts: a 70 mm frame round a 9 mm panel; small fronts stay slab",
+                ),
+                (
+                    "glass_frame",
+                    "Glass",
+                    "The frame round 4 mm glass held in a back rebate by beads; drawers get a panel",
+                ),
+            ],
+        ),
+        group(
+            "handle_size",
+            "Handle",
+            &[
+                ("knob", "Knob", "A knob on one screw"),
+                ("cc96", "96", "Handle with 96 mm hole centres"),
+                ("cc128", "128", "Handle with 128 mm hole centres"),
+                ("cc160", "160", "Handle with 160 mm hole centres"),
+                ("cc192", "192", "Handle with 192 mm hole centres"),
+                ("cc224", "224", "Handle with 224 mm hole centres"),
+                ("cc256", "256", "Handle with 256 mm hole centres"),
+                ("cc320", "320", "Handle with 320 mm hole centres"),
+                ("cc448", "448", "Handle with 448 mm hole centres"),
+            ],
+        ),
+        group(
+            "handle_finish",
+            "Handle finish",
+            &[
+                ("stainless", "Stainless", "Stainless steel handles"),
+                ("black", "Black", "Matt black handles"),
+                ("brushed_brass", "Brass", "Brushed brass handles"),
+                ("brushed_nickel", "Nickel", "Brushed nickel handles"),
+            ],
+        ),
+        group(
+            "handle_place",
+            "Handle place",
+            &[
+                (
+                    "corner",
+                    "Corner",
+                    "Doors: by the free edge, near the top (wall: the bottom); deep drawers near the top",
+                ),
+                (
+                    "centre",
+                    "Centre",
+                    "Doors: by the free edge, halfway up; drawers across the middle",
+                ),
+                (
+                    "edge_pull",
+                    "Edge pull",
+                    "A pull on the top edge (wall doors: the bottom), screwed from behind",
+                ),
+                (
+                    "finger_pull",
+                    "Finger pull",
+                    "Handleless: a grip routed along the back of the top edge (wall: the bottom)",
+                ),
+            ],
+        ),
+        group(
             "drawer_system",
             "Drawers",
             &[
@@ -133,6 +201,50 @@ pub fn option_groups() -> Vec<OptionGroup> {
                     "tandem",
                     "Wood on TANDEM",
                     "Wooden boxes on concealed Blum TANDEM runners, 30 kg",
+                ),
+            ],
+        ),
+        group(
+            "drawer_sides",
+            "Drawer sides",
+            &[
+                (
+                    "standard",
+                    "N, M or K",
+                    "Deep drawers are a K box behind a tall front",
+                ),
+                (
+                    "high_fronted",
+                    "High sides C/F",
+                    "LEGRABOX pure high fronted pull-outs, 177 or 241 mm sides, where they fit",
+                ),
+            ],
+        ),
+        group(
+            "insert_design",
+            "Insert design",
+            &[
+                ("steel", "Steel", "AMBIA-LINE inserts and frames in steel"),
+                (
+                    "wood",
+                    "Wood décor",
+                    "AMBIA-LINE in oak or walnut décor on steel, ordered with a colour code",
+                ),
+            ],
+        ),
+        group(
+            "front_grain",
+            "Front grain",
+            &[
+                (
+                    "free",
+                    "Each front",
+                    "Fronts are cut on their own; drawer fronts' grain runs across",
+                ),
+                (
+                    "matched",
+                    "Continuous",
+                    "Stacked fronts run their grain upright, cut in sequence from one strip",
                 ),
             ],
         ),

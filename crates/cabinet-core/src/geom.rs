@@ -98,4 +98,16 @@ impl Aabb {
     pub fn volume(&self) -> f64 {
         self.size.x * self.size.y * self.size.z
     }
+
+    /// The smallest box holding both.
+    pub fn union(&self, o: &Aabb) -> Aabb {
+        let (a, b) = (self.max(), o.max());
+        let min = Vec3::new(
+            self.min.x.min(o.min.x),
+            self.min.y.min(o.min.y),
+            self.min.z.min(o.min.z),
+        );
+        let max = Vec3::new(a.x.max(b.x), a.y.max(b.y), a.z.max(b.z));
+        Aabb::new(min, Vec3::new(max.x - min.x, max.y - min.y, max.z - min.z))
+    }
 }

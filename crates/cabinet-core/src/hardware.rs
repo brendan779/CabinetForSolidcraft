@@ -20,6 +20,26 @@ const FILES: &[(&str, &str)] = &[
         include_str!("../../../catalog/hardware/blum-aventos-hk.json"),
     ),
     (
+        "blum-ambia-line.json",
+        include_str!("../../../catalog/hardware/blum-ambia-line.json"),
+    ),
+    (
+        "blum-cabloxx.json",
+        include_str!("../../../catalog/hardware/blum-cabloxx.json"),
+    ),
+    (
+        "blum-orga-line.json",
+        include_str!("../../../catalog/hardware/blum-orga-line.json"),
+    ),
+    (
+        "blum-aventos-hki.json",
+        include_str!("../../../catalog/hardware/blum-aventos-hki.json"),
+    ),
+    (
+        "blum-aventos-hk-s-xs.json",
+        include_str!("../../../catalog/hardware/blum-aventos-hk-s-xs.json"),
+    ),
+    (
         "blum-aventos-hs-hl.json",
         include_str!("../../../catalog/hardware/blum-aventos-hs-hl.json"),
     ),

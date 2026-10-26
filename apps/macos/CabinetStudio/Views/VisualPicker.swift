@@ -79,6 +79,13 @@ struct ConstructionThumbnail: View {
             case "wall_hanging": pen.wallHanging(choice)
             case "opening": pen.opening(choice)
             case "drawer_system": pen.drawerSystem(choice)
+            case "drawer_sides": pen.drawerSides(choice)
+            case "front_grain": pen.frontGrain(choice)
+            case "insert_design": pen.insertDesign(choice)
+            case "door_style": pen.doorStyle(choice)
+            case "handle_size": pen.handleSize(choice)
+            case "handle_place": pen.handlePlace(choice)
+            case "handle_finish": pen.handleFinish(choice)
             case "overlay": pen.overlayPlan(choice)
             case "fixings": pen.fixing(choice)
             case "biscuit": pen.biscuit(choice)
@@ -231,6 +238,123 @@ private struct Pen {
             board(18, 58, 64, 5)
             board(14, 64, 12, 4, hot: true)
             board(74, 64, 12, 4, hot: true)
+        }
+    }
+
+    /// A door from the front: one board, or a frame round a recessed panel.
+    func doorStyle(_ choice: String) {
+        board(28, 6, 44, 68, hot: choice == "slab")
+        guard choice != "slab" else { return }
+        board(28, 6, 9, 68, hot: true)        // stiles
+        board(63, 6, 9, 68, hot: true)
+        board(37, 6, 26, 9, hot: true)        // rails
+        board(37, 65, 26, 9, hot: true)
+        if choice == "glass_frame" {
+            // Glass: pale, with a glint.
+            ctx.fill(Path(r(37, 15, 26, 50)), with: .color(.cyan.opacity(0.15)))
+            line(p(42, 22), p(52, 34), colour: .white.opacity(0.9), width: 1.2)
+        } else {
+            ctx.fill(Path(r(38, 16, 24, 48)), with: .color(.primary.opacity(0.18)))
+        }
+    }
+
+    /// A drawer front with the handle to scale against it (a 600 mm front is 80 units).
+    func handleSize(_ choice: String) {
+        board(10, 26, 80, 30)
+        guard let cc = Double(choice.dropFirst(2)) else {
+            ctx.fill(Path(ellipseIn: r(45, 36, 10, 10)), with: .color(accent.opacity(0.35)))
+            ctx.stroke(Path(ellipseIn: r(45, 36, 10, 10)), with: .color(accent), lineWidth: 1.4)
+            return
+        }
+        let w = CGFloat(cc) * 80 / 600
+        board(50 - w / 2 - 3, 39, w + 6, 4, hot: true)
+        for x in [50 - w / 2, 50 + w / 2] {
+            ctx.fill(Path(ellipseIn: r(x - 1, 40, 2, 2)), with: .color(accent))
+        }
+    }
+
+    /// A handle bar in the finish's colour on a door.
+    func handleFinish(_ choice: String) {
+        board(24, 8, 52, 64)
+        let colour: Color = switch choice {
+        case "black": Color(white: 0.1)
+        case "brushed_brass": Color(red: 0.76, green: 0.6, blue: 0.33)
+        case "brushed_nickel": Color(red: 0.72, green: 0.71, blue: 0.67)
+        default: Color(white: 0.75)
+        }
+        ctx.fill(Path(roundedRect: r(64, 14, 4, 26), cornerRadius: 2 * s), with: .color(colour))
+        ctx.stroke(Path(roundedRect: r(64, 14, 4, 26), cornerRadius: 2 * s), with: .color(.primary.opacity(0.6)), lineWidth: 0.8)
+    }
+
+    /// A base door hinged on the left and a drawer, with the handles where the choice puts them.
+    func handlePlace(_ choice: String) {
+        board(12, 8, 36, 64)       // door
+        board(56, 8, 32, 26)       // drawer fronts
+        board(56, 38, 32, 34)
+        switch choice {
+        case "edge_pull":
+            board(30, 5, 16, 3, hot: true)
+            board(64, 5, 16, 3, hot: true)
+            board(64, 35, 16, 3, hot: true)
+        case "finger_pull":
+            // The grip along each front's top edge, shaded.
+            board(12, 8, 36, 4, hot: true)
+            board(56, 8, 32, 4, hot: true)
+            board(56, 38, 32, 4, hot: true)
+        case "centre":
+            board(41, 32, 2.5, 16, hot: true)
+            board(64, 20, 16, 2.5, hot: true)
+            board(64, 54, 16, 2.5, hot: true)
+        default:
+            board(41, 12, 2.5, 16, hot: true)
+            board(64, 20, 16, 2.5, hot: true)
+            board(64, 42, 16, 2.5, hot: true)
+        }
+    }
+
+    /// A deep drawer from the side: the tall front on the left, the box's steel side behind it.
+    func drawerSides(_ choice: String) {
+        board(12, 10, 6, 62)                          // front
+        board(18, 64, 70, 5)                          // base
+        let top: CGFloat = choice == "high_fronted" ? 14 : 44
+        board(18, top, 66, 64 - top, hot: true)       // steel side
+        line(p(18, 72), p(88, 72), colour: accent, width: 2)
+    }
+
+    /// A drawer insert from above: a frame with two dividers, in steel lines or wood boards.
+    func insertDesign(_ choice: String) {
+        let (x0, y0, w, h): (CGFloat, CGFloat, CGFloat, CGFloat) = (14, 12, 72, 56)
+        if choice == "wood" {
+            board(x0, y0, w, 5, hot: true)
+            board(x0, y0 + h - 5, w, 5, hot: true)
+            board(x0, y0, 5, h, hot: true)
+            board(x0 + w - 5, y0, 5, h, hot: true)
+            board(x0 + 26, y0 + 5, 4, h - 10, hot: true)
+            board(x0 + 46, y0 + 5, 4, h - 10, hot: true)
+        } else {
+            ctx.stroke(Path(r(x0, y0, w, h)), with: .color(accent), lineWidth: 1.5)
+            line(p(x0 + 28, y0), p(x0 + 28, y0 + h), colour: accent, width: 1.5)
+            line(p(x0 + 48, y0), p(x0 + 48, y0 + h), colour: accent, width: 1.5)
+        }
+    }
+
+    /// A door over two drawer fronts, with their grain: upright and running on through all three,
+    /// or upright on the door and across the drawers.
+    func frontGrain(_ choice: String) {
+        let fronts: [(CGFloat, CGFloat)] = [(6, 40), (48, 12), (62, 12)]
+        for (y, h) in fronts { board(30, y, 40, h) }
+        let matched = choice == "matched"
+        for x in stride(from: CGFloat(36), through: 64, by: 7) {
+            for (i, (y, h)) in fronts.enumerated() where matched || i == 0 {
+                line(p(x, y + 2), p(x, y + h - 2), colour: matched ? accent : nil, width: 1)
+            }
+        }
+        if !matched {
+            for (y, h) in fronts.dropFirst() {
+                for dy in stride(from: CGFloat(3), to: h - 1, by: 3) {
+                    line(p(34, y + dy), p(66, y + dy), width: 1)
+                }
+            }
         }
     }
 
@@ -484,6 +608,19 @@ struct FrontThumbnail: View {
                     y += h
                     if i < ratios.count - 1 { hLine(y) }
                 }
+            case "oven_tower":
+                // A door at the top, the oven's dark glass, two drawers.
+                hLine(r.minY + r.height * 0.4)
+                hLine(r.minY + r.height * 0.7)
+                hLine(r.minY + r.height * 0.85)
+                ctx.fill(Path(CGRect(x: r.minX + 3, y: r.minY + r.height * 0.43, width: r.width - 6, height: r.height * 0.24)),
+                         with: .color(.primary.opacity(0.55)))
+                handle(r.maxX - 6, r.minY + r.height * 0.32, vertical: true)
+            case "fridge":
+                hLine(r.minY + r.height * 0.2)
+                ctx.fill(Path(CGRect(x: r.minX + 3, y: r.minY + r.height * 0.24, width: r.width - 6, height: r.height * 0.72)),
+                         with: .color(.primary.opacity(0.18)))
+                handle(r.maxX - 6, r.minY + r.height * 0.12, vertical: false)
             default:
                 for i in 1..<3 { hLine(r.minY + r.height * CGFloat(i) / 3) }
             }

@@ -1,0 +1,993 @@
+{
+  "brand": "Blum",
+  "website": "https://www.blum.com",
+  "notes": "AMBIA-LINE steel drawer frames and cutlery inserts for LEGRABOX and MERIVOBOX drawers (heights M and K) from the Blum Catalogue and technical manual 2024/2025, printed pages 544 (order information) and 546 (recommendation by cabinet width KB and nominal length NL). The recommendation tables give item counts by KB; between printed widths the next narrower row applies. Wood design pieces (p.545) take the same recommendation; p.545 prints no adapter profile for them. High fronted pull-outs (pp. 547-551) are not recorded. Not verified by a person.",
+  "items": [
+    {
+      "id": "blum.ambia-line",
+      "brand": "Blum",
+      "article": "AMBIA-LINE",
+      "family": "AMBIA-LINE",
+      "variant": "inner dividing system for LEGRABOX and MERIVOBOX drawers, heights M and K, steel design",
+      "kind": "drawer_system",
+      "parameters": {
+        "frame_height": 51
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.546, web code (AMBIA-LINE has none in the list)",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      },
+      "tables": {
+        "cutlery_set_cutlery_inserts": {
+          "rows_name": "cabinet_width",
+          "cols_name": "any",
+          "rows": [
+            400,
+            450,
+            500,
+            550,
+            600,
+            800,
+            900,
+            1000,
+            1100,
+            1200
+          ],
+          "cols": [
+            0
+          ],
+          "values": [
+            [
+              1.0
+            ],
+            [
+              1.0
+            ],
+            [
+              1.0
+            ],
+            [
+              1.0
+            ],
+            [
+              1.0
+            ],
+            [
+              2.0
+            ],
+            [
+              2.0
+            ],
+            [
+              2.0
+            ],
+            [
+              2.0
+            ],
+            [
+              2.0
+            ]
+          ],
+          "note": "Cutlery insert and drawer frame, NL 450-650: cutlery inserts"
+        },
+        "cutlery_set_frames_100": {
+          "rows_name": "cabinet_width",
+          "cols_name": "any",
+          "rows": [
+            400,
+            450,
+            500,
+            550,
+            600,
+            800,
+            900,
+            1000,
+            1100,
+            1200
+          ],
+          "cols": [
+            0
+          ],
+          "values": [
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              1.0
+            ],
+            [
+              1.0
+            ],
+            [
+              0.0
+            ],
+            [
+              1.0
+            ],
+            [
+              2.0
+            ],
+            [
+              1.0
+            ],
+            [
+              1.0
+            ]
+          ],
+          "note": "Cutlery insert and drawer frame: 100 mm frames"
+        },
+        "cutlery_set_frames_200": {
+          "rows_name": "cabinet_width",
+          "cols_name": "any",
+          "rows": [
+            400,
+            450,
+            500,
+            550,
+            600,
+            800,
+            900,
+            1000,
+            1100,
+            1200
+          ],
+          "cols": [
+            0
+          ],
+          "values": [
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              1.0
+            ],
+            [
+              1.0
+            ]
+          ],
+          "note": "Cutlery insert and drawer frame: 200 mm frames"
+        },
+        "long_frames_100": {
+          "rows_name": "cabinet_width",
+          "cols_name": "any",
+          "rows": [
+            275,
+            300,
+            350,
+            400,
+            450,
+            500,
+            550,
+            600,
+            800,
+            900,
+            1000,
+            1100,
+            1200
+          ],
+          "cols": [
+            0
+          ],
+          "values": [
+            [
+              1.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              0.0
+            ],
+            [
+              1.0
+            ],
+            [
+              1.0
+            ],
+            [
+              1.0
+            ],
+            [
+              2.0
+            ],
+            [
+              2.0
+            ],
+            [
+              2.0
+            ],
+            [
+              2.0
+            ],
+            [
+              2.0
+            ],
+            [
+              2.0
+            ]
+          ],
+          "note": "Drawer frame, NL 450-650: 100 mm frames"
+        },
+        "long_frames_200": {
+          "rows_name": "cabinet_width",
+          "cols_name": "any",
+          "rows": [
+            275,
+            300,
+            350,
+            400,
+            450,
+            500,
+            550,
+            600,
+            800,
+            900,
+            1000,
+            1100,
+            1200
+          ],
+          "cols": [
+            0
+          ],
+          "values": [
+            [
+              0.0
+            ],
+            [
+              1.0
+            ],
+            [
+              1.0
+            ],
+            [
+              1.0
+            ],
+            [
+              1.0
+            ],
+            [
+              1.0
+            ],
+            [
+              1.0
+            ],
+            [
+              1.0
+            ],
+            [
+              2.0
+            ],
+            [
+              2.0
+            ],
+            [
+              2.0
+            ],
+            [
+              3.0
+            ],
+            [
+              3.0
+            ]
+          ],
+          "note": "Drawer frame, NL 450-650: 200 mm frames"
+        },
+        "short_frames_242": {
+          "rows_name": "cabinet_width",
+          "cols_name": "nominal_length",
+          "rows": [
+            275,
+            300,
+            350,
+            400,
+            450,
+            500,
+            550,
+            600,
+            800,
+            900,
+            1000,
+            1200
+          ],
+          "cols": [
+            270,
+            300
+          ],
+          "values": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              1
+            ],
+            [
+              1,
+              1
+            ],
+            [
+              1,
+              1
+            ],
+            [
+              1,
+              1
+            ],
+            [
+              1,
+              2
+            ],
+            [
+              2,
+              2
+            ],
+            [
+              3,
+              3
+            ],
+            [
+              3,
+              3
+            ],
+            [
+              4,
+              4
+            ]
+          ],
+          "note": "Drawer frame, NL 270-400: 242 mm frames (the 300 column holds for 300-400)"
+        }
+      }
+    },
+    {
+      "id": "blum.ambia-line.cutlery-insert.450",
+      "brand": "Blum",
+      "article": "ZC7S450BS3",
+      "family": "AMBIA-LINE",
+      "variant": "cutlery insert, NL 450, 300 wide, steel",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 450,
+        "width": 300
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.544, web code (AMBIA-LINE has none in the list)",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.ambia-line.frame-100.450",
+      "brand": "Blum",
+      "article": "ZC7S450RS1",
+      "family": "AMBIA-LINE",
+      "variant": "drawer frame 100 mm, NL 450, steel",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 450,
+        "width": 100
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.544, web code (AMBIA-LINE has none in the list)",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.ambia-line.frame-200.450",
+      "brand": "Blum",
+      "article": "ZC7S450RS2",
+      "family": "AMBIA-LINE",
+      "variant": "drawer frame 200 mm, NL 450, steel",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 450,
+        "width": 200
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.544, web code (AMBIA-LINE has none in the list)",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.ambia-line.cutlery-insert.500",
+      "brand": "Blum",
+      "article": "ZC7S500BS3",
+      "family": "AMBIA-LINE",
+      "variant": "cutlery insert, NL 500, 300 wide, steel",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 500,
+        "width": 300
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.544, web code (AMBIA-LINE has none in the list)",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.ambia-line.frame-100.500",
+      "brand": "Blum",
+      "article": "ZC7S500RS1",
+      "family": "AMBIA-LINE",
+      "variant": "drawer frame 100 mm, NL 500, steel",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 500,
+        "width": 100
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.544, web code (AMBIA-LINE has none in the list)",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.ambia-line.frame-200.500",
+      "brand": "Blum",
+      "article": "ZC7S500RS2",
+      "family": "AMBIA-LINE",
+      "variant": "drawer frame 200 mm, NL 500, steel",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 500,
+        "width": 200
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.544, web code (AMBIA-LINE has none in the list)",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.ambia-line.cutlery-insert.550",
+      "brand": "Blum",
+      "article": "ZC7S550BS3",
+      "family": "AMBIA-LINE",
+      "variant": "cutlery insert, NL 550, 300 wide, steel",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 550,
+        "width": 300
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.544, web code (AMBIA-LINE has none in the list)",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.ambia-line.frame-100.550",
+      "brand": "Blum",
+      "article": "ZC7S550RS1",
+      "family": "AMBIA-LINE",
+      "variant": "drawer frame 100 mm, NL 550, steel",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 550,
+        "width": 100
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.544, web code (AMBIA-LINE has none in the list)",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.ambia-line.frame-200.550",
+      "brand": "Blum",
+      "article": "ZC7S550RS2",
+      "family": "AMBIA-LINE",
+      "variant": "drawer frame 200 mm, NL 550, steel",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 550,
+        "width": 200
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.544, web code (AMBIA-LINE has none in the list)",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.ambia-line.cutlery-insert.600",
+      "brand": "Blum",
+      "article": "ZC7S600BS3",
+      "family": "AMBIA-LINE",
+      "variant": "cutlery insert, NL 600, 300 wide, steel",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 600,
+        "width": 300
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.544, web code (AMBIA-LINE has none in the list)",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.ambia-line.frame-100.600",
+      "brand": "Blum",
+      "article": "ZC7S600RS1",
+      "family": "AMBIA-LINE",
+      "variant": "drawer frame 100 mm, NL 600, steel",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 600,
+        "width": 100
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.544, web code (AMBIA-LINE has none in the list)",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.ambia-line.frame-200.600",
+      "brand": "Blum",
+      "article": "ZC7S600RS2",
+      "family": "AMBIA-LINE",
+      "variant": "drawer frame 200 mm, NL 600, steel",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 600,
+        "width": 200
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.544, web code (AMBIA-LINE has none in the list)",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.ambia-line.cutlery-insert.650",
+      "brand": "Blum",
+      "article": "ZC7S650BS3",
+      "family": "AMBIA-LINE",
+      "variant": "cutlery insert, NL 650, 300 wide, steel",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 650,
+        "width": 300
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.544, web code (AMBIA-LINE has none in the list)",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.ambia-line.frame-100.650",
+      "brand": "Blum",
+      "article": "ZC7S650RS1",
+      "family": "AMBIA-LINE",
+      "variant": "drawer frame 100 mm, NL 650, steel",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 650,
+        "width": 100
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.544, web code (AMBIA-LINE has none in the list)",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.ambia-line.frame-200.650",
+      "brand": "Blum",
+      "article": "ZC7S650RS2",
+      "family": "AMBIA-LINE",
+      "variant": "drawer frame 200 mm, NL 650, steel",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 650,
+        "width": 200
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.544, web code (AMBIA-LINE has none in the list)",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.ambia-line.frame-242",
+      "brand": "Blum",
+      "article": "ZC7S300RSU",
+      "family": "AMBIA-LINE",
+      "variant": "drawer frame 242 mm across, NL 270-400, steel, with magnetic panel",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length_min": 270,
+        "nominal_length_max": 400,
+        "width": 242
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.544, web code (AMBIA-LINE has none in the list)",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.ambia-line.adapter.m",
+      "brand": "Blum",
+      "article": "ZC7A0U0M",
+      "family": "AMBIA-LINE",
+      "variant": "adapter profile M, connection to a chipboard back (recommended from NL 350)",
+      "kind": "drawer_system",
+      "parameters": {
+        "from_nominal_length": 350
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.544, web code (AMBIA-LINE has none in the list)",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.ambia-line.adapter.k",
+      "brand": "Blum",
+      "article": "ZC7A0U0K",
+      "family": "AMBIA-LINE",
+      "variant": "adapter profile K, connection to a chipboard back (recommended from NL 350)",
+      "kind": "drawer_system",
+      "parameters": {
+        "from_nominal_length": 350
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.544, web code (AMBIA-LINE has none in the list)",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.ambia-line.wood.cutlery-insert.450",
+      "brand": "Blum",
+      "article": "ZC7S450BH3",
+      "family": "AMBIA-LINE",
+      "variant": "cutlery insert, NL 450, 300 wide, wood design; order with a colour: E01S (Bardolino oak/silk white), E02G (Nebraska oak/Orion grey) or N01C (Tennessee walnut/carbon black)",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 450,
+        "width": 300
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.545, short URL www.blum.com/a510",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.ambia-line.wood.frame-100.450",
+      "brand": "Blum",
+      "article": "ZC7S450RH1",
+      "family": "AMBIA-LINE",
+      "variant": "drawer frame, NL 450, 100 wide, wood design; order with a colour: E01S (Bardolino oak/silk white), E02G (Nebraska oak/Orion grey) or N01C (Tennessee walnut/carbon black)",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 450,
+        "width": 100
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.545, short URL www.blum.com/a510",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.ambia-line.wood.frame-200.450",
+      "brand": "Blum",
+      "article": "ZC7S450RH2",
+      "family": "AMBIA-LINE",
+      "variant": "drawer frame, NL 450, 200 wide, wood design; order with a colour: E01S (Bardolino oak/silk white), E02G (Nebraska oak/Orion grey) or N01C (Tennessee walnut/carbon black)",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 450,
+        "width": 200
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.545, short URL www.blum.com/a510",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.ambia-line.wood.cutlery-insert.500",
+      "brand": "Blum",
+      "article": "ZC7S500BH3",
+      "family": "AMBIA-LINE",
+      "variant": "cutlery insert, NL 500, 300 wide, wood design; order with a colour: E01S (Bardolino oak/silk white), E02G (Nebraska oak/Orion grey) or N01C (Tennessee walnut/carbon black)",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 500,
+        "width": 300
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.545, short URL www.blum.com/a510",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.ambia-line.wood.frame-100.500",
+      "brand": "Blum",
+      "article": "ZC7S500RH1",
+      "family": "AMBIA-LINE",
+      "variant": "drawer frame, NL 500, 100 wide, wood design; order with a colour: E01S (Bardolino oak/silk white), E02G (Nebraska oak/Orion grey) or N01C (Tennessee walnut/carbon black)",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 500,
+        "width": 100
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.545, short URL www.blum.com/a510",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.ambia-line.wood.frame-200.500",
+      "brand": "Blum",
+      "article": "ZC7S500RH2",
+      "family": "AMBIA-LINE",
+      "variant": "drawer frame, NL 500, 200 wide, wood design; order with a colour: E01S (Bardolino oak/silk white), E02G (Nebraska oak/Orion grey) or N01C (Tennessee walnut/carbon black)",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 500,
+        "width": 200
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.545, short URL www.blum.com/a510",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.ambia-line.wood.cutlery-insert.550",
+      "brand": "Blum",
+      "article": "ZC7S550BH3",
+      "family": "AMBIA-LINE",
+      "variant": "cutlery insert, NL 550, 300 wide, wood design; order with a colour: E01S (Bardolino oak/silk white), E02G (Nebraska oak/Orion grey) or N01C (Tennessee walnut/carbon black)",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 550,
+        "width": 300
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.545, short URL www.blum.com/a510",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.ambia-line.wood.frame-100.550",
+      "brand": "Blum",
+      "article": "ZC7S550RH1",
+      "family": "AMBIA-LINE",
+      "variant": "drawer frame, NL 550, 100 wide, wood design; order with a colour: E01S (Bardolino oak/silk white), E02G (Nebraska oak/Orion grey) or N01C (Tennessee walnut/carbon black)",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 550,
+        "width": 100
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.545, short URL www.blum.com/a510",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.ambia-line.wood.frame-200.550",
+      "brand": "Blum",
+      "article": "ZC7S550RH2",
+      "family": "AMBIA-LINE",
+      "variant": "drawer frame, NL 550, 200 wide, wood design; order with a colour: E01S (Bardolino oak/silk white), E02G (Nebraska oak/Orion grey) or N01C (Tennessee walnut/carbon black)",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 550,
+        "width": 200
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.545, short URL www.blum.com/a510",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.ambia-line.wood.cutlery-insert.600",
+      "brand": "Blum",
+      "article": "ZC7S600BH3",
+      "family": "AMBIA-LINE",
+      "variant": "cutlery insert, NL 600, 300 wide, wood design; order with a colour: E01S (Bardolino oak/silk white), E02G (Nebraska oak/Orion grey) or N01C (Tennessee walnut/carbon black)",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 600,
+        "width": 300
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.545, short URL www.blum.com/a510",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.ambia-line.wood.frame-100.600",
+      "brand": "Blum",
+      "article": "ZC7S600RH1",
+      "family": "AMBIA-LINE",
+      "variant": "drawer frame, NL 600, 100 wide, wood design; order with a colour: E01S (Bardolino oak/silk white), E02G (Nebraska oak/Orion grey) or N01C (Tennessee walnut/carbon black)",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 600,
+        "width": 100
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.545, short URL www.blum.com/a510",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.ambia-line.wood.frame-200.600",
+      "brand": "Blum",
+      "article": "ZC7S600RH2",
+      "family": "AMBIA-LINE",
+      "variant": "drawer frame, NL 600, 200 wide, wood design; order with a colour: E01S (Bardolino oak/silk white), E02G (Nebraska oak/Orion grey) or N01C (Tennessee walnut/carbon black)",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 600,
+        "width": 200
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.545, short URL www.blum.com/a510",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.ambia-line.wood.cutlery-insert.650",
+      "brand": "Blum",
+      "article": "ZC7S650BH3",
+      "family": "AMBIA-LINE",
+      "variant": "cutlery insert, NL 650, 300 wide, wood design; order with a colour: E01S (Bardolino oak/silk white), E02G (Nebraska oak/Orion grey) or N01C (Tennessee walnut/carbon black)",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 650,
+        "width": 300
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.545, short URL www.blum.com/a510",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.ambia-line.wood.frame-100.650",
+      "brand": "Blum",
+      "article": "ZC7S650RH1",
+      "family": "AMBIA-LINE",
+      "variant": "drawer frame, NL 650, 100 wide, wood design; order with a colour: E01S (Bardolino oak/silk white), E02G (Nebraska oak/Orion grey) or N01C (Tennessee walnut/carbon black)",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 650,
+        "width": 100
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.545, short URL www.blum.com/a510",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.ambia-line.wood.frame-200.650",
+      "brand": "Blum",
+      "article": "ZC7S650RH2",
+      "family": "AMBIA-LINE",
+      "variant": "drawer frame, NL 650, 200 wide, wood design; order with a colour: E01S (Bardolino oak/silk white), E02G (Nebraska oak/Orion grey) or N01C (Tennessee walnut/carbon black)",
+      "kind": "drawer_system",
+      "parameters": {
+        "nominal_length": 650,
+        "width": 200
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.545, short URL www.blum.com/a510",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.ambia-line.wood.frame-242",
+      "brand": "Blum",
+      "article": "ZC7S300RHU",
+      "family": "AMBIA-LINE",
+      "variant": "drawer frame, NL 270-400, 242 long, wood design; order with a colour: E01S (Bardolino oak/silk white), E02G (Nebraska oak/Orion grey) or N01C (Tennessee walnut/carbon black)",
+      "kind": "drawer_system",
+      "parameters": {
+        "width": 242
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.545, short URL www.blum.com/a510",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    }
+  ]
+}

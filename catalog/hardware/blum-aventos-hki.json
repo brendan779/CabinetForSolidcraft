@@ -1,0 +1,219 @@
+{
+  "brand": "Blum",
+  "website": "https://www.blum.com",
+  "notes": "AVENTOS HKi integrated stay lift from the Blum Catalogue and technical manual 2024/2025, printed pages 14-15. LF = KH x FG including double the handle weight; the stronger set where ranges overlap; at most 18 kg front for two mechanisms; sides 16-25 mm; inside depth at least 271 mm. Fully integrated: a 265 x 120 recess 12 mm deep in each side's inside face, open at the front edge, 21 mm below the cabinet top, R25 at its back lower corner (p.15). Cover caps are for semi-integrated mechanisms only. Not verified by a person.",
+  "items": [
+    {
+      "id": "blum.aventos.hki",
+      "brand": "Blum",
+      "article": "AVENTOS HKi",
+      "family": "AVENTOS HKi",
+      "variant": "integrated stay lift, fully integrated in the cabinet sides, wooden fronts",
+      "kind": "lift_system",
+      "parameters": {
+        "cabinet_height_max": 600,
+        "cabinet_width_max": 1800,
+        "front_weight_max_kg": 18,
+        "inside_depth_min": 271,
+        "side_thickness_min": 16,
+        "side_thickness_max": 25,
+        "handle_weight_factor": 2,
+        "recess_depth": 12,
+        "recess_height": 120,
+        "recess_length": 265,
+        "recess_below_top": 21,
+        "recess_corner_radius": 25
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.15, web code DQDW6P",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.aventos.hki.mechanism.24k2300",
+      "brand": "Blum",
+      "article": "24K2300",
+      "family": "AVENTOS HKi",
+      "variant": "lift mechanism set (2, symmetrical), LF 420-1610",
+      "kind": "lift_system",
+      "parameters": {
+        "power_factor_min": 420,
+        "power_factor_max": 1610,
+        "opening_angle_max": 107
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.14, web code DQDW6P",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.aventos.hki.tip-on.mechanism.24k2300t",
+      "brand": "Blum",
+      "article": "24K2300T",
+      "family": "AVENTOS HKi",
+      "variant": "lift mechanism set TIP-ON (2, symmetrical), LF 420-1610",
+      "kind": "lift_system",
+      "parameters": {
+        "power_factor_min": 420,
+        "power_factor_max": 1610,
+        "opening_angle_max": 107
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.14, web code DQDW6P",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.aventos.hki.mechanism.24k2500",
+      "brand": "Blum",
+      "article": "24K2500",
+      "family": "AVENTOS HKi",
+      "variant": "lift mechanism set (2, symmetrical), LF 930-2800",
+      "kind": "lift_system",
+      "parameters": {
+        "power_factor_min": 930,
+        "power_factor_max": 2800,
+        "opening_angle_max": 107
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.14, web code DQDW6P",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.aventos.hki.tip-on.mechanism.24k2500t",
+      "brand": "Blum",
+      "article": "24K2500T",
+      "family": "AVENTOS HKi",
+      "variant": "lift mechanism set TIP-ON (2, symmetrical), LF 930-2800",
+      "kind": "lift_system",
+      "parameters": {
+        "power_factor_min": 930,
+        "power_factor_max": 2800,
+        "opening_angle_max": 107
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.14, web code DQDW6P",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.aventos.hki.mechanism.24k2700",
+      "brand": "Blum",
+      "article": "24K2700",
+      "family": "AVENTOS HKi",
+      "variant": "lift mechanism set (2, symmetrical), LF 1730-5200",
+      "kind": "lift_system",
+      "parameters": {
+        "power_factor_min": 1730,
+        "power_factor_max": 5200,
+        "opening_angle_max": 107
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.14, web code DQDW6P",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.aventos.hki.tip-on.mechanism.24k2700t",
+      "brand": "Blum",
+      "article": "24K2700T",
+      "family": "AVENTOS HKi",
+      "variant": "lift mechanism set TIP-ON (2, symmetrical), LF 1730-5200",
+      "kind": "lift_system",
+      "parameters": {
+        "power_factor_min": 1730,
+        "power_factor_max": 5200,
+        "opening_angle_max": 107
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.14, web code DQDW6P",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.aventos.hki.mechanism.24k2800",
+      "brand": "Blum",
+      "article": "24K2800",
+      "family": "AVENTOS HKi",
+      "variant": "lift mechanism set (2, symmetrical), LF 2600-7800",
+      "kind": "lift_system",
+      "parameters": {
+        "power_factor_min": 2600,
+        "power_factor_max": 7800,
+        "opening_angle_max": 107
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.14, web code DQDW6P",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.aventos.hki.tip-on.mechanism.24k2800t",
+      "brand": "Blum",
+      "article": "24K2800T",
+      "family": "AVENTOS HKi",
+      "variant": "lift mechanism set TIP-ON (2, symmetrical), LF 2600-7800",
+      "kind": "lift_system",
+      "parameters": {
+        "power_factor_min": 2600,
+        "power_factor_max": 7800,
+        "opening_angle_max": 107
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.14, web code DQDW6P",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.aventos.hki.front-fixing",
+      "brand": "Blum",
+      "article": "24K42E1",
+      "family": "AVENTOS HKi",
+      "variant": "front fixing bracket, EXPANDO, wooden fronts (2 per front)",
+      "kind": "lift_system",
+      "parameters": {
+        "per_front": 2
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.14, web code DQDW6P",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.aventos.hki.cover-caps",
+      "brand": "Blum",
+      "article": "24K8000",
+      "family": "AVENTOS HKi",
+      "variant": "cover cap set, for semi-integrated mechanisms only",
+      "kind": "lift_system",
+      "parameters": {},
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.14, web code DQDW6P",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    }
+  ]
+}

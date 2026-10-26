@@ -119,7 +119,13 @@ fn cuts_in(list: &PartList, part: &Part) -> Vec<Cut> {
                     start,
                     length: *depth,
                     radius: diameter / 2.0,
-                    through: *purpose == BorePurpose::Screw,
+                    through: matches!(
+                        purpose,
+                        BorePurpose::Screw
+                            | BorePurpose::CableHole
+                            | BorePurpose::HandleScrew
+                            | BorePurpose::TapHole
+                    ),
                     label: format!("{purpose:?} Ø{diameter} at {}", show(*at)),
                 });
             }

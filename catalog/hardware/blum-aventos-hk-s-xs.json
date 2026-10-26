@@ -1,0 +1,328 @@
+{
+  "brand": "Blum",
+  "website": "https://www.blum.com",
+  "notes": "AVENTOS HK-S (printed pp. 56-57) and HK-XS (pp. 62-64) stay lifts from the Blum Catalogue and technical manual 2024/2025. LF = KH x FG including double the handle weight; the stronger mechanism where ranges overlap. HK-S: a set of two unsprung mechanisms, front fixed with 2 x 175H3100; inside height at least 150 mm, inside depth 163 mm (read from the space requirement drawing). Blum allows +50 % LF with a third HK-S mechanism (not chosen automatically). HK-XS: one mechanism, or one each side for double the LF, on CLIP top 110 hinges (70T3550.TL unsprung recommended) with 175H3100 plates: 2 hinges, 3 from KB 900 or LF 1800, 4 from KB 1200 or LF 2700. Side drilling (pp. 57, 64) is not recorded yet. Not verified by a person.",
+  "items": [
+    {
+      "id": "blum.aventos.hk-s",
+      "brand": "Blum",
+      "article": "AVENTOS HK-S",
+      "family": "AVENTOS HK-S",
+      "variant": "stay lift, small fronts, wooden fronts and alu frames",
+      "kind": "lift_system",
+      "parameters": {
+        "cabinet_height_max": 600,
+        "inside_height_min": 150,
+        "inside_depth_min": 163,
+        "handle_weight_factor": 2
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.57, web code DQDD6M",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.aventos.hk-s.mechanism.20k2b00-06",
+      "brand": "Blum",
+      "article": "20K2B00.06",
+      "family": "AVENTOS HK-S",
+      "variant": "lift mechanism set (2, symmetrical, unsprung), LF 220-500, with cover caps",
+      "kind": "lift_system",
+      "parameters": {
+        "power_factor_min": 220,
+        "power_factor_max": 500,
+        "opening_angle_max": 107
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.56, web code DQDD6M",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.aventos.hk-s.mechanism.20k2c00-06",
+      "brand": "Blum",
+      "article": "20K2C00.06",
+      "family": "AVENTOS HK-S",
+      "variant": "lift mechanism set (2, symmetrical, unsprung), LF 400-1000, with cover caps",
+      "kind": "lift_system",
+      "parameters": {
+        "power_factor_min": 400,
+        "power_factor_max": 1000,
+        "opening_angle_max": 107
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.56, web code DQDD6M",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.aventos.hk-s.mechanism.20k2e00-06",
+      "brand": "Blum",
+      "article": "20K2E00.06",
+      "family": "AVENTOS HK-S",
+      "variant": "lift mechanism set (2, symmetrical, unsprung), LF 960-2215, with cover caps",
+      "kind": "lift_system",
+      "parameters": {
+        "power_factor_min": 960,
+        "power_factor_max": 2215,
+        "opening_angle_max": 107
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.56, web code DQDD6M",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.aventos.hk-s.tip-on.mechanism.20k2b00t06",
+      "brand": "Blum",
+      "article": "20K2B00T06",
+      "family": "AVENTOS HK-S",
+      "variant": "lift mechanism set TIP-ON (2, symmetrical, unsprung), LF 220-500, with cover caps",
+      "kind": "lift_system",
+      "parameters": {
+        "power_factor_min": 220,
+        "power_factor_max": 500,
+        "opening_angle_max": 107
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.56, web code DQDD6M",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.aventos.hk-s.tip-on.mechanism.20k2c00t06",
+      "brand": "Blum",
+      "article": "20K2C00T06",
+      "family": "AVENTOS HK-S",
+      "variant": "lift mechanism set TIP-ON (2, symmetrical, unsprung), LF 400-1000, with cover caps",
+      "kind": "lift_system",
+      "parameters": {
+        "power_factor_min": 400,
+        "power_factor_max": 1000,
+        "opening_angle_max": 107
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.56, web code DQDD6M",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.aventos.hk-s.tip-on.mechanism.20k2e00t06",
+      "brand": "Blum",
+      "article": "20K2E00T06",
+      "family": "AVENTOS HK-S",
+      "variant": "lift mechanism set TIP-ON (2, symmetrical, unsprung), LF 960-2215, with cover caps",
+      "kind": "lift_system",
+      "parameters": {
+        "power_factor_min": 960,
+        "power_factor_max": 2215,
+        "opening_angle_max": 107
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.56, web code DQDD6M",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.mounting-plate.175h3100",
+      "brand": "Blum",
+      "article": "175H3100",
+      "family": "CLIP mounting plate",
+      "variant": "screw-on, 0 mm spacing: the front fixing of AVENTOS HK-S (2 per front) and the plate for HK-XS hinges",
+      "kind": "hinge_plate",
+      "parameters": {
+        "per_front": 2
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.56, web code DQDD6M",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.aventos.hk-xs",
+      "brand": "Blum",
+      "article": "AVENTOS HK-XS",
+      "family": "AVENTOS HK-XS",
+      "variant": "stay lift on CLIP top hinges, small fronts, wooden fronts and alu frames",
+      "kind": "lift_system",
+      "parameters": {
+        "cabinet_height_min": 240,
+        "cabinet_height_max": 600,
+        "inside_height_min": 200,
+        "inside_depth_min": 125,
+        "handle_weight_factor": 2,
+        "two_sides_factor": 2,
+        "hinges_3_from_width": 900,
+        "hinges_3_from_power_factor": 1800,
+        "hinges_4_from_width": 1200,
+        "hinges_4_from_power_factor": 2700
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.62, web code DQDDVY",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.aventos.hk-xs.mechanism.20k1101",
+      "brand": "Blum",
+      "article": "20K1101",
+      "family": "AVENTOS HK-XS",
+      "variant": "lift mechanism (one, symmetrical), LF 200-1000 on one side, doubled on two",
+      "kind": "lift_system",
+      "parameters": {
+        "power_factor_min": 200,
+        "power_factor_max": 1000,
+        "opening_angle_max": 105
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.62, web code DQDDVY",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.aventos.hk-xs.mechanism.20k1301",
+      "brand": "Blum",
+      "article": "20K1301",
+      "family": "AVENTOS HK-XS",
+      "variant": "lift mechanism (one, symmetrical), LF 500-1500 on one side, doubled on two",
+      "kind": "lift_system",
+      "parameters": {
+        "power_factor_min": 500,
+        "power_factor_max": 1500,
+        "opening_angle_max": 105
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.62, web code DQDDVY",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.aventos.hk-xs.mechanism.20k1501",
+      "brand": "Blum",
+      "article": "20K1501",
+      "family": "AVENTOS HK-XS",
+      "variant": "lift mechanism (one, symmetrical), LF 800-1800 on one side, doubled on two",
+      "kind": "lift_system",
+      "parameters": {
+        "power_factor_min": 800,
+        "power_factor_max": 1800,
+        "opening_angle_max": 105
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.62, web code DQDDVY",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.aventos.hk-xs.tip-on.mechanism.20k1101t",
+      "brand": "Blum",
+      "article": "20K1101T",
+      "family": "AVENTOS HK-XS",
+      "variant": "lift mechanism TIP-ON (one, symmetrical), LF 180-800 on one side, doubled on two",
+      "kind": "lift_system",
+      "parameters": {
+        "power_factor_min": 180,
+        "power_factor_max": 800,
+        "opening_angle_max": 105
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.62, web code DQDDVY",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.aventos.hk-xs.tip-on.mechanism.20k1301t",
+      "brand": "Blum",
+      "article": "20K1301T",
+      "family": "AVENTOS HK-XS",
+      "variant": "lift mechanism TIP-ON (one, symmetrical), LF 500-1200 on one side, doubled on two",
+      "kind": "lift_system",
+      "parameters": {
+        "power_factor_min": 500,
+        "power_factor_max": 1200,
+        "opening_angle_max": 105
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.62, web code DQDDVY",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.aventos.hk-xs.tip-on.mechanism.20k1501t",
+      "brand": "Blum",
+      "article": "20K1501T",
+      "family": "AVENTOS HK-XS",
+      "variant": "lift mechanism TIP-ON (one, symmetrical), LF 800-1600 on one side, doubled on two",
+      "kind": "lift_system",
+      "parameters": {
+        "power_factor_min": 800,
+        "power_factor_max": 1600,
+        "opening_angle_max": 105
+      },
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.62, web code DQDDVY",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.aventos.hk-xs.cabinet-fixing",
+      "brand": "Blum",
+      "article": "20K5101",
+      "family": "AVENTOS HK-XS",
+      "variant": "cabinet fixing, screw-on (one per mechanism)",
+      "kind": "lift_system",
+      "parameters": {},
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.62, web code DQDDVY",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.aventos.hk-xs.front-fixing",
+      "brand": "Blum",
+      "article": "20K4101",
+      "family": "AVENTOS HK-XS",
+      "variant": "front fixing bracket, screw-on, wooden fronts and wide alu frames (one per mechanism)",
+      "kind": "lift_system",
+      "parameters": {},
+      "source": {
+        "url": "Blum Catalogue and technical manual 2024/2025, p.62, web code DQDDVY",
+        "document_date": "2024/2025",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    }
+  ]
+}

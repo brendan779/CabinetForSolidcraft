@@ -36,6 +36,24 @@ pub enum PartRole {
     DrawerInnerFront,
     /// The upper (1) and lower (2) front of a bi-fold lift.
     LiftFront,
+    /// A shaker front's upright frame members, left (1) and right (2).
+    FrameStile,
+    /// A shaker front's cross frame members, bottom (1) and top (2), with stub tenons.
+    FrameRail,
+    /// A shaker front's panel, in the frame's grooves.
+    FramePanel,
+    /// A benchtop piece over a stretch of base cabinets.
+    Benchtop,
+    /// A slab splashback standing on a benchtop piece.
+    Splashback,
+    /// A lining board on a face seen from the room: `CladLeft`, `CladRight`, `CladBack`.
+    Cladding,
+    /// A rangehood canopy's fixed front.
+    CanopyFront,
+    /// A cornice board over wall-height cabinets, and its returns.
+    Cornice,
+    /// A light rail under wall cabinets, and its returns.
+    LightRail,
 }
 
 impl PartRole {
@@ -60,6 +78,15 @@ impl PartRole {
             PartRole::DrawerLeftSide | PartRole::DrawerRightSide => "Drawer side",
             PartRole::DrawerInnerFront => "Drawer box front",
             PartRole::LiftFront => "Lift front",
+            PartRole::FrameStile => "Frame stile",
+            PartRole::FrameRail => "Frame rail",
+            PartRole::FramePanel => "Frame panel",
+            PartRole::Benchtop => "Benchtop",
+            PartRole::Splashback => "Splashback",
+            PartRole::Cladding => "Cladding",
+            PartRole::CanopyFront => "Canopy front",
+            PartRole::Cornice => "Cornice",
+            PartRole::LightRail => "Light rail",
         }
     }
 
@@ -86,6 +113,15 @@ impl PartRole {
             PartRole::DrawerRightSide => "DrawerRightSide",
             PartRole::DrawerInnerFront => "DrawerInnerFront",
             PartRole::LiftFront => "LiftFront",
+            PartRole::FrameStile => "Stile",
+            PartRole::FrameRail => "Rail",
+            PartRole::FramePanel => "Panel",
+            PartRole::Benchtop => "Benchtop",
+            PartRole::Splashback => "Splashback",
+            PartRole::Cladding => "Clad",
+            PartRole::CanopyFront => "CanopyFront",
+            PartRole::Cornice => "Cornice",
+            PartRole::LightRail => "LightRail",
         }
     }
 
@@ -96,10 +132,17 @@ impl PartRole {
             PartRole::Door
                 | PartRole::DrawerFront
                 | PartRole::LiftFront
+                | PartRole::FrameStile
+                | PartRole::FrameRail
+                | PartRole::FramePanel
                 | PartRole::Plinth
                 | PartRole::BlindPanel
                 | PartRole::Filler
                 | PartRole::EndPanel
+                | PartRole::Cladding
+                | PartRole::CanopyFront
+                | PartRole::Cornice
+                | PartRole::LightRail
         )
     }
 }
@@ -204,6 +247,17 @@ pub enum Operation {
     },
     /// A rectangular groove or rebate.
     Groove { part: String, bounds: Aabb },
+    /// A corner of the part's face rounded to `radius`, right through the thickness: `at` is the
+    /// corner (its coordinate along the thickness is the part's middle).
+    Round { part: String, at: Vec3, radius: f64 },
+    /// The top edge of a front cut to a circular arch, right through the thickness: the part
+    /// keeps what lies under the circle of `radius` about `centre` (the centre's coordinate
+    /// along the thickness is the part's middle); nothing below the centre is cut.
+    Arch {
+        part: String,
+        centre: Vec3,
+        radius: f64,
+    },
     /// A mortise for a loose tenon (Festool DOMINO), one part's half of the joint: `bounds` is
     /// the cutter's slot in that part, `tenon` the tenon's catalog id.
     Mortise {
@@ -228,6 +282,12 @@ pub enum BorePurpose {
     Dowel,
     /// A drawer system's front fixing (LEGRABOX EXPANDO bracket), in the back of a drawer front.
     FrontFixing,
+    /// A light's cable, through a panel.
+    CableHole,
+    /// A handle's or knob's screw hole, through the front from the back.
+    HandleScrew,
+    /// A tap's hole through a benchtop.
+    TapHole,
 }
 
 fn default_biscuit() -> BiscuitSize {
@@ -272,6 +332,13 @@ pub struct PartList {
     pub hardware: Vec<HardwarePlacement>,
     /// Problems the builder worked around (moved fixings, skipped biscuits...).
     pub warnings: Vec<String>,
+    /// What the maker needs to know that is not a size (a benchtop's edge profile).
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub notes: Vec<String>,
+    /// Parts cut in sequence from one piece so the grain runs on across them (a tall cabinet's
+    /// stacked fronts), each group in order from the top.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub grain_matched: Vec<Vec<String>>,
 }
 
 impl PartList {

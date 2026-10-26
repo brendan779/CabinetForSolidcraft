@@ -5,7 +5,7 @@ use std::collections::BTreeMap;
 use serde::{Deserialize, Serialize};
 
 use crate::geom::Axis;
-use crate::part::{Part, PartList};
+use crate::part::{Part, PartList, PartRole};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct CutRow {
@@ -24,6 +24,14 @@ pub struct CutRow {
     pub edges: [bool; 4],
     pub grain: bool,
     pub quantity: u32,
+    /// Made to a template by a benchtop maker (benchtops, splashbacks), not cut from stock
+    /// sheets in the shop.
+    #[serde(default)]
+    pub templated: bool,
+    /// Rows with the same name are cut in sequence from one strip, in row order, so the grain
+    /// runs on across them.
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub grain_match: String,
 }
 
 impl CutRow {
@@ -61,9 +69,25 @@ pub struct CutList {
 pub fn cut_list(lists: &[PartList], default_board: &str, tape: f64) -> CutList {
     let mut rows = Vec::new();
     for list in lists {
-        for p in &list.parts {
-            rows.push(row(&list.cabinet, p, default_board, tape));
+        let mut mine: Vec<CutRow> = list
+            .parts
+            .iter()
+            .map(|p| row(&list.cabinet, p, default_board, tape))
+            .collect();
+        // A matched group's rows go together, top first, under the group's name.
+        for (n, group) in list.grain_matched.iter().enumerate() {
+            let name = format!("{}.grain{}", list.cabinet, n + 1);
+            let mut members = Vec::new();
+            for part in group {
+                if let Some(i) = mine.iter().position(|r| &r.part == part) {
+                    let mut r = mine.remove(i);
+                    r.grain_match = name.clone();
+                    members.push(r);
+                }
+            }
+            mine.extend(members);
         }
+        rows.extend(mine);
     }
     let mut totals: BTreeMap<(String, i64), BoardTotal> = BTreeMap::new();
     for r in &rows {
@@ -115,6 +139,8 @@ fn row(cabinet: &str, p: &Part, default_board: &str, tape: f64) -> CutRow {
         edges: [l1, l2, w1, w2],
         grain: p.grain_axis.is_some(),
         quantity: 1,
+        templated: matches!(p.role, PartRole::Benchtop | PartRole::Splashback),
+        grain_match: String::new(),
     }
 }
 
@@ -181,6 +207,25 @@ mod tests {
         let door = cl.rows.iter().find(|r| r.part == "B01.Door1").unwrap();
         assert_eq!(door.edges, [true; 4]);
         assert_eq!(door.cut_length, door.length - 2.0);
+    }
+
+    /// STYLE-1: a drawer bank's matched fronts are rows of one group, top first, their length
+    /// up the grain.
+    #[test]
+    fn grain_matched_fronts_share_a_group_top_first() {
+        let mut c = Cabinet::new("D01", CabinetKind::DrawerBank);
+        c.standard.front_grain = crate::model::FrontGrain::Matched;
+        let cl = cut_list(&[build_cabinet(&c).unwrap()], "", 1.0);
+        let fronts: Vec<&CutRow> = cl
+            .rows
+            .iter()
+            .filter(|r| !r.grain_match.is_empty())
+            .collect();
+        assert!(fronts.len() > 1);
+        assert!(fronts.iter().all(|r| r.grain_match == "D01.grain1"));
+        assert_eq!(fronts[0].part, "D01.DrawerFront1");
+        // Upright grain: a 600 wide drawer front's length is its height.
+        assert!(fronts.iter().all(|r| r.width > 590.0));
     }
 
     #[test]

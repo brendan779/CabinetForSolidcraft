@@ -38,6 +38,8 @@ fn transform(
                 *at = point(*at);
                 *direction = dir(*direction);
             }
+            Operation::Round { at, .. } => *at = point(*at),
+            Operation::Arch { centre, .. } => *centre = point(*centre),
             Operation::BiscuitSlot { bounds, along, .. } => {
                 *bounds = boxed(*bounds);
                 *along = axis(*along);
@@ -82,7 +84,8 @@ pub fn turn_to_face_x(list: &mut PartList, depth: f64, y0: f64) {
     );
 }
 
-/// Mirrors a cabinet left to right across its `width`; left and right sides swap names.
+/// Mirrors a cabinet left to right across its `width`; left and right sides swap names, and so
+/// do handed hardware items (`….left` / `….right`).
 pub fn mirror_x(list: &mut PartList, width: f64) {
     transform(
         list,
@@ -106,6 +109,15 @@ pub fn mirror_x(list: &mut PartList, width: f64) {
             name.replace(r, l)
         }
     });
+    for h in &mut list.hardware {
+        if let Some(base) = h.item.strip_suffix(".left") {
+            h.item = format!("{base}.right");
+            h.description = h.description.replace("left", "right");
+        } else if let Some(base) = h.item.strip_suffix(".right") {
+            h.item = format!("{base}.left");
+            h.description = h.description.replace("right", "left");
+        }
+    }
     for p in &mut list.parts {
         p.role = match p.role {
             PartRole::LeftSide => PartRole::RightSide,
@@ -124,7 +136,9 @@ pub fn rename(list: &mut PartList, f: impl Fn(&str) -> String) {
         match op {
             Operation::Bore { part, .. }
             | Operation::Groove { part, .. }
-            | Operation::Mortise { part, .. } => *part = f(part),
+            | Operation::Mortise { part, .. }
+            | Operation::Round { part, .. }
+            | Operation::Arch { part, .. } => *part = f(part),
             Operation::BiscuitSlot { parts, .. } => {
                 for p in parts {
                     *p = f(p);
@@ -156,7 +170,9 @@ pub fn open_end(list: &mut PartList, side: &str, end: f64) {
     list.operations.retain(|op| match op {
         Operation::Bore { part, at, .. } => part != side && !at_point(at),
         Operation::BiscuitSlot { parts, .. } => !parts.iter().any(|p| p == side),
-        Operation::Groove { part, .. } => part != side,
+        Operation::Groove { part, .. }
+        | Operation::Round { part, .. }
+        | Operation::Arch { part, .. } => part != side,
         Operation::Mortise { part, bounds, .. } => part != side && !touches(bounds),
     });
     list.hardware.retain(|h| h.part != side);

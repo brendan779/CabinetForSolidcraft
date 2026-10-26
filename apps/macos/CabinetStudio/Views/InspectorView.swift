@@ -23,11 +23,18 @@ struct InspectorView: View {
                     if cab.kind == "sink" {
                         SinkSection(cab: cab)
                     }
-                    if cab.kind == "corner_base" {
+                    if cab.kind == "wardrobe" {
+                        WardrobeSection(cab: cab)
+                    }
+                    if cab.kind == "corner_base" || cab.kind == "corner_wall" {
                         CornerSection(cab: cab)
+                    } else if cab.kind == "rangehood" {
+                        InsertSection(cab: cab)
                     } else {
                         FrontsSection(cab: cab)
                     }
+                    LightsSection(cab: cab)
+                    CladdingSection(cab: cab)
                     BoardsSection(cab: cab)
                     ConstructionScope(cab: cab)
                     let overrides = project.overrides(of: cab)
@@ -75,7 +82,144 @@ struct PieceSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            if cab.kind == "filler" {
+            if ["cornice", "light_rail"].contains(cab.kind) {
+                let cornice = cab.kind == "cornice"
+                SectionTitle(cornice ? "Cornice" : "Light rail")
+                chips("Height", value: cab.mouldingHeight, presets: [40, 60, 80, 100]) { c, v in c.mouldingHeight = v }
+                HStack(spacing: 6) {
+                    Text("Ends").foregroundStyle(.secondary)
+                    Spacer()
+                    ForEach([true, false], id: \.self) { on in
+                        Button(on ? "Returned" : "Square") {
+                            withAnimation(.snappy) { var c = cab; c.returns = on; project.selected = c }
+                        }
+                        .buttonStyle(ChipStyle(selected: cab.returns == on))
+                        .help(on ? "A return piece back to the wall at each open end" : "The face stops square at the ends, its end edges taped")
+                    }
+                }
+                Text(cornice
+                     ? "A board in the plane of the door faces on top of each stretch of wall, tall, wardrobe and rangehood cabinets with the same top, in the front board."
+                     : "A board in the plane of the door faces under each stretch of wall cabinets, hiding their lights, in the front board.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            } else if cab.kind == "floating_shelf" {
+                SectionTitle("Floating shelf")
+                chips("Width", value: cab.width, presets: [450, 600, 900, 1200]) { c, v in c.width = v }
+                chips("Depth", value: cab.shelfDepth, presets: [200, 250, 300]) { c, v in c.shelfDepth = v }
+                chips("Thick", value: cab.topThickness, presets: [30, 40, 50]) { c, v in c.topThickness = v }
+                chips("Height", value: cab.shelfHeight, presets: [1300, 1400, 1500, 1600]) { c, v in c.shelfHeight = v }
+                HStack(spacing: 6) {
+                    Text("LED").foregroundStyle(.secondary)
+                    Spacer()
+                    ForEach([0.0, 4.8, 9.6], id: \.self) { w in
+                        Button(w == 0 ? "None" : String(format: "%.1f W/m", w)) {
+                            withAnimation(.snappy) { var c = cab; c.shelfLight = w; project.selected = c }
+                        }
+                        .buttonStyle(ChipStyle(selected: abs(cab.shelfLight - w) < 0.05))
+                    }
+                }
+                Text("A shelf on concealed brackets in the run, against the wall; its LED strip is 24 V.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            } else if cab.kind == "benchtop" {
+                SectionTitle("Benchtop")
+                chips("Thickness", value: cab.topThickness, presets: [20, 33, 40, 60, 80]) { c, v in c.topThickness = v }
+                chips("Front", value: cab.frontOverhang, presets: [0, 10, 20, 30, 40]) { c, v in c.frontOverhang = v }
+                chips("Ends", value: cab.sideOverhang, presets: [0, 10, 20, 40]) { c, v in c.sideOverhang = v }
+                chips("Splashback", value: cab.splashback, presets: [0, 100, 300, 600, 650]) { c, v in c.splashback = v }
+                chips("Seating", value: cab.backOverhang, presets: [0, 300, 400, 600]) { c, v in c.backOverhang = v }
+                chips("Corners", value: cab.endRadius, presets: [0, 25, 100, 300]) { c, v in c.endRadius = v }
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 3), spacing: 8) {
+                    ForEach([("square", "Square"), ("pencil_round", "Pencil"), ("bullnose", "Bullnose"),
+                             ("bevel", "Bevel"), ("mitred_apron", "Apron")], id: \.0) { id, title in
+                        Button {
+                            withAnimation(.snappy) { var c = cab; c.edgeProfile = id; project.selected = c }
+                        } label: {
+                            VStack(spacing: 6) {
+                                EdgeProfileThumbnail(profile: id).frame(width: 44, height: 30)
+                                Text(title).font(.caption)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 6)
+                        }
+                        .buttonStyle(TileStyle(selected: cab.edgeProfile == id))
+                        .help(id == "mitred_apron" ? "A strip mitred under the front edge: the top looks 60 mm thick"
+                                                   : "The front edge's profile, for the benchtop maker")
+                        .accessibilityLabel("Edge: \(title)")
+                    }
+                }
+                HStack(spacing: 6) {
+                    Text("Waterfall").foregroundStyle(.secondary)
+                    Spacer()
+                    ForEach(["left", "right"], id: \.self) { side in
+                        let on = cab.waterfall(side)
+                        Button {
+                            withAnimation(.snappy) { var c = cab; c.setWaterfall(side, !on); project.selected = c }
+                        } label: {
+                            Label(side.capitalized, systemImage: side == "left" ? "arrow.down.left" : "arrow.down.right")
+                        }
+                        .buttonStyle(ChipStyle(selected: on))
+                        .help("The top turns down to the floor at the \(side) end of each stretch, mitred at the corner")
+                    }
+                }
+                Text("One piece over each stretch of base cabinets in the run, past the door faces by the front overhang and past each end of a stretch by the end overhang.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                SectionTitle("Cut-outs")
+                let bases = project.cabinets.filter {
+                    ["base", "drawer_bank", "sink", "blind_corner", "corner_base"].contains($0.kind)
+                }
+                ForEach(bases, id: \.id) { base in
+                    HStack(spacing: 6) {
+                        Text(base.id).monospaced()
+                        Spacer()
+                        ForEach([("sink", "Sink", "drop"), ("cooktop", "Cooktop", "flame")], id: \.0) { kind, title, symbol in
+                            let on = cab.cutout(over: base.id) == kind
+                            Button {
+                                withAnimation(.snappy) {
+                                    var c = cab
+                                    c.setCutout(over: base.id, kind: on ? nil : kind)
+                                    project.selected = c
+                                }
+                            } label: {
+                                Label(title, systemImage: symbol)
+                            }
+                            .buttonStyle(ChipStyle(selected: on))
+                            .help(on ? "Remove the \(title.lowercased()) cut-out over \(base.id)"
+                                     : "A \(title.lowercased()) cut-out centred over \(base.id)\(kind == "sink" ? ", with a tap hole behind it" : "")")
+                        }
+                    }
+                }
+                if cab.splashback > 0 && cab.backOverhang == 0 {
+                    SectionTitle("Splashback")
+                    ForEach(bases, id: \.id) { base in
+                        HStack(spacing: 6) {
+                            Text(base.id).monospaced()
+                            Spacer()
+                            ForEach([("niches", "Niche", "square.split.1x2"), ("power_points", "Power", "powerplug")],
+                                    id: \.0) { field, title, symbol in
+                                let on = cab.hasOpening(field, over: base.id)
+                                Button {
+                                    withAnimation(.snappy) {
+                                        var c = cab
+                                        c.setOpening(field, over: base.id, !on)
+                                        project.selected = c
+                                    }
+                                } label: {
+                                    Label(title, systemImage: symbol)
+                                }
+                                .buttonStyle(ChipStyle(selected: on))
+                                .help(field == "niches"
+                                      ? "An open niche in the splashback over \(base.id): lined in the benchtop's board, one shelf"
+                                      : "A cut-out for a double power point in the splashback over \(base.id)")
+                            }
+                        }
+                    }
+                }
+            } else if cab.kind == "filler" {
                 SectionTitle("Filler")
                 chips("Width", value: cab.width, presets: [25, 38, 50, 75, 100, 150]) { c, v in c.width = v }
             } else {
@@ -98,11 +242,13 @@ struct PieceSection: View {
                     }
                 }
             }
-            chips("Scribe", value: cab.scribe, presets: [0, 10, 20, 30, 40]) { c, v in c.scribe = v }
-            Text("The scribe is extra board, cut off on site to follow the wall. It is not part of the run's length.")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
+            if !["benchtop", "floating_shelf", "cornice", "light_rail"].contains(cab.kind) {
+                chips("Scribe", value: cab.scribe, presets: [0, 10, 20, 30, 40]) { c, v in c.scribe = v }
+                Text("The scribe is extra board, cut off on site to follow the wall. It is not part of the run's length.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
         }
     }
 
@@ -295,6 +441,19 @@ struct SizeSection: View {
                 }), in: 0...8)
                 .monospacedDigit()
             }
+            if ["door", "door_pair", "open"].contains(cab.frontType), cab.kind != "sink" {
+                HStack {
+                    Text("Inner drawers").foregroundStyle(.secondary)
+                    Spacer()
+                    Stepper("\(cab.innerDrawers)", value: Binding(get: { cab.innerDrawers }, set: { v in
+                        withAnimation(.snappy) { var c = cab; c.innerDrawers = v; project.selected = c }
+                    }), in: 0...5)
+                    .monospacedDigit()
+                    .help("Blum LEGRABOX inner drawers behind the doors, sharing the opening from the bottom. They replace the shelves; doors hang on 0-protrusion hinges.")
+                    .accessibilityLabel("Inner drawers")
+                    .accessibilityValue("\(cab.innerDrawers)")
+                }
+            }
             HStack(spacing: 6) {
                 Text("Seen ends").foregroundStyle(.secondary)
                 Spacer()
@@ -339,7 +498,7 @@ struct SizeSection: View {
     private var heightPresets: [Double] {
         switch cab.kind {
         case "wall", "open_shelf": [360, 450, 600, 720, 900]
-        case "tall": [1800, 2100, 2250, 2400]
+        case "tall", "wardrobe": [1800, 2100, 2250, 2400]
         default: [720, 820, 870, 900]
         }
     }
@@ -411,6 +570,318 @@ struct SinkSection: View {
     }
 }
 
+/// A rangehood canopy's insert cut-out, from the insert maker's drawing.
+struct InsertSection: View {
+    @Environment(ProjectModel.self) private var project
+    @AppStorage(LengthUnit.key) private var unit: LengthUnit = .millimetres
+    let cab: CabinetDoc
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            SectionTitle("Rangehood insert")
+            row("Width", cab.insertWidth, [480, 520, 560, 700, 800]) { c, v in c.insertWidth = v }
+            row("Depth", cab.insertDepth, [240, 260, 280, 300]) { c, v in c.insertDepth = v }
+            Text("The cut-out in the canopy's bottom. Take it from the insert's installation drawing.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    private func row(_ title: String, _ value: Double, _ presets: [Double],
+                     set: @escaping (inout CabinetDoc, Double) -> Void) -> some View {
+        HStack(spacing: 6) {
+            Text(title).foregroundStyle(.secondary)
+            Spacer()
+            ForEach(presets, id: \.self) { p in
+                Button(unit.format(p, suffix: false)) {
+                    withAnimation(.snappy) { var c = cab; set(&c, p); project.selected = c }
+                }
+                .buttonStyle(ChipStyle(selected: abs(p - value) < 0.5))
+            }
+        }
+    }
+}
+
+/// A wardrobe's hanging, drawn: one long rail under the hat shelf, or two rails one above the other.
+struct WardrobeSection: View {
+    @Environment(ProjectModel.self) private var project
+    let cab: CabinetDoc
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            SectionTitle("Hanging")
+            HStack(spacing: 8) {
+                ForEach([("long", "Long"), ("double", "Double")], id: \.0) { id, title in
+                    Button {
+                        withAnimation(.snappy) { var c = cab; c.hanging = id; project.selected = c }
+                    } label: {
+                        VStack(spacing: 6) {
+                            HangingThumbnail(double: id == "double").frame(width: 40, height: 56)
+                            Text(title).font(.caption)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 8)
+                    }
+                    .buttonStyle(TileStyle(selected: cab.hanging == id))
+                    .help(id == "long" ? "One rail under the hat shelf, for coats and dresses"
+                                       : "A second shelf and rail halfway down, for shirts and trousers")
+                    .accessibilityLabel("\(title) hanging")
+                }
+            }
+        }
+    }
+}
+
+struct HangingThumbnail: View {
+    let double: Bool
+
+    var body: some View {
+        Canvas { ctx, size in
+            let w = size.width, h = size.height
+            let box = CGRect(x: 2, y: 2, width: w - 4, height: h - 4)
+            ctx.stroke(Path(box), with: .color(.primary.opacity(0.6)), lineWidth: 1)
+            let shelves: [CGFloat] = double ? [0.18, 0.55] : [0.18]
+            for f in shelves {
+                let y = box.minY + box.height * f
+                ctx.fill(Path(CGRect(x: box.minX, y: y, width: box.width, height: 2)), with: .color(.primary.opacity(0.5)))
+                var rail = Path()
+                rail.move(to: CGPoint(x: box.minX + 3, y: y + 5))
+                rail.addLine(to: CGPoint(x: box.maxX - 3, y: y + 5))
+                ctx.stroke(rail, with: .color(.accentColor), lineWidth: 1.6)
+                // Hangers with clothes.
+                for x in stride(from: box.minX + 7, to: box.maxX - 4, by: 7) {
+                    let drop = (double ? 0.3 : 0.6) * box.height
+                    ctx.fill(Path(CGRect(x: x - 1.5, y: y + 6, width: 3, height: drop)), with: .color(.accentColor.opacity(0.25)))
+                }
+            }
+        }
+        .accessibilityHidden(true)
+    }
+}
+
+/// A benchtop's front edge in section: the top's end on the right.
+struct EdgeProfileThumbnail: View {
+    let profile: String
+
+    var body: some View {
+        Canvas { ctx, size in
+            let w = size.width, h = size.height
+            let t: CGFloat = h * 0.3, top: CGFloat = h * 0.25
+            var p = Path()
+            p.move(to: CGPoint(x: 2, y: top))
+            switch profile {
+            case "pencil_round":
+                p.addLine(to: CGPoint(x: w - 8, y: top))
+                p.addQuadCurve(to: CGPoint(x: w - 4, y: top + 4), control: CGPoint(x: w - 4, y: top))
+                p.addLine(to: CGPoint(x: w - 4, y: top + t - 4))
+                p.addQuadCurve(to: CGPoint(x: w - 8, y: top + t), control: CGPoint(x: w - 4, y: top + t))
+            case "bullnose":
+                p.addLine(to: CGPoint(x: w - 4 - t / 2, y: top))
+                p.addArc(center: CGPoint(x: w - 4 - t / 2, y: top + t / 2), radius: t / 2,
+                         startAngle: .degrees(-90), endAngle: .degrees(90), clockwise: false)
+            case "bevel":
+                p.addLine(to: CGPoint(x: w - 10, y: top))
+                p.addLine(to: CGPoint(x: w - 4, y: top + 6))
+                p.addLine(to: CGPoint(x: w - 4, y: top + t))
+            case "mitred_apron":
+                p.addLine(to: CGPoint(x: w - 4, y: top))
+                p.addLine(to: CGPoint(x: w - 4, y: h - 2))
+                p.addLine(to: CGPoint(x: w - 4 - t * 0.6, y: h - 2))
+                p.addLine(to: CGPoint(x: w - 4 - t * 0.6, y: top + t))
+            default:
+                p.addLine(to: CGPoint(x: w - 4, y: top))
+                p.addLine(to: CGPoint(x: w - 4, y: top + t))
+            }
+            p.addLine(to: CGPoint(x: 2, y: top + t))
+            p.closeSubpath()
+            ctx.fill(p, with: .color(.primary.opacity(0.15)))
+            ctx.stroke(p, with: .color(.primary.opacity(0.75)), lineWidth: 1.2)
+        }
+        .accessibilityHidden(true)
+    }
+}
+
+/// Lining boards on the faces seen from the room (an island's back and ends), drawn from above.
+struct CladdingSection: View {
+    @Environment(ProjectModel.self) private var project
+    @AppStorage(LengthUnit.key) private var unit: LengthUnit = .millimetres
+    let cab: CabinetDoc
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            SectionTitle("Cladding")
+            HStack(spacing: 8) {
+                ForEach([("left", "Left"), ("back", "Back"), ("right", "Right")], id: \.0) { face, title in
+                    let on = cab.clad(face)
+                    Button {
+                        withAnimation(.snappy) { var c = cab; c.setClad(face, !on); project.selected = c }
+                    } label: {
+                        VStack(spacing: 6) {
+                            CladThumbnail(face: face, on: on).frame(width: 48, height: 40)
+                            Text(title).font(.caption)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 8)
+                    }
+                    .buttonStyle(TileStyle(selected: on))
+                    .help("Clad the \(title.lowercased()) face in a lining board, flutes upright")
+                    .accessibilityLabel("Clad \(title.lowercased())")
+                    .accessibilityValue(on ? "on" : "off")
+                }
+            }
+            if ["left", "back", "right"].contains(where: cab.clad) {
+                let linings = project.boards.filter { $0.kind == "lining" && $0.profileModule > 0 }
+                if !linings.isEmpty {
+                    Picker("Profile", selection: Binding(get: { cab.cladBoard }, set: { id in
+                        var c = cab
+                        c.cladBoard = id
+                        // The board's own thickness.
+                        if let b = linings.first(where: { $0.id == id }) { c.cladThickness = b.thickness }
+                        withAnimation(.snappy) { project.selected = c }
+                    })) {
+                        Text("Plain").tag("")
+                        ForEach(linings, id: \.id) { b in
+                            Text("\(b.finish), \(Int(b.thickness)) mm, \(b.substrate.replacingOccurrences(of: "_", with: " "))").tag(b.id)
+                        }
+                    }
+                    .help("The lining board and its routed profile (Surround by Laminex)")
+                }
+                HStack(spacing: 6) {
+                    Text("Thickness").foregroundStyle(.secondary)
+                    Spacer()
+                    ForEach([9.0, 12.0, 16.0], id: \.self) { t in
+                        Button(unit.format(t, suffix: false)) {
+                            withAnimation(.snappy) { var c = cab; c.cladThickness = t; project.selected = c }
+                        }
+                        .buttonStyle(ChipStyle(selected: abs(cab.cladThickness - t) < 0.5))
+                    }
+                }
+            }
+        }
+    }
+}
+
+/// A cabinet from above, its front at the bottom, with the clad face fluted.
+struct CladThumbnail: View {
+    let face: String
+    let on: Bool
+
+    var body: some View {
+        Canvas { ctx, size in
+            let w = size.width, h = size.height
+            let body = CGRect(x: w * 0.2, y: h * 0.25, width: w * 0.6, height: h * 0.5)
+            ctx.stroke(Path(body), with: .color(.primary.opacity(0.6)), lineWidth: 1)
+            let strip: CGRect = switch face {
+            case "left": CGRect(x: body.minX - 5, y: body.minY, width: 4, height: body.height + 4)
+            case "right": CGRect(x: body.maxX + 1, y: body.minY, width: 4, height: body.height + 4)
+            default: CGRect(x: body.minX, y: body.minY - 5, width: body.width, height: 4)
+            }
+            ctx.fill(Path(strip), with: .color(on ? Color.accentColor : Color.primary.opacity(0.2)))
+        }
+        .accessibilityHidden(true)
+    }
+}
+
+/// LED strips: tap a zone on the drawn cabinet to light it, then the strips' voltage and power.
+struct LightsSection: View {
+    @Environment(ProjectModel.self) private var project
+    let cab: CabinetDoc
+
+    private var zones: [(id: String, title: String, help: String)] {
+        var z: [(String, String, String)] = []
+        if ["wall", "open_shelf", "corner_wall"].contains(cab.kind) {
+            z.append(("under_cabinet", "Under", "A strip under the cabinet, lighting the bench"))
+        }
+        z.append(("in_cabinet", "Inside", "A strip under the top, inside the cabinet"))
+        if ["base", "tall", "drawer_bank", "blind_corner", "corner_base", "sink", "wardrobe"].contains(cab.kind) {
+            z.append(("plinth", "Plinth", "A strip in the plinth, lighting the floor"))
+        }
+        return z
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            SectionTitle("Lights")
+            HStack(spacing: 8) {
+                ForEach(zones, id: \.id) { zone in
+                    let on = cab.hasLight(zone.id)
+                    Button {
+                        withAnimation(.snappy) { var c = cab; c.toggleLight(zone.id); project.selected = c }
+                    } label: {
+                        VStack(spacing: 6) {
+                            LightZoneThumbnail(zone: zone.id, on: on).frame(width: 52, height: 44)
+                            Text(zone.title).font(.caption)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 8)
+                    }
+                    .buttonStyle(TileStyle(selected: on))
+                    .help(zone.help + ". A 10 mm cable hole is drilled for it.")
+                    .accessibilityLabel("\(zone.title) light")
+                    .accessibilityValue(on ? "on" : "off")
+                }
+            }
+            if !cab.lights.isEmpty {
+                HStack(spacing: 6) {
+                    Text("Strip").foregroundStyle(.secondary)
+                    Spacer(minLength: 0)
+                    ForEach(["12v", "24v"], id: \.self) { v in
+                        Button(v == "12v" ? "12 V" : "24 V") {
+                            withAnimation(.snappy) { var c = cab; c.lightVoltage = v; project.selected = c }
+                        }
+                        .buttonStyle(ChipStyle(selected: cab.lightVoltage == v))
+                        .help("Strips of one voltage share a driver; 12 V and 24 V never mix")
+                    }
+                }
+                HStack(spacing: 6) {
+                    Text("Power").foregroundStyle(.secondary)
+                    Spacer(minLength: 0)
+                    ForEach([4.8, 9.6, 14.4], id: \.self) { w in
+                        Button(String(format: "%.1f W/m", w)) {
+                            withAnimation(.snappy) { var c = cab; c.lightWatts = w; project.selected = c }
+                        }
+                        .buttonStyle(ChipStyle(selected: abs(cab.lightWatts - w) < 0.05))
+                        .help("The strip's power per metre, from its data sheet")
+                    }
+                }
+            }
+        }
+    }
+}
+
+/// A cabinet from the front with the zone's strip as a glowing line.
+struct LightZoneThumbnail: View {
+    let zone: String
+    let on: Bool
+
+    var body: some View {
+        Canvas { ctx, size in
+            let w = size.width, h = size.height
+            let body = CGRect(x: w * 0.15, y: h * 0.12, width: w * 0.7, height: h * 0.6)
+            ctx.stroke(Path(body), with: .color(.primary.opacity(0.6)), lineWidth: 1)
+            let y: CGFloat
+            switch zone {
+            case "under_cabinet": y = body.maxY + 3
+            case "plinth":
+                ctx.stroke(Path(CGRect(x: body.minX + 4, y: body.maxY, width: body.width - 8, height: h * 0.18)),
+                           with: .color(.primary.opacity(0.4)), lineWidth: 1)
+                y = body.maxY + h * 0.12
+            default: y = body.minY + 4
+            }
+            var strip = Path()
+            strip.move(to: CGPoint(x: body.minX + 5, y: y))
+            strip.addLine(to: CGPoint(x: body.maxX - 5, y: y))
+            let colour: Color = on ? .yellow : .primary.opacity(0.25)
+            if on {
+                ctx.stroke(strip, with: .color(.yellow.opacity(0.35)), lineWidth: 6)
+            }
+            ctx.stroke(strip, with: .color(colour), lineWidth: 2)
+        }
+        .accessibilityHidden(true)
+    }
+}
+
 /// A blind corner's blind side and widths, drawn as the front seen from the room.
 struct BlindSection: View {
     @Environment(ProjectModel.self) private var project
@@ -461,9 +932,14 @@ struct CornerSection: View {
     @Environment(ProjectModel.self) private var project
     let cab: CabinetDoc
 
+    /// Second-leg lengths: wall corners are shallower, so their legs are shorter.
+    private var legLengths: [Double] {
+        cab.kind == "corner_wall" ? [600, 650, 700, 800, 900] : [800, 900, 1000, 1100, 1200]
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            SectionTitle("L-corner")
+            SectionTitle(cab.kind == "corner_wall" ? "Corner wall" : "L-corner")
             HStack(spacing: 8) {
                 ForEach(["left", "right"], id: \.self) { side in
                     Button {
@@ -485,7 +961,7 @@ struct CornerSection: View {
             HStack(spacing: 6) {
                 Text("Second leg").foregroundStyle(.secondary)
                 Spacer()
-                ForEach([800.0, 900, 1000, 1100, 1200], id: \.self) { p in
+                ForEach(legLengths, id: \.self) { p in
                     Button("\(Int(p))") {
                         withAnimation(.snappy) { var c = cab; c.cornerWidth = p; project.selected = c }
                     }
@@ -561,9 +1037,15 @@ struct FrontsSection: View {
     @Environment(ProjectModel.self) private var project
     let cab: CabinetDoc
 
-    private let layouts: [(id: String, title: String)] = [
-        ("door", "Door"), ("door_pair", "Pair"), ("drawers", "Drawers"), ("lift", "Lift"), ("bi_fold_lift", "Bi-fold"), ("open", "Open"),
-    ]
+    private var layouts: [(id: String, title: String)] {
+        var l: [(String, String)] = [
+            ("door", "Door"), ("door_pair", "Pair"), ("drawers", "Drawers"), ("lift", "Lift"), ("bi_fold_lift", "Bi-fold"), ("open", "Open"),
+        ]
+        if cab.kind == "tall" {
+            l += [("oven_tower", "Oven"), ("fridge", "Fridge")]
+        }
+        return l
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -594,8 +1076,32 @@ struct FrontsSection: View {
                 }
                 .pickerStyle(.segmented)
             }
+            if ["door", "door_pair"].contains(cab.frontType) {
+                HStack(spacing: 6) {
+                    Text("Arch").foregroundStyle(.secondary)
+                    Spacer()
+                    ForEach([0.0, 40, 60, 80], id: \.self) { rise in
+                        Button(rise == 0 ? "Square" : "\(Int(rise))") {
+                            withAnimation(.snappy) { var c = cab; c.archedTop = rise; project.selected = c }
+                        }
+                        .buttonStyle(ChipStyle(selected: abs(cab.archedTop - rise) < 0.5))
+                        .accessibilityLabel(rise == 0 ? "Square top" : "Arched top, \(Int(rise)) millimetres")
+                    }
+                }
+                .help("An arched top across the doors: this many millimetres higher in the middle than at the sides (slab doors)")
+            }
             if cab.frontType == "drawers" {
                 DrawerStackPicker(cab: cab)
+            }
+            if ["drawers", "oven_tower"].contains(cab.frontType) {
+                Toggle("Drawer inserts", isOn: Binding(get: { cab.drawerInserts }, set: { v in
+                    withAnimation(.snappy) { var c = cab; c.drawerInserts = v; project.selected = c }
+                }))
+                .help("Blum AMBIA-LINE in LEGRABOX and MERIVOBOX drawers (a cutlery insert on top, frames below), ORGA-LINE in TANDEMBOX (containers on top, utensil dividers below), sized for the cabinet")
+                Toggle("Lock", isOn: Binding(get: { cab.lock }, set: { v in
+                    withAnimation(.snappy) { var c = cab; c.lock = v; project.selected = c }
+                }))
+                .help("Blum CABLOXX: one locking bar locks every drawer (up to five); fit a cylinder lock, bought separately")
             }
             if cab.frontType == "lift" {
                 LiftKindPicker(cab: cab)
@@ -613,10 +1119,13 @@ struct LiftKindPicker: View {
         ("stay_lift", "Stay lift", "Swings up about its top edge and stays open (AVENTOS HK top)"),
         ("up_and_over", "Up and over", "Rises and tips over the top, for large fronts (AVENTOS HS top)"),
         ("lift_up", "Lift up", "Rises parallel to itself, for small fronts (AVENTOS HL top)"),
+        ("small_stay_lift", "Small stay", "A small stay lift for small wall cabinets and over the fridge (AVENTOS HK-S)"),
+        ("hinged_stay_lift", "On hinges", "A stay lift on hinges along the top, for the smallest fronts (AVENTOS HK-XS)"),
+        ("integrated_stay_lift", "Integrated", "A stay lift hidden in pockets in the cabinet sides (AVENTOS HKi)"),
     ]
 
     var body: some View {
-        HStack(spacing: 8) {
+        LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 3), spacing: 8) {
             ForEach(kinds, id: \.id) { kind in
                 Button {
                     withAnimation(.snappy) { var c = cab; c.liftKind = kind.id; project.selected = c }
@@ -658,6 +1167,19 @@ struct LiftKindThumbnail: View {
             case "lift_up":
                 open.move(to: CGPoint(x: body.minX - 2, y: 2))
                 open.addLine(to: CGPoint(x: body.minX - 2, y: body.minY - 2))
+            case "small_stay_lift":
+                open.move(to: CGPoint(x: body.minX - 2, y: body.minY))
+                open.addLine(to: CGPoint(x: w * 0.12, y: body.minY - h * 0.15))
+            case "integrated_stay_lift":
+                open.move(to: CGPoint(x: body.minX - 2, y: body.minY))
+                open.addLine(to: CGPoint(x: 2, y: body.minY - h * 0.25))
+                ctx.fill(Path(CGRect(x: body.minX + 2, y: body.minY + 3, width: body.width * 0.45, height: 5)),
+                         with: .color(.accentColor.opacity(0.5)))
+            case "hinged_stay_lift":
+                open.move(to: CGPoint(x: body.minX - 2, y: body.minY))
+                open.addLine(to: CGPoint(x: w * 0.12, y: body.minY - h * 0.15))
+                ctx.fill(Path(ellipseIn: CGRect(x: body.minX - 4, y: body.minY - 2, width: 4, height: 4)),
+                         with: .color(.accentColor))
             default:
                 open.move(to: CGPoint(x: body.minX - 2, y: body.minY))
                 open.addLine(to: CGPoint(x: 2, y: body.minY - h * 0.25))

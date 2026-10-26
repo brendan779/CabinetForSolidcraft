@@ -3,7 +3,7 @@
 use cabinet_core::PartList;
 use cabinet_core::geom::{Axis, Vec3};
 use cabinet_core::model::BiscuitSize;
-use cabinet_core::part::{BorePurpose, Dir, Operation, PartRole};
+use cabinet_core::part::{BorePurpose, Dir, Operation, Part, PartRole};
 use cabinet_core::standins::{Shape, StandIn, stand_ins};
 use serde_json::{Value, json};
 
@@ -57,6 +57,26 @@ pub fn emit_cabinet(list: &PartList, detail: Detail, spec: Option<&Value>) -> Ve
                 "name": p.name,
             }
         }));
+    }
+    // Rounded corners and arches are part of the shape: every detail level has them, before
+    // any cut.
+    for op in &list.operations {
+        match op {
+            Operation::Round { part, at, radius } => cmds.push(json!({
+                "command": "solid.fillet",
+                "params": { "body": part, "edges": [arr(*at)], "radius": round(*radius) }
+            })),
+            Operation::Arch {
+                part,
+                centre,
+                radius,
+            } => {
+                if let Some(p) = list.part(part) {
+                    cmds.extend(arch_cut(p, *centre, *radius));
+                }
+            }
+            _ => {}
+        }
     }
     if detail != Detail::Design {
         for op in &list.operations {
@@ -629,6 +649,56 @@ fn sketch_axes(axis: Axis) -> [Axis; 2] {
         Axis::Y => [Axis::Z, Axis::X],
         Axis::Z => [Axis::X, Axis::Y],
     }
+}
+
+/// Cuts away what lies above the arch in a front standing in the XZ plane: a sketch on its face
+/// closed by the arc, extruded through it.
+fn arch_cut(p: &Part, centre: Vec3, radius: f64) -> Vec<Value> {
+    let t = p.thickness_axis;
+    let [u, v] = sketch_axes(t);
+    let b = p.bounds;
+    let (x0, x1, top) = (b.min.x, b.max().x, b.max().z);
+    let under = |x: f64| centre.z + (radius * radius - (x - centre.x).powi(2)).max(0.0).sqrt();
+    let at = |x: f64, z: f64| {
+        let w = Vec3::new(x, b.min.y, z);
+        json!([round(w.get(u)), round(w.get(v))])
+    };
+    let mid = (x0 + x1) / 2.0;
+    let sketch = format!("{}.Arch", p.name);
+    let above = top + 1.0;
+    vec![
+        json!({
+            "command": "sketch.create",
+            "params": {
+                "plane": {
+                    "origin": arr(Vec3::default().with(t, b.min.get(t))),
+                    "x_dir": arr(Vec3::default().with(u, 1.0)),
+                    "y_dir": arr(Vec3::default().with(v, 1.0)),
+                },
+                "name": sketch,
+            }
+        }),
+        json!({
+            "command": "sketch.line",
+            "params": { "points": [at(x1, under(x1)), at(x1, above), at(x0, above), at(x0, under(x0))] }
+        }),
+        json!({
+            "command": "sketch.arc.three_point",
+            "params": { "start": at(x0, under(x0)), "end": at(x1, under(x1)), "through": at(mid, under(mid)) }
+        }),
+        json!({ "command": "sketch.finish", "params": {} }),
+        json!({
+            "command": "solid.extrude",
+            "params": {
+                "sketch": sketch,
+                "profiles": "all",
+                "distance": round(b.size.get(t)),
+                "direction": "positive",
+                "operation": "cut",
+                "targets": [p.name],
+            }
+        }),
+    ]
 }
 
 fn cut_box(min: Vec3, size: Vec3, targets: &[String]) -> Value {

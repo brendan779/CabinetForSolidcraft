@@ -1,0 +1,826 @@
+---
+source: crates/cabinet-core/tests/golden.rs
+expression: list
+---
+{
+  "cabinet": "C01",
+  "parts": [
+    {
+      "name": "C01.LeftSide",
+      "role": "left_side",
+      "bounds": {
+        "min": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 0.0
+        },
+        "size": {
+          "x": 16.0,
+          "y": 330.0,
+          "z": 720.0
+        }
+      },
+      "thickness_axis": "X",
+      "grain_axis": "Z",
+      "board": "",
+      "edges": {
+        "front": true,
+        "back": false,
+        "top": false,
+        "bottom": false,
+        "left": false,
+        "right": false
+      }
+    },
+    {
+      "name": "C01.RightSide",
+      "role": "right_side",
+      "bounds": {
+        "min": {
+          "x": 884.0,
+          "y": 0.0,
+          "z": 0.0
+        },
+        "size": {
+          "x": 16.0,
+          "y": 330.0,
+          "z": 720.0
+        }
+      },
+      "thickness_axis": "X",
+      "grain_axis": "Z",
+      "board": "",
+      "edges": {
+        "front": true,
+        "back": false,
+        "top": false,
+        "bottom": false,
+        "left": false,
+        "right": false
+      }
+    },
+    {
+      "name": "C01.Top",
+      "role": "top",
+      "bounds": {
+        "min": {
+          "x": 16.0,
+          "y": 0.0,
+          "z": 704.0
+        },
+        "size": {
+          "x": 868.0,
+          "y": 330.0,
+          "z": 16.0
+        }
+      },
+      "thickness_axis": "Z",
+      "grain_axis": "X",
+      "board": "",
+      "edges": {
+        "front": false,
+        "back": false,
+        "top": false,
+        "bottom": false,
+        "left": false,
+        "right": false
+      }
+    },
+    {
+      "name": "C01.Bottom",
+      "role": "bottom",
+      "bounds": {
+        "min": {
+          "x": 16.0,
+          "y": 0.0,
+          "z": 0.0
+        },
+        "size": {
+          "x": 868.0,
+          "y": 330.0,
+          "z": 16.0
+        }
+      },
+      "thickness_axis": "Z",
+      "grain_axis": "X",
+      "board": "",
+      "edges": {
+        "front": true,
+        "back": false,
+        "top": false,
+        "bottom": false,
+        "left": false,
+        "right": false
+      }
+    },
+    {
+      "name": "C01.CanopyFront",
+      "role": "canopy_front",
+      "bounds": {
+        "min": {
+          "x": 0.0,
+          "y": -18.0,
+          "z": 0.0
+        },
+        "size": {
+          "x": 900.0,
+          "y": 18.0,
+          "z": 720.0
+        }
+      },
+      "thickness_axis": "Y",
+      "grain_axis": "Z",
+      "board": "",
+      "edges": {
+        "front": true,
+        "back": true,
+        "top": true,
+        "bottom": true,
+        "left": true,
+        "right": true
+      }
+    }
+  ],
+  "operations": [
+    {
+      "type": "biscuit_slot",
+      "parts": [
+        "C01.LeftSide",
+        "C01.Top"
+      ],
+      "bounds": {
+        "min": {
+          "x": 3.5,
+          "y": 16.928108611692615,
+          "z": 710.0
+        },
+        "size": {
+          "x": 25.0,
+          "y": 66.14378277661477,
+          "z": 4.0
+        }
+      },
+      "along": "Y",
+      "size": "no20"
+    },
+    {
+      "type": "biscuit_slot",
+      "parts": [
+        "C01.LeftSide",
+        "C01.Top"
+      ],
+      "bounds": {
+        "min": {
+          "x": 3.5,
+          "y": 131.9281086116926,
+          "z": 710.0
+        },
+        "size": {
+          "x": 25.0,
+          "y": 66.14378277661477,
+          "z": 4.0
+        }
+      },
+      "along": "Y",
+      "size": "no20"
+    },
+    {
+      "type": "biscuit_slot",
+      "parts": [
+        "C01.LeftSide",
+        "C01.Top"
+      ],
+      "bounds": {
+        "min": {
+          "x": 3.5,
+          "y": 246.9281086116926,
+          "z": 710.0
+        },
+        "size": {
+          "x": 25.0,
+          "y": 66.14378277661477,
+          "z": 4.0
+        }
+      },
+      "along": "Y",
+      "size": "no20"
+    },
+    {
+      "type": "bore",
+      "part": "C01.LeftSide",
+      "at": {
+        "x": 0.0,
+        "y": 107.5,
+        "z": 712.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 4.5,
+      "depth": 16.0,
+      "purpose": "screw"
+    },
+    {
+      "type": "bore",
+      "part": "C01.LeftSide",
+      "at": {
+        "x": 0.0,
+        "y": 107.5,
+        "z": 712.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 8.0,
+      "depth": 1.75,
+      "purpose": "countersink"
+    },
+    {
+      "type": "bore",
+      "part": "C01.Top",
+      "at": {
+        "x": 16.0,
+        "y": 107.5,
+        "z": 712.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 3.0,
+      "depth": 35.0,
+      "purpose": "screw_pilot"
+    },
+    {
+      "type": "bore",
+      "part": "C01.LeftSide",
+      "at": {
+        "x": 0.0,
+        "y": 222.5,
+        "z": 712.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 4.5,
+      "depth": 16.0,
+      "purpose": "screw"
+    },
+    {
+      "type": "bore",
+      "part": "C01.LeftSide",
+      "at": {
+        "x": 0.0,
+        "y": 222.5,
+        "z": 712.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 8.0,
+      "depth": 1.75,
+      "purpose": "countersink"
+    },
+    {
+      "type": "bore",
+      "part": "C01.Top",
+      "at": {
+        "x": 16.0,
+        "y": 222.5,
+        "z": 712.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 3.0,
+      "depth": 35.0,
+      "purpose": "screw_pilot"
+    },
+    {
+      "type": "biscuit_slot",
+      "parts": [
+        "C01.RightSide",
+        "C01.Top"
+      ],
+      "bounds": {
+        "min": {
+          "x": 871.5,
+          "y": 16.928108611692615,
+          "z": 710.0
+        },
+        "size": {
+          "x": 25.0,
+          "y": 66.14378277661477,
+          "z": 4.0
+        }
+      },
+      "along": "Y",
+      "size": "no20"
+    },
+    {
+      "type": "biscuit_slot",
+      "parts": [
+        "C01.RightSide",
+        "C01.Top"
+      ],
+      "bounds": {
+        "min": {
+          "x": 871.5,
+          "y": 131.9281086116926,
+          "z": 710.0
+        },
+        "size": {
+          "x": 25.0,
+          "y": 66.14378277661477,
+          "z": 4.0
+        }
+      },
+      "along": "Y",
+      "size": "no20"
+    },
+    {
+      "type": "biscuit_slot",
+      "parts": [
+        "C01.RightSide",
+        "C01.Top"
+      ],
+      "bounds": {
+        "min": {
+          "x": 871.5,
+          "y": 246.9281086116926,
+          "z": 710.0
+        },
+        "size": {
+          "x": 25.0,
+          "y": 66.14378277661477,
+          "z": 4.0
+        }
+      },
+      "along": "Y",
+      "size": "no20"
+    },
+    {
+      "type": "bore",
+      "part": "C01.RightSide",
+      "at": {
+        "x": 900.0,
+        "y": 107.5,
+        "z": 712.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 4.5,
+      "depth": 16.0,
+      "purpose": "screw"
+    },
+    {
+      "type": "bore",
+      "part": "C01.RightSide",
+      "at": {
+        "x": 900.0,
+        "y": 107.5,
+        "z": 712.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 8.0,
+      "depth": 1.75,
+      "purpose": "countersink"
+    },
+    {
+      "type": "bore",
+      "part": "C01.Top",
+      "at": {
+        "x": 884.0,
+        "y": 107.5,
+        "z": 712.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 3.0,
+      "depth": 35.0,
+      "purpose": "screw_pilot"
+    },
+    {
+      "type": "bore",
+      "part": "C01.RightSide",
+      "at": {
+        "x": 900.0,
+        "y": 222.5,
+        "z": 712.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 4.5,
+      "depth": 16.0,
+      "purpose": "screw"
+    },
+    {
+      "type": "bore",
+      "part": "C01.RightSide",
+      "at": {
+        "x": 900.0,
+        "y": 222.5,
+        "z": 712.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 8.0,
+      "depth": 1.75,
+      "purpose": "countersink"
+    },
+    {
+      "type": "bore",
+      "part": "C01.Top",
+      "at": {
+        "x": 884.0,
+        "y": 222.5,
+        "z": 712.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 3.0,
+      "depth": 35.0,
+      "purpose": "screw_pilot"
+    },
+    {
+      "type": "biscuit_slot",
+      "parts": [
+        "C01.LeftSide",
+        "C01.Bottom"
+      ],
+      "bounds": {
+        "min": {
+          "x": 3.5,
+          "y": 16.928108611692615,
+          "z": 6.0
+        },
+        "size": {
+          "x": 25.0,
+          "y": 66.14378277661477,
+          "z": 4.0
+        }
+      },
+      "along": "Y",
+      "size": "no20"
+    },
+    {
+      "type": "biscuit_slot",
+      "parts": [
+        "C01.LeftSide",
+        "C01.Bottom"
+      ],
+      "bounds": {
+        "min": {
+          "x": 3.5,
+          "y": 131.9281086116926,
+          "z": 6.0
+        },
+        "size": {
+          "x": 25.0,
+          "y": 66.14378277661477,
+          "z": 4.0
+        }
+      },
+      "along": "Y",
+      "size": "no20"
+    },
+    {
+      "type": "biscuit_slot",
+      "parts": [
+        "C01.LeftSide",
+        "C01.Bottom"
+      ],
+      "bounds": {
+        "min": {
+          "x": 3.5,
+          "y": 246.9281086116926,
+          "z": 6.0
+        },
+        "size": {
+          "x": 25.0,
+          "y": 66.14378277661477,
+          "z": 4.0
+        }
+      },
+      "along": "Y",
+      "size": "no20"
+    },
+    {
+      "type": "bore",
+      "part": "C01.LeftSide",
+      "at": {
+        "x": 0.0,
+        "y": 107.5,
+        "z": 8.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 4.5,
+      "depth": 16.0,
+      "purpose": "screw"
+    },
+    {
+      "type": "bore",
+      "part": "C01.LeftSide",
+      "at": {
+        "x": 0.0,
+        "y": 107.5,
+        "z": 8.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 8.0,
+      "depth": 1.75,
+      "purpose": "countersink"
+    },
+    {
+      "type": "bore",
+      "part": "C01.Bottom",
+      "at": {
+        "x": 16.0,
+        "y": 107.5,
+        "z": 8.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 3.0,
+      "depth": 35.0,
+      "purpose": "screw_pilot"
+    },
+    {
+      "type": "bore",
+      "part": "C01.LeftSide",
+      "at": {
+        "x": 0.0,
+        "y": 222.5,
+        "z": 8.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 4.5,
+      "depth": 16.0,
+      "purpose": "screw"
+    },
+    {
+      "type": "bore",
+      "part": "C01.LeftSide",
+      "at": {
+        "x": 0.0,
+        "y": 222.5,
+        "z": 8.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 8.0,
+      "depth": 1.75,
+      "purpose": "countersink"
+    },
+    {
+      "type": "bore",
+      "part": "C01.Bottom",
+      "at": {
+        "x": 16.0,
+        "y": 222.5,
+        "z": 8.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 3.0,
+      "depth": 35.0,
+      "purpose": "screw_pilot"
+    },
+    {
+      "type": "biscuit_slot",
+      "parts": [
+        "C01.RightSide",
+        "C01.Bottom"
+      ],
+      "bounds": {
+        "min": {
+          "x": 871.5,
+          "y": 16.928108611692615,
+          "z": 6.0
+        },
+        "size": {
+          "x": 25.0,
+          "y": 66.14378277661477,
+          "z": 4.0
+        }
+      },
+      "along": "Y",
+      "size": "no20"
+    },
+    {
+      "type": "biscuit_slot",
+      "parts": [
+        "C01.RightSide",
+        "C01.Bottom"
+      ],
+      "bounds": {
+        "min": {
+          "x": 871.5,
+          "y": 131.9281086116926,
+          "z": 6.0
+        },
+        "size": {
+          "x": 25.0,
+          "y": 66.14378277661477,
+          "z": 4.0
+        }
+      },
+      "along": "Y",
+      "size": "no20"
+    },
+    {
+      "type": "biscuit_slot",
+      "parts": [
+        "C01.RightSide",
+        "C01.Bottom"
+      ],
+      "bounds": {
+        "min": {
+          "x": 871.5,
+          "y": 246.9281086116926,
+          "z": 6.0
+        },
+        "size": {
+          "x": 25.0,
+          "y": 66.14378277661477,
+          "z": 4.0
+        }
+      },
+      "along": "Y",
+      "size": "no20"
+    },
+    {
+      "type": "bore",
+      "part": "C01.RightSide",
+      "at": {
+        "x": 900.0,
+        "y": 107.5,
+        "z": 8.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 4.5,
+      "depth": 16.0,
+      "purpose": "screw"
+    },
+    {
+      "type": "bore",
+      "part": "C01.RightSide",
+      "at": {
+        "x": 900.0,
+        "y": 107.5,
+        "z": 8.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 8.0,
+      "depth": 1.75,
+      "purpose": "countersink"
+    },
+    {
+      "type": "bore",
+      "part": "C01.Bottom",
+      "at": {
+        "x": 884.0,
+        "y": 107.5,
+        "z": 8.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 3.0,
+      "depth": 35.0,
+      "purpose": "screw_pilot"
+    },
+    {
+      "type": "bore",
+      "part": "C01.RightSide",
+      "at": {
+        "x": 900.0,
+        "y": 222.5,
+        "z": 8.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 4.5,
+      "depth": 16.0,
+      "purpose": "screw"
+    },
+    {
+      "type": "bore",
+      "part": "C01.RightSide",
+      "at": {
+        "x": 900.0,
+        "y": 222.5,
+        "z": 8.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 8.0,
+      "depth": 1.75,
+      "purpose": "countersink"
+    },
+    {
+      "type": "bore",
+      "part": "C01.Bottom",
+      "at": {
+        "x": 884.0,
+        "y": 222.5,
+        "z": 8.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 3.0,
+      "depth": 35.0,
+      "purpose": "screw_pilot"
+    },
+    {
+      "type": "groove",
+      "part": "C01.Bottom",
+      "bounds": {
+        "min": {
+          "x": 190.0,
+          "y": 35.0,
+          "z": 0.0
+        },
+        "size": {
+          "x": 520.0,
+          "y": 260.0,
+          "z": 16.0
+        }
+      }
+    }
+  ],
+  "hardware": [
+    {
+      "item": "screw-cover-cap",
+      "description": "Screw cover cap, colour to match the carcass",
+      "at": {
+        "x": 8.0,
+        "y": 165.0,
+        "z": 360.0
+      },
+      "part": "C01.LeftSide",
+      "quantity": 4
+    },
+    {
+      "item": "screw-cover-cap",
+      "description": "Screw cover cap, colour to match the carcass",
+      "at": {
+        "x": 892.0,
+        "y": 165.0,
+        "z": 360.0
+      },
+      "part": "C01.RightSide",
+      "quantity": 4
+    }
+  ],
+  "warnings": [],
+  "notes": [
+    "Rangehood insert cut-out 520 × 260: check it against the insert's installation drawing"
+  ]
+}

@@ -5,8 +5,28 @@ use cabinet_catalog::HardwareItem;
 
 use crate::hardware;
 
-/// Box heights, tallest first: the box chosen is the tallest whose space requirement fits.
-const BOX_HEIGHTS: [&str; 3] = ["k", "m", "n"];
+/// Which boxes a drawer may be: each range lists (planning row, side set) keys tallest first,
+/// and the box chosen is the tallest whose space requirement fits. A system without a row
+/// (MERIVOBOX has no C or F) skips it.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum BoxRange {
+    /// N, M or K behind a drawer front.
+    Drawers,
+    /// LEGRABOX pure's high fronted pull-outs C and F as well.
+    HighFronted,
+    /// Inner drawers behind a door: M or K sides and a steel front piece.
+    Inner,
+}
+
+impl BoxRange {
+    fn heights(self) -> &'static [(&'static str, &'static str)] {
+        match self {
+            BoxRange::Drawers => &[("k", "k"), ("m", "m"), ("n", "n")],
+            BoxRange::HighFronted => &[("f", "f"), ("c", "c"), ("k", "k"), ("m", "m"), ("n", "n")],
+            BoxRange::Inner => &[("inner-k", "k"), ("inner-m", "m")],
+        }
+    }
+}
 
 /// Blum's steel-sided box systems, with their cabinet profile series (lighter first).
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -50,39 +70,50 @@ pub struct SteelBox {
     pub kind: BoxSystem,
     /// The planning row (`blum.legrabox.m`): side height, deductions, front drilling.
     pub system: &'static HardwareItem,
-    /// N, M or K.
+    /// The side set: N, M, K, C or F.
     pub height: String,
+    /// An inner drawer: no drawer front, a steel front piece cut to `front_piece` long.
+    pub front_piece: Option<(&'static HardwareItem, f64)>,
     pub nominal_length: f64,
     pub profile: &'static HardwareItem,
     /// The profile is the heavy series (70 kg LEGRABOX / MERIVOBOX, 65 kg TANDEMBOX).
     pub heavy_profile: bool,
     pub sides: &'static HardwareItem,
     pub back_fixing: &'static HardwareItem,
-    pub front_fixing: &'static HardwareItem,
+    /// Front fixings and how many of each a drawer takes.
+    pub front_fixings: Vec<(&'static HardwareItem, u32)>,
     /// Cut sizes in 16 mm board: base width × length, back width × height.
     pub base: (f64, f64),
     pub back: (f64, f64),
     pub board_thickness: f64,
 }
 
-/// The tallest box of `kind` of the longest nominal length that fits an opening `inner_width`
-/// (LW) wide, `inner_depth` (LT) deep from the back of the front, with `space` mm from the
-/// drawer's datum (the surface its profiles stand on) to the next one up.
+/// The tallest box of `kind` in `range` of the longest nominal length that fits an opening
+/// `inner_width` (LW) wide, `inner_depth` (LT) deep from the back of the front, with `space` mm
+/// from the drawer's datum (the surface its profiles stand on) to the next one up.
 pub fn steel_box(
     kind: BoxSystem,
+    range: BoxRange,
     inner_width: f64,
     inner_depth: f64,
     space: f64,
 ) -> Result<SteelBox, String> {
     let key = kind.key();
-    let mut last_err = format!("no {} drawer fits in {space:.0} mm of height", kind.name());
-    for h in BOX_HEIGHTS {
-        let system = hardware::item(&format!("blum.{key}.{h}"))?;
+    let what = if range == BoxRange::Inner {
+        "inner drawer"
+    } else {
+        "drawer"
+    };
+    let mut last_err = format!("no {} {what} fits in {space:.0} mm of height", kind.name());
+    for &(h, sides_key) in range.heights() {
+        let Ok(system) = hardware::item(&format!("blum.{key}.{h}")) else {
+            continue;
+        };
         if system.param("space_height")? > space + 1e-9 {
             continue;
         }
         let allowance = system.param("depth_allowance")?;
-        let side_prefix = format!("blum.{key}.drawer-side.{h}.");
+        let side_prefix = format!("blum.{key}.drawer-side.{sides_key}.");
         let mut lengths: Vec<(f64, &HardwareItem)> = hardware::items()
             .iter()
             .filter(|i| i.id.starts_with(&side_prefix))
@@ -92,9 +123,9 @@ pub fn steel_box(
         lengths.sort_by(|a, b| a.0.total_cmp(&b.0));
         let Some(&(nl, sides)) = lengths.last() else {
             last_err = format!(
-                "no {} {} drawer is short enough for {inner_depth:.0} mm inside depth",
+                "no {} {} {what} is short enough for {inner_depth:.0} mm inside depth",
                 kind.name(),
-                h.to_uppercase()
+                sides_key.to_uppercase()
             );
             continue;
         };
@@ -109,16 +140,34 @@ pub fn steel_box(
                 ),
             };
         let p = |name: &str| system.param(name);
+        // A bracket pair per id (F takes an M pair below a C pair): `front-fixing.f.lower`.
+        let fixing = format!("blum.{key}.front-fixing.{h}");
+        let front_fixings: Vec<_> = hardware::items()
+            .iter()
+            .filter(|i| i.id == fixing || i.id.starts_with(&format!("{fixing}.")))
+            .map(|i| (i, i.param("per_drawer").map_or(2, |n| n as u32)))
+            .collect();
+        if front_fixings.is_empty() {
+            return Err(format!("no front fixing {fixing} in the hardware catalog"));
+        }
+        let front_piece = match range {
+            BoxRange::Inner => Some((
+                hardware::item(&format!("blum.{key}.front-piece"))?,
+                inner_width - p("front_piece_deduction")?,
+            )),
+            _ => None,
+        };
         return Ok(SteelBox {
             kind,
             system,
-            height: h.to_uppercase(),
+            height: sides_key.to_uppercase(),
+            front_piece,
             nominal_length: nl,
             profile,
             heavy_profile,
             sides,
-            back_fixing: hardware::item(&format!("blum.{key}.back-fixing.{h}"))?,
-            front_fixing: hardware::item(&format!("blum.{key}.front-fixing.{h}"))?,
+            back_fixing: hardware::item(&format!("blum.{key}.back-fixing.{sides_key}"))?,
+            front_fixings,
             base: (
                 inner_width - p("base_width_deduction")?,
                 nl - p("base_length_deduction")?,
@@ -128,6 +177,149 @@ pub fn steel_box(
         });
     }
     Err(last_err)
+}
+
+/// What Blum's AMBIA-LINE recommendation (p.546) puts in an M or K drawer of nominal length
+/// `nl` in a cabinet `kb` wide: a cutlery insert set (`cutlery`, from NL 450) or drawer frames,
+/// in steel (p.544) or wood design (p.545); steel 242 mm frames for NL 270–400 take an adapter
+/// profile to a chipboard back from NL 350 (p.545 prints none for wood).
+pub fn ambia_line(
+    kb: f64,
+    nl: f64,
+    height: &str,
+    cutlery: bool,
+    wood: bool,
+) -> Result<Vec<(&'static HardwareItem, u32)>, String> {
+    let piece = |name: &str| {
+        if wood {
+            format!("blum.ambia-line.wood.{name}")
+        } else {
+            format!("blum.ambia-line.{name}")
+        }
+    };
+    if !matches!(height, "M" | "K") {
+        return Err(format!(
+            "AMBIA-LINE needs drawers of height M or K, not {height}"
+        ));
+    }
+    let sys = hardware::item("blum.ambia-line")?;
+    // The printed row at or under `kb`; nothing under the first.
+    let count = |name: &str, col: f64| -> Result<u32, String> {
+        let t = sys.table(name)?;
+        let r = t.rows.iter().rposition(|&r| r <= kb + 1e-6);
+        let c = t.cols.iter().rposition(|&c| c <= col + 1e-6).unwrap_or(0);
+        Ok(r.and_then(|r| t.values[r][c]).unwrap_or(0.0) as u32)
+    };
+    let mut out = Vec::new();
+    let mut add = |id: String, n: u32| -> Result<(), String> {
+        if n > 0 {
+            out.push((hardware::item(&id)?, n));
+        }
+        Ok(())
+    };
+    if nl >= 450.0 {
+        let nl = nl as u32;
+        let (c, f100, f200) = if cutlery {
+            (
+                count("cutlery_set_cutlery_inserts", 0.0)?,
+                count("cutlery_set_frames_100", 0.0)?,
+                count("cutlery_set_frames_200", 0.0)?,
+            )
+        } else {
+            (
+                0,
+                count("long_frames_100", 0.0)?,
+                count("long_frames_200", 0.0)?,
+            )
+        };
+        add(piece(&format!("cutlery-insert.{nl}")), c)?;
+        add(piece(&format!("frame-100.{nl}")), f100)?;
+        add(piece(&format!("frame-200.{nl}")), f200)?;
+    } else if nl >= 270.0 {
+        let n = count("short_frames_242", nl)?;
+        add(piece("frame-242"), n)?;
+        if wood {
+            return Ok(out);
+        }
+        let adapter = hardware::item(&format!(
+            "blum.ambia-line.adapter.{}",
+            height.to_lowercase()
+        ))?;
+        if nl >= adapter.param("from_nominal_length")? {
+            add(adapter.id.clone(), n)?;
+        }
+    }
+    if out.is_empty() {
+        return Err(format!(
+            "AMBIA-LINE recommends nothing for a {kb:.0} mm cabinet at NL {nl:.0}"
+        ));
+    }
+    Ok(out)
+}
+
+/// ORGA-LINE set kinds Blum lists for TANDEMBOX drawers (pp. 556-558).
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum OrgaSet {
+    /// Containers, well suited to cutlery.
+    Container,
+    /// Utensil dividers.
+    Utensil,
+    /// Containers with dividers.
+    Combo,
+}
+
+impl OrgaSet {
+    fn key(self) -> &'static str {
+        match self {
+            OrgaSet::Container => "container",
+            OrgaSet::Utensil => "utensil",
+            OrgaSet::Combo => "combo",
+        }
+    }
+}
+
+/// The ORGA-LINE set Blum lists (pp. 556-558) for an M or K TANDEMBOX drawer of nominal length
+/// `nl` (450, 500 or 550) in a cabinet `kb` wide: each piece and how many.
+pub fn orga_line(
+    kb: f64,
+    nl: f64,
+    height: &str,
+    set: OrgaSet,
+) -> Result<Vec<(&'static HardwareItem, u32)>, String> {
+    if !matches!(height, "M" | "K") {
+        return Err(format!(
+            "ORGA-LINE needs drawers of height M or K, not {height}"
+        ));
+    }
+    let nl = nl.round() as u32;
+    if ![450, 500, 550].contains(&nl) {
+        return Err(format!(
+            "ORGA-LINE sets come for NL 450, 500 and 550, not {nl}"
+        ));
+    }
+    let sys = hardware::item("blum.orga-line")?;
+    let prefix = format!("{}_", set.key());
+    let mut out = Vec::new();
+    for (name, t) in sys.tables.iter().filter(|(n, _)| n.starts_with(&prefix)) {
+        // The printed range `kb` falls in: the last row starting at or under it.
+        let n = t
+            .rows
+            .iter()
+            .rposition(|&r| r <= kb + 1e-6)
+            .and_then(|r| t.values[r][0])
+            .unwrap_or(0.0) as u32;
+        if n > 0 {
+            let piece = &name[prefix.len()..];
+            out.push((hardware::item(&format!("blum.orga-line.{piece}.{nl}"))?, n));
+        }
+    }
+    if out.is_empty() {
+        return Err(format!(
+            "ORGA-LINE lists no {} set for a {kb:.0} mm cabinet",
+            set.key()
+        ));
+    }
+    Ok(out)
 }
 
 /// The wooden-drawer runner systems.
@@ -355,7 +547,7 @@ mod tests {
     /// (Blum p.201, 203, 207).
     #[test]
     fn legrabox_cut_sizes_follow_blums_deductions() {
-        let m = steel_box(BoxSystem::Legrabox, 568.0, 540.0, 120.0).unwrap();
+        let m = steel_box(BoxSystem::Legrabox, BoxRange::Drawers, 568.0, 540.0, 120.0).unwrap();
         assert_eq!(m.height, "M");
         assert_eq!(m.nominal_length, 500.0);
         assert_eq!(m.base, (533.0, 490.0));
@@ -363,12 +555,15 @@ mod tests {
         assert_eq!(m.board_thickness, 16.0);
         assert_eq!(m.sides.article, "770M5002S");
         assert_eq!(m.profile.article, "750.5001S");
-        assert_eq!(m.front_fixing.article, "ZF7M70E2");
+        assert_eq!(m.front_fixings[0].0.article, "ZF7M70E2");
+        assert_eq!(m.front_fixings[0].1, 2);
     }
 
     #[test]
     fn the_tallest_box_whose_space_fits_is_chosen() {
-        let height = |space| steel_box(BoxSystem::Legrabox, 568.0, 540.0, space).map(|b| b.height);
+        let height = |space| {
+            steel_box(BoxSystem::Legrabox, BoxRange::Drawers, 568.0, 540.0, space).map(|b| b.height)
+        };
         assert_eq!(height(80.0).as_deref(), Ok("N"));
         assert_eq!(height(105.9).as_deref(), Ok("N"));
         assert_eq!(height(106.0).as_deref(), Ok("M"));
@@ -379,17 +574,82 @@ mod tests {
 
     #[test]
     fn the_nominal_length_leaves_three_mm_behind_the_box() {
-        let nl =
-            |depth| steel_box(BoxSystem::Legrabox, 568.0, depth, 150.0).map(|b| b.nominal_length);
+        let nl = |depth| {
+            steel_box(BoxSystem::Legrabox, BoxRange::Drawers, 568.0, depth, 150.0)
+                .map(|b| b.nominal_length)
+        };
         assert_eq!(nl(503.0), Ok(500.0));
         assert_eq!(nl(502.9), Ok(450.0));
         // Only the 70 kg profile comes in 650.
-        let b = steel_box(BoxSystem::Legrabox, 568.0, 700.0, 120.0).unwrap();
+        let b = steel_box(BoxSystem::Legrabox, BoxRange::Drawers, 568.0, 700.0, 120.0).unwrap();
         assert_eq!(
             (b.nominal_length, b.profile.article.as_str()),
             (650.0, "753.6501S")
         );
-        assert!(steel_box(BoxSystem::Legrabox, 568.0, 250.0, 120.0).is_err());
+        assert!(steel_box(BoxSystem::Legrabox, BoxRange::Drawers, 568.0, 250.0, 120.0).is_err());
+    }
+
+    /// BLUM-4b: C (p.211) and F (p.217) take a drawer's place only where their space fits,
+    /// and only in the high-fronted range.
+    #[test]
+    fn high_fronted_pull_outs_are_chosen_by_space_when_allowed() {
+        let side = |range, space| {
+            steel_box(BoxSystem::Legrabox, range, 568.0, 540.0, space).map(|b| b.height)
+        };
+        assert_eq!(side(BoxRange::HighFronted, 192.0).as_deref(), Ok("K"));
+        assert_eq!(side(BoxRange::HighFronted, 193.0).as_deref(), Ok("C"));
+        assert_eq!(side(BoxRange::HighFronted, 257.0).as_deref(), Ok("F"));
+        assert_eq!(side(BoxRange::Drawers, 300.0).as_deref(), Ok("K"));
+        let f = steel_box(
+            BoxSystem::Legrabox,
+            BoxRange::HighFronted,
+            568.0,
+            540.0,
+            300.0,
+        )
+        .unwrap();
+        assert_eq!((f.base, f.back), ((533.0, 490.0), (530.0, 212.0)));
+        assert_eq!(f.sides.article, "770F5002S");
+        let fixings: Vec<_> = f
+            .front_fixings
+            .iter()
+            .map(|(i, n)| (i.article.as_str(), *n))
+            .collect();
+        assert_eq!(fixings, [("ZF7M70E2", 2), ("ZF7C70E2", 2)]);
+        assert_eq!(f.system.drilling.len(), 5);
+        // MERIVOBOX has no C or F: the range falls back to its own heights.
+        let m = steel_box(
+            BoxSystem::Merivobox,
+            BoxRange::HighFronted,
+            568.0,
+            540.0,
+            300.0,
+        );
+        assert_eq!(m.unwrap().height, "K");
+    }
+
+    /// BLUM-4b: inner drawers M (p.205, 104 mm) and K (p.209, 142 mm), a front piece cut to
+    /// LW − 126 and one front fixing set.
+    #[test]
+    fn inner_drawers_take_m_or_k_sides_and_a_cut_front_piece() {
+        let inner = |space| steel_box(BoxSystem::Legrabox, BoxRange::Inner, 568.0, 540.0, space);
+        assert!(inner(103.0).is_err());
+        let m = inner(104.0).unwrap();
+        assert_eq!(
+            (m.height.as_str(), m.sides.article.as_str()),
+            ("M", "770M5002S")
+        );
+        assert_eq!(m.back, (530.0, 63.0));
+        let k = inner(142.0).unwrap();
+        assert_eq!(k.height, "K");
+        let (piece, length) = k.front_piece.unwrap();
+        assert_eq!((piece.article.as_str(), length), ("ZV7.1043C01", 442.0));
+        assert_eq!(k.front_fixings.len(), 1);
+        assert_eq!(
+            (k.front_fixings[0].0.article.as_str(), k.front_fixings[0].1),
+            ("ZI7.0KS0", 1)
+        );
+        assert!(k.system.drilling.is_empty());
     }
 
     /// Blum p.413 / p.435: SKW = LW − 42, SKL = NL − 10, NL + 3 ≤ LT.
@@ -477,22 +737,22 @@ mod tests {
     /// BLUM-5: MERIVOBOX (p.257) and TANDEMBOX antaro (p.297) cut sizes and the three heights.
     #[test]
     fn merivobox_and_tandembox_follow_their_own_deductions() {
-        let m = steel_box(BoxSystem::Merivobox, 568.0, 540.0, 120.0).unwrap();
+        let m = steel_box(BoxSystem::Merivobox, BoxRange::Drawers, 568.0, 540.0, 120.0).unwrap();
         assert_eq!((m.height.as_str(), m.nominal_length), ("M", 500.0));
         assert_eq!((m.base, m.back), ((517.0, 474.0), (517.0, 83.0)));
         assert_eq!(
             (m.sides.article.as_str(), m.profile.article.as_str()),
             ("470M5002S", "450.5001B")
         );
-        let t = steel_box(BoxSystem::Tandembox, 568.0, 540.0, 140.0).unwrap();
+        let t = steel_box(BoxSystem::Tandembox, BoxRange::Drawers, 568.0, 540.0, 140.0).unwrap();
         assert_eq!((t.height.as_str(), t.nominal_length), ("K", 500.0));
         assert_eq!((t.base, t.back), ((493.0, 476.0), (481.0, 116.0)));
         assert_eq!(t.system.drilling.len(), 3);
         assert_eq!(t.profile.article, "578.5001M");
-        let n = steel_box(BoxSystem::Tandembox, 568.0, 540.0, 90.0).unwrap();
+        let n = steel_box(BoxSystem::Tandembox, BoxRange::Drawers, 568.0, 540.0, 90.0).unwrap();
         assert_eq!(n.height, "N");
         // Only the 65 kg profile comes in 650.
-        let long = steel_box(BoxSystem::Tandembox, 568.0, 660.0, 120.0).unwrap();
+        let long = steel_box(BoxSystem::Tandembox, BoxRange::Drawers, 568.0, 660.0, 120.0).unwrap();
         assert!(long.heavy_profile && long.profile.article == "576.6501M");
     }
 
@@ -509,5 +769,87 @@ mod tests {
         assert_eq!(unit("legrabox"), "T60L7340");
         let narrow = tip_on_blumotion("tandembox", 500.0, false, false, 280.0).unwrap();
         assert_eq!(narrow[1].0.article, "T60.300D");
+    }
+
+    /// pp. 556-557: ORGA-LINE sets by cabinet width, the article by nominal length.
+    #[test]
+    fn orga_line_follows_blums_set_lists() {
+        let arts = |kb, nl, set| {
+            let mut v: Vec<_> = orga_line(kb, nl, "M", set)
+                .unwrap()
+                .iter()
+                .map(|(i, n)| (i.article.clone(), *n))
+                .collect();
+            v.sort();
+            v
+        };
+        let a = |s: &str, n| (s.to_string(), n);
+        assert_eq!(arts(600.0, 500.0, OrgaSet::Container), [a("ZSI.60VEI6", 1)]);
+        // 650 falls in 601-699: BI1 + BI3.
+        assert_eq!(
+            arts(650.0, 450.0, OrgaSet::Container),
+            [a("ZSI.450BI1N", 1), a("ZSI.450BI3N", 1)]
+        );
+        assert_eq!(
+            arts(1100.0, 550.0, OrgaSet::Utensil),
+            [a("ZSI.550FI2N", 1), a("ZSI.550KI3N", 2)]
+        );
+        assert_eq!(
+            arts(800.0, 500.0, OrgaSet::Combo),
+            [a("ZSI.500BI3", 1), a("ZSI.500KI3N", 1)]
+        );
+        assert!(orga_line(250.0, 500.0, "M", OrgaSet::Container).is_err());
+        assert!(orga_line(1300.0, 500.0, "M", OrgaSet::Container).is_err());
+        assert!(orga_line(600.0, 600.0, "M", OrgaSet::Container).is_err());
+        assert!(orga_line(600.0, 500.0, "N", OrgaSet::Container).is_err());
+    }
+
+    /// p.546: AMBIA-LINE by cabinet width and nominal length.
+    #[test]
+    fn ambia_line_follows_blums_recommendation() {
+        let arts = |kb, nl, cutlery| {
+            ambia_line(kb, nl, "M", cutlery, false)
+                .unwrap()
+                .iter()
+                .map(|(i, n)| (i.article.clone(), *n))
+                .collect::<Vec<_>>()
+        };
+        let a = |s: &str, n| (s.to_string(), n);
+        assert_eq!(
+            arts(600.0, 500.0, true),
+            [a("ZC7S500BS3", 1), a("ZC7S500RS1", 1)]
+        );
+        assert_eq!(
+            arts(900.0, 500.0, false),
+            [a("ZC7S500RS1", 2), a("ZC7S500RS2", 2)]
+        );
+        // 700 is not printed: the 600 row.
+        assert_eq!(
+            arts(700.0, 550.0, false),
+            [a("ZC7S550RS1", 2), a("ZC7S550RS2", 1)]
+        );
+        assert_eq!(arts(600.0, 300.0, false), [a("ZC7S300RSU", 2)]);
+        assert_eq!(
+            arts(600.0, 350.0, false),
+            [a("ZC7S300RSU", 2), a("ZC7A0U0M", 2)]
+        );
+        assert!(ambia_line(600.0, 500.0, "N", false, false).is_err());
+        // p.545: the wood design's pieces, no adapter.
+        let wood: Vec<_> = ambia_line(600.0, 350.0, "M", false, true)
+            .unwrap()
+            .iter()
+            .map(|(i, n)| (i.article.clone(), *n))
+            .collect();
+        assert_eq!(wood, [a("ZC7S300RHU", 2)]);
+        let wood: Vec<_> = ambia_line(600.0, 500.0, "M", true, true)
+            .unwrap()
+            .iter()
+            .map(|(i, n)| (i.article.clone(), *n))
+            .collect();
+        assert_eq!(wood, [a("ZC7S500BH3", 1), a("ZC7S500RH1", 1)]);
+        assert!(
+            ambia_line(300.0, 300.0, "M", false, false).is_err(),
+            "nothing under 400 at NL 300"
+        );
     }
 }

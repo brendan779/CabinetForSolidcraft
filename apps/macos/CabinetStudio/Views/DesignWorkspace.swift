@@ -117,7 +117,9 @@ struct RunStrip: View {
     private static let fillerWidths: [Double] = [25, 38, 50, 75, 100, 150, 200]
 
     private var items: [CabinetDoc] {
-        project.cabinets.filter { $0.placed != true && $0.kind != "end_panel" }
+        project.cabinets.filter {
+            $0.placed != true && !["end_panel", "benchtop", "cornice", "light_rail"].contains($0.kind)
+        }
     }
 
     private func width(_ c: CabinetDoc) -> Double {
@@ -184,7 +186,7 @@ struct RunStrip: View {
                 .accessibilityLabel("\(c.id) width")
                 .accessibilityValue(unit.format(c.width))
                 .accessibilityAdjustableAction { direction in
-                    let list = c.isPiece ? Self.fillerWidths : Self.cabinetWidths
+                    let list = c.kind == "filler" ? Self.fillerWidths : Self.cabinetWidths
                     let next = direction == .increment ? list.first { $0 > c.width } : list.last { $0 < c.width }
                     if let next, let i = project.cabinets.firstIndex(where: { $0.id == c.id }) {
                         project.cabinets[i].width = next
@@ -209,7 +211,7 @@ struct RunStrip: View {
 
     /// The nearest usual width: cabinet sizes for cabinets, filler sizes for fillers.
     private func snap(_ c: CabinetDoc, _ w: Double) -> Double {
-        let list = c.isPiece ? Self.fillerWidths : Self.cabinetWidths
+        let list = c.kind == "filler" ? Self.fillerWidths : Self.cabinetWidths
         return list.min { abs($0 - w) < abs($1 - w) } ?? w
     }
 
@@ -492,13 +494,10 @@ final class ViewportScene {
         point(p.x + p.width / 2, p.y + p.depth / 2, p.z + p.height / 2)
     }
 
-    /// A door turns about its hinged edge at the front face; everything else about its middle.
+    /// A door (and each piece of a shaker door) turns about the door's hinge line; everything else
+    /// about its middle.
     private static func pivot(_ p: PanelBox) -> SIMD3<Float> {
-        switch p.hinged {
-        case "left": point(p.x, p.y, p.z + p.height / 2)
-        case "right": point(p.x + p.width, p.y, p.z + p.height / 2)
-        default: mid(p)
-        }
+        p.hinged.isEmpty ? mid(p) : point(p.hingeX, p.hingeY, p.z + p.height / 2)
     }
 
     private static func centre(of panels: [PanelBox]) -> SIMD3<Float> {
@@ -514,9 +513,9 @@ final class ViewportScene {
         if len > 0.0001 { t.translation += away / len * Float(look.explode) * 0.25 }
         if look.open {
             switch (p.role, p.hinged) {
-            case ("Door", "left"): t.rotation = simd_quatf(angle: -.pi * 0.55, axis: [0, 1, 0])
-            case ("Door", "right"): t.rotation = simd_quatf(angle: .pi * 0.55, axis: [0, 1, 0])
-            case ("Drawer front", _), ("Drawer bottom", _), ("Drawer back", _), ("Drawer side", _):
+            case (_, "left"): t.rotation = simd_quatf(angle: -.pi * 0.55, axis: [0, 1, 0])
+            case (_, "right"): t.rotation = simd_quatf(angle: .pi * 0.55, axis: [0, 1, 0])
+            case ("Drawer front", _), ("Drawer bottom", _), ("Drawer back", _), ("Drawer side", _), ("Drawer handle", _):
                 t.translation.z += 0.35
             case ("Lift front", _): t.translation.y += 0.3
             default: break
@@ -535,10 +534,20 @@ final class ViewportScene {
         let generic: NSColor = p.isFront
             ? NSColor(calibratedRed: 0.78, green: 0.65, blue: 0.48, alpha: 1)
             : NSColor(calibratedWhite: p.role == "Back" ? 0.78 : 0.93, alpha: 1)
+        if p.board.hasPrefix("handle:") {
+            return Self.handleMaterial(p.board.dropFirst("handle:".count), selected: selected)
+        }
         let colour = board?.displayColour ?? generic
         var m = PhysicallyBasedMaterial()
         let tint = selected ? NSColor.white : NSColor(calibratedWhite: 0.72, alpha: 1)
-        if let board, board.grained, let texture = grainTexture(board.id, colour) {
+        let texture: TextureResource? = if let board, board.profileModule > 0 {
+            profileTexture(board, colour)
+        } else if let board, board.grained {
+            grainTexture(board.id, colour)
+        } else {
+            nil
+        }
+        if let texture {
             let sampler = MTLSamplerDescriptor()
             sampler.sAddressMode = .repeat
             sampler.tAddressMode = .repeat
@@ -558,9 +567,80 @@ final class ViewportScene {
         return m
     }
 
+    /// A handle's metal, by its finish's name.
+    private static func handleMaterial(_ finish: Substring, selected: Bool) -> PhysicallyBasedMaterial {
+        let colour: NSColor = switch finish {
+        case "matt black": NSColor(calibratedWhite: 0.08, alpha: 1)
+        case "brushed brass": NSColor(calibratedRed: 0.76, green: 0.6, blue: 0.33, alpha: 1)
+        case "brushed nickel": NSColor(calibratedRed: 0.72, green: 0.71, blue: 0.67, alpha: 1)
+        default: NSColor(calibratedWhite: 0.8, alpha: 1)
+        }
+        var m = PhysicallyBasedMaterial()
+        m.baseColor = .init(tint: selected ? colour : colour.blended(withFraction: 0.3, of: .gray) ?? colour)
+        m.metallic = .init(floatLiteral: finish == "matt black" ? 0.2 : 1)
+        m.roughness = .init(floatLiteral: finish.hasPrefix("brushed") ? 0.45 : 0.3)
+        return m
+    }
+
     private var loading: Set<String> = []
     /// Called when a texture has loaded, so the viewport updates with it.
     var onTextureLoaded: (() -> Void)?
+
+    /// A lining's routed profile as stripes along the grain, or nil while it loads.
+    private func profileTexture(_ board: BoardRecord, _ colour: NSColor) -> TextureResource? {
+        let key = "profile:" + board.id
+        if let t = grainTextures[key] { return t }
+        guard !loading.contains(key),
+              let image = Self.flutes(colour, shape: board.profileShape, module: board.profileModule,
+                                      groove: board.profileGroove)
+        else { return nil }
+        loading.insert(key)
+        Task {
+            let t = try? await TextureResource(image: image, options: .init(semantic: .color, mipmapsMode: .allocateAndGenerateAll))
+            grainTextures[key] = t
+            loading.remove(key)
+            onTextureLoaded?()
+        }
+        return nil
+    }
+
+    /// A profile tile: one texture tile spans `grainRepeat` metres across the board, so the
+    /// module repeats a whole number of times in it (rounded, to tile without a seam). Grooves are
+    /// dark bands along the grain (the image's x axis); scallops and rounds shade across each module.
+    static func flutes(_ colour: NSColor, shape: String, module: Double, groove: Double) -> CGImage? {
+        let w = 64, h = 512
+        guard module > 0, let rgb = colour.usingColorSpace(.sRGB),
+              let ctx = CGContext(data: nil, width: w, height: h, bitsPerComponent: 8, bytesPerRow: 0,
+                                  space: CGColorSpace(name: CGColorSpace.sRGB)!,
+                                  bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)
+        else { return nil }
+        ctx.setFillColor(rgb.cgColor)
+        ctx.fill(CGRect(x: 0, y: 0, width: w, height: h))
+        let count = max(1, (Double(grainRepeat) * 1000 / module).rounded())
+        let pitch = CGFloat(h) / CGFloat(count)
+        let band = pitch * CGFloat(min(groove / module, 0.6))
+        for i in 0..<Int(count) {
+            let y0 = CGFloat(i) * pitch
+            switch shape {
+            case "scallop", "round":
+                // Light at one edge of each module, dark at the other: a curved face in light.
+                let steps = 16
+                for s in 0..<steps {
+                    let f = CGFloat(s) / CGFloat(steps)
+                    let shade = shape == "round" ? 0.5 - 0.5 * cos(f * 2 * .pi) : f
+                    ctx.setFillColor(CGColor(gray: 0, alpha: 0.18 * shade))
+                    ctx.fill(CGRect(x: 0, y: y0 + f * pitch, width: CGFloat(w), height: pitch / CGFloat(steps) + 0.5))
+                }
+            default:
+                ctx.setFillColor(CGColor(gray: 0, alpha: 0.35))
+                ctx.fill(CGRect(x: 0, y: y0, width: CGFloat(w), height: max(band, 1)))
+                // A light edge where the face meets the groove.
+                ctx.setFillColor(CGColor(gray: 1, alpha: 0.25))
+                ctx.fill(CGRect(x: 0, y: y0 + max(band, 1), width: CGFloat(w), height: 1))
+            }
+        }
+        return ctx.makeImage()
+    }
 
     /// The decor's woodgrain texture, or nil while it loads.
     private func grainTexture(_ key: String, _ colour: NSColor) -> TextureResource? {
