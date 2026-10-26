@@ -100,7 +100,7 @@ Priorities: **P0** blocks most other work · **P1** MVP · **P2** commercial par
 | BLUM-14 | done (0abec81; articles only: bracket screw positions and the 22 × 33 back cut-out vs our inset-back void need the owner's look, EXPANDO T not used yet) | S | Wall hanging bracket (598), cabinet connectors (599), EXPANDO T (596) for CORE-3's hangers | part numbers + drilling |
 | BLUM-15 | done (0abec81) | S | General information and System 32 definitions (710–731) as the reference for our constants; record any constant in code that disagrees | list in docs/blum/ |
 | BLUM-13b | done (d3e54c7) | S | SERVO-DRIVE for MOVENTO / TANDEM wooden drawers (printed 462 on) in place of the generic rows | BOM rows with part numbers |
-| BLUM-16 | todo (later: pocket and interior systems, not cabinet basics; left for after the P1 cabinet systems) | M | Later: REVEGO (534–540), AMBIA-LINE / ORGA-LINE (542–569), SPACE STEP (586), CABLOXX (594) | — |
+| BLUM-16 | todo (AMBIA-LINE steel drawer inserts done in a26eeec; wood design, ORGA-LINE, REVEGO, SPACE STEP and CABLOXX left) | M | Later: REVEGO (534–540), AMBIA-LINE / ORGA-LINE (542–569), SPACE STEP (586), CABLOXX (594) | — |
 | BLUM-CAD-1 | needs-human (list committed in 7943b00: owner downloads the STEP files) | S | `docs/blum/cad-shopping-list.md`: short prioritised list of configurations the app uses (default hinges + plates, LEGRABOX N/M/K, MOVENTO/TANDEM common lengths, AVENTOS HF top): web code, configurator choices, expected part numbers, file name `vendor-cad/blum/<part-no>.step`, for the owner to download from E-SERVICES | list committed; owner downloads |
 
 All Blum rows: source = Blum Catalogue and technical manual 2024/2025 in `vendor-cad/blum/catalogue/` (local only; PDF page = printed + 4; web codes in its webcodes.csv); records get `source.url` "Blum Catalogue and technical manual 2024/2025, p.<printed>, web code <code>", `document_date` "2024/2025", `verified: false`. Never commit catalogue text, pages or drawings. BLUM-10's stand-in dimensions should move to this data.
@@ -370,3 +370,4 @@ Agents append one line per session: date, items touched, outcome.
 - 2026-10-26b (night) — STYLE-2 built (c875186): floating shelves with concealed brackets and LED strip.
 - 2026-10-26b (night) — SURR-4 built (a7f650d): rangehood canopy kind with the insert's cut-out.
 - 2026-10-26b (night) — STYLE-3 built (dd2d290): handle finishes; handles drawn in the viewport from their screw holes.
+- 2026-10-26b (night) — BLUM-16 part (a26eeec): AMBIA-LINE cutlery insert and frames by Blum's width/length recommendation.
