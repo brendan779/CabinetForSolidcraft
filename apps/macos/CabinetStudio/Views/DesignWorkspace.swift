@@ -434,7 +434,9 @@ final class ViewportScene {
             }
         }
         addHardware(project: project, look: look, sectionX: look.section ? sectionX : nil, seen: &seen)
-        for e in root.children where !seen.contains(e.name) {
+        // A copy: removing from `root.children` while walking it skips the entity after each one
+        // removed (a door's handle, say).
+        for e in Array(root.children) where !seen.contains(e.name) {
             e.removeFromParent()
             panels[e.name] = nil
             sizes[e.name] = nil
