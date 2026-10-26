@@ -193,7 +193,7 @@ committed: they are the brands' copyright. `preview_colour` is an approximation.
 | P2-2 | todo | L | Shaker / 5-piece doors, glass frames, aluminium frame doors (Polytec Alu frames) |
 | P2-3 | todo | L | Wardrobes: hanging rails, drawers, shoe shelves, sliding doors |
 | P2-4 | todo | L | Benchtops, cornices, light rails, panels with scribes |
-| P2-5 | todo | L | Quoting: material + hardware + labour rates |
+| P2-5 | split → P2-5a done (ab3f118: core quote, PDF, Cut List › Quote with prices typed per line; not seen on screen), P2-5b todo (labour minutes and tax in the app, price per sheet as well as per m², quote per cabinet, a customer-facing layout) | L | Quoting: material + hardware + labour rates |
 | P2-6 | todo | L | CNC post-processors (MPR, CIX), BXF exchange with Blum (needs Blum spec 👤) |
 | P2-7 | todo | L | True-shape nesting for CNC |
 
@@ -349,3 +349,4 @@ Agents append one line per session: date, items touched, outcome.
 - 2026-10-26b (night) — PLG-3 checked: no plugin runtime yet (#1221, draft #4980 open; #5586 replaces #4330); SolidCraft v0.23.0 is out (this Mac's CLI is 0.20.0).
 - 2026-10-26b (night) — BLUM-7b HKi done (f87997e): integrated stay lift with its side pockets cut (265 × 120 × 12, 21 below the top); semi-integrated not offered.
 - 2026-10-26b (night) — HAF-1 and UI-7 set to needs-human (supplier data; room planner design), UI-15 blocked on UI automation permission.
+- 2026-10-26b (night) — P2-5 split; P2-5a built (ab3f118): quote from a price list the owner types in (board per m² of nested sheets, tape, hardware, labour, markup, GST); missing prices listed.
