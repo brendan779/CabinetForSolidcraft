@@ -249,5 +249,46 @@ ITEM CODE COLOUR WIDTH
             p.lining_tables(self.RAW.replace("Bead 20 33333 na", "Bead 20 33333"), {})
 
 
+def at(y, *placed):
+    """Words at given left edges on one line: at(10, (60, "Test"), (90, "Oak"))."""
+    return [p.Word(x, y, x + 5 * len(t), y + 10.5, t) for x, t in placed]
+
+
+class LiningBoards(unittest.TestCase):
+    SRC = {"url": "https://x.invalid", "verified": False}
+
+    def test_contours_rows_take_their_profile_and_a_code_per_length(self):
+        page = p.lines(
+            at(10, (200, "900x91mm"), (300, "2700x91mm"), (400, "900x39mm"))
+            + at(30, (100, "TESTPROFILE"))
+            + at(42, (100, "Test"), (125, "Oak"), (205, "111111"), (305, "222222"), (405, "333333"))
+            + at(54, (100, "Test"), (125, "Pine"), (210, "na"), (305, "444444"), (410, "na"))
+            + at(70, (100, "TIMBER"), (140, "LINING"), (180, "PROFILES")))
+        boards = p.contours_boards(page, self.SRC)
+        self.assertEqual([b["id"] for b in boards], [
+            "polytec.easycraft-contours.testprofile-test-oak.21.timber",
+            "polytec.easycraft-contours.testprofile-test-pine.21.timber",
+        ])
+        # The bead column is not a board size.
+        self.assertEqual(boards[0]["item_codes"], {"900x91": "111111", "2700x91": "222222"})
+        self.assertEqual(boards[1]["sheets"], [{"length": 2700.0, "width": 91.0}])
+        self.assertEqual(boards[0]["substrate"], "timber")
+
+    def test_ikara_rows_give_a_board_per_profile_at_its_width(self):
+        page = p.lines(
+            at(10, (100, "Easycraft"), (150, "Ikara"), (190, "Lining"), (230, "Boards"))
+            + at(20, (300, "118x2700"), (360, "105x2700"))
+            + at(30, (305, "15mm"), (365, "15mm"))
+            + at(40, (300, "Convex"), (360, "Channel"))
+            + at(52, (100, "Test"), (125, "Oak"), (240, "Woodmatt"), (300, "11111"), (360, "22222"))
+            + at(70, (100, "easyLINING"), (160, "PROFILES"))
+            + at(80, (100, "Channel"), (160, "Convex")))
+        boards = p.ikara_boards(page, self.SRC)
+        self.assertEqual([(b["id"], b["sheets"][0]["width"]) for b in boards], [
+            ("polytec.easycraft-ikara.test-oak-convex.15.mr-mdf", 118.0),
+            ("polytec.easycraft-ikara.test-oak-channel.15.mr-mdf", 105.0),
+        ])
+
+
 if __name__ == "__main__":
     unittest.main()

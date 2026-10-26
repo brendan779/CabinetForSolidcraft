@@ -518,6 +518,105 @@ def lining_tables(raw, source):
     return boards
 
 
+SIZED = re.compile(r"^(\d{3,4})x(\d{2,4})mm$")
+
+
+def nearest_heading(headings, w):
+    """The heading (x centre, value) nearest a cell's centre."""
+    return min(headings, key=lambda h: abs(h[0] - w.cx))[1]
+
+
+def contours_boards(page, source):
+    """Easycraft Contours timber lining boards (guide p.30): a profile name in capitals over a
+    row per timber species, with an item code (or `na`) under each board length's `900x91mm` /
+    `2700x91mm` heading. The curved wall beads beside them are mouldings, not boards."""
+    sizes = []
+    for line in page:
+        for w in line:
+            m = SIZED.match(w.text)
+            if m and m.group(2) == "91":
+                sizes.append((w.cx, (float(m.group(1)), float(m.group(2)))))
+    if not sizes:
+        return []
+    reach = max(x for x, _ in sizes) + 30
+    boards, profile = [], None
+    for line in page:
+        words = [w for w in line if w.x0 < reach]
+        cells = [w for w in words if re.match(r"^(\d{6}|na)$", w.text)]
+        name = " ".join(w.text for w in words if w not in cells and w.x0 < min(x for x, _ in sizes) - 40)
+        if not cells:
+            if re.match(r"^[A-Z]+$", name) and name not in ("NOTES",):
+                profile = name.title()
+            if name.startswith("TIMBER LINING"):
+                break
+            continue
+        if profile is None or not name:
+            continue
+        board = {
+            "id": f"polytec.easycraft-contours.{slug(profile)}-{slug(name)}.21.timber",
+            "brand": "Polytec", "range": "Easycraft Contours", "decor": name, "finish": profile,
+            "kind": "lining", "substrate": "timber", "thickness": 21.0, "sheets": [],
+            "grained": True, "double_sided": False, "emission": "", "edge_tapes": [],
+            "preview_colour": "", "item_codes": {}, "source": source,
+        }
+        for c in cells:
+            length, width = nearest_heading(sizes, c)
+            if c.text != "na":
+                board["sheets"].append({"length": length, "width": width})
+                board["item_codes"][f"{length:g}x{width:g}"] = c.text
+        if board["sheets"]:
+            board["sheets"].sort(key=lambda s: -s["length"])
+            boards.append(board)
+    return boards
+
+
+def ikara_boards(page, source):
+    """Easycraft Ikara MR MDF E-Zero lining boards (guide p.31): a row per colour (finish
+    Woodmatt) with an item code under each profile (`Convex`, `Channel`), whose width the
+    `118x2700` / `105x2700` heading over it gives. Only the table's lines: from its title down to
+    the profile drawings' caption (the DAR table beside it has its own thickness headings)."""
+    start = next((i for i, line in enumerate(page)
+                  if {"Ikara", "Lining", "Boards"} <= {w.text for w in line}), None)
+    if start is None:
+        return []
+    end = next((i for i in range(start, len(page)) if "PROFILES" in {w.text for w in page[i]}),
+               len(page))
+    page = page[start:end]
+    widths, profiles = [], []
+    for line in page:
+        for w in line:
+            if m := re.match(r"^(\d{3})x(\d{4})$", w.text):
+                widths.append((w.cx, (float(m.group(2)), float(m.group(1)))))
+            if w.text in ("Convex", "Channel"):
+                profiles.append((w.cx, w.text))
+    thickness = next((float(w.text[:-2]) for line in page for w in line
+                      if re.match(r"^\d+mm$", w.text) and widths
+                      and abs(w.cx - widths[0][0]) < 20), None)
+    if not widths or not profiles or thickness is None:
+        return []
+    boards = []
+    for line in page:
+        cells = [w for w in line if re.match(r"^\d{5}$", w.text)]
+        if not cells or not any(w.text == "Woodmatt" for w in line):
+            continue
+        colour = " ".join(w.text for w in line if w.x1 < min(x for x, _ in profiles) - 60
+                          and w.text != "Woodmatt")
+        for c in cells:
+            profile = nearest_heading(profiles, c)
+            length, width = nearest_heading(widths, c)
+            boards.append({
+                "id": f"polytec.easycraft-ikara.{slug(colour)}-{slug(profile)}.{thickness:g}.mr-mdf",
+                "brand": "Polytec", "range": "Easycraft Ikara", "decor": colour,
+                "finish": f"{profile} Woodmatt", "kind": "lining",
+                "substrate": "moisture_resistant_mdf", "thickness": thickness,
+                "sheets": [{"length": length, "width": width}], "grained": True,
+                "double_sided": False, "emission": "E-Zero", "edge_tapes": [],
+                "preview_colour": "", "item_codes": {f"{length:g}x{width:g}": c.text},
+                "source": source,
+            })
+    return boards
+
+
 def raw_pages(pdf):
     out = subprocess.run(["pdftotext", "-raw", str(pdf), "-"], check=True, capture_output=True,
                          text=True).stdout
@@ -565,6 +664,12 @@ def main():
     source = {"url": URL, "document_date": date, "retrieved": date, "verified": False}
     boards += [b for raw in raw_pages(pdf) if "ROUTED PANELS" in raw
                for b in lining_tables(raw, source)]
+    for page in pages:
+        words = {w.text for line in page for w in line}
+        if "CIRQUE" in words:
+            boards += contours_boards(page, source)
+        if "Ikara" in words and "Woodmatt" in words:
+            boards += ikara_boards(page, source)
     existing = json.loads(args.out.read_text()) if args.out.exists() else {}
     merge_existing(boards, tapes, existing)
     used = {t for b in boards for t in b["edge_tapes"]}
@@ -574,7 +679,10 @@ def main():
         "website": "https://www.polytec.com.au",
         "notes": f"Generated by tools/parse_polytec.py from the polytec Availability Guide of {date} "
                  "(DECORATIVE board tables, guide pages 3-13; COMMERCIAL boards and edge tapes, "
-                 "pages 14-17; routed wall lining panels, page 28). Item codes are per sheet size. "
+                 "pages 14-17; routed wall lining panels, page 28; Easycraft Contours timber and "
+                 "Ikara MR MDF lining boards, pages 30-31, as boards one lining board wide). "
+                 "Item codes are per sheet size. Curved wall beads and DAR mouldings are not "
+                 "recorded. "
                  "Availability marks (limited stock, made to order, ex NSW) and COMMERCIAL pack "
                  "quantities are not recorded. "
                  "Do not edit by hand: rerun the tool.",

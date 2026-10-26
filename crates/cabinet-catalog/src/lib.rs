@@ -56,6 +56,8 @@ pub enum Substrate {
     Plywood,
     Hmr,
     Compact,
+    /// Solid timber (dressed lining boards).
+    Timber,
     Other,
 }
 
