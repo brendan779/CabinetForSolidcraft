@@ -5,7 +5,9 @@
 //! The placement is the guillotine free-rectangle method (Jylänki, "A Thousand Ways to Pack the
 //! Bin", 2010): parts, largest first, go into the free rectangle they fit most tightly (best short
 //! side), and that rectangle is cut in two along the shorter leftover, so every cut is a through
-//! cut of the piece it is made in.
+//! cut of the piece it is made in. For a CNC router, which needs no through cuts, the same
+//! paper's MaxRects method keeps every maximal free rectangle instead, and the kerf is the
+//! cutter's width between parts.
 
 use std::collections::BTreeMap;
 
@@ -31,6 +33,9 @@ pub struct Settings {
     /// Leftovers at least this long and wide are kept as offcuts.
     pub offcut_length: f64,
     pub offcut_width: f64,
+    /// Nest for a CNC router (MaxRects, no through cuts) rather than the panel saw.
+    #[serde(default)]
+    pub router: bool,
 }
 
 impl Default for Settings {
@@ -41,6 +46,7 @@ impl Default for Settings {
             trim: 10.0,
             offcut_length: 300.0,
             offcut_width: 100.0,
+            router: false,
         }
     }
 }
@@ -140,9 +146,23 @@ pub fn nest_with_offcuts(
             .iter()
             .filter(|o| o.board == board && (o.thickness - thickness).abs() < 1e-6)
             .collect();
-        let best = stock(&board, thickness)
+        // A router can cut a saw's layout too: it tries both and keeps the better.
+        let methods: Vec<Settings> = if settings.router {
+            vec![
+                *settings,
+                Settings {
+                    router: false,
+                    ..*settings
+                },
+            ]
+        } else {
+            vec![*settings]
+        };
+        let sizes = stock(&board, thickness);
+        let best = sizes
             .iter()
-            .map(|s| nest_group(&board, thickness, s, &mine, &group, settings))
+            .flat_map(|s| methods.iter().map(move |m| (s, m)))
+            .map(|(s, m)| nest_group(&board, thickness, s, &mine, &group, m))
             .min_by(|(a, ua), (b, ub)| {
                 let area = |v: &Vec<Sheet>| -> f64 {
                     v.iter()
@@ -285,7 +305,11 @@ fn nest_group(
             }
         };
         let o = &mut open[s];
-        let rect = o.free.swap_remove(f);
+        let rect = if settings.router {
+            o.free[f]
+        } else {
+            o.free.swap_remove(f)
+        };
         let (l, w) = size(r, turned);
         // A strip's parts one after the other from its start, along the grain.
         let mut along = 0.0;
@@ -313,13 +337,25 @@ fn nest_group(
             });
             along += if turned { mw } else { ml } + settings.kerf;
         }
-        o.free.extend(split(rect, l, w, settings.kerf));
+        if settings.router {
+            // The part and the cutter's path all round it come out of every free rectangle.
+            let k = settings.kerf;
+            let used = Rect {
+                x: rect.x - k,
+                y: rect.y - k,
+                length: l + 2.0 * k,
+                width: w + 2.0 * k,
+            };
+            o.free = carve(&o.free, &used);
+        } else {
+            o.free.extend(split(rect, l, w, settings.kerf));
+        }
     }
     let sheets = open
         .into_iter()
         .filter(|o| !(o.sheet.from_offcut && o.sheet.placements.is_empty()))
         .map(|mut o| {
-            o.sheet.offcuts = o
+            let mut keep: Vec<Rect> = o
                 .free
                 .into_iter()
                 .filter(|f| {
@@ -327,6 +363,18 @@ fn nest_group(
                     a >= settings.offcut_length && b >= settings.offcut_width
                 })
                 .collect();
+            if settings.router {
+                // MaxRects' free rectangles overlap: keep the largest that do not.
+                keep.sort_by(|a, b| b.area().total_cmp(&a.area()));
+                let mut chosen: Vec<Rect> = Vec::new();
+                for r in keep {
+                    if !chosen.iter().any(|c| overlaps(c, &r)) {
+                        chosen.push(r);
+                    }
+                }
+                keep = chosen;
+            }
+            o.sheet.offcuts = keep;
             o.sheet
         })
         .collect();
@@ -386,6 +434,67 @@ fn size(r: &Piece, turned: bool) -> (f64, f64) {
     } else {
         (r.cut_length, r.cut_width)
     }
+}
+
+fn overlaps(a: &Rect, b: &Rect) -> bool {
+    a.x < b.x + b.length - 1e-9
+        && b.x < a.x + a.length - 1e-9
+        && a.y < b.y + b.width - 1e-9
+        && b.y < a.y + a.width - 1e-9
+}
+
+/// MaxRects: every free rectangle less `used`, as the up to four maximal rectangles beside it,
+/// with those inside another dropped.
+fn carve(free: &[Rect], used: &Rect) -> Vec<Rect> {
+    let mut out: Vec<Rect> = Vec::new();
+    for f in free {
+        if !overlaps(f, used) {
+            out.push(*f);
+            continue;
+        }
+        let pieces = [
+            Rect {
+                length: used.x - f.x,
+                ..*f
+            },
+            Rect {
+                x: used.x + used.length,
+                length: f.x + f.length - (used.x + used.length),
+                ..*f
+            },
+            Rect {
+                width: used.y - f.y,
+                ..*f
+            },
+            Rect {
+                y: used.y + used.width,
+                width: f.y + f.width - (used.y + used.width),
+                ..*f
+            },
+        ];
+        out.extend(
+            pieces
+                .into_iter()
+                .filter(|r| r.length > 1e-6 && r.width > 1e-6),
+        );
+    }
+    let inside = |a: &Rect, b: &Rect| {
+        a.x >= b.x - 1e-9
+            && a.y >= b.y - 1e-9
+            && a.x + a.length <= b.x + b.length + 1e-9
+            && a.y + a.width <= b.y + b.width + 1e-9
+    };
+    let mut kept: Vec<Rect> = Vec::new();
+    for (i, r) in out.iter().enumerate() {
+        let dup = out
+            .iter()
+            .enumerate()
+            .any(|(j, o)| j != i && inside(r, o) && (!inside(o, r) || j < i));
+        if !dup {
+            kept.push(*r);
+        }
+    }
+    kept
 }
 
 /// What is left of `rect` after an `l` × `w` part in its corner: two rectangles, cut along the
@@ -552,6 +661,39 @@ mod tests {
         rows[1].cut_length = 2000.0;
         let n = nest(&rows, stock(true), &s);
         assert!(n.unplaced.iter().any(|u| u.contains("T01.grain1")));
+    }
+
+    /// P2-7: a router packs without through cuts: parts a cutter's width apart, offcuts apart
+    /// from each other, and never more sheets than the saw needs.
+    #[test]
+    fn the_router_packs_at_least_as_tight_as_the_saw() {
+        let saw = Settings::default();
+        let router = Settings {
+            kerf: 12.0,
+            router: true,
+            ..Settings::default()
+        };
+        let rows = [
+            row("side", 820.0, 560.0, 6, true),
+            row("bottom", 568.0, 560.0, 3, true),
+            row("rail", 568.0, 100.0, 6, true),
+            row("shelf", 564.0, 540.0, 5, false),
+            row("door", 716.0, 446.0, 4, true),
+        ];
+        let r = nest(&rows, stock(false), &router);
+        assert!(r.unplaced.is_empty());
+        assert_valid(&r, &router);
+        for sheet in &r.sheets {
+            for (i, a) in sheet.offcuts.iter().enumerate() {
+                for b in &sheet.offcuts[i + 1..] {
+                    assert!(!overlap(a, b), "{a:?} {b:?}");
+                }
+            }
+        }
+        let placed: usize = r.sheets.iter().map(|s| s.placements.len()).sum();
+        assert_eq!(placed, 24);
+        let s = nest(&rows, stock(false), &saw);
+        assert!(r.sheets.len() <= s.sheets.len());
     }
 
     #[test]

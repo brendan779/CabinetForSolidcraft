@@ -713,13 +713,14 @@ pub fn cut_sheets_pdf(items: JobItems, job: String) -> Result<Vec<u8>, CoreError
 /// The usual Australian sheet for parts without a catalog board (mm).
 const GENERIC_SHEET: (f64, f64) = (2400.0, 1200.0);
 
-/// The job's parts nested on stock sheets for the panel saw, on whichever of each board's catalog
+/// The job's parts nested on stock sheets for the panel saw (or a CNC router), on whichever of each board's catalog
 /// sheet sizes uses least board; parts with no board go on 2400 × 1200 sheets.
 fn job_nesting(
     items: &JobItems,
     catalog_dir: &str,
     kerf: f64,
     trim: f64,
+    router: bool,
     offcuts: &[cabinet_core::nesting::Offcut],
 ) -> Result<
     (
@@ -735,6 +736,7 @@ fn job_nesting(
     let settings = Settings {
         kerf,
         trim,
+        router,
         ..Settings::default()
     };
     let nesting = nest_with_offcuts(
@@ -777,10 +779,11 @@ pub fn nesting_kept_offcuts(
     catalog_dir: String,
     kerf: f64,
     trim: f64,
+    router: bool,
     offcuts_json: String,
 ) -> Result<String, CoreError> {
     let stored = offcuts(&offcuts_json)?;
-    let (nesting, _) = job_nesting(&items, &catalog_dir, kerf, trim, &stored)?;
+    let (nesting, _) = job_nesting(&items, &catalog_dir, kerf, trim, router, &stored)?;
     serde_json::to_string(&cabinet_core::nesting::kept_offcuts(&nesting, &stored)).map_err(invalid)
 }
 
@@ -792,10 +795,17 @@ pub fn nesting_pdf(
     job: String,
     kerf: f64,
     trim: f64,
+    router: bool,
     offcuts_json: String,
 ) -> Result<Vec<u8>, CoreError> {
-    let (nesting, settings) =
-        job_nesting(&items, &catalog_dir, kerf, trim, &offcuts(&offcuts_json)?)?;
+    let (nesting, settings) = job_nesting(
+        &items,
+        &catalog_dir,
+        kerf,
+        trim,
+        router,
+        &offcuts(&offcuts_json)?,
+    )?;
     Ok(cabinet_sheets::nesting::nesting_pdf(
         &nesting, &job, &settings,
     ))
@@ -809,10 +819,17 @@ pub fn nesting_pages(
     job: String,
     kerf: f64,
     trim: f64,
+    router: bool,
     offcuts_json: String,
 ) -> Result<Vec<String>, CoreError> {
-    let (nesting, settings) =
-        job_nesting(&items, &catalog_dir, kerf, trim, &offcuts(&offcuts_json)?)?;
+    let (nesting, settings) = job_nesting(
+        &items,
+        &catalog_dir,
+        kerf,
+        trim,
+        router,
+        &offcuts(&offcuts_json)?,
+    )?;
     Ok(cabinet_sheets::nesting::nesting_svgs(
         &nesting, &job, &settings,
     ))
@@ -848,6 +865,7 @@ fn job_quote_core(
     catalog_dir: &str,
     kerf: f64,
     trim: f64,
+    router: bool,
     offcuts_json: &str,
     prices_json: &str,
 ) -> Result<cabinet_core::quote::Quote, CoreError> {
@@ -856,7 +874,14 @@ fn job_quote_core(
     } else {
         serde_json::from_str(prices_json).map_err(invalid)?
     };
-    let (nesting, _) = job_nesting(items, catalog_dir, kerf, trim, &offcuts(offcuts_json)?)?;
+    let (nesting, _) = job_nesting(
+        items,
+        catalog_dir,
+        kerf,
+        trim,
+        router,
+        &offcuts(offcuts_json)?,
+    )?;
     let (lists, tape) = cut_lists(items)?;
     let cut = cut_list(&lists, "Generic", tape);
     let bom = cabinet_core::bom::hardware_bom(&lists);
@@ -876,6 +901,7 @@ pub fn job_quote(
     catalog_dir: String,
     kerf: f64,
     trim: f64,
+    router: bool,
     offcuts_json: String,
     prices_json: String,
 ) -> Result<QuoteRecord, CoreError> {
@@ -884,6 +910,7 @@ pub fn job_quote(
         &catalog_dir,
         kerf,
         trim,
+        router,
         &offcuts_json,
         &prices_json,
     )?;
@@ -915,12 +942,15 @@ pub fn job_quote(
 
 /// The quote as a PDF table.
 #[uniffi::export]
+// Swift calls it with named arguments; a settings record would only wrap the same values.
+#[allow(clippy::too_many_arguments)]
 pub fn quote_pdf(
     items: JobItems,
     catalog_dir: String,
     job: String,
     kerf: f64,
     trim: f64,
+    router: bool,
     offcuts_json: String,
     prices_json: String,
 ) -> Result<Vec<u8>, CoreError> {
@@ -929,6 +959,7 @@ pub fn quote_pdf(
         &catalog_dir,
         kerf,
         trim,
+        router,
         &offcuts_json,
         &prices_json,
     )?;
@@ -985,12 +1016,15 @@ pub fn quote_pdf(
 
 /// The quote as the customer sees it: one price per cabinet, filler and end panel, tax included.
 #[uniffi::export]
+// Swift calls it with named arguments; a settings record would only wrap the same values.
+#[allow(clippy::too_many_arguments)]
 pub fn customer_quote_pdf(
     items: JobItems,
     catalog_dir: String,
     job: String,
     kerf: f64,
     trim: f64,
+    router: bool,
     offcuts_json: String,
     prices_json: String,
 ) -> Result<Vec<u8>, CoreError> {
@@ -1004,10 +1038,18 @@ pub fn customer_quote_pdf(
         &catalog_dir,
         kerf,
         trim,
+        router,
         &offcuts_json,
         &prices_json,
     )?;
-    let (nesting, _) = job_nesting(&items, &catalog_dir, kerf, trim, &offcuts(&offcuts_json)?)?;
+    let (nesting, _) = job_nesting(
+        &items,
+        &catalog_dir,
+        kerf,
+        trim,
+        router,
+        &offcuts(&offcuts_json)?,
+    )?;
     let built = job_lists(&items)?;
     let ids: Vec<String> = built
         .iter()
@@ -1658,6 +1700,7 @@ mod tests {
             catalog.clone(),
             4.4,
             10.0,
+            false,
             String::new(),
             prices.into(),
         )
@@ -1674,6 +1717,7 @@ mod tests {
             "Kitchen".into(),
             4.4,
             10.0,
+            false,
             String::new(),
             prices.into(),
         )

@@ -147,8 +147,13 @@ pub fn sheet_svg(sheet: &Sheet, n: usize, of: usize, job: &str, settings: &Setti
     }
     let _ = writeln!(
         svg,
-        r##"<text x="{MARGIN:.2}" y="{:.2}" font-size="2.6" fill="#555">Cut sizes in mm, x along the sheet's length from the left, y across it from the top. Kerf {} mm, trim {} mm each edge. Green: offcuts to keep.</text>"##,
+        r##"<text x="{MARGIN:.2}" y="{:.2}" font-size="2.6" fill="#555">Cut sizes in mm, x along the sheet's length from the left, y across it from the top. {} {} mm, trim {} mm each edge. Green: offcuts to keep.</text>"##,
         PAGE_H - 8.0,
+        if settings.router {
+            "CNC router, cutter"
+        } else {
+            "Panel saw, kerf"
+        },
         settings.kerf,
         settings.trim
     );

@@ -61,6 +61,7 @@ struct NestingView: View {
     @Environment(ProjectModel.self) private var project
     @AppStorage("nestingKerf") private var kerf = 4.4
     @AppStorage("nestingTrim") private var trim = 10.0
+    @AppStorage("nestingRouter") private var router = false
     @AppStorage("nestingUseOffcuts") private var useOffcuts = true
     @State private var stored = OffcutStore.load()
     @State private var page = 0
@@ -71,7 +72,7 @@ struct NestingView: View {
     private var pages: [String] {
         guard let dir = Preferences.catalogDir?.path else { return [] }
         return (try? nestingPages(items: project.jobItems, catalogDir: dir, job: project.jobName,
-                                  kerf: kerf, trim: trim, offcutsJson: offcuts)) ?? []
+                                  kerf: kerf, trim: trim, router: router, offcutsJson: offcuts)) ?? []
     }
 
     var body: some View {
@@ -97,12 +98,20 @@ struct NestingView: View {
                         .labelStyle(.iconOnly)
                         .disabled(page >= pages.count - 1)
                     Spacer(minLength: 0)
+                    Picker("Machine", selection: $router) {
+                        Text("Panel saw").tag(false)
+                        Text("CNC router").tag(true)
+                    }
+                    .pickerStyle(.menu)
+                    .labelsHidden()
+                    .fixedSize()
+                    .help("A panel saw cuts edge to edge; a CNC router can nest tighter, its cutter's width apart")
                     Button("Export PDF…", systemImage: "doc.richtext") { makePdf() }
                         .help("The summary and every sheet as a PDF")
                 }
                 HStack(spacing: 10) {
-                    Stepper("Kerf \(String(format: "%.1f", kerf))", value: $kerf, in: 1...8, step: 0.2)
-                        .help("Saw kerf, mm")
+                    Stepper("\(router ? "Cutter" : "Kerf") \(String(format: "%.1f", kerf))", value: $kerf, in: 1...20, step: 0.2)
+                        .help(router ? "The router cutter's diameter: the gap between parts, mm" : "Saw kerf, mm")
                     Stepper("Trim \(Int(trim))", value: $trim, in: 0...25, step: 1)
                         .help("Taken off every new sheet's edges before the first cut, mm")
                     Spacer(minLength: 0)
@@ -132,7 +141,7 @@ struct NestingView: View {
         guard let dir = Preferences.catalogDir?.path else { return }
         do {
             export = DataDocument(data: try nestingPdf(items: project.jobItems, catalogDir: dir,
-                                                      job: project.jobName, kerf: kerf, trim: trim,
+                                                      job: project.jobName, kerf: kerf, trim: trim, router: router,
                                                       offcutsJson: offcuts))
         } catch {
             project.lastError = "Could not nest the parts: \(error)"
@@ -144,7 +153,7 @@ struct NestingView: View {
         guard let dir = Preferences.catalogDir?.path else { return }
         do {
             let kept = try nestingKeptOffcuts(items: project.jobItems, catalogDir: dir, kerf: kerf,
-                                              trim: trim, offcutsJson: offcuts)
+                                              trim: trim, router: router, offcutsJson: offcuts)
             // Offcuts not offered to this nesting stay as they were.
             let json = useOffcuts ? kept : merge(stored, kept)
             try OffcutStore.save(json)
@@ -197,6 +206,7 @@ struct QuoteView: View {
     @Environment(ProjectModel.self) private var project
     @AppStorage("nestingKerf") private var kerf = 4.4
     @AppStorage("nestingTrim") private var trim = 10.0
+    @AppStorage("nestingRouter") private var router = false
     @AppStorage("nestingUseOffcuts") private var useOffcuts = true
     @State private var prices = PriceStore.load()
     @State private var export: DataDocument?
@@ -204,7 +214,7 @@ struct QuoteView: View {
 
     private var quote: QuoteRecord? {
         guard let dir = Preferences.catalogDir?.path else { return nil }
-        return try? jobQuote(items: project.jobItems, catalogDir: dir, kerf: kerf, trim: trim,
+        return try? jobQuote(items: project.jobItems, catalogDir: dir, kerf: kerf, trim: trim, router: router,
                              offcutsJson: useOffcuts ? OffcutStore.load() : "",
                              pricesJson: PriceStore.json(prices))
     }
@@ -313,9 +323,9 @@ struct QuoteView: View {
         do {
             let data = customer
                 ? try customerQuotePdf(items: project.jobItems, catalogDir: dir, job: project.jobName,
-                                       kerf: kerf, trim: trim, offcutsJson: offcuts, pricesJson: PriceStore.json(prices))
+                                       kerf: kerf, trim: trim, router: router, offcutsJson: offcuts, pricesJson: PriceStore.json(prices))
                 : try quotePdf(items: project.jobItems, catalogDir: dir, job: project.jobName,
-                               kerf: kerf, trim: trim, offcutsJson: offcuts, pricesJson: PriceStore.json(prices))
+                               kerf: kerf, trim: trim, router: router, offcutsJson: offcuts, pricesJson: PriceStore.json(prices))
             export = DataDocument(data: data)
         } catch {
             project.lastError = "Could not make the quote: \(error)"
@@ -442,9 +452,10 @@ struct PartsListView: View {
             let d = UserDefaults.standard
             let kerf = d.object(forKey: "nestingKerf") as? Double ?? 4.4
             let trim = d.object(forKey: "nestingTrim") as? Double ?? 10
+            let router = d.object(forKey: "nestingRouter") as? Bool ?? false
             let use = d.object(forKey: "nestingUseOffcuts") as? Bool ?? true
             let data = try nestingPdf(items: project.jobItems, catalogDir: dir, job: project.jobName,
-                                      kerf: kerf, trim: trim, offcutsJson: use ? OffcutStore.load() : "")
+                                      kerf: kerf, trim: trim, router: router, offcutsJson: use ? OffcutStore.load() : "")
             export = (DataDocument(data: data), .pdf, "\(project.jobName) nesting")
         } catch {
             project.lastError = "Could not nest the parts: \(error)"
