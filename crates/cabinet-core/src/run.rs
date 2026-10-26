@@ -46,7 +46,43 @@ pub struct Benchtop {
     /// Catalog board id, or empty for generic.
     #[serde(default)]
     pub board: String,
+    /// Holes through the top for a sink or a cooktop, each centred over a cabinet.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub cutouts: Vec<Cutout>,
 }
+
+/// A hole through a benchtop, centred across the cabinet it sits over.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct Cutout {
+    /// The cabinet's id.
+    pub over: String,
+    pub kind: CutoutKind,
+    /// Along the run, and front to back.
+    pub width: f64,
+    pub depth: f64,
+    /// From the benchtop's front edge to the cut-out.
+    #[serde(default = "Cutout::default_setback")]
+    pub setback: f64,
+}
+
+impl Cutout {
+    /// Our default: 70 mm of top in front of a sink or cooktop.
+    fn default_setback() -> f64 {
+        70.0
+    }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum CutoutKind {
+    /// A sink, with a tap hole behind it.
+    Sink,
+    Cooktop,
+}
+
+/// Our choices: a tap hole's diameter and how far behind the sink cut-out its centre sits.
+const TAP_HOLE_DIAMETER: f64 = 35.0;
+const TAP_HOLE_BEHIND: f64 = 40.0;
 
 impl Benchtop {
     /// Our defaults: a 33 mm laminate top 20 mm past the doors.
@@ -121,7 +157,9 @@ pub fn build_run(run: &Run) -> Result<Vec<PartList>> {
                     RunItem::Benchtop(_) => false,
                 })
                 .collect();
-            out[i] = benchtop(b, &out, &under);
+            let mut top = benchtop(b, &out, &under);
+            cutouts(b, &mut top, &out);
+            out[i] = top;
         }
     }
     Ok(out)
@@ -320,6 +358,76 @@ fn benchtop(b: &Benchtop, lists: &[PartList], under: &[bool]) -> PartList {
     out
 }
 
+/// Cuts each cut-out through the benchtop piece over its cabinet, and a tap hole behind a sink.
+fn cutouts(b: &Benchtop, top: &mut PartList, lists: &[PartList]) {
+    use crate::part::{BorePurpose, Dir, Operation};
+    for c in &b.cutouts {
+        let Some(cab) = lists.iter().find(|l| l.cabinet == c.over) else {
+            top.warnings.push(format!(
+                "{:?} cut-out: no cabinet {} in the run",
+                c.kind, c.over
+            ));
+            continue;
+        };
+        let x0 = cab
+            .parts
+            .iter()
+            .map(|p| p.bounds.min.x)
+            .fold(f64::MAX, f64::min);
+        let x1 = cab
+            .parts
+            .iter()
+            .map(|p| p.bounds.max().x)
+            .fold(f64::MIN, f64::max);
+        let mid = (x0 + x1) / 2.0;
+        let Some(piece) = top
+            .parts
+            .iter()
+            .find(|p| p.bounds.min.x <= mid && mid <= p.bounds.max().x)
+            .cloned()
+        else {
+            top.warnings
+                .push(format!("{:?} cut-out: no benchtop over {}", c.kind, c.over));
+            continue;
+        };
+        let pb = piece.bounds;
+        let y0 = pb.min.y + c.setback;
+        let bounds = Aabb::new(
+            Vec3::new(mid - c.width / 2.0, y0, pb.min.z),
+            Vec3::new(c.width, c.depth, pb.size.z),
+        );
+        if bounds.min.x < pb.min.x || bounds.max().x > pb.max().x || bounds.max().y > pb.max().y {
+            top.warnings.push(format!(
+                "{:?} cut-out over {} does not fit the benchtop",
+                c.kind, c.over
+            ));
+            continue;
+        }
+        top.operations.push(Operation::Groove {
+            part: piece.name.clone(),
+            bounds,
+        });
+        if c.kind == CutoutKind::Sink {
+            let y = bounds.max().y + TAP_HOLE_BEHIND;
+            if y + TAP_HOLE_DIAMETER / 2.0 < pb.max().y {
+                top.operations.push(Operation::Bore {
+                    part: piece.name.clone(),
+                    at: Vec3::new(mid, y, pb.max().z),
+                    direction: Dir::new(Axis::Z, false),
+                    diameter: TAP_HOLE_DIAMETER,
+                    depth: pb.size.z,
+                    purpose: BorePurpose::TapHole,
+                });
+            } else {
+                top.warnings.push(format!(
+                    "no room behind the sink over {} for a tap hole",
+                    c.over
+                ));
+            }
+        }
+    }
+}
+
 fn single(
     id: &str,
     role: PartRole,
@@ -458,6 +566,7 @@ mod tests {
             side_overhang: side,
             back_clearance: 0.0,
             board: String::new(),
+            cutouts: Vec::new(),
         })
     }
 
@@ -518,5 +627,70 @@ mod tests {
         let lists = build_run(&run).unwrap();
         assert!(lists[1].parts.is_empty());
         assert!(lists[1].warnings[0].contains("no base cabinets"));
+    }
+
+    /// BENCH-4: a sink cut-out over the sink cabinet with a tap hole behind it, a cooktop over a
+    /// base cabinet; both through the top.
+    #[test]
+    fn cut_outs_go_through_the_top_over_their_cabinets() {
+        let mut bt = Benchtop {
+            id: "BT1".into(),
+            thickness: 33.0,
+            front_overhang: 20.0,
+            side_overhang: 0.0,
+            back_clearance: 0.0,
+            board: String::new(),
+            cutouts: vec![
+                Cutout {
+                    over: "S01".into(),
+                    kind: CutoutKind::Sink,
+                    width: 760.0,
+                    depth: 440.0,
+                    setback: 70.0,
+                },
+                Cutout {
+                    over: "B01".into(),
+                    kind: CutoutKind::Cooktop,
+                    width: 560.0,
+                    depth: 490.0,
+                    setback: 70.0,
+                },
+            ],
+        };
+        let run = |bt: &Benchtop| Run {
+            origin: Vec3::default(),
+            items: vec![
+                cab("B01", CabinetKind::Base),
+                cab("S01", CabinetKind::Sink),
+                RunItem::Benchtop(bt.clone()),
+            ],
+        };
+        let lists = build_run(&run(&bt)).unwrap();
+        let top = &lists[2];
+        assert!(top.warnings.is_empty(), "{:?}", top.warnings);
+        let holes: Vec<_> = top
+            .operations
+            .iter()
+            .filter_map(|o| match o {
+                crate::part::Operation::Groove { bounds, .. } => Some(*bounds),
+                _ => None,
+            })
+            .collect();
+        assert_eq!(holes.len(), 2);
+        // The sink centred on S01 (600 + 900 / 2), through the 33 mm top.
+        assert!((holes[0].center().x - 1050.0).abs() < 1e-9);
+        assert_eq!(holes[0].size.z, 33.0);
+        assert!(top.operations.iter().any(|o| matches!(
+            o,
+            crate::part::Operation::Bore {
+                purpose: crate::part::BorePurpose::TapHole,
+                ..
+            }
+        )));
+        assert!(crate::collisions::check(top).is_empty());
+        // Too wide for its top.
+        bt.cutouts[1].width = 2000.0;
+        let lists = build_run(&run(&bt)).unwrap();
+        assert!(lists[2].warnings.iter().any(|w| w.contains("does not fit")));
     }
 }

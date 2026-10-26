@@ -88,6 +88,31 @@ struct PieceSection: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
+                SectionTitle("Cut-outs")
+                let bases = project.cabinets.filter {
+                    ["base", "drawer_bank", "sink", "blind_corner", "corner_base"].contains($0.kind)
+                }
+                ForEach(bases, id: \.id) { base in
+                    HStack(spacing: 6) {
+                        Text(base.id).monospaced()
+                        Spacer()
+                        ForEach([("sink", "Sink", "drop"), ("cooktop", "Cooktop", "flame")], id: \.0) { kind, title, symbol in
+                            let on = cab.cutout(over: base.id) == kind
+                            Button {
+                                withAnimation(.snappy) {
+                                    var c = cab
+                                    c.setCutout(over: base.id, kind: on ? nil : kind)
+                                    project.selected = c
+                                }
+                            } label: {
+                                Label(title, systemImage: symbol)
+                            }
+                            .buttonStyle(ChipStyle(selected: on))
+                            .help(on ? "Remove the \(title.lowercased()) cut-out over \(base.id)"
+                                     : "A \(title.lowercased()) cut-out centred over \(base.id)\(kind == "sink" ? ", with a tap hole behind it" : "")")
+                        }
+                    }
+                }
             } else if cab.kind == "filler" {
                 SectionTitle("Filler")
                 chips("Width", value: cab.width, presets: [25, 38, 50, 75, 100, 150]) { c, v in c.width = v }

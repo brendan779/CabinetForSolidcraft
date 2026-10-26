@@ -155,9 +155,21 @@ pub fn features(list: &PartList, part: &Part) -> Vec<Feature> {
                 out.push(rect(part, bounds.min, bounds.size, "biscuit"));
             }
             Operation::Groove { part: name, bounds } if *name == part.name => {
-                // A groove through the whole thickness takes material away: a notch.
+                // A groove through the whole thickness takes material away: a notch at an edge, a
+                // cut-out (a sink's, a cooktop's) inside the part.
                 let through = bounds.size.get(part.thickness_axis) >= part.thickness() - 1e-6;
-                let label = if through { "notch" } else { "groove" };
+                let inside = Axis::ALL
+                    .iter()
+                    .filter(|&&a| a != part.thickness_axis)
+                    .all(|&a| {
+                        bounds.min.get(a) > part.bounds.min.get(a) + 1e-6
+                            && bounds.max().get(a) < part.bounds.max().get(a) - 1e-6
+                    });
+                let label = match (through, inside) {
+                    (true, true) => "cutout",
+                    (true, false) => "notch",
+                    _ => "groove",
+                };
                 out.push(rect(part, bounds.min, bounds.size, label));
             }
             Operation::Mortise {
@@ -578,7 +590,7 @@ fn face_view(
                 // A notch is drawn as the paper showing through: no board there.
                 let fill = match *label {
                     "biscuit" => "#e8c27a",
-                    "notch" => "#ffffff",
+                    "notch" | "cutout" => "#ffffff",
                     _ => "#9bb7d4",
                 };
                 let (xa, xb) = (x(*u), x(u + w));

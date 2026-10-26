@@ -251,6 +251,8 @@ pub enum BorePurpose {
     CableHole,
     /// A handle's or knob's screw hole, through the front from the back.
     HandleScrew,
+    /// A tap's hole through a benchtop.
+    TapHole,
 }
 
 fn default_biscuit() -> BiscuitSize {

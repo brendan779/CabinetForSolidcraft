@@ -432,3 +432,55 @@ fn the_new_cabinets_build_every_part_where_the_core_puts_it() {
         }
     }
 }
+
+/// BENCH-4: a benchtop's sink and cooktop cut-outs and tap hole cut through in SolidCraft: the
+/// piece keeps its outline.
+#[test]
+fn a_benchtop_with_cut_outs_builds() {
+    let Some(cli) = cli() else {
+        eprintln!("SOLIDCRAFT_CLI not set: skipped");
+        return;
+    };
+    use cabinet_core::run::{Benchtop, Cutout, CutoutKind, Run, RunItem, build_run};
+    let cutout = |over: &str, kind, width, depth| Cutout {
+        over: over.into(),
+        kind,
+        width,
+        depth,
+        setback: 70.0,
+    };
+    let run = Run {
+        origin: Default::default(),
+        items: vec![
+            RunItem::Cabinet(Box::new(Cabinet::new("B01", CabinetKind::Base))),
+            RunItem::Cabinet(Box::new(Cabinet::new("S01", CabinetKind::Sink))),
+            RunItem::Benchtop(Benchtop {
+                id: "BT1".into(),
+                thickness: 33.0,
+                front_overhang: 20.0,
+                side_overhang: 0.0,
+                back_clearance: 0.0,
+                board: String::new(),
+                cutouts: vec![
+                    cutout("S01", CutoutKind::Sink, 760.0, 440.0),
+                    cutout("B01", CutoutKind::Cooktop, 560.0, 490.0),
+                ],
+            }),
+        ],
+    };
+    let lists = build_run(&run).unwrap();
+    let top = &lists[2];
+    let built = bounds(
+        &cli,
+        "benchtop",
+        &emit_cabinet(top, Detail::Manufacturing, None),
+    );
+    let p = &top.parts[0];
+    let um = |v: f64| (v * 1000.0).round() as i64;
+    let (lo, hi) = (p.bounds.min, p.bounds.max());
+    let want = [um(lo.x), um(lo.y), um(lo.z), um(hi.x), um(hi.y), um(hi.z)];
+    let got = &built.iter().find(|(n, _)| *n == p.name).unwrap().1;
+    for (g, w) in got.iter().zip(want) {
+        assert!((g - w).abs() <= 5, "{got:?} vs {want:?}");
+    }
+}

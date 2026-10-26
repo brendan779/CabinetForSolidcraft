@@ -67,6 +67,24 @@ struct CabinetDoc: Identifiable, Hashable, Codable {
         set { setNumber("side_overhang", newValue) }
     }
 
+    /// Benchtop: the kind of cut-out over cabinet `id` (`sink`, `cooktop`), if any.
+    func cutout(over id: String) -> String? {
+        (object["cutouts"] as? [[String: Any]])?.first { $0["over"] as? String == id }?["kind"] as? String
+    }
+
+    /// Sets or clears the cut-out over a cabinet, at our default sizes (a sink 760 × 440, a cooktop
+    /// 560 × 490) until appliance templates exist.
+    mutating func setCutout(over id: String, kind: String?) {
+        update { o in
+            var list = (o["cutouts"] as? [[String: Any]] ?? []).filter { $0["over"] as? String != id }
+            if let kind {
+                let (w, d) = kind == "sink" ? (760.0, 440.0) : (560.0, 490.0)
+                list.append(["over": id, "kind": kind, "width": w, "depth": d, "setback": 70.0])
+            }
+            o["cutouts"] = list.isEmpty ? nil : list
+        }
+    }
+
     /// The cabinet's construction standard as JSON values, field by field.
     var standard: [String: Any] {
         get { object["standard"] as? [String: Any] ?? [:] }
