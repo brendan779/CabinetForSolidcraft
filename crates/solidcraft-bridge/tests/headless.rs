@@ -380,6 +380,8 @@ fn the_new_cabinets_build_every_part_where_the_core_puts_it() {
         ratios: vec![1.0, 1.0],
     };
     high.standard.drawer_sides = cabinet_core::model::DrawerSides::HighFronted;
+    let mut wardrobe = Cabinet::new("R01", CabinetKind::Wardrobe);
+    wardrobe.wardrobe = cabinet_core::model::Hanging::Double;
     let mut shaker = Cabinet::new("B02", CabinetKind::Base);
     shaker.standard.door_style = cabinet_core::model::DoorStyle::Shaker;
     let mut hki = Cabinet::new("W02", CabinetKind::Wall);
@@ -402,6 +404,7 @@ fn the_new_cabinets_build_every_part_where_the_core_puts_it() {
         inner,
         high,
         shaker,
+        wardrobe,
         hki,
         lift,
         wood,

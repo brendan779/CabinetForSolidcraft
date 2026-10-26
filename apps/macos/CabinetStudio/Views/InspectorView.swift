@@ -23,6 +23,9 @@ struct InspectorView: View {
                     if cab.kind == "sink" {
                         SinkSection(cab: cab)
                     }
+                    if cab.kind == "wardrobe" {
+                        WardrobeSection(cab: cab)
+                    }
                     if cab.kind == "corner_base" || cab.kind == "corner_wall" {
                         CornerSection(cab: cab)
                     } else {
@@ -353,7 +356,7 @@ struct SizeSection: View {
     private var heightPresets: [Double] {
         switch cab.kind {
         case "wall", "open_shelf": [360, 450, 600, 720, 900]
-        case "tall": [1800, 2100, 2250, 2400]
+        case "tall", "wardrobe": [1800, 2100, 2250, 2400]
         default: [720, 820, 870, 900]
         }
     }
@@ -425,6 +428,63 @@ struct SinkSection: View {
     }
 }
 
+/// A wardrobe's hanging, drawn: one long rail under the hat shelf, or two rails one above the other.
+struct WardrobeSection: View {
+    @Environment(ProjectModel.self) private var project
+    let cab: CabinetDoc
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            SectionTitle("Hanging")
+            HStack(spacing: 8) {
+                ForEach([("long", "Long"), ("double", "Double")], id: \.0) { id, title in
+                    Button {
+                        withAnimation(.snappy) { var c = cab; c.hanging = id; project.selected = c }
+                    } label: {
+                        VStack(spacing: 6) {
+                            HangingThumbnail(double: id == "double").frame(width: 40, height: 56)
+                            Text(title).font(.caption)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 8)
+                    }
+                    .buttonStyle(TileStyle(selected: cab.hanging == id))
+                    .help(id == "long" ? "One rail under the hat shelf, for coats and dresses"
+                                       : "A second shelf and rail halfway down, for shirts and trousers")
+                    .accessibilityLabel("\(title) hanging")
+                }
+            }
+        }
+    }
+}
+
+struct HangingThumbnail: View {
+    let double: Bool
+
+    var body: some View {
+        Canvas { ctx, size in
+            let w = size.width, h = size.height
+            let box = CGRect(x: 2, y: 2, width: w - 4, height: h - 4)
+            ctx.stroke(Path(box), with: .color(.primary.opacity(0.6)), lineWidth: 1)
+            let shelves: [CGFloat] = double ? [0.18, 0.55] : [0.18]
+            for f in shelves {
+                let y = box.minY + box.height * f
+                ctx.fill(Path(CGRect(x: box.minX, y: y, width: box.width, height: 2)), with: .color(.primary.opacity(0.5)))
+                var rail = Path()
+                rail.move(to: CGPoint(x: box.minX + 3, y: y + 5))
+                rail.addLine(to: CGPoint(x: box.maxX - 3, y: y + 5))
+                ctx.stroke(rail, with: .color(.accentColor), lineWidth: 1.6)
+                // Hangers with clothes.
+                for x in stride(from: box.minX + 7, to: box.maxX - 4, by: 7) {
+                    let drop = (double ? 0.3 : 0.6) * box.height
+                    ctx.fill(Path(CGRect(x: x - 1.5, y: y + 6, width: 3, height: drop)), with: .color(.accentColor.opacity(0.25)))
+                }
+            }
+        }
+        .accessibilityHidden(true)
+    }
+}
+
 /// LED strips: tap a zone on the drawn cabinet to light it, then the strips' voltage and power.
 struct LightsSection: View {
     @Environment(ProjectModel.self) private var project
@@ -436,7 +496,7 @@ struct LightsSection: View {
             z.append(("under_cabinet", "Under", "A strip under the cabinet, lighting the bench"))
         }
         z.append(("in_cabinet", "Inside", "A strip under the top, inside the cabinet"))
-        if ["base", "tall", "drawer_bank", "blind_corner", "corner_base", "sink"].contains(cab.kind) {
+        if ["base", "tall", "drawer_bank", "blind_corner", "corner_base", "sink", "wardrobe"].contains(cab.kind) {
             z.append(("plinth", "Plinth", "A strip in the plinth, lighting the floor"))
         }
         return z

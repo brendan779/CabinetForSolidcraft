@@ -178,6 +178,12 @@ struct CabinetDoc: Identifiable, Hashable, Codable {
         }
     }
 
+    /// A wardrobe's hanging: `long` or `double`.
+    var hanging: String {
+        get { object["wardrobe"] as? String ?? "long" }
+        set { update { $0["wardrobe"] = newValue } }
+    }
+
     /// LED strips (zone, voltage, W/m), as the core's `lights`.
     var lights: [[String: Any]] {
         get { object["lights"] as? [[String: Any]] ?? [] }
@@ -865,6 +871,7 @@ extension CabinetDoc {
         case "blind_corner": "Blind corner"
         case "corner_base": "L-corner"
         case "corner_wall": "Corner wall"
+        case "wardrobe": "Wardrobe"
         case "sink": "Sink"
         case "filler": "Filler"
         case "end_panel": "End panel"
@@ -882,6 +889,7 @@ extension CabinetDoc {
         case "blind_corner": "rectangle.lefthalf.inset.filled"
         case "corner_base": "l.square"
         case "corner_wall": "l.square.fill"
+        case "wardrobe": "cabinet"
         case "sink": "drop"
         case "filler": "rectangle.portrait.split.2x1"
         case "end_panel": "rectangle.portrait.lefthalf.filled"

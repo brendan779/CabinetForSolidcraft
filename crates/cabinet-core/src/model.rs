@@ -49,6 +49,9 @@ pub struct Cabinet {
     /// Sink cabinet options (ignored by other kinds).
     #[serde(default)]
     pub sink: Sink,
+    /// How a wardrobe hangs clothes (ignored by other kinds).
+    #[serde(default)]
+    pub wardrobe: Hanging,
     /// The second leg of an L-shaped corner cabinet (ignored by other kinds).
     #[serde(default)]
     pub corner: Corner,
@@ -130,6 +133,18 @@ impl Default for Sink {
     }
 }
 
+/// A wardrobe's interior: a fixed hat shelf near the top with a rail under it, and for double
+/// hanging a second fixed shelf and rail halfway down.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum Hanging {
+    /// Long hanging: coats and dresses.
+    #[default]
+    Long,
+    /// Two rails, one above the other: shirts and trousers.
+    Double,
+}
+
 /// A blind corner cabinet's front: from its blind side, a fixed blind panel and a filler cover
 /// `width` (where the other run of cabinets meets it); one door covers the rest.
 #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
@@ -207,6 +222,7 @@ impl Cabinet {
             lights: Vec::new(),
             blind: Blind::default(),
             sink: Sink::default(),
+            wardrobe: Hanging::default(),
             corner: Corner::for_kind(kind),
             exposed: Exposed::default(),
         }
@@ -234,6 +250,7 @@ impl Cabinet {
                 | CabinetKind::BlindCorner
                 | CabinetKind::CornerBase
                 | CabinetKind::Sink
+                | CabinetKind::Wardrobe
         ) && self.standard.toe_kick != ToeKick::None
     }
 }
@@ -254,10 +271,12 @@ pub enum CabinetKind {
     CornerBase,
     /// The wall-height L-corner: the corner base's legs and bi-fold doors, hung on hangers.
     CornerWall,
+    /// A full-height wardrobe with a hat shelf and hanging rails.
+    Wardrobe,
 }
 
 impl CabinetKind {
-    pub const ALL: [CabinetKind; 9] = [
+    pub const ALL: [CabinetKind; 10] = [
         CabinetKind::Base,
         CabinetKind::Wall,
         CabinetKind::Tall,
@@ -267,6 +286,7 @@ impl CabinetKind {
         CabinetKind::Sink,
         CabinetKind::CornerBase,
         CabinetKind::CornerWall,
+        CabinetKind::Wardrobe,
     ];
 
     /// The kind a drawn box most likely is: as tall as a pantry → tall, hanging off the floor →
@@ -293,6 +313,7 @@ impl CabinetKind {
             CabinetKind::Sink => (900.0, 580.0, 870.0),
             CabinetKind::CornerBase => (900.0, 580.0, 870.0),
             CabinetKind::CornerWall => (600.0, 330.0, 720.0),
+            CabinetKind::Wardrobe => (900.0, 600.0, 2100.0),
         }
     }
 
@@ -323,6 +344,8 @@ impl CabinetKind {
             | CabinetKind::BlindCorner
             | CabinetKind::CornerBase
             | CabinetKind::CornerWall => 1,
+            // The hat shelf and rails are its own.
+            CabinetKind::Wardrobe => 0,
             // The bowl and pipes take the space.
             CabinetKind::Sink => 0,
             CabinetKind::Tall => 4,

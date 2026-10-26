@@ -1,0 +1,2362 @@
+---
+source: crates/cabinet-core/tests/golden.rs
+expression: list
+---
+{
+  "cabinet": "C01",
+  "parts": [
+    {
+      "name": "C01.LeftSide",
+      "role": "left_side",
+      "bounds": {
+        "min": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 150.0
+        },
+        "size": {
+          "x": 16.0,
+          "y": 600.0,
+          "z": 1950.0
+        }
+      },
+      "thickness_axis": "X",
+      "grain_axis": "Z",
+      "board": "",
+      "edges": {
+        "front": true,
+        "back": false,
+        "top": false,
+        "bottom": false,
+        "left": false,
+        "right": false
+      }
+    },
+    {
+      "name": "C01.RightSide",
+      "role": "right_side",
+      "bounds": {
+        "min": {
+          "x": 884.0,
+          "y": 0.0,
+          "z": 150.0
+        },
+        "size": {
+          "x": 16.0,
+          "y": 600.0,
+          "z": 1950.0
+        }
+      },
+      "thickness_axis": "X",
+      "grain_axis": "Z",
+      "board": "",
+      "edges": {
+        "front": true,
+        "back": false,
+        "top": false,
+        "bottom": false,
+        "left": false,
+        "right": false
+      }
+    },
+    {
+      "name": "C01.Bottom",
+      "role": "bottom",
+      "bounds": {
+        "min": {
+          "x": 16.0,
+          "y": 0.0,
+          "z": 150.0
+        },
+        "size": {
+          "x": 868.0,
+          "y": 600.0,
+          "z": 16.0
+        }
+      },
+      "thickness_axis": "Z",
+      "grain_axis": "X",
+      "board": "",
+      "edges": {
+        "front": true,
+        "back": false,
+        "top": false,
+        "bottom": false,
+        "left": false,
+        "right": false
+      }
+    },
+    {
+      "name": "C01.FrontRail",
+      "role": "front_rail",
+      "bounds": {
+        "min": {
+          "x": 16.0,
+          "y": 0.0,
+          "z": 2084.0
+        },
+        "size": {
+          "x": 868.0,
+          "y": 100.0,
+          "z": 16.0
+        }
+      },
+      "thickness_axis": "Z",
+      "grain_axis": "X",
+      "board": "",
+      "edges": {
+        "front": true,
+        "back": false,
+        "top": false,
+        "bottom": false,
+        "left": false,
+        "right": false
+      }
+    },
+    {
+      "name": "C01.BackRail",
+      "role": "back_rail",
+      "bounds": {
+        "min": {
+          "x": 16.0,
+          "y": 478.0,
+          "z": 2084.0
+        },
+        "size": {
+          "x": 868.0,
+          "y": 100.0,
+          "z": 16.0
+        }
+      },
+      "thickness_axis": "Z",
+      "grain_axis": "X",
+      "board": "",
+      "edges": {
+        "front": false,
+        "back": false,
+        "top": false,
+        "bottom": false,
+        "left": false,
+        "right": false
+      }
+    },
+    {
+      "name": "C01.Back",
+      "role": "back",
+      "bounds": {
+        "min": {
+          "x": 8.0,
+          "y": 578.0,
+          "z": 158.0
+        },
+        "size": {
+          "x": 884.0,
+          "y": 6.0,
+          "z": 1942.0
+        }
+      },
+      "thickness_axis": "Y",
+      "grain_axis": "Z",
+      "board": "",
+      "edges": {
+        "front": false,
+        "back": false,
+        "top": false,
+        "bottom": false,
+        "left": false,
+        "right": false
+      }
+    },
+    {
+      "name": "C01.Door1",
+      "role": "door",
+      "bounds": {
+        "min": {
+          "x": 1.0,
+          "y": -18.0,
+          "z": 150.0
+        },
+        "size": {
+          "x": 448.0,
+          "y": 18.0,
+          "z": 1950.0
+        }
+      },
+      "thickness_axis": "Y",
+      "grain_axis": "Z",
+      "board": "",
+      "edges": {
+        "front": true,
+        "back": true,
+        "top": true,
+        "bottom": true,
+        "left": true,
+        "right": true
+      }
+    },
+    {
+      "name": "C01.Door2",
+      "role": "door",
+      "bounds": {
+        "min": {
+          "x": 451.0,
+          "y": -18.0,
+          "z": 150.0
+        },
+        "size": {
+          "x": 448.0,
+          "y": 18.0,
+          "z": 1950.0
+        }
+      },
+      "thickness_axis": "Y",
+      "grain_axis": "Z",
+      "board": "",
+      "edges": {
+        "front": true,
+        "back": true,
+        "top": true,
+        "bottom": true,
+        "left": true,
+        "right": true
+      }
+    },
+    {
+      "name": "C01.Shelf1",
+      "role": "shelf",
+      "bounds": {
+        "min": {
+          "x": 16.0,
+          "y": 2.0,
+          "z": 1784.0
+        },
+        "size": {
+          "x": 868.0,
+          "y": 576.0,
+          "z": 16.0
+        }
+      },
+      "thickness_axis": "Z",
+      "grain_axis": "X",
+      "board": "",
+      "edges": {
+        "front": true,
+        "back": false,
+        "top": false,
+        "bottom": false,
+        "left": false,
+        "right": false
+      }
+    },
+    {
+      "name": "C01.Plinth",
+      "role": "plinth",
+      "bounds": {
+        "min": {
+          "x": 0.0,
+          "y": 50.0,
+          "z": 0.0
+        },
+        "size": {
+          "x": 900.0,
+          "y": 18.0,
+          "z": 150.0
+        }
+      },
+      "thickness_axis": "Y",
+      "grain_axis": "X",
+      "board": "",
+      "edges": {
+        "front": false,
+        "back": false,
+        "top": true,
+        "bottom": false,
+        "left": false,
+        "right": false
+      }
+    }
+  ],
+  "operations": [
+    {
+      "type": "groove",
+      "part": "C01.LeftSide",
+      "bounds": {
+        "min": {
+          "x": 8.0,
+          "y": 578.0,
+          "z": 150.0
+        },
+        "size": {
+          "x": 8.0,
+          "y": 6.0,
+          "z": 1950.0
+        }
+      }
+    },
+    {
+      "type": "groove",
+      "part": "C01.RightSide",
+      "bounds": {
+        "min": {
+          "x": 884.0,
+          "y": 578.0,
+          "z": 150.0
+        },
+        "size": {
+          "x": 8.0,
+          "y": 6.0,
+          "z": 1950.0
+        }
+      }
+    },
+    {
+      "type": "groove",
+      "part": "C01.Bottom",
+      "bounds": {
+        "min": {
+          "x": 16.0,
+          "y": 578.0,
+          "z": 158.0
+        },
+        "size": {
+          "x": 868.0,
+          "y": 6.0,
+          "z": 8.0
+        }
+      }
+    },
+    {
+      "type": "biscuit_slot",
+      "parts": [
+        "C01.LeftSide",
+        "C01.Bottom"
+      ],
+      "bounds": {
+        "min": {
+          "x": 3.5,
+          "y": 16.928108611692615,
+          "z": 156.0
+        },
+        "size": {
+          "x": 25.0,
+          "y": 66.14378277661477,
+          "z": 4.0
+        }
+      },
+      "along": "Y",
+      "size": "no20"
+    },
+    {
+      "type": "biscuit_slot",
+      "parts": [
+        "C01.LeftSide",
+        "C01.Bottom"
+      ],
+      "bounds": {
+        "min": {
+          "x": 3.5,
+          "y": 176.26144194502595,
+          "z": 156.0
+        },
+        "size": {
+          "x": 25.0,
+          "y": 66.14378277661477,
+          "z": 4.0
+        }
+      },
+      "along": "Y",
+      "size": "no20"
+    },
+    {
+      "type": "biscuit_slot",
+      "parts": [
+        "C01.LeftSide",
+        "C01.Bottom"
+      ],
+      "bounds": {
+        "min": {
+          "x": 3.5,
+          "y": 335.5947752783593,
+          "z": 156.0
+        },
+        "size": {
+          "x": 25.0,
+          "y": 66.14378277661477,
+          "z": 4.0
+        }
+      },
+      "along": "Y",
+      "size": "no20"
+    },
+    {
+      "type": "biscuit_slot",
+      "parts": [
+        "C01.LeftSide",
+        "C01.Bottom"
+      ],
+      "bounds": {
+        "min": {
+          "x": 3.5,
+          "y": 494.9281086116926,
+          "z": 156.0
+        },
+        "size": {
+          "x": 25.0,
+          "y": 66.14378277661477,
+          "z": 4.0
+        }
+      },
+      "along": "Y",
+      "size": "no20"
+    },
+    {
+      "type": "bore",
+      "part": "C01.LeftSide",
+      "at": {
+        "x": 0.0,
+        "y": 129.66666666666669,
+        "z": 158.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 4.5,
+      "depth": 16.0,
+      "purpose": "screw"
+    },
+    {
+      "type": "bore",
+      "part": "C01.LeftSide",
+      "at": {
+        "x": 0.0,
+        "y": 129.66666666666669,
+        "z": 158.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 8.0,
+      "depth": 1.75,
+      "purpose": "countersink"
+    },
+    {
+      "type": "bore",
+      "part": "C01.Bottom",
+      "at": {
+        "x": 16.0,
+        "y": 129.66666666666669,
+        "z": 158.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 3.0,
+      "depth": 35.0,
+      "purpose": "screw_pilot"
+    },
+    {
+      "type": "bore",
+      "part": "C01.LeftSide",
+      "at": {
+        "x": 0.0,
+        "y": 289.0,
+        "z": 158.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 4.5,
+      "depth": 16.0,
+      "purpose": "screw"
+    },
+    {
+      "type": "bore",
+      "part": "C01.LeftSide",
+      "at": {
+        "x": 0.0,
+        "y": 289.0,
+        "z": 158.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 8.0,
+      "depth": 1.75,
+      "purpose": "countersink"
+    },
+    {
+      "type": "bore",
+      "part": "C01.Bottom",
+      "at": {
+        "x": 16.0,
+        "y": 289.0,
+        "z": 158.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 3.0,
+      "depth": 35.0,
+      "purpose": "screw_pilot"
+    },
+    {
+      "type": "bore",
+      "part": "C01.LeftSide",
+      "at": {
+        "x": 0.0,
+        "y": 448.33333333333337,
+        "z": 158.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 4.5,
+      "depth": 16.0,
+      "purpose": "screw"
+    },
+    {
+      "type": "bore",
+      "part": "C01.LeftSide",
+      "at": {
+        "x": 0.0,
+        "y": 448.33333333333337,
+        "z": 158.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 8.0,
+      "depth": 1.75,
+      "purpose": "countersink"
+    },
+    {
+      "type": "bore",
+      "part": "C01.Bottom",
+      "at": {
+        "x": 16.0,
+        "y": 448.33333333333337,
+        "z": 158.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 3.0,
+      "depth": 35.0,
+      "purpose": "screw_pilot"
+    },
+    {
+      "type": "biscuit_slot",
+      "parts": [
+        "C01.RightSide",
+        "C01.Bottom"
+      ],
+      "bounds": {
+        "min": {
+          "x": 871.5,
+          "y": 16.928108611692615,
+          "z": 156.0
+        },
+        "size": {
+          "x": 25.0,
+          "y": 66.14378277661477,
+          "z": 4.0
+        }
+      },
+      "along": "Y",
+      "size": "no20"
+    },
+    {
+      "type": "biscuit_slot",
+      "parts": [
+        "C01.RightSide",
+        "C01.Bottom"
+      ],
+      "bounds": {
+        "min": {
+          "x": 871.5,
+          "y": 176.26144194502595,
+          "z": 156.0
+        },
+        "size": {
+          "x": 25.0,
+          "y": 66.14378277661477,
+          "z": 4.0
+        }
+      },
+      "along": "Y",
+      "size": "no20"
+    },
+    {
+      "type": "biscuit_slot",
+      "parts": [
+        "C01.RightSide",
+        "C01.Bottom"
+      ],
+      "bounds": {
+        "min": {
+          "x": 871.5,
+          "y": 335.5947752783593,
+          "z": 156.0
+        },
+        "size": {
+          "x": 25.0,
+          "y": 66.14378277661477,
+          "z": 4.0
+        }
+      },
+      "along": "Y",
+      "size": "no20"
+    },
+    {
+      "type": "biscuit_slot",
+      "parts": [
+        "C01.RightSide",
+        "C01.Bottom"
+      ],
+      "bounds": {
+        "min": {
+          "x": 871.5,
+          "y": 494.9281086116926,
+          "z": 156.0
+        },
+        "size": {
+          "x": 25.0,
+          "y": 66.14378277661477,
+          "z": 4.0
+        }
+      },
+      "along": "Y",
+      "size": "no20"
+    },
+    {
+      "type": "bore",
+      "part": "C01.RightSide",
+      "at": {
+        "x": 900.0,
+        "y": 129.66666666666669,
+        "z": 158.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 4.5,
+      "depth": 16.0,
+      "purpose": "screw"
+    },
+    {
+      "type": "bore",
+      "part": "C01.RightSide",
+      "at": {
+        "x": 900.0,
+        "y": 129.66666666666669,
+        "z": 158.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 8.0,
+      "depth": 1.75,
+      "purpose": "countersink"
+    },
+    {
+      "type": "bore",
+      "part": "C01.Bottom",
+      "at": {
+        "x": 884.0,
+        "y": 129.66666666666669,
+        "z": 158.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 3.0,
+      "depth": 35.0,
+      "purpose": "screw_pilot"
+    },
+    {
+      "type": "bore",
+      "part": "C01.RightSide",
+      "at": {
+        "x": 900.0,
+        "y": 289.0,
+        "z": 158.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 4.5,
+      "depth": 16.0,
+      "purpose": "screw"
+    },
+    {
+      "type": "bore",
+      "part": "C01.RightSide",
+      "at": {
+        "x": 900.0,
+        "y": 289.0,
+        "z": 158.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 8.0,
+      "depth": 1.75,
+      "purpose": "countersink"
+    },
+    {
+      "type": "bore",
+      "part": "C01.Bottom",
+      "at": {
+        "x": 884.0,
+        "y": 289.0,
+        "z": 158.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 3.0,
+      "depth": 35.0,
+      "purpose": "screw_pilot"
+    },
+    {
+      "type": "bore",
+      "part": "C01.RightSide",
+      "at": {
+        "x": 900.0,
+        "y": 448.33333333333337,
+        "z": 158.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 4.5,
+      "depth": 16.0,
+      "purpose": "screw"
+    },
+    {
+      "type": "bore",
+      "part": "C01.RightSide",
+      "at": {
+        "x": 900.0,
+        "y": 448.33333333333337,
+        "z": 158.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 8.0,
+      "depth": 1.75,
+      "purpose": "countersink"
+    },
+    {
+      "type": "bore",
+      "part": "C01.Bottom",
+      "at": {
+        "x": 884.0,
+        "y": 448.33333333333337,
+        "z": 158.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 3.0,
+      "depth": 35.0,
+      "purpose": "screw_pilot"
+    },
+    {
+      "type": "bore",
+      "part": "C01.LeftSide",
+      "at": {
+        "x": 0.0,
+        "y": 25.0,
+        "z": 2092.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 4.5,
+      "depth": 16.0,
+      "purpose": "screw"
+    },
+    {
+      "type": "bore",
+      "part": "C01.LeftSide",
+      "at": {
+        "x": 0.0,
+        "y": 25.0,
+        "z": 2092.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 8.0,
+      "depth": 1.75,
+      "purpose": "countersink"
+    },
+    {
+      "type": "bore",
+      "part": "C01.FrontRail",
+      "at": {
+        "x": 16.0,
+        "y": 25.0,
+        "z": 2092.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 3.0,
+      "depth": 35.0,
+      "purpose": "screw_pilot"
+    },
+    {
+      "type": "bore",
+      "part": "C01.LeftSide",
+      "at": {
+        "x": 0.0,
+        "y": 75.0,
+        "z": 2092.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 4.5,
+      "depth": 16.0,
+      "purpose": "screw"
+    },
+    {
+      "type": "bore",
+      "part": "C01.LeftSide",
+      "at": {
+        "x": 0.0,
+        "y": 75.0,
+        "z": 2092.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 8.0,
+      "depth": 1.75,
+      "purpose": "countersink"
+    },
+    {
+      "type": "bore",
+      "part": "C01.FrontRail",
+      "at": {
+        "x": 16.0,
+        "y": 75.0,
+        "z": 2092.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 3.0,
+      "depth": 35.0,
+      "purpose": "screw_pilot"
+    },
+    {
+      "type": "bore",
+      "part": "C01.RightSide",
+      "at": {
+        "x": 900.0,
+        "y": 25.0,
+        "z": 2092.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 4.5,
+      "depth": 16.0,
+      "purpose": "screw"
+    },
+    {
+      "type": "bore",
+      "part": "C01.RightSide",
+      "at": {
+        "x": 900.0,
+        "y": 25.0,
+        "z": 2092.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 8.0,
+      "depth": 1.75,
+      "purpose": "countersink"
+    },
+    {
+      "type": "bore",
+      "part": "C01.FrontRail",
+      "at": {
+        "x": 884.0,
+        "y": 25.0,
+        "z": 2092.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 3.0,
+      "depth": 35.0,
+      "purpose": "screw_pilot"
+    },
+    {
+      "type": "bore",
+      "part": "C01.RightSide",
+      "at": {
+        "x": 900.0,
+        "y": 75.0,
+        "z": 2092.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 4.5,
+      "depth": 16.0,
+      "purpose": "screw"
+    },
+    {
+      "type": "bore",
+      "part": "C01.RightSide",
+      "at": {
+        "x": 900.0,
+        "y": 75.0,
+        "z": 2092.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 8.0,
+      "depth": 1.75,
+      "purpose": "countersink"
+    },
+    {
+      "type": "bore",
+      "part": "C01.FrontRail",
+      "at": {
+        "x": 884.0,
+        "y": 75.0,
+        "z": 2092.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 3.0,
+      "depth": 35.0,
+      "purpose": "screw_pilot"
+    },
+    {
+      "type": "bore",
+      "part": "C01.LeftSide",
+      "at": {
+        "x": 0.0,
+        "y": 503.0,
+        "z": 2092.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 4.5,
+      "depth": 16.0,
+      "purpose": "screw"
+    },
+    {
+      "type": "bore",
+      "part": "C01.LeftSide",
+      "at": {
+        "x": 0.0,
+        "y": 503.0,
+        "z": 2092.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 8.0,
+      "depth": 1.75,
+      "purpose": "countersink"
+    },
+    {
+      "type": "bore",
+      "part": "C01.BackRail",
+      "at": {
+        "x": 16.0,
+        "y": 503.0,
+        "z": 2092.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 3.0,
+      "depth": 35.0,
+      "purpose": "screw_pilot"
+    },
+    {
+      "type": "bore",
+      "part": "C01.LeftSide",
+      "at": {
+        "x": 0.0,
+        "y": 553.0,
+        "z": 2092.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 4.5,
+      "depth": 16.0,
+      "purpose": "screw"
+    },
+    {
+      "type": "bore",
+      "part": "C01.LeftSide",
+      "at": {
+        "x": 0.0,
+        "y": 553.0,
+        "z": 2092.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 8.0,
+      "depth": 1.75,
+      "purpose": "countersink"
+    },
+    {
+      "type": "bore",
+      "part": "C01.BackRail",
+      "at": {
+        "x": 16.0,
+        "y": 553.0,
+        "z": 2092.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 3.0,
+      "depth": 35.0,
+      "purpose": "screw_pilot"
+    },
+    {
+      "type": "bore",
+      "part": "C01.RightSide",
+      "at": {
+        "x": 900.0,
+        "y": 503.0,
+        "z": 2092.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 4.5,
+      "depth": 16.0,
+      "purpose": "screw"
+    },
+    {
+      "type": "bore",
+      "part": "C01.RightSide",
+      "at": {
+        "x": 900.0,
+        "y": 503.0,
+        "z": 2092.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 8.0,
+      "depth": 1.75,
+      "purpose": "countersink"
+    },
+    {
+      "type": "bore",
+      "part": "C01.BackRail",
+      "at": {
+        "x": 884.0,
+        "y": 503.0,
+        "z": 2092.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 3.0,
+      "depth": 35.0,
+      "purpose": "screw_pilot"
+    },
+    {
+      "type": "bore",
+      "part": "C01.RightSide",
+      "at": {
+        "x": 900.0,
+        "y": 553.0,
+        "z": 2092.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 4.5,
+      "depth": 16.0,
+      "purpose": "screw"
+    },
+    {
+      "type": "bore",
+      "part": "C01.RightSide",
+      "at": {
+        "x": 900.0,
+        "y": 553.0,
+        "z": 2092.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 8.0,
+      "depth": 1.75,
+      "purpose": "countersink"
+    },
+    {
+      "type": "bore",
+      "part": "C01.BackRail",
+      "at": {
+        "x": 884.0,
+        "y": 553.0,
+        "z": 2092.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 3.0,
+      "depth": 35.0,
+      "purpose": "screw_pilot"
+    },
+    {
+      "type": "bore",
+      "part": "C01.Door1",
+      "at": {
+        "x": 22.5,
+        "y": 0.0,
+        "z": 250.0
+      },
+      "direction": {
+        "axis": "Y",
+        "positive": false
+      },
+      "diameter": 35.0,
+      "depth": 13.0,
+      "purpose": "hinge_cup"
+    },
+    {
+      "type": "bore",
+      "part": "C01.LeftSide",
+      "at": {
+        "x": 16.0,
+        "y": 37.0,
+        "z": 234.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 5.0,
+      "depth": 11.5,
+      "purpose": "hinge_plate"
+    },
+    {
+      "type": "bore",
+      "part": "C01.LeftSide",
+      "at": {
+        "x": 16.0,
+        "y": 37.0,
+        "z": 266.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 5.0,
+      "depth": 11.5,
+      "purpose": "hinge_plate"
+    },
+    {
+      "type": "bore",
+      "part": "C01.Door1",
+      "at": {
+        "x": 22.5,
+        "y": 0.0,
+        "z": 833.3333333333334
+      },
+      "direction": {
+        "axis": "Y",
+        "positive": false
+      },
+      "diameter": 35.0,
+      "depth": 13.0,
+      "purpose": "hinge_cup"
+    },
+    {
+      "type": "bore",
+      "part": "C01.LeftSide",
+      "at": {
+        "x": 16.0,
+        "y": 37.0,
+        "z": 817.3333333333334
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 5.0,
+      "depth": 11.5,
+      "purpose": "hinge_plate"
+    },
+    {
+      "type": "bore",
+      "part": "C01.LeftSide",
+      "at": {
+        "x": 16.0,
+        "y": 37.0,
+        "z": 849.3333333333334
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 5.0,
+      "depth": 11.5,
+      "purpose": "hinge_plate"
+    },
+    {
+      "type": "bore",
+      "part": "C01.Door1",
+      "at": {
+        "x": 22.5,
+        "y": 0.0,
+        "z": 1416.6666666666667
+      },
+      "direction": {
+        "axis": "Y",
+        "positive": false
+      },
+      "diameter": 35.0,
+      "depth": 13.0,
+      "purpose": "hinge_cup"
+    },
+    {
+      "type": "bore",
+      "part": "C01.LeftSide",
+      "at": {
+        "x": 16.0,
+        "y": 37.0,
+        "z": 1400.6666666666667
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 5.0,
+      "depth": 11.5,
+      "purpose": "hinge_plate"
+    },
+    {
+      "type": "bore",
+      "part": "C01.LeftSide",
+      "at": {
+        "x": 16.0,
+        "y": 37.0,
+        "z": 1432.6666666666667
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 5.0,
+      "depth": 11.5,
+      "purpose": "hinge_plate"
+    },
+    {
+      "type": "bore",
+      "part": "C01.Door1",
+      "at": {
+        "x": 22.5,
+        "y": 0.0,
+        "z": 2000.0
+      },
+      "direction": {
+        "axis": "Y",
+        "positive": false
+      },
+      "diameter": 35.0,
+      "depth": 13.0,
+      "purpose": "hinge_cup"
+    },
+    {
+      "type": "bore",
+      "part": "C01.LeftSide",
+      "at": {
+        "x": 16.0,
+        "y": 37.0,
+        "z": 1984.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 5.0,
+      "depth": 11.5,
+      "purpose": "hinge_plate"
+    },
+    {
+      "type": "bore",
+      "part": "C01.LeftSide",
+      "at": {
+        "x": 16.0,
+        "y": 37.0,
+        "z": 2016.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 5.0,
+      "depth": 11.5,
+      "purpose": "hinge_plate"
+    },
+    {
+      "type": "bore",
+      "part": "C01.Door2",
+      "at": {
+        "x": 877.5,
+        "y": 0.0,
+        "z": 250.0
+      },
+      "direction": {
+        "axis": "Y",
+        "positive": false
+      },
+      "diameter": 35.0,
+      "depth": 13.0,
+      "purpose": "hinge_cup"
+    },
+    {
+      "type": "bore",
+      "part": "C01.RightSide",
+      "at": {
+        "x": 884.0,
+        "y": 37.0,
+        "z": 234.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 5.0,
+      "depth": 11.5,
+      "purpose": "hinge_plate"
+    },
+    {
+      "type": "bore",
+      "part": "C01.RightSide",
+      "at": {
+        "x": 884.0,
+        "y": 37.0,
+        "z": 266.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 5.0,
+      "depth": 11.5,
+      "purpose": "hinge_plate"
+    },
+    {
+      "type": "bore",
+      "part": "C01.Door2",
+      "at": {
+        "x": 877.5,
+        "y": 0.0,
+        "z": 833.3333333333334
+      },
+      "direction": {
+        "axis": "Y",
+        "positive": false
+      },
+      "diameter": 35.0,
+      "depth": 13.0,
+      "purpose": "hinge_cup"
+    },
+    {
+      "type": "bore",
+      "part": "C01.RightSide",
+      "at": {
+        "x": 884.0,
+        "y": 37.0,
+        "z": 817.3333333333334
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 5.0,
+      "depth": 11.5,
+      "purpose": "hinge_plate"
+    },
+    {
+      "type": "bore",
+      "part": "C01.RightSide",
+      "at": {
+        "x": 884.0,
+        "y": 37.0,
+        "z": 849.3333333333334
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 5.0,
+      "depth": 11.5,
+      "purpose": "hinge_plate"
+    },
+    {
+      "type": "bore",
+      "part": "C01.Door2",
+      "at": {
+        "x": 877.5,
+        "y": 0.0,
+        "z": 1416.6666666666667
+      },
+      "direction": {
+        "axis": "Y",
+        "positive": false
+      },
+      "diameter": 35.0,
+      "depth": 13.0,
+      "purpose": "hinge_cup"
+    },
+    {
+      "type": "bore",
+      "part": "C01.RightSide",
+      "at": {
+        "x": 884.0,
+        "y": 37.0,
+        "z": 1400.6666666666667
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 5.0,
+      "depth": 11.5,
+      "purpose": "hinge_plate"
+    },
+    {
+      "type": "bore",
+      "part": "C01.RightSide",
+      "at": {
+        "x": 884.0,
+        "y": 37.0,
+        "z": 1432.6666666666667
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 5.0,
+      "depth": 11.5,
+      "purpose": "hinge_plate"
+    },
+    {
+      "type": "bore",
+      "part": "C01.Door2",
+      "at": {
+        "x": 877.5,
+        "y": 0.0,
+        "z": 2000.0
+      },
+      "direction": {
+        "axis": "Y",
+        "positive": false
+      },
+      "diameter": 35.0,
+      "depth": 13.0,
+      "purpose": "hinge_cup"
+    },
+    {
+      "type": "bore",
+      "part": "C01.RightSide",
+      "at": {
+        "x": 884.0,
+        "y": 37.0,
+        "z": 1984.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 5.0,
+      "depth": 11.5,
+      "purpose": "hinge_plate"
+    },
+    {
+      "type": "bore",
+      "part": "C01.RightSide",
+      "at": {
+        "x": 884.0,
+        "y": 37.0,
+        "z": 2016.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 5.0,
+      "depth": 11.5,
+      "purpose": "hinge_plate"
+    },
+    {
+      "type": "biscuit_slot",
+      "parts": [
+        "C01.LeftSide",
+        "C01.Shelf1"
+      ],
+      "bounds": {
+        "min": {
+          "x": 3.5,
+          "y": 18.928108611692615,
+          "z": 1790.0
+        },
+        "size": {
+          "x": 25.0,
+          "y": 66.14378277661477,
+          "z": 4.0
+        }
+      },
+      "along": "Y",
+      "size": "no20"
+    },
+    {
+      "type": "biscuit_slot",
+      "parts": [
+        "C01.LeftSide",
+        "C01.Shelf1"
+      ],
+      "bounds": {
+        "min": {
+          "x": 3.5,
+          "y": 177.59477527835926,
+          "z": 1790.0
+        },
+        "size": {
+          "x": 25.0,
+          "y": 66.14378277661477,
+          "z": 4.0
+        }
+      },
+      "along": "Y",
+      "size": "no20"
+    },
+    {
+      "type": "biscuit_slot",
+      "parts": [
+        "C01.LeftSide",
+        "C01.Shelf1"
+      ],
+      "bounds": {
+        "min": {
+          "x": 3.5,
+          "y": 336.2614419450259,
+          "z": 1790.0
+        },
+        "size": {
+          "x": 25.0,
+          "y": 66.14378277661477,
+          "z": 4.0
+        }
+      },
+      "along": "Y",
+      "size": "no20"
+    },
+    {
+      "type": "biscuit_slot",
+      "parts": [
+        "C01.LeftSide",
+        "C01.Shelf1"
+      ],
+      "bounds": {
+        "min": {
+          "x": 3.5,
+          "y": 494.9281086116926,
+          "z": 1790.0
+        },
+        "size": {
+          "x": 25.0,
+          "y": 66.14378277661477,
+          "z": 4.0
+        }
+      },
+      "along": "Y",
+      "size": "no20"
+    },
+    {
+      "type": "bore",
+      "part": "C01.LeftSide",
+      "at": {
+        "x": 0.0,
+        "y": 131.33333333333331,
+        "z": 1792.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 4.5,
+      "depth": 16.0,
+      "purpose": "screw"
+    },
+    {
+      "type": "bore",
+      "part": "C01.LeftSide",
+      "at": {
+        "x": 0.0,
+        "y": 131.33333333333331,
+        "z": 1792.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 8.0,
+      "depth": 1.75,
+      "purpose": "countersink"
+    },
+    {
+      "type": "bore",
+      "part": "C01.Shelf1",
+      "at": {
+        "x": 16.0,
+        "y": 131.33333333333331,
+        "z": 1792.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 3.0,
+      "depth": 35.0,
+      "purpose": "screw_pilot"
+    },
+    {
+      "type": "bore",
+      "part": "C01.LeftSide",
+      "at": {
+        "x": 0.0,
+        "y": 290.0,
+        "z": 1792.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 4.5,
+      "depth": 16.0,
+      "purpose": "screw"
+    },
+    {
+      "type": "bore",
+      "part": "C01.LeftSide",
+      "at": {
+        "x": 0.0,
+        "y": 290.0,
+        "z": 1792.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 8.0,
+      "depth": 1.75,
+      "purpose": "countersink"
+    },
+    {
+      "type": "bore",
+      "part": "C01.Shelf1",
+      "at": {
+        "x": 16.0,
+        "y": 290.0,
+        "z": 1792.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 3.0,
+      "depth": 35.0,
+      "purpose": "screw_pilot"
+    },
+    {
+      "type": "bore",
+      "part": "C01.LeftSide",
+      "at": {
+        "x": 0.0,
+        "y": 448.66666666666663,
+        "z": 1792.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 4.5,
+      "depth": 16.0,
+      "purpose": "screw"
+    },
+    {
+      "type": "bore",
+      "part": "C01.LeftSide",
+      "at": {
+        "x": 0.0,
+        "y": 448.66666666666663,
+        "z": 1792.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 8.0,
+      "depth": 1.75,
+      "purpose": "countersink"
+    },
+    {
+      "type": "bore",
+      "part": "C01.Shelf1",
+      "at": {
+        "x": 16.0,
+        "y": 448.66666666666663,
+        "z": 1792.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 3.0,
+      "depth": 35.0,
+      "purpose": "screw_pilot"
+    },
+    {
+      "type": "biscuit_slot",
+      "parts": [
+        "C01.RightSide",
+        "C01.Shelf1"
+      ],
+      "bounds": {
+        "min": {
+          "x": 871.5,
+          "y": 18.928108611692615,
+          "z": 1790.0
+        },
+        "size": {
+          "x": 25.0,
+          "y": 66.14378277661477,
+          "z": 4.0
+        }
+      },
+      "along": "Y",
+      "size": "no20"
+    },
+    {
+      "type": "biscuit_slot",
+      "parts": [
+        "C01.RightSide",
+        "C01.Shelf1"
+      ],
+      "bounds": {
+        "min": {
+          "x": 871.5,
+          "y": 177.59477527835926,
+          "z": 1790.0
+        },
+        "size": {
+          "x": 25.0,
+          "y": 66.14378277661477,
+          "z": 4.0
+        }
+      },
+      "along": "Y",
+      "size": "no20"
+    },
+    {
+      "type": "biscuit_slot",
+      "parts": [
+        "C01.RightSide",
+        "C01.Shelf1"
+      ],
+      "bounds": {
+        "min": {
+          "x": 871.5,
+          "y": 336.2614419450259,
+          "z": 1790.0
+        },
+        "size": {
+          "x": 25.0,
+          "y": 66.14378277661477,
+          "z": 4.0
+        }
+      },
+      "along": "Y",
+      "size": "no20"
+    },
+    {
+      "type": "biscuit_slot",
+      "parts": [
+        "C01.RightSide",
+        "C01.Shelf1"
+      ],
+      "bounds": {
+        "min": {
+          "x": 871.5,
+          "y": 494.9281086116926,
+          "z": 1790.0
+        },
+        "size": {
+          "x": 25.0,
+          "y": 66.14378277661477,
+          "z": 4.0
+        }
+      },
+      "along": "Y",
+      "size": "no20"
+    },
+    {
+      "type": "bore",
+      "part": "C01.RightSide",
+      "at": {
+        "x": 900.0,
+        "y": 131.33333333333331,
+        "z": 1792.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 4.5,
+      "depth": 16.0,
+      "purpose": "screw"
+    },
+    {
+      "type": "bore",
+      "part": "C01.RightSide",
+      "at": {
+        "x": 900.0,
+        "y": 131.33333333333331,
+        "z": 1792.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 8.0,
+      "depth": 1.75,
+      "purpose": "countersink"
+    },
+    {
+      "type": "bore",
+      "part": "C01.Shelf1",
+      "at": {
+        "x": 884.0,
+        "y": 131.33333333333331,
+        "z": 1792.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 3.0,
+      "depth": 35.0,
+      "purpose": "screw_pilot"
+    },
+    {
+      "type": "bore",
+      "part": "C01.RightSide",
+      "at": {
+        "x": 900.0,
+        "y": 290.0,
+        "z": 1792.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 4.5,
+      "depth": 16.0,
+      "purpose": "screw"
+    },
+    {
+      "type": "bore",
+      "part": "C01.RightSide",
+      "at": {
+        "x": 900.0,
+        "y": 290.0,
+        "z": 1792.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 8.0,
+      "depth": 1.75,
+      "purpose": "countersink"
+    },
+    {
+      "type": "bore",
+      "part": "C01.Shelf1",
+      "at": {
+        "x": 884.0,
+        "y": 290.0,
+        "z": 1792.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 3.0,
+      "depth": 35.0,
+      "purpose": "screw_pilot"
+    },
+    {
+      "type": "bore",
+      "part": "C01.RightSide",
+      "at": {
+        "x": 900.0,
+        "y": 448.66666666666663,
+        "z": 1792.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 4.5,
+      "depth": 16.0,
+      "purpose": "screw"
+    },
+    {
+      "type": "bore",
+      "part": "C01.RightSide",
+      "at": {
+        "x": 900.0,
+        "y": 448.66666666666663,
+        "z": 1792.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 8.0,
+      "depth": 1.75,
+      "purpose": "countersink"
+    },
+    {
+      "type": "bore",
+      "part": "C01.Shelf1",
+      "at": {
+        "x": 884.0,
+        "y": 448.66666666666663,
+        "z": 1792.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 3.0,
+      "depth": 35.0,
+      "purpose": "screw_pilot"
+    },
+    {
+      "type": "bore",
+      "part": "C01.Door1",
+      "at": {
+        "x": 414.0,
+        "y": 0.0,
+        "z": 986.0
+      },
+      "direction": {
+        "axis": "Y",
+        "positive": false
+      },
+      "diameter": 5.0,
+      "depth": 18.0,
+      "purpose": "handle_screw"
+    },
+    {
+      "type": "bore",
+      "part": "C01.Door1",
+      "at": {
+        "x": 414.0,
+        "y": 0.0,
+        "z": 1114.0
+      },
+      "direction": {
+        "axis": "Y",
+        "positive": false
+      },
+      "diameter": 5.0,
+      "depth": 18.0,
+      "purpose": "handle_screw"
+    },
+    {
+      "type": "bore",
+      "part": "C01.Door2",
+      "at": {
+        "x": 486.0,
+        "y": 0.0,
+        "z": 986.0
+      },
+      "direction": {
+        "axis": "Y",
+        "positive": false
+      },
+      "diameter": 5.0,
+      "depth": 18.0,
+      "purpose": "handle_screw"
+    },
+    {
+      "type": "bore",
+      "part": "C01.Door2",
+      "at": {
+        "x": 486.0,
+        "y": 0.0,
+        "z": 1114.0
+      },
+      "direction": {
+        "axis": "Y",
+        "positive": false
+      },
+      "diameter": 5.0,
+      "depth": 18.0,
+      "purpose": "handle_screw"
+    }
+  ],
+  "hardware": [
+    {
+      "item": "blum.clip-top-blumotion.110.overlay",
+      "description": "CLIP top BLUMOTION 110°, overlay application (straight arm), screw-on boss, nickel",
+      "at": {
+        "x": 22.5,
+        "y": 0.0,
+        "z": 250.0
+      },
+      "part": "C01.Door1",
+      "quantity": 1
+    },
+    {
+      "item": "blum.mounting-plate.cruciform-37-32.system-screw.0",
+      "description": "CLIP mounting plate cruciform 37/32, 0 mm spacing, system screws Ø6 × 14.5, zinc",
+      "at": {
+        "x": 16.0,
+        "y": 37.0,
+        "z": 250.0
+      },
+      "part": "C01.LeftSide",
+      "quantity": 1
+    },
+    {
+      "item": "blum.clip-top-blumotion.110.overlay",
+      "description": "CLIP top BLUMOTION 110°, overlay application (straight arm), screw-on boss, nickel",
+      "at": {
+        "x": 22.5,
+        "y": 0.0,
+        "z": 833.3333333333334
+      },
+      "part": "C01.Door1",
+      "quantity": 1
+    },
+    {
+      "item": "blum.mounting-plate.cruciform-37-32.system-screw.0",
+      "description": "CLIP mounting plate cruciform 37/32, 0 mm spacing, system screws Ø6 × 14.5, zinc",
+      "at": {
+        "x": 16.0,
+        "y": 37.0,
+        "z": 833.3333333333334
+      },
+      "part": "C01.LeftSide",
+      "quantity": 1
+    },
+    {
+      "item": "blum.clip-top-blumotion.110.overlay",
+      "description": "CLIP top BLUMOTION 110°, overlay application (straight arm), screw-on boss, nickel",
+      "at": {
+        "x": 22.5,
+        "y": 0.0,
+        "z": 1416.6666666666667
+      },
+      "part": "C01.Door1",
+      "quantity": 1
+    },
+    {
+      "item": "blum.mounting-plate.cruciform-37-32.system-screw.0",
+      "description": "CLIP mounting plate cruciform 37/32, 0 mm spacing, system screws Ø6 × 14.5, zinc",
+      "at": {
+        "x": 16.0,
+        "y": 37.0,
+        "z": 1416.6666666666667
+      },
+      "part": "C01.LeftSide",
+      "quantity": 1
+    },
+    {
+      "item": "blum.clip-top-blumotion.110.overlay",
+      "description": "CLIP top BLUMOTION 110°, overlay application (straight arm), screw-on boss, nickel",
+      "at": {
+        "x": 22.5,
+        "y": 0.0,
+        "z": 2000.0
+      },
+      "part": "C01.Door1",
+      "quantity": 1
+    },
+    {
+      "item": "blum.mounting-plate.cruciform-37-32.system-screw.0",
+      "description": "CLIP mounting plate cruciform 37/32, 0 mm spacing, system screws Ø6 × 14.5, zinc",
+      "at": {
+        "x": 16.0,
+        "y": 37.0,
+        "z": 2000.0
+      },
+      "part": "C01.LeftSide",
+      "quantity": 1
+    },
+    {
+      "item": "blum.clip-top-blumotion.110.overlay",
+      "description": "CLIP top BLUMOTION 110°, overlay application (straight arm), screw-on boss, nickel",
+      "at": {
+        "x": 877.5,
+        "y": 0.0,
+        "z": 250.0
+      },
+      "part": "C01.Door2",
+      "quantity": 1
+    },
+    {
+      "item": "blum.mounting-plate.cruciform-37-32.system-screw.0",
+      "description": "CLIP mounting plate cruciform 37/32, 0 mm spacing, system screws Ø6 × 14.5, zinc",
+      "at": {
+        "x": 884.0,
+        "y": 37.0,
+        "z": 250.0
+      },
+      "part": "C01.RightSide",
+      "quantity": 1
+    },
+    {
+      "item": "blum.clip-top-blumotion.110.overlay",
+      "description": "CLIP top BLUMOTION 110°, overlay application (straight arm), screw-on boss, nickel",
+      "at": {
+        "x": 877.5,
+        "y": 0.0,
+        "z": 833.3333333333334
+      },
+      "part": "C01.Door2",
+      "quantity": 1
+    },
+    {
+      "item": "blum.mounting-plate.cruciform-37-32.system-screw.0",
+      "description": "CLIP mounting plate cruciform 37/32, 0 mm spacing, system screws Ø6 × 14.5, zinc",
+      "at": {
+        "x": 884.0,
+        "y": 37.0,
+        "z": 833.3333333333334
+      },
+      "part": "C01.RightSide",
+      "quantity": 1
+    },
+    {
+      "item": "blum.clip-top-blumotion.110.overlay",
+      "description": "CLIP top BLUMOTION 110°, overlay application (straight arm), screw-on boss, nickel",
+      "at": {
+        "x": 877.5,
+        "y": 0.0,
+        "z": 1416.6666666666667
+      },
+      "part": "C01.Door2",
+      "quantity": 1
+    },
+    {
+      "item": "blum.mounting-plate.cruciform-37-32.system-screw.0",
+      "description": "CLIP mounting plate cruciform 37/32, 0 mm spacing, system screws Ø6 × 14.5, zinc",
+      "at": {
+        "x": 884.0,
+        "y": 37.0,
+        "z": 1416.6666666666667
+      },
+      "part": "C01.RightSide",
+      "quantity": 1
+    },
+    {
+      "item": "blum.clip-top-blumotion.110.overlay",
+      "description": "CLIP top BLUMOTION 110°, overlay application (straight arm), screw-on boss, nickel",
+      "at": {
+        "x": 877.5,
+        "y": 0.0,
+        "z": 2000.0
+      },
+      "part": "C01.Door2",
+      "quantity": 1
+    },
+    {
+      "item": "blum.mounting-plate.cruciform-37-32.system-screw.0",
+      "description": "CLIP mounting plate cruciform 37/32, 0 mm spacing, system screws Ø6 × 14.5, zinc",
+      "at": {
+        "x": 884.0,
+        "y": 37.0,
+        "z": 2000.0
+      },
+      "part": "C01.RightSide",
+      "quantity": 1
+    },
+    {
+      "item": "wardrobe-rail.oval",
+      "description": "Wardrobe rail, cut to 866 mm",
+      "at": {
+        "x": 450.0,
+        "y": 289.0,
+        "z": 1724.0
+      },
+      "part": "C01.Shelf1",
+      "quantity": 1
+    },
+    {
+      "item": "wardrobe-rail.end-support",
+      "description": "Wardrobe rail end support",
+      "at": {
+        "x": 450.0,
+        "y": 289.0,
+        "z": 1724.0
+      },
+      "part": "C01.Shelf1",
+      "quantity": 2
+    },
+    {
+      "item": "hafele.leg.adjustable",
+      "description": "Adjustable cabinet leg with plinth clip",
+      "at": {
+        "x": 50.0,
+        "y": 118.0,
+        "z": 0.0
+      },
+      "part": "C01.Bottom",
+      "quantity": 1
+    },
+    {
+      "item": "hafele.leg.adjustable",
+      "description": "Adjustable cabinet leg with plinth clip",
+      "at": {
+        "x": 50.0,
+        "y": 550.0,
+        "z": 0.0
+      },
+      "part": "C01.Bottom",
+      "quantity": 1
+    },
+    {
+      "item": "hafele.leg.adjustable",
+      "description": "Adjustable cabinet leg with plinth clip",
+      "at": {
+        "x": 850.0,
+        "y": 118.0,
+        "z": 0.0
+      },
+      "part": "C01.Bottom",
+      "quantity": 1
+    },
+    {
+      "item": "hafele.leg.adjustable",
+      "description": "Adjustable cabinet leg with plinth clip",
+      "at": {
+        "x": 850.0,
+        "y": 550.0,
+        "z": 0.0
+      },
+      "part": "C01.Bottom",
+      "quantity": 1
+    },
+    {
+      "item": "screw-cover-cap",
+      "description": "Screw cover cap, colour to match the carcass",
+      "at": {
+        "x": 8.0,
+        "y": 300.0,
+        "z": 1125.0
+      },
+      "part": "C01.LeftSide",
+      "quantity": 10
+    },
+    {
+      "item": "screw-cover-cap",
+      "description": "Screw cover cap, colour to match the carcass",
+      "at": {
+        "x": 892.0,
+        "y": 300.0,
+        "z": 1125.0
+      },
+      "part": "C01.RightSide",
+      "quantity": 10
+    },
+    {
+      "item": "handle.cc128",
+      "description": "Handle, 128 mm hole centres",
+      "at": {
+        "x": 225.0,
+        "y": -9.0,
+        "z": 1125.0
+      },
+      "part": "C01.Door1",
+      "quantity": 1
+    },
+    {
+      "item": "handle.cc128",
+      "description": "Handle, 128 mm hole centres",
+      "at": {
+        "x": 675.0,
+        "y": -9.0,
+        "z": 1125.0
+      },
+      "part": "C01.Door2",
+      "quantity": 1
+    }
+  ],
+  "warnings": []
+}

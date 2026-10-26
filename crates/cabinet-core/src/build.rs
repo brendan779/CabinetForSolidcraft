@@ -8,8 +8,8 @@ use crate::joinery::ButtJoint;
 use crate::lift;
 use crate::model::{
     BackStyle, BottomJoint, Cabinet, CabinetKind, DoorOverlay, DoorStyle, DrawerSides,
-    DrawerSystem, Exposed, FrontCore, FrontLayout, HandlePlace, HingeSide, LiftKind, LightZone,
-    Opening, ToeKick, TopJoint, WallHanging,
+    DrawerSystem, Exposed, FrontCore, FrontLayout, HandlePlace, Hanging, HingeSide, LiftKind,
+    LightZone, Opening, ToeKick, TopJoint, WallHanging,
 };
 use crate::part::{
     BorePurpose, Dir, EdgeBanding, HardwarePlacement, Operation, Part, PartList, PartRole,
@@ -55,6 +55,12 @@ const HANDLE_EDGE_INSET: f64 = 35.0;
 const HANDLE_END_INSET: f64 = 50.0;
 const TALL_HANDLE_HEIGHT: f64 = 1050.0;
 const DEEP_FRONT: f64 = 200.0;
+/// Our choices for wardrobes: the hat shelf's top this far under the cabinet top, a rail's centre
+/// this far under the shelf above it, and double hanging's lower shelf at this height from the
+/// floor (rails hang shirts above and trousers below).
+const HAT_SHELF_DROP: f64 = 300.0;
+const RAIL_DROP: f64 = 60.0;
+const DOUBLE_HANG_SHELF: f64 = 1050.0;
 /// Our choices for shaker fronts: frame member width, panel thickness, groove depth (and stub
 /// tenon length), and the panel's play in the groove each side. A front under twice the frame
 /// width plus this much stays slab.
@@ -877,6 +883,10 @@ impl<'a> Builder<'a> {
             self.inner_drawers();
             return;
         }
+        if cab.kind == CabinetKind::Wardrobe {
+            self.wardrobe();
+            return;
+        }
         let n = cab.adjustable_shelves as usize;
         let s = &cab.standard;
         let (w, t) = (cab.width, s.carcass_thickness);
@@ -1319,6 +1329,69 @@ impl<'a> Builder<'a> {
                 part: part.to_string(),
                 quantity: 1,
             });
+        }
+    }
+
+    /// A wardrobe's fixed hat shelf and hanging rails (one, or two for double hanging), each rail
+    /// cut to the inside width with an end support each side.
+    fn wardrobe(&mut self) {
+        let cab = self.cab;
+        let s = &cab.standard;
+        let (w, h, t) = (cab.width, cab.height, s.carcass_thickness);
+        let mut shelves = vec![h - HAT_SHELF_DROP - t];
+        if cab.wardrobe == Hanging::Double {
+            shelves.push(DOUBLE_HANG_SHELF);
+        }
+        let (left, right) = match (
+            self.part(PartRole::LeftSide),
+            self.part(PartRole::RightSide),
+        ) {
+            (Some(l), Some(r)) => (l, r),
+            _ => return,
+        };
+        for (i, &z) in shelves.iter().enumerate() {
+            let bounds = aabb(
+                t,
+                s.shelf_front_setback,
+                z,
+                w - t,
+                self.interior_back,
+                z + t,
+            );
+            self.add(
+                PartRole::Shelf,
+                Some(i + 1),
+                bounds,
+                Axis::Z,
+                Axis::X,
+                EdgeBanding::front_only(),
+            );
+            let shelf = self.list.parts.last().cloned().unwrap();
+            self.joint_parts(&left, &shelf, Dir::new(Axis::X, true), Axis::Y);
+            self.joint_parts(&right, &shelf, Dir::new(Axis::X, false), Axis::Y);
+            let rail_z = z - RAIL_DROP;
+            let length = w - 2.0 * t - 2.0;
+            let at = Vec3::new(w / 2.0, self.interior_back / 2.0, rail_z);
+            for (item, description, quantity) in [
+                (
+                    "wardrobe-rail.oval",
+                    format!("Wardrobe rail, cut to {length:.0} mm"),
+                    1,
+                ),
+                (
+                    "wardrobe-rail.end-support",
+                    "Wardrobe rail end support".to_string(),
+                    2,
+                ),
+            ] {
+                self.list.hardware.push(HardwarePlacement {
+                    item: item.into(),
+                    description,
+                    at,
+                    part: shelf.name.clone(),
+                    quantity,
+                });
+            }
         }
     }
 
@@ -2042,7 +2115,7 @@ impl<'a> Builder<'a> {
                         (c - span / 2.0, c + span / 2.0)
                     }
                     _ if wall_hung => (z0 + HANDLE_END_INSET, z0 + HANDLE_END_INSET + span),
-                    _ if cab.kind == CabinetKind::Tall => {
+                    _ if matches!(cab.kind, CabinetKind::Tall | CabinetKind::Wardrobe) => {
                         let c = TALL_HANDLE_HEIGHT.clamp(z0 + span / 2.0, z1 - span / 2.0);
                         (c - span / 2.0, c + span / 2.0)
                     }
@@ -3755,6 +3828,39 @@ mod tests {
             glass.description
         );
         assert!(list.hardware.iter().all(|h| list.part(&h.part).is_some()));
+    }
+
+    /// P2-3a: a wardrobe: hat shelf 300 under the top with a rail under it; double hanging adds
+    /// a shelf at 1050 with its own rail. Both shelves are fixed between the sides.
+    #[test]
+    fn a_wardrobe_hangs_from_rails_under_fixed_shelves() {
+        for (hanging, shelves) in [(Hanging::Long, 1), (Hanging::Double, 2)] {
+            let mut cab = Cabinet::new("R01", CabinetKind::Wardrobe);
+            cab.wardrobe = hanging;
+            let list = build_cabinet(&cab).unwrap();
+            assert!(
+                !list.warnings.iter().any(|w| w.contains("clash")),
+                "{:?}",
+                list.warnings
+            );
+            assert_eq!(list.by_role(PartRole::Shelf).count(), shelves);
+            let rails: Vec<_> = list
+                .hardware
+                .iter()
+                .filter(|h| h.item == "wardrobe-rail.oval")
+                .collect();
+            assert_eq!(rails.len(), shelves);
+            assert!(
+                rails[0].description.ends_with("cut to 866 mm"),
+                "{}",
+                rails[0].description
+            );
+            let hat = list.part("R01.Shelf1").unwrap();
+            assert_eq!(hat.bounds.max().z, 2100.0 - HAT_SHELF_DROP);
+            // Fixed: fixings in the sides at the shelf.
+            assert!(list.operations.iter().any(|o| matches!(o,
+                Operation::BiscuitSlot { parts, .. } if parts.iter().any(|p| p == "R01.Shelf1"))));
+        }
     }
 
     fn handle_holes(list: &PartList, part: &str) -> Vec<Vec3> {
