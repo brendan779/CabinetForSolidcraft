@@ -215,7 +215,7 @@ features in words.
 | BENCH-5 | todo | M | Benchtop outputs: dimensioned template sheet per piece with joins, cut-outs and edge profiles; area and edge metres for quoting | PDF/SVG sheet |
 | BENCH-6 | todo (slab splashback built in 394ac5d; the niche with open shelves and power points is left) | M | Splashbacks: slab splashback panels matching the benchtop, with a niche/recess for open shelves and power points | splashback part + sheet |
 | SURR-1 | todo | M | Laminex Surround profiles as catalog data (`kind: lining`) from Laminex's own current documents: profile names (Classic VJ, Scallop, Demi Round...), module width, flute/groove pitch, thickness, sheet sizes, substrate, flexible/curved variants | catalog rows with sources |
-| SURR-2 | todo | M | Cladding as a cabinet finish: island backs and ends, end panels and kick panels clad in a Surround profile, flutes vertical and aligned across panels | an island back renders fluted |
+| SURR-2 | needs-human (built in b3e72a4: cladding parts on chosen faces; the run layout does not yet leave room for a clad end between cabinets; profile choice waits for SURR-1; not seen on screen) | M | Cladding as a cabinet finish: island backs and ends, end panels and kick panels clad in a Surround profile, flutes vertical and aligned across panels | an island back renders fluted |
 | SURR-3 | todo | L | Curved ends: rounded island ends (radius picker) from curved substrate (bending ply / kerfed MDF / flexible Surround), fluting following the curve, benchtop ends to match | split |
 | SURR-4 | todo | M | Clad rangehood / canopy box with rounded front corners, in a Surround profile or paint finish | rangehood part between wall cabinets |
 | SURR-5 | todo | S | Flute and VJ procedural textures in the viewport (normal-mapped grooves) | looks fluted in the app |
@@ -360,3 +360,4 @@ Agents append one line per session: date, items touched, outcome.
 - 2026-10-26b (night) — BENCH-6 part (394ac5d): slab splashbacks on benchtop pieces; niches left.
 - 2026-10-26b (night) — STYLE-4 built (19b3821): stacked front layout (drawers / door / niche sections with fixed shelves); oven tower and fridge presets for tall cabinets.
 - 2026-10-26b (night) — STYLE-1 part (04a890b): finger pulls routed along the gripping edge.
+- 2026-10-26b (night) — SURR-2 built (b3e72a4): cladding parts on a cabinet's left/right/back faces.
