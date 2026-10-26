@@ -67,6 +67,17 @@ struct CabinetDoc: Identifiable, Hashable, Codable {
         set { setNumber("side_overhang", newValue) }
     }
 
+    /// Benchtop: seating overhang past the cabinets' backs (0: to the wall).
+    var backOverhang: Double {
+        get { number("back_overhang") }
+        set { setNumber("back_overhang", newValue) }
+    }
+
+    /// Benchtop: waterfall ends, `left` or `right`.
+    func waterfall(_ side: String) -> Bool { object["waterfall_\(side)"] as? Bool ?? false }
+
+    mutating func setWaterfall(_ side: String, _ on: Bool) { update { $0["waterfall_\(side)"] = on } }
+
     /// Benchtop: a slab splashback's height on the top (0: none).
     var splashback: Double {
         get { number("splashback") }

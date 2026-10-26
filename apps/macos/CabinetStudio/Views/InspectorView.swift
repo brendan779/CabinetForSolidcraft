@@ -86,6 +86,21 @@ struct PieceSection: View {
                 chips("Front", value: cab.frontOverhang, presets: [0, 10, 20, 30, 40]) { c, v in c.frontOverhang = v }
                 chips("Ends", value: cab.sideOverhang, presets: [0, 10, 20, 40]) { c, v in c.sideOverhang = v }
                 chips("Splashback", value: cab.splashback, presets: [0, 100, 300, 600, 650]) { c, v in c.splashback = v }
+                chips("Seating", value: cab.backOverhang, presets: [0, 300, 400, 600]) { c, v in c.backOverhang = v }
+                HStack(spacing: 6) {
+                    Text("Waterfall").foregroundStyle(.secondary)
+                    Spacer()
+                    ForEach(["left", "right"], id: \.self) { side in
+                        let on = cab.waterfall(side)
+                        Button {
+                            withAnimation(.snappy) { var c = cab; c.setWaterfall(side, !on); project.selected = c }
+                        } label: {
+                            Label(side.capitalized, systemImage: side == "left" ? "arrow.down.left" : "arrow.down.right")
+                        }
+                        .buttonStyle(ChipStyle(selected: on))
+                        .help("The top turns down to the floor at the \(side) end of each stretch, mitred at the corner")
+                    }
+                }
                 Text("One piece over each stretch of base cabinets in the run, past the door faces by the front overhang and past each end of a stretch by the end overhang.")
                     .font(.caption)
                     .foregroundStyle(.secondary)

@@ -483,6 +483,9 @@ fn a_benchtop_with_cut_outs_builds() {
                 side_overhang: 0.0,
                 back_clearance: 0.0,
                 board: String::new(),
+                back_overhang: 0.0,
+                waterfall_left: true,
+                waterfall_right: false,
                 splashback: 600.0,
                 splashback_thickness: 20.0,
                 cutouts: vec![

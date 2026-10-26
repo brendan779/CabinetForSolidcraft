@@ -49,6 +49,16 @@ pub struct Benchtop {
     /// Holes through the top for a sink or a cooktop, each centred over a cabinet.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub cutouts: Vec<Cutout>,
+    /// Past the cabinets' backs (an island's seating side, a breakfast bar); with it there is
+    /// no back clearance or splashback.
+    #[serde(default)]
+    pub back_overhang: f64,
+    /// The top turns down to the floor at the left / right end of each stretch, mitred at the
+    /// corner.
+    #[serde(default)]
+    pub waterfall_left: bool,
+    #[serde(default)]
+    pub waterfall_right: bool,
     /// A slab splashback this high standing on each piece against the wall (0: none), in the
     /// benchtop's board.
     #[serde(default)]
@@ -85,6 +95,10 @@ pub enum CutoutKind {
     Sink,
     Cooktop,
 }
+
+/// Our choices: overhangs up to this need no support, and brackets go at most this far apart.
+const BAR_OVERHANG_UNSUPPORTED: f64 = 300.0;
+const BAR_BRACKET_SPACING: f64 = 600.0;
 
 /// Our choices: a tap hole's diameter and how far behind the sink cut-out its centre sits.
 const TAP_HOLE_DIAMETER: f64 = 35.0;
@@ -346,7 +360,11 @@ fn benchtop(b: &Benchtop, lists: &[PartList], under: &[bool]) -> PartList {
             .filter(|p| !matches!(p.role, PartRole::EndPanel | PartRole::Filler))
             .map(|p| p.bounds.max().y)
             .fold(f64::MIN, f64::max)
-            - b.back_clearance;
+            + if b.back_overhang > 0.0 {
+                b.back_overhang
+            } else {
+                -b.back_clearance
+            };
         let z = hi(|p| p.bounds.max().z);
         out.parts.push(Part {
             name: format!("{}.{}{}", b.id, PartRole::Benchtop.code(), n + 1),
@@ -365,7 +383,49 @@ fn benchtop(b: &Benchtop, lists: &[PartList], under: &[bool]) -> PartList {
                 ..EdgeBanding::default()
             },
         });
-        if b.splashback > 0.0 {
+        // Waterfall ends: from the floor up the stretch's ends to the top's upper face, the
+        // depth of the top. Mitred with the top: both pieces are cut to their outer faces.
+        let floor = in_line
+            .iter()
+            .map(|p| p.bounds.min.z)
+            .fold(f64::MAX, f64::min);
+        for (on, side, wx0) in [
+            (b.waterfall_left, "L", x0 - b.thickness),
+            (b.waterfall_right, "R", x1),
+        ] {
+            if on {
+                out.parts.push(Part {
+                    name: format!("{}.Waterfall{}{side}", b.id, n + 1),
+                    role: PartRole::Benchtop,
+                    bounds: Aabb::new(
+                        Vec3::new(wx0, y0, floor),
+                        Vec3::new(b.thickness, y1 - y0, z + b.thickness - floor),
+                    ),
+                    thickness_axis: Axis::X,
+                    grain_axis: Some(Axis::Z),
+                    board: b.board.clone(),
+                    edges: EdgeBanding {
+                        front: true,
+                        ..EdgeBanding::default()
+                    },
+                });
+            }
+        }
+        // Our rule of thumb: an overhang past this needs brackets under it, one per this spacing.
+        if b.back_overhang > BAR_OVERHANG_UNSUPPORTED {
+            let brackets = ((x1 - x0) / BAR_BRACKET_SPACING).ceil().max(2.0) as u32;
+            out.hardware.push(crate::part::HardwarePlacement {
+                item: "benchtop.support-bracket".into(),
+                description: format!(
+                    "Concealed benchtop support bracket for a {:.0} mm overhang",
+                    b.back_overhang
+                ),
+                at: Vec3::new((x0 + x1) / 2.0, y1, z),
+                part: format!("{}.{}{}", b.id, PartRole::Benchtop.code(), n + 1),
+                quantity: brackets,
+            });
+        }
+        if b.splashback > 0.0 && b.back_overhang <= 0.0 {
             let t = b.splashback_thickness;
             out.parts.push(Part {
                 name: format!("{}.{}{}", b.id, PartRole::Splashback.code(), n + 1),
@@ -596,6 +656,9 @@ mod tests {
             back_clearance: 0.0,
             board: String::new(),
             cutouts: Vec::new(),
+            back_overhang: 0.0,
+            waterfall_left: false,
+            waterfall_right: false,
             splashback: 0.0,
             splashback_thickness: 20.0,
         })
@@ -671,6 +734,9 @@ mod tests {
             side_overhang: 0.0,
             back_clearance: 0.0,
             board: String::new(),
+            back_overhang: 0.0,
+            waterfall_left: false,
+            waterfall_right: false,
             splashback: 600.0,
             splashback_thickness: 20.0,
             cutouts: vec![
@@ -747,5 +813,44 @@ mod tests {
             (back.size.x, back.size.y, back.size.z),
             (top.size.x, 20.0, 600.0)
         );
+    }
+
+    /// BENCH-3a/3c: an island top: waterfall ends down to the floor and a 400 mm seating
+    /// overhang at the back, which needs brackets; no splashback with an overhang.
+    #[test]
+    fn an_island_top_has_waterfall_ends_and_a_supported_overhang() {
+        let mut item = top("BT1", 0.0);
+        if let RunItem::Benchtop(b) = &mut item {
+            b.waterfall_left = true;
+            b.waterfall_right = true;
+            b.back_overhang = 400.0;
+            b.splashback = 600.0;
+        }
+        let run = Run {
+            origin: Vec3::default(),
+            items: vec![
+                cab("B01", CabinetKind::Base),
+                cab("B02", CabinetKind::Base),
+                item,
+            ],
+        };
+        let lists = build_run(&run).unwrap();
+        let bt = &lists[2];
+        let top = bt.part("BT1.Benchtop1").unwrap().bounds;
+        assert!((top.max().y - 980.0).abs() < 1e-9);
+        let (l, r) = (
+            bt.part("BT1.Waterfall1L").unwrap().bounds,
+            bt.part("BT1.Waterfall1R").unwrap().bounds,
+        );
+        assert_eq!((l.max().x, r.min.x), (top.min.x, top.max().x));
+        assert_eq!((l.min.z, l.max().z), (0.0, top.max().z));
+        assert_eq!(l.size.y, top.size.y);
+        assert!(bt.part("BT1.Splashback1").is_none());
+        let brackets = bt
+            .hardware
+            .iter()
+            .find(|h| h.item == "benchtop.support-bracket")
+            .unwrap();
+        assert_eq!(brackets.quantity, 2);
     }
 }
