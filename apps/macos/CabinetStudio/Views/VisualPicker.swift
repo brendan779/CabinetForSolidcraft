@@ -76,6 +76,7 @@ struct ConstructionThumbnail: View {
             case "top_joint", "bottom_joint": pen.carcassFront(field: field, choice: choice)
             case "back": pen.backSection(choice)
             case "toe_kick": pen.toeKick(choice)
+            case "leg_fixing": pen.legFixing(choice)
             case "wall_hanging": pen.wallHanging(choice)
             case "opening": pen.opening(choice)
             case "drawer_system": pen.drawerSystem(choice)
@@ -402,6 +403,34 @@ private struct Pen {
             ctx.stroke(Path(notch), with: .color(accent), lineWidth: 1.4)
         default:
             break
+        }
+    }
+
+    // MARK: Leg fixing, a leg's plate under the bottom in section
+
+    func legFixing(_ choice: String) {
+        let floor: CGFloat = 74
+        line(p(4, floor), p(96, floor), colour: .primary.opacity(0.5))
+        board(8, 14, 84, 12)
+        // The plate under the bottom, the tube down to its foot.
+        board(30, 26, 40, 9, hot: true)
+        board(44, 35, 12, 31, hot: true)
+        board(38, 66, 24, 6, hot: true)
+        switch choice {
+        case "screw_on":
+            // Screws up through the plate's flanges into the bottom.
+            for x: CGFloat in [35, 65] {
+                line(p(x, 34), p(x, 18), colour: accent, width: 1.6)
+                line(p(x - 3.5, 34), p(x + 3.5, 34), colour: accent, width: 2)
+            }
+        default:
+            // Spigots on the plate's top in bored holes.
+            for x: CGFloat in [35, 65] {
+                let hole = r(x - 2.5, 18, 5, 8)
+                ctx.fill(Path(hole), with: .color(Color(nsColor: .windowBackgroundColor)))
+                ctx.fill(Path(r(x - 2, 19, 4, 7)), with: .color(accent.opacity(0.7)))
+                ctx.stroke(Path(hole), with: .color(accent), lineWidth: 1)
+            }
         }
     }
 

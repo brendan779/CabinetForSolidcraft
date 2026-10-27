@@ -538,6 +538,8 @@ pub struct ConstructionStandard {
     pub toe_kick_height: f64,
     /// How far the plinth sits back from the carcass front.
     pub toe_kick_setback: f64,
+    /// How legs fix to the carcass bottom, with legs + plinth.
+    pub leg_fixing: LegFixing,
     pub overlay: DoorOverlay,
     /// Gap between a front and its neighbour or the envelope edge.
     pub front_gap: f64,
@@ -620,6 +622,7 @@ impl Default for ConstructionStandard {
             toe_kick: ToeKick::LegsAndPlinth,
             toe_kick_height: 150.0,
             toe_kick_setback: 50.0,
+            leg_fixing: LegFixing::ScrewOn,
             overlay: DoorOverlay::Full,
             front_gap: 2.0,
             fixings: FixingRecipe::BiscuitAndScrew,
@@ -881,6 +884,17 @@ pub enum ToeKick {
     /// Sides run to the floor with a notch at the front.
     IntegratedNotch,
     None,
+}
+
+/// How a plinth leg's mounting plate fixes to the carcass bottom.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum LegFixing {
+    /// Screwed to the underside.
+    #[default]
+    ScrewOn,
+    /// Knocked into bored holes.
+    KnockIn,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]

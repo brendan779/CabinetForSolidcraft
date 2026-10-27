@@ -283,6 +283,22 @@ pub fn option_groups() -> Vec<OptionGroup> {
             ],
         ),
         group(
+            "leg_fixing",
+            "Leg fixing",
+            &[
+                (
+                    "screw_on",
+                    "Screw-on",
+                    "Each leg's plate screws to the underside of the bottom",
+                ),
+                (
+                    "knock_in",
+                    "Knock-in",
+                    "Each leg's plate knocks into holes bored in the bottom",
+                ),
+            ],
+        ),
+        group(
             "overlay",
             "Door mounting",
             &[

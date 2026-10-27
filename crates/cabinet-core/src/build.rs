@@ -9,8 +9,8 @@ use crate::lift;
 use crate::model::{
     BackStyle, BottomJoint, Cabinet, CabinetKind, DoorOverlay, DoorStyle, DrawerSides,
     DrawerSystem, Exposed, FrontCore, FrontGrain, FrontLayout, HandlePlace, Hanging, HingeSide,
-    InsertDesign, LiftKind, LightZone, Opening, SectionKind, StackSection, ToeKick, TopJoint,
-    WallHanging,
+    InsertDesign, LegFixing, LiftKind, LightZone, Opening, SectionKind, StackSection, ToeKick,
+    TopJoint, WallHanging,
 };
 use crate::part::{
     BorePurpose, Dir, EdgeBanding, HardwarePlacement, Operation, Part, PartList, PartRole,
@@ -3223,7 +3223,7 @@ impl<'a> Builder<'a> {
             },
         );
         if s.toe_kick == ToeKick::LegsAndPlinth {
-            let (item, description) = match axilo_set(kick) {
+            let (item, description) = match axilo_set(kick, s.leg_fixing) {
                 Some(set) => (
                     set.id.clone(),
                     format!("Häfele AXILO 78 leg, {} ({})", set.variant, set.article),
@@ -3259,12 +3259,19 @@ impl<'a> Builder<'a> {
     }
 }
 
-/// The screw-on Häfele AXILO 78 leg set whose adjustment covers a plinth `height`, the nearest
-/// nominal height first.
-fn axilo_set(height: f64) -> Option<&'static cabinet_catalog::HardwareItem> {
+/// The Häfele AXILO 78 leg set with `fixing` whose adjustment covers a plinth `height`, the
+/// nearest nominal height first.
+fn axilo_set(height: f64, fixing: LegFixing) -> Option<&'static cabinet_catalog::HardwareItem> {
+    let screw_on = if fixing == LegFixing::ScrewOn {
+        1.0
+    } else {
+        0.0
+    };
     crate::hardware::items()
         .iter()
-        .filter(|i| i.id.starts_with("hafele.axilo.set.") && i.param("screw_on").ok() == Some(1.0))
+        .filter(|i| {
+            i.id.starts_with("hafele.axilo.set.") && i.param("screw_on").ok() == Some(screw_on)
+        })
         .filter_map(|i| {
             let (h, down, up) = (
                 i.param("nominal_height").ok()?,
@@ -3318,6 +3325,31 @@ mod tests {
                 "{kick}"
             );
         }
+    }
+
+    #[test]
+    fn knock_in_legs_are_the_knock_in_axilo_set() {
+        let mut cab = base();
+        cab.standard.toe_kick = ToeKick::LegsAndPlinth;
+        cab.standard.leg_fixing = LegFixing::KnockIn;
+        let list = build_cabinet(&cab).unwrap();
+        let legs: Vec<_> = list
+            .hardware
+            .iter()
+            .filter(|h| crate::cad::is_leg(&h.item))
+            .collect();
+        assert_eq!(legs.len(), 4);
+        assert!(
+            legs.iter()
+                .all(|h| h.item == "hafele.axilo.set.150.knock-in")
+        );
+        assert!(legs[0].description.contains("637.76.409"));
+        let plates: Vec<_> = crate::cad::cad_placements(&list)
+            .into_iter()
+            .filter(|c| c.item.contains(".glide."))
+            .collect();
+        assert_eq!(plates.len(), 4);
+        assert!(plates.iter().all(|c| c.article == "637.38.296"));
     }
 
     #[test]

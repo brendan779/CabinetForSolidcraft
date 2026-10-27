@@ -38,7 +38,11 @@ struct InspectorView: View {
                     BoardsSection(cab: cab)
                     ConstructionScope(cab: cab)
                     let overrides = project.overrides(of: cab)
-                    ForEach(optionGroups(), id: \.field) { group in
+                    // Leg fixing only means something on legs.
+                    let groups = optionGroups().filter {
+                        $0.field != "leg_fixing" || project.option("toe_kick", of: cab) == "legs_and_plinth"
+                    }
+                    ForEach(groups, id: \.field) { group in
                         VisualPicker(group: group, selected: project.option(group.field, of: cab),
                                      overridden: overrides.contains(group.field),
                                      onReset: { project.resetToProject([group.field]) }) { choice in
