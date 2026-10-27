@@ -62,14 +62,9 @@ const CANOPY_CUTOUT_MARGIN: f64 = 20.0;
 /// deep into the front it goes.
 const FINGER_PULL_HEIGHT: f64 = 25.0;
 const FINGER_PULL_DEPTH: f64 = 10.0;
-/// Our choices for wardrobes: the hat shelf's top this far under the cabinet top, a rail's centre
-/// this far under the shelf above it, and double hanging's lower shelf at this height from the
-/// floor (rails hang shirts above and trousers below).
-const HAT_SHELF_DROP: f64 = 300.0;
-const RAIL_DROP: f64 = 60.0;
-const DOUBLE_HANG_SHELF: f64 = 1050.0;
-/// Our choice: each inner drawer at a wardrobe's foot takes this much height.
-const WARDROBE_DRAWER_PITCH: f64 = 200.0;
+/// Our choice: double hanging's lower rail needs at least this much drop above whatever is under
+/// it. The wardrobe's other sizes are the standard's.
+const MIN_LOWER_HANGING: f64 = 300.0;
 /// Our choice: a shaker panel's play in its groove each side. The frame, panel and groove sizes
 /// are the standard's.
 const SHAKER_PLAY: f64 = 1.0;
@@ -1508,22 +1503,34 @@ impl<'a> Builder<'a> {
         let cab = self.cab;
         let s = &cab.standard;
         let (w, h, t) = (cab.width, cab.height, s.carcass_thickness);
-        let mut shelves = vec![h - HAT_SHELF_DROP - t];
+        let (hat_drop, rail_drop, lower_shelf, pitch) = (
+            s.wardrobe_hat_shelf_drop,
+            s.wardrobe_rail_drop,
+            s.wardrobe_double_hang_shelf,
+            s.wardrobe_drawer_pitch,
+        );
+        let hat = h - hat_drop - t;
+        let mut shelves = vec![hat];
         // Inner drawers at the foot, under a fixed shelf: the hanging above it.
         let mut drawers_top = None;
         if cab.inner_drawers > 0 {
             let z0 = self.opening_z.0;
-            let top = z0 + cab.inner_drawers as f64 * WARDROBE_DRAWER_PITCH;
+            let top = z0 + cab.inner_drawers as f64 * pitch;
             self.inner_drawers_in(z0, top);
             drawers_top = Some(top);
         }
         if cab.wardrobe == Hanging::Double {
-            if drawers_top.is_some_and(|top| top + t > DOUBLE_HANG_SHELF - RAIL_DROP - 300.0) {
+            if drawers_top.is_some_and(|top| top + t > lower_shelf - rail_drop - MIN_LOWER_HANGING)
+            {
                 self.list
                     .warnings
                     .push("the drawers leave no room for a lower rail; long hanging only".into());
+            } else if lower_shelf + t > hat - rail_drop - MIN_LOWER_HANGING {
+                self.list.warnings.push(format!(
+                    "a lower shelf at {lower_shelf:.0} mm leaves no room for the upper rail; long hanging only"
+                ));
             } else {
-                shelves.push(DOUBLE_HANG_SHELF);
+                shelves.push(lower_shelf);
             }
         }
         let (left, right) = match (
@@ -1553,7 +1560,7 @@ impl<'a> Builder<'a> {
             let shelf = self.list.parts.last().cloned().unwrap();
             self.joint_parts(&left, &shelf, Dir::new(Axis::X, true), Axis::Y);
             self.joint_parts(&right, &shelf, Dir::new(Axis::X, false), Axis::Y);
-            let rail_z = z - RAIL_DROP;
+            let rail_z = z - rail_drop;
             let length = w - 2.0 * t - 2.0;
             let at = Vec3::new(w / 2.0, self.interior_back / 2.0, rail_z);
             for (item, description, quantity) in [
@@ -4718,11 +4725,69 @@ mod tests {
                 rails[0].description
             );
             let hat = list.part("R01.Shelf1").unwrap();
-            assert_eq!(hat.bounds.max().z, 2100.0 - HAT_SHELF_DROP);
+            assert_eq!(
+                hat.bounds.max().z,
+                2100.0 - cab.standard.wardrobe_hat_shelf_drop
+            );
             // Fixed: fixings in the sides at the shelf.
             assert!(list.operations.iter().any(|o| matches!(o,
                 Operation::BiscuitSlot { parts, .. } if parts.iter().any(|p| p == "R01.Shelf1"))));
         }
+    }
+
+    /// WARD-1: the hat shelf, rails, lower shelf and drawer heights come from the standard; a
+    /// lower shelf crowding the upper rail falls back to long hanging with a note.
+    #[test]
+    fn wardrobe_sizes_follow_the_standard() {
+        let mut cab = Cabinet::new("R01", CabinetKind::Wardrobe);
+        cab.wardrobe = Hanging::Double;
+        cab.inner_drawers = 2;
+        cab.standard.wardrobe_hat_shelf_drop = 400.0;
+        cab.standard.wardrobe_rail_drop = 70.0;
+        cab.standard.wardrobe_double_hang_shelf = 1100.0;
+        cab.standard.wardrobe_drawer_pitch = 150.0;
+        let list = build_cabinet(&cab).unwrap();
+        let t = cab.standard.carcass_thickness;
+        assert_eq!(
+            list.part("R01.Shelf1").unwrap().bounds.max().z,
+            2100.0 - 400.0
+        );
+        assert_eq!(list.part("R01.Shelf2").unwrap().bounds.min.z, 1100.0);
+        let rails: Vec<f64> = list
+            .hardware
+            .iter()
+            .filter(|h| h.item == "wardrobe-rail.oval")
+            .map(|h| h.at.z)
+            .collect();
+        assert_eq!(rails, [2100.0 - 400.0 - t - 70.0, 1100.0 - 70.0]);
+        let drawers_top = list
+            .by_role(PartRole::DrawerBack)
+            .map(|p| p.bounds.max().z)
+            .fold(f64::MIN, f64::max);
+        assert!(drawers_top < list.part("R01.Shelf3").unwrap().bounds.min.z);
+        // The top drawer starts one 150 mm drawer up instead of 200; its box is the system's.
+        let mut tall = cab.clone();
+        tall.standard.wardrobe_drawer_pitch = 200.0;
+        let tall_top = build_cabinet(&tall)
+            .unwrap()
+            .by_role(PartRole::DrawerBack)
+            .map(|p| p.bounds.max().z)
+            .fold(f64::MIN, f64::max);
+        assert!(
+            (tall_top - drawers_top - 50.0).abs() < 1e-9,
+            "{tall_top} {drawers_top}"
+        );
+
+        cab.standard.wardrobe_double_hang_shelf = 1500.0;
+        let list = build_cabinet(&cab).unwrap();
+        assert!(list.warnings.iter().any(|w| w.contains("upper rail")));
+        assert_eq!(
+            list.hardware
+                .iter()
+                .filter(|h| h.item == "wardrobe-rail.oval")
+                .count(),
+            1
+        );
     }
 
     /// P2-3b: inner drawers at a wardrobe's foot under a fixed shelf; double hanging keeps its

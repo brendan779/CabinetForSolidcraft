@@ -547,6 +547,12 @@ pub struct ConstructionStandard {
     pub shaker_groove_depth: f64,
     /// A shaker-style front narrower or shorter than this stays a slab.
     pub shaker_slab_below: f64,
+    /// Wardrobes: the hat shelf's top under the cabinet top, a rail's centre under the shelf
+    /// above it, double hanging's lower shelf from the floor, and each inner drawer's height.
+    pub wardrobe_hat_shelf_drop: f64,
+    pub wardrobe_rail_drop: f64,
+    pub wardrobe_double_hang_shelf: f64,
+    pub wardrobe_drawer_pitch: f64,
     pub overlay: DoorOverlay,
     /// Gap between a front and its neighbour or the envelope edge.
     pub front_gap: f64,
@@ -634,6 +640,10 @@ impl Default for ConstructionStandard {
             shaker_panel_thickness: 9.0,
             shaker_groove_depth: 10.0,
             shaker_slab_below: 200.0,
+            wardrobe_hat_shelf_drop: 300.0,
+            wardrobe_rail_drop: 60.0,
+            wardrobe_double_hang_shelf: 1050.0,
+            wardrobe_drawer_pitch: 200.0,
             overlay: DoorOverlay::Full,
             front_gap: 2.0,
             fixings: FixingRecipe::BiscuitAndScrew,

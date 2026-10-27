@@ -97,6 +97,12 @@ struct StandardSizes: View {
                   ("Panel", "shaker_panel_thickness", [6, 9, 12]),
                   ("Groove", "shaker_groove_depth", [8, 10, 12]),
                   ("Slab below", "shaker_slab_below", [150, 200, 250, 300])])
+        case "wardrobe":
+            // Each row only where the wardrobe has the part it sizes.
+            rows([("Hat shelf drop", "wardrobe_hat_shelf_drop", [250, 300, 350, 400]),
+                  ("Rail drop", "wardrobe_rail_drop", [50, 60, 70, 80])]
+                 + (cab.hanging == "double" ? [("Lower shelf", "wardrobe_double_hang_shelf", [950, 1000, 1050, 1100, 1150])] : [])
+                 + (cab.innerDrawers > 0 ? [("Drawer height", "wardrobe_drawer_pitch", [150, 200, 250])] : []))
         default:
             EmptyView()
         }
@@ -684,6 +690,8 @@ struct WardrobeSection: View {
                     .accessibilityLabel("\(title) hanging")
                 }
             }
+            StandardSizes(after: "wardrobe", cab: cab)
+                .padding(.top, 6)
         }
     }
 }
