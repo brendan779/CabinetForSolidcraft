@@ -112,7 +112,7 @@ pub fn stand_ins(list: &PartList) -> Vec<StandIn> {
                     shapes,
                 });
             }
-        } else if h.item.starts_with("hafele.leg") {
+        } else if crate::cad::is_leg(&h.item) {
             if let Some(shapes) = leg(list, h) {
                 legs += 1;
                 out.push(StandIn {

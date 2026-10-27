@@ -13,7 +13,7 @@
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
-use cabinet_core::cad::{BLUM_FRONT_PLANE, CadPlacement, transform};
+use cabinet_core::cad::{BLUM_FRONT_PLANE, CadPlacement, Frame, transform};
 use serde::{Deserialize, Serialize};
 
 use crate::{Error, Result};
@@ -159,7 +159,12 @@ pub fn load_index(vendor_dir: &Path) -> Option<Vec<VendorModel>> {
 pub fn resolve(placements: &[CadPlacement], models: &[VendorModel]) -> Vec<VendorInstance> {
     let mut out = Vec::new();
     for p in placements {
-        let files: Vec<&VendorModel> = models.iter().filter(|m| m.article == p.article).collect();
+        let mut files: Vec<&VendorModel> =
+            models.iter().filter(|m| m.article == p.article).collect();
+        // An upright part is one model; the same file comes in several downloaded sets.
+        if p.frame == Frame::Upright {
+            files.truncate(1);
+        }
         let two_handed = files.iter().any(|m| m.interior_positive())
             && files.iter().any(|m| !m.interior_positive());
         let want = p.side.interior_sign() > 0.0;

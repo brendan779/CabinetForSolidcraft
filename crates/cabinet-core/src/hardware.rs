@@ -75,6 +75,10 @@ const FILES: &[(&str, &str)] = &[
         "blum-movento-tandem.json",
         include_str!("../../../catalog/hardware/blum-movento-tandem.json"),
     ),
+    (
+        "hafele-axilo.json",
+        include_str!("../../../catalog/hardware/hafele-axilo.json"),
+    ),
 ];
 
 /// Every bundled hardware item. The files are checked by this crate's tests, so a parse failure

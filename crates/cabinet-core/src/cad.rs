@@ -10,6 +10,11 @@
 //! So a model is placed by mapping that frame onto ours: the side's inner face, the cabinet front
 //! (y = 0) and the part's height. Nothing here needs the model files; the app and the SolidCraft
 //! bridge look them up by article number.
+//!
+//! Häfele draws an AXILO 78 leg set upright in our own axes (Z up), with the leg's axis at X = Y
+//! = 0: the tube hangs from Z = 0 down its length and the mounting plate sits above it. The tube
+//! clips up into the plate, so the tube stands on the floor and the plate is moved up under the
+//! carcass bottom.
 
 use serde::{Deserialize, Serialize};
 
@@ -39,6 +44,17 @@ impl Side {
     }
 }
 
+/// How a supplier's model frame maps onto the cabinet's.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum Frame {
+    /// Blum's mounted frame, turned onto [`CadPlacement::side`] ([`transform`]).
+    #[default]
+    Blum,
+    /// Our own axes: the model's origin goes to [`CadPlacement::origin`] as it is.
+    Upright,
+}
+
 /// One supplier model to place.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct CadPlacement {
@@ -49,13 +65,20 @@ pub struct CadPlacement {
     /// The supplier's article number, which names the model file.
     pub article: String,
     pub side: Side,
-    /// The cabinet-frame point Blum's frame origin maps to: the side's inner face (x), the
-    /// cabinet front (y = 0) and the part's height (z).
+    /// The cabinet-frame point the model's frame origin maps to. For Blum: the side's inner face
+    /// (x), the cabinet front (y = 0) and the part's height (z).
     pub origin: Vec3,
+    #[serde(default)]
+    pub frame: Frame,
 }
 
-/// Every hinge, mounting plate, runner, LEGRABOX profile and drawer side in `list` that has an
-/// article number, in the order of its hardware.
+/// A plinth leg, generic or a Häfele AXILO 78 set.
+pub fn is_leg(item: &str) -> bool {
+    item.starts_with("hafele.leg") || item.starts_with("hafele.axilo.set.")
+}
+
+/// Every hinge, mounting plate, runner, LEGRABOX profile, drawer side and AXILO leg in `list` that
+/// has an article number, in the order of its hardware.
 pub fn cad_placements(list: &PartList) -> Vec<CadPlacement> {
     let mut out = Vec::new();
     let mut count = std::collections::BTreeMap::<&str, usize>::new();
@@ -87,9 +110,41 @@ pub fn cad_placements(list: &PartList) -> Vec<CadPlacement> {
             article: item.article.clone(),
             side,
             origin: Vec3::new(inner(side), 0.0, z),
+            frame: Frame::Blum,
         };
         let side_of = |x: f64| if x < mid { Side::Left } else { Side::Right };
-        if h.item.starts_with("blum.clip-top") {
+        if h.item.starts_with("hafele.axilo.set.") {
+            // Both pieces under the leg's name, so they replace its stand-in together.
+            let n = next("Leg");
+            let (Ok(height), Some(bottom)) = (item.param("nominal_height"), list.part(&h.part))
+            else {
+                continue;
+            };
+            let fixing = if item.param("screw_on").ok() == Some(1.0) {
+                "screw-on"
+            } else {
+                "knock-in"
+            };
+            let tube = crate::hardware::item(&format!("hafele.axilo.tube.{height}"));
+            let glide = crate::hardware::item(&format!("hafele.axilo.glide.{fixing}"));
+            let upright = |piece: &cabinet_catalog::HardwareItem, z: f64| CadPlacement {
+                name: format!("{}.Leg{n}", list.cabinet),
+                item: piece.id.clone(),
+                article: piece.article.clone(),
+                side: side_of(h.at.x),
+                origin: Vec3::new(h.at.x, h.at.y, z),
+                frame: Frame::Upright,
+            };
+            // The tube's foot on the floor; the plate's top against the carcass bottom.
+            if let Ok(t) = tube {
+                out.push(upright(t, height));
+            }
+            if let Ok(g) = glide
+                && let Ok(top) = g.param("model_top")
+            {
+                out.push(upright(g, bottom.bounds.min.z - top));
+            }
+        } else if h.item.starts_with("blum.clip-top") {
             let n = next("Hinge");
             out.push(place(
                 format!("{}.Hinge{n}", list.cabinet),
@@ -151,6 +206,14 @@ fn drawer_base(list: &PartList, front: &str) -> Option<f64> {
 /// inside faces the cabinet's inside; a one-handed model on the other side turns half a turn
 /// about the depth axis, which flips it upside down too (hinges and plates are symmetric).
 pub fn transform(p: &CadPlacement, model_interior_positive: bool, front_plane: f64) -> [f64; 12] {
+    if p.frame == Frame::Upright {
+        let o = p.origin;
+        return [
+            1.0, 0.0, 0.0, o.x, //
+            0.0, 1.0, 0.0, o.y, //
+            0.0, 0.0, 1.0, o.z,
+        ];
+    }
     let model = if model_interior_positive { 1.0 } else { -1.0 };
     let flip = model * p.side.interior_sign();
     // Columns: where the model's X, Y and Z axes point in the cabinet frame.
@@ -234,9 +297,12 @@ mod tests {
     #[test]
     fn transforms_are_rotations_that_put_the_front_plane_on_the_cabinet_front() {
         let list = build_cabinet(&Cabinet::new("B01", CabinetKind::Base)).unwrap();
-        for c in cad_placements(&list) {
+        for c in cad_placements(&list)
+            .iter()
+            .filter(|c| c.frame == Frame::Blum)
+        {
             for interior in [true, false] {
-                let m = transform(&c, interior, BLUM_FRONT_PLANE);
+                let m = transform(c, interior, BLUM_FRONT_PLANE);
                 assert!(
                     (det(&m) - 1.0).abs() < 1e-12,
                     "{} is not a rotation",
@@ -252,5 +318,27 @@ mod tests {
                 assert_eq!((inside.x - c.origin.x).signum(), c.side.interior_sign());
             }
         }
+    }
+
+    #[test]
+    fn an_axilo_leg_stands_its_tube_on_the_floor_and_its_plate_under_the_carcass() {
+        let mut cab = Cabinet::new("B01", CabinetKind::Base);
+        cab.standard.toe_kick = crate::model::ToeKick::LegsAndPlinth;
+        let list = build_cabinet(&cab).unwrap();
+        let bottom = list.part("B01.Bottom").unwrap().bounds.min.z;
+        let legs: Vec<_> = cad_placements(&list)
+            .into_iter()
+            .filter(|c| c.name == "B01.Leg1")
+            .collect();
+        let tube = legs.iter().find(|c| c.item.contains(".tube.")).unwrap();
+        let plate = legs.iter().find(|c| c.item.contains(".glide.")).unwrap();
+        assert_eq!(tube.frame, Frame::Upright);
+        assert_eq!(tube.article, "637.76.355");
+        assert_eq!(plate.article, "637.38.287");
+        // The 150 mm tube hangs from its origin, so its foot is on the floor.
+        assert_eq!(tube.origin.z, 150.0);
+        assert_eq!(plate.origin.z, bottom - 25.6);
+        let m = transform(tube, true, BLUM_FRONT_PLANE);
+        assert_eq!(apply(&m, Vec3::new(0.0, 0.0, -150.0)).z, 0.0);
     }
 }

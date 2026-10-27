@@ -114,7 +114,7 @@ mod tests {
         );
         let legs = rows
             .iter()
-            .find(|r| r.item == "hafele.leg.adjustable")
+            .find(|r| r.item == "hafele.axilo.set.150.screw-on")
             .unwrap();
         assert_eq!(legs.cabinets, ["B02"]);
         let runners: u32 = rows
@@ -129,10 +129,14 @@ mod tests {
     fn items_without_a_catalog_record_say_so_in_the_csv() {
         let rows = hardware_bom(&job());
         let csv = bom_csv(&rows, |item| {
-            (item == "hafele.leg.adjustable").then(|| ("Brand".to_string(), "TEST-1".to_string()))
+            (item == "hafele.axilo.set.150.screw-on")
+                .then(|| ("Brand".to_string(), "TEST-1".to_string()))
         });
         assert!(csv.starts_with("Item,Brand,Article,Description,Qty,Cabinets\n"));
-        assert!(csv.contains("hafele.leg.adjustable,Brand,TEST-1,"), "{csv}");
+        assert!(
+            csv.contains("hafele.axilo.set.150.screw-on,Brand,TEST-1,"),
+            "{csv}"
+        );
         assert!(csv.contains(&format!(",,{NOT_CATALOGUED},")));
     }
 }

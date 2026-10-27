@@ -3223,6 +3223,21 @@ impl<'a> Builder<'a> {
             },
         );
         if s.toe_kick == ToeKick::LegsAndPlinth {
+            let (item, description) = match axilo_set(kick) {
+                Some(set) => (
+                    set.id.clone(),
+                    format!("Häfele AXILO 78 leg, {} ({})", set.variant, set.article),
+                ),
+                None => {
+                    self.list.warnings.push(format!(
+                        "no Häfele AXILO 78 leg reaches a {kick:.0} mm plinth: a generic adjustable leg is listed"
+                    ));
+                    (
+                        "hafele.leg.adjustable".to_string(),
+                        "Adjustable cabinet leg with plinth clip".to_string(),
+                    )
+                }
+            };
             let xs: Vec<f64> = if w > 900.0 {
                 vec![50.0, w / 2.0, w - 50.0]
             } else {
@@ -3232,8 +3247,8 @@ impl<'a> Builder<'a> {
             for x in xs {
                 for y in [sb + ft + 50.0, cab.depth - 50.0] {
                     self.list.hardware.push(HardwarePlacement {
-                        item: "hafele.leg.adjustable".into(),
-                        description: "Adjustable cabinet leg with plinth clip".into(),
+                        item: item.clone(),
+                        description: description.clone(),
                         at: Vec3::new(x, y, 0.0),
                         part: bottom.clone(),
                         quantity: 1,
@@ -3244,6 +3259,25 @@ impl<'a> Builder<'a> {
     }
 }
 
+/// The screw-on Häfele AXILO 78 leg set whose adjustment covers a plinth `height`, the nearest
+/// nominal height first.
+fn axilo_set(height: f64) -> Option<&'static cabinet_catalog::HardwareItem> {
+    crate::hardware::items()
+        .iter()
+        .filter(|i| i.id.starts_with("hafele.axilo.set.") && i.param("screw_on").ok() == Some(1.0))
+        .filter_map(|i| {
+            let (h, down, up) = (
+                i.param("nominal_height").ok()?,
+                i.param("adjust_down").ok()?,
+                i.param("adjust_up").ok()?,
+            );
+            (height >= h - down - 1e-9 && height <= h + up + 1e-9)
+                .then_some(((height - h).abs(), i))
+        })
+        .min_by(|a, b| a.0.total_cmp(&b.0))
+        .map(|(_, i)| i)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -3251,6 +3285,39 @@ mod tests {
 
     fn base() -> Cabinet {
         Cabinet::new("B01", CabinetKind::Base)
+    }
+
+    #[test]
+    fn legs_are_the_axilo_set_whose_adjustment_covers_the_plinth() {
+        for (kick, set) in [
+            (150.0, Some("hafele.axilo.set.150.screw-on")),
+            (165.0, Some("hafele.axilo.set.150.screw-on")),
+            (170.0, Some("hafele.axilo.set.180.screw-on")),
+            (100.0, Some("hafele.axilo.set.100.screw-on")),
+            (250.0, None),
+        ] {
+            let mut cab = base();
+            cab.standard.toe_kick = ToeKick::LegsAndPlinth;
+            cab.standard.toe_kick_height = kick;
+            let list = build_cabinet(&cab).unwrap();
+            let legs: Vec<_> = list
+                .hardware
+                .iter()
+                .filter(|h| crate::cad::is_leg(&h.item))
+                .collect();
+            assert_eq!(legs.len(), 4, "{kick}");
+            let want = set.unwrap_or("hafele.leg.adjustable");
+            assert!(
+                legs.iter().all(|h| h.item == want),
+                "{kick}: {}",
+                legs[0].item
+            );
+            assert_eq!(
+                list.warnings.iter().any(|w| w.contains("AXILO")),
+                set.is_none(),
+                "{kick}"
+            );
+        }
     }
 
     #[test]

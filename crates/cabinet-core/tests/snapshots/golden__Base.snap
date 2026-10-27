@@ -2444,8 +2444,8 @@ expression: list
       "quantity": 4
     },
     {
-      "item": "hafele.leg.adjustable",
-      "description": "Adjustable cabinet leg with plinth clip",
+      "item": "hafele.axilo.set.150.screw-on",
+      "description": "Häfele AXILO 78 leg, 150 mm, screw-on (637.76.408)",
       "at": {
         "x": 50.0,
         "y": 118.0,
@@ -2455,8 +2455,8 @@ expression: list
       "quantity": 1
     },
     {
-      "item": "hafele.leg.adjustable",
-      "description": "Adjustable cabinet leg with plinth clip",
+      "item": "hafele.axilo.set.150.screw-on",
+      "description": "Häfele AXILO 78 leg, 150 mm, screw-on (637.76.408)",
       "at": {
         "x": 50.0,
         "y": 530.0,
@@ -2466,8 +2466,8 @@ expression: list
       "quantity": 1
     },
     {
-      "item": "hafele.leg.adjustable",
-      "description": "Adjustable cabinet leg with plinth clip",
+      "item": "hafele.axilo.set.150.screw-on",
+      "description": "Häfele AXILO 78 leg, 150 mm, screw-on (637.76.408)",
       "at": {
         "x": 550.0,
         "y": 118.0,
@@ -2477,8 +2477,8 @@ expression: list
       "quantity": 1
     },
     {
-      "item": "hafele.leg.adjustable",
-      "description": "Adjustable cabinet leg with plinth clip",
+      "item": "hafele.axilo.set.150.screw-on",
+      "description": "Häfele AXILO 78 leg, 150 mm, screw-on (637.76.408)",
       "at": {
         "x": 550.0,
         "y": 530.0,

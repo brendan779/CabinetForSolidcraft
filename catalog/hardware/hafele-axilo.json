@@ -1,0 +1,374 @@
+{
+  "brand": "Häfele",
+  "website": "https://www.hafele.com.au",
+  "notes": "AXILO 78 plinth legs (owner's choice, docs/benchtops.md). A set is a tube with its adjusting foot and a mounting plate (the glide) that screws or knocks into the carcass bottom; the tube clips up into the plate, so the leg stands its nominal height, adjustable -10/+20 mm. Tube articles are known only for the sets downloaded so far. Not verified by a person.",
+  "items": [
+    {
+      "id": "hafele.axilo.set.60.screw-on",
+      "brand": "Häfele",
+      "article": "637.76.400",
+      "family": "AXILO 78 adjustable leg set",
+      "variant": "60 mm, screw-on",
+      "kind": "other",
+      "parameters": {
+        "nominal_height": 60,
+        "adjust_down": 10,
+        "adjust_up": 20,
+        "screw_on": 1
+      },
+      "source": {
+        "url": "https://www.hafele.com.au/en/product/axilo-adjustable-legs-for-base-cabinet-plinths/P-00869889/",
+        "document_date": "2026",
+        "retrieved": "2026-10-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "hafele.axilo.set.60.knock-in",
+      "brand": "Häfele",
+      "article": "637.76.401",
+      "family": "AXILO 78 adjustable leg set",
+      "variant": "60 mm, knock-in",
+      "kind": "other",
+      "parameters": {
+        "nominal_height": 60,
+        "adjust_down": 10,
+        "adjust_up": 20,
+        "screw_on": 0
+      },
+      "source": {
+        "url": "https://www.hafele.com.au/en/product/axilo-adjustable-legs-for-base-cabinet-plinths/P-00869889/",
+        "document_date": "2026",
+        "retrieved": "2026-10-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "hafele.axilo.set.80.screw-on",
+      "brand": "Häfele",
+      "article": "637.76.402",
+      "family": "AXILO 78 adjustable leg set",
+      "variant": "80 mm, screw-on",
+      "kind": "other",
+      "parameters": {
+        "nominal_height": 80,
+        "adjust_down": 10,
+        "adjust_up": 20,
+        "screw_on": 1
+      },
+      "source": {
+        "url": "https://www.hafele.com.au/en/product/axilo-adjustable-legs-for-base-cabinet-plinths/P-00869889/",
+        "document_date": "2026",
+        "retrieved": "2026-10-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "hafele.axilo.set.80.knock-in",
+      "brand": "Häfele",
+      "article": "637.76.403",
+      "family": "AXILO 78 adjustable leg set",
+      "variant": "80 mm, knock-in",
+      "kind": "other",
+      "parameters": {
+        "nominal_height": 80,
+        "adjust_down": 10,
+        "adjust_up": 20,
+        "screw_on": 0
+      },
+      "source": {
+        "url": "https://www.hafele.com.au/en/product/axilo-adjustable-legs-for-base-cabinet-plinths/P-00869889/",
+        "document_date": "2026",
+        "retrieved": "2026-10-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "hafele.axilo.set.100.screw-on",
+      "brand": "Häfele",
+      "article": "637.76.404",
+      "family": "AXILO 78 adjustable leg set",
+      "variant": "100 mm, screw-on",
+      "kind": "other",
+      "parameters": {
+        "nominal_height": 100,
+        "adjust_down": 10,
+        "adjust_up": 20,
+        "screw_on": 1
+      },
+      "source": {
+        "url": "https://www.hafele.com.au/en/product/axilo-adjustable-legs-for-base-cabinet-plinths/P-00869889/",
+        "document_date": "2026",
+        "retrieved": "2026-10-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "hafele.axilo.set.100.knock-in",
+      "brand": "Häfele",
+      "article": "637.76.405",
+      "family": "AXILO 78 adjustable leg set",
+      "variant": "100 mm, knock-in",
+      "kind": "other",
+      "parameters": {
+        "nominal_height": 100,
+        "adjust_down": 10,
+        "adjust_up": 20,
+        "screw_on": 0
+      },
+      "source": {
+        "url": "https://www.hafele.com.au/en/product/axilo-adjustable-legs-for-base-cabinet-plinths/P-00869889/",
+        "document_date": "2026",
+        "retrieved": "2026-10-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "hafele.axilo.set.125.screw-on",
+      "brand": "Häfele",
+      "article": "637.76.406",
+      "family": "AXILO 78 adjustable leg set",
+      "variant": "125 mm, screw-on",
+      "kind": "other",
+      "parameters": {
+        "nominal_height": 125,
+        "adjust_down": 10,
+        "adjust_up": 20,
+        "screw_on": 1
+      },
+      "source": {
+        "url": "https://www.hafele.com.au/en/product/axilo-adjustable-legs-for-base-cabinet-plinths/P-00869889/",
+        "document_date": "2026",
+        "retrieved": "2026-10-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "hafele.axilo.set.125.knock-in",
+      "brand": "Häfele",
+      "article": "637.76.407",
+      "family": "AXILO 78 adjustable leg set",
+      "variant": "125 mm, knock-in",
+      "kind": "other",
+      "parameters": {
+        "nominal_height": 125,
+        "adjust_down": 10,
+        "adjust_up": 20,
+        "screw_on": 0
+      },
+      "source": {
+        "url": "https://www.hafele.com.au/en/product/axilo-adjustable-legs-for-base-cabinet-plinths/P-00869889/",
+        "document_date": "2026",
+        "retrieved": "2026-10-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "hafele.axilo.set.150.screw-on",
+      "brand": "Häfele",
+      "article": "637.76.408",
+      "family": "AXILO 78 adjustable leg set",
+      "variant": "150 mm, screw-on",
+      "kind": "other",
+      "parameters": {
+        "nominal_height": 150,
+        "adjust_down": 10,
+        "adjust_up": 20,
+        "screw_on": 1
+      },
+      "source": {
+        "url": "https://www.hafele.com.au/en/product/axilo-adjustable-legs-for-base-cabinet-plinths/P-00869889/",
+        "document_date": "2026",
+        "retrieved": "2026-10-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "hafele.axilo.set.150.knock-in",
+      "brand": "Häfele",
+      "article": "637.76.409",
+      "family": "AXILO 78 adjustable leg set",
+      "variant": "150 mm, knock-in",
+      "kind": "other",
+      "parameters": {
+        "nominal_height": 150,
+        "adjust_down": 10,
+        "adjust_up": 20,
+        "screw_on": 0
+      },
+      "source": {
+        "url": "https://www.hafele.com.au/en/product/axilo-adjustable-legs-for-base-cabinet-plinths/P-00869889/",
+        "document_date": "2026",
+        "retrieved": "2026-10-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "hafele.axilo.set.180.screw-on",
+      "brand": "Häfele",
+      "article": "637.76.410",
+      "family": "AXILO 78 adjustable leg set",
+      "variant": "180 mm, screw-on",
+      "kind": "other",
+      "parameters": {
+        "nominal_height": 180,
+        "adjust_down": 10,
+        "adjust_up": 20,
+        "screw_on": 1
+      },
+      "source": {
+        "url": "https://www.hafele.com.au/en/product/axilo-adjustable-legs-for-base-cabinet-plinths/P-00869889/",
+        "document_date": "2026",
+        "retrieved": "2026-10-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "hafele.axilo.set.180.knock-in",
+      "brand": "Häfele",
+      "article": "637.76.411",
+      "family": "AXILO 78 adjustable leg set",
+      "variant": "180 mm, knock-in",
+      "kind": "other",
+      "parameters": {
+        "nominal_height": 180,
+        "adjust_down": 10,
+        "adjust_up": 20,
+        "screw_on": 0
+      },
+      "source": {
+        "url": "https://www.hafele.com.au/en/product/axilo-adjustable-legs-for-base-cabinet-plinths/P-00869889/",
+        "document_date": "2026",
+        "retrieved": "2026-10-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "hafele.axilo.set.200.screw-on",
+      "brand": "Häfele",
+      "article": "637.76.412",
+      "family": "AXILO 78 adjustable leg set",
+      "variant": "200 mm, screw-on",
+      "kind": "other",
+      "parameters": {
+        "nominal_height": 200,
+        "adjust_down": 10,
+        "adjust_up": 20,
+        "screw_on": 1
+      },
+      "source": {
+        "url": "https://www.hafele.com.au/en/product/axilo-adjustable-legs-for-base-cabinet-plinths/P-00869889/",
+        "document_date": "2026",
+        "retrieved": "2026-10-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "hafele.axilo.set.200.knock-in",
+      "brand": "Häfele",
+      "article": "637.76.413",
+      "family": "AXILO 78 adjustable leg set",
+      "variant": "200 mm, knock-in",
+      "kind": "other",
+      "parameters": {
+        "nominal_height": 200,
+        "adjust_down": 10,
+        "adjust_up": 20,
+        "screw_on": 0
+      },
+      "source": {
+        "url": "https://www.hafele.com.au/en/product/axilo-adjustable-legs-for-base-cabinet-plinths/P-00869889/",
+        "document_date": "2026",
+        "retrieved": "2026-10-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "hafele.axilo.tube.60",
+      "brand": "Häfele",
+      "article": "637.76.351",
+      "family": "AXILO 78 leg tube",
+      "variant": "60 mm, with adjusting piece",
+      "kind": "other",
+      "parameters": {
+        "length": 60
+      },
+      "source": {
+        "url": "Häfele CAD data for the AXILO 78 sets on hafele.com.au (set contents); length measured from the model",
+        "document_date": "2026",
+        "retrieved": "2026-10-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "hafele.axilo.tube.80",
+      "brand": "Häfele",
+      "article": "637.76.352",
+      "family": "AXILO 78 leg tube",
+      "variant": "80 mm, with adjusting piece",
+      "kind": "other",
+      "parameters": {
+        "length": 80
+      },
+      "source": {
+        "url": "Häfele CAD data for the AXILO 78 sets on hafele.com.au (set contents); length measured from the model",
+        "document_date": "2026",
+        "retrieved": "2026-10-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "hafele.axilo.tube.150",
+      "brand": "Häfele",
+      "article": "637.76.355",
+      "family": "AXILO 78 leg tube",
+      "variant": "150 mm, with adjusting piece",
+      "kind": "other",
+      "parameters": {
+        "length": 150
+      },
+      "source": {
+        "url": "Häfele CAD data for the AXILO 78 sets on hafele.com.au (set contents); length measured from the model",
+        "document_date": "2026",
+        "retrieved": "2026-10-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "hafele.axilo.glide.screw-on",
+      "brand": "Häfele",
+      "article": "637.38.287",
+      "family": "AXILO 78 mounting plate",
+      "variant": "screw-on, black",
+      "kind": "other",
+      "parameters": {
+        "model_top": 25.6,
+        "screw_on": 1
+      },
+      "source": {
+        "url": "Häfele CAD data for the AXILO 78 sets on hafele.com.au (set contents); model_top is the plate's top face in Häfele's CAD frame, measured from the model",
+        "document_date": "2026",
+        "retrieved": "2026-10-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "hafele.axilo.glide.knock-in",
+      "brand": "Häfele",
+      "article": "637.38.296",
+      "family": "AXILO 78 mounting plate",
+      "variant": "knock-in, black",
+      "kind": "other",
+      "parameters": {
+        "model_top": 36.0,
+        "screw_on": 0
+      },
+      "source": {
+        "url": "Häfele CAD data for the AXILO 78 sets on hafele.com.au (set contents); model_top is the plate's top face in Häfele's CAD frame, measured from the model",
+        "document_date": "2026",
+        "retrieved": "2026-10-27",
+        "verified": false
+      }
+    }
+  ]
+}
