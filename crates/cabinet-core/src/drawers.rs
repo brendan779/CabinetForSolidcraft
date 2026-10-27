@@ -90,13 +90,15 @@ pub struct SteelBox {
 
 /// The tallest box of `kind` in `range` of the longest nominal length that fits an opening
 /// `inner_width` (LW) wide, `inner_depth` (LT) deep from the back of the front, with `space` mm
-/// from the drawer's datum (the surface its profiles stand on) to the next one up.
+/// from the drawer's datum (the surface its profiles stand on) to the next one up. With
+/// `servo_drive` the box leaves the room SERVO-DRIVE's bracket and drive unit take behind it.
 pub fn steel_box(
     kind: BoxSystem,
     range: BoxRange,
     inner_width: f64,
     inner_depth: f64,
     space: f64,
+    servo_drive: bool,
 ) -> Result<SteelBox, String> {
     let key = kind.key();
     let what = if range == BoxRange::Inner {
@@ -112,7 +114,11 @@ pub fn steel_box(
         if system.param("space_height")? > space + 1e-9 {
             continue;
         }
-        let allowance = system.param("depth_allowance")?;
+        let allowance = if servo_drive {
+            system.param("servo_drive_depth_allowance")?
+        } else {
+            system.param("depth_allowance")?
+        };
         let side_prefix = format!("blum.{key}.drawer-side.{sides_key}.");
         let mut lengths: Vec<(f64, &HardwareItem)> = hardware::items()
             .iter()
@@ -547,7 +553,15 @@ mod tests {
     /// (Blum p.201, 203, 207).
     #[test]
     fn legrabox_cut_sizes_follow_blums_deductions() {
-        let m = steel_box(BoxSystem::Legrabox, BoxRange::Drawers, 568.0, 540.0, 120.0).unwrap();
+        let m = steel_box(
+            BoxSystem::Legrabox,
+            BoxRange::Drawers,
+            568.0,
+            540.0,
+            120.0,
+            false,
+        )
+        .unwrap();
         assert_eq!(m.height, "M");
         assert_eq!(m.nominal_length, 500.0);
         assert_eq!(m.base, (533.0, 490.0));
@@ -562,7 +576,15 @@ mod tests {
     #[test]
     fn the_tallest_box_whose_space_fits_is_chosen() {
         let height = |space| {
-            steel_box(BoxSystem::Legrabox, BoxRange::Drawers, 568.0, 540.0, space).map(|b| b.height)
+            steel_box(
+                BoxSystem::Legrabox,
+                BoxRange::Drawers,
+                568.0,
+                540.0,
+                space,
+                false,
+            )
+            .map(|b| b.height)
         };
         assert_eq!(height(80.0).as_deref(), Ok("N"));
         assert_eq!(height(105.9).as_deref(), Ok("N"));
@@ -575,18 +597,43 @@ mod tests {
     #[test]
     fn the_nominal_length_leaves_three_mm_behind_the_box() {
         let nl = |depth| {
-            steel_box(BoxSystem::Legrabox, BoxRange::Drawers, 568.0, depth, 150.0)
-                .map(|b| b.nominal_length)
+            steel_box(
+                BoxSystem::Legrabox,
+                BoxRange::Drawers,
+                568.0,
+                depth,
+                150.0,
+                false,
+            )
+            .map(|b| b.nominal_length)
         };
         assert_eq!(nl(503.0), Ok(500.0));
         assert_eq!(nl(502.9), Ok(450.0));
         // Only the 70 kg profile comes in 650.
-        let b = steel_box(BoxSystem::Legrabox, BoxRange::Drawers, 568.0, 700.0, 120.0).unwrap();
+        let b = steel_box(
+            BoxSystem::Legrabox,
+            BoxRange::Drawers,
+            568.0,
+            700.0,
+            120.0,
+            false,
+        )
+        .unwrap();
         assert_eq!(
             (b.nominal_length, b.profile.article.as_str()),
             (650.0, "753.6501S")
         );
-        assert!(steel_box(BoxSystem::Legrabox, BoxRange::Drawers, 568.0, 250.0, 120.0).is_err());
+        assert!(
+            steel_box(
+                BoxSystem::Legrabox,
+                BoxRange::Drawers,
+                568.0,
+                250.0,
+                120.0,
+                false
+            )
+            .is_err()
+        );
     }
 
     /// BLUM-4b: C (p.211) and F (p.217) take a drawer's place only where their space fits,
@@ -594,7 +641,7 @@ mod tests {
     #[test]
     fn high_fronted_pull_outs_are_chosen_by_space_when_allowed() {
         let side = |range, space| {
-            steel_box(BoxSystem::Legrabox, range, 568.0, 540.0, space).map(|b| b.height)
+            steel_box(BoxSystem::Legrabox, range, 568.0, 540.0, space, false).map(|b| b.height)
         };
         assert_eq!(side(BoxRange::HighFronted, 192.0).as_deref(), Ok("K"));
         assert_eq!(side(BoxRange::HighFronted, 193.0).as_deref(), Ok("C"));
@@ -606,6 +653,7 @@ mod tests {
             568.0,
             540.0,
             300.0,
+            false,
         )
         .unwrap();
         assert_eq!((f.base, f.back), ((533.0, 490.0), (530.0, 212.0)));
@@ -624,6 +672,7 @@ mod tests {
             568.0,
             540.0,
             300.0,
+            false,
         );
         assert_eq!(m.unwrap().height, "K");
     }
@@ -632,7 +681,16 @@ mod tests {
     /// LW − 126 and one front fixing set.
     #[test]
     fn inner_drawers_take_m_or_k_sides_and_a_cut_front_piece() {
-        let inner = |space| steel_box(BoxSystem::Legrabox, BoxRange::Inner, 568.0, 540.0, space);
+        let inner = |space| {
+            steel_box(
+                BoxSystem::Legrabox,
+                BoxRange::Inner,
+                568.0,
+                540.0,
+                space,
+                false,
+            )
+        };
         assert!(inner(103.0).is_err());
         let m = inner(104.0).unwrap();
         assert_eq!(
@@ -737,22 +795,54 @@ mod tests {
     /// BLUM-5: MERIVOBOX (p.257) and TANDEMBOX antaro (p.297) cut sizes and the three heights.
     #[test]
     fn merivobox_and_tandembox_follow_their_own_deductions() {
-        let m = steel_box(BoxSystem::Merivobox, BoxRange::Drawers, 568.0, 540.0, 120.0).unwrap();
+        let m = steel_box(
+            BoxSystem::Merivobox,
+            BoxRange::Drawers,
+            568.0,
+            540.0,
+            120.0,
+            false,
+        )
+        .unwrap();
         assert_eq!((m.height.as_str(), m.nominal_length), ("M", 500.0));
         assert_eq!((m.base, m.back), ((517.0, 474.0), (517.0, 83.0)));
         assert_eq!(
             (m.sides.article.as_str(), m.profile.article.as_str()),
             ("470M5002S", "450.5001B")
         );
-        let t = steel_box(BoxSystem::Tandembox, BoxRange::Drawers, 568.0, 540.0, 140.0).unwrap();
+        let t = steel_box(
+            BoxSystem::Tandembox,
+            BoxRange::Drawers,
+            568.0,
+            540.0,
+            140.0,
+            false,
+        )
+        .unwrap();
         assert_eq!((t.height.as_str(), t.nominal_length), ("K", 500.0));
         assert_eq!((t.base, t.back), ((493.0, 476.0), (481.0, 116.0)));
         assert_eq!(t.system.drilling.len(), 3);
         assert_eq!(t.profile.article, "578.5001M");
-        let n = steel_box(BoxSystem::Tandembox, BoxRange::Drawers, 568.0, 540.0, 90.0).unwrap();
+        let n = steel_box(
+            BoxSystem::Tandembox,
+            BoxRange::Drawers,
+            568.0,
+            540.0,
+            90.0,
+            false,
+        )
+        .unwrap();
         assert_eq!(n.height, "N");
         // Only the 65 kg profile comes in 650.
-        let long = steel_box(BoxSystem::Tandembox, BoxRange::Drawers, 568.0, 660.0, 120.0).unwrap();
+        let long = steel_box(
+            BoxSystem::Tandembox,
+            BoxRange::Drawers,
+            568.0,
+            660.0,
+            120.0,
+            false,
+        )
+        .unwrap();
         assert!(long.heavy_profile && long.profile.article == "576.6501M");
     }
 
@@ -851,5 +941,30 @@ mod tests {
             ambia_line(300.0, 300.0, "M", false, false).is_err(),
             "nothing under 400 at NL 300"
         );
+    }
+
+    /// WF-2b: SERVO-DRIVE needs NL + 33 inside (Blum p.367), so a 558 deep LEGRABOX opening
+    /// takes 500 drawers instead of 550.
+    #[test]
+    fn servo_drive_leaves_room_behind_the_box() {
+        let plain = steel_box(
+            BoxSystem::Legrabox,
+            BoxRange::Drawers,
+            568.0,
+            558.0,
+            150.0,
+            false,
+        )
+        .unwrap();
+        let servo = steel_box(
+            BoxSystem::Legrabox,
+            BoxRange::Drawers,
+            568.0,
+            558.0,
+            150.0,
+            true,
+        )
+        .unwrap();
+        assert_eq!((plain.nominal_length, servo.nominal_length), (550.0, 500.0));
     }
 }

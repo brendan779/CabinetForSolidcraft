@@ -42,10 +42,16 @@ const TIP_ON_INSET: f64 = 15.0;
 const TIP_ON_DROP: f64 = 100.0;
 /// A TIP-ON BLUMOTION unit at the back of each runner, behind the drawer box: width, height.
 const TOB_UNIT: (f64, f64) = (20.0, 30.0);
-/// A SERVO-DRIVE drive unit behind each drawer box, on a bracket profile across the cabinet:
-/// unit width, depth, height, and the profile's square section.
-const SERVO_UNIT: (f64, f64, f64) = (100.0, 60.0, 40.0);
+/// SERVO-DRIVE (Blum catalogue p.366-367, standard cabinet, cross bar horizontal): an upright
+/// bracket profile PL = LH - 10, its base drilling NL + 19 from the cabinet front, centred from
+/// LW 387 and 184 in from the left side below (LEGRABOX's Z), and a drive unit per drawer whose
+/// bottom is A = 45 above the cabinet profile's. Unit width and height as Blum's model, the
+/// profile's section drawn.
+const SERVO_UNIT: (f64, f64) = (214.0, 52.0);
 const SERVO_PROFILE: f64 = 20.0;
+const SERVO_CENTRED_FROM: f64 = 387.0;
+const SERVO_SIDE_INSET: f64 = 184.0;
+const SERVO_LIFT: f64 = 45.0;
 
 /// One solid of a stand-in.
 #[derive(Clone, Debug, PartialEq)]
@@ -261,34 +267,89 @@ fn tip_on_blumotion(list: &PartList, h: &HardwarePlacement) -> Option<Vec<Shape>
     Some(vec![unit(left, 1.0), unit(right, -1.0)])
 }
 
-/// A SERVO-DRIVE drive unit behind each drawer's box, on a bracket profile across the cabinet.
+/// SERVO-DRIVE: the upright bracket profile (with the first drawer), and a drive unit per drawer
+/// between its box and the room Blum asks for behind it (NL + 33).
 fn servo_drive(list: &PartList) -> Vec<Vec<Shape>> {
-    let Some((left, right, back)) = interior(list) else {
+    let Some((left, right, _)) = interior(list) else {
         return Vec::new();
     };
-    let (w, d, ht) = SERVO_UNIT;
-    let mid = (left + right) / 2.0;
-    list.by_role(PartRole::DrawerBottom)
-        .filter_map(|b| {
-            let n = b.name.rsplit_once(PartRole::DrawerBottom.code())?.1;
-            let (y0, _, z0) = behind_drawer(list, n)?;
-            // Shrunk into what room the box leaves (the drawer length does not yet allow for
-            // SERVO-DRIVE).
-            let gap = back - y0 - 1.0;
-            let profile = SERVO_PROFILE.min(gap / 3.0);
-            let depth = d.min(gap - profile);
-            Some(vec![
-                Shape::Box(boxed(
-                    Vec3::new(mid - w / 2.0, back - profile - depth, z0),
-                    Vec3::new(mid + w / 2.0, back - profile, z0 + ht),
-                )),
-                Shape::Box(boxed(
-                    Vec3::new(left, back - profile, z0),
-                    Vec3::new(right, back, z0 + profile),
-                )),
-            ])
+    let floor = list
+        .by_role(PartRole::Bottom)
+        .map(|b| b.bounds.max().z)
+        .fold(f64::MIN, f64::max);
+    let ceiling = list
+        .parts
+        .iter()
+        .filter(|p| {
+            matches!(
+                p.role,
+                PartRole::Top | PartRole::FrontRail | PartRole::BackRail
+            )
         })
-        .collect()
+        .map(|p| p.bounds.min.z)
+        .fold(f64::MAX, f64::min);
+    let lw = right - left;
+    let x = if lw >= SERVO_CENTRED_FROM {
+        (left + right) / 2.0
+    } else {
+        left + SERVO_SIDE_INSET
+    };
+    let (w, ht) = SERVO_UNIT;
+    let mut out = Vec::new();
+    for b in list.by_role(PartRole::DrawerBottom) {
+        let Some(n) = b
+            .name
+            .rsplit_once(PartRole::DrawerBottom.code())
+            .map(|t| t.1)
+        else {
+            continue;
+        };
+        // The drawer's nominal length, from its cabinet profile.
+        let front = format!("{}.{}{n}", list.cabinet, PartRole::DrawerFront.code());
+        let Some(nl) = list
+            .hardware
+            .iter()
+            .filter(|h| h.part == front && h.item.contains(".cabinet-profile."))
+            .find_map(|h| {
+                crate::hardware::item(&h.item)
+                    .ok()?
+                    .param("nominal_length")
+                    .ok()
+            })
+        else {
+            continue;
+        };
+        let Some((box_back, _, z0)) = behind_drawer(list, n) else {
+            continue;
+        };
+        let bracket = nl + 19.0;
+        // The drawer's base stands in for the cabinet profile's bottom edge.
+        let mut shapes = vec![Shape::Box(boxed(
+            Vec3::new(x - w / 2.0, box_back.max(nl + 3.0), z0 + SERVO_LIFT),
+            Vec3::new(
+                x + w / 2.0,
+                bracket - SERVO_PROFILE / 2.0,
+                z0 + SERVO_LIFT + ht,
+            ),
+        ))];
+        if out.is_empty() && ceiling > floor {
+            let lh = ceiling - floor;
+            shapes.push(Shape::Box(boxed(
+                Vec3::new(
+                    x - SERVO_PROFILE / 2.0,
+                    bracket - SERVO_PROFILE / 2.0,
+                    floor,
+                ),
+                Vec3::new(
+                    x + SERVO_PROFILE / 2.0,
+                    bracket + SERVO_PROFILE / 2.0,
+                    floor + lh - 10.0,
+                ),
+            )));
+        }
+        out.push(shapes);
+    }
+    out
 }
 
 /// An adjustable leg from the floor to the carcass bottom: a foot, a column and a mounting plate

@@ -1418,8 +1418,15 @@ impl<'a> Builder<'a> {
             DrawerSides::Standard => BoxRange::Drawers,
             DrawerSides::HighFronted => BoxRange::HighFronted,
         };
-        let lb = match drawers::steel_box(kind, range, inner_width, self.interior_back - fy, space)
-        {
+        let servo = cab.standard.opening == Opening::ServoDrive;
+        let lb = match drawers::steel_box(
+            kind,
+            range,
+            inner_width,
+            self.interior_back - fy,
+            space,
+            servo,
+        ) {
             Ok(lb) => lb,
             Err(e) => {
                 self.list
@@ -1671,6 +1678,7 @@ impl<'a> Builder<'a> {
                 cab.width - 2.0 * t,
                 self.interior_back - fy,
                 pitch,
+                false,
             ) {
                 Ok(lb) => lb,
                 Err(e) => {

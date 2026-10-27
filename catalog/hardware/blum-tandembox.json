@@ -20,7 +20,9 @@
         "back_height": 69,
         "board_thickness": 16,
         "base_above_datum": 9,
-        "front_hole_inset": 15.5
+        "front_hole_inset": 15.5,
+        "servo_drive_depth_allowance": 33,
+        "servo_drive_bracket_from_front": 19
       },
       "drilling": [
         {
@@ -39,7 +41,7 @@
         }
       ],
       "source": {
-        "url": "Blum Catalogue and technical manual 2024/2025, p.295, web code DQC21A",
+        "url": "Blum Catalogue and technical manual 2024/2025, p.295, web code DQC21A; SERVO-DRIVE: p.367 (standard cabinet, cross bar horizontal, chipboard back: min. space NL + 33, base drilling at NL + 19 from the cabinet front)",
         "document_date": "2024/2025",
         "retrieved": "2026-10-26",
         "verified": false
@@ -164,7 +166,9 @@
         "back_height": 84,
         "board_thickness": 16,
         "base_above_datum": 9,
-        "front_hole_inset": 15.5
+        "front_hole_inset": 15.5,
+        "servo_drive_depth_allowance": 33,
+        "servo_drive_bracket_from_front": 19
       },
       "drilling": [
         {
@@ -183,7 +187,7 @@
         }
       ],
       "source": {
-        "url": "Blum Catalogue and technical manual 2024/2025, p.297, web code DQC2QM",
+        "url": "Blum Catalogue and technical manual 2024/2025, p.297, web code DQC2QM; SERVO-DRIVE: p.367 (standard cabinet, cross bar horizontal, chipboard back: min. space NL + 33, base drilling at NL + 19 from the cabinet front)",
         "document_date": "2024/2025",
         "retrieved": "2026-10-26",
         "verified": false
@@ -398,7 +402,9 @@
         "back_height": 116,
         "board_thickness": 16,
         "base_above_datum": 9,
-        "front_hole_inset": 15.5
+        "front_hole_inset": 15.5,
+        "servo_drive_depth_allowance": 33,
+        "servo_drive_bracket_from_front": 19
       },
       "drilling": [
         {
@@ -424,7 +430,7 @@
         }
       ],
       "source": {
-        "url": "Blum Catalogue and technical manual 2024/2025, p.301, web code DQC3FY",
+        "url": "Blum Catalogue and technical manual 2024/2025, p.301, web code DQC3FY; SERVO-DRIVE: p.367 (standard cabinet, cross bar horizontal, chipboard back: min. space NL + 33, base drilling at NL + 19 from the cabinet front)",
         "document_date": "2024/2025",
         "retrieved": "2026-10-26",
         "verified": false
