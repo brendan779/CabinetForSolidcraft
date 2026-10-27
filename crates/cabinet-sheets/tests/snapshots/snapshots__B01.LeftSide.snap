@@ -21,16 +21,6 @@ expression: svg
 <circle cx="52.29" cy="146.17" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
 <circle cx="128.90" cy="146.17" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
 <circle cx="133.94" cy="146.17" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
-<circle cx="46.61" cy="69.87" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
-<circle cx="51.66" cy="69.87" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
-<circle cx="56.70" cy="146.17" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
-<circle cx="56.70" cy="69.87" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
-<circle cx="61.74" cy="146.17" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
-<circle cx="61.74" cy="69.87" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
-<circle cx="66.79" cy="146.17" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
-<circle cx="66.79" cy="69.87" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
-<circle cx="71.83" cy="146.17" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
-<circle cx="71.83" cy="69.87" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
 <circle cx="76.88" cy="146.17" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
 <circle cx="76.88" cy="69.87" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
 <circle cx="81.92" cy="146.17" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
@@ -45,32 +35,10 @@ expression: svg
 <circle cx="102.10" cy="69.87" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
 <circle cx="107.14" cy="146.17" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
 <circle cx="107.14" cy="69.87" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
-<circle cx="112.19" cy="146.17" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
-<circle cx="112.19" cy="69.87" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
-<circle cx="117.23" cy="146.17" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
-<circle cx="117.23" cy="69.87" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
-<circle cx="122.28" cy="146.17" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
-<circle cx="122.28" cy="69.87" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
-<circle cx="127.32" cy="146.17" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
-<circle cx="127.32" cy="69.87" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
-<circle cx="132.37" cy="146.17" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
-<circle cx="132.37" cy="69.87" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
-<line class="d" x1="46.61" y1="152.00" x2="46.61" y2="153.50"/>
-<text class="o2" x="46.61" y="154.00" transform="rotate(90 46.61 154.00)">80</text>
 <line class="d" x1="47.24" y1="152.00" x2="47.24" y2="153.50"/>
-<text class="o2" x="47.24" y="157.50" transform="rotate(90 47.24 157.50)">84</text>
-<line class="d" x1="51.66" y1="152.00" x2="51.66" y2="153.50"/>
-<text class="o2" x="51.66" y="154.00" transform="rotate(90 51.66 154.00)">112</text>
+<text class="o2" x="47.24" y="154.00" transform="rotate(90 47.24 154.00)">84</text>
 <line class="d" x1="52.29" y1="152.00" x2="52.29" y2="153.50"/>
-<text class="o2" x="52.29" y="157.50" transform="rotate(90 52.29 157.50)">116</text>
-<line class="d" x1="56.70" y1="152.00" x2="56.70" y2="153.50"/>
-<text class="o2" x="56.70" y="154.00" transform="rotate(90 56.70 154.00)">144</text>
-<line class="d" x1="61.74" y1="152.00" x2="61.74" y2="153.50"/>
-<text class="o2" x="61.74" y="154.00" transform="rotate(90 61.74 154.00)">176</text>
-<line class="d" x1="66.79" y1="152.00" x2="66.79" y2="153.50"/>
-<text class="o2" x="66.79" y="154.00" transform="rotate(90 66.79 154.00)">208</text>
-<line class="d" x1="71.83" y1="152.00" x2="71.83" y2="153.50"/>
-<text class="o2" x="71.83" y="154.00" transform="rotate(90 71.83 154.00)">240</text>
+<text class="o2" x="52.29" y="154.00" transform="rotate(90 52.29 154.00)">116</text>
 <line class="d" x1="76.88" y1="152.00" x2="76.88" y2="153.50"/>
 <text class="o2" x="76.88" y="154.00" transform="rotate(90 76.88 154.00)">272</text>
 <line class="d" x1="81.92" y1="152.00" x2="81.92" y2="153.50"/>
@@ -85,20 +53,10 @@ expression: svg
 <text class="o2" x="102.10" y="154.00" transform="rotate(90 102.10 154.00)">432</text>
 <line class="d" x1="107.14" y1="152.00" x2="107.14" y2="153.50"/>
 <text class="o2" x="107.14" y="154.00" transform="rotate(90 107.14 154.00)">464</text>
-<line class="d" x1="112.19" y1="152.00" x2="112.19" y2="153.50"/>
-<text class="o2" x="112.19" y="154.00" transform="rotate(90 112.19 154.00)">496</text>
-<line class="d" x1="117.23" y1="152.00" x2="117.23" y2="153.50"/>
-<text class="o2" x="117.23" y="154.00" transform="rotate(90 117.23 154.00)">528</text>
-<line class="d" x1="122.28" y1="152.00" x2="122.28" y2="153.50"/>
-<text class="o2" x="122.28" y="154.00" transform="rotate(90 122.28 154.00)">560</text>
-<line class="d" x1="127.32" y1="152.00" x2="127.32" y2="153.50"/>
-<text class="o2" x="127.32" y="154.00" transform="rotate(90 127.32 154.00)">592</text>
 <line class="d" x1="128.90" y1="152.00" x2="128.90" y2="153.50"/>
-<text class="o2" x="128.90" y="157.50" transform="rotate(90 128.90 157.50)">602</text>
-<line class="d" x1="132.37" y1="152.00" x2="132.37" y2="153.50"/>
-<text class="o2" x="132.37" y="154.00" transform="rotate(90 132.37 154.00)">624</text>
+<text class="o2" x="128.90" y="154.00" transform="rotate(90 128.90 154.00)">602</text>
 <line class="d" x1="133.94" y1="152.00" x2="133.94" y2="153.50"/>
-<text class="o2" x="133.94" y="157.50" transform="rotate(90 133.94 157.50)">634</text>
+<text class="o2" x="133.94" y="154.00" transform="rotate(90 133.94 154.00)">634</text>
 <line class="d" x1="32.50" y1="146.17" x2="34.00" y2="146.17"/>
 <text class="o2" x="32.00" y="146.77" text-anchor="end">37</text>
 <line class="d" x1="32.50" y1="69.87" x2="34.00" y2="69.87"/>
@@ -147,11 +105,11 @@ expression: svg
 <rect x="12" y="168.00" width="273.00" height="30" fill="none" stroke="#222" stroke-width="0.3"/>
 <text class="t" x="15.00" y="175.00">B01.LeftSide  —  Left side</text>
 <text class="t" x="15.00" y="182.00">Finished 720 × 580 × 16 mm   Board: Polytec Classic White Matt 16 MR MDF</text>
-<text class="t" x="15.00" y="189.00">Job: Snapshot job   Cabinet: B01   Operations: 57   Reference corner ●   Edge tape ▬</text>
+<text class="t" x="15.00" y="189.00">Job: Snapshot job   Cabinet: B01   Operations: 37   Reference corner ●   Edge tape ▬</text>
 <text class="s" x="158.50" y="172.50">in groove 720 × 6 ×1  @ 0, 558</text>
 <text class="s" x="158.50" y="175.40">in biscuit 4 × 66.1 ×4  @ 6, 16.9; 6, 169.6; …</text>
 <text class="s" x="158.50" y="178.30">in Ø5 × 11.5 HingePlate ×4  @ 84, 37; 116, 37; …</text>
-<text class="s" x="158.50" y="181.20">in Ø5 × 10 ShelfPin ×34  @ 80, 521; 112, 521; …</text>
+<text class="s" x="158.50" y="181.20">in Ø5 × 10 ShelfPin ×14  @ 272, 37; 272, 521; …</text>
 <text class="s" x="158.50" y="184.10">out Ø4.5 × 16 Screw ×7  @ 8, 126.3; 8, 279; …</text>
 <text class="s" x="158.50" y="187.00">out Ø8 × 1.8 Countersink ×7  @ 8, 126.3; 8, 279; …</text>
 </svg>

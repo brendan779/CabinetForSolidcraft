@@ -48,6 +48,9 @@ const SYSTEM32_SETBACK: f64 = 37.0;
 const SYSTEM32_PITCH: f64 = 32.0;
 const SHELF_PIN_DIAMETER: f64 = 5.0;
 const SHELF_PIN_DEPTH: f64 = 10.0;
+/// Our choice (owner, 2026-10-27): shelf-pin holes only this many grid steps above and below each
+/// adjustable shelf, so it can still move ±96 mm, not full-height rows.
+const SHELF_PIN_REACH: f64 = 3.0;
 /// Our choices for handles: the screw hole, the handle's centre line in from a door's free edge,
 /// the nearest hole in from the top or bottom edge, the height of a tall door's handle centre,
 /// and how deep a drawer front is before its handle moves up from the middle.
@@ -918,6 +921,7 @@ impl<'a> Builder<'a> {
         let (z0, z1) = self.opening_z;
         let y1 = self.interior_back - 2.0;
         let mut fixed_z = Vec::new();
+        let mut loose_z = Vec::new();
         if n > 0 {
             let step = (z1 - z0) / (n + 1) as f64;
             for i in 1..=n {
@@ -953,6 +957,9 @@ impl<'a> Builder<'a> {
                     Axis::X,
                     EdgeBanding::front_only(),
                 );
+                if !fixed {
+                    loose_z.push(z);
+                }
                 if fixed {
                     fixed_z.push(z + t / 2.0);
                     let shelf = self.list.parts.last().cloned().unwrap();
@@ -974,14 +981,15 @@ impl<'a> Builder<'a> {
                 }
             }
             if fixed_z.len() < n {
-                self.shelf_pin_rows(&fixed_z);
+                self.shelf_pin_rows(&fixed_z, &loose_z);
             }
         }
     }
 
     /// Shelf-pin holes on the inside of both sides: a front and a back row on the 32 mm grid,
-    /// left out within a pitch of a fixed shelf (centres in `fixed_z`), where its fixings are.
-    fn shelf_pin_rows(&mut self, fixed_z: &[f64]) {
+    /// within [`SHELF_PIN_REACH`] steps of each adjustable shelf (its underside in `loose_z`),
+    /// and left out within a pitch of a fixed shelf (centres in `fixed_z`), where its fixings are.
+    fn shelf_pin_rows(&mut self, fixed_z: &[f64], loose_z: &[f64]) {
         let cab = self.cab;
         let t = cab.standard.carcass_thickness;
         let (z0, z1) = self.opening_z;
@@ -992,7 +1000,10 @@ impl<'a> Builder<'a> {
         let mut z = first;
         let mut skipped = 0;
         while z <= z1 - 2.0 * SYSTEM32_PITCH {
-            if fixed_z.iter().any(|f| (z - f).abs() < SYSTEM32_PITCH) {
+            let near_shelf = loose_z
+                .iter()
+                .any(|l| (z - l).abs() <= SHELF_PIN_REACH * SYSTEM32_PITCH + 1e-6);
+            if !near_shelf || fixed_z.iter().any(|f| (z - f).abs() < SYSTEM32_PITCH) {
                 z += SYSTEM32_PITCH;
                 continue;
             }
@@ -3565,6 +3576,42 @@ mod tests {
             | Operation::Arch { part, .. } => *part == shelf.name,
         }));
         assert_eq!(shelf.bounds.min.x, 16.0 + SHELF_SIDE_CLEARANCE);
+    }
+
+    /// Owner 2026-10-27: pin holes only a few steps above and below each adjustable shelf.
+    #[test]
+    fn shelf_pins_are_drilled_only_around_each_adjustable_shelf() {
+        let mut cab = Cabinet::new("T01", CabinetKind::Tall);
+        cab.adjustable_shelves = 2;
+        let list = build_cabinet(&cab).unwrap();
+        let shelves: Vec<f64> = list
+            .by_role(PartRole::Shelf)
+            .map(|p| p.bounds.min.z)
+            .collect();
+        let pins: Vec<f64> = list
+            .operations
+            .iter()
+            .filter_map(|o| match o {
+                Operation::Bore {
+                    purpose: BorePurpose::ShelfPin,
+                    at,
+                    ..
+                } => Some(at.z),
+                _ => None,
+            })
+            .collect();
+        assert!(!pins.is_empty());
+        let reach = SHELF_PIN_REACH * SYSTEM32_PITCH + 1e-6;
+        assert!(
+            pins.iter()
+                .all(|z| shelves.iter().any(|s| (z - s).abs() <= reach))
+        );
+        // Each shelf has holes at its own height and at the ends of its reach.
+        for s in &shelves {
+            for d in [-reach + 1e-6, 0.0, reach - 1e-6] {
+                assert!(pins.iter().any(|z| (z - (s + d)).abs() < 1e-3), "{s} {d}");
+            }
+        }
     }
 
     #[test]
