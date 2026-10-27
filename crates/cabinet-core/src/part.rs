@@ -10,6 +10,8 @@ use crate::model::BiscuitSize;
 pub enum PartRole {
     LeftSide,
     RightSide,
+    /// An upright panel between two columns of sections.
+    Divider,
     Top,
     Bottom,
     FrontRail,
@@ -61,6 +63,7 @@ impl PartRole {
         match self {
             PartRole::LeftSide => "Left side",
             PartRole::RightSide => "Right side",
+            PartRole::Divider => "Divider",
             PartRole::Top => "Top",
             PartRole::Bottom => "Bottom",
             PartRole::FrontRail => "Front rail",
@@ -95,6 +98,7 @@ impl PartRole {
         match self {
             PartRole::LeftSide => "LeftSide",
             PartRole::RightSide => "RightSide",
+            PartRole::Divider => "Divider",
             PartRole::Top => "Top",
             PartRole::Bottom => "Bottom",
             PartRole::FrontRail => "FrontRail",
@@ -366,5 +370,24 @@ impl PartList {
 
     pub fn by_role(&self, role: PartRole) -> impl Iterator<Item = &Part> {
         self.parts.iter().filter(move |p| p.role == role)
+    }
+
+    /// The upright panels (sides or dividers) either side of `x`: the bay a front at `x` opens.
+    pub fn bay_around(&self, x: f64) -> Option<(&Part, &Part)> {
+        let uprights = || {
+            self.parts.iter().filter(|p| {
+                matches!(
+                    p.role,
+                    PartRole::LeftSide | PartRole::RightSide | PartRole::Divider
+                )
+            })
+        };
+        let left = uprights()
+            .filter(|p| p.bounds.center().x < x)
+            .max_by(|a, b| a.bounds.max().x.total_cmp(&b.bounds.max().x))?;
+        let right = uprights()
+            .filter(|p| p.bounds.center().x > x)
+            .min_by(|a, b| a.bounds.min.x.total_cmp(&b.bounds.min.x))?;
+        Some((left, right))
     }
 }

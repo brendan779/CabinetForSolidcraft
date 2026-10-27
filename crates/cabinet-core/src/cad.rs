@@ -99,7 +99,16 @@ pub fn cad_placements(list: &PartList) -> Vec<CadPlacement> {
         Side::Left => left.bounds.max().x,
         Side::Right => right.bounds.min.x,
     };
-    let mid = (inner(Side::Left) + inner(Side::Right)) / 2.0;
+    // Inner faces of the bay at x: between the sides, or a divider in a sectioned cabinet.
+    let bay = |x: f64| {
+        list.bay_around(x)
+            .map(|(l, r)| (l.bounds.max().x, r.bounds.min.x))
+            .unwrap_or((inner(Side::Left), inner(Side::Right)))
+    };
+    let face = |x: f64, side: Side| match side {
+        Side::Left => bay(x).0,
+        Side::Right => bay(x).1,
+    };
     for h in &list.hardware {
         let Ok(item) = crate::hardware::item(&h.item) else {
             continue;
@@ -107,15 +116,22 @@ pub fn cad_placements(list: &PartList) -> Vec<CadPlacement> {
         if item.article.is_empty() {
             continue;
         }
-        let place = |name: String, side: Side, z: f64| CadPlacement {
+        let place = |name: String, side: Side, x: f64, z: f64| CadPlacement {
             name,
             item: h.item.clone(),
             article: item.article.clone(),
             side,
-            origin: Vec3::new(inner(side), 0.0, z),
+            origin: Vec3::new(face(x, side), 0.0, z),
             frame: Frame::Blum,
         };
-        let side_of = |x: f64| if x < mid { Side::Left } else { Side::Right };
+        let side_of = |x: f64| {
+            let (l, r) = bay(x);
+            if x < (l + r) / 2.0 {
+                Side::Left
+            } else {
+                Side::Right
+            }
+        };
         if h.item.starts_with("handle.") && h.item != "handle.edge-pull" {
             // Between its screw holes on the front's face, the bar along them, standing out of
             // the face the screws come through.
@@ -205,6 +221,7 @@ pub fn cad_placements(list: &PartList) -> Vec<CadPlacement> {
             out.push(place(
                 format!("{}.Hinge{n}", list.cabinet),
                 side_of(h.at.x),
+                h.at.x,
                 h.at.z,
             ));
         } else if h.item.starts_with("blum.mounting-plate") {
@@ -212,6 +229,7 @@ pub fn cad_placements(list: &PartList) -> Vec<CadPlacement> {
             out.push(place(
                 format!("{}.Plate{n}", list.cabinet),
                 side_of(h.at.x),
+                h.at.x,
                 h.at.z,
             ));
         } else if is_runner(&h.item) {
@@ -225,10 +243,12 @@ pub fn cad_placements(list: &PartList) -> Vec<CadPlacement> {
                 "Runner"
             };
             let n = next(kind);
+            let x = list.part(&h.part).map_or(h.at.x, |p| p.bounds.center().x);
             for (suffix, side) in [("L", Side::Left), ("R", Side::Right)] {
                 out.push(place(
                     format!("{}.{kind}{n}{suffix}", list.cabinet),
                     side,
+                    x,
                     z,
                 ));
             }

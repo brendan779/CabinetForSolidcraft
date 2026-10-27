@@ -440,7 +440,16 @@ struct CabinetDoc: Identifiable, Hashable, Codable {
         (object["standard"] as? [String: Any])?["\(slot)_board"] as? String ?? ""
     }
 
-    /// The front layout's type: open, door, door_pair, drawers, lift, bi_fold_lift.
+    /// A sectioned front's columns, left to right (SEC-1).
+    var sectionColumns: [SectionColumnDoc] {
+        get {
+            let fronts = object["fronts"] as? [String: Any]
+            return (fronts?["columns"] as? [[String: Any]] ?? []).map(SectionColumnDoc.init(json:))
+        }
+        set { update { $0["fronts"] = ["type": "sections", "columns": newValue.map(\.json)] } }
+    }
+
+    /// The front layout's type: open, door, door_pair, drawers, lift, bi_fold_lift, sections.
     var frontType: String {
         get {
             let fronts = object["fronts"] as? [String: Any]
@@ -468,6 +477,26 @@ struct CabinetDoc: Identifiable, Hashable, Codable {
                     ["type": "niche", "height": 0],
                     ["type": "door", "hinge_side": "left", "height": 350],
                 ] as [[String: Any]]]
+                case "sections":
+                    // One section holding what the cabinet has now; its shelves move into it.
+                    var cell = SectionCell()
+                    let fronts = o["fronts"] as? [String: Any] ?? [:]
+                    switch fronts["type"] as? String {
+                    case "door": cell.front = (fronts["hinge_side"] as? String) == "right" ? "door_right" : "door_left"
+                    case "door_pair": cell.front = "door_pair"
+                    case "drawers":
+                        cell.front = "drawers"
+                        cell.drawers = max((fronts["ratios"] as? [Any])?.count ?? 3, 1)
+                    default: break
+                    }
+                    let shelves = (o["adjustable_shelves"] as? NSNumber)?.intValue ?? 0
+                    if shelves > 0, cell.front != "drawers" {
+                        cell.inside = "shelves"
+                        cell.insideCount = shelves
+                    }
+                    o["fronts"] = ["type": "sections", "columns": [SectionColumnDoc(rows: [cell]).json]]
+                    o["adjustable_shelves"] = 0
+                    o["inner_drawers"] = 0
                 default: o["fronts"] = ["type": "open"]
                 }
                 // The stacked sections bring their own fixed shelves.

@@ -467,6 +467,61 @@ pub enum FrontLayout {
     Stack {
         sections: Vec<StackSection>,
     },
+    /// Columns side by side between vertical dividers, each split into rows by fixed shelves,
+    /// every row with its own fronts and inside (SEC-1, docs/sections.md).
+    Sections {
+        columns: Vec<SectionColumn>,
+    },
+}
+
+/// A column of a sectioned cabinet: its share of the fronts' width and its rows, bottom first.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct SectionColumn {
+    /// The column's fronts' width (0: shares what the others leave).
+    #[serde(default)]
+    pub width: f64,
+    pub rows: Vec<Section>,
+}
+
+/// One section of a column: its fronts' height, its fronts and what is inside it.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct Section {
+    /// The section's fronts' height (0: shares what the others leave).
+    #[serde(default)]
+    pub height: f64,
+    #[serde(default)]
+    pub front: SectionFront,
+    #[serde(default)]
+    pub inside: SectionInside,
+}
+
+#[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case", tag = "type")]
+pub enum SectionFront {
+    #[default]
+    Open,
+    Door {
+        hinge_side: HingeSide,
+    },
+    DoorPair,
+    Drawers {
+        count: u32,
+    },
+}
+
+#[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case", tag = "type")]
+pub enum SectionInside {
+    #[default]
+    Empty,
+    /// Adjustable shelves, evenly spaced.
+    Shelves { count: u32 },
+    /// Fixed shoe shelves at an even pitch.
+    ShoeShelves { count: u32 },
+    /// A wardrobe rail under the section's top.
+    Hanging,
+    /// LEGRABOX inner drawers from the section's floor.
+    InnerDrawers { count: u32 },
 }
 
 /// One section of a stacked front.

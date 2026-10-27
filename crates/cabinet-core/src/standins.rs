@@ -209,8 +209,9 @@ fn interior(list: &PartList) -> Option<(f64, f64, f64)> {
 /// pushing at the carcass front near the door's top.
 fn tip_on_door(list: &PartList, h: &HardwarePlacement) -> Option<Vec<Shape>> {
     let door = list.part(&h.part)?;
-    let (left, right, _) = interior(list)?;
     let mid = door.bounds.center().x;
+    let (l, r) = list.bay_around(mid)?;
+    let (left, right) = (l.bounds.max().x, r.bounds.min.x);
     let hinge_x = list
         .hardware
         .iter()
@@ -256,7 +257,8 @@ fn behind_drawer(list: &PartList, n: &str) -> Option<(f64, f64, f64)> {
 fn tip_on_blumotion(list: &PartList, h: &HardwarePlacement) -> Option<Vec<Shape>> {
     let n = h.part.rsplit_once(PartRole::DrawerFront.code())?.1;
     let (y0, y1, z0) = behind_drawer(list, n)?;
-    let (left, right, _) = interior(list)?;
+    let (l, r) = list.bay_around(list.part(&h.part)?.bounds.center().x)?;
+    let (left, right) = (l.bounds.max().x, r.bounds.min.x);
     let (w, ht) = TOB_UNIT;
     let unit = |inner: f64, sign: f64| {
         Shape::Box(boxed(
@@ -407,14 +409,8 @@ fn hinge(list: &PartList, h: &HardwarePlacement) -> Option<Vec<Shape>> {
         _ => None,
     })?;
     let left = h.at.x < door.bounds.center().x;
-    let side = side(
-        list,
-        if left {
-            PartRole::LeftSide
-        } else {
-            PartRole::RightSide
-        },
-    )?;
+    let (l, r) = list.bay_around(h.at.x)?;
+    let side = if left { l } else { r };
     let inner = if left {
         side.bounds.max().x
     } else {
@@ -476,10 +472,7 @@ fn runners(list: &PartList, h: &HardwarePlacement) -> Option<[Vec<Shape>; 2]> {
     if let Some(shapes) = wood_runners(list, &h.part) {
         return Some(shapes);
     }
-    let (l, r) = (
-        side(list, PartRole::LeftSide)?,
-        side(list, PartRole::RightSide)?,
-    );
+    let (l, r) = list.bay_around(front.bounds.center().x)?;
     let back = list
         .by_role(PartRole::Back)
         .map(|b| b.bounds.min.y)

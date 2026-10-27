@@ -9,8 +9,8 @@ use crate::lift;
 use crate::model::{
     BackStyle, BottomJoint, Cabinet, CabinetKind, DoorOverlay, DoorStyle, DrawerSides,
     DrawerSystem, Exposed, FrontCore, FrontGrain, FrontLayout, HandlePlace, Hanging, HingeSide,
-    InsertDesign, LegFixing, LiftKind, LightZone, Opening, SectionKind, StackSection, ToeKick,
-    TopJoint, WallHanging,
+    InsertDesign, LegFixing, LiftKind, LightZone, Opening, Section, SectionColumn, SectionFront,
+    SectionInside, SectionKind, StackSection, ToeKick, TopJoint, WallHanging,
 };
 use crate::part::{
     BorePurpose, Dir, EdgeBanding, HardwarePlacement, Operation, Part, PartList, PartRole,
@@ -82,6 +82,11 @@ const SHELF_SUPPORT: &str = "shelf-support.5mm";
 /// Our choice, not Blum's: the end hinges sit this far in from the door's top and bottom. The
 /// hinge itself, its cup and plate come from the hardware catalog (see `hinges`).
 const HINGE_END_OFFSET: f64 = 100.0;
+/// The least a hinge's cup centre sits from its door's top or bottom when it moves off a joint
+/// (the 35 mm cup and some wood beyond it).
+const HINGE_EDGE_CLEARANCE: f64 = 40.0;
+/// Wood left between a plate screw and a joint beside it.
+const JOINT_CLEARANCE: f64 = 2.0;
 /// Our choice: a light's cable hole, its diameter and how far it sits in from the side and in
 /// front of the back (clear of the side joint's screws and the back's groove).
 const CABLE_HOLE_DIAMETER: f64 = 10.0;
@@ -336,6 +341,31 @@ struct Builder<'a> {
     interior_back: f64,
     /// The drawer box behind each drawer front, for the opening hardware.
     drawer_fits: Vec<DrawerFit>,
+    /// The space being fitted out when it is a column of sections, not the whole carcass.
+    bay: Option<Bay>,
+    /// Doors being hung now have inner drawers behind them (in a section).
+    inner_hinge: bool,
+}
+
+/// Numbers already given in a sectioned cabinet, so part names stay unique across columns.
+#[derive(Default)]
+struct SectionCounts {
+    doors: usize,
+    drawers: usize,
+    shelves: usize,
+}
+
+/// The space doors hinge in and drawers run in: the inner faces of the panels either side and
+/// those panels (a side or a divider).
+#[derive(Clone)]
+struct Bay {
+    left: f64,
+    right: f64,
+    left_panel: String,
+    right_panel: String,
+    /// The panel on that hand is a divider, which doors share (half overlay).
+    left_divider: bool,
+    right_divider: bool,
 }
 
 /// What the opening hardware needs to know about a drawer's box.
@@ -367,7 +397,24 @@ impl<'a> Builder<'a> {
             opening_z: (0.0, 0.0),
             interior_back: 0.0,
             drawer_fits: Vec::new(),
+            bay: None,
+            inner_hinge: false,
         }
+    }
+
+    /// The bay being fitted out: a column of sections, or the carcass between its sides.
+    fn bay(&self) -> Bay {
+        self.bay.clone().unwrap_or_else(|| {
+            let t = self.cab.standard.carcass_thickness;
+            Bay {
+                left: t,
+                right: self.cab.width - t,
+                left_panel: self.name(PartRole::LeftSide, None),
+                right_panel: self.name(PartRole::RightSide, None),
+                left_divider: false,
+                right_divider: false,
+            }
+        })
     }
 
     fn name(&self, role: PartRole, n: Option<usize>) -> String {
@@ -900,11 +947,19 @@ impl<'a> Builder<'a> {
 
     fn shelves(&mut self) {
         let cab = self.cab;
+        // A stacked front's or sectioned cabinet's sections bring their own fixed shelves.
+        if matches!(cab.fronts, FrontLayout::Sections { .. }) {
+            if cab.adjustable_shelves > 0 || cab.inner_drawers > 0 {
+                self.list
+                    .warnings
+                    .push("shelves and inner drawers left out: each section sets its own".into());
+            }
+            return;
+        }
         if cab.kind == CabinetKind::Wardrobe {
             self.wardrobe();
             return;
         }
-        // A stacked front's sections bring their own fixed shelves.
         if matches!(cab.fronts, FrontLayout::Stack { .. }) {
             if cab.adjustable_shelves > 0 {
                 self.list
@@ -1128,6 +1183,339 @@ impl<'a> Builder<'a> {
             FrontLayout::Stack { sections } => {
                 self.stack_fronts(sections, (x0, x1, y0, y1), (z0, z1));
             }
+            FrontLayout::Sections { columns } => {
+                self.section_fronts(columns, (x0, x1, y0, y1), (z0, z1));
+            }
+        }
+    }
+
+    /// Shares a length among parts asking for `asks` each (0: a share of what is left), with
+    /// `gap` between them; with none at 0 the last takes the rest. None when they need more.
+    fn share(total: f64, asks: &[f64], gap: f64) -> Option<Vec<f64>> {
+        let fixed: f64 = asks.iter().map(|a| a.max(0.0)).sum();
+        let rest = total - gap * asks.len().saturating_sub(1) as f64 - fixed;
+        if rest < -1e-6 {
+            return None;
+        }
+        let free = asks.iter().filter(|a| **a <= 0.0).count();
+        let mut out: Vec<f64> = asks.to_vec();
+        if free > 0 {
+            for a in out.iter_mut().filter(|a| **a <= 0.0) {
+                *a = rest / free as f64;
+            }
+        } else if let Some(last) = out.last_mut() {
+            *last += rest;
+        }
+        Some(out)
+    }
+
+    /// A sectioned cabinet (SEC-1): columns between full-height dividers, each split into rows
+    /// by fixed shelves, every row with its own fronts and inside. Doors hinge on the side or
+    /// divider beside them; drawers run in their column.
+    fn section_fronts(
+        &mut self,
+        columns: &[SectionColumn],
+        (x0, x1, y0, y1): (f64, f64, f64, f64),
+        (z0, z1): (f64, f64),
+    ) {
+        let cab = self.cab;
+        let s = &cab.standard;
+        let (g, t) = (s.front_gap, s.carcass_thickness);
+        if columns.is_empty() {
+            return;
+        }
+        let asks: Vec<f64> = columns.iter().map(|c| c.width).collect();
+        let Some(widths) = Self::share(x1 - x0, &asks, g) else {
+            self.list.warnings.push(
+                "the columns need more width than the cabinet's fronts have; left out".into(),
+            );
+            return;
+        };
+        // The dividers stand in the gaps between the columns' fronts, bottom to top.
+        let (oz0, oz1) = self.opening_z;
+        let mut bays = Vec::new();
+        let mut left = (t, self.name(PartRole::LeftSide, None), false);
+        let mut fx0 = x0;
+        for (i, w) in widths.iter().enumerate() {
+            let fx1 = fx0 + w;
+            let right = if i + 1 == widths.len() {
+                (cab.width - t, self.name(PartRole::RightSide, None), false)
+            } else {
+                let c = fx1 + g / 2.0;
+                self.add(
+                    PartRole::Divider,
+                    Some(i + 1),
+                    aabb(c - t / 2.0, 0.0, oz0, c + t / 2.0, self.interior_back, oz1),
+                    Axis::X,
+                    Axis::Z,
+                    EdgeBanding::front_only(),
+                );
+                let divider = self.list.parts.last().cloned().unwrap();
+                if let Some(bottom) = self.part(PartRole::Bottom) {
+                    self.joint_parts(&bottom, &divider, Dir::new(Axis::Z, true), Axis::Y);
+                }
+                for role in [PartRole::Top, PartRole::FrontRail, PartRole::BackRail] {
+                    if let Some(over) = self.part(role) {
+                        self.joint_parts(&over, &divider, Dir::new(Axis::Z, false), Axis::Y);
+                    }
+                }
+                (c - t / 2.0, divider.name.clone(), true)
+            };
+            bays.push((
+                Bay {
+                    left: left.0,
+                    right: right.0,
+                    left_panel: left.1.clone(),
+                    right_panel: right.1.clone(),
+                    left_divider: left.2,
+                    right_divider: right.2,
+                },
+                (fx0, fx1),
+            ));
+            left = (right.0 + if right.2 { t } else { 0.0 }, right.1, right.2);
+            fx0 = fx1 + g;
+        }
+        // Every column's insides and shelves before any front, so each hinge can keep clear of
+        // the joints on its panel, a divider's other face included.
+        let mut counts = SectionCounts::default();
+        for fronts in [false, true] {
+            for (column, (bay, (fx0, fx1))) in columns.iter().zip(bays.iter().cloned()) {
+                self.bay = Some(bay);
+                let at = ((fx0, fx1, y0, y1), (z0, z1));
+                self.column_rows(&column.rows, at, &mut counts, fronts);
+            }
+        }
+        self.bay = None;
+    }
+
+    /// One column's rows, bottom to top, as `stack_fronts` lays a stack out: what is inside each
+    /// row and a fixed shelf over it (but the top one), or, with `fronts`, each row's fronts.
+    fn column_rows(
+        &mut self,
+        rows: &[Section],
+        ((x0, x1, y0, y1), (z0, z1)): ((f64, f64, f64, f64), (f64, f64)),
+        counts: &mut SectionCounts,
+        fronts: bool,
+    ) {
+        let cab = self.cab;
+        let s = &cab.standard;
+        let (g, t) = (s.front_gap, s.carcass_thickness);
+        if rows.is_empty() {
+            return;
+        }
+        let asks: Vec<f64> = rows.iter().map(|r| r.height).collect();
+        let Some(heights) = Self::share(z1 - z0, &asks, g) else {
+            if !fronts {
+                self.list.warnings.push(
+                    "a column's sections need more height than the cabinet has; left out".into(),
+                );
+            }
+            return;
+        };
+        let bay = self.bay();
+        let panel = |b: &Self, name: &str| b.list.parts.iter().find(|p| p.name == name).cloned();
+        let lift = self.opening_z.0 - z0;
+        let mut fz0 = z0;
+        let mut floor = self.opening_z.0;
+        for (i, (row, h)) in rows.iter().zip(&heights).enumerate() {
+            let fz1 = fz0 + h;
+            let last = i + 1 == rows.len();
+            let ceiling = if last {
+                self.opening_z.1
+            } else {
+                fz1 + g + lift - t
+            };
+            let behind_drawers = matches!(row.front, SectionFront::Drawers { .. });
+            if fronts {
+                // Inner drawers take the 0-protrusion hinge on the doors in front of them.
+                self.inner_hinge =
+                    matches!(row.inside, SectionInside::InnerDrawers { .. }) && !behind_drawers;
+                self.row_fronts(row, (x0, x1, y0, y1), (fz0, fz1), (floor, ceiling), counts);
+                self.inner_hinge = false;
+                if !last {
+                    floor = ceiling + t;
+                }
+                fz0 = fz1 + g;
+                continue;
+            }
+            match &row.inside {
+                SectionInside::Empty => {}
+                SectionInside::Shelves { count } => {
+                    let n = *count as usize;
+                    for k in 1..=n {
+                        let z = floor + (ceiling - floor) * k as f64 / (n + 1) as f64 - t / 2.0;
+                        counts.shelves += 1;
+                        let bounds = aabb(
+                            bay.left + SHELF_SIDE_CLEARANCE,
+                            s.shelf_front_setback,
+                            z,
+                            bay.right - SHELF_SIDE_CLEARANCE,
+                            self.interior_back - 2.0,
+                            z + t,
+                        );
+                        self.add(
+                            PartRole::Shelf,
+                            Some(counts.shelves),
+                            bounds,
+                            Axis::Z,
+                            Axis::X,
+                            EdgeBanding::front_only(),
+                        );
+                        self.list.hardware.push(HardwarePlacement {
+                            item: SHELF_SUPPORT.into(),
+                            description: "Shelf support for 5 mm holes".into(),
+                            at: bounds.center(),
+                            part: self.name(PartRole::Shelf, Some(counts.shelves)),
+                            quantity: 4,
+                        });
+                    }
+                }
+                SectionInside::ShoeShelves { count } => {
+                    let n = *count as usize;
+                    for k in 1..=n {
+                        let z = floor + (ceiling - floor) * (k - 1) as f64 / n as f64;
+                        if k == 1 && (z - floor).abs() < 1e-9 {
+                            // The floor is the first shoe shelf.
+                            continue;
+                        }
+                        counts.shelves += 1;
+                        self.fixed_shelf(
+                            counts.shelves,
+                            &bay,
+                            z,
+                            panel(self, &bay.left_panel),
+                            panel(self, &bay.right_panel),
+                        );
+                    }
+                }
+                SectionInside::Hanging => {
+                    let length = bay.right - bay.left - 2.0;
+                    let at = Vec3::new(
+                        (bay.left + bay.right) / 2.0,
+                        self.interior_back / 2.0,
+                        ceiling - s.wardrobe_rail_drop,
+                    );
+                    // Its end supports screw to the bay's panels.
+                    let part = bay.left_panel.clone();
+                    for (item, description, quantity) in [
+                        (
+                            "wardrobe-rail.oval",
+                            format!("Wardrobe rail, cut to {length:.0} mm"),
+                            1,
+                        ),
+                        (
+                            "wardrobe-rail.end-support",
+                            "Wardrobe rail end support".to_string(),
+                            2,
+                        ),
+                    ] {
+                        self.list.hardware.push(HardwarePlacement {
+                            item: item.into(),
+                            description,
+                            at,
+                            part: part.clone(),
+                            quantity,
+                        });
+                    }
+                }
+                SectionInside::InnerDrawers { count } => {
+                    if behind_drawers {
+                        self.list.warnings.push(
+                            "inner drawers go behind doors or in the open; left out behind drawers"
+                                .into(),
+                        );
+                    } else {
+                        counts.drawers += self.inner_drawers_from(
+                            counts.drawers + 1,
+                            *count as usize,
+                            floor,
+                            ceiling,
+                        );
+                    }
+                }
+            }
+            if !last {
+                counts.shelves += 1;
+                self.fixed_shelf(
+                    counts.shelves,
+                    &bay,
+                    ceiling,
+                    panel(self, &bay.left_panel),
+                    panel(self, &bay.right_panel),
+                );
+                floor = ceiling + t;
+            }
+            fz0 = fz1 + g;
+        }
+    }
+
+    /// A section row's fronts across `x`, `fz` high, opening onto `inside` (floor, ceiling).
+    fn row_fronts(
+        &mut self,
+        row: &Section,
+        (x0, x1, y0, y1): (f64, f64, f64, f64),
+        (fz0, fz1): (f64, f64),
+        (floor, ceiling): (f64, f64),
+        counts: &mut SectionCounts,
+    ) {
+        let g = self.cab.standard.front_gap;
+        match &row.front {
+            SectionFront::Open => {}
+            SectionFront::Door { hinge_side } => {
+                counts.doors += 1;
+                self.door(counts.doors, aabb(x0, y0, fz0, x1, y1, fz1), *hinge_side);
+            }
+            SectionFront::DoorPair => {
+                let mid = (x0 + x1) / 2.0;
+                self.door(
+                    counts.doors + 1,
+                    aabb(x0, y0, fz0, mid - g / 2.0, y1, fz1),
+                    HingeSide::Left,
+                );
+                self.door(
+                    counts.doors + 2,
+                    aabb(mid + g / 2.0, y0, fz0, x1, y1, fz1),
+                    HingeSide::Right,
+                );
+                counts.doors += 2;
+            }
+            SectionFront::Drawers { count } => {
+                let ratios = vec![1.0; (*count).max(1) as usize];
+                counts.drawers += self.drawer_fronts(
+                    counts.drawers + 1,
+                    &ratios,
+                    (x0, x1, y0, y1),
+                    (fz0, fz1),
+                    (floor, ceiling),
+                );
+            }
+        }
+    }
+
+    /// A fixed shelf across `bay` with its top at `z + t`, jointed to the panels either side.
+    fn fixed_shelf(
+        &mut self,
+        n: usize,
+        bay: &Bay,
+        z: f64,
+        left: Option<Part>,
+        right: Option<Part>,
+    ) {
+        let t = self.cab.standard.carcass_thickness;
+        self.add(
+            PartRole::Shelf,
+            Some(n),
+            aabb(bay.left, 0.0, z, bay.right, self.interior_back, z + t),
+            Axis::Z,
+            Axis::X,
+            EdgeBanding::front_only(),
+        );
+        let shelf = self.list.parts.last().cloned().unwrap();
+        if let Some(l) = left {
+            self.joint_parts(&l, &shelf, Dir::new(Axis::X, true), Axis::Y);
+        }
+        if let Some(r) = right {
+            self.joint_parts(&r, &shelf, Dir::new(Axis::X, false), Axis::Y);
         }
     }
 
@@ -1326,12 +1714,12 @@ impl<'a> Builder<'a> {
     fn wood_box(&mut self, runner: WoodRunner, n: usize, front: Aabb, datum: f64, space: f64) {
         let cab = self.cab;
         let s = &cab.standard;
-        let t = s.carcass_thickness;
         let front_name = self.name(PartRole::DrawerFront, Some(n));
+        let bay = self.bay();
         let fy = front.max().y;
         let b = match drawers::wood(
             runner,
-            cab.width - 2.0 * t,
+            bay.right - bay.left,
             self.interior_back - fy,
             space,
             s.drawer_board_thickness,
@@ -1358,7 +1746,7 @@ impl<'a> Builder<'a> {
             height: String::new(),
             front_top: front.max().z,
         });
-        let (st, mid) = (b.board, cab.width / 2.0);
+        let (st, mid) = (b.board, (bay.left + bay.right) / 2.0);
         let (x0, x1) = (mid - b.inside_width / 2.0, mid + b.inside_width / 2.0);
         let (y0, y1) = (fy, fy + b.length);
         let z0 = datum + b.side_lift;
@@ -1410,9 +1798,9 @@ impl<'a> Builder<'a> {
     /// Blum's sizes.
     fn steel_box(&mut self, kind: BoxSystem, n: usize, front: Aabb, datum: f64, space: f64) {
         let cab = self.cab;
-        let t = cab.standard.carcass_thickness;
         let front_name = self.name(PartRole::DrawerFront, Some(n));
-        let inner_width = cab.width - 2.0 * t;
+        let bay = self.bay();
+        let inner_width = bay.right - bay.left;
         let fy = front.max().y;
         let range = match cab.standard.drawer_sides {
             DrawerSides::Standard => BoxRange::Drawers,
@@ -1457,7 +1845,7 @@ impl<'a> Builder<'a> {
         });
         self.steel_box_parts(n, &lb, fy, datum + base_lift);
         // Front fixing brackets: their bores in the back of the front, in from each side.
-        for x in [t + hole_inset, cab.width - t - hole_inset] {
+        for x in [bay.left + hole_inset, bay.right - hole_inset] {
             for hole in &lb.system.drilling {
                 self.list.operations.push(Operation::Bore {
                     part: front_name.clone(),
@@ -1478,7 +1866,8 @@ impl<'a> Builder<'a> {
         let bt = lb.board_thickness;
         let (bw, bl) = lb.base;
         let (kw, kh) = lb.back;
-        let mid = self.cab.width / 2.0;
+        let bay = self.bay();
+        let mid = (bay.left + bay.right) / 2.0;
         self.add_drawer_part(
             PartRole::DrawerBottom,
             n,
@@ -1662,7 +2051,23 @@ impl<'a> Builder<'a> {
                 .push("inner drawers are LEGRABOX only; left out".into());
             return;
         }
-        let t = s.carcass_thickness;
+        self.inner_drawers_from(1, n, z0, z1);
+    }
+
+    /// `n` LEGRABOX inner drawers from `z0` up to `z1` in the bay, numbered from `first`.
+    /// Returns how many it made.
+    fn inner_drawers_from(&mut self, first: usize, n: usize, z0: f64, z1: f64) -> usize {
+        let s = &self.cab.standard;
+        if n == 0 {
+            return 0;
+        }
+        if s.drawer_system != DrawerSystem::Legrabox {
+            self.list
+                .warnings
+                .push("inner drawers are LEGRABOX only; left out".into());
+            return 0;
+        }
+        let bay = self.bay();
         let pitch = (z1 - z0) / n as f64;
         // Inset doors fill the front of the opening; the boxes start behind them.
         let fy = if s.overlay == DoorOverlay::Inset {
@@ -1675,7 +2080,7 @@ impl<'a> Builder<'a> {
             let lb = match drawers::steel_box(
                 BoxSystem::Legrabox,
                 BoxRange::Inner,
-                cab.width - 2.0 * t,
+                bay.right - bay.left,
                 self.interior_back - fy,
                 pitch,
                 false,
@@ -1685,20 +2090,21 @@ impl<'a> Builder<'a> {
                     self.list
                         .warnings
                         .push(format!("inner drawer {}: {e}; left out", i + 1));
-                    return;
+                    return i;
                 }
             };
             let base_lift = match lb.system.param("base_above_datum") {
                 Ok(v) => v,
                 Err(e) => {
                     self.list.warnings.push(e);
-                    return;
+                    return i;
                 }
             };
-            self.steel_box_parts(i + 1, &lb, fy, datum + base_lift);
+            self.steel_box_parts(first + i, &lb, fy, datum + base_lift);
             let base = self.list.parts[self.list.parts.len() - 2].clone();
             self.steel_box_hardware(&lb, base.bounds.center(), &base.name);
         }
+        n
     }
 
     /// A drawer box part in the carcass board when it is the system's thickness, else generic.
@@ -1997,7 +2403,8 @@ impl<'a> Builder<'a> {
         );
         let door = self.name(PartRole::Door, Some(n));
         // Blum's 0-protrusion hinge lets inner drawers pass the open door (p.84).
-        let hinge_id = (self.cab.inner_drawers > 0).then_some(INNER_DRAWER_HINGE);
+        let hinge_id =
+            (self.cab.inner_drawers > 0 || self.inner_hinge).then_some(INNER_DRAWER_HINGE);
         if hinge_id.is_some() && self.cab.standard.overlay != DoorOverlay::Full {
             self.list.warnings.push(format!(
                 "{door}: inner drawers need a 0-protrusion hinge; only the full overlay one is \
@@ -2021,11 +2428,11 @@ impl<'a> Builder<'a> {
         let cab = self.cab;
         let s = &cab.standard;
         let door = door.to_string();
-        let side_role = match hinge {
-            HingeSide::Left => PartRole::LeftSide,
-            HingeSide::Right => PartRole::RightSide,
+        let bay = self.bay();
+        let (side, on_divider) = match hinge {
+            HingeSide::Left => (bay.left_panel.clone(), bay.left_divider),
+            HingeSide::Right => (bay.right_panel.clone(), bay.right_divider),
         };
-        let side = self.name(side_role, None);
         let height = b.size.z;
         let weight = lift::reference_density(s.front_core == FrontCore::Mdf)
             .map(|density| lift::front_weight(height, b.size.x, b.size.y, density));
@@ -2046,11 +2453,17 @@ impl<'a> Builder<'a> {
         // How far the door covers its hinge side's front edge (negative: inset, its gap).
         let t = s.carcass_thickness;
         let front_overlay = match hinge {
-            HingeSide::Left => t - b.min.x,
-            HingeSide::Right => b.max().x - (cab.width - t),
+            HingeSide::Left => bay.left - b.min.x,
+            HingeSide::Right => b.max().x - bay.right,
+        };
+        // Two doors share a divider: each covers half of it.
+        let overlay = if on_divider && s.overlay == DoorOverlay::Full {
+            DoorOverlay::Half
+        } else {
+            s.overlay
         };
         let need = HingeNeed {
-            overlay: s.overlay,
+            overlay,
             front_overlay,
             door_thickness: b.size.y,
             side_thickness: t,
@@ -2094,14 +2507,21 @@ impl<'a> Builder<'a> {
         // The cup is bored into the door's back face, towards the front.
         let back_y = b.max().y;
         let (inner_x, toward_side) = match hinge {
-            HingeSide::Left => (t, false),
-            HingeSide::Right => (cab.width - t, true),
+            HingeSide::Left => (bay.left, false),
+            HingeSide::Right => (bay.right, true),
         };
         // The carcass front is Y = 0 whatever the overlay; the plate is set out from it.
         let plate_y = choice.plate_setback;
         let span = height - 2.0 * HINGE_END_OFFSET;
+        let holes: Vec<(f64, f64, f64)> = choice
+            .plate
+            .drilling
+            .iter()
+            .map(|h| (plate_y + h.y - pattern_setback, h.x, h.diameter / 2.0))
+            .collect();
         let zs: Vec<f64> = (0..count)
             .map(|i| b.min.z + HINGE_END_OFFSET + span * i as f64 / (count - 1) as f64)
+            .map(|z| self.clear_of_joints(&side, z, &holes, (b.min.z, b.max().z)))
             .collect();
         for &z in &zs {
             self.list.operations.push(Operation::Bore {
@@ -2139,6 +2559,52 @@ impl<'a> Builder<'a> {
             });
         }
         zs
+    }
+
+    /// The height nearest `z` at which a mounting plate's `holes` (y, z offset, radius) clear the
+    /// joints and bores already in `panel`: a fixed shelf or the next bay's door may be there.
+    /// The hinge stays on its door, `HINGE_EDGE_CLEARANCE` in from either end.
+    fn clear_of_joints(
+        &self,
+        panel: &str,
+        z: f64,
+        holes: &[(f64, f64, f64)],
+        door: (f64, f64),
+    ) -> f64 {
+        let taken: Vec<(f64, f64, f64, f64)> = self
+            .list
+            .operations
+            .iter()
+            .filter_map(|op| match op {
+                Operation::BiscuitSlot { parts, bounds, .. }
+                    if parts.iter().any(|p| p == panel) =>
+                {
+                    Some((bounds.min.y, bounds.max().y, bounds.min.z, bounds.max().z))
+                }
+                Operation::Bore {
+                    part, at, diameter, ..
+                } if part == panel => {
+                    let r = diameter / 2.0;
+                    Some((at.y - r, at.y + r, at.z - r, at.z + r))
+                }
+                _ => None,
+            })
+            .collect();
+        let clear = |z: f64| {
+            holes.iter().all(|&(y, dz, r)| {
+                let (y0, y1) = (y - r - JOINT_CLEARANCE, y + r + JOINT_CLEARANCE);
+                let (z0, z1) = (z + dz - r - JOINT_CLEARANCE, z + dz + r + JOINT_CLEARANCE);
+                taken
+                    .iter()
+                    .all(|&(ty0, ty1, tz0, tz1)| y1 <= ty0 || ty1 <= y0 || z1 <= tz0 || tz1 <= z0)
+            })
+        };
+        let on_door =
+            |z: f64| z >= door.0 + HINGE_EDGE_CLEARANCE && z <= door.1 - HINGE_EDGE_CLEARANCE;
+        (0..=40)
+            .flat_map(|i| [z - 5.0 * i as f64, z + 5.0 * i as f64])
+            .find(|&z| on_door(z) && clear(z))
+            .unwrap_or(z)
     }
 
     /// An L-corner's bi-fold pair: door 1 across the main leg, hung on its end side with 155°
@@ -5001,6 +5467,177 @@ mod tests {
             ],
         };
         cab
+    }
+
+    fn section(height: f64, front: SectionFront, inside: SectionInside) -> Section {
+        Section {
+            height,
+            front,
+            inside,
+        }
+    }
+
+    /// SEC-1: a 900 base, drawers on the left and a door on the right, split by a divider.
+    fn sectioned_base() -> Cabinet {
+        let mut cab = base();
+        cab.width = 900.0;
+        cab.adjustable_shelves = 0;
+        cab.fronts = FrontLayout::Sections {
+            columns: vec![
+                SectionColumn {
+                    width: 450.0,
+                    rows: vec![section(
+                        0.0,
+                        SectionFront::Drawers { count: 3 },
+                        SectionInside::Empty,
+                    )],
+                },
+                SectionColumn {
+                    width: 0.0,
+                    rows: vec![section(
+                        0.0,
+                        SectionFront::Door {
+                            hinge_side: HingeSide::Left,
+                        },
+                        SectionInside::Shelves { count: 1 },
+                    )],
+                },
+            ],
+        };
+        cab
+    }
+
+    fn quiet(list: &PartList) {
+        assert!(
+            !list
+                .warnings
+                .iter()
+                .any(|w| w.contains("clash") || w.contains("need") || w.contains("left out")),
+            "{:?}",
+            list.warnings
+        );
+    }
+
+    /// SEC-1: a divider stands between the columns, in the gap between their fronts.
+    #[test]
+    fn sections_put_a_divider_between_columns() {
+        let list = build_cabinet(&sectioned_base()).unwrap();
+        quiet(&list);
+        let dividers: Vec<_> = list.by_role(PartRole::Divider).collect();
+        assert_eq!(dividers.len(), 1);
+        let d = dividers[0].bounds;
+        let door = list.part("B01.Door1").unwrap().bounds;
+        let drawer = list
+            .by_role(PartRole::DrawerFront)
+            .map(|p| p.bounds.max().x)
+            .fold(f64::MIN, f64::max);
+        assert!(drawer < d.center().x && d.center().x < door.min.x);
+        assert!(((drawer + door.min.x) / 2.0 - d.center().x).abs() < 1e-6);
+        // Jointed to the bottom like a side.
+        assert!(list.operations.iter().any(|o| match o {
+            Operation::BiscuitSlot { parts, .. } => parts.contains(&dividers[0].name),
+            Operation::Bore { part, .. } => *part == dividers[0].name,
+            _ => false,
+        }));
+    }
+
+    /// SEC-1: drawer boxes fit the bay between the left side and the divider, not the carcass.
+    #[test]
+    fn section_drawers_fit_their_bay() {
+        let list = build_cabinet(&sectioned_base()).unwrap();
+        let left = list.part("B01.LeftSide").unwrap().bounds.max().x;
+        let divider = list.by_role(PartRole::Divider).next().unwrap().bounds.min.x;
+        let bottoms: Vec<_> = list.by_role(PartRole::DrawerBottom).collect();
+        assert_eq!(bottoms.len(), 3);
+        for b in bottoms {
+            assert!(
+                b.bounds.min.x > left && b.bounds.max().x < divider,
+                "{}",
+                b.name
+            );
+        }
+    }
+
+    /// SEC-1: a door hinged on a divider shares it with its neighbour: half overlay, and the
+    /// plate holes go in the divider.
+    #[test]
+    fn a_door_on_a_divider_gets_the_half_overlay_hinge() {
+        let list = build_cabinet(&sectioned_base()).unwrap();
+        let hinge = list
+            .hardware
+            .iter()
+            .find(|h| h.item.starts_with("blum.clip-top"))
+            .unwrap();
+        assert_eq!(
+            crate::hardware::item(&hinge.item).unwrap().article,
+            "71B3650"
+        );
+        let divider = &list.by_role(PartRole::Divider).next().unwrap().name;
+        assert!(list.operations.iter().any(|o| matches!(
+            o,
+            Operation::Bore { part, purpose: BorePurpose::HingePlate, .. } if part == divider
+        )));
+        // The supplier models sit on the divider's face too.
+        let face = list
+            .by_role(PartRole::Divider)
+            .next()
+            .unwrap()
+            .bounds
+            .max()
+            .x;
+        let plates: Vec<_> = crate::cad::cad_placements(&list)
+            .into_iter()
+            .filter(|c| c.name.contains("Hinge") || c.name.contains("Plate"))
+            .collect();
+        assert!(!plates.is_empty());
+        assert!(plates.iter().all(|c| (c.origin.x - face).abs() < 1e-6));
+    }
+
+    /// SEC-1: a wardrobe column: drawers at the bottom, a hanging rail, shelves on top, with a
+    /// fixed shelf between each row.
+    #[test]
+    fn a_wardrobe_column_stacks_drawers_hanging_and_shelves() {
+        let mut cab = Cabinet::new("W01", CabinetKind::Tall);
+        cab.adjustable_shelves = 0;
+        cab.fronts = FrontLayout::Sections {
+            columns: vec![SectionColumn {
+                width: 0.0,
+                rows: vec![
+                    section(
+                        500.0,
+                        SectionFront::Drawers { count: 2 },
+                        SectionInside::Empty,
+                    ),
+                    section(0.0, SectionFront::Open, SectionInside::Hanging),
+                    section(
+                        400.0,
+                        SectionFront::DoorPair,
+                        SectionInside::Shelves { count: 1 },
+                    ),
+                ],
+            }],
+        };
+        let list = build_cabinet(&cab).unwrap();
+        quiet(&list);
+        assert_eq!(list.by_role(PartRole::Divider).count(), 0);
+        assert_eq!(list.by_role(PartRole::DrawerFront).count(), 2);
+        assert_eq!(list.by_role(PartRole::Door).count(), 2);
+        // Two fixed shelves between the rows and one adjustable on pins.
+        assert_eq!(list.by_role(PartRole::Shelf).count(), 3);
+        assert!(list.hardware.iter().any(|h| h.item == "wardrobe-rail.oval"));
+    }
+
+    /// SEC-1: inner drawers behind a section's door, which takes Blum's 0-protrusion hinge.
+    #[test]
+    fn inner_drawers_in_a_section_change_its_door_hinge() {
+        let mut cab = sectioned_base();
+        if let FrontLayout::Sections { columns } = &mut cab.fronts {
+            columns[1].rows[0].inside = SectionInside::InnerDrawers { count: 2 };
+        }
+        let list = build_cabinet(&cab).unwrap();
+        quiet(&list);
+        assert_eq!(list.by_role(PartRole::DrawerBottom).count(), 5);
+        assert!(list.hardware.iter().any(|h| h.item == INNER_DRAWER_HINGE));
     }
 
     /// STYLE-4: an oven tower: two drawers, a 600 mm clear niche between fixed shelves, a door

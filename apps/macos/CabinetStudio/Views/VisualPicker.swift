@@ -651,6 +651,15 @@ struct FrontThumbnail: View {
                 ctx.fill(Path(CGRect(x: r.minX + 3, y: r.minY + r.height * 0.43, width: r.width - 6, height: r.height * 0.24)),
                          with: .color(.primary.opacity(0.55)))
                 handle(r.maxX - 6, r.minY + r.height * 0.32, vertical: true)
+            case "sections":
+                // A divider, drawers on one side, a door over a shelf on the other.
+                let x = r.minX + r.width * 0.5
+                var p = Path(); p.move(to: CGPoint(x: x, y: r.minY)); p.addLine(to: CGPoint(x: x, y: r.maxY))
+                p.move(to: CGPoint(x: r.minX, y: r.midY)); p.addLine(to: CGPoint(x: x, y: r.midY))
+                p.move(to: CGPoint(x: x, y: r.minY + r.height * 0.6)); p.addLine(to: CGPoint(x: r.maxX, y: r.minY + r.height * 0.6))
+                ctx.stroke(p, with: .color(.primary.opacity(0.75)), lineWidth: 1.2)
+                handle(r.minX + r.width * 0.25, r.midY + 6, vertical: false)
+                handle(x + 4, r.minY + 10, vertical: true)
             case "fridge":
                 hLine(r.minY + r.height * 0.2)
                 ctx.fill(Path(CGRect(x: r.minX + 3, y: r.minY + r.height * 0.24, width: r.width - 6, height: r.height * 0.72)),

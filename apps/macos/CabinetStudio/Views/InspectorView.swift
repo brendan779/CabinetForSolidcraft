@@ -23,7 +23,7 @@ struct InspectorView: View {
                     if cab.kind == "sink" {
                         SinkSection(cab: cab)
                     }
-                    if cab.kind == "wardrobe" {
+                    if cab.kind == "wardrobe", cab.frontType != "sections" {
                         WardrobeSection(cab: cab)
                     }
                     if cab.kind == "corner_base" || cab.kind == "corner_wall" {
@@ -579,13 +579,16 @@ struct SizeSection: View {
             dimension("Width", \.width, presets: [300, 400, 450, 500, 600, 800, 900, 1000, 1200])
             dimension("Height", \.height, presets: heightPresets)
             dimension("Depth", \.depth, presets: [300, 330, 350, 450, 560, 580, 600])
-            HStack {
-                Text("Shelves").foregroundStyle(.secondary)
-                Spacer()
-                Stepper("\(cab.shelves)", value: Binding(get: { cab.shelves }, set: { v in
-                    var c = cab; c.shelves = v; project.selected = c
-                }), in: 0...8)
-                .monospacedDigit()
+            // A sectioned cabinet sets its shelves per section.
+            if cab.frontType != "sections" {
+                HStack {
+                    Text("Shelves").foregroundStyle(.secondary)
+                    Spacer()
+                    Stepper("\(cab.shelves)", value: Binding(get: { cab.shelves }, set: { v in
+                        var c = cab; c.shelves = v; project.selected = c
+                    }), in: 0...8)
+                    .monospacedDigit()
+                }
             }
             if ["door", "door_pair", "open"].contains(cab.frontType), cab.kind != "sink" {
                 HStack {
@@ -1362,6 +1365,7 @@ struct FrontsSection: View {
     private var layouts: [(id: String, title: String)] {
         var l: [(String, String)] = [
             ("door", "Door"), ("door_pair", "Pair"), ("drawers", "Drawers"), ("lift", "Lift"), ("bi_fold_lift", "Bi-fold"), ("open", "Open"),
+            ("sections", "Sections"),
         ]
         if cab.kind == "tall" {
             l += [("oven_tower", "Oven"), ("fridge", "Fridge")]
@@ -1427,6 +1431,9 @@ struct FrontsSection: View {
             }
             if cab.frontType == "lift" {
                 LiftKindPicker(cab: cab)
+            }
+            if cab.frontType == "sections" {
+                SectionsEditor(cab: cab)
             }
         }
     }
