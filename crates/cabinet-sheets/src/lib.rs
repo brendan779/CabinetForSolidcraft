@@ -52,6 +52,8 @@ pub enum Feature {
         depth: f64,
         label: &'static str,
         face: Option<Face>,
+        /// Its corners' radius (a benchtop cut-out's; 0: square).
+        radius: f64,
     },
     /// A corner of the outline rounded right through: `(u, v)` is the corner.
     Round { u: f64, v: f64, radius: f64 },
@@ -205,6 +207,18 @@ pub fn features(list: &PartList, part: &Part) -> Vec<Feature> {
                 };
                 out.push(rect(part, bounds.min, bounds.size, label));
             }
+            Operation::Cutout {
+                part: name,
+                bounds,
+                radius,
+                ..
+            } if *name == part.name => {
+                let mut r = rect(part, bounds.min, bounds.size, "cutout");
+                if let Feature::Rect { radius: rr, .. } = &mut r {
+                    *rr = *radius;
+                }
+                out.push(r);
+            }
             Operation::Mortise {
                 part: name, bounds, ..
             } if *name == part.name => {
@@ -264,6 +278,7 @@ fn rect(part: &Part, min: Vec3, size: Vec3, label: &'static str) -> Feature {
         depth: r1.min(hi) - r0.max(lo),
         label,
         face,
+        radius: 0.0,
     }
 }
 
@@ -643,6 +658,7 @@ fn face_view(
                 h,
                 label,
                 face: on,
+                radius,
                 ..
             } => {
                 // A notch is drawn as the paper showing through: no board there.
@@ -654,11 +670,16 @@ fn face_view(
                 let (xa, xb) = (x(*u), x(u + w));
                 let _ = writeln!(
                     svg,
-                    r##"<rect x="{:.2}" y="{:.2}" width="{:.2}" height="{:.2}" fill="{fill}" stroke="#222" stroke-width="0.15"/>"##,
+                    r##"<rect x="{:.2}" y="{:.2}" width="{:.2}" height="{:.2}"{} fill="{fill}" stroke="#222" stroke-width="0.15"/>"##,
                     xa.min(xb),
                     y(v + h),
                     (w * s).max(0.3),
-                    (h * s).max(0.3)
+                    (h * s).max(0.3),
+                    if *radius > 0.0 {
+                        format!(r#" rx="{:.2}""#, radius * s)
+                    } else {
+                        String::new()
+                    }
                 );
                 if on.is_some()
                     || face != Some(Face::High) && face != Some(Face::Low)
@@ -978,6 +999,7 @@ mod tests {
                     depth: s.carcass_thickness,
                     label: "notch",
                     face: None,
+                    radius: 0.0,
                 }],
                 "{side}"
             );

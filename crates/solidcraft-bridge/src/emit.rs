@@ -86,6 +86,28 @@ pub fn emit_cabinet_with(
                     cmds.extend(arch_cut(p, *centre, *radius));
                 }
             }
+            // A benchtop's sink or cooktop hole, its inside corners filleted when rounded.
+            Operation::Cutout {
+                part,
+                bounds,
+                radius,
+                ..
+            } => {
+                cmds.push(cut_box(bounds.min, bounds.size, std::slice::from_ref(part)));
+                if *radius > 0.0 {
+                    let (lo, hi) = (bounds.min, bounds.max());
+                    let z = lo.z + bounds.size.z / 2.0;
+                    let edges: Vec<Value> =
+                        [(lo.x, lo.y), (hi.x, lo.y), (hi.x, hi.y), (lo.x, hi.y)]
+                            .iter()
+                            .map(|&(x, y)| arr(Vec3::new(x, y, z)))
+                            .collect();
+                    cmds.push(json!({
+                        "command": "solid.fillet",
+                        "params": { "body": part, "edges": edges, "radius": round(*radius) }
+                    }));
+                }
+            }
             _ => {}
         }
     }

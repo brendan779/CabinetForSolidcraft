@@ -133,16 +133,37 @@ struct CabinetDoc: Identifiable, Hashable, Codable {
         (object["cutouts"] as? [[String: Any]])?.first { $0["over"] as? String == id }?["kind"] as? String
     }
 
-    /// Sets or clears the cut-out over a cabinet, at our default sizes (a sink 760 × 440, a cooktop
-    /// 560 × 490) until appliance templates exist.
-    mutating func setCutout(over id: String, kind: String?) {
+    /// Benchtop: the name of the template the cut-out over cabinet `id` was made from, if any.
+    func cutoutName(over id: String) -> String? {
+        guard let c = (object["cutouts"] as? [[String: Any]])?.first(where: { $0["over"] as? String == id }) else {
+            return nil
+        }
+        return c["name"] as? String ?? (c["kind"] as? String).map { $0 == "sink" ? "Sink" : "Cooktop" }
+    }
+
+    /// Sets the cut-out over a cabinet to appliance `template` (the core's `Appliance`), or clears
+    /// it.
+    mutating func setCutout(over id: String, template: [String: Any]?) {
         update { o in
             var list = (o["cutouts"] as? [[String: Any]] ?? []).filter { $0["over"] as? String != id }
-            if let kind {
-                let (w, d) = kind == "sink" ? (760.0, 440.0) : (560.0, 490.0)
-                list.append(["over": id, "kind": kind, "width": w, "depth": d, "setback": 70.0])
+            if var t = template {
+                t["over"] = id
+                list.append(t)
             }
             o["cutouts"] = list.isEmpty ? nil : list
+        }
+    }
+
+    /// Re-cuts the cut-outs made from the template named `name` to `template`.
+    mutating func recut(from name: String, to template: [String: Any]) {
+        update { o in
+            guard var list = o["cutouts"] as? [[String: Any]] else { return }
+            for i in list.indices where list[i]["name"] as? String == name {
+                var t = template
+                t["over"] = list[i]["over"]
+                list[i] = t
+            }
+            o["cutouts"] = list
         }
     }
 
@@ -493,6 +514,9 @@ final class ProjectModel {
     /// The job's construction standard (JSON): every cabinet follows it except in the fields it
     /// overrides.
     var standardJson: String
+    /// The job's sink and cooktop templates (a JSON array of the core's `Appliance`), which
+    /// benchtop cut-outs are made from.
+    var appliancesJson: String = defaultAppliancesJson()
     /// Picker changes go to the selected cabinet only, as an override, instead of the whole job.
     var onlyThisCabinet = false
     /// Where the job is saved; nil until it is.
@@ -506,7 +530,7 @@ final class ProjectModel {
     /// document knows it has changes to save.
     @ObservationIgnored weak var undoManager: UndoManager?
     /// The cabinets as of the last registered edit: what undo goes back to.
-    @ObservationIgnored private var committed = Committed(cabinets: [], standardJson: "")
+    @ObservationIgnored private var committed = Committed(cabinets: [], standardJson: "", appliancesJson: "")
     /// Receives the job's file contents after every edit.
     @ObservationIgnored var onEdit: (@MainActor (Data) -> Void)?
 
@@ -524,15 +548,16 @@ final class ProjectModel {
             for kind in ["base", "drawer_bank", "base"] { add(kind: kind) }
         }
         selection = cabinets.first?.id
-        committed = Committed(cabinets: cabinets, standardJson: standardJson)
+        committed = Committed(cabinets: cabinets, standardJson: standardJson, appliancesJson: appliancesJson)
     }
 
     init(contents: JobContents) {
         jobName = contents.name
         standardJson = contents.standardJson
+        appliancesJson = contents.appliancesJson
         cabinets = contents.cabinets
         selection = cabinets.first?.id
-        committed = Committed(cabinets: cabinets, standardJson: standardJson)
+        committed = Committed(cabinets: cabinets, standardJson: standardJson, appliancesJson: appliancesJson)
     }
 
     var selected: CabinetDoc? {
@@ -675,6 +700,54 @@ final class ProjectModel {
         var edited = cab
         edited.json = json
         applyStandard(from: cab, to: edited)
+    }
+
+    // MARK: Appliance library
+
+    /// The job's sink and cooktop templates, each the core's `Appliance` as a dictionary.
+    var appliances: [[String: Any]] {
+        get { (try? JSONSerialization.jsonObject(with: Data(appliancesJson.utf8))) as? [[String: Any]] ?? [] }
+        set {
+            if let data = try? JSONSerialization.data(withJSONObject: newValue, options: [.sortedKeys]) {
+                appliancesJson = String(decoding: data, as: UTF8.self)
+            }
+        }
+    }
+
+    /// Adds a template of `kind` (`sink`, `cooktop`), copied from the first of that kind.
+    func addAppliance(kind: String) {
+        var list = appliances
+        var new = list.first { $0["kind"] as? String == kind } ?? ["kind": kind, "width": 600.0, "depth": 450.0]
+        let names = Set(list.compactMap { $0["name"] as? String })
+        let base = kind == "sink" ? "Sink" : "Cooktop"
+        new["name"] = (1...).lazy.map { "\(base) \($0)" }.first { !names.contains($0) }!
+        list.append(new)
+        withAnimation(.snappy) { appliances = list }
+        changed()
+    }
+
+    /// Sets `field` of template `index`, and re-cuts every benchtop cut-out made from it. A new
+    /// name is carried to those cut-outs too.
+    func setAppliance(_ index: Int, _ field: String, _ value: Any?) {
+        var list = appliances
+        guard list.indices.contains(index) else { return }
+        let oldName = list[index]["name"] as? String ?? ""
+        list[index][field] = value
+        appliances = list
+        let template = list[index]
+        for i in cabinets.indices where cabinets[i].kind == "benchtop" {
+            cabinets[i].recut(from: oldName, to: template)
+        }
+        changed()
+    }
+
+    /// Drops template `index`; cut-outs made from it stay as they are.
+    func removeAppliance(_ index: Int) {
+        var list = appliances
+        guard list.indices.contains(index) else { return }
+        list.remove(at: index)
+        withAnimation(.snappy) { appliances = list }
+        changed()
     }
 
     // MARK: Project standard
@@ -1019,12 +1092,13 @@ final class ProjectModel {
     private struct Committed: Equatable {
         var cabinets: [CabinetDoc]
         var standardJson: String
+        var appliancesJson: String
     }
 
     /// Registers the edit since the last one with the undo manager, which marks the document
     /// edited; the system saves it.
     func save() {
-        let now = Committed(cabinets: cabinets, standardJson: standardJson)
+        let now = Committed(cabinets: cabinets, standardJson: standardJson, appliancesJson: appliancesJson)
         guard now != committed else { return }
         let before = committed
         committed = now
@@ -1038,6 +1112,7 @@ final class ProjectModel {
         withAnimation(.snappy) {
             cabinets = state.cabinets
             standardJson = state.standardJson
+            appliancesJson = state.appliancesJson
             if !cabinets.contains(where: { $0.id == selection }) { selection = cabinets.first?.id }
         }
         changed()
@@ -1046,7 +1121,8 @@ final class ProjectModel {
     /// The job file: the core's project JSON.
     func encoded() throws -> Data {
         let text = try projectJson(name: jobName, standardJson: standardJson, itemsJson: cabinets.map(\.json),
-                                   placed: cabinets.filter { $0.placed == true }.map(\.id))
+                                   placed: cabinets.filter { $0.placed == true }.map(\.id),
+                                   appliancesJson: appliancesJson)
         return Data(text.utf8)
     }
 
@@ -1077,6 +1153,7 @@ struct JobContents: Sendable {
     var name: String
     var standardJson: String
     var cabinets: [CabinetDoc]
+    var appliancesJson = defaultAppliancesJson()
 
     /// The core's default standard, for jobs that predate the job standard.
     static var defaultStandard: String {
@@ -1098,6 +1175,7 @@ struct JobContents: Sendable {
         if let p = try? openProject(json: String(decoding: data, as: UTF8.self)) {
             name = p.name
             standardJson = p.standardJson
+            appliancesJson = p.appliancesJson
             cabinets = p.itemsJson.compactMap { json in
                 CabinetDoc.id(of: json).map { CabinetDoc(id: $0, json: json, placed: p.placed.contains($0) ? true : nil) }
             }

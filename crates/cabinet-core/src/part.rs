@@ -247,6 +247,17 @@ pub enum Operation {
     },
     /// A rectangular groove or rebate.
     Groove { part: String, bounds: Aabb },
+    /// A hole right through a part (a benchtop's sink or cooktop cut-out), its four corners
+    /// rounded to `radius` (0: square).
+    Cutout {
+        part: String,
+        bounds: Aabb,
+        #[serde(default)]
+        radius: f64,
+        /// For the maker: the appliance and how it sits ("Undermount sink 760, edge finished").
+        #[serde(default, skip_serializing_if = "String::is_empty")]
+        note: String,
+    },
     /// A corner of the part's face rounded to `radius`, right through the thickness: `at` is the
     /// corner (its coordinate along the thickness is the part's middle).
     Round { part: String, at: Vec3, radius: f64 },

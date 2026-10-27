@@ -79,6 +79,45 @@ struct InspectorView: View {
     }
 }
 
+/// A title and its row of chips: on one line where they fit, the chips under the title where the
+/// inspector is narrow (full screen), so neither the title nor a chip's number wraps.
+struct ChipRow<Chips: View>: View {
+    let title: String
+    let reset: (() -> Void)?
+    let chips: Chips
+
+    init(_ title: String, reset: (() -> Void)? = nil, @ViewBuilder chips: () -> Chips) {
+        self.title = title
+        self.reset = reset
+        self.chips = chips()
+    }
+
+    var body: some View {
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: 6) {
+                label
+                Spacer(minLength: 4)
+                HStack(spacing: 6) { chips }.fixedSize()
+            }
+            VStack(alignment: .leading, spacing: 4) {
+                label
+                HStack(spacing: 6) { chips }.fixedSize()
+            }
+        }
+    }
+
+    private var label: some View {
+        HStack(spacing: 4) {
+            Text(title).foregroundStyle(.secondary).lineLimit(1)
+            if let reset {
+                Button(action: reset) { Image(systemName: "arrow.uturn.backward.circle") }
+                    .buttonStyle(.borderless)
+                    .help("Only this cabinet differs from the job; click to follow the job again")
+            }
+        }
+    }
+}
+
 /// The sizes that go with a construction choice, as rows of usual values: the plinth under Base,
 /// the frame under a shaker or glass door style.
 struct StandardSizes: View {
@@ -113,16 +152,7 @@ struct StandardSizes: View {
         return VStack(alignment: .leading, spacing: 8) {
             ForEach(items, id: \.1) { title, field, presets in
                 let value = project.standardNumber(field, of: cab)
-                HStack(spacing: 6) {
-                    Text(title).foregroundStyle(.secondary)
-                        .lineLimit(1)
-                        .layoutPriority(1)
-                    if overrides.contains(field) {
-                        Button { project.resetToProject([field]) } label: { Image(systemName: "arrow.uturn.backward.circle") }
-                            .buttonStyle(.borderless)
-                            .help("Only this cabinet differs from the job; click to follow the job again")
-                    }
-                    Spacer(minLength: 4)
+                ChipRow(title, reset: overrides.contains(field) ? { project.resetToProject([field]) } : nil) {
                     ForEach(presets, id: \.self) { p in
                         Button(unit.format(p, suffix: false)) {
                             withAnimation(.snappy) { project.setStandardNumber(field, p) }
@@ -239,23 +269,32 @@ struct PieceSection: View {
                     HStack(spacing: 6) {
                         Text(base.id).monospaced()
                         Spacer()
-                        ForEach([("sink", "Sink", "drop"), ("cooktop", "Cooktop", "flame")], id: \.0) { kind, title, symbol in
-                            let on = cab.cutout(over: base.id) == kind
-                            Button {
-                                withAnimation(.snappy) {
-                                    var c = cab
-                                    c.setCutout(over: base.id, kind: on ? nil : kind)
-                                    project.selected = c
-                                }
-                            } label: {
-                                Label(title, systemImage: symbol)
+                        let kind = cab.cutout(over: base.id)
+                        Menu {
+                            Button("None") {
+                                withAnimation(.snappy) { var c = cab; c.setCutout(over: base.id, template: nil); project.selected = c }
                             }
-                            .buttonStyle(ChipStyle(selected: on))
-                            .help(on ? "Remove the \(title.lowercased()) cut-out over \(base.id)"
-                                     : "A \(title.lowercased()) cut-out centred over \(base.id)\(kind == "sink" ? ", with a tap hole behind it" : "")")
+                            Divider()
+                            let library = project.appliances
+                            ForEach(library.indices, id: \.self) { i in
+                                let t = library[i]
+                                Button {
+                                    withAnimation(.snappy) { var c = cab; c.setCutout(over: base.id, template: t); project.selected = c }
+                                } label: {
+                                    Label(t["name"] as? String ?? "Appliance",
+                                          systemImage: t["kind"] as? String == "sink" ? "drop" : "flame")
+                                }
+                            }
+                        } label: {
+                            Label(cab.cutoutName(over: base.id) ?? "None",
+                                  systemImage: kind == nil ? "circle.dashed" : kind == "sink" ? "drop" : "flame")
                         }
+                        .menuStyle(.borderlessButton)
+                        .fixedSize()
+                        .help("The sink or cooktop cut-out centred over \(base.id), from the job's appliances")
                     }
                 }
+                AppliancesEditor()
                 if cab.splashback > 0 && cab.backOverhang == 0 {
                     SectionTitle("Splashback")
                     ForEach(bases, id: \.id) { base in
@@ -317,9 +356,7 @@ struct PieceSection: View {
 
     private func chips(_ title: String, value: Double, presets: [Double],
                        set: @escaping (inout CabinetDoc, Double) -> Void) -> some View {
-        HStack(spacing: 6) {
-            Text(title).foregroundStyle(.secondary)
-            Spacer()
+        ChipRow(title) {
             ForEach(presets, id: \.self) { p in
                 Button(unit.format(p, suffix: false)) {
                     withAnimation(.snappy) { var c = cab; set(&c, p); project.selected = c }
@@ -653,15 +690,100 @@ struct InsertSection: View {
 
     private func row(_ title: String, _ value: Double, _ presets: [Double],
                      set: @escaping (inout CabinetDoc, Double) -> Void) -> some View {
-        HStack(spacing: 6) {
-            Text(title).foregroundStyle(.secondary)
-            Spacer()
+        ChipRow(title) {
             ForEach(presets, id: \.self) { p in
                 Button(unit.format(p, suffix: false)) {
                     withAnimation(.snappy) { var c = cab; set(&c, p); project.selected = c }
                 }
                 .buttonStyle(ChipStyle(selected: abs(p - value) < 0.5))
             }
+        }
+    }
+}
+
+/// The job's sink and cooktop templates (BENCH-9): each cut-out made from one follows its edits.
+struct AppliancesEditor: View {
+    @Environment(ProjectModel.self) private var project
+    @State private var open = false
+
+    var body: some View {
+        let library = project.appliances
+        DisclosureGroup(isExpanded: $open) {
+            VStack(alignment: .leading, spacing: 10) {
+                ForEach(library.indices, id: \.self) { i in
+                    card(i, library[i])
+                }
+                HStack {
+                    Button { project.addAppliance(kind: "sink") } label: { Label("Sink", systemImage: "plus") }
+                    Button { project.addAppliance(kind: "cooktop") } label: { Label("Cooktop", systemImage: "plus") }
+                }
+                .buttonStyle(.borderless)
+                Text("Copy each appliance's cut-out from its installation template. A cut-out keeps the template's name; editing the template re-cuts it.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .padding(.top, 6)
+        } label: {
+            Text("Appliances (\(library.count))").foregroundStyle(.secondary)
+        }
+    }
+
+    private func card(_ i: Int, _ t: [String: Any]) -> some View {
+        let sink = t["kind"] as? String == "sink"
+        return VStack(alignment: .leading, spacing: 6) {
+            HStack {
+                Image(systemName: sink ? "drop" : "flame").foregroundStyle(.secondary)
+                TextField("Name", text: Binding(get: { t["name"] as? String ?? "" },
+                                                 set: { project.setAppliance(i, "name", $0) }))
+                    .textFieldStyle(.plain)
+                    .font(.body.weight(.medium))
+                Button { project.removeAppliance(i) } label: { Image(systemName: "trash") }
+                    .buttonStyle(.borderless)
+                    .help("Remove this template; cut-outs made from it stay")
+            }
+            Grid(alignment: .leading, horizontalSpacing: 8, verticalSpacing: 4) {
+                GridRow {
+                    number(i, "Width", "width", t)
+                    number(i, "Depth", "depth", t)
+                }
+                GridRow {
+                    number(i, "Corners R", "corner_radius", t)
+                    number(i, "Setback", "setback", t)
+                }
+                if sink {
+                    GridRow {
+                        number(i, "Tap hole Ø", "tap_hole", t, ours: 35)
+                        number(i, "Tap behind", "tap_hole_behind", t)
+                    }
+                }
+            }
+            if sink {
+                Picker("Mount", selection: Binding(get: { t["mount"] as? String ?? "undermount" },
+                                                   set: { project.setAppliance(i, "mount", $0) })) {
+                    Text("Undermount").tag("undermount")
+                    Text("Top mount").tag("top_mount")
+                }
+                .pickerStyle(.segmented)
+                .labelsHidden()
+                .help("Undermount: the cut-out's edge shows and is finished. Top mount: the sink's rim covers it.")
+            }
+        }
+        .padding(8)
+        .background(.quaternary.opacity(0.5), in: RoundedRectangle(cornerRadius: 8))
+    }
+
+    /// A millimetre field; `ours` is shown when the template leaves the value to our default.
+    private func number(_ i: Int, _ title: String, _ field: String, _ t: [String: Any], ours: Double = 0) -> some View {
+        HStack(spacing: 4) {
+            Text(title).font(.caption).foregroundStyle(.secondary).lineLimit(1)
+            Spacer(minLength: 2)
+            TextField(title, value: Binding(get: { (t[field] as? NSNumber)?.doubleValue ?? ours },
+                                            set: { project.setAppliance(i, field, $0) }),
+                      format: .number.precision(.fractionLength(0...1)))
+                .multilineTextAlignment(.trailing)
+                .frame(width: 52)
+                .labelsHidden()
         }
     }
 }
@@ -979,9 +1101,7 @@ struct BlindSection: View {
 
     private func chips(_ title: String, value: Double, presets: [Double],
                        set: @escaping (inout CabinetDoc, Double) -> Void) -> some View {
-        HStack(spacing: 6) {
-            Text(title).foregroundStyle(.secondary)
-            Spacer()
+        ChipRow(title) {
             ForEach(presets, id: \.self) { p in
                 Button("\(Int(p))") {
                     withAnimation(.snappy) { var c = cab; set(&c, p); project.selected = c }

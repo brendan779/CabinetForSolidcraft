@@ -235,6 +235,7 @@ struct QuoteView: View {
                 .width(80)
                 TableColumn("Total") { Text(String(format: "%.2f", $0.total)).monospacedDigit() }.width(80)
             }
+            .padding(.bottom, StatusBar.height)
             HStack(spacing: 12) {
                 if let q {
                     Text("Cost \(money(q.cost)) · markup \(money(q.markup)) · tax \(money(q.tax)) · **\(q.currency) \(money(q.total))**")
@@ -361,6 +362,7 @@ struct HardwareListView: View {
                 TableColumn("Item") { Text($0.item).monospaced().foregroundStyle(.secondary) }
                 TableColumn("Cabinets", value: \.cabinets).width(120)
             }
+            .padding(.bottom, StatusBar.height)
             HStack {
                 let missing = rows.filter { $0.brand.isEmpty }.count
                 Text("\(rows.reduce(0) { $0 + Int($1.quantity) }) items in \(rows.count) lines"
@@ -423,6 +425,7 @@ struct PartsListView: View {
                 TableColumn("Cut W", value: \.cutWidth) { Text(mm($0.cutWidth)).foregroundStyle(.secondary) }.width(70)
                 TableColumn("Edges", value: \.edges).width(90)
             }
+            .padding(.bottom, StatusBar.height)
             HStack {
                 let area = rows.reduce(0) { $0 + $1.length * $1.width } / 1e6
                 let tape = rows.reduce(0) { $0 + $1.edgeMetres }
@@ -515,6 +518,9 @@ struct CutSheetsView: View {
                     }
                 }
             }
+            // The status bar is a safe-area inset AppKit-backed lists and tables here do not see:
+            // they stop above it, so their last row (a benchtop's) can be scrolled into view.
+            .padding(.bottom, StatusBar.height)
             .frame(width: 220)
             Divider()
             VStack(spacing: 0) {

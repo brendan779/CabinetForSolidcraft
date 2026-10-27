@@ -37,11 +37,29 @@ fn line(list: &PartList, p: &Part) -> String {
             metres += along(axis);
         }
     }
-    let cutouts = list
+    let cutouts: Vec<String> = list
         .operations
         .iter()
-        .filter(|o| matches!(o, Operation::Groove { part, .. } if *part == p.name))
-        .count();
+        .filter_map(|o| match o {
+            Operation::Cutout {
+                part,
+                bounds,
+                radius,
+                note,
+            } if *part == p.name => Some(format!(
+                "{} {:.0} × {:.0}{}",
+                if note.is_empty() { "cut-out" } else { note },
+                bounds.size.x,
+                bounds.size.y,
+                if *radius > 0.0 {
+                    format!(" R{radius:.0}")
+                } else {
+                    String::new()
+                }
+            )),
+            _ => None,
+        })
+        .collect();
     let rounds: Vec<f64> = list
         .operations
         .iter()
@@ -59,10 +77,10 @@ fn line(list: &PartList, p: &Part) -> String {
         p.thickness(),
         l * w / 1e6,
         metres,
-        match cutouts {
-            0 => String::new(),
-            1 => "1 cut-out  ".to_string(),
-            n => format!("{n} cut-outs  "),
+        if cutouts.is_empty() {
+            String::new()
+        } else {
+            format!("{}  ", cutouts.join("; "))
         },
         match rounds.first() {
             None => String::new(),
@@ -172,13 +190,7 @@ mod tests {
                     back_clearance: 0.0,
                     board: String::new(),
                     edge: Default::default(),
-                    cutouts: vec![Cutout {
-                        over: "S01".into(),
-                        kind: CutoutKind::Sink,
-                        width: 760.0,
-                        depth: 440.0,
-                        setback: 70.0,
-                    }],
+                    cutouts: vec![Cutout::new("S01", CutoutKind::Sink, 760.0, 440.0)],
                     back_overhang: 0.0,
                     waterfall_left: false,
                     waterfall_right: false,
@@ -194,7 +206,10 @@ mod tests {
         let p = pieces(&lists);
         assert_eq!(p.len(), 2);
         let summary = line(p[0].0, p[0].1);
-        assert!(summary.contains("1 cut-out "));
+        assert!(
+            summary.contains("sink, undermount: edge finished 760 × 440"),
+            "{summary}"
+        );
         // BENCH-3e: both front corners rounded, on the summary, the sheet and the DXF outline.
         assert!(summary.contains("2 corners R100"), "{summary}");
         let sheet = part_sheet(p[0].0, p[0].1, "Generic", "Job");

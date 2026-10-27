@@ -335,6 +335,9 @@ pub struct ProjectRecord {
     pub items_json: Vec<String>,
     /// Ids of cabinets kept where they were drawn in SolidCraft.
     pub placed: Vec<String>,
+    /// The job's sink and cooktop templates (a JSON array of `Appliance`); our starting library
+    /// when the file has none.
+    pub appliances_json: String,
 }
 
 /// The job file: `standard_json` once, each cabinet with only the fields it overrides.
@@ -344,7 +347,13 @@ pub fn project_json(
     standard_json: String,
     items_json: Vec<String>,
     placed: Vec<String>,
+    appliances_json: String,
 ) -> Result<String, CoreError> {
+    let appliances: Vec<cabinet_core::run::Appliance> = if appliances_json.trim().is_empty() {
+        Vec::new()
+    } else {
+        serde_json::from_str(&appliances_json).map_err(invalid)?
+    };
     let standard: ConstructionStandard = serde_json::from_str(&standard_json).map_err(invalid)?;
     let mut cabinets = Vec::new();
     let mut pieces = Vec::new();
@@ -357,6 +366,7 @@ pub fn project_json(
     let mut p = Project::new(name, standard, &cabinets).map_err(invalid)?;
     p.placed = placed;
     p.pieces = pieces;
+    p.appliances = appliances;
     serde_json::to_string_pretty(&p).map_err(invalid)
 }
 
@@ -364,6 +374,7 @@ pub fn project_json(
 #[uniffi::export]
 pub fn open_project(json: String) -> Result<ProjectRecord, CoreError> {
     let p: Project = serde_json::from_str(&json).map_err(invalid)?;
+    let default_appliances = cabinet_core::run::Appliance::defaults();
     let mut items_json: Vec<String> = p
         .resolved()
         .map_err(invalid)?
@@ -379,7 +390,19 @@ pub fn open_project(json: String) -> Result<ProjectRecord, CoreError> {
         standard_json: serde_json::to_string(&p.standard).map_err(invalid)?,
         items_json,
         placed: p.placed,
+        appliances_json: serde_json::to_string(if p.appliances.is_empty() {
+            &default_appliances
+        } else {
+            &p.appliances
+        })
+        .map_err(invalid)?,
     })
+}
+
+/// Our starting sink and cooktop templates, as a JSON array of `Appliance`.
+#[uniffi::export]
+pub fn default_appliances_json() -> String {
+    serde_json::to_string(&cabinet_core::run::Appliance::defaults()).unwrap_or_else(|_| "[]".into())
 }
 
 #[uniffi::export]
@@ -1792,6 +1815,7 @@ mod tests {
             standard.clone(),
             vec![base.clone(), wall.clone()],
             vec!["W01".into()],
+            String::new(),
         )
         .unwrap();
         let v: serde_json::Value = serde_json::from_str(&file).unwrap();
@@ -1850,7 +1874,14 @@ mod tests {
         assert!(cut_sheet_svg(job(&items), "F01.Filler".into(), "Job".into()).is_ok());
         // The job file keeps the pieces where they were.
         let standard = serde_json::to_string(&parse(&items[1]).unwrap().standard).unwrap();
-        let file = project_json("Kitchen".into(), standard, items.clone(), Vec::new()).unwrap();
+        let file = project_json(
+            "Kitchen".into(),
+            standard,
+            items.clone(),
+            Vec::new(),
+            String::new(),
+        )
+        .unwrap();
         let back = open_project(file).unwrap();
         let ids: Vec<String> = back
             .items_json
@@ -1992,6 +2023,36 @@ mod tests {
         );
     }
 
+    /// BENCH-9: the job keeps its appliance library; a job without one opens with ours.
+    #[test]
+    fn the_appliance_library_keeps_in_the_job_file() {
+        let standard = serde_json::to_string(&ConstructionStandard::default()).unwrap();
+        let fresh = project_json(
+            "Kitchen".into(),
+            standard.clone(),
+            Vec::new(),
+            Vec::new(),
+            String::new(),
+        )
+        .unwrap();
+        let opened = open_project(fresh).unwrap();
+        assert_eq!(opened.appliances_json, default_appliances_json());
+        let mut library: Vec<cabinet_core::run::Appliance> =
+            serde_json::from_str(&opened.appliances_json).unwrap();
+        library[0].name = "Franke 820".into();
+        library[0].corner_radius = 25.0;
+        let json = serde_json::to_string(&library).unwrap();
+        let file = project_json(
+            "Kitchen".into(),
+            standard,
+            Vec::new(),
+            Vec::new(),
+            json.clone(),
+        )
+        .unwrap();
+        assert_eq!(open_project(file).unwrap().appliances_json, json);
+    }
+
     #[test]
     fn a_benchtop_item_builds_over_the_run_and_keeps_in_the_job_file() {
         let top = r#"{"type":"benchtop","id":"BT01","thickness":33,"front_overhang":20}"#;
@@ -2006,7 +2067,14 @@ mod tests {
         assert_eq!(panels[0].role, "Benchtop");
         assert!((panels[0].width - 1200.0).abs() < 1e-9);
         let standard = serde_json::to_string(&parse(&items[0]).unwrap().standard).unwrap();
-        let file = project_json("Kitchen".into(), standard, items.clone(), Vec::new()).unwrap();
+        let file = project_json(
+            "Kitchen".into(),
+            standard,
+            items.clone(),
+            Vec::new(),
+            String::new(),
+        )
+        .unwrap();
         let back = open_project(file).unwrap();
         assert_eq!(back.items_json.len(), 3);
         assert!(back.items_json[2].contains("benchtop"));
@@ -2033,7 +2101,14 @@ mod tests {
         assert_eq!(panels.len(), 3);
         assert!(panels.iter().all(|p| p.role == "Cornice"));
         let standard = serde_json::to_string(&parse(&items[0]).unwrap().standard).unwrap();
-        let file = project_json("Kitchen".into(), standard, items.clone(), Vec::new()).unwrap();
+        let file = project_json(
+            "Kitchen".into(),
+            standard,
+            items.clone(),
+            Vec::new(),
+            String::new(),
+        )
+        .unwrap();
         let back = open_project(file).unwrap();
         assert!(back.items_json[2].contains("moulding"));
     }

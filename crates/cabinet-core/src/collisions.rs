@@ -135,7 +135,10 @@ fn cuts_in(list: &PartList, part: &Part) -> Vec<Cut> {
                     label: format!("biscuit slot at {}", show(bounds.center())),
                 });
             }
-            Operation::Groove { part: p, bounds } if *p == part.name => {
+            Operation::Groove { part: p, bounds }
+            | Operation::Cutout {
+                part: p, bounds, ..
+            } if *p == part.name => {
                 cuts.push(Cut::Box {
                     bounds: *bounds,
                     label: format!("groove at {}", show(bounds.min)),

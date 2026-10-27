@@ -44,9 +44,9 @@ fn transform(
                 *bounds = boxed(*bounds);
                 *along = axis(*along);
             }
-            Operation::Groove { bounds, .. } | Operation::Mortise { bounds, .. } => {
-                *bounds = boxed(*bounds)
-            }
+            Operation::Groove { bounds, .. }
+            | Operation::Cutout { bounds, .. }
+            | Operation::Mortise { bounds, .. } => *bounds = boxed(*bounds),
         }
     }
     for h in &mut list.hardware {
@@ -136,6 +136,7 @@ pub fn rename(list: &mut PartList, f: impl Fn(&str) -> String) {
         match op {
             Operation::Bore { part, .. }
             | Operation::Groove { part, .. }
+            | Operation::Cutout { part, .. }
             | Operation::Mortise { part, .. }
             | Operation::Round { part, .. }
             | Operation::Arch { part, .. } => *part = f(part),
@@ -171,6 +172,7 @@ pub fn open_end(list: &mut PartList, side: &str, end: f64) {
         Operation::Bore { part, at, .. } => part != side && !at_point(at),
         Operation::BiscuitSlot { parts, .. } => !parts.iter().any(|p| p == side),
         Operation::Groove { part, .. }
+        | Operation::Cutout { part, .. }
         | Operation::Round { part, .. }
         | Operation::Arch { part, .. } => part != side,
         Operation::Mortise { part, bounds, .. } => part != side && !touches(bounds),

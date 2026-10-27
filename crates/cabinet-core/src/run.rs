@@ -245,25 +245,139 @@ impl EdgeProfile {
     }
 }
 
-/// A hole through a benchtop, centred across the cabinet it sits over.
+/// A hole through a benchtop, centred across the cabinet it sits over, cut to an appliance's
+/// template (BENCH-9): its size, corner radius, how a sink sits, and its tap hole.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Cutout {
     /// The cabinet's id.
     pub over: String,
     pub kind: CutoutKind,
+    /// The template's name ("Undermount sink 760"), for the schedule.
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub name: String,
     /// Along the run, and front to back.
     pub width: f64,
     pub depth: f64,
     /// From the benchtop's front edge to the cut-out.
     #[serde(default = "Cutout::default_setback")]
     pub setback: f64,
+    /// The cut-out's corners (0: square).
+    #[serde(default, skip_serializing_if = "is_zero")]
+    pub corner_radius: f64,
+    /// How a sink sits in the top (cooktops sit on it).
+    #[serde(default)]
+    pub mount: SinkMount,
+    /// A sink's tap hole: its diameter (0: none; unset: ours), and its centre behind the cut-out.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub tap_hole: Option<f64>,
+    #[serde(default = "Cutout::default_tap_hole_behind")]
+    pub tap_hole_behind: f64,
 }
 
 impl Cutout {
+    /// A square-cornered `width` × `depth` cut-out over cabinet `over`, with our defaults.
+    pub fn new(over: &str, kind: CutoutKind, width: f64, depth: f64) -> Self {
+        Self {
+            over: over.into(),
+            kind,
+            name: String::new(),
+            width,
+            depth,
+            setback: Self::default_setback(),
+            corner_radius: 0.0,
+            mount: SinkMount::default(),
+            tap_hole: None,
+            tap_hole_behind: Self::default_tap_hole_behind(),
+        }
+    }
+
     /// Our default: 70 mm of top in front of a sink or cooktop.
     fn default_setback() -> f64 {
         70.0
     }
+
+    fn default_tap_hole_behind() -> f64 {
+        TAP_HOLE_BEHIND
+    }
+
+    /// The tap hole's diameter: the template's, or ours behind a sink.
+    pub fn tap_hole_diameter(&self) -> f64 {
+        match (self.tap_hole, self.kind) {
+            (Some(d), _) => d,
+            (None, CutoutKind::Sink) => TAP_HOLE_DIAMETER,
+            (None, CutoutKind::Cooktop) => 0.0,
+        }
+    }
+}
+
+/// A sink's or cooktop's cut-out template (BENCH-9), kept in the job's appliance library: a
+/// benchtop cut-out over a cabinet is made from one ([`Appliance::cutout`]).
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct Appliance {
+    pub name: String,
+    pub kind: CutoutKind,
+    pub width: f64,
+    pub depth: f64,
+    #[serde(default)]
+    pub corner_radius: f64,
+    #[serde(default = "Cutout::default_setback")]
+    pub setback: f64,
+    #[serde(default)]
+    pub mount: SinkMount,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub tap_hole: Option<f64>,
+    #[serde(default = "Cutout::default_tap_hole_behind")]
+    pub tap_hole_behind: f64,
+}
+
+impl Appliance {
+    /// Our starting library, to be replaced by the appliances' own templates: an undermount
+    /// sink and 600 and 900 cooktops at common cut-out sizes. VERIFY against each appliance's
+    /// installation template.
+    pub fn defaults() -> Vec<Appliance> {
+        let make = |name: &str, kind, width, depth, corner_radius| Appliance {
+            name: name.into(),
+            kind,
+            width,
+            depth,
+            corner_radius,
+            setback: Cutout::default_setback(),
+            mount: SinkMount::Undermount,
+            tap_hole: None,
+            tap_hole_behind: Cutout::default_tap_hole_behind(),
+        };
+        vec![
+            make("Undermount sink 760", CutoutKind::Sink, 760.0, 440.0, 10.0),
+            make("Cooktop 600", CutoutKind::Cooktop, 560.0, 490.0, 0.0),
+            make("Cooktop 900", CutoutKind::Cooktop, 860.0, 490.0, 0.0),
+        ]
+    }
+
+    /// This appliance's cut-out over cabinet `over`.
+    pub fn cutout(&self, over: &str) -> Cutout {
+        Cutout {
+            over: over.into(),
+            kind: self.kind,
+            name: self.name.clone(),
+            width: self.width,
+            depth: self.depth,
+            setback: self.setback,
+            corner_radius: self.corner_radius,
+            mount: self.mount,
+            tap_hole: self.tap_hole,
+            tap_hole_behind: self.tap_hole_behind,
+        }
+    }
+}
+
+/// How a sink sits in a benchtop: under it (the cut-out's edge shows and is finished) or on it
+/// (its rim covers the edge).
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum SinkMount {
+    #[default]
+    Undermount,
+    TopMount,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -278,7 +392,7 @@ pub enum CutoutKind {
 const BAR_OVERHANG_UNSUPPORTED: f64 = 300.0;
 const BAR_BRACKET_SPACING: f64 = 600.0;
 
-/// Our choices: a tap hole's diameter and how far behind the sink cut-out its centre sits.
+/// Our defaults: a tap hole's diameter and how far behind the sink cut-out its centre sits.
 const TAP_HOLE_DIAMETER: f64 = 35.0;
 const TAP_HOLE_BEHIND: f64 = 40.0;
 
@@ -897,18 +1011,42 @@ fn cutouts(b: &Benchtop, top: &mut PartList, lists: &[PartList]) {
             ));
             continue;
         }
-        top.operations.push(Operation::Groove {
+        let most = c.width.min(c.depth) / 2.0;
+        let radius = c.corner_radius.clamp(0.0, most);
+        if c.corner_radius > most {
+            top.warnings.push(format!(
+                "the cut-out over {} is rounded R{most:.0}, its most for {:.0} × {:.0}",
+                c.over, c.width, c.depth
+            ));
+        }
+        let what = match c.kind {
+            CutoutKind::Sink => "sink",
+            CutoutKind::Cooktop => "cooktop",
+        };
+        let name = if c.name.is_empty() { what } else { &c.name };
+        // An undermount sink's cut-out edge shows: the maker finishes it.
+        let note = match (c.kind, c.mount) {
+            (CutoutKind::Sink, SinkMount::Undermount) => {
+                format!("{name}, undermount: edge finished")
+            }
+            (CutoutKind::Sink, SinkMount::TopMount) => format!("{name}, top mount"),
+            (CutoutKind::Cooktop, _) => name.to_string(),
+        };
+        top.operations.push(Operation::Cutout {
             part: piece.name.clone(),
             bounds,
+            radius,
+            note,
         });
-        if c.kind == CutoutKind::Sink {
-            let y = bounds.max().y + TAP_HOLE_BEHIND;
-            if y + TAP_HOLE_DIAMETER / 2.0 < pb.max().y {
+        let tap = c.tap_hole_diameter();
+        if c.kind == CutoutKind::Sink && tap > 0.0 {
+            let y = bounds.max().y + c.tap_hole_behind;
+            if y + tap / 2.0 < pb.max().y {
                 top.operations.push(Operation::Bore {
                     part: piece.name.clone(),
                     at: Vec3::new(mid, y, pb.max().z),
                     direction: Dir::new(Axis::Z, false),
-                    diameter: TAP_HOLE_DIAMETER,
+                    diameter: tap,
                     depth: pb.size.z,
                     purpose: BorePurpose::TapHole,
                 });
@@ -1423,20 +1561,8 @@ mod tests {
             power_points: Vec::new(),
             end_radius: 0.0,
             cutouts: vec![
-                Cutout {
-                    over: "S01".into(),
-                    kind: CutoutKind::Sink,
-                    width: 760.0,
-                    depth: 440.0,
-                    setback: 70.0,
-                },
-                Cutout {
-                    over: "B01".into(),
-                    kind: CutoutKind::Cooktop,
-                    width: 560.0,
-                    depth: 490.0,
-                    setback: 70.0,
-                },
+                Cutout::new("S01", CutoutKind::Sink, 760.0, 440.0),
+                Cutout::new("B01", CutoutKind::Cooktop, 560.0, 490.0),
             ],
         };
         let run = |bt: &Benchtop| Run {
@@ -1454,7 +1580,7 @@ mod tests {
             .operations
             .iter()
             .filter_map(|o| match o {
-                crate::part::Operation::Groove { bounds, .. } => Some(*bounds),
+                crate::part::Operation::Cutout { bounds, .. } => Some(*bounds),
                 _ => None,
             })
             .collect();
@@ -1474,6 +1600,69 @@ mod tests {
         bt.cutouts[1].width = 2000.0;
         let lists = build_run(&run(&bt)).unwrap();
         assert!(lists[2].warnings.iter().any(|w| w.contains("does not fit")));
+    }
+
+    /// BENCH-4/9: a cut-out follows its template: corner radius (at most half its smaller side,
+    /// with a note), tap hole size and offset, none when the template has none.
+    #[test]
+    fn cut_outs_follow_their_template() {
+        let mut sink = Cutout::new("S01", CutoutKind::Sink, 760.0, 440.0);
+        sink.corner_radius = 15.0;
+        sink.tap_hole = Some(32.0);
+        sink.tap_hole_behind = 55.0;
+        let mut item = top("BT1", 0.0);
+        if let RunItem::Benchtop(b) = &mut item {
+            b.cutouts = vec![sink];
+        }
+        let run = |item: RunItem| Run {
+            origin: Vec3::default(),
+            items: vec![cab("S01", CabinetKind::Sink), item],
+        };
+        let lists = build_run(&run(item.clone())).unwrap();
+        let top = &lists[1];
+        let (bounds, radius) = top
+            .operations
+            .iter()
+            .find_map(|o| match o {
+                crate::part::Operation::Cutout { bounds, radius, .. } => Some((*bounds, *radius)),
+                _ => None,
+            })
+            .unwrap();
+        assert_eq!(radius, 15.0);
+        let tap = top
+            .operations
+            .iter()
+            .find_map(|o| match o {
+                crate::part::Operation::Bore {
+                    at,
+                    diameter,
+                    purpose: crate::part::BorePurpose::TapHole,
+                    ..
+                } => Some((*at, *diameter)),
+                _ => None,
+            })
+            .unwrap();
+        assert_eq!(tap.1, 32.0);
+        assert_eq!(tap.0.y, bounds.max().y + 55.0);
+
+        // No tap hole; a radius too big is cut to half the depth, with a note.
+        if let RunItem::Benchtop(b) = &mut item {
+            b.cutouts[0].tap_hole = Some(0.0);
+            b.cutouts[0].corner_radius = 500.0;
+        }
+        let lists = build_run(&run(item)).unwrap();
+        let top = &lists[1];
+        assert!(!top.operations.iter().any(|o| matches!(
+            o,
+            crate::part::Operation::Bore {
+                purpose: crate::part::BorePurpose::TapHole,
+                ..
+            }
+        )));
+        assert!(top.operations.iter().any(
+            |o| matches!(o, crate::part::Operation::Cutout { radius, .. } if *radius == 220.0)
+        ));
+        assert!(top.warnings.iter().any(|w| w.contains("R220")));
     }
 
     /// BENCH-6: a splashback stands on each piece at the back, across the same length.

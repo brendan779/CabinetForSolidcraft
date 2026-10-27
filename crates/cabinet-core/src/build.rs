@@ -302,6 +302,7 @@ fn offset_operations(list: &mut PartList, o: Vec3) {
             Operation::Arch { centre, .. } => *centre = *centre + o,
             Operation::BiscuitSlot { bounds, .. }
             | Operation::Groove { bounds, .. }
+            | Operation::Cutout { bounds, .. }
             | Operation::Mortise { bounds, .. } => bounds.min = bounds.min + o,
         }
     }
@@ -3546,6 +3547,7 @@ mod tests {
             Operation::BiscuitSlot { parts, .. } => parts.contains(&shelf.name),
             Operation::Bore { part, .. }
             | Operation::Groove { part, .. }
+            | Operation::Cutout { part, .. }
             | Operation::Mortise { part, .. }
             | Operation::Round { part, .. }
             | Operation::Arch { part, .. } => *part == shelf.name,

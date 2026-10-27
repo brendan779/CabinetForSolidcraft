@@ -166,6 +166,8 @@ struct ConnectionDot: View {
 }
 
 struct StatusBar: View {
+    /// How tall the bar is, for views under it that do not see its safe-area inset.
+    static let height: CGFloat = 30
     @Environment(ProjectModel.self) private var project
     @AppStorage(LengthUnit.key) private var unit: LengthUnit = .millimetres
 

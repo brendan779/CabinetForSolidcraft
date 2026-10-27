@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
 
 use crate::model::{Cabinet, ConstructionStandard};
-use crate::run::RunItem;
+use crate::run::{Appliance, RunItem};
 use crate::{Error, Result};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -21,6 +21,9 @@ pub struct Project {
     /// Fillers and end panels, each at its place in the job's list of items.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub pieces: Vec<Piece>,
+    /// The job's sink and cooktop templates, which benchtop cut-outs are made from (BENCH-9).
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub appliances: Vec<Appliance>,
 }
 
 /// A filler or end panel and its position among the job's items (cabinets and pieces together).
@@ -71,6 +74,7 @@ impl Project {
             cabinets,
             placed: Vec::new(),
             pieces: Vec::new(),
+            appliances: Vec::new(),
         })
     }
 

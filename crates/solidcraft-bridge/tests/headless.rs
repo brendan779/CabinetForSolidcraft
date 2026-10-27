@@ -475,13 +475,10 @@ fn a_benchtop_with_cut_outs_builds() {
     use cabinet_core::run::{
         Benchtop, Cutout, CutoutKind, Niche, PowerPoint, Run, RunItem, build_run,
     };
-    let cutout = |over: &str, kind, width, depth| Cutout {
-        over: over.into(),
-        kind,
-        width,
-        depth,
-        setback: 70.0,
-    };
+    let cutout = |over: &str, kind, width, depth| Cutout::new(over, kind, width, depth);
+    // BENCH-9: a sink template with radius corners.
+    let mut sink = cutout("S01", CutoutKind::Sink, 760.0, 440.0);
+    sink.corner_radius = 15.0;
     let run = Run {
         origin: Default::default(),
         items: vec![
@@ -513,10 +510,7 @@ fn a_benchtop_with_cut_outs_builds() {
                     height: 150.0,
                 }],
                 end_radius: 60.0,
-                cutouts: vec![
-                    cutout("S01", CutoutKind::Sink, 760.0, 440.0),
-                    cutout("B01", CutoutKind::Cooktop, 560.0, 490.0),
-                ],
+                cutouts: vec![sink, cutout("B01", CutoutKind::Cooktop, 560.0, 490.0)],
             }),
         ],
     };
@@ -536,7 +530,7 @@ fn a_benchtop_with_cut_outs_builds() {
         assert!((g - w).abs() <= 5, "{got:?} vs {want:?}");
     }
     // BENCH-3e: the free front corner (the left end is a waterfall) is filleted: a curved face
-    // besides the tap hole's.
+    // besides the tap hole's, and the sink cut-out's four rounded corners.
     let r = crate::run(
         &cli,
         "benchtop",
@@ -549,7 +543,7 @@ fn a_benchtop_with_cut_outs_builds() {
         .iter()
         .find(|b| b["name"] == p.name.as_str())
         .unwrap();
-    assert_eq!(body["face_types"]["cylinder"], 2, "{body}");
+    assert_eq!(body["face_types"]["cylinder"], 6, "{body}");
 }
 
 /// STYLE-1: an arched pair of wall doors: SolidCraft cuts each door's top to the arch (a curved

@@ -94,6 +94,11 @@ impl Dxf {
     /// A closed `w` × `h` rectangle from the origin with its corners rounded (bottom left,
     /// bottom right, top right, top left; 0: square), drawn anticlockwise with arc bulges.
     fn rounded_rect(&mut self, layer: &str, w: f64, h: f64, r: [f64; 4]) {
+        self.rounded_rect_at(layer, (0.0, 0.0), w, h, r);
+    }
+
+    /// [`rounded_rect`](Self::rounded_rect) with its bottom left corner at `at`.
+    fn rounded_rect_at(&mut self, layer: &str, at: (f64, f64), w: f64, h: f64, r: [f64; 4]) {
         // tan(90° / 4): a quarter arc, anticlockwise.
         const QUARTER: f64 = 0.414_213_562;
         let [bl, br, tr, tl] = r;
@@ -129,7 +134,7 @@ impl Dxf {
         for (px, py, bulge) in points {
             self.pair(0, "VERTEX");
             self.pair(8, layer);
-            self.xy(10, px, py);
+            self.xy(10, at.0 + px, at.1 + py);
             if bulge != 0.0 {
                 self.pair(42, format!("{bulge:.9}"));
             }
@@ -306,6 +311,7 @@ pub fn part_dxfs(list: &PartList, part: &Part) -> Vec<DxfFile> {
                         depth,
                         label,
                         face: fc,
+                        radius,
                     } => {
                         let through = depth >= t - 1e-6;
                         let kind = label.to_uppercase();
@@ -319,7 +325,11 @@ pub fn part_dxfs(list: &PartList, part: &Part) -> Vec<DxfFile> {
                             _ => continue,
                         };
                         let x0 = if mirror { lu - u - w } else { u };
-                        d.rect(&layer, x0, v, w, h);
+                        if radius > 0.0 {
+                            d.rounded_rect_at(&layer, (x0, v), w, h, [radius; 4]);
+                        } else {
+                            d.rect(&layer, x0, v, w, h);
+                        }
                     }
                     Feature::EdgeBore {
                         u,
