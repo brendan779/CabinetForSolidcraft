@@ -91,6 +91,9 @@ fn step_files(dir: &Path, out: &mut Vec<PathBuf>) {
 /// Converts every STEP file under `vendor_dir` that has no up-to-date mesh, with `cli`
 /// (`solidcraft-cli`), and writes the index. Returns the index and how many files it converted.
 pub fn prepare(vendor_dir: &Path, cli: &Path) -> Result<(Vec<VendorModel>, usize)> {
+    // The index matches files by path and the app opens the meshes from it, so keep it absolute
+    // whichever way the folder was named.
+    let vendor_dir = &std::fs::canonicalize(vendor_dir)?;
     let mesh_dir = vendor_dir.join(MESH_DIR);
     std::fs::create_dir_all(&mesh_dir)?;
     let old: Vec<VendorModel> = load_index(vendor_dir).unwrap_or_default();
