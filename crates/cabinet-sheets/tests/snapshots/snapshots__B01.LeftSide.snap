@@ -17,10 +17,10 @@ expression: svg
 <rect x="34.95" y="114.84" width="0.63" height="10.43" fill="#e8c27a" stroke="#222" stroke-width="0.15"/>
 <rect x="34.95" y="90.77" width="0.63" height="10.43" fill="#e8c27a" stroke="#222" stroke-width="0.15"/>
 <rect x="34.95" y="66.71" width="0.63" height="10.43" fill="#e8c27a" stroke="#222" stroke-width="0.15"/>
-<circle cx="47.24" cy="146.17" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
-<circle cx="52.29" cy="146.17" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
-<circle cx="128.90" cy="146.17" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
-<circle cx="133.94" cy="146.17" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
+<circle cx="44.09" cy="146.17" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
+<circle cx="49.13" cy="146.17" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
+<circle cx="132.05" cy="146.17" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
+<circle cx="137.10" cy="146.17" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
 <circle cx="76.88" cy="146.17" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
 <circle cx="76.88" cy="69.87" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
 <circle cx="81.92" cy="146.17" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
@@ -35,10 +35,10 @@ expression: svg
 <circle cx="102.10" cy="69.87" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
 <circle cx="107.14" cy="146.17" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
 <circle cx="107.14" cy="69.87" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
-<line class="d" x1="47.24" y1="152.00" x2="47.24" y2="153.50"/>
-<text class="o2" x="47.24" y="154.00" transform="rotate(90 47.24 154.00)">84</text>
-<line class="d" x1="52.29" y1="152.00" x2="52.29" y2="153.50"/>
-<text class="o2" x="52.29" y="154.00" transform="rotate(90 52.29 154.00)">116</text>
+<line class="d" x1="44.09" y1="152.00" x2="44.09" y2="153.50"/>
+<text class="o2" x="44.09" y="154.00" transform="rotate(90 44.09 154.00)">64</text>
+<line class="d" x1="49.13" y1="152.00" x2="49.13" y2="153.50"/>
+<text class="o2" x="49.13" y="154.00" transform="rotate(90 49.13 154.00)">96</text>
 <line class="d" x1="76.88" y1="152.00" x2="76.88" y2="153.50"/>
 <text class="o2" x="76.88" y="154.00" transform="rotate(90 76.88 154.00)">272</text>
 <line class="d" x1="81.92" y1="152.00" x2="81.92" y2="153.50"/>
@@ -53,10 +53,10 @@ expression: svg
 <text class="o2" x="102.10" y="154.00" transform="rotate(90 102.10 154.00)">432</text>
 <line class="d" x1="107.14" y1="152.00" x2="107.14" y2="153.50"/>
 <text class="o2" x="107.14" y="154.00" transform="rotate(90 107.14 154.00)">464</text>
-<line class="d" x1="128.90" y1="152.00" x2="128.90" y2="153.50"/>
-<text class="o2" x="128.90" y="154.00" transform="rotate(90 128.90 154.00)">602</text>
-<line class="d" x1="133.94" y1="152.00" x2="133.94" y2="153.50"/>
-<text class="o2" x="133.94" y="154.00" transform="rotate(90 133.94 154.00)">634</text>
+<line class="d" x1="132.05" y1="152.00" x2="132.05" y2="153.50"/>
+<text class="o2" x="132.05" y="154.00" transform="rotate(90 132.05 154.00)">622</text>
+<line class="d" x1="137.10" y1="152.00" x2="137.10" y2="153.50"/>
+<text class="o2" x="137.10" y="154.00" transform="rotate(90 137.10 154.00)">654</text>
 <line class="d" x1="32.50" y1="146.17" x2="34.00" y2="146.17"/>
 <text class="o2" x="32.00" y="146.77" text-anchor="end">37</text>
 <line class="d" x1="32.50" y1="69.87" x2="34.00" y2="69.87"/>
@@ -108,7 +108,7 @@ expression: svg
 <text class="t" x="15.00" y="189.00">Job: Snapshot job   Cabinet: B01   Operations: 37   Reference corner ●   Edge tape ▬</text>
 <text class="s" x="158.50" y="172.50">in groove 720 × 6 ×1  @ 0, 558</text>
 <text class="s" x="158.50" y="175.40">in biscuit 4 × 66.1 ×4  @ 6, 16.9; 6, 169.6; …</text>
-<text class="s" x="158.50" y="178.30">in Ø5 × 11.5 HingePlate ×4  @ 84, 37; 116, 37; …</text>
+<text class="s" x="158.50" y="178.30">in Ø5 × 11.5 HingePlate ×4  @ 64, 37; 96, 37; …</text>
 <text class="s" x="158.50" y="181.20">in Ø5 × 10 ShelfPin ×14  @ 272, 37; 272, 521; …</text>
 <text class="s" x="158.50" y="184.10">out Ø4.5 × 16 Screw ×7  @ 8, 126.3; 8, 279; …</text>
 <text class="s" x="158.50" y="187.00">out Ø8 × 1.8 Countersink ×7  @ 8, 126.3; 8, 279; …</text>

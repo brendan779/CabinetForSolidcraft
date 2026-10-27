@@ -88,6 +88,7 @@ struct ConstructionThumbnail: View {
             case "handle_place": pen.handlePlace(choice)
             case "handle_finish": pen.handleFinish(choice)
             case "overlay": pen.overlayPlan(choice)
+            case "hinge_boss": pen.hingeBoss(choice)
             case "fixings": pen.fixing(choice)
             case "biscuit": pen.biscuit(choice)
             case "domino": pen.domino(choice)
@@ -437,6 +438,40 @@ private struct Pen {
                 ctx.fill(Path(r(x - 2, 19, 4, 7)), with: .color(accent.opacity(0.7)))
                 ctx.stroke(Path(hole), with: .color(accent), lineWidth: 1)
             }
+        }
+    }
+
+    // MARK: Back of a door at a hinge (boss fixing)
+
+    func hingeBoss(_ choice: String) {
+        // The door's back with its hinged edge on the left; the cup, and the boss across it.
+        board(6, 6, 88, 68)
+        let cup = r(18, 26, 28, 28)
+        ctx.fill(Path(ellipseIn: cup), with: .color(Color(nsColor: .windowBackgroundColor)))
+        ctx.stroke(Path(ellipseIn: cup), with: .color(.primary.opacity(0.7)), lineWidth: 1)
+        // The boss's flange over the cup, its fixings 45 apart and set back from the cup.
+        ctx.fill(Path(roundedRect: r(36, 10, 12, 60), cornerRadius: 3 * s), with: .color(accent.opacity(0.25)))
+        ctx.stroke(Path(roundedRect: r(36, 10, 12, 60), cornerRadius: 3 * s), with: .color(accent), lineWidth: 1.2)
+        line(p(46, 40), p(90, 40), colour: accent, width: 3)
+        for y: CGFloat in [18, 62] {
+            switch choice {
+            case "screw_on":
+                // A screw head: a cross in a circle.
+                ctx.stroke(Path(ellipseIn: r(38, y - 4, 8, 8)), with: .color(accent), lineWidth: 1.2)
+                line(p(39.5, y), p(44.5, y), colour: accent, width: 1.2)
+                line(p(42, y - 2.5), p(42, y + 2.5), colour: accent, width: 1.2)
+            case "expando":
+                // A screw in a split dowel: the hole, and the split.
+                ctx.fill(Path(ellipseIn: r(37, y - 5, 10, 10)), with: .color(accent.opacity(0.6)))
+                line(p(42, y - 5), p(42, y + 5), colour: Color(nsColor: .windowBackgroundColor), width: 1.4)
+            default:
+                // A pressed-in dowel: the hole, solid.
+                ctx.fill(Path(ellipseIn: r(37, y - 5, 10, 10)), with: .color(accent))
+            }
+        }
+        if choice == "inserta" {
+            // INSERTA's lever, folded down to press the dowels in.
+            line(p(48, 30), p(60, 22), colour: accent, width: 2)
         }
     }
 

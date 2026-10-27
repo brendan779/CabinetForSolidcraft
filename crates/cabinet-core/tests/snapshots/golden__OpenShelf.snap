@@ -174,7 +174,7 @@ expression: list
         "min": {
           "x": 17.0,
           "y": 2.0,
-          "z": 368.0
+          "z": 370.5
         },
         "size": {
           "x": 566.0,
@@ -1264,7 +1264,7 @@ expression: list
       "at": {
         "x": 300.0,
         "y": 139.0,
-        "z": 376.0
+        "z": 378.5
       },
       "part": "C01.Shelf1",
       "quantity": 4

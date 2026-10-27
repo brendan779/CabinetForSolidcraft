@@ -300,6 +300,8 @@ pub enum BorePurpose {
     ScrewPilot,
     ShelfPin,
     HingeCup,
+    /// An EXPANDO or INSERTA hinge's boss dowel, beside its cup.
+    HingeBoss,
     HingePlate,
     Dowel,
     /// A drawer system's front fixing (LEGRABOX EXPANDO bracket), in the back of a drawer front.

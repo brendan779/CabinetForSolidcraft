@@ -313,6 +313,27 @@ pub fn option_groups() -> Vec<OptionGroup> {
             ],
         ),
         group(
+            "hinge_boss",
+            "Hinge fixing",
+            &[
+                (
+                    "screw_on",
+                    "Screw-on",
+                    "Two screws through the hinge into the door",
+                ),
+                (
+                    "expando",
+                    "EXPANDO",
+                    "Pre-mounted screws with split dowels in two 8 mm holes",
+                ),
+                (
+                    "inserta",
+                    "INSERTA",
+                    "Dowels pressed into two 8 mm holes, no tools",
+                ),
+            ],
+        ),
+        group(
             "fixings",
             "Fixings",
             &[

@@ -155,6 +155,11 @@ struct StandardSizes: View {
         case "toe_kick" where project.option("toe_kick", of: cab) != "none":
             rows([("Plinth height", "toe_kick_height", [100, 125, 150, 180, 200]),
                   ("Plinth setback", "toe_kick_setback", [25, 50, 75, 100])])
+        case "overlay" where project.option("overlay", of: cab) != "inset":
+            // Blum's configurator's gaps: between fronts (half at each side), top and bottom.
+            rows([("Front gap", "front_gap", [2, 3, 4]),
+                  ("Top gap", "top_gap", [0, 2, 3]),
+                  ("Bottom gap", "bottom_gap", [0, 2])])
         case "door_style" where ["shaker", "glass_frame"].contains(project.option("door_style", of: cab)):
             rows([("Frame", "shaker_frame_width", [50, 60, 70, 80, 90]),
                   ("Panel", "shaker_panel_thickness", [6, 9, 12]),

@@ -4404,7 +4404,7 @@ expression: list
       "at": {
         "x": 22.5,
         "y": 0.0,
-        "z": 852.0
+        "z": 832.0
       },
       "direction": {
         "axis": "Y",
@@ -4420,7 +4420,7 @@ expression: list
       "at": {
         "x": 16.0,
         "y": 37.0,
-        "z": 836.0
+        "z": 816.0
       },
       "direction": {
         "axis": "X",
@@ -4436,7 +4436,7 @@ expression: list
       "at": {
         "x": 16.0,
         "y": 37.0,
-        "z": 868.0
+        "z": 848.0
       },
       "direction": {
         "axis": "X",
@@ -4452,7 +4452,7 @@ expression: list
       "at": {
         "x": 22.5,
         "y": 0.0,
-        "z": 1426.0
+        "z": 1430.0
       },
       "direction": {
         "axis": "Y",
@@ -4468,7 +4468,7 @@ expression: list
       "at": {
         "x": 16.0,
         "y": 37.0,
-        "z": 1410.0
+        "z": 1414.0
       },
       "direction": {
         "axis": "X",
@@ -4484,7 +4484,7 @@ expression: list
       "at": {
         "x": 16.0,
         "y": 37.0,
-        "z": 1442.0
+        "z": 1446.0
       },
       "direction": {
         "axis": "X",
@@ -4500,7 +4500,7 @@ expression: list
       "at": {
         "x": 22.5,
         "y": 0.0,
-        "z": 2000.0
+        "z": 2020.0
       },
       "direction": {
         "axis": "Y",
@@ -4516,7 +4516,7 @@ expression: list
       "at": {
         "x": 16.0,
         "y": 37.0,
-        "z": 1984.0
+        "z": 2004.0
       },
       "direction": {
         "axis": "X",
@@ -4532,7 +4532,7 @@ expression: list
       "at": {
         "x": 16.0,
         "y": 37.0,
-        "z": 2016.0
+        "z": 2036.0
       },
       "direction": {
         "axis": "X",
@@ -4548,7 +4548,7 @@ expression: list
       "at": {
         "x": 578.0,
         "y": 0.0,
-        "z": 847.0
+        "z": 832.0
       },
       "direction": {
         "axis": "Y",
@@ -4564,7 +4564,7 @@ expression: list
       "at": {
         "x": 594.0,
         "y": 37.0,
-        "z": 831.0
+        "z": 816.0
       },
       "direction": {
         "axis": "X",
@@ -4580,7 +4580,7 @@ expression: list
       "at": {
         "x": 594.0,
         "y": 37.0,
-        "z": 863.0
+        "z": 848.0
       },
       "direction": {
         "axis": "X",
@@ -4596,7 +4596,7 @@ expression: list
       "at": {
         "x": 578.0,
         "y": 0.0,
-        "z": 1426.0
+        "z": 1430.0
       },
       "direction": {
         "axis": "Y",
@@ -4612,7 +4612,7 @@ expression: list
       "at": {
         "x": 594.0,
         "y": 37.0,
-        "z": 1410.0
+        "z": 1414.0
       },
       "direction": {
         "axis": "X",
@@ -4628,7 +4628,7 @@ expression: list
       "at": {
         "x": 594.0,
         "y": 37.0,
-        "z": 1442.0
+        "z": 1446.0
       },
       "direction": {
         "axis": "X",
@@ -4644,7 +4644,7 @@ expression: list
       "at": {
         "x": 578.0,
         "y": 0.0,
-        "z": 2000.0
+        "z": 2020.0
       },
       "direction": {
         "axis": "Y",
@@ -4660,7 +4660,7 @@ expression: list
       "at": {
         "x": 594.0,
         "y": 37.0,
-        "z": 1984.0
+        "z": 2004.0
       },
       "direction": {
         "axis": "X",
@@ -4676,7 +4676,7 @@ expression: list
       "at": {
         "x": 594.0,
         "y": 37.0,
-        "z": 2016.0
+        "z": 2036.0
       },
       "direction": {
         "axis": "X",
@@ -4692,7 +4692,7 @@ expression: list
       "at": {
         "x": 1177.5,
         "y": 0.0,
-        "z": 250.0
+        "z": 230.0
       },
       "direction": {
         "axis": "Y",
@@ -4708,7 +4708,7 @@ expression: list
       "at": {
         "x": 1184.0,
         "y": 37.0,
-        "z": 234.0
+        "z": 214.0
       },
       "direction": {
         "axis": "X",
@@ -4724,7 +4724,7 @@ expression: list
       "at": {
         "x": 1184.0,
         "y": 37.0,
-        "z": 266.0
+        "z": 246.0
       },
       "direction": {
         "axis": "X",
@@ -4740,7 +4740,7 @@ expression: list
       "at": {
         "x": 1177.5,
         "y": 0.0,
-        "z": 590.0
+        "z": 593.0
       },
       "direction": {
         "axis": "Y",
@@ -4756,7 +4756,7 @@ expression: list
       "at": {
         "x": 1184.0,
         "y": 37.0,
-        "z": 574.0
+        "z": 577.0
       },
       "direction": {
         "axis": "X",
@@ -4772,7 +4772,7 @@ expression: list
       "at": {
         "x": 1184.0,
         "y": 37.0,
-        "z": 606.0
+        "z": 609.0
       },
       "direction": {
         "axis": "X",
@@ -4788,7 +4788,7 @@ expression: list
       "at": {
         "x": 1177.5,
         "y": 0.0,
-        "z": 950.0
+        "z": 970.0
       },
       "direction": {
         "axis": "Y",
@@ -4804,7 +4804,7 @@ expression: list
       "at": {
         "x": 1184.0,
         "y": 37.0,
-        "z": 934.0
+        "z": 954.0
       },
       "direction": {
         "axis": "X",
@@ -4820,7 +4820,7 @@ expression: list
       "at": {
         "x": 1184.0,
         "y": 37.0,
-        "z": 966.0
+        "z": 986.0
       },
       "direction": {
         "axis": "X",
@@ -4836,7 +4836,7 @@ expression: list
       "at": {
         "x": 1177.5,
         "y": 0.0,
-        "z": 1152.0
+        "z": 1132.0
       },
       "direction": {
         "axis": "Y",
@@ -4852,7 +4852,7 @@ expression: list
       "at": {
         "x": 1184.0,
         "y": 37.0,
-        "z": 1136.0
+        "z": 1116.0
       },
       "direction": {
         "axis": "X",
@@ -4868,7 +4868,7 @@ expression: list
       "at": {
         "x": 1184.0,
         "y": 37.0,
-        "z": 1168.0
+        "z": 1148.0
       },
       "direction": {
         "axis": "X",
@@ -4884,7 +4884,7 @@ expression: list
       "at": {
         "x": 1177.5,
         "y": 0.0,
-        "z": 1576.0
+        "z": 1590.0
       },
       "direction": {
         "axis": "Y",
@@ -4900,7 +4900,7 @@ expression: list
       "at": {
         "x": 1184.0,
         "y": 37.0,
-        "z": 1560.0
+        "z": 1574.0
       },
       "direction": {
         "axis": "X",
@@ -4916,7 +4916,7 @@ expression: list
       "at": {
         "x": 1184.0,
         "y": 37.0,
-        "z": 1592.0
+        "z": 1606.0
       },
       "direction": {
         "axis": "X",
@@ -4932,7 +4932,7 @@ expression: list
       "at": {
         "x": 1177.5,
         "y": 0.0,
-        "z": 2000.0
+        "z": 2020.0
       },
       "direction": {
         "axis": "Y",
@@ -4948,7 +4948,7 @@ expression: list
       "at": {
         "x": 1184.0,
         "y": 37.0,
-        "z": 1984.0
+        "z": 2004.0
       },
       "direction": {
         "axis": "X",
@@ -4964,7 +4964,7 @@ expression: list
       "at": {
         "x": 1184.0,
         "y": 37.0,
-        "z": 2016.0
+        "z": 2036.0
       },
       "direction": {
         "axis": "X",
@@ -5306,7 +5306,7 @@ expression: list
       "at": {
         "x": 22.5,
         "y": 0.0,
-        "z": 852.0
+        "z": 832.0
       },
       "part": "W01.Door1",
       "quantity": 1
@@ -5317,7 +5317,18 @@ expression: list
       "at": {
         "x": 16.0,
         "y": 37.0,
-        "z": 852.0
+        "z": 832.0
+      },
+      "part": "W01.LeftSide",
+      "quantity": 1
+    },
+    {
+      "item": "blum.hinge-cover-cap.overlay",
+      "description": "CLIP top hinge arm cover cap",
+      "at": {
+        "x": 16.0,
+        "y": 37.0,
+        "z": 832.0
       },
       "part": "W01.LeftSide",
       "quantity": 1
@@ -5328,7 +5339,7 @@ expression: list
       "at": {
         "x": 22.5,
         "y": 0.0,
-        "z": 1426.0
+        "z": 1430.0
       },
       "part": "W01.Door1",
       "quantity": 1
@@ -5339,7 +5350,18 @@ expression: list
       "at": {
         "x": 16.0,
         "y": 37.0,
-        "z": 1426.0
+        "z": 1430.0
+      },
+      "part": "W01.LeftSide",
+      "quantity": 1
+    },
+    {
+      "item": "blum.hinge-cover-cap.overlay",
+      "description": "CLIP top hinge arm cover cap",
+      "at": {
+        "x": 16.0,
+        "y": 37.0,
+        "z": 1430.0
       },
       "part": "W01.LeftSide",
       "quantity": 1
@@ -5350,7 +5372,7 @@ expression: list
       "at": {
         "x": 22.5,
         "y": 0.0,
-        "z": 2000.0
+        "z": 2020.0
       },
       "part": "W01.Door1",
       "quantity": 1
@@ -5361,7 +5383,18 @@ expression: list
       "at": {
         "x": 16.0,
         "y": 37.0,
-        "z": 2000.0
+        "z": 2020.0
+      },
+      "part": "W01.LeftSide",
+      "quantity": 1
+    },
+    {
+      "item": "blum.hinge-cover-cap.overlay",
+      "description": "CLIP top hinge arm cover cap",
+      "at": {
+        "x": 16.0,
+        "y": 37.0,
+        "z": 2020.0
       },
       "part": "W01.LeftSide",
       "quantity": 1
@@ -5372,7 +5405,7 @@ expression: list
       "at": {
         "x": 578.0,
         "y": 0.0,
-        "z": 847.0
+        "z": 832.0
       },
       "part": "W01.Door2",
       "quantity": 1
@@ -5383,7 +5416,18 @@ expression: list
       "at": {
         "x": 594.0,
         "y": 37.0,
-        "z": 847.0
+        "z": 832.0
+      },
+      "part": "W01.Divider1",
+      "quantity": 1
+    },
+    {
+      "item": "blum.hinge-cover-cap.dual-inset",
+      "description": "CLIP top hinge arm cover cap",
+      "at": {
+        "x": 594.0,
+        "y": 37.0,
+        "z": 832.0
       },
       "part": "W01.Divider1",
       "quantity": 1
@@ -5394,7 +5438,7 @@ expression: list
       "at": {
         "x": 578.0,
         "y": 0.0,
-        "z": 1426.0
+        "z": 1430.0
       },
       "part": "W01.Door2",
       "quantity": 1
@@ -5405,7 +5449,18 @@ expression: list
       "at": {
         "x": 594.0,
         "y": 37.0,
-        "z": 1426.0
+        "z": 1430.0
+      },
+      "part": "W01.Divider1",
+      "quantity": 1
+    },
+    {
+      "item": "blum.hinge-cover-cap.dual-inset",
+      "description": "CLIP top hinge arm cover cap",
+      "at": {
+        "x": 594.0,
+        "y": 37.0,
+        "z": 1430.0
       },
       "part": "W01.Divider1",
       "quantity": 1
@@ -5416,7 +5471,7 @@ expression: list
       "at": {
         "x": 578.0,
         "y": 0.0,
-        "z": 2000.0
+        "z": 2020.0
       },
       "part": "W01.Door2",
       "quantity": 1
@@ -5427,7 +5482,18 @@ expression: list
       "at": {
         "x": 594.0,
         "y": 37.0,
-        "z": 2000.0
+        "z": 2020.0
+      },
+      "part": "W01.Divider1",
+      "quantity": 1
+    },
+    {
+      "item": "blum.hinge-cover-cap.dual-inset",
+      "description": "CLIP top hinge arm cover cap",
+      "at": {
+        "x": 594.0,
+        "y": 37.0,
+        "z": 2020.0
       },
       "part": "W01.Divider1",
       "quantity": 1
@@ -5438,7 +5504,7 @@ expression: list
       "at": {
         "x": 1177.5,
         "y": 0.0,
-        "z": 250.0
+        "z": 230.0
       },
       "part": "W01.Door3",
       "quantity": 1
@@ -5449,7 +5515,18 @@ expression: list
       "at": {
         "x": 1184.0,
         "y": 37.0,
-        "z": 250.0
+        "z": 230.0
+      },
+      "part": "W01.RightSide",
+      "quantity": 1
+    },
+    {
+      "item": "blum.hinge-cover-cap.overlay",
+      "description": "CLIP top hinge arm cover cap",
+      "at": {
+        "x": 1184.0,
+        "y": 37.0,
+        "z": 230.0
       },
       "part": "W01.RightSide",
       "quantity": 1
@@ -5460,7 +5537,7 @@ expression: list
       "at": {
         "x": 1177.5,
         "y": 0.0,
-        "z": 590.0
+        "z": 593.0
       },
       "part": "W01.Door3",
       "quantity": 1
@@ -5471,7 +5548,18 @@ expression: list
       "at": {
         "x": 1184.0,
         "y": 37.0,
-        "z": 590.0
+        "z": 593.0
+      },
+      "part": "W01.RightSide",
+      "quantity": 1
+    },
+    {
+      "item": "blum.hinge-cover-cap.overlay",
+      "description": "CLIP top hinge arm cover cap",
+      "at": {
+        "x": 1184.0,
+        "y": 37.0,
+        "z": 593.0
       },
       "part": "W01.RightSide",
       "quantity": 1
@@ -5482,7 +5570,7 @@ expression: list
       "at": {
         "x": 1177.5,
         "y": 0.0,
-        "z": 950.0
+        "z": 970.0
       },
       "part": "W01.Door3",
       "quantity": 1
@@ -5493,7 +5581,18 @@ expression: list
       "at": {
         "x": 1184.0,
         "y": 37.0,
-        "z": 950.0
+        "z": 970.0
+      },
+      "part": "W01.RightSide",
+      "quantity": 1
+    },
+    {
+      "item": "blum.hinge-cover-cap.overlay",
+      "description": "CLIP top hinge arm cover cap",
+      "at": {
+        "x": 1184.0,
+        "y": 37.0,
+        "z": 970.0
       },
       "part": "W01.RightSide",
       "quantity": 1
@@ -5504,7 +5603,7 @@ expression: list
       "at": {
         "x": 1177.5,
         "y": 0.0,
-        "z": 1152.0
+        "z": 1132.0
       },
       "part": "W01.Door4",
       "quantity": 1
@@ -5515,7 +5614,18 @@ expression: list
       "at": {
         "x": 1184.0,
         "y": 37.0,
-        "z": 1152.0
+        "z": 1132.0
+      },
+      "part": "W01.RightSide",
+      "quantity": 1
+    },
+    {
+      "item": "blum.hinge-cover-cap.overlay",
+      "description": "CLIP top hinge arm cover cap",
+      "at": {
+        "x": 1184.0,
+        "y": 37.0,
+        "z": 1132.0
       },
       "part": "W01.RightSide",
       "quantity": 1
@@ -5526,7 +5636,7 @@ expression: list
       "at": {
         "x": 1177.5,
         "y": 0.0,
-        "z": 1576.0
+        "z": 1590.0
       },
       "part": "W01.Door4",
       "quantity": 1
@@ -5537,7 +5647,18 @@ expression: list
       "at": {
         "x": 1184.0,
         "y": 37.0,
-        "z": 1576.0
+        "z": 1590.0
+      },
+      "part": "W01.RightSide",
+      "quantity": 1
+    },
+    {
+      "item": "blum.hinge-cover-cap.overlay",
+      "description": "CLIP top hinge arm cover cap",
+      "at": {
+        "x": 1184.0,
+        "y": 37.0,
+        "z": 1590.0
       },
       "part": "W01.RightSide",
       "quantity": 1
@@ -5548,7 +5669,7 @@ expression: list
       "at": {
         "x": 1177.5,
         "y": 0.0,
-        "z": 2000.0
+        "z": 2020.0
       },
       "part": "W01.Door4",
       "quantity": 1
@@ -5559,7 +5680,18 @@ expression: list
       "at": {
         "x": 1184.0,
         "y": 37.0,
-        "z": 2000.0
+        "z": 2020.0
+      },
+      "part": "W01.RightSide",
+      "quantity": 1
+    },
+    {
+      "item": "blum.hinge-cover-cap.overlay",
+      "description": "CLIP top hinge arm cover cap",
+      "at": {
+        "x": 1184.0,
+        "y": 37.0,
+        "z": 2020.0
       },
       "part": "W01.RightSide",
       "quantity": 1

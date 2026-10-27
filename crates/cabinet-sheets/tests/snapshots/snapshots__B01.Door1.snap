@@ -15,16 +15,16 @@ expression: svg
 <line class="d" x1="27.00" y1="152.00" x2="27.00" y2="20.00"/>
 <text class="t" x="25.00" y="86.00" text-anchor="middle" transform="rotate(-90 25.00 86.00)">598</text>
 <circle cx="34.00" cy="152.00" r="1" fill="#c0392b"/>
-<circle cx="56.07" cy="147.25" r="3.86" fill="none" stroke="#222" stroke-width="0.25"/>
-<circle cx="170.41" cy="147.25" r="3.86" fill="none" stroke="#222" stroke-width="0.25"/>
+<circle cx="51.66" cy="147.25" r="3.86" fill="none" stroke="#222" stroke-width="0.25"/>
+<circle cx="174.83" cy="147.25" r="3.86" fill="none" stroke="#222" stroke-width="0.25"/>
 <circle cx="153.20" cy="27.73" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
 <circle cx="181.45" cy="27.73" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
-<line class="d" x1="56.07" y1="152.00" x2="56.07" y2="153.50"/>
-<text class="o2" x="56.07" y="154.00" transform="rotate(90 56.07 154.00)">100</text>
+<line class="d" x1="51.66" y1="152.00" x2="51.66" y2="153.50"/>
+<text class="o2" x="51.66" y="154.00" transform="rotate(90 51.66 154.00)">80</text>
 <line class="d" x1="153.20" y1="152.00" x2="153.20" y2="153.50"/>
 <text class="o2" x="153.20" y="154.00" transform="rotate(90 153.20 154.00)">540</text>
-<line class="d" x1="170.41" y1="152.00" x2="170.41" y2="153.50"/>
-<text class="o2" x="170.41" y="154.00" transform="rotate(90 170.41 154.00)">618</text>
+<line class="d" x1="174.83" y1="152.00" x2="174.83" y2="153.50"/>
+<text class="o2" x="174.83" y="154.00" transform="rotate(90 174.83 154.00)">638</text>
 <line class="d" x1="181.45" y1="152.00" x2="181.45" y2="153.50"/>
 <text class="o2" x="181.45" y="154.00" transform="rotate(90 181.45 154.00)">668</text>
 <line class="d" x1="32.50" y1="147.25" x2="34.00" y2="147.25"/>
@@ -35,6 +35,6 @@ expression: svg
 <text class="t" x="15.00" y="175.00">B01.Door1  —  Door</text>
 <text class="t" x="15.00" y="182.00">Finished 718 × 598 × 18 mm   Board: Polytec Classic White Matt 16 MR MDF</text>
 <text class="t" x="15.00" y="189.00">Job: Snapshot job   Cabinet: B01   Operations: 4   Reference corner ●   Edge tape ▬</text>
-<text class="s" x="158.50" y="172.50">Ø35 × 13 HingeCup ×2  @ 100, 21.5; 618, 21.5</text>
+<text class="s" x="158.50" y="172.50">Ø35 × 13 HingeCup ×2  @ 80, 21.5; 638, 21.5</text>
 <text class="s" x="158.50" y="175.40">Ø5 × 18 HandleScrew ×2  @ 540, 563; 668, 563</text>
 </svg>

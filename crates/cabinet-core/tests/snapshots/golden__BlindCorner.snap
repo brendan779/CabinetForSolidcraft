@@ -255,7 +255,7 @@ expression: list
         "min": {
           "x": 17.0,
           "y": 2.0,
-          "z": 518.0
+          "z": 520.5
         },
         "size": {
           "x": 966.0,
@@ -1198,7 +1198,7 @@ expression: list
       "at": {
         "x": 977.5,
         "y": 0.0,
-        "z": 250.0
+        "z": 230.0
       },
       "direction": {
         "axis": "Y",
@@ -1214,7 +1214,7 @@ expression: list
       "at": {
         "x": 984.0,
         "y": 37.0,
-        "z": 234.0
+        "z": 214.0
       },
       "direction": {
         "axis": "X",
@@ -1230,7 +1230,7 @@ expression: list
       "at": {
         "x": 984.0,
         "y": 37.0,
-        "z": 266.0
+        "z": 246.0
       },
       "direction": {
         "axis": "X",
@@ -1246,7 +1246,7 @@ expression: list
       "at": {
         "x": 977.5,
         "y": 0.0,
-        "z": 768.0
+        "z": 788.0
       },
       "direction": {
         "axis": "Y",
@@ -1262,7 +1262,7 @@ expression: list
       "at": {
         "x": 984.0,
         "y": 37.0,
-        "z": 752.0
+        "z": 772.0
       },
       "direction": {
         "axis": "X",
@@ -1278,7 +1278,7 @@ expression: list
       "at": {
         "x": 984.0,
         "y": 37.0,
-        "z": 784.0
+        "z": 804.0
       },
       "direction": {
         "axis": "X",
@@ -1776,7 +1776,7 @@ expression: list
       "at": {
         "x": 977.5,
         "y": 0.0,
-        "z": 250.0
+        "z": 230.0
       },
       "part": "C01.Door1",
       "quantity": 1
@@ -1787,7 +1787,18 @@ expression: list
       "at": {
         "x": 984.0,
         "y": 37.0,
-        "z": 250.0
+        "z": 230.0
+      },
+      "part": "C01.RightSide",
+      "quantity": 1
+    },
+    {
+      "item": "blum.hinge-cover-cap.overlay",
+      "description": "CLIP top hinge arm cover cap",
+      "at": {
+        "x": 984.0,
+        "y": 37.0,
+        "z": 230.0
       },
       "part": "C01.RightSide",
       "quantity": 1
@@ -1798,7 +1809,7 @@ expression: list
       "at": {
         "x": 977.5,
         "y": 0.0,
-        "z": 768.0
+        "z": 788.0
       },
       "part": "C01.Door1",
       "quantity": 1
@@ -1809,7 +1820,18 @@ expression: list
       "at": {
         "x": 984.0,
         "y": 37.0,
-        "z": 768.0
+        "z": 788.0
+      },
+      "part": "C01.RightSide",
+      "quantity": 1
+    },
+    {
+      "item": "blum.hinge-cover-cap.overlay",
+      "description": "CLIP top hinge arm cover cap",
+      "at": {
+        "x": 984.0,
+        "y": 37.0,
+        "z": 788.0
       },
       "part": "C01.RightSide",
       "quantity": 1
@@ -1820,7 +1842,7 @@ expression: list
       "at": {
         "x": 500.0,
         "y": 279.0,
-        "z": 526.0
+        "z": 528.5
       },
       "part": "C01.Shelf1",
       "quantity": 4

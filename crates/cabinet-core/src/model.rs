@@ -609,8 +609,15 @@ pub struct ConstructionStandard {
     pub wardrobe_double_hang_shelf: f64,
     pub wardrobe_drawer_pitch: f64,
     pub overlay: DoorOverlay,
-    /// Gap between a front and its neighbour or the envelope edge.
+    /// Gap between a front and its neighbour; half of it at the cabinet's sides, as Blum's
+    /// configurator splits it (3 between fronts, 1.5 at each side).
     pub front_gap: f64,
+    /// Overlay fronts under a benchtop: their gap below the cabinet's top. Blum's default: 2.
+    pub top_gap: f64,
+    /// Overlay fronts: their gap above the carcass bottom. Blum's default: 0.
+    pub bottom_gap: f64,
+    /// How hinges fix into the door's cup bore: screwed, or Blum's EXPANDO or INSERTA bosses.
+    pub hinge_boss: HingeBoss,
     pub fixings: FixingRecipe,
     pub biscuit: BiscuitSize,
     /// The DOMINO tenon when the fixings are DOMINO.
@@ -701,6 +708,9 @@ impl Default for ConstructionStandard {
             wardrobe_drawer_pitch: 200.0,
             overlay: DoorOverlay::Full,
             front_gap: 2.0,
+            top_gap: 2.0,
+            bottom_gap: 0.0,
+            hinge_boss: HingeBoss::ScrewOn,
             fixings: FixingRecipe::BiscuitAndScrew,
             biscuit: BiscuitSize::No20,
             domino: DominoSize::D5x30,
@@ -761,6 +771,19 @@ pub enum BackStyle {
     /// Full-thickness back between sides, top and bottom.
     Structural,
     None,
+}
+
+/// How a CLIP top hinge's boss fixes in the door (Blum catalogue 2024/2025 p.76).
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum HingeBoss {
+    /// Two screws through the boss into the door.
+    #[default]
+    ScrewOn,
+    /// Pre-mounted special screws with split dowels in two 8 mm holes.
+    Expando,
+    /// Dowels pressed into two 8 mm holes, tool-free.
+    Inserta,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]

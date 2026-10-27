@@ -8,7 +8,7 @@
 use cabinet_catalog::HardwareItem;
 
 use crate::hardware;
-use crate::model::DoorOverlay;
+use crate::model::{DoorOverlay, HingeBoss};
 
 /// What a door asks of its hinges.
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -24,6 +24,8 @@ pub struct HingeNeed {
     pub gap: f64,
     /// False for doors opened by TIP-ON: those hinges have no spring.
     pub sprung: bool,
+    /// How the hinge fixes in the door.
+    pub boss: HingeBoss,
 }
 
 /// The hinge and plate for a door, and where they go.
@@ -46,38 +48,63 @@ impl HingeChoice {
     }
 }
 
-/// The hinge row for an overlay, by the cranking that application needs.
-fn hinge_id(overlay: DoorOverlay, sprung: bool) -> String {
+/// The hinge row for an overlay, by the cranking that application needs, with the boss asked
+/// for where the catalog has that hinge; otherwise the screw-on one and why.
+fn hinge_id(overlay: DoorOverlay, sprung: bool, boss: HingeBoss) -> (String, Option<String>) {
     let app = match overlay {
         DoorOverlay::Full => "overlay",
         DoorOverlay::Half => "dual",
         DoorOverlay::Inset => "inset",
     };
-    if sprung {
+    let plain = if sprung {
         format!("blum.clip-top-blumotion.110.{app}")
     } else {
         format!("blum.clip-top.110.{app}.unsprung")
+    };
+    let Some(suffix) = boss_suffix(boss) else {
+        return (plain, None);
+    };
+    let id = format!("{plain}.{suffix}");
+    if hardware::item(&id).is_ok() {
+        (id, None)
+    } else {
+        let note = format!("no {suffix} hinge for this door in our data; screw-on hinges used");
+        (plain, Some(note))
     }
 }
 
-/// The plates, thinnest spacing first.
-fn plates() -> Vec<&'static HardwareItem> {
-    let mut out: Vec<_> = hardware::items()
-        .iter()
-        .filter(|h| {
-            h.id.starts_with("blum.mounting-plate.cruciform-37-32.system-screw.")
-        })
-        .collect();
-    out.sort_by(|a, b| {
-        let md = |h: &HardwareItem| h.param("plate_spacing").unwrap_or(f64::MAX);
-        md(a).total_cmp(&md(b))
-    });
+fn boss_suffix(boss: HingeBoss) -> Option<&'static str> {
+    match boss {
+        HingeBoss::ScrewOn => None,
+        HingeBoss::Expando => Some("expando"),
+        HingeBoss::Inserta => Some("inserta"),
+    }
+}
+
+/// The plates for a boss fixing, thinnest spacing first: Blum's EXPANDO and INSERTA plates
+/// (0 and 3 mm only), then the system-screw ones for the spacings they lack.
+fn plates(boss: HingeBoss) -> Vec<&'static HardwareItem> {
+    let spacing = |h: &HardwareItem| h.param("plate_spacing").unwrap_or(f64::MAX);
+    let of = |kind: &str| {
+        let prefix = format!("blum.mounting-plate.cruciform-37-32.{kind}.");
+        let mut out: Vec<_> = hardware::items()
+            .iter()
+            .filter(|h| h.id.starts_with(&prefix))
+            .collect();
+        out.sort_by(|a, b| spacing(a).total_cmp(&spacing(b)));
+        out
+    };
+    let mut out = boss_suffix(boss).map(of).unwrap_or_default();
+    out.extend(of("system-screw"));
     out
 }
 
 /// Picks the hinge and the thinnest plate that brings the boring distance into the hinge's range.
 pub fn select(need: &HingeNeed) -> Result<HingeChoice, String> {
-    select_hinge(&hinge_id(need.overlay, need.sprung), need)
+    let (id, note) = hinge_id(need.overlay, need.sprung, need.boss);
+    let mut choice = select_hinge(&id, need)?;
+    choice.warnings.extend(note);
+    Ok(choice)
 }
 
 /// As [`select`], for a given hinge (a wide-angle hinge, say) instead of the standard 110°.
@@ -89,7 +116,7 @@ pub fn select_hinge(id: &str, need: &HingeNeed) -> Result<HingeChoice, String> {
         hinge.param("boring_distance_max")?,
     );
     let mut fitted = None;
-    for plate in plates() {
+    for plate in plates(need.boss) {
         let md = plate.param("plate_spacing")?;
         let tb = need.front_overlay - to + crank + md;
         if (tb_min - 1e-9..=tb_max + 1e-9).contains(&tb) {
@@ -183,6 +210,7 @@ mod tests {
             side_thickness: 16.0,
             gap: 2.0,
             sprung: true,
+            boss: HingeBoss::ScrewOn,
         }
     }
 

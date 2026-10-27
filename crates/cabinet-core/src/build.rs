@@ -79,9 +79,23 @@ const GLASS_THICKNESS: f64 = 4.0;
 const GLASS_REBATE_DEPTH: f64 = 12.0;
 /// Generic until a supplier's shelf support is catalogued (HAF-3).
 const SHELF_SUPPORT: &str = "shelf-support.5mm";
-/// Our choice, not Blum's: the end hinges sit this far in from the door's top and bottom. The
-/// hinge itself, its cup and plate come from the hardware catalog (see `hinges`).
+/// Our choice, not Blum's: an AVENTOS HF bi-fold's end hinges sit this far in from the fronts'
+/// sides. A door's come from [`HINGE_POSITION`].
 const HINGE_END_OFFSET: f64 = 100.0;
+/// Where a door's end hinges sit, from Blum's configurator.
+const HINGE_POSITION: &str = "blum.clip-top.hinge-position";
+
+/// The arm cover cap for a 110° CLIP top hinge (catalogue p.76); other hinges take none here.
+fn cover_cap(hinge: &str) -> Option<&'static str> {
+    let rest = hinge
+        .strip_prefix("blum.clip-top-blumotion.110.")
+        .or_else(|| hinge.strip_prefix("blum.clip-top.110."))?;
+    Some(if rest.starts_with("overlay") {
+        "blum.hinge-cover-cap.overlay"
+    } else {
+        "blum.hinge-cover-cap.dual-inset"
+    })
+}
 /// The least a hinge's cup centre sits from its door's top or bottom when it moves off a joint
 /// (the 35 mm cup and some wood beyond it).
 const HINGE_EDGE_CLEARANCE: f64 = 40.0;
@@ -987,10 +1001,16 @@ impl<'a> Builder<'a> {
         if n > 0 {
             let step = (z1 - z0) / (n + 1) as f64;
             for i in 1..=n {
-                // Snap to the 32 mm grid so a shelf rests on real pin holes.
+                // Snap to the 32 mm grid so a shelf rests on real pin holes: on top of the pins,
+                // a pin's radius above the holes' centres (Blum's configurator, 2026-10-27).
                 let raw = z0 + step * i as f64;
-                let z = z0 + ((raw - z0) / SYSTEM32_PITCH).round() * SYSTEM32_PITCH;
+                let hole = z0 + ((raw - z0) / SYSTEM32_PITCH).round() * SYSTEM32_PITCH;
                 let fixed = cab.fixed_shelves.contains(&(i as u32));
+                let z = if fixed {
+                    hole
+                } else {
+                    hole + SHELF_PIN_DIAMETER / 2.0
+                };
                 // A fixed shelf fills the width and reaches the back, like a bottom.
                 let bounds = if fixed {
                     aabb(
@@ -1020,7 +1040,7 @@ impl<'a> Builder<'a> {
                     EdgeBanding::front_only(),
                 );
                 if !fixed {
-                    loose_z.push(z);
+                    loose_z.push(hole);
                 }
                 if fixed {
                     fixed_z.push(z + t / 2.0);
@@ -1049,7 +1069,7 @@ impl<'a> Builder<'a> {
     }
 
     /// Shelf-pin holes on the inside of both sides: a front and a back row on the 32 mm grid,
-    /// within [`SHELF_PIN_REACH`] steps of each adjustable shelf (its underside in `loose_z`),
+    /// within [`SHELF_PIN_REACH`] steps of each adjustable shelf (its pins' holes in `loose_z`),
     /// and left out within a pitch of a fixed shelf (centres in `fixed_z`), where its fixings are.
     fn shelf_pin_rows(&mut self, fixed_z: &[f64], loose_z: &[f64]) {
         let cab = self.cab;
@@ -1072,6 +1092,25 @@ impl<'a> Builder<'a> {
             for y in rows {
                 for (part, x, positive) in [(&left, t, false), (&right, cab.width - t, true)] {
                     let at = Vec3::new(x, y, z);
+                    // A plate screw's hole on the row serves as this pin hole too.
+                    let shared = self.list.operations.iter().any(|o| match o {
+                        Operation::Bore {
+                            part: p,
+                            at: h,
+                            diameter: d,
+                            ..
+                        } => {
+                            p == part
+                                && Axis::ALL
+                                    .iter()
+                                    .all(|&a| (h.get(a) - at.get(a)).abs() < 1e-6)
+                                && (d - SHELF_PIN_DIAMETER).abs() < 1e-6
+                        }
+                        _ => false,
+                    });
+                    if shared {
+                        continue;
+                    }
                     if self.bore_clashes(part, at, SHELF_PIN_DIAMETER) {
                         skipped += 1;
                         continue;
@@ -1107,7 +1146,9 @@ impl<'a> Builder<'a> {
             } if p == part => {
                 let dist =
                     ((at.x - o.x).powi(2) + (at.y - o.y).powi(2) + (at.z - o.z).powi(2)).sqrt();
-                dist < (diameter + d) / 2.0 + WALL
+                // The same hole already there (a plate screw's on the pin row) is shared.
+                let same = dist < 1e-6 && (diameter - d).abs() < 1e-6;
+                !same && dist < (diameter + d) / 2.0 + WALL
             }
             // A pocket in the part (AVENTOS HKi's): no hole in or beside it.
             Operation::Groove { part: p, bounds } if p == part => {
@@ -1138,10 +1179,12 @@ impl<'a> Builder<'a> {
                 | CabinetKind::BlindCorner
                 | CabinetKind::Sink
         );
-        let top_gap = if under_bench { g } else { 0.0 };
+        // Blum's configurator sets these apart from the gap between fronts.
+        let top_gap = if under_bench { s.top_gap } else { 0.0 };
+        let z0 = self.carcass_z0 + s.bottom_gap;
         match s.overlay {
-            DoorOverlay::Full => (g / 2.0, w - g / 2.0, self.carcass_z0, h - top_gap, -ft, 0.0),
-            DoorOverlay::Half => (t / 2.0, w - t / 2.0, self.carcass_z0, h - top_gap, -ft, 0.0),
+            DoorOverlay::Full => (g / 2.0, w - g / 2.0, z0, h - top_gap, -ft, 0.0),
+            DoorOverlay::Half => (t / 2.0, w - t / 2.0, z0, h - top_gap, -ft, 0.0),
             DoorOverlay::Inset => {
                 let (z0, z1) = self.opening_z;
                 (t + g, w - t - g, z0 + g, z1 - g, 0.0, ft)
@@ -2469,6 +2512,7 @@ impl<'a> Builder<'a> {
             side_thickness: t,
             gap: s.front_gap,
             sprung: s.opening == Opening::Handles,
+            boss: s.hinge_boss,
         };
         let chosen = match hinge_id {
             Some(id) => hinges::select_hinge(id, &need),
@@ -2489,9 +2533,11 @@ impl<'a> Builder<'a> {
                 choice.hinge.param("cup_diameter")?,
                 choice.hinge.param("cup_depth")?,
                 choice.plate.param("setback")?,
+                crate::hardware::item(HINGE_POSITION)?.param("end_distance")?,
             ))
         })();
-        let Ok((cup_inset, cup_diameter, cup_depth, pattern_setback)) = numbers else {
+        let Ok((cup_inset, cup_diameter, cup_depth, pattern_setback, end_distance)) = numbers
+        else {
             self.list
                 .warnings
                 .push(format!("{door}: {}", numbers.unwrap_err()));
@@ -2512,15 +2558,32 @@ impl<'a> Builder<'a> {
         };
         // The carcass front is Y = 0 whatever the overlay; the plate is set out from it.
         let plate_y = choice.plate_setback;
-        let span = height - 2.0 * HINGE_END_OFFSET;
+        // An arched top row comes down almost its full rise at the hinged edges: the top hinge
+        // keeps its distance from there.
+        let arched = cab.arched_top > 0.0 && (b.max().z - self.front_region().3).abs() < 1e-6;
+        let top_end = end_distance + if arched { cab.arched_top } else { 0.0 };
+        let span = height - end_distance - top_end;
         let holes: Vec<(f64, f64, f64)> = choice
             .plate
             .drilling
             .iter()
             .map(|h| (plate_y + h.y - pattern_setback, h.x, h.diameter / 2.0))
             .collect();
+        // Blum's 37/32 system: a middle hinge's plate screws go in the shelf-pin rows' holes,
+        // so its holes land on the 32 mm grid the rows are drilled on.
+        let pitch = choice.plate.param("hole_pitch").ok();
+        let grid = |z: f64| match pitch {
+            Some(p) if (pattern_setback - SYSTEM32_SETBACK).abs() < 1e-9 => {
+                let g0 = self.opening_z.0 + p / 2.0;
+                g0 + ((z - g0) / SYSTEM32_PITCH).round() * SYSTEM32_PITCH
+            }
+            _ => z,
+        };
         let zs: Vec<f64> = (0..count)
-            .map(|i| b.min.z + HINGE_END_OFFSET + span * i as f64 / (count - 1) as f64)
+            .map(|i| {
+                let z = b.min.z + end_distance + span * i as f64 / (count - 1) as f64;
+                if i == 0 || i + 1 == count { z } else { grid(z) }
+            })
             .map(|z| self.clear_of_joints(&side, z, &holes, (b.min.z, b.max().z)))
             .collect();
         for &z in &zs {
@@ -2532,6 +2595,21 @@ impl<'a> Builder<'a> {
                 depth: cup_depth.min(b.size.y - 3.0),
                 purpose: BorePurpose::HingeCup,
             });
+            // EXPANDO and INSERTA bosses: x along the door, y further from its edge than the cup.
+            let away = match hinge {
+                HingeSide::Left => 1.0,
+                HingeSide::Right => -1.0,
+            };
+            for hole in choice.hinge.drilling.iter().filter(|h| h.x != 0.0) {
+                self.list.operations.push(Operation::Bore {
+                    part: door.clone(),
+                    at: Vec3::new(cup_x + away * hole.y, back_y, z + hole.x),
+                    direction: Dir::new(Axis::Y, false),
+                    diameter: hole.diameter,
+                    depth: hole.depth.min(b.size.y - 3.0),
+                    purpose: BorePurpose::HingeBoss,
+                });
+            }
             // The plate's pattern: x along the side (up), y in from its front edge.
             for hole in &choice.plate.drilling {
                 self.list.operations.push(Operation::Bore {
@@ -2557,6 +2635,15 @@ impl<'a> Builder<'a> {
                 part: side.clone(),
                 quantity: 1,
             });
+            if let Some(cap) = cover_cap(&choice.hinge.id) {
+                self.list.hardware.push(HardwarePlacement {
+                    item: cap.into(),
+                    description: "CLIP top hinge arm cover cap".into(),
+                    at: Vec3::new(inner_x, plate_y, z),
+                    part: side.clone(),
+                    quantity: 1,
+                });
+            }
         }
         zs
     }
@@ -4098,9 +4185,10 @@ mod tests {
         let mut cab = Cabinet::new("T01", CabinetKind::Tall);
         cab.adjustable_shelves = 2;
         let list = build_cabinet(&cab).unwrap();
+        // Each shelf's pin holes, a pin's radius under it.
         let shelves: Vec<f64> = list
             .by_role(PartRole::Shelf)
-            .map(|p| p.bounds.min.z)
+            .map(|p| p.bounds.min.z - SHELF_PIN_DIAMETER / 2.0)
             .collect();
         let pins: Vec<f64> = list
             .operations
@@ -5947,13 +6035,25 @@ mod tests {
         assert!((c.z + r - top).abs() < 1e-6);
         let at_edge = c.z + (r * r - (x0 - c.x).powi(2)).sqrt();
         assert!((top - at_edge - 80.0).abs() < 1e-6);
-        cab.arched_top = 250.0;
+        // The top hinges keep Blum's distance from where the arch meets their edge.
+        let cups: Vec<f64> = list
+            .operations
+            .iter()
+            .filter_map(|o| match o {
+                Operation::Bore {
+                    at,
+                    purpose: BorePurpose::HingeCup,
+                    ..
+                } => Some(at.z),
+                _ => None,
+            })
+            .collect();
+        let highest = cups.iter().copied().fold(f64::MIN, f64::max);
+        assert!((top - 80.0 - 80.0 - highest).abs() < 1e-6, "{cups:?}");
+        // An arch too high for the doors stays square.
+        cab.arched_top = 400.0;
         let list = build_cabinet(&cab).unwrap();
-        assert!(
-            list.warnings
-                .iter()
-                .any(|w| w.contains("cut through the hole"))
-        );
+        assert!(list.warnings.iter().any(|w| w.contains("too high")));
         assert!(
             !list
                 .operations
@@ -6494,5 +6594,184 @@ mod tests {
         let mut c = base();
         c.width = 60.0;
         assert!(matches!(build_cabinet(&c), Err(Error::TooSmall(_))));
+    }
+
+    /// Blum E-SERVICES check 1 (docs/blum-checks.md): a 600 × 850 × 580 standard cabinet,
+    /// 16 mm throughout, a lay-on back and one door hinged left on EXPANDO hinges.
+    fn blum_check_1() -> Cabinet {
+        let mut cab = base();
+        cab.height = 850.0;
+        let s = &mut cab.standard;
+        s.toe_kick = ToeKick::None;
+        s.top_joint = crate::model::TopJoint::OverSides;
+        s.bottom_joint = crate::model::BottomJoint::UnderSides;
+        s.back = crate::model::BackStyle::Applied;
+        s.back_thickness = 16.0;
+        s.front_thickness = 16.0;
+        s.front_gap = 3.0;
+        s.top_gap = 2.0;
+        s.bottom_gap = 0.0;
+        s.hinge_boss = crate::model::HingeBoss::Expando;
+        cab
+    }
+
+    fn bores(list: &PartList, part: &str, purpose: BorePurpose) -> Vec<Vec3> {
+        list.operations
+            .iter()
+            .filter_map(|o| match o {
+                Operation::Bore {
+                    part: p,
+                    at,
+                    purpose: q,
+                    ..
+                } if p == part && *q == purpose => Some(*at),
+                _ => None,
+            })
+            .collect()
+    }
+
+    /// Blum check 1: the door takes Blum's side, top and bottom gaps.
+    #[test]
+    fn overlay_doors_keep_blums_side_top_and_bottom_gaps() {
+        let list = build_cabinet(&blum_check_1()).unwrap();
+        let door = list.part("B01.Door1").unwrap().bounds;
+        assert!((door.size.x - 597.0).abs() < 1e-9 && (door.min.x - 1.5).abs() < 1e-9);
+        assert!((door.size.z - 848.0).abs() < 1e-9 && door.min.z.abs() < 1e-9);
+        let mut cab = blum_check_1();
+        cab.standard.bottom_gap = 2.0;
+        let raised = build_cabinet(&cab).unwrap();
+        let door = raised.part("B01.Door1").unwrap().bounds;
+        assert!((door.min.z - 2.0).abs() < 1e-9 && (door.size.z - 846.0).abs() < 1e-9);
+    }
+
+    /// Blum check 1: cups 21 mm in (TB 3.5) and the end hinges 80 mm from the door's ends, the
+    /// plates centred on each hinge's height.
+    #[test]
+    fn end_hinges_sit_80_from_the_door_ends_as_blum_places_them() {
+        let list = build_cabinet(&blum_check_1()).unwrap();
+        let door = list.part("B01.Door1").unwrap().bounds;
+        let cups = bores(&list, "B01.Door1", BorePurpose::HingeCup);
+        assert!(cups.iter().all(|c| (c.x - door.min.x - 21.0).abs() < 1e-9));
+        let zs: Vec<f64> = cups.iter().map(|c| c.z - door.min.z).collect();
+        assert!((zs.first().unwrap() - 80.0).abs() < 1e-9, "{zs:?}");
+        assert!((zs.last().unwrap() - 768.0).abs() < 1e-9, "{zs:?}");
+        let plates = bores(&list, "B01.LeftSide", BorePurpose::HingePlate);
+        for c in &cups {
+            let mut near: Vec<f64> = plates
+                .iter()
+                .filter(|p| (p.z - c.z).abs() < 20.0)
+                .map(|p| p.z - c.z)
+                .collect();
+            near.sort_by(f64::total_cmp);
+            assert_eq!(near, vec![-16.0, 16.0]);
+        }
+    }
+
+    /// Blum check 1: EXPANDO hinges and plates, with two Ø8 boss holes 45 apart, 9.5 behind
+    /// each cup, on whichever hand the door hinges.
+    #[test]
+    fn expando_hinges_drill_two_boss_holes_behind_the_cup() {
+        for hand in [HingeSide::Left, HingeSide::Right] {
+            let mut cab = blum_check_1();
+            cab.fronts = FrontLayout::Door { hinge_side: hand };
+            let list = build_cabinet(&cab).unwrap();
+            let article = |prefix: &str| {
+                let h = list
+                    .hardware
+                    .iter()
+                    .find(|h| h.item.starts_with(prefix))
+                    .unwrap();
+                crate::hardware::item(&h.item).unwrap().article.clone()
+            };
+            assert_eq!(article("blum.clip-top-blumotion"), "71B358E");
+            assert_eq!(article("blum.mounting-plate"), "174H7100E");
+            let cups = bores(&list, "B01.Door1", BorePurpose::HingeCup);
+            let bosses = bores(&list, "B01.Door1", BorePurpose::HingeBoss);
+            assert_eq!(bosses.len(), 2 * cups.len());
+            let away = if hand == HingeSide::Left { 1.0 } else { -1.0 };
+            for c in &cups {
+                let mut dz: Vec<f64> = bosses
+                    .iter()
+                    .filter(|b| (b.z - c.z).abs() < 30.0)
+                    .inspect(|b| assert!((b.x - c.x - away * 9.5).abs() < 1e-9, "{hand:?}"))
+                    .map(|b| b.z - c.z)
+                    .collect();
+                dz.sort_by(f64::total_cmp);
+                assert_eq!(dz, vec![-22.5, 22.5]);
+            }
+        }
+    }
+
+    /// INSERTA comes for every application; EXPANDO only overlay, so a half-overlay door falls
+    /// back to screw-on hinges and says so.
+    #[test]
+    fn inserta_fits_every_application_and_expando_falls_back_on_dual_doors() {
+        let mut cab = blum_check_1();
+        cab.standard.overlay = DoorOverlay::Half;
+        cab.standard.hinge_boss = crate::model::HingeBoss::Inserta;
+        let list = build_cabinet(&cab).unwrap();
+        assert!(
+            list.hardware
+                .iter()
+                .any(|h| h.item == "blum.clip-top-blumotion.110.dual.inserta")
+        );
+        assert!(
+            list.hardware
+                .iter()
+                .any(|h| h.item == "blum.mounting-plate.cruciform-37-32.inserta.0")
+        );
+        assert!(!bores(&list, "B01.Door1", BorePurpose::HingeBoss).is_empty());
+        cab.standard.hinge_boss = crate::model::HingeBoss::Expando;
+        let list = build_cabinet(&cab).unwrap();
+        assert!(
+            list.hardware
+                .iter()
+                .any(|h| h.item == "blum.clip-top-blumotion.110.dual")
+        );
+        assert!(list.warnings.iter().any(|w| w.contains("no expando hinge")));
+        assert!(bores(&list, "B01.Door1", BorePurpose::HingeBoss).is_empty());
+    }
+
+    /// Blum check 1: a cover cap on every 110° hinge's arm, the one for its application.
+    #[test]
+    fn every_110_hinge_gets_its_arm_cover_cap() {
+        for (overlay, cap, article) in [
+            (
+                DoorOverlay::Full,
+                "blum.hinge-cover-cap.overlay",
+                "70.1503.BP",
+            ),
+            (
+                DoorOverlay::Inset,
+                "blum.hinge-cover-cap.dual-inset",
+                "70.1663.BP",
+            ),
+        ] {
+            let mut cab = blum_check_1();
+            cab.standard.overlay = overlay;
+            let list = build_cabinet(&cab).unwrap();
+            let hinges = list
+                .hardware
+                .iter()
+                .filter(|h| h.item.starts_with("blum.clip-top-blumotion.110."))
+                .count();
+            let caps = list.hardware.iter().filter(|h| h.item == cap).count();
+            assert!(hinges > 0 && caps == hinges, "{overlay:?}");
+            assert_eq!(crate::hardware::item(cap).unwrap().article, article);
+        }
+    }
+
+    /// Blum check 1: an adjustable shelf rests on its pins, a pin's radius above the holes.
+    #[test]
+    fn adjustable_shelves_rest_on_top_of_their_pins() {
+        let list = build_cabinet(&blum_check_1()).unwrap();
+        let shelf = list.part("B01.Shelf1").unwrap().bounds;
+        let pins = bores(&list, "B01.LeftSide", BorePurpose::ShelfPin);
+        let under = pins
+            .iter()
+            .map(|p| p.z)
+            .filter(|z| *z < shelf.min.z)
+            .fold(f64::MIN, f64::max);
+        assert!((shelf.min.z - under - SHELF_PIN_DIAMETER / 2.0).abs() < 1e-9);
     }
 }
