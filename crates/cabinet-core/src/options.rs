@@ -152,6 +152,11 @@ pub fn option_groups() -> Vec<OptionGroup> {
             "Handle place",
             &[
                 (
+                    "sharknose",
+                    "Sharknose",
+                    "No handle: each front's top edge (wall: the bottom) bevelled at the back to pull on",
+                ),
+                (
                     "corner",
                     "Corner",
                     "Doors: by the free edge, near the top (wall: the bottom); deep drawers near the top",

@@ -65,6 +65,9 @@ const CANOPY_CUTOUT_MARGIN: f64 = 20.0;
 /// deep into the front it goes.
 const FINGER_PULL_HEIGHT: f64 = 25.0;
 const FINGER_PULL_DEPTH: f64 = 10.0;
+/// Our choices for a sharknose bevel: how far down the back of the front and how far into it.
+const SHARKNOSE_DOWN: f64 = 20.0;
+const SHARKNOSE_INTO: f64 = 12.0;
 /// Our choice: double hanging's lower rail needs at least this much drop above whatever is under
 /// it. The wardrobe's other sizes are the standard's.
 const MIN_LOWER_HANGING: f64 = 300.0;
@@ -303,6 +306,10 @@ fn offset_operations(list: &mut PartList, o: Vec3) {
         match op {
             Operation::Bore { at, .. } | Operation::Round { at, .. } => *at = *at + o,
             Operation::Arch { centre, .. } => *centre = *centre + o,
+            Operation::Chamfer { at, bounds, .. } => {
+                *at = *at + o;
+                bounds.min = bounds.min + o;
+            }
             Operation::BiscuitSlot { bounds, .. }
             | Operation::Groove { bounds, .. }
             | Operation::Cutout { bounds, .. }
@@ -2283,7 +2290,11 @@ impl<'a> Builder<'a> {
             cab.kind,
             CabinetKind::Wall | CabinetKind::CornerWall | CabinetKind::OpenShelf
         );
-        if s.handle_place == HandlePlace::FingerPull && s.door_style != DoorStyle::Slab {
+        if matches!(
+            s.handle_place,
+            HandlePlace::FingerPull | HandlePlace::Sharknose
+        ) && s.door_style != DoorStyle::Slab
+        {
             self.list.warnings.push(
                 "finger pulls need slab fronts: a frame's grooves run where the grip would be; \
                  none cut"
@@ -2388,6 +2399,34 @@ impl<'a> Builder<'a> {
                     None => vec![(c, z)],
                 }
             };
+            if s.handle_place == HandlePlace::Sharknose {
+                if s.door_style != DoorStyle::Slab {
+                    continue;
+                }
+                // The gripping edge's back corner, bevelled across the front's width.
+                let top = !(wall_hung && f.role != PartRole::DrawerFront);
+                let (zl, zh, ze) = if top {
+                    (z1 - SHARKNOSE_DOWN, z1, z1)
+                } else {
+                    (z0, z0 + SHARKNOSE_DOWN, z0)
+                };
+                let (t_lo, t_hi) = if back_low {
+                    (back, back + SHARKNOSE_INTO)
+                } else {
+                    (back - SHARKNOSE_INTO, back)
+                };
+                let lo = Vec3::new(0.0, 0.0, zl).with(wa, w0).with(ta, t_lo);
+                let hi = Vec3::new(0.0, 0.0, zh).with(wa, w1).with(ta, t_hi);
+                let at = Vec3::new(0.0, 0.0, ze)
+                    .with(wa, (w0 + w1) / 2.0)
+                    .with(ta, back);
+                self.list.operations.push(Operation::Chamfer {
+                    part: f.name.clone(),
+                    at,
+                    bounds: Aabb::new(lo, Vec3::new(hi.x - lo.x, hi.y - lo.y, hi.z - lo.z)),
+                });
+                continue;
+            }
             if s.handle_place == HandlePlace::FingerPull {
                 // A frame's grooves and tenons run where the grip would be cut.
                 if s.door_style != DoorStyle::Slab {
@@ -3571,6 +3610,7 @@ mod tests {
             Operation::Bore { part, .. }
             | Operation::Groove { part, .. }
             | Operation::Cutout { part, .. }
+            | Operation::Chamfer { part, .. }
             | Operation::Mortise { part, .. }
             | Operation::Round { part, .. }
             | Operation::Arch { part, .. } => *part == shelf.name,
@@ -4793,6 +4833,51 @@ mod tests {
             // Fixed: fixings in the sides at the shelf.
             assert!(list.operations.iter().any(|o| matches!(o,
                 Operation::BiscuitSlot { parts, .. } if parts.iter().any(|p| p == "R01.Shelf1"))));
+        }
+    }
+
+    /// WF-3: a sharknose front is bevelled at the back of its top edge (a wall door's bottom),
+    /// across its width, and gets no handle.
+    #[test]
+    fn sharknose_fronts_are_bevelled_at_the_back_of_their_gripping_edge() {
+        for kind in [
+            CabinetKind::Base,
+            CabinetKind::Wall,
+            CabinetKind::DrawerBank,
+        ] {
+            let mut cab = Cabinet::new("X01", kind);
+            cab.standard.handle_place = HandlePlace::Sharknose;
+            let list = build_cabinet(&cab).unwrap();
+            assert!(!list.hardware.iter().any(|h| h.item.starts_with("handle.")));
+            let fronts: Vec<_> = list
+                .parts
+                .iter()
+                .filter(|p| matches!(p.role, PartRole::Door | PartRole::DrawerFront))
+                .collect();
+            assert!(!fronts.is_empty());
+            for f in fronts {
+                let (at, b) = list
+                    .operations
+                    .iter()
+                    .find_map(|o| match o {
+                        Operation::Chamfer { part, at, bounds } if *part == f.name => {
+                            Some((*at, *bounds))
+                        }
+                        _ => None,
+                    })
+                    .unwrap_or_else(|| panic!("{}", f.name));
+                let fb = f.bounds;
+                assert_eq!((b.min.x, b.max().x), (fb.min.x, fb.max().x), "{}", f.name);
+                // At the back face (the cabinet side of the front).
+                assert_eq!(at.y, fb.max().y);
+                let edge = if kind == CabinetKind::Wall {
+                    fb.min.z
+                } else {
+                    fb.max().z
+                };
+                assert_eq!(at.z, edge, "{}", f.name);
+                assert_eq!((b.size.y, b.size.z), (SHARKNOSE_INTO, SHARKNOSE_DOWN));
+            }
         }
     }
 

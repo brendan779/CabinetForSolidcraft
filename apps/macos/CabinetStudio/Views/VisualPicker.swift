@@ -297,6 +297,12 @@ private struct Pen {
             board(30, 5, 16, 3, hot: true)
             board(64, 5, 16, 3, hot: true)
             board(64, 35, 16, 3, hot: true)
+        case "sharknose":
+            // Each front's top edge bevelled back: a slanted line across it.
+            for (x, y, w) in [(12.0, 8.0, 36.0), (56.0, 8.0, 32.0), (56.0, 38.0, 32.0)] as [(CGFloat, CGFloat, CGFloat)] {
+                line(p(x, y + 5), p(x + w, y + 5), colour: accent, width: 2)
+                line(p(x, y), p(x + 4, y + 5), colour: accent, width: 1.2)
+            }
         case "finger_pull":
             // The grip along each front's top edge, shaded.
             board(12, 8, 36, 4, hot: true)

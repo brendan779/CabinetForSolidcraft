@@ -588,7 +588,10 @@ fn summary(list: PartList) -> BuildSummary {
     use cabinet_core::geom::Axis;
     let rebate = |p: &cabinet_core::Part| {
         list.operations.iter().find_map(|o| match o {
-            Operation::Groove { part, bounds } if *part == p.name => {
+            // A sharknose bevel is drawn as the box it cuts the corner off: a step, not a slope.
+            Operation::Groove { part, bounds } | Operation::Chamfer { part, bounds, .. }
+                if *part == p.name =>
+            {
                 let (b, q) = (bounds, p.bounds);
                 let eps = 1e-6;
                 let spans = |a: Axis| {

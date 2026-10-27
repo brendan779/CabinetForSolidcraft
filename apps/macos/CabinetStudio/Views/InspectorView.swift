@@ -1006,6 +1006,7 @@ struct EdgeProfileThumbnail: View {
 struct CladdingSection: View {
     @Environment(ProjectModel.self) private var project
     @AppStorage(LengthUnit.key) private var unit: LengthUnit = .millimetres
+    @State private var picking = false
     let cab: CabinetDoc
 
     var body: some View {
@@ -1031,22 +1032,44 @@ struct CladdingSection: View {
                 }
             }
             if ["left", "back", "right"].contains(where: cab.clad) {
-                let linings = project.boards.filter { $0.kind == "lining" && $0.profileModule > 0 }
-                if !linings.isEmpty {
-                    Picker("Profile", selection: Binding(get: { cab.cladBoard }, set: { id in
-                        var c = cab
-                        c.cladBoard = id
-                        // The board's own thickness.
-                        if let b = linings.first(where: { $0.id == id }) { c.cladThickness = b.thickness }
-                        withAnimation(.snappy) { project.selected = c }
-                    })) {
-                        Text("Plain").tag("")
-                        ForEach(linings, id: \.id) { b in
-                            Text("\(b.finish), \(Int(b.thickness)) mm, \(b.substrate.replacingOccurrences(of: "_", with: " "))").tag(b.id)
+                // Any board: a Surround profiled lining, a plain lining, or a decor board.
+                let board = project.boardsById[cab.cladBoard]
+                Button { picking = true } label: {
+                    HStack(spacing: 10) {
+                        RoundedRectangle(cornerRadius: 5)
+                            .fill(board.map { Color(nsColor: $0.displayColour) } ?? Color.primary.opacity(0.08))
+                            .overlay {
+                                if board?.grained == true { GrainPattern().clipShape(RoundedRectangle(cornerRadius: 5)) }
+                            }
+                            .overlay(RoundedRectangle(cornerRadius: 5).strokeBorder(.primary.opacity(0.2)))
+                            .frame(width: 34, height: 24)
+                        VStack(alignment: .leading, spacing: 1) {
+                            Text(board?.profileModule ?? 0 > 0 ? "Lining, \(board!.range)" : "Cladding board")
+                                .font(.caption).foregroundStyle(.secondary).lineLimit(1)
+                            Text(board.map { "\($0.decor) \($0.finish), \(Int($0.thickness)) mm" } ?? "Generic board")
+                                .lineLimit(1)
                         }
+                        Spacer()
+                        Image(systemName: "chevron.right").foregroundStyle(.tertiary)
                     }
-                    .help("The lining board and its routed profile (Surround by Laminex)")
+                    .padding(6)
+                    .contentShape(Rectangle())
                 }
+                .buttonStyle(TileStyle(selected: picking))
+                .help("The board the clad faces are covered in: a Surround profiled lining, a plain lining or any decor board")
+                .popover(isPresented: $picking, arrowEdge: .leading) {
+                    // Linings first: they are what cladding is usually in.
+                    let boards = project.boards.filter { $0.kind == "lining" } + project.boards.filter { $0.kind != "lining" }
+                    BoardPicker(boards: boards, marked: [cab.cladBoard], columns: 140, onPick: { b in
+                        var c = cab
+                        c.cladBoard = b.id
+                        c.cladThickness = b.thickness
+                        withAnimation(.snappy) { project.selected = c }
+                        picking = false
+                    }) { _ in EmptyView() }
+                        .frame(width: 640, height: 520)
+                }
+                if board == nil {
                 HStack(spacing: 6) {
                     Text("Thickness").foregroundStyle(.secondary)
                     Spacer()
@@ -1056,6 +1079,7 @@ struct CladdingSection: View {
                         }
                         .buttonStyle(ChipStyle(selected: abs(cab.cladThickness - t) < 0.5))
                     }
+                }
                 }
             }
         }

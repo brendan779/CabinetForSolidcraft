@@ -34,6 +34,18 @@ const LEG_FOOT_HEIGHT: f64 = 8.0;
 const LEG_COLUMN_DIAMETER: f64 = 30.0;
 const LEG_PLATE: f64 = 60.0;
 const LEG_PLATE_THICKNESS: f64 = 4.0;
+/// A TIP-ON door unit: a push cylinder on the side opposite the hinges, its tip at the carcass
+/// front, this far in from the side and down from the door's top. Drawn, not ordered (WF-2).
+const TIP_ON_DIAMETER: f64 = 20.0;
+const TIP_ON_LENGTH: f64 = 76.0;
+const TIP_ON_INSET: f64 = 15.0;
+const TIP_ON_DROP: f64 = 100.0;
+/// A TIP-ON BLUMOTION unit at the back of each runner, behind the drawer box: width, height.
+const TOB_UNIT: (f64, f64) = (20.0, 30.0);
+/// A SERVO-DRIVE drive unit behind each drawer box, on a bracket profile across the cabinet:
+/// unit width, depth, height, and the profile's square section.
+const SERVO_UNIT: (f64, f64, f64) = (100.0, 60.0, 40.0);
+const SERVO_PROFILE: f64 = 20.0;
 
 /// One solid of a stand-in.
 #[derive(Clone, Debug, PartialEq)]
@@ -102,8 +114,36 @@ impl StandIn {
 pub fn stand_ins(list: &PartList) -> Vec<StandIn> {
     let mut out = Vec::new();
     let (mut hinges, mut drawers, mut legs) = (0, 0, 0);
+    let (mut pushes, mut servos) = (0, 0);
     for h in &list.hardware {
-        if h.item.starts_with("blum.clip-top") {
+        if h.item.starts_with("blum.tip-on.door") {
+            if let Some(shapes) = tip_on_door(list, h) {
+                pushes += 1;
+                out.push(StandIn {
+                    name: format!("{}.TipOn{pushes}", list.cabinet),
+                    item: h.item.clone(),
+                    shapes,
+                });
+            }
+        } else if is_tip_on_blumotion(&h.item) {
+            if let Some(shapes) = tip_on_blumotion(list, h) {
+                pushes += 1;
+                out.push(StandIn {
+                    name: format!("{}.TipOn{pushes}", list.cabinet),
+                    item: h.item.clone(),
+                    shapes,
+                });
+            }
+        } else if h.item == "blum.servo-drive.drive-unit" {
+            for shapes in servo_drive(list) {
+                servos += 1;
+                out.push(StandIn {
+                    name: format!("{}.Servo{servos}", list.cabinet),
+                    item: h.item.clone(),
+                    shapes,
+                });
+            }
+        } else if h.item.starts_with("blum.clip-top") {
             if let Some(shapes) = hinge(list, h) {
                 hinges += 1;
                 out.push(StandIn {
@@ -136,6 +176,119 @@ pub fn stand_ins(list: &PartList) -> Vec<StandIn> {
         }
     }
     out
+}
+
+/// A TIP-ON BLUMOTION set (S0...L5, for any box system), not its synchronisation parts.
+fn is_tip_on_blumotion(item: &str) -> bool {
+    item.starts_with("blum.tip-on-blumotion.")
+        && ["s0", "s1", "l1", "l3", "l5"]
+            .iter()
+            .any(|set| item.ends_with(&format!(".{set}")))
+}
+
+/// The carcass sides' inner faces and the front of the back (the interior's back).
+fn interior(list: &PartList) -> Option<(f64, f64, f64)> {
+    let (l, r) = (
+        side(list, PartRole::LeftSide)?,
+        side(list, PartRole::RightSide)?,
+    );
+    let back = list
+        .by_role(PartRole::Back)
+        .map(|b| b.bounds.min.y)
+        .fold(l.bounds.max().y, f64::min);
+    Some((l.bounds.max().x, r.bounds.min.x, back))
+}
+
+/// A TIP-ON door unit: on the side opposite the door's hinges (the door's middle without any),
+/// pushing at the carcass front near the door's top.
+fn tip_on_door(list: &PartList, h: &HardwarePlacement) -> Option<Vec<Shape>> {
+    let door = list.part(&h.part)?;
+    let (left, right, _) = interior(list)?;
+    let mid = door.bounds.center().x;
+    let hinge_x = list
+        .hardware
+        .iter()
+        .find(|g| g.item.starts_with("blum.clip-top") && g.part == h.part)
+        .map(|g| g.at.x);
+    let x = match hinge_x {
+        Some(hx) if hx < mid => right - TIP_ON_INSET,
+        Some(_) => left + TIP_ON_INSET,
+        None => mid,
+    };
+    Some(vec![Shape::Cylinder {
+        base: Vec3::new(x, 0.0, door.bounds.max().z - TIP_ON_DROP),
+        axis: Dir::new(Axis::Y, true),
+        diameter: TIP_ON_DIAMETER,
+        height: TIP_ON_LENGTH,
+    }])
+}
+
+/// The room behind drawer `n`'s box: from its back to the carcass back (y), from its base up
+/// (z0).
+fn behind_drawer(list: &PartList, n: &str) -> Option<(f64, f64, f64)> {
+    let part = |role: PartRole| list.part(&format!("{}.{}{n}", list.cabinet, role.code()));
+    let bottom = part(PartRole::DrawerBottom)?;
+    let box_back = list
+        .parts
+        .iter()
+        .filter(|p| {
+            p.name.starts_with(&format!("{}.Drawer", list.cabinet)) && {
+                let tail = p
+                    .name
+                    .rsplit_once(|c: char| !c.is_ascii_digit())
+                    .map(|t| t.1);
+                tail == Some(n)
+            }
+        })
+        .map(|p| p.bounds.max().y)
+        .fold(bottom.bounds.max().y, f64::max);
+    let (_, _, back) = interior(list)?;
+    (back - box_back > 10.0).then_some((box_back, back, bottom.bounds.min.z))
+}
+
+/// A TIP-ON BLUMOTION unit at the back of each of the drawer's runners, behind its box.
+fn tip_on_blumotion(list: &PartList, h: &HardwarePlacement) -> Option<Vec<Shape>> {
+    let n = h.part.rsplit_once(PartRole::DrawerFront.code())?.1;
+    let (y0, y1, z0) = behind_drawer(list, n)?;
+    let (left, right, _) = interior(list)?;
+    let (w, ht) = TOB_UNIT;
+    let unit = |inner: f64, sign: f64| {
+        Shape::Box(boxed(
+            Vec3::new(inner, y0, z0),
+            Vec3::new(inner + sign * w, y1, z0 + ht),
+        ))
+    };
+    Some(vec![unit(left, 1.0), unit(right, -1.0)])
+}
+
+/// A SERVO-DRIVE drive unit behind each drawer's box, on a bracket profile across the cabinet.
+fn servo_drive(list: &PartList) -> Vec<Vec<Shape>> {
+    let Some((left, right, back)) = interior(list) else {
+        return Vec::new();
+    };
+    let (w, d, ht) = SERVO_UNIT;
+    let mid = (left + right) / 2.0;
+    list.by_role(PartRole::DrawerBottom)
+        .filter_map(|b| {
+            let n = b.name.rsplit_once(PartRole::DrawerBottom.code())?.1;
+            let (y0, _, z0) = behind_drawer(list, n)?;
+            // Shrunk into what room the box leaves (the drawer length does not yet allow for
+            // SERVO-DRIVE).
+            let gap = back - y0 - 1.0;
+            let profile = SERVO_PROFILE.min(gap / 3.0);
+            let depth = d.min(gap - profile);
+            Some(vec![
+                Shape::Box(boxed(
+                    Vec3::new(mid - w / 2.0, back - profile - depth, z0),
+                    Vec3::new(mid + w / 2.0, back - profile, z0 + ht),
+                )),
+                Shape::Box(boxed(
+                    Vec3::new(left, back - profile, z0),
+                    Vec3::new(right, back, z0 + profile),
+                )),
+            ])
+        })
+        .collect()
 }
 
 /// An adjustable leg from the floor to the carcass bottom: a foot, a column and a mounting plate
@@ -465,5 +618,53 @@ mod tests {
         // Wall cabinets hang: no legs.
         let wall = build_cabinet(&Cabinet::new("W01", CabinetKind::Wall)).unwrap();
         assert!(!stand_ins(&wall).iter().any(|s| s.name.contains("Leg")));
+    }
+
+    /// WF-2: TIP-ON for doors is drawn on the side opposite the hinges; TIP-ON BLUMOTION gives
+    /// each drawer two units, SERVO-DRIVE one; none of them runs into a panel.
+    #[test]
+    fn tip_on_and_servo_drive_are_drawn() {
+        use crate::model::Opening;
+        let mut door = Cabinet::new("B01", CabinetKind::Base);
+        door.fronts = FrontLayout::Door {
+            hinge_side: HingeSide::Left,
+        };
+        door.standard.opening = Opening::TipOn;
+        let list = build_cabinet(&door).unwrap();
+        let pushes: Vec<_> = stand_ins(&list)
+            .into_iter()
+            .filter(|s| s.name.contains("TipOn"))
+            .collect();
+        assert_eq!(pushes.len(), 1);
+        let right = list.part("B01.RightSide").unwrap().bounds.min.x;
+        assert!((pushes[0].bounds().center().x - (right - TIP_ON_INSET)).abs() < 1e-9);
+        for (opening, per_drawer) in [(Opening::TipOn, 1), (Opening::ServoDrive, 1)] {
+            let mut bank = Cabinet::new("D01", CabinetKind::DrawerBank);
+            bank.standard.opening = opening;
+            let list = build_cabinet(&bank).unwrap();
+            let drawers = list.by_role(PartRole::DrawerBottom).count();
+            let tag = if opening == Opening::TipOn {
+                "TipOn"
+            } else {
+                "Servo"
+            };
+            let found: Vec<_> = stand_ins(&list)
+                .into_iter()
+                .filter(|s| s.name.contains(tag))
+                .collect();
+            assert_eq!(found.len(), drawers * per_drawer, "{opening:?}");
+            for st in &found {
+                for p in &list.parts {
+                    for sh in &st.shapes {
+                        let (a, b) = (sh.bounds(), p.bounds);
+                        let overlap = Axis::ALL.iter().all(|&ax| {
+                            a.min.get(ax) < b.max().get(ax) - 1e-6
+                                && b.min.get(ax) < a.max().get(ax) - 1e-6
+                        });
+                        assert!(!overlap, "{} runs into {}", st.name, p.name);
+                    }
+                }
+            }
+        }
     }
 }

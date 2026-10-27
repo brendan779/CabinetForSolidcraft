@@ -247,6 +247,13 @@ pub enum Operation {
     },
     /// A rectangular groove or rebate.
     Groove { part: String, bounds: Aabb },
+    /// An edge bevelled away (a sharknose grip): the edge through `at` runs along the part's
+    /// width; `bounds` is the box the bevel cuts its corner off, its two sides the bevel's legs.
+    Chamfer {
+        part: String,
+        at: Vec3,
+        bounds: Aabb,
+    },
     /// A hole right through a part (a benchtop's sink or cooktop cut-out), its four corners
     /// rounded to `radius` (0: square).
     Cutout {

@@ -806,6 +806,8 @@ pub enum HandlePlace {
     /// Handleless: a finger grip routed along the back of the top edge (bottom edge of wall
     /// fronts).
     FingerPull,
+    /// Handleless: the same edge bevelled at the back to pull on (a sharknose front).
+    Sharknose,
 }
 
 /// How a single lifting front moves.

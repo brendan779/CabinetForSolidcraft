@@ -86,6 +86,24 @@ pub fn emit_cabinet_with(
                     cmds.extend(arch_cut(p, *centre, *radius));
                 }
             }
+            // A sharknose: the edge bevelled, its legs the box's sizes along the edge's two faces
+            // (the horizontal face first: SolidCraft takes the face facing up most first).
+            Operation::Chamfer { part, at, bounds } => {
+                let p = list.part(part);
+                let (along_t, along_z) = p
+                    .map(|p| (bounds.size.get(p.thickness_axis), bounds.size.z))
+                    .unwrap_or((bounds.size.y, bounds.size.z));
+                let top = p.is_none_or(|p| (at.z - p.bounds.max().z).abs() < 1e-6);
+                let (d1, d2) = if top {
+                    (along_t, along_z)
+                } else {
+                    (along_z, along_t)
+                };
+                cmds.push(json!({
+                    "command": "solid.chamfer",
+                    "params": { "body": part, "edges": [arr(*at)], "distance": round(d1), "distance2": round(d2) }
+                }));
+            }
             // A benchtop's sink or cooktop hole, its inside corners filleted when rounded.
             Operation::Cutout {
                 part,

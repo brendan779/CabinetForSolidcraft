@@ -39,6 +39,10 @@ fn transform(
                 *direction = dir(*direction);
             }
             Operation::Round { at, .. } => *at = point(*at),
+            Operation::Chamfer { at, bounds, .. } => {
+                *at = point(*at);
+                *bounds = boxed(*bounds);
+            }
             Operation::Arch { centre, .. } => *centre = point(*centre),
             Operation::BiscuitSlot { bounds, along, .. } => {
                 *bounds = boxed(*bounds);
@@ -137,6 +141,7 @@ pub fn rename(list: &mut PartList, f: impl Fn(&str) -> String) {
             Operation::Bore { part, .. }
             | Operation::Groove { part, .. }
             | Operation::Cutout { part, .. }
+            | Operation::Chamfer { part, .. }
             | Operation::Mortise { part, .. }
             | Operation::Round { part, .. }
             | Operation::Arch { part, .. } => *part = f(part),
@@ -173,6 +178,7 @@ pub fn open_end(list: &mut PartList, side: &str, end: f64) {
         Operation::BiscuitSlot { parts, .. } => !parts.iter().any(|p| p == side),
         Operation::Groove { part, .. }
         | Operation::Cutout { part, .. }
+        | Operation::Chamfer { part, .. }
         | Operation::Round { part, .. }
         | Operation::Arch { part, .. } => part != side,
         Operation::Mortise { part, bounds, .. } => part != side && !touches(bounds),

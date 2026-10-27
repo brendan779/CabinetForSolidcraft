@@ -585,3 +585,43 @@ fn an_arched_top_cuts_both_doors() {
         );
     }
 }
+
+/// WF-3: a sharknose door and a wall door come out of SolidCraft with their gripping edge's
+/// back corner bevelled off: the 20 × 12 mm triangle less than the box.
+#[test]
+fn a_sharknose_bevels_the_gripping_edge() {
+    let Some(cli) = cli() else {
+        eprintln!("SOLIDCRAFT_CLI not set: skipped");
+        return;
+    };
+    for (kind, door) in [
+        (CabinetKind::Base, "B01.Door1"),
+        (CabinetKind::Wall, "W01.Door1"),
+    ] {
+        let id = &door[..3];
+        let mut cab = Cabinet::new(id, kind);
+        cab.standard.handle_place = cabinet_core::model::HandlePlace::Sharknose;
+        let list = build_cabinet(&cab).unwrap();
+        let r = run(
+            &cli,
+            "sharknose",
+            &emit_cabinet(&list, Detail::Design, None),
+            &["eval"],
+        );
+        let p = list.part(door).unwrap();
+        let body = r["bodies"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|b| b["name"] == door)
+            .unwrap();
+        let full = p.bounds.size.x * p.bounds.size.y * p.bounds.size.z;
+        let cut = p.bounds.size.x * 20.0 * 12.0 / 2.0;
+        let volume = body["volume_mm3"].as_f64().unwrap();
+        assert!(
+            (full - cut - volume).abs() < 50.0,
+            "{door}: {volume} vs {}",
+            full - cut
+        );
+    }
+}
