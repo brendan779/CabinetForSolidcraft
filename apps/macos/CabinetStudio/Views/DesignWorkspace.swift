@@ -376,7 +376,8 @@ final class ViewportScene {
     let camera = PerspectiveCamera()
     /// The panels shown, by part name, as last built.
     private(set) var panels: [String: PanelBox] = [:]
-    private var sizes: [String: SIMD3<Float>] = [:]
+    /// Each panel entity's mesh size and its offset from the pivot, as last made.
+    private var shapes: [String: [SIMD3<Float>]] = [:]
     private var wasOpen = false
 
     func update(project: ProjectModel, look: ViewportLook, hovered: String?) {
@@ -439,7 +440,7 @@ final class ViewportScene {
         for e in Array(root.children) where !seen.contains(e.name) {
             e.removeFromParent()
             panels[e.name] = nil
-            sizes[e.name] = nil
+            shapes[e.name] = nil
         }
         // Keep the run centred on the origin the camera orbits.
         if minX < maxX { root.position.x = -(minX + maxX) / 2 }
@@ -576,22 +577,23 @@ final class ViewportScene {
         return m
     }
 
-    /// The panel's entity, made or remade when its size changes. Its mesh is centred on its hinge
-    /// edge for doors (so it swings about it) and on its middle otherwise.
+    /// The panel's entity, made or remade when its size or pivot changes (a door hinged on the
+    /// other side keeps its size). Its mesh is centred on its hinge edge for doors (so it swings
+    /// about it) and on its middle otherwise.
     private func entity(for p: PanelBox) -> ModelEntity {
         let size = SIMD3<Float>(Float(p.width), Float(p.height), Float(p.depth)) / 1000
-        if let e = root.findEntity(named: p.name) as? ModelEntity, sizes[p.name] == size {
+        // The geometry sits off the entity's origin so the origin is the pivot.
+        let offset = Self.mid(p) - Self.pivot(p)
+        if let e = root.findEntity(named: p.name) as? ModelEntity, shapes[p.name] == [size, offset] {
             return e
         }
         root.findEntity(named: p.name)?.removeFromParent()
-        // The geometry sits off the entity's origin so the origin is the pivot.
-        let offset = Self.mid(p) - Self.pivot(p)
         let e = ModelEntity(mesh: Self.offsetMesh(size: size, by: offset, grain: Self.grainAxis(p)), materials: [])
         e.name = p.name
         e.components.set(InputTargetComponent())
         e.collision = CollisionComponent(shapes: [ShapeResource.generateBox(size: size).offsetBy(translation: offset)])
         root.addChild(e)
-        sizes[p.name] = size
+        shapes[p.name] = [size, offset]
         return e
     }
 
