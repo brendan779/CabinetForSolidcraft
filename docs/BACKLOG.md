@@ -110,6 +110,7 @@ All Blum rows: source = Blum Catalogue and technical manual 2024/2025 in `vendor
 | id | status | size | task | done when |
 |---|---|---|---|---|
 | HAF-1 | doing (2026-10-27: legs are the screw-on AXILO 78 set covering the plinth height, -10/+20, from `catalog/hardware/hafele-axilo.json`; real models drawn and sent to SolidCraft. Left: plinth clips, knock-in choice, legs per cabinet editable; all `verified: false`) | M | Adjustable legs + plinth clips (count rule by width), from Häfele data | BOM rows with article numbers |
+| HAF-1b | todo (owner 2026-10-27) | S | Knock-in or screw-on AXILO legs: a picture picker under Base when Legs + plinth is chosen, kept in the construction standard; the builder picks the set with that fixing (catalog `screw_on`) | a knock-in job lists 637.76.409 for a 150 mm plinth and draws the knock-in plate |
 | HAF-2 | done (f844e59; handle rows are generic `handle.cc128` etc. until handle articles are chosen; insets 35/50 mm and tall handles at 1050 are our choices) | M | Handles: catalog of CC spacings; placement picker (top corner, centre, edge pull) drawn on the door | handle bores on door sheets |
 | HAF-3 | needs-human (count done in a7d72a0: 4 per adjustable shelf as generic `shelf-support.5mm`; the article needs the owner's pick and the supplier's data, like HAF-4) | M | Shelf supports (5 mm pins) article + count | BOM |
 | HAF-4 | needs-human (Häfele data) | L | Loox5 lighting: profiles (surface, recessed, shelf-edge), 12 V/24 V strips, drivers, distributors, switches/sensors | split |
