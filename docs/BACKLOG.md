@@ -241,6 +241,21 @@ source and `verified: false`.
 | SHAK-1 | done (this commit; frame and panel boards stay the front board, split out if wanted) | S | Shaker sizes editable: stile/rail width, panel thickness, groove depth, the slab threshold (default 70 / 9 / 10 / 200 mm), frame and panel boards | inspector fields; cut list follows |
 | ROOM-1 | todo | L | Room planner (UI-7): walls of any length and angle, ceiling height, door and window openings (width, height, sill) that runs stop at, runs along walls, islands, wall cabinets over base runs. Split into ROOM-1a..e before building | a room with a door and window gap lays out its runs |
 
+## P2 — Owner's workflow test (2026-10-27): to fix
+
+From the owner trying a drawer cabinet and a hinged-door base end to end.
+
+| id | status | size | task | done when |
+|---|---|---|---|---|
+| WF-1 | todo | M | Cladding needs a board: picking Left/Back/Right cladding offers no board. Each clad face picks its board, including lining profiles like Laminex Surround (fluted/profiled linings) | clad a side in Surround and it shows that board in the cut list and 3D |
+| WF-2 | todo | M | TIP-ON and SERVO-DRIVE openings draw nothing: show the TIP-ON units and SERVO-DRIVE drive units in the viewport and SolidCraft (stand-ins, then Blum's models when downloaded) | a TIP-ON drawer shows its unit |
+| WF-3 | todo | M | Sharknose (bevelled finger-grip) profiles for drawer fronts and doors as a picker, and fancy fronts (Laminex Surround profiled fronts) as front boards | a sharknose front shows its bevel in 3D and on its cut sheet |
+| WF-4 | todo | S | Finger pull and Edge pull show nothing: the routed finger pull and the edge pull profile must draw in the viewport and SolidCraft | choosing either changes what the fronts look like |
+| WF-5 | todo | S | Joinery pickers clutter the inspector: show biscuit size only with biscuits, DOMINO size only with DOMINO, dowel size and spacing only with dowels (as Leg fixing shows only with legs) | picking Screws hides all of them |
+| WF-6 | todo | M | SolidCraft: a hinged base comes in with the full adjustable-shelf pin rows and its hinge parts look wrong. Check shelf pins are the system's (rows at 37 mm, only where shelves go) and the hinge cup, plate and model placement in SolidCraft | a base door cabinet in SolidCraft matches the cut sheet and Blum's drawing |
+| WF-7 | todo | M | Handles have no models: a catalog of standard handles (bar sizes, knobs, finishes) with STEP models in vendor-cad, drawn in the viewport and inserted in SolidCraft like the Blum parts | a 128 mm bar handle is Blum/Häfele's real model in SolidCraft |
+| SEC-1 | todo | L | Sections like Blum's configurator: a cabinet starts as an open carcass; vertical dividers (and fixed shelves) split it into sections, and each section is set on its own: open, shelves, adjustable shelves, shoe rack, drawers (inner or with fronts), hat shelf and rail, with its own fronts. Replaces separate cabinets per section (wardrobe hat shelf + drawers, a drawer under a door). Design the model first (sections as a tree in the cabinet), then the inspector (click a section in a drawn elevation to set it) | a wardrobe with a hat shelf over hanging and three drawers below, each section's fronts set on its own |
+
 ## P3 — SolidCraft plugin
 
 | id | status | size | task |
