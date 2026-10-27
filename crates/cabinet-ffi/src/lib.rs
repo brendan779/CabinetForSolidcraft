@@ -774,6 +774,15 @@ pub fn option_groups() -> Vec<OptionGroupRecord> {
         .collect()
 }
 
+/// Whether the picker for `field` means anything for this cabinet's standard (a fixing's size
+/// only with that fixing, handle pickers only with handles...).
+#[uniffi::export]
+pub fn option_applies(cabinet_json: String, field: String) -> bool {
+    parse(&cabinet_json)
+        .map(|c| cabinet_core::options::applies(&field, &c.standard))
+        .unwrap_or(true)
+}
+
 /// The current choice of `field` in the cabinet's standard.
 #[uniffi::export]
 pub fn standard_option(cabinet_json: String, field: String) -> Result<String, CoreError> {

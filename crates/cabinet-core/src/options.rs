@@ -389,6 +389,28 @@ pub fn option_groups() -> Vec<OptionGroup> {
     ]
 }
 
+/// Whether the picker for `field` means anything under `s`: the size of a fixing only with that
+/// fixing, handle pickers only with handles, leg fixing only on legs, drawer side height only for
+/// steel-sided drawers. The app hides the others.
+pub fn applies(field: &str, s: &crate::model::ConstructionStandard) -> bool {
+    use crate::model::{DrawerSystem, FixingRecipe, Opening, ToeKick};
+    match field {
+        "biscuit" => matches!(
+            s.fixings,
+            FixingRecipe::BiscuitAndScrew | FixingRecipe::BiscuitOnly
+        ),
+        "domino" => s.fixings == FixingRecipe::Domino,
+        "dowel" | "dowel_spacing" => s.fixings == FixingRecipe::Dowel,
+        "handle_size" | "handle_finish" | "handle_place" => s.opening == Opening::Handles,
+        "leg_fixing" => s.toe_kick == ToeKick::LegsAndPlinth,
+        "drawer_sides" => matches!(
+            s.drawer_system,
+            DrawerSystem::Legrabox | DrawerSystem::Merivobox | DrawerSystem::Tandembox
+        ),
+        _ => true,
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -407,5 +429,24 @@ mod tests {
                     .unwrap_or_else(|e| panic!("{}={}: {e}", g.field, c.id));
             }
         }
+    }
+
+    #[test]
+    fn only_the_chosen_fixing_shows_its_size() {
+        use crate::model::{ConstructionStandard, FixingRecipe, Opening};
+        let mut s = ConstructionStandard {
+            fixings: FixingRecipe::ScrewOnly,
+            ..Default::default()
+        };
+        for f in ["biscuit", "domino", "dowel", "dowel_spacing"] {
+            assert!(!applies(f, &s), "{f}");
+        }
+        s.fixings = FixingRecipe::Domino;
+        assert!(applies("domino", &s) && !applies("biscuit", &s));
+        s.fixings = FixingRecipe::Dowel;
+        assert!(applies("dowel", &s) && applies("dowel_spacing", &s));
+        s.opening = Opening::TipOn;
+        assert!(!applies("handle_size", &s));
+        assert!(applies("fixings", &s));
     }
 }

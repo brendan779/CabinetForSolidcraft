@@ -38,10 +38,8 @@ struct InspectorView: View {
                     BoardsSection(cab: cab)
                     ConstructionScope(cab: cab)
                     let overrides = project.overrides(of: cab)
-                    // Leg fixing only means something on legs.
-                    let groups = optionGroups().filter {
-                        $0.field != "leg_fixing" || project.option("toe_kick", of: cab) == "legs_and_plinth"
-                    }
+                    // Only the pickers that mean something for the choices made (the core says which).
+                    let groups = optionGroups().filter { optionApplies(cabinetJson: cab.json, field: $0.field) }
                     ForEach(groups, id: \.field) { group in
                         VisualPicker(group: group, selected: project.option(group.field, of: cab),
                                      overridden: overrides.contains(group.field),
