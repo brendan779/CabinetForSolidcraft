@@ -153,6 +153,78 @@ pub struct Benchtop {
     /// corners, and the back ones too past a seating overhang. Not at a waterfall or a leg piece.
     #[serde(default, skip_serializing_if = "is_zero")]
     pub end_radius: f64,
+    /// The material family (`natural-stone`, `porcelain`, `zenith`, `dekton`, `laminate`),
+    /// whose catalog rules set overhang supports and cut-out clearances (BENCH-7).
+    #[serde(default = "Benchtop::default_material")]
+    pub material: String,
+    /// The material's rules changed for this benchtop, by parameter name
+    /// (`unsupported_overhang`, `support_spacing`, `front_clearance`...).
+    #[serde(default, skip_serializing_if = "std::collections::BTreeMap::is_empty")]
+    pub material_rules: std::collections::BTreeMap<String, f64>,
+}
+
+/// The material a benchtop is unless it says: laminate.
+pub const DEFAULT_BENCHTOP_MATERIAL: &str = "laminate";
+
+/// A benchtop's material rules: the catalog entry for its material and thickness, with the
+/// benchtop's own changes over it.
+#[derive(Clone, Debug)]
+pub struct MaterialRules {
+    /// "Natural stone (granite, marble, quartzite) 20 mm", for notes.
+    pub name: String,
+    pub unsupported_overhang: f64,
+    /// How far an 18 mm substrate takes an overhang without supports (0: no such step).
+    pub substrate_overhang: f64,
+    pub support_spacing: f64,
+    /// Whether an overhang may be at most a third of the top's depth.
+    pub third_of_depth: bool,
+    pub front_clearance: f64,
+    pub rear_clearance: f64,
+    pub tap_clearance: f64,
+    pub electrical_edge: f64,
+}
+
+impl Benchtop {
+    /// The rules for this benchtop: its material's catalog entry with the largest thickness not
+    /// over the top's (or the thinnest), changed by `material_rules`.
+    pub fn rules(&self) -> Result<MaterialRules> {
+        let prefix = format!("benchtop-material.{}.", self.material);
+        let mut entries: Vec<(f64, &cabinet_catalog::HardwareItem)> = crate::hardware::items()
+            .iter()
+            .filter(|i| i.id.starts_with(&prefix))
+            .filter_map(|i| Some((i.param("thickness").ok()?, i)))
+            .collect();
+        entries.sort_by(|a, b| a.0.total_cmp(&b.0));
+        let item = entries
+            .iter()
+            .rev()
+            .find(|(t, _)| *t <= self.thickness + 1e-9)
+            .or(entries.first())
+            .map(|(_, i)| *i)
+            .ok_or_else(|| {
+                Error::Invalid(format!(
+                    "no benchtop material \"{}\" in the catalog",
+                    self.material
+                ))
+            })?;
+        let p = |n: &str| -> Result<f64> {
+            match self.material_rules.get(n) {
+                Some(v) => Ok(*v),
+                None => item.param(n).map_err(Error::Invalid),
+            }
+        };
+        Ok(MaterialRules {
+            name: format!("{} {}", item.family, item.variant),
+            unsupported_overhang: p("unsupported_overhang")?,
+            substrate_overhang: p("substrate_overhang")?,
+            support_spacing: p("support_spacing")?,
+            third_of_depth: p("third_of_depth")? > 0.0,
+            front_clearance: p("front_clearance")?,
+            rear_clearance: p("rear_clearance")?,
+            tap_clearance: p("tap_clearance")?,
+            electrical_edge: p("electrical_edge")?,
+        })
+    }
 }
 
 fn is_zero(v: &f64) -> bool {
@@ -301,9 +373,10 @@ impl Cutout {
         }
     }
 
-    /// Our default: 70 mm of top in front of a sink or cooktop.
+    /// Our default: 80 mm of top in front of a sink or cooktop, the stone fabricators' least
+    /// (AB Stone, docs/benchtops.md).
     fn default_setback() -> f64 {
-        70.0
+        80.0
     }
 
     fn default_tap_hole_behind() -> f64 {
@@ -398,13 +471,10 @@ pub enum CutoutKind {
     Cooktop,
 }
 
-/// Our choices: overhangs up to this need no support, and brackets go at most this far apart.
-const BAR_OVERHANG_UNSUPPORTED: f64 = 300.0;
-const BAR_BRACKET_SPACING: f64 = 600.0;
-
-/// Our defaults: a tap hole's diameter and how far behind the sink cut-out its centre sits.
+/// Our defaults: a tap hole's diameter, and its centre behind the sink cut-out far enough to
+/// leave the stone fabricators' 35 mm between them (AB Stone, docs/benchtops.md).
 const TAP_HOLE_DIAMETER: f64 = 35.0;
-const TAP_HOLE_BEHIND: f64 = 40.0;
+const TAP_HOLE_BEHIND: f64 = 55.0;
 
 impl Benchtop {
     /// Our defaults: a 33 mm laminate top 20 mm past the doors.
@@ -419,6 +489,10 @@ impl Benchtop {
     /// Our default: a 20 mm slab.
     fn default_splashback_thickness() -> f64 {
         20.0
+    }
+
+    fn default_material() -> String {
+        DEFAULT_BENCHTOP_MATERIAL.into()
     }
 }
 
@@ -801,6 +875,11 @@ fn benchtop(b: &Benchtop, lists: &[PartList], under: &[bool]) -> PartList {
         cabinet: b.id.clone(),
         ..PartList::default()
     };
+    let rules = b.rules();
+    if let Err(e) = &rules {
+        out.warnings
+            .push(format!("{e}: no overhang or cut-out rules checked"));
+    }
     let mut stretches: Vec<Vec<&PartList>> = Vec::new();
     let mut open = false;
     for (list, &u) in lists.iter().zip(under) {
@@ -949,19 +1028,37 @@ fn benchtop(b: &Benchtop, lists: &[PartList], under: &[bool]) -> PartList {
                 });
             }
         }
-        // Our rule of thumb: an overhang past this needs brackets under it, one per this spacing.
-        if b.back_overhang > BAR_OVERHANG_UNSUPPORTED {
-            let brackets = ((x1 - x0) / BAR_BRACKET_SPACING).ceil().max(2.0) as u32;
-            out.hardware.push(crate::part::HardwarePlacement {
-                item: "benchtop.support-bracket".into(),
-                description: format!(
-                    "Concealed benchtop support bracket for a {:.0} mm overhang",
-                    b.back_overhang
-                ),
-                at: Vec3::new((x0 + x1) / 2.0, y1, z),
-                part: format!("{}.{}{}", b.id, PartRole::Benchtop.code(), n + 1),
-                quantity: brackets,
-            });
+        // The material's rules: an overhang needs nothing, an 18 mm substrate, or brackets at
+        // the material's spacing; stone also keeps it to a third of the top's depth.
+        let overhang = b.back_overhang;
+        if let (Ok(r), true) = (&rules, overhang > 0.0) {
+            let piece = format!("{}.{}{}", b.id, PartRole::Benchtop.code(), n + 1);
+            let most = (y1 - y0) / 3.0;
+            if r.third_of_depth && overhang > most + 1e-9 {
+                out.warnings.push(format!(
+                    "{piece}: a {overhang:.0} mm overhang is more than a third of the top's depth ({most:.0} mm), the most for {}",
+                    r.name
+                ));
+            }
+            if overhang <= r.unsupported_overhang + 1e-9 {
+            } else if overhang <= r.substrate_overhang + 1e-9 {
+                out.warnings.push(format!(
+                    "{piece}: {} needs an 18 mm substrate under its {overhang:.0} mm overhang",
+                    r.name
+                ));
+            } else {
+                let brackets = ((x1 - x0) / r.support_spacing).ceil().max(2.0) as u32;
+                out.hardware.push(crate::part::HardwarePlacement {
+                    item: "benchtop.support-bracket".into(),
+                    description: format!(
+                        "Concealed benchtop support bracket for a {overhang:.0} mm overhang, at most {:.0} mm apart ({})",
+                        r.support_spacing, r.name
+                    ),
+                    at: Vec3::new((x0 + x1) / 2.0, y1, z),
+                    part: piece,
+                    quantity: brackets,
+                });
+            }
         }
         if b.splashback > 0.0 && b.back_overhang <= 0.0 {
             let t = b.splashback_thickness;
@@ -988,6 +1085,7 @@ fn benchtop(b: &Benchtop, lists: &[PartList], under: &[bool]) -> PartList {
 /// Cuts each cut-out through the benchtop piece over its cabinet, and a tap hole behind a sink.
 fn cutouts(b: &Benchtop, top: &mut PartList, lists: &[PartList]) {
     use crate::part::{BorePurpose, Dir, Operation};
+    let rules = b.rules().ok();
     for c in &b.cutouts {
         let Some(cab) = lists.iter().find(|l| l.cabinet == c.over) else {
             top.warnings.push(format!(
@@ -1049,6 +1147,34 @@ fn cutouts(b: &Benchtop, top: &mut PartList, lists: &[PartList]) {
             note,
         });
         let tap = c.tap_hole_diameter();
+        // The material's clearances, as notes: the fabricator may still cut it.
+        if let Some(r) = &rules {
+            let what = if c.name.is_empty() {
+                format!("{:?} cut-out", c.kind)
+            } else {
+                c.name.clone()
+            };
+            if c.setback < r.front_clearance - 1e-9 {
+                top.warnings.push(format!(
+                    "{what} over {}: {:.0} mm from the front edge, under the {:.0} mm {} asks for",
+                    c.over, c.setback, r.front_clearance, r.name
+                ));
+            }
+            let rear = pb.max().y - bounds.max().y;
+            if rear < r.rear_clearance - 1e-9 {
+                top.warnings.push(format!(
+                    "{what} over {}: {rear:.0} mm from the rear edge, under the {:.0} mm {} asks for",
+                    c.over, r.rear_clearance, r.name
+                ));
+            }
+            let gap = c.tap_hole_behind - tap / 2.0;
+            if c.kind == CutoutKind::Sink && tap > 0.0 && gap < r.tap_clearance - 1e-9 {
+                top.warnings.push(format!(
+                    "{what} over {}: {gap:.0} mm between the sink and its tap hole, under the {:.0} mm {} asks for",
+                    c.over, r.tap_clearance, r.name
+                ));
+            }
+        }
         if c.kind == CutoutKind::Sink && tap > 0.0 {
             let y = bounds.max().y + c.tap_hole_behind;
             if y + tap / 2.0 < pb.max().y {
@@ -1145,6 +1271,7 @@ fn span_x(cab: &PartList) -> (f64, f64) {
 /// niche: top and bottom across, sides between them, a back behind them all, shelves inside.
 fn splashback_openings(b: &Benchtop, top: &mut PartList, lists: &[PartList]) {
     let t = b.splashback_thickness;
+    let rules = b.rules().ok();
     let openings = b
         .niches
         .iter()
@@ -1211,6 +1338,19 @@ fn splashback_openings(b: &Benchtop, top: &mut PartList, lists: &[PartList]) {
             top.warnings
                 .push(format!("{what} over {over} does not fit the splashback"));
             continue;
+        }
+        // An electrical cut-out keeps its distance from the slab's ends and top (its foot is
+        // meant to sit low over the benchtop).
+        if let (None, Some(r)) = (niche, &rules) {
+            let edge = (hole.min.x - sb.min.x)
+                .min(sb.max().x - hole.max().x)
+                .min(sb.max().z - hole.max().z);
+            if edge < r.electrical_edge - 1e-9 {
+                top.warnings.push(format!(
+                    "power point over {over}: {edge:.0} mm from the splashback's edge, under the {:.0} mm {} asks for",
+                    r.electrical_edge, r.name
+                ));
+            }
         }
         let note = match niche {
             Some(_) => "niche".to_string(),
@@ -1511,6 +1651,8 @@ mod tests {
             niches: Vec::new(),
             power_points: Vec::new(),
             end_radius: 0.0,
+            material: "laminate".into(),
+            material_rules: Default::default(),
         })
     }
 
@@ -1593,9 +1735,12 @@ mod tests {
             niches: Vec::new(),
             power_points: Vec::new(),
             end_radius: 0.0,
+            material: "laminate".into(),
+            material_rules: Default::default(),
             cutouts: vec![
                 Cutout::new("S01", CutoutKind::Sink, 760.0, 440.0),
-                Cutout::new("B01", CutoutKind::Cooktop, 560.0, 490.0),
+                // 80 from the front and 50 behind on a 618 deep top: at most 488 deep.
+                Cutout::new("B01", CutoutKind::Cooktop, 560.0, 480.0),
             ],
         };
         let run = |bt: &Benchtop| Run {
@@ -1943,6 +2088,112 @@ mod tests {
             .find(|h| h.item == "benchtop.support-bracket")
             .unwrap();
         assert_eq!(brackets.quantity, 2);
+    }
+
+    /// BENCH-7: the material sets an island overhang's support: a 1800 mm island with a 400 mm
+    /// seating overhang needs brackets 600 apart in laminate, natural stone and Zenith, 900 apart
+    /// in 20 mm porcelain, and none in 20 mm Dekton; 250 mm on 20 mm stone needs a substrate.
+    #[test]
+    fn the_benchtop_material_sets_its_overhang_supports() {
+        let island = |material: &str, thickness: f64, overhang: f64| {
+            let mut item = top("BT1", 0.0);
+            if let RunItem::Benchtop(b) = &mut item {
+                b.material = material.into();
+                b.thickness = thickness;
+                b.back_overhang = overhang;
+            }
+            let run = Run {
+                origin: Vec3::default(),
+                items: vec![
+                    cab("B01", CabinetKind::Base),
+                    cab("B02", CabinetKind::Base),
+                    cab("B03", CabinetKind::Base),
+                    item,
+                ],
+            };
+            build_run(&run).unwrap().pop().unwrap()
+        };
+        let brackets = |bt: &PartList| {
+            bt.hardware
+                .iter()
+                .filter(|h| h.item == "benchtop.support-bracket")
+                .map(|h| h.quantity)
+                .sum::<u32>()
+        };
+        for (material, thickness, want) in [
+            ("laminate", 33.0, 3),
+            ("natural-stone", 20.0, 3),
+            ("natural-stone", 40.0, 3),
+            ("zenith", 12.0, 3),
+            ("porcelain", 20.0, 2),
+            ("dekton", 20.0, 0),
+        ] {
+            assert_eq!(
+                brackets(&island(material, thickness, 400.0)),
+                want,
+                "{material} {thickness}"
+            );
+        }
+        // 250 mm on 20 mm stone: no brackets, an 18 mm substrate.
+        let stone = island("natural-stone", 20.0, 250.0);
+        assert_eq!(brackets(&stone), 0);
+        assert!(stone.warnings.iter().any(|w| w.contains("substrate")));
+        // Stone keeps an overhang to a third of the top's depth: 400 of 1018 is more.
+        assert!(
+            island("natural-stone", 40.0, 400.0)
+                .warnings
+                .iter()
+                .any(|w| w.contains("third"))
+        );
+        // A value overridden on the benchtop wins over the catalog's.
+        let mut item = top("BT1", 0.0);
+        if let RunItem::Benchtop(b) = &mut item {
+            b.material = "dekton".into();
+            b.thickness = 20.0;
+            b.material_rules
+                .insert("unsupported_overhang".into(), 300.0);
+            assert_eq!(b.rules().unwrap().unsupported_overhang, 300.0);
+            assert_eq!(b.rules().unwrap().support_spacing, 600.0);
+        }
+        // An unknown material says so.
+        assert!(
+            island("granite-ish", 20.0, 400.0)
+                .warnings
+                .iter()
+                .any(|w| w.contains("no benchtop material"))
+        );
+    }
+
+    /// BENCH-7: cut-outs closer to an edge than the material's clearances get a note; our
+    /// defaults keep them.
+    #[test]
+    fn cut_outs_inside_the_material_clearances_get_a_note() {
+        let warnings = |sink: Cutout| {
+            let mut item = top("BT1", 0.0);
+            if let RunItem::Benchtop(b) = &mut item {
+                b.material = "natural-stone".into();
+                b.thickness = 20.0;
+                b.cutouts = vec![sink];
+            }
+            let run = Run {
+                origin: Vec3::default(),
+                items: vec![
+                    cab("B01", CabinetKind::Base),
+                    cab("B02", CabinetKind::Base),
+                    cab("B03", CabinetKind::Base),
+                    item,
+                ],
+            };
+            build_run(&run).unwrap().pop().unwrap().warnings
+        };
+        let mut close = Cutout::new("B02", CutoutKind::Sink, 760.0, 440.0);
+        close.setback = 60.0;
+        close.tap_hole_behind = 40.0;
+        let w = warnings(close);
+        assert!(w.iter().any(|w| w.contains("from the front edge")), "{w:?}");
+        assert!(w.iter().any(|w| w.contains("tap hole")), "{w:?}");
+        let w = warnings(Cutout::new("B02", CutoutKind::Sink, 760.0, 440.0));
+        assert!(!w.iter().any(|w| w.contains("asks for")), "{w:?}");
     }
 
     /// BENCH-3b: an L-corner's second leg gets its own piece, butted against the main top's

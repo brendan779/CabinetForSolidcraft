@@ -399,6 +399,112 @@ pub fn open_project(json: String) -> Result<ProjectRecord, CoreError> {
     })
 }
 
+/// The benchtop materials in the catalog, one per family, for the material picker (BENCH-7):
+/// id (`natural-stone`), name, and the thicknesses it has rules for.
+#[uniffi::export]
+pub fn benchtop_materials() -> Vec<ChoiceRecord> {
+    let mut out: Vec<ChoiceRecord> = Vec::new();
+    for i in cabinet_core::hardware::items()
+        .iter()
+        .filter(|i| i.id.starts_with("benchtop-material."))
+    {
+        let family = i.id.split('.').nth(1).unwrap_or_default().to_string();
+        match out.iter_mut().find(|c| c.id == family) {
+            Some(c) => c.description = format!("{}, {}", c.description, i.variant),
+            None => out.push(ChoiceRecord {
+                id: family,
+                label: i.family.clone(),
+                description: i.variant.clone(),
+            }),
+        }
+    }
+    out
+}
+
+/// One of a benchtop's material rules as it applies (BENCH-7): the catalog's value, or the
+/// benchtop's own where it changed it.
+#[derive(uniffi::Record)]
+pub struct MaterialRuleRecord {
+    /// The parameter (`unsupported_overhang`).
+    pub field: String,
+    pub label: String,
+    pub value: f64,
+    /// The material's own value, which an override equal to it gives back.
+    pub material_value: f64,
+    pub overridden: bool,
+}
+
+/// The rules for a benchtop item (its JSON), and which of them it overrides; empty for an
+/// unknown material.
+#[uniffi::export]
+pub fn benchtop_rules(item_json: String) -> Result<Vec<MaterialRuleRecord>, CoreError> {
+    let RunItem::Benchtop(b) = parse_item(&item_json)? else {
+        return Err(invalid("not a benchtop"));
+    };
+    let Ok(r) = b.rules() else {
+        return Ok(Vec::new());
+    };
+    let mut plain = b.clone();
+    plain.material_rules.clear();
+    let Ok(m) = plain.rules() else {
+        return Ok(Vec::new());
+    };
+    let rows = [
+        (
+            "unsupported_overhang",
+            "Unsupported overhang",
+            r.unsupported_overhang,
+            m.unsupported_overhang,
+        ),
+        (
+            "substrate_overhang",
+            "With a substrate to",
+            r.substrate_overhang,
+            m.substrate_overhang,
+        ),
+        (
+            "support_spacing",
+            "Supports apart",
+            r.support_spacing,
+            m.support_spacing,
+        ),
+        (
+            "front_clearance",
+            "Cut-out from front",
+            r.front_clearance,
+            m.front_clearance,
+        ),
+        (
+            "rear_clearance",
+            "Cut-out from rear",
+            r.rear_clearance,
+            m.rear_clearance,
+        ),
+        (
+            "tap_clearance",
+            "Sink to tap hole",
+            r.tap_clearance,
+            m.tap_clearance,
+        ),
+        (
+            "electrical_edge",
+            "Power point from edge",
+            r.electrical_edge,
+            m.electrical_edge,
+        ),
+    ];
+    Ok(rows
+        .into_iter()
+        .map(|(field, label, value, material_value)| MaterialRuleRecord {
+            field: field.into(),
+            label: label.into(),
+            value,
+            material_value,
+            overridden: b.material_rules.contains_key(field),
+        })
+        .collect())
+}
+
 /// The power point plates in the catalog, for the splashback's plate picker (BENCH-8): id,
 /// name, and the plate and cut-out sizes.
 #[uniffi::export]

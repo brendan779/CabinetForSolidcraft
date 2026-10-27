@@ -188,6 +188,21 @@ struct CabinetDoc: Identifiable, Hashable, Codable {
         }
     }
 
+    /// Benchtop: its material family (`natural-stone`, `laminate`...).
+    var material: String {
+        get { object["material"] as? String ?? "laminate" }
+        set { update { $0["material"] = newValue } }
+    }
+
+    /// Benchtop: changes one of its material's rules (nil: back to the material's).
+    mutating func setMaterialRule(_ field: String, _ value: Double?) {
+        update { o in
+            var rules = o["material_rules"] as? [String: Any] ?? [:]
+            rules[field] = value
+            o["material_rules"] = rules.isEmpty ? nil : rules
+        }
+    }
+
     /// Benchtop: whether its splashback has a power point.
     var hasAnyPowerPoint: Bool { !((object["power_points"] as? [[String: Any]]) ?? []).isEmpty }
 

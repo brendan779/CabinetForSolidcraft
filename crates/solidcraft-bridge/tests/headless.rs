@@ -511,6 +511,8 @@ fn a_benchtop_with_cut_outs_builds() {
                     plate: cabinet_core::run::DEFAULT_POWER_POINT_PLATE.into(),
                 }],
                 end_radius: 60.0,
+                material: "laminate".into(),
+                material_rules: Default::default(),
                 cutouts: vec![sink, cutout("B01", CutoutKind::Cooktop, 560.0, 490.0)],
             }),
         ],

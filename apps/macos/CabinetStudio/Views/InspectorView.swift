@@ -79,6 +79,32 @@ struct InspectorView: View {
     }
 }
 
+/// A title and a menu: on one line where they fit, the menu under the title where its choice's
+/// name is long.
+struct MenuRow<Content: View>: View {
+    let title: String
+    let content: Content
+
+    init(_ title: String, @ViewBuilder content: () -> Content) {
+        self.title = title
+        self.content = content()
+    }
+
+    var body: some View {
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: 6) {
+                Text(title).foregroundStyle(.secondary).lineLimit(1).fixedSize()
+                Spacer(minLength: 4)
+                content
+            }
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title).foregroundStyle(.secondary).lineLimit(1)
+                content
+            }
+        }
+    }
+}
+
 /// A title and its row of chips: on one line where they fit, the chips under the title where the
 /// inspector is narrow (full screen), so neither the title nor a chip's number wraps.
 struct ChipRow<Chips: View>: View {
@@ -261,6 +287,7 @@ struct PieceSection: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
+                MaterialSection(cab: cab)
                 SectionTitle("Cut-outs")
                 let bases = project.cabinets.filter {
                     ["base", "drawer_bank", "sink", "blind_corner", "corner_base"].contains($0.kind)
@@ -323,9 +350,7 @@ struct PieceSection: View {
                     let plates = powerPointPlates()
                     if cab.hasAnyPowerPoint, !plates.isEmpty {
                         let current = cab.powerPointPlate ?? plates[0].id
-                        HStack(spacing: 6) {
-                            Text("Plate").foregroundStyle(.secondary).lineLimit(1)
-                            Spacer()
+                        MenuRow("Plate") {
                             Menu {
                                 ForEach(plates, id: \.id) { plate in
                                     Button {
@@ -719,6 +744,73 @@ struct InsertSection: View {
                     withAnimation(.snappy) { var c = cab; set(&c, p); project.selected = c }
                 }
                 .buttonStyle(ChipStyle(selected: abs(p - value) < 0.5))
+            }
+        }
+    }
+}
+
+/// A benchtop's material (BENCH-7), whose rules set its overhang supports and cut-out
+/// clearances; each rule can be changed for this benchtop.
+struct MaterialSection: View {
+    @Environment(ProjectModel.self) private var project
+    @State private var open = false
+    let cab: CabinetDoc
+
+    var body: some View {
+        let materials = benchtopMaterials()
+        let current = materials.first { $0.id == cab.material }
+        VStack(alignment: .leading, spacing: 8) {
+            MenuRow("Material") {
+                Menu {
+                    ForEach(materials, id: \.id) { m in
+                        Button {
+                            withAnimation(.snappy) { var c = cab; c.material = m.id; project.selected = c }
+                        } label: {
+                            Text(m.label)
+                            Text(m.description)
+                        }
+                    }
+                } label: {
+                    Text(current?.label ?? cab.material).lineLimit(1)
+                }
+                .menuStyle(.borderlessButton)
+                .fixedSize()
+                .help("Its overhang supports and cut-out clearances follow the material's rules")
+            }
+            let rules = (try? benchtopRules(itemJson: cab.json)) ?? []
+            if rules.isEmpty {
+                Text("No rules for this material in the catalog.").font(.caption).foregroundStyle(.orange)
+            } else {
+                DisclosureGroup(isExpanded: $open) {
+                    Grid(alignment: .leading, horizontalSpacing: 8, verticalSpacing: 4) {
+                        ForEach(rules, id: \.field) { r in
+                            GridRow {
+                                Text(r.label).font(.caption).foregroundStyle(.secondary).lineLimit(1)
+                                // A value equal to the material's is no change: it follows the material again.
+                                TextField(r.label, value: Binding(get: { r.value },
+                                                                  set: { v in
+                                                                      var c = cab
+                                                                      c.setMaterialRule(r.field, abs(v - r.materialValue) < 1e-9 ? nil : v)
+                                                                      project.selected = c
+                                                                  }),
+                                          format: .number.precision(.fractionLength(0...1)))
+                                    .multilineTextAlignment(.trailing)
+                                    .frame(width: 56)
+                                    .labelsHidden()
+                                Button {
+                                    var c = cab; c.setMaterialRule(r.field, nil); project.selected = c
+                                } label: { Image(systemName: "arrow.uturn.backward.circle") }
+                                    .buttonStyle(.borderless)
+                                    .opacity(r.overridden ? 1 : 0)
+                                    .disabled(!r.overridden)
+                                    .help("Back to the material's value")
+                            }
+                        }
+                    }
+                    .padding(.top, 4)
+                } label: {
+                    Text("Material rules").foregroundStyle(.secondary)
+                }
             }
         }
     }

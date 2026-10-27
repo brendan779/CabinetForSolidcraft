@@ -199,6 +199,8 @@ mod tests {
                     niches: Vec::new(),
                     power_points: Vec::new(),
                     end_radius: 100.0,
+                    material: "laminate".into(),
+                    material_rules: Default::default(),
                 }),
             ],
         };

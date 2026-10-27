@@ -1,0 +1,207 @@
+{
+  "brand": "Generic",
+  "website": "",
+  "notes": "Benchtop material rules (BENCH-7), research in docs/benchtops.md. Per material and thickness: the overhang past the cabinets that needs no support, how far an 18 mm substrate takes it (0: no such step), support spacing beyond, whether the overhang may be at most a third of the top's depth, and cut-out clearances (from the front and rear edges, between a sink and its tap hole, and an electrical cut-out from a slab's edge). A benchtop takes the entry of its material with the largest thickness not over its own. Engineered stone is banned in Australia since 1 July 2024 and is not offered. Compact laminate and timber wait for sources. Every value is overridable per benchtop. Not verified by a person.",
+  "items": [
+    {
+      "id": "benchtop-material.natural-stone.20",
+      "brand": "Generic",
+      "article": "natural-stone 20",
+      "family": "Natural stone (granite, marble, quartzite)",
+      "variant": "20 mm",
+      "kind": "other",
+      "parameters": {
+        "thickness": 20,
+        "unsupported_overhang": 150,
+        "substrate_overhang": 300,
+        "support_spacing": 600,
+        "third_of_depth": 1,
+        "front_clearance": 80,
+        "rear_clearance": 50,
+        "tap_clearance": 35,
+        "electrical_edge": 150
+      },
+      "source": {
+        "url": "AB Stone (AU): 150 mm unsupported at 20 mm, an 18 mm substrate to 300 mm, supports at most 600 mm apart beyond; the 1/3-of-depth rule: Natural Stone Institute via Elite Makeovers (AU); clearances: AB Stone (AU), electrical: Archant (NZ)",
+        "document_date": "2026",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "benchtop-material.natural-stone.30",
+      "brand": "Generic",
+      "article": "natural-stone 30",
+      "family": "Natural stone (granite, marble, quartzite)",
+      "variant": "30-40 mm",
+      "kind": "other",
+      "parameters": {
+        "thickness": 30,
+        "unsupported_overhang": 300,
+        "substrate_overhang": 0,
+        "support_spacing": 600,
+        "third_of_depth": 1,
+        "front_clearance": 80,
+        "rear_clearance": 50,
+        "tap_clearance": 35,
+        "electrical_edge": 150
+      },
+      "source": {
+        "url": "AB Stone (AU); Elite Makeovers (AU): 300 mm unsupported at 30-40 mm, brackets at most 600 mm apart; clearances: AB Stone (AU), electrical: Archant (NZ)",
+        "document_date": "2026",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "benchtop-material.porcelain.12",
+      "brand": "Generic",
+      "article": "porcelain 12",
+      "family": "Porcelain / sintered",
+      "variant": "12 mm",
+      "kind": "other",
+      "parameters": {
+        "thickness": 12,
+        "unsupported_overhang": 300,
+        "substrate_overhang": 0,
+        "support_spacing": 600,
+        "third_of_depth": 0,
+        "front_clearance": 80,
+        "rear_clearance": 50,
+        "tap_clearance": 35,
+        "electrical_edge": 150
+      },
+      "source": {
+        "url": "Archant (NZ); AB Stone (AU): 300 mm unsupported at 12 mm, supports every 600 mm; clearances: AB Stone (AU), electrical: Archant (NZ)",
+        "document_date": "2026",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "benchtop-material.porcelain.20",
+      "brand": "Generic",
+      "article": "porcelain 20",
+      "family": "Porcelain / sintered",
+      "variant": "20 mm",
+      "kind": "other",
+      "parameters": {
+        "thickness": 20,
+        "unsupported_overhang": 300,
+        "substrate_overhang": 0,
+        "support_spacing": 900,
+        "third_of_depth": 0,
+        "front_clearance": 80,
+        "rear_clearance": 50,
+        "tap_clearance": 35,
+        "electrical_edge": 150
+      },
+      "source": {
+        "url": "Archant (NZ): 300 mm unsupported at 20 mm, supports every 900 mm; clearances: AB Stone (AU), electrical: Archant (NZ)",
+        "document_date": "2026",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "benchtop-material.zenith.12",
+      "brand": "Generic",
+      "article": "zenith 12",
+      "family": "Zenith Surfaces / Vasari porcelain",
+      "variant": "12 mm on a substrate",
+      "kind": "other",
+      "parameters": {
+        "thickness": 12,
+        "unsupported_overhang": 300,
+        "substrate_overhang": 0,
+        "support_spacing": 600,
+        "third_of_depth": 0,
+        "front_clearance": 80,
+        "rear_clearance": 50,
+        "tap_clearance": 35,
+        "electrical_edge": 150
+      },
+      "source": {
+        "url": "The Stone People (Stone Ambassador distributor, AU): 300 mm unsupported at 12 mm on a substrate, steel rods, posts or brackets beyond (600 mm apart: our choice, as general porcelain); clearances: AB Stone (AU), electrical: Archant (NZ)",
+        "document_date": "2026",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "benchtop-material.dekton.12",
+      "brand": "Generic",
+      "article": "dekton 12",
+      "family": "Dekton",
+      "variant": "12 mm",
+      "kind": "other",
+      "parameters": {
+        "thickness": 12,
+        "unsupported_overhang": 250,
+        "substrate_overhang": 0,
+        "support_spacing": 600,
+        "third_of_depth": 0,
+        "front_clearance": 80,
+        "rear_clearance": 50,
+        "tap_clearance": 35,
+        "electrical_edge": 150
+      },
+      "source": {
+        "url": "Dekton data via worktops.net (UK): 250 mm unsupported at 12 mm, steel support every 600 mm; clearances: AB Stone (AU), electrical: Archant (NZ)",
+        "document_date": "2026",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "benchtop-material.dekton.20",
+      "brand": "Generic",
+      "article": "dekton 20",
+      "family": "Dekton",
+      "variant": "20 mm",
+      "kind": "other",
+      "parameters": {
+        "thickness": 20,
+        "unsupported_overhang": 500,
+        "substrate_overhang": 0,
+        "support_spacing": 600,
+        "third_of_depth": 0,
+        "front_clearance": 80,
+        "rear_clearance": 50,
+        "tap_clearance": 35,
+        "electrical_edge": 150
+      },
+      "source": {
+        "url": "Dekton data via worktops.net (UK): 500 mm unsupported at 20 mm, steel support every 600 mm; clearances: AB Stone (AU), electrical: Archant (NZ)",
+        "document_date": "2026",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    },
+    {
+      "id": "benchtop-material.laminate.33",
+      "brand": "Generic",
+      "article": "laminate 33",
+      "family": "Laminate on particleboard",
+      "variant": "33 mm",
+      "kind": "other",
+      "parameters": {
+        "thickness": 33,
+        "unsupported_overhang": 300,
+        "substrate_overhang": 0,
+        "support_spacing": 600,
+        "third_of_depth": 0,
+        "front_clearance": 80,
+        "rear_clearance": 50,
+        "tap_clearance": 35,
+        "electrical_edge": 150
+      },
+      "source": {
+        "url": "Our rule of thumb (no published source): 300 mm unsupported, brackets at most 600 mm apart; the stone clearances (AB Stone, AU) kept for the cut-outs",
+        "document_date": "2026",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    }
+  ]
+}
