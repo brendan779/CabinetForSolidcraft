@@ -1,0 +1,29 @@
+{
+  "brand": "Clipsal",
+  "website": "https://www.clipsal.com",
+  "notes": "Power point plates for splashback cut-outs (BENCH-8; the owner's standard is Schneider Electric / Clipsal, docs/benchtops.md). The cut-out takes the mounting box behind the plate and is hidden by it: the plate less 5 mm each side, our rule. Clipsal publishes no splashback template, so the electrician or fabricator confirms it. Other plates (Saturn, quad) are added here as data. Not verified by a person.",
+  "items": [
+    {
+      "id": "clipsal.iconic.3025",
+      "brand": "Clipsal",
+      "article": "3025",
+      "family": "Clipsal Iconic power point",
+      "variant": "double, horizontal mount, 250 V 10 A",
+      "kind": "other",
+      "parameters": {
+        "plate_width": 120,
+        "plate_height": 78,
+        "plate_depth": 27,
+        "cutout_width": 110,
+        "cutout_height": 68,
+        "mounting_centres": 84
+      },
+      "source": {
+        "url": "https://www.clipsal.com/products/power-points-switches/clipsal-iconic/double-power-point-grid-horizontal-mount-250v-10a-3025g?itemno=3025G; mounting centres: https://media.goelectrical.com.au/Datasheets/Clipsal/Clipsal_Iconic_Mounting_Accessories.pdf",
+        "document_date": "2026",
+        "retrieved": "2026-10-26",
+        "verified": false
+      }
+    }
+  ]
+}

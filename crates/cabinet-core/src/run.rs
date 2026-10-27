@@ -204,18 +204,28 @@ pub struct PowerPoint {
     /// The cut-out's centre above the benchtop.
     #[serde(default = "PowerPoint::default_height")]
     pub height: f64,
+    /// The plate's catalog id, whose cut-out size is cut (BENCH-8).
+    #[serde(default = "PowerPoint::default_plate")]
+    pub plate: String,
 }
+
+/// The plate a power point gets unless the job picks another: the owner's Clipsal Iconic
+/// horizontal double power point.
+pub const DEFAULT_POWER_POINT_PLATE: &str = "clipsal.iconic.3025";
 
 impl PowerPoint {
     /// Our default: centred 150 above the top.
     fn default_height() -> f64 {
         150.0
     }
+
+    fn default_plate() -> String {
+        DEFAULT_POWER_POINT_PLATE.into()
+    }
 }
 
-/// Our choices, VERIFY with the electrician: the cut-out for a double power point's mounting
-/// block (it is covered by the plate, 116 × 73), and the niche's margin to its cabinet's sides.
-const POWER_POINT_CUTOUT: (f64, f64) = (100.0, 60.0);
+/// Our choice: a niche's margin to its cabinet's sides. A power point's cut-out comes from its
+/// plate in the catalog.
 const NICHE_MARGIN: f64 = 50.0;
 
 /// A benchtop's edge.
@@ -1177,7 +1187,19 @@ fn splashback_openings(b: &Benchtop, top: &mut PartList, lists: &[PartList]) {
             }
             None => {
                 let p = &b.power_points[k - b.niches.len()];
-                let (w, h) = POWER_POINT_CUTOUT;
+                let size = crate::hardware::item(&p.plate).ok().and_then(|plate| {
+                    Some((
+                        plate.param("cutout_width").ok()?,
+                        plate.param("cutout_height").ok()?,
+                    ))
+                });
+                let Some((w, h)) = size else {
+                    top.warnings.push(format!(
+                        "power point over {over}: no plate {} with a cut-out size in the catalog",
+                        p.plate
+                    ));
+                    continue;
+                };
                 (w, h, sb.min.z + p.height - h / 2.0)
             }
         };
@@ -1190,9 +1212,20 @@ fn splashback_openings(b: &Benchtop, top: &mut PartList, lists: &[PartList]) {
                 .push(format!("{what} over {over} does not fit the splashback"));
             continue;
         }
-        top.operations.push(crate::part::Operation::Groove {
+        let note = match niche {
+            Some(_) => "niche".to_string(),
+            None => {
+                let p = &b.power_points[k - b.niches.len()];
+                crate::hardware::item(&p.plate)
+                    .map(|i| format!("{} {} ({})", i.family, i.variant, i.article))
+                    .unwrap_or_else(|_| "power point".into())
+            }
+        };
+        top.operations.push(crate::part::Operation::Cutout {
             part: back.name.clone(),
             bounds: hole,
+            radius: 0.0,
+            note,
         });
         let Some(n) = niche else { continue };
         if n.depth <= 2.0 * t || w <= 2.0 * t || h <= 2.0 * t {
@@ -1705,6 +1738,7 @@ mod tests {
             b.power_points.push(PowerPoint {
                 over: "B01".into(),
                 height: 150.0,
+                plate: DEFAULT_POWER_POINT_PLATE.into(),
             });
         }
         let run = |item: &RunItem| Run {
@@ -1722,12 +1756,21 @@ mod tests {
             .operations
             .iter()
             .filter_map(|o| match o {
-                crate::part::Operation::Groove { part, bounds } => Some((part.as_str(), *bounds)),
+                crate::part::Operation::Cutout { part, bounds, .. } => {
+                    Some((part.as_str(), *bounds))
+                }
                 _ => None,
             })
             .collect();
         assert_eq!(holes.len(), 2);
         assert!(holes.iter().all(|(p, _)| *p == "BT1.Splashback1"));
+        // BENCH-8: the power point's hole is the Clipsal Iconic 3025's cut-out, 110 × 68.
+        let power = holes
+            .iter()
+            .map(|(_, b)| b)
+            .find(|b| b.size.x < 200.0)
+            .unwrap();
+        assert_eq!((power.size.x, power.size.z), (110.0, 68.0));
         // Over B02 (600..1200), 50 in from each side, 150 above the 33 mm top at 870.
         let (_, niche) = holes[0];
         assert_eq!((niche.min.x, niche.size.x), (650.0, 500.0));

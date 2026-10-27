@@ -508,6 +508,7 @@ fn a_benchtop_with_cut_outs_builds() {
                 power_points: vec![PowerPoint {
                     over: "B01".into(),
                     height: 150.0,
+                    plate: cabinet_core::run::DEFAULT_POWER_POINT_PLATE.into(),
                 }],
                 end_radius: 60.0,
                 cutouts: vec![sink, cutout("B01", CutoutKind::Cooktop, 560.0, 490.0)],

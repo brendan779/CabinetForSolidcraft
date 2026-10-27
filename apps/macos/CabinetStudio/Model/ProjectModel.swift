@@ -176,12 +176,32 @@ struct CabinetDoc: Identifiable, Hashable, Codable {
     /// Adds or removes a splashback opening over a cabinet, at the core's default sizes (a niche
     /// with one shelf; a double power point).
     mutating func setOpening(_ field: String, over id: String, _ on: Bool) {
+        let plate = powerPointPlate
         update { o in
             var list = (o[field] as? [[String: Any]] ?? []).filter { $0["over"] as? String != id }
             if on {
-                list.append(field == "niches" ? ["over": id, "shelves": 1] : ["over": id])
+                var new: [String: Any] = ["over": id]
+                if field == "niches" { new["shelves"] = 1 } else if let plate { new["plate"] = plate }
+                list.append(new)
             }
             o[field] = list.isEmpty ? nil : list
+        }
+    }
+
+    /// Benchtop: whether its splashback has a power point.
+    var hasAnyPowerPoint: Bool { !((object["power_points"] as? [[String: Any]]) ?? []).isEmpty }
+
+    /// Benchtop: the plate (catalog id) its power points are cut for, if it has any.
+    var powerPointPlate: String? {
+        (object["power_points"] as? [[String: Any]])?.first?["plate"] as? String
+    }
+
+    /// Cuts every power point in the splashback for plate `id`.
+    mutating func setPowerPointPlate(_ id: String) {
+        update { o in
+            guard var list = o["power_points"] as? [[String: Any]] else { return }
+            for i in list.indices { list[i]["plate"] = id }
+            o["power_points"] = list
         }
     }
 

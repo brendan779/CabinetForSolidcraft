@@ -399,6 +399,31 @@ pub fn open_project(json: String) -> Result<ProjectRecord, CoreError> {
     })
 }
 
+/// The power point plates in the catalog, for the splashback's plate picker (BENCH-8): id,
+/// name, and the plate and cut-out sizes.
+#[uniffi::export]
+pub fn power_point_plates() -> Vec<ChoiceRecord> {
+    cabinet_core::hardware::items()
+        .iter()
+        .filter(|i| i.param("cutout_width").is_ok() && i.param("plate_width").is_ok())
+        .map(|i| {
+            let p = |n: &str| i.param(n).unwrap_or_default();
+            ChoiceRecord {
+                id: i.id.clone(),
+                label: format!("{} {}", i.family, i.article),
+                description: format!(
+                    "{}; plate {:.0} × {:.0}, cut-out {:.0} × {:.0}",
+                    i.variant,
+                    p("plate_width"),
+                    p("plate_height"),
+                    p("cutout_width"),
+                    p("cutout_height")
+                ),
+            }
+        })
+        .collect()
+}
+
 /// Our starting sink and cooktop templates, as a JSON array of `Appliance`.
 #[uniffi::export]
 pub fn default_appliances_json() -> String {

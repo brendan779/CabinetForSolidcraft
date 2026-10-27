@@ -316,8 +316,31 @@ struct PieceSection: View {
                                 .buttonStyle(ChipStyle(selected: on))
                                 .help(field == "niches"
                                       ? "An open niche in the splashback over \(base.id): lined in the benchtop's board, one shelf"
-                                      : "A cut-out for a double power point in the splashback over \(base.id)")
+                                      : "A cut-out for a power point in the splashback over \(base.id), sized for the plate below")
                             }
+                        }
+                    }
+                    let plates = powerPointPlates()
+                    if cab.hasAnyPowerPoint, !plates.isEmpty {
+                        let current = cab.powerPointPlate ?? plates[0].id
+                        HStack(spacing: 6) {
+                            Text("Plate").foregroundStyle(.secondary).lineLimit(1)
+                            Spacer()
+                            Menu {
+                                ForEach(plates, id: \.id) { plate in
+                                    Button {
+                                        withAnimation(.snappy) { var c = cab; c.setPowerPointPlate(plate.id); project.selected = c }
+                                    } label: {
+                                        Text(plate.label)
+                                        Text(plate.description)
+                                    }
+                                }
+                            } label: {
+                                Label(plates.first { $0.id == current }?.label ?? current, systemImage: "powerplug")
+                            }
+                            .menuStyle(.borderlessButton)
+                            .fixedSize()
+                            .help(plates.first { $0.id == current }?.description ?? "")
                         }
                     }
                 }
