@@ -101,7 +101,7 @@ struct StandardSizes: View {
             // Each row only where the wardrobe has the part it sizes.
             rows([("Hat shelf drop", "wardrobe_hat_shelf_drop", [250, 300, 350, 400]),
                   ("Rail drop", "wardrobe_rail_drop", [50, 60, 70, 80])]
-                 + (cab.hanging == "double" ? [("Lower shelf", "wardrobe_double_hang_shelf", [950, 1000, 1050, 1100, 1150])] : [])
+                 + (cab.hanging == "double" ? [("Lower shelf", "wardrobe_double_hang_shelf", [950, 1050, 1150])] : [])
                  + (cab.innerDrawers > 0 ? [("Drawer height", "wardrobe_drawer_pitch", [150, 200, 250])] : []))
         default:
             EmptyView()
@@ -115,6 +115,8 @@ struct StandardSizes: View {
                 let value = project.standardNumber(field, of: cab)
                 HStack(spacing: 6) {
                     Text(title).foregroundStyle(.secondary)
+                        .lineLimit(1)
+                        .layoutPriority(1)
                     if overrides.contains(field) {
                         Button { project.resetToProject([field]) } label: { Image(systemName: "arrow.uturn.backward.circle") }
                             .buttonStyle(.borderless)

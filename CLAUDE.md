@@ -55,7 +55,8 @@ Rust is installed through Homebrew's rustup: `export PATH="$HOME/.cargo/bin:/opt
 
 AppKit throws on layout loops and unsatisfiable constraints, and the app dies. Before committing
 UI, launch the Release build under `lldb` with a breakpoint on `objc_exception_throw` and visit every
-workspace, windowed and full screen (⌃⌘F).
+workspace, windowed and full screen (⌃⌘F). To stop that copy, kill `lldb` first and then the app:
+signalling the app first is caught by the debugger, and the app outlives it.
 
 - Don't add window toolbar items from workspace views; the toolbar is full. Put controls in a bar
   inside the view.
