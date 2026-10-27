@@ -113,7 +113,7 @@ pub fn option_groups() -> Vec<OptionGroup> {
                 (
                     "shaker",
                     "Shaker",
-                    "Five-piece fronts: a 70 mm frame round a 9 mm panel; small fronts stay slab",
+                    "Five-piece fronts: a frame round a thin grooved panel; small fronts stay slab",
                 ),
                 (
                     "glass_frame",

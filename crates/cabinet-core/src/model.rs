@@ -540,6 +540,13 @@ pub struct ConstructionStandard {
     pub toe_kick_setback: f64,
     /// How legs fix to the carcass bottom, with legs + plinth.
     pub leg_fixing: LegFixing,
+    /// Shaker and glass frame fronts: stile and rail width, panel thickness, and groove depth
+    /// (which is also the rails' stub tenon length).
+    pub shaker_frame_width: f64,
+    pub shaker_panel_thickness: f64,
+    pub shaker_groove_depth: f64,
+    /// A shaker-style front narrower or shorter than this stays a slab.
+    pub shaker_slab_below: f64,
     pub overlay: DoorOverlay,
     /// Gap between a front and its neighbour or the envelope edge.
     pub front_gap: f64,
@@ -623,6 +630,10 @@ impl Default for ConstructionStandard {
             toe_kick_height: 150.0,
             toe_kick_setback: 50.0,
             leg_fixing: LegFixing::ScrewOn,
+            shaker_frame_width: 70.0,
+            shaker_panel_thickness: 9.0,
+            shaker_groove_depth: 10.0,
+            shaker_slab_below: 200.0,
             overlay: DoorOverlay::Full,
             front_gap: 2.0,
             fixings: FixingRecipe::BiscuitAndScrew,

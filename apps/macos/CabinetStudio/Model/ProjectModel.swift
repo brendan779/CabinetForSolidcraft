@@ -653,6 +653,22 @@ final class ProjectModel {
         (try? standardOption(cabinetJson: cab.json, field: field)) ?? ""
     }
 
+    /// A number in the cabinet's construction standard (mm).
+    func standardNumber(_ field: String, of cab: CabinetDoc) -> Double {
+        (cab.standard[field] as? NSNumber)?.doubleValue ?? 0
+    }
+
+    /// Sets a number in the selected cabinet's standard, for the whole job or only this cabinet
+    /// as the construction scope says.
+    func setStandardNumber(_ field: String, _ value: Double) {
+        guard let cab = selected else { return }
+        var edited = cab
+        var standard = edited.standard
+        standard[field] = value
+        edited.standard = standard
+        applyStandard(from: cab, to: edited)
+    }
+
     func setOption(_ field: String, _ choice: String) {
         guard let cab = selected,
               let json = try? setStandardOption(cabinetJson: cab.json, field: field, choice: choice) else { return }

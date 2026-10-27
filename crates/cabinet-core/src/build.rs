@@ -70,14 +70,9 @@ const RAIL_DROP: f64 = 60.0;
 const DOUBLE_HANG_SHELF: f64 = 1050.0;
 /// Our choice: each inner drawer at a wardrobe's foot takes this much height.
 const WARDROBE_DRAWER_PITCH: f64 = 200.0;
-/// Our choices for shaker fronts: frame member width, panel thickness, groove depth (and stub
-/// tenon length), and the panel's play in the groove each side. A front under twice the frame
-/// width plus this much stays slab.
-const SHAKER_FRAME: f64 = 70.0;
-const SHAKER_PANEL: f64 = 9.0;
-const SHAKER_GROOVE: f64 = 10.0;
+/// Our choice: a shaker panel's play in its groove each side. The frame, panel and groove sizes
+/// are the standard's.
 const SHAKER_PLAY: f64 = 1.0;
-const SHAKER_MIN_OPENING: f64 = 60.0;
 /// Glass frames: the glass, and the rebate at the frame's back that takes it and its bead.
 const GLASS_THICKNESS: f64 = 4.0;
 const GLASS_REBATE_DEPTH: f64 = 12.0;
@@ -2662,7 +2657,23 @@ impl<'a> Builder<'a> {
         }
         let glass_style = s.door_style == DoorStyle::GlassFrame;
         let front_board = s.front_board.clone();
-        let (f, p, g, play) = (SHAKER_FRAME, SHAKER_PANEL, SHAKER_GROOVE, SHAKER_PLAY);
+        let (f, p, g, play) = (
+            s.shaker_frame_width,
+            s.shaker_panel_thickness,
+            s.shaker_groove_depth,
+            SHAKER_PLAY,
+        );
+        let slab_below = s.shaker_slab_below;
+        // The groove must leave frame each side of it, and the panel must leave face each side.
+        if g <= 0.0 || f <= g || p <= 0.0 || p >= s.front_thickness - 4.0 {
+            self.list.warnings.push(format!(
+                "shaker sizes do not fit: a {f:.0} mm frame needs a groove under {f:.0} mm, and a \
+                 {:.0} mm front a panel under {:.0} mm; the fronts stay slab",
+                s.front_thickness,
+                s.front_thickness - 4.0
+            ));
+            return;
+        }
         let fronts: Vec<Part> = self
             .list
             .parts
@@ -2680,7 +2691,8 @@ impl<'a> Builder<'a> {
             let ta = front.thickness_axis;
             let wa = if ta == Axis::X { Axis::Y } else { Axis::X };
             let (w0, w1, z0, z1) = (b.min.get(wa), b.max().get(wa), b.min.z, b.max().z);
-            let min = 2.0 * f + SHAKER_MIN_OPENING;
+            // A front narrower or shorter than the threshold, or with no panel left, stays slab.
+            let min = slab_below.max(2.0 * f + 2.0 * g);
             if w1 - w0 < min || z1 - z0 < min {
                 continue;
             }
@@ -4540,6 +4552,38 @@ mod tests {
         );
     }
 
+    /// SHAK-1: the frame width, panel thickness and groove depth come from the standard, and a
+    /// front under the slab threshold stays slab.
+    #[test]
+    fn shaker_sizes_and_the_slab_threshold_follow_the_standard() {
+        let mut cab = Cabinet::new("B01", CabinetKind::Base);
+        cab.standard.door_style = DoorStyle::Shaker;
+        cab.standard.shaker_frame_width = 90.0;
+        cab.standard.shaker_panel_thickness = 6.0;
+        cab.standard.shaker_groove_depth = 12.0;
+        let list = build_cabinet(&cab).unwrap();
+        let get = |n: &str| list.part(n).unwrap_or_else(|| panic!("{n}"));
+        let (l, rail) = (get("B01.Door1Stile1"), get("B01.Door1Rail1"));
+        assert_eq!(l.bounds.size.x, 90.0);
+        assert_eq!(rail.bounds.size.z, 90.0);
+        assert_eq!(get("B01.Door1Panel").thickness(), 6.0);
+        assert_eq!(rail.bounds.min.x, l.bounds.max().x - 12.0);
+        // A threshold over the door's width keeps it slab.
+        cab.standard.shaker_slab_below = 700.0;
+        let list = build_cabinet(&cab).unwrap();
+        assert!(list.part("B01.Door1").is_some());
+    }
+
+    #[test]
+    fn shaker_sizes_that_do_not_fit_leave_the_fronts_slab_with_a_note() {
+        let mut cab = Cabinet::new("B01", CabinetKind::Base);
+        cab.standard.door_style = DoorStyle::Shaker;
+        cab.standard.shaker_panel_thickness = 16.0;
+        let list = build_cabinet(&cab).unwrap();
+        assert!(list.part("B01.Door1").is_some());
+        assert!(list.warnings.iter().any(|w| w.contains("shaker sizes")));
+    }
+
     /// P2-2: a shaker door is two stiles, two tenoned rails and a grooved panel; its hinge cups
     /// move to the hinge-side stile and its handle to the other; nothing clashes.
     #[test]
@@ -4559,11 +4603,12 @@ mod tests {
         let panel = get("B01.Door1Panel");
         // Rails reach a groove's depth into each stile.
         assert!(
-            (bottom.bounds.size.x - (r.bounds.min.x - l.bounds.max().x + 2.0 * SHAKER_GROOVE))
+            (bottom.bounds.size.x
+                - (r.bounds.min.x - l.bounds.max().x + 2.0 * cab.standard.shaker_groove_depth))
                 .abs()
                 < 1e-9
         );
-        assert!((panel.thickness() - SHAKER_PANEL).abs() < 1e-9);
+        assert!((panel.thickness() - cab.standard.shaker_panel_thickness).abs() < 1e-9);
         assert_eq!(l.bounds.size.z, top.bounds.max().z - bottom.bounds.min.z);
         // A left-hinged door: cups in the left stile, the handle in the right.
         let on = |part: &str, purpose: BorePurpose| {

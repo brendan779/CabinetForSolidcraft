@@ -48,6 +48,7 @@ struct InspectorView: View {
                                      onReset: { project.resetToProject([group.field]) }) { choice in
                             withAnimation(.snappy) { project.setOption(group.field, choice) }
                         }
+                        StandardSizes(after: group.field, cab: cab)
                     }
                     if let b = project.build(cab), !b.hardware.isEmpty {
                         HardwareSection(items: b.hardware)
@@ -75,6 +76,56 @@ struct InspectorView: View {
                     .help(err)
             }
         }
+    }
+}
+
+/// The sizes that go with a construction choice, as rows of usual values: the plinth under Base,
+/// the frame under a shaker or glass door style.
+struct StandardSizes: View {
+    @Environment(ProjectModel.self) private var project
+    @AppStorage(LengthUnit.key) private var unit: LengthUnit = .millimetres
+    let after: String
+    let cab: CabinetDoc
+
+    var body: some View {
+        switch after {
+        case "toe_kick" where project.option("toe_kick", of: cab) != "none":
+            rows([("Plinth height", "toe_kick_height", [100, 125, 150, 180, 200]),
+                  ("Plinth setback", "toe_kick_setback", [25, 50, 75, 100])])
+        case "door_style" where ["shaker", "glass_frame"].contains(project.option("door_style", of: cab)):
+            rows([("Frame", "shaker_frame_width", [50, 60, 70, 80, 90]),
+                  ("Panel", "shaker_panel_thickness", [6, 9, 12]),
+                  ("Groove", "shaker_groove_depth", [8, 10, 12]),
+                  ("Slab below", "shaker_slab_below", [150, 200, 250, 300])])
+        default:
+            EmptyView()
+        }
+    }
+
+    private func rows(_ items: [(String, String, [Double])]) -> some View {
+        let overrides = project.overrides(of: cab)
+        return VStack(alignment: .leading, spacing: 8) {
+            ForEach(items, id: \.1) { title, field, presets in
+                let value = project.standardNumber(field, of: cab)
+                HStack(spacing: 6) {
+                    Text(title).foregroundStyle(.secondary)
+                    if overrides.contains(field) {
+                        Button { project.resetToProject([field]) } label: { Image(systemName: "arrow.uturn.backward.circle") }
+                            .buttonStyle(.borderless)
+                            .help("Only this cabinet differs from the job; click to follow the job again")
+                    }
+                    Spacer(minLength: 4)
+                    ForEach(presets, id: \.self) { p in
+                        Button(unit.format(p, suffix: false)) {
+                            withAnimation(.snappy) { project.setStandardNumber(field, p) }
+                        }
+                        .buttonStyle(ChipStyle(selected: abs(p - value) < 0.5))
+                        .accessibilityLabel("\(title) \(unit.format(p))")
+                    }
+                }
+            }
+        }
+        .padding(.top, -6)
     }
 }
 
