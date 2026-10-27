@@ -45,7 +45,7 @@ impl Side {
 }
 
 /// How a supplier's model frame maps onto the cabinet's.
-#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum Frame {
     /// Blum's mounted frame, turned onto [`CadPlacement::side`] ([`transform`]).
@@ -53,6 +53,9 @@ pub enum Frame {
     Blum,
     /// Our own axes: the model's origin goes to [`CadPlacement::origin`] as it is.
     Upright,
+    /// Turned: the model's X along `x`, its Y along `y` (unit vectors in the cabinet frame), its
+    /// Z along their cross product. Our generic handles: holes on X, standing out towards -Y.
+    Oriented { x: Vec3, y: Vec3 },
 }
 
 /// One supplier model to place.
@@ -113,7 +116,60 @@ pub fn cad_placements(list: &PartList) -> Vec<CadPlacement> {
             frame: Frame::Blum,
         };
         let side_of = |x: f64| if x < mid { Side::Left } else { Side::Right };
-        if h.item.starts_with("hafele.axilo.set.") {
+        if h.item.starts_with("handle.") && h.item != "handle.edge-pull" {
+            // Between its screw holes on the front's face, the bar along them, standing out of
+            // the face the screws come through.
+            let holes: Vec<(Vec3, crate::part::Dir, f64)> = list
+                .operations
+                .iter()
+                .filter_map(|o| match o {
+                    crate::part::Operation::Bore {
+                        part,
+                        at,
+                        direction,
+                        depth,
+                        purpose: crate::part::BorePurpose::HandleScrew,
+                        ..
+                    } if *part == h.part => Some((*at, *direction, *depth)),
+                    _ => None,
+                })
+                .collect();
+            let (Some(&(first, dir, depth)), Some(&(last, ..))) = (holes.first(), holes.last())
+            else {
+                continue;
+            };
+            let n = next("Handle");
+            let sign = dir.sign();
+            let mut origin = Vec3::new(
+                (first.x + last.x) / 2.0,
+                (first.y + last.y) / 2.0,
+                (first.z + last.z) / 2.0,
+            );
+            origin = origin.with(dir.axis, first.get(dir.axis) + sign * depth);
+            let d = Vec3::new(last.x - first.x, last.y - first.y, last.z - first.z);
+            let len = (d.x * d.x + d.y * d.y + d.z * d.z).sqrt();
+            let x = if len > 1e-6 {
+                Vec3::new(d.x / len, d.y / len, d.z / len)
+            } else {
+                // A knob: any way across the face.
+                let across = if dir.axis == crate::geom::Axis::X {
+                    crate::geom::Axis::Y
+                } else {
+                    crate::geom::Axis::X
+                };
+                Vec3::default().with(across, 1.0)
+            };
+            // The model stands out towards its -Y: its Y points into the front.
+            let y = Vec3::default().with(dir.axis, -sign);
+            out.push(CadPlacement {
+                name: format!("{}.Handle{n}", list.cabinet),
+                item: h.item.clone(),
+                article: item.article.clone(),
+                side: side_of(origin.x),
+                origin,
+                frame: Frame::Oriented { x, y },
+            });
+        } else if h.item.starts_with("hafele.axilo.set.") {
             // Both pieces under the leg's name, so they replace its stand-in together.
             let n = next("Leg");
             let (Ok(height), Some(bottom)) = (item.param("nominal_height"), list.part(&h.part))
@@ -206,13 +262,28 @@ fn drawer_base(list: &PartList, front: &str) -> Option<f64> {
 /// inside faces the cabinet's inside; a one-handed model on the other side turns half a turn
 /// about the depth axis, which flips it upside down too (hinges and plates are symmetric).
 pub fn transform(p: &CadPlacement, model_interior_positive: bool, front_plane: f64) -> [f64; 12] {
-    if p.frame == Frame::Upright {
-        let o = p.origin;
-        return [
-            1.0, 0.0, 0.0, o.x, //
-            0.0, 1.0, 0.0, o.y, //
-            0.0, 0.0, 1.0, o.z,
-        ];
+    let o = p.origin;
+    match p.frame {
+        Frame::Upright => {
+            return [
+                1.0, 0.0, 0.0, o.x, //
+                0.0, 1.0, 0.0, o.y, //
+                0.0, 0.0, 1.0, o.z,
+            ];
+        }
+        Frame::Oriented { x, y } => {
+            let z = Vec3::new(
+                x.y * y.z - x.z * y.y,
+                x.z * y.x - x.x * y.z,
+                x.x * y.y - x.y * y.x,
+            );
+            return [
+                x.x, y.x, z.x, o.x, //
+                x.y, y.y, z.y, o.y, //
+                x.z, y.z, z.z, o.z,
+            ];
+        }
+        Frame::Blum => {}
     }
     let model = if model_interior_positive { 1.0 } else { -1.0 };
     let flip = model * p.side.interior_sign();
@@ -340,5 +411,54 @@ mod tests {
         assert_eq!(plate.origin.z, bottom - 25.6);
         let m = transform(tube, true, BLUM_FRONT_PLANE);
         assert_eq!(apply(&m, Vec3::new(0.0, 0.0, -150.0)).z, 0.0);
+    }
+
+    /// WF-7: a handle model sits between its screw holes on the front's face: a door's bar
+    /// upright, a drawer's across, both standing out in front of the face; a knob on its hole.
+    #[test]
+    fn handles_sit_on_their_holes_standing_out_of_the_front() {
+        let door = build_cabinet(&Cabinet::new("B01", CabinetKind::Base)).unwrap();
+        let bank = build_cabinet(&Cabinet::new("D01", CabinetKind::DrawerBank)).unwrap();
+        for (list, upright) in [(&door, true), (&bank, false)] {
+            let handles: Vec<_> = cad_placements(list)
+                .into_iter()
+                .filter(|c| c.name.contains(".Handle"))
+                .collect();
+            assert!(!handles.is_empty());
+            for h in &handles {
+                assert_eq!(h.article, "GEN-H-CC128");
+                let m = transform(h, true, BLUM_FRONT_PLANE);
+                assert!((det(&m) - 1.0).abs() < 1e-12);
+                // The holes, ±64 along the model's X, land on the front's face, upright on a
+                // door and across on a drawer.
+                let (a, b) = (
+                    apply(&m, Vec3::new(-64.0, 0.0, 0.0)),
+                    apply(&m, Vec3::new(64.0, 0.0, 0.0)),
+                );
+                if upright {
+                    assert!((b.z - a.z).abs() > 127.0 && (b.x - a.x).abs() < 1e-9);
+                } else {
+                    assert!((b.x - a.x).abs() > 127.0 && (b.z - a.z).abs() < 1e-9);
+                }
+                let front = list
+                    .parts
+                    .iter()
+                    .filter(|p| p.role.is_front())
+                    .find(|p| {
+                        let q = p.bounds;
+                        a.x >= q.min.x - 1e-6
+                            && a.x <= q.max().x + 1e-6
+                            && a.z >= q.min.z
+                            && a.z <= q.max().z
+                    })
+                    .unwrap();
+                assert!((a.y - front.bounds.min.y).abs() < 1e-9, "{}", h.name);
+                // The bar 32 in front of it.
+                assert!(
+                    (apply(&m, Vec3::new(0.0, -32.0, 0.0)).y - (front.bounds.min.y - 32.0)).abs()
+                        < 1e-9
+                );
+            }
+        }
     }
 }

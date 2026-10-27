@@ -1627,7 +1627,11 @@ pub fn hardware_models(job: JobItems, vendor_dir: String) -> Result<Vec<Hardware
     };
     let mut out = Vec::new();
     for (list, _) in job_lists(&job)? {
-        for m in vendor::resolve(&cad_placements(&list), &index) {
+        // Handles are drawn by the panel summary, where they swing with their fronts.
+        for m in vendor::resolve(&cad_placements(&list), &index)
+            .into_iter()
+            .filter(|m| !m.name.contains(".Handle"))
+        {
             out.push(HardwareModel {
                 name: m.name,
                 article: m.article,

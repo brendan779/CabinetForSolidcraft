@@ -162,7 +162,7 @@ pub fn resolve(placements: &[CadPlacement], models: &[VendorModel]) -> Vec<Vendo
         let mut files: Vec<&VendorModel> =
             models.iter().filter(|m| m.article == p.article).collect();
         // An upright part is one model; the same file comes in several downloaded sets.
-        if p.frame == Frame::Upright {
+        if p.frame != Frame::Blum {
             files.truncate(1);
         }
         let two_handed = files.iter().any(|m| m.interior_positive())

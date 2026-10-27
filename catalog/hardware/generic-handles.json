@@ -1,0 +1,194 @@
+{
+  "brand": "Generic",
+  "website": "",
+  "notes": "A generic handle family in one style (WF-7), so a job's handles match at every size until the shop picks a supplier's range. Models: scripts/make-generic-handles.py writes their STEP files to vendor-cad/generic/handles. The finish is the job's; the article numbers are ours, so order the real handles from the supplier.",
+  "items": [
+    {
+      "id": "handle.cc96",
+      "brand": "Generic",
+      "article": "GEN-H-CC96",
+      "family": "Generic bar handle",
+      "variant": "96 mm hole centres, 12 mm round bar on 10 mm legs, 32 mm off the front, 136 mm long",
+      "kind": "other",
+      "parameters": {
+        "centres": 96,
+        "bar_diameter": 12,
+        "leg_diameter": 10,
+        "standoff": 32,
+        "bar_end": 20
+      },
+      "source": {
+        "url": "Our own generic design (scripts/make-generic-handles.py, WF-7): no supplier range covers every size in one style",
+        "document_date": "2026",
+        "retrieved": "2026-10-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "handle.cc128",
+      "brand": "Generic",
+      "article": "GEN-H-CC128",
+      "family": "Generic bar handle",
+      "variant": "128 mm hole centres, 12 mm round bar on 10 mm legs, 32 mm off the front, 168 mm long",
+      "kind": "other",
+      "parameters": {
+        "centres": 128,
+        "bar_diameter": 12,
+        "leg_diameter": 10,
+        "standoff": 32,
+        "bar_end": 20
+      },
+      "source": {
+        "url": "Our own generic design (scripts/make-generic-handles.py, WF-7): no supplier range covers every size in one style",
+        "document_date": "2026",
+        "retrieved": "2026-10-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "handle.cc160",
+      "brand": "Generic",
+      "article": "GEN-H-CC160",
+      "family": "Generic bar handle",
+      "variant": "160 mm hole centres, 12 mm round bar on 10 mm legs, 32 mm off the front, 200 mm long",
+      "kind": "other",
+      "parameters": {
+        "centres": 160,
+        "bar_diameter": 12,
+        "leg_diameter": 10,
+        "standoff": 32,
+        "bar_end": 20
+      },
+      "source": {
+        "url": "Our own generic design (scripts/make-generic-handles.py, WF-7): no supplier range covers every size in one style",
+        "document_date": "2026",
+        "retrieved": "2026-10-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "handle.cc192",
+      "brand": "Generic",
+      "article": "GEN-H-CC192",
+      "family": "Generic bar handle",
+      "variant": "192 mm hole centres, 12 mm round bar on 10 mm legs, 32 mm off the front, 232 mm long",
+      "kind": "other",
+      "parameters": {
+        "centres": 192,
+        "bar_diameter": 12,
+        "leg_diameter": 10,
+        "standoff": 32,
+        "bar_end": 20
+      },
+      "source": {
+        "url": "Our own generic design (scripts/make-generic-handles.py, WF-7): no supplier range covers every size in one style",
+        "document_date": "2026",
+        "retrieved": "2026-10-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "handle.cc224",
+      "brand": "Generic",
+      "article": "GEN-H-CC224",
+      "family": "Generic bar handle",
+      "variant": "224 mm hole centres, 12 mm round bar on 10 mm legs, 32 mm off the front, 264 mm long",
+      "kind": "other",
+      "parameters": {
+        "centres": 224,
+        "bar_diameter": 12,
+        "leg_diameter": 10,
+        "standoff": 32,
+        "bar_end": 20
+      },
+      "source": {
+        "url": "Our own generic design (scripts/make-generic-handles.py, WF-7): no supplier range covers every size in one style",
+        "document_date": "2026",
+        "retrieved": "2026-10-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "handle.cc256",
+      "brand": "Generic",
+      "article": "GEN-H-CC256",
+      "family": "Generic bar handle",
+      "variant": "256 mm hole centres, 12 mm round bar on 10 mm legs, 32 mm off the front, 296 mm long",
+      "kind": "other",
+      "parameters": {
+        "centres": 256,
+        "bar_diameter": 12,
+        "leg_diameter": 10,
+        "standoff": 32,
+        "bar_end": 20
+      },
+      "source": {
+        "url": "Our own generic design (scripts/make-generic-handles.py, WF-7): no supplier range covers every size in one style",
+        "document_date": "2026",
+        "retrieved": "2026-10-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "handle.cc320",
+      "brand": "Generic",
+      "article": "GEN-H-CC320",
+      "family": "Generic bar handle",
+      "variant": "320 mm hole centres, 12 mm round bar on 10 mm legs, 32 mm off the front, 360 mm long",
+      "kind": "other",
+      "parameters": {
+        "centres": 320,
+        "bar_diameter": 12,
+        "leg_diameter": 10,
+        "standoff": 32,
+        "bar_end": 20
+      },
+      "source": {
+        "url": "Our own generic design (scripts/make-generic-handles.py, WF-7): no supplier range covers every size in one style",
+        "document_date": "2026",
+        "retrieved": "2026-10-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "handle.cc448",
+      "brand": "Generic",
+      "article": "GEN-H-CC448",
+      "family": "Generic bar handle",
+      "variant": "448 mm hole centres, 12 mm round bar on 10 mm legs, 32 mm off the front, 488 mm long",
+      "kind": "other",
+      "parameters": {
+        "centres": 448,
+        "bar_diameter": 12,
+        "leg_diameter": 10,
+        "standoff": 32,
+        "bar_end": 20
+      },
+      "source": {
+        "url": "Our own generic design (scripts/make-generic-handles.py, WF-7): no supplier range covers every size in one style",
+        "document_date": "2026",
+        "retrieved": "2026-10-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "handle.knob",
+      "brand": "Generic",
+      "article": "GEN-H-KNOB",
+      "family": "Generic knob",
+      "variant": "30 mm knob on a 12 mm post, 32 mm off the front",
+      "kind": "other",
+      "parameters": {
+        "diameter": 30,
+        "post_diameter": 12,
+        "standoff": 32
+      },
+      "source": {
+        "url": "Our own generic design (scripts/make-generic-handles.py, WF-7): no supplier range covers every size in one style",
+        "document_date": "2026",
+        "retrieved": "2026-10-27",
+        "verified": false
+      }
+    }
+  ]
+}
