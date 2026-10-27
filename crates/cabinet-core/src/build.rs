@@ -2431,10 +2431,22 @@ impl<'a> Builder<'a> {
                     });
                 }
             }
+            // An edge pull sits on the gripping edge: the top, or a wall door's bottom (as a
+            // finger pull's groove).
+            let at = if s.handle_place == HandlePlace::EdgePull {
+                let z = if wall_hung && f.role != PartRole::DrawerFront {
+                    z0
+                } else {
+                    z1
+                };
+                Vec3::new(b.center().x, b.center().y, z)
+            } else {
+                b.center()
+            };
             self.list.hardware.push(HardwarePlacement {
                 item,
                 description,
-                at: b.center(),
+                at,
                 part: f.name.clone(),
                 quantity: 1,
             });

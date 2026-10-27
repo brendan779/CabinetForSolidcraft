@@ -405,18 +405,9 @@ final class ViewportScene {
                         box.x = cut
                     }
                 }
-                // A side notched for the toe kick: its upper part, and the foot behind the notch.
-                var pieces = [box]
-                if p.notchHeight > 0 {
-                    var foot = box
-                    foot.name = p.name + "~foot"
-                    foot.y += p.notchDepth
-                    foot.depth -= p.notchDepth
-                    foot.height = p.notchHeight
-                    pieces[0].z += p.notchHeight
-                    pieces[0].height -= p.notchHeight
-                    pieces.append(foot)
-                }
+                // A rebate along an edge (a side's toe-kick notch, a front's finger pull): the two
+                // boxes it leaves.
+                let pieces = Self.split(box, by: p.rebate)
                 let board = project.boardsById[p.board]
                 for piece in pieces {
                     seen.insert(piece.name)
@@ -662,6 +653,36 @@ final class ViewportScene {
     private static func centre(of panels: [PanelBox]) -> SIMD3<Float> {
         guard !panels.isEmpty else { return .zero }
         return panels.map(mid).reduce(.zero, +) / Float(panels.count)
+    }
+
+    /// `box` less the rebate `r` (min x, y, z, max x, y, z), which runs right through it along
+    /// one axis and reaches a face on each of the other two: the part beside the rebate on one of
+    /// those axes, and the part beside it on the other, within the rebate's span on the first.
+    static func split(_ box: PanelBox, by r: [Double]) -> [PanelBox] {
+        guard r.count == 6 else { return [box] }
+        let lo = [box.x, box.y, box.z], hi = [box.x + box.width, box.y + box.depth, box.z + box.height]
+        let rlo = (0..<3).map { max(r[$0], lo[$0]) }, rhi = (0..<3).map { min(r[$0 + 3], hi[$0]) }
+        let eps = 1e-6
+        let spans = (0..<3).filter { rlo[$0] <= lo[$0] + eps && rhi[$0] >= hi[$0] - eps }
+        let cut = (0..<3).filter { !spans.contains($0) }
+        guard spans.count == 1, cut.count == 2 else { return [box] }
+        // The range of axis `a` beside the rebate.
+        func beside(_ a: Int) -> (Double, Double) {
+            abs(rlo[a] - lo[a]) < eps ? (rhi[a], hi[a]) : (lo[a], rlo[a])
+        }
+        func piece(_ name: String, _ ranges: [Int: (Double, Double)]) -> PanelBox {
+            var l = lo, h = hi
+            for (a, (x0, x1)) in ranges { l[a] = x0; h[a] = x1 }
+            var b = box
+            b.name = name
+            b.x = l[0]; b.y = l[1]; b.z = l[2]
+            b.width = h[0] - l[0]; b.depth = h[1] - l[1]; b.height = h[2] - l[2]
+            return b
+        }
+        let (a, c) = (cut[0], cut[1])
+        let first = piece(box.name, [a: beside(a)])
+        let second = piece(box.name + "~rebate", [a: (rlo[a], rhi[a]), c: beside(c)])
+        return [first, second].filter { $0.width > eps && $0.depth > eps && $0.height > eps }
     }
 
     /// How far an open drawer slides out, m.

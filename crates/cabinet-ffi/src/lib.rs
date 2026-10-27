@@ -55,10 +55,10 @@ pub struct PanelBox {
     pub board: String,
     /// The axis the decor's grain runs along in the cabinet frame (`x`, `y`, `z`), or empty.
     pub grain: String,
-    /// A toe-kick notch cut through the front-bottom corner (a side running to the floor): how
-    /// deep from the front and how high from the bottom. Zero without one.
-    pub notch_depth: f64,
-    pub notch_height: f64,
+    /// A rebate cut along one whole edge of the part, through it along that edge: a side's
+    /// toe-kick notch, a front's routed finger pull. Its box as min x, y, z, max x, y, z; empty
+    /// without one. The part is the two boxes it leaves.
+    pub rebate: Vec<f64>,
 }
 
 #[derive(uniffi::Record)]
@@ -112,6 +112,9 @@ pub struct BoardRecord {
 const HANDLE_BAR: f64 = 12.0;
 const HANDLE_STANDOFF: f64 = 30.0;
 const HANDLE_END: f64 = 15.0;
+/// An edge pull as the viewport draws it until it has a model (WF-7): a lip this long on the
+/// gripping edge, this far down the face and this proud of it.
+const EDGE_PULL: (f64, f64, f64) = (150.0, 25.0, 3.0);
 
 /// A job's items in the sidebar's order: cabinets (cabinet JSON) and the fillers and end panels
 /// between them (run item JSON, `type` `filler` or `end_panel`). Cabinets named in `placed` keep
@@ -580,18 +583,29 @@ fn summary(list: PartList) -> BuildSummary {
             ("right".into(), hi, front)
         })
     };
-    // A toe-kick notch cut right through a part's front-bottom corner, as (back y, top z).
-    let notch = |p: &cabinet_core::Part| {
+    // A groove along a whole edge: right through the part along one axis, and reaching a face
+    // on each of the other two (so the part is left as two boxes).
+    use cabinet_core::geom::Axis;
+    let rebate = |p: &cabinet_core::Part| {
         list.operations.iter().find_map(|o| match o {
-            Operation::Groove { part, bounds }
-                if *part == p.name
-                    && bounds.size.x >= p.bounds.size.x - 1e-6
-                    && (bounds.min.y - p.bounds.min.y).abs() < 1e-6
-                    && (bounds.min.z - p.bounds.min.z).abs() < 1e-6
-                    && bounds.max().z < p.bounds.max().z
-                    && bounds.max().y < p.bounds.max().y =>
-            {
-                Some((bounds.max().y, bounds.max().z))
+            Operation::Groove { part, bounds } if *part == p.name => {
+                let (b, q) = (bounds, p.bounds);
+                let eps = 1e-6;
+                let spans = |a: Axis| {
+                    b.min.get(a) <= q.min.get(a) + eps && b.max().get(a) >= q.max().get(a) - eps
+                };
+                // At one face and short of the other.
+                let edge = |a: Axis| {
+                    let (lo, hi) = (
+                        (b.min.get(a) - q.min.get(a)).abs() < eps,
+                        (b.max().get(a) - q.max().get(a)).abs() < eps,
+                    );
+                    lo != hi
+                };
+                let along = Axis::ALL.iter().filter(|&&a| spans(a)).count();
+                let edges = Axis::ALL.iter().filter(|&&a| !spans(a) && edge(a)).count();
+                (along == 1 && edges == 2)
+                    .then(|| vec![b.min.x, b.min.y, b.min.z, b.max().x, b.max().y, b.max().z])
             }
             _ => None,
         })
@@ -601,9 +615,6 @@ fn summary(list: PartList) -> BuildSummary {
         .iter()
         .map(|p| {
             let (hinged, hinge_x, hinge_y) = hinge(&door_of(p)).unwrap_or_default();
-            let (notch_depth, notch_height) = notch(p)
-                .map(|(y, z)| (y - p.bounds.min.y, z - p.bounds.min.z))
-                .unwrap_or_default();
             PanelBox {
                 name: p.name.clone(),
                 role: p.role.label().to_string(),
@@ -622,8 +633,7 @@ fn summary(list: PartList) -> BuildSummary {
                     .grain_axis
                     .map(|a| format!("{a:?}").to_lowercase())
                     .unwrap_or_default(),
-                notch_depth,
-                notch_height,
+                rebate: rebate(p).unwrap_or_default(),
             }
         })
         .collect();
@@ -736,8 +746,60 @@ fn summary(list: PartList) -> BuildSummary {
             hinge_y,
             board: format!("handle:{finish}"),
             grain: String::new(),
-            notch_depth: 0.0,
-            notch_height: 0.0,
+            rebate: Vec::new(),
+        });
+    }
+    // Edge pulls have no screw holes: a lip centred on the gripping edge the core places them
+    // on, the top or a wall door's bottom.
+    for h in list
+        .hardware
+        .iter()
+        .filter(|h| h.item == "handle.edge-pull")
+    {
+        let Some(p) = list.part(&h.part) else {
+            continue;
+        };
+        let Some(front) = panels.iter().find(|b| b.name == p.name) else {
+            continue;
+        };
+        use cabinet_core::geom::Axis;
+        let (ta, b) = (p.thickness_axis, p.bounds);
+        let wa = if ta == Axis::X { Axis::Y } else { Axis::X };
+        let (len, drop, proud) = EDGE_PULL;
+        // Across the thickness: the front face (the low side) and proud of it.
+        let t = (b.min.get(ta) - proud, b.max().get(ta));
+        let mid = b.min.get(wa) + b.size.get(wa) / 2.0;
+        let half = len.min(b.size.get(wa) - 20.0) / 2.0;
+        let w = (mid - half, mid + half);
+        let z = if h.at.z <= b.min.z + 1e-6 {
+            (b.min.z, b.min.z + drop)
+        } else {
+            (b.max().z - drop, b.max().z)
+        };
+        let lo = cabinet_core::geom::Vec3::new(0.0, 0.0, z.0)
+            .with(wa, w.0)
+            .with(ta, t.0);
+        let hi = cabinet_core::geom::Vec3::new(0.0, 0.0, z.1)
+            .with(wa, w.1)
+            .with(ta, t.1);
+        let (hinged, hinge_x, hinge_y) = (front.hinged.clone(), front.hinge_x, front.hinge_y);
+        let on_drawer = p.role == cabinet_core::part::PartRole::DrawerFront;
+        panels.push(PanelBox {
+            name: format!("{}.Handle", p.name),
+            role: if on_drawer { "Drawer handle" } else { "Handle" }.into(),
+            x: lo.x,
+            y: lo.y,
+            z: lo.z,
+            width: hi.x - lo.x,
+            depth: hi.y - lo.y,
+            height: hi.z - lo.z,
+            is_front: false,
+            hinged,
+            hinge_x,
+            hinge_y,
+            board: format!("handle:{finish}"),
+            grain: String::new(),
+            rebate: Vec::new(),
         });
     }
     BuildSummary {
@@ -2150,17 +2212,84 @@ mod tests {
             .filter(|p| p.role.ends_with("side"))
             .collect();
         assert_eq!(sides.len(), 2);
+        let s = &cab.standard;
         for p in sides {
             assert_eq!(p.z, 0.0);
-            assert_eq!(p.notch_depth, cab.standard.toe_kick_setback);
-            assert_eq!(p.notch_height, cab.standard.toe_kick_height);
+            // From the front and the floor, back to the setback and up to the kick's top.
+            assert_eq!(
+                (p.rebate[1], p.rebate[2], p.rebate[4], p.rebate[5]),
+                (0.0, 0.0, s.toe_kick_setback, s.toe_kick_height)
+            );
         }
         assert!(
             sum.panels
                 .iter()
                 .filter(|p| !p.role.ends_with("side"))
-                .all(|p| p.notch_height == 0.0)
+                .all(|p| p.rebate.is_empty())
         );
+    }
+
+    /// WF-4: an edge pull is drawn as a lip centred on the top edge of each door and drawer
+    /// front, and on the bottom of a wall door.
+    #[test]
+    fn edge_pulls_are_drawn_on_the_gripping_edge() {
+        let mut cab = Cabinet::new("B01", cabinet_core::CabinetKind::Base);
+        cab.standard.handle_place = cabinet_core::model::HandlePlace::EdgePull;
+        let sum = summary(cabinet_core::build_cabinet(&cab).unwrap());
+        let door = sum.panels.iter().find(|p| p.name == "B01.Door1").unwrap();
+        let pull = sum
+            .panels
+            .iter()
+            .find(|p| p.name == "B01.Door1.Handle")
+            .unwrap();
+        // On the door's top edge, centred, proud of its face.
+        assert_eq!(pull.z + pull.height, door.z + door.height);
+        assert!((pull.x + pull.width / 2.0 - (door.x + door.width / 2.0)).abs() < 1e-9);
+        assert!(pull.y < door.y);
+        let mut wall = Cabinet::new("W01", cabinet_core::CabinetKind::Wall);
+        wall.standard.handle_place = cabinet_core::model::HandlePlace::EdgePull;
+        let sum = summary(cabinet_core::build_cabinet(&wall).unwrap());
+        let door = sum.panels.iter().find(|p| p.name == "W01.Door1").unwrap();
+        let pull = sum
+            .panels
+            .iter()
+            .find(|p| p.name == "W01.Door1.Handle")
+            .unwrap();
+        assert_eq!(pull.z, door.z);
+        let mut bank = Cabinet::new("D01", cabinet_core::CabinetKind::DrawerBank);
+        bank.standard.handle_place = cabinet_core::model::HandlePlace::EdgePull;
+        let sum = summary(cabinet_core::build_cabinet(&bank).unwrap());
+        let pulls: Vec<_> = sum
+            .panels
+            .iter()
+            .filter(|p| p.role == "Drawer handle")
+            .collect();
+        assert_eq!(pulls.len(), 3);
+        for pull in pulls {
+            let front = sum
+                .panels
+                .iter()
+                .find(|p| pull.name == format!("{}.Handle", p.name))
+                .unwrap();
+            assert_eq!(pull.z + pull.height, front.z + front.height);
+        }
+    }
+
+    /// WF-4: a routed finger pull is a rebate along the door's gripping edge, at its back.
+    #[test]
+    fn a_finger_pull_is_a_rebate_along_the_fronts_edge() {
+        let mut cab = Cabinet::new("B01", cabinet_core::CabinetKind::Base);
+        cab.standard.handle_place = cabinet_core::model::HandlePlace::FingerPull;
+        let sum = summary(cabinet_core::build_cabinet(&cab).unwrap());
+        let door = sum.panels.iter().find(|p| p.name == "B01.Door1").unwrap();
+        assert_eq!(door.rebate.len(), 6);
+        // Across the door's width, at its top, from its back face.
+        assert_eq!(
+            (door.rebate[0], door.rebate[3]),
+            (door.x, door.x + door.width)
+        );
+        assert_eq!(door.rebate[5], door.z + door.height);
+        assert_eq!(door.rebate[4], door.y + door.depth);
     }
 
     /// BENCH-9: the job keeps its appliance library; a job without one opens with ours.
