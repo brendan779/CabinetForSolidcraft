@@ -499,9 +499,10 @@ pub fn tip_on_blumotion(
 }
 
 /// SERVO-DRIVE for a cabinet of drawers (any Blum box system, or MOVENTO/TANDEM, p.464) with
-/// fronts `front_heights` high: a drive unit
-/// and distance bumpers per drawer, and for the cabinet the bracket profile (PL = LH − 10, the
-/// shortest article that cuts to it), its attachments, cabling and the power supply (p.364).
+/// fronts `front_heights` high (`heavy` per front: the 70 kg profile / 60–70 kg runner): a drive
+/// unit and distance bumpers per drawer, and for the cabinet the bracket profile (PL = LH − 10,
+/// the row whose ICH range fits, else the shortest article that cuts to it), its attachments,
+/// cabling and the power supply (p.364).
 pub fn servo_drive(
     inside_height: f64,
     front_heights: &[f64],
@@ -519,13 +520,26 @@ pub fn servo_drive(
         l(a).total_cmp(&l(b))
     });
     let profile = profiles
-        .into_iter()
-        .find(|i| i.param("length").is_ok_and(|l| l >= pl))
+        .iter()
+        .find(|i| {
+            matches!(
+                (i.param("ich_min"), i.param("ich_max")),
+                (Ok(lo), Ok(hi)) if (lo..=hi).contains(&inside_height)
+            )
+        })
+        .or_else(|| {
+            profiles
+                .iter()
+                .find(|i| i.param("length").is_ok_and(|l| l >= pl))
+        })
         .ok_or_else(|| format!("no SERVO-DRIVE bracket profile reaches {pl:.0} mm"))?;
+    // 2 bumpers on a front to 300 mm, 4 above it or on a heavy runner (p.366; per front, as
+    // Blum's configurator does: the 70 kg drawer of the 2026-10-27 session got 4, the 40 kg
+    // ones 2).
     let bumpers: u32 = front_heights
         .iter()
         .map(|h| {
-            if !heavy_runner && *h <= p("low_front_max").unwrap_or(0.0) {
+            if *h <= p("low_front_max").unwrap_or(0.0) && !heavy_runner {
                 p("bumpers_low_front").unwrap_or(0.0) as u32
             } else {
                 p("bumpers_high_front").unwrap_or(0.0) as u32

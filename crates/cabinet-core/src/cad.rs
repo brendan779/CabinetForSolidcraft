@@ -252,13 +252,165 @@ pub fn cad_placements(list: &PartList) -> Vec<CadPlacement> {
                     z,
                 ));
             }
+        } else if h.item == "blum.servo-drive.drive-unit" {
+            // WF-2c: Blum's own models, one per drawer. Their frame is the cabinet's own: X
+            // across from the mounting centre (the bay centre from LW 387, else 184 from the
+            // left side), Z = 0 on the bracket line (NL + 19), Y = 0 at the datum the unit
+            // measures from (A = 45 above the cabinet profile's bottom edge, the drawer base's
+            // underside). Names match the stand-ins they replace.
+            let Some(unit) = crate::hardware::item(&h.item).ok() else {
+                continue;
+            };
+            let frame = servo_frame();
+            for (n, b) in list.by_role(PartRole::DrawerBottom).enumerate() {
+                let Some(num) = b
+                    .name
+                    .rsplit_once(PartRole::DrawerBottom.code())
+                    .map(|t| t.1)
+                else {
+                    continue;
+                };
+                let front = format!("{}.{}{num}", list.cabinet, PartRole::DrawerFront.code());
+                let Some(nl) = crate::standins::nominal_length(list, &front) else {
+                    continue;
+                };
+                let lift = unit.param("lift_above_profile_bottom").unwrap_or(45.0);
+                let from_front = unit.param("bracket_from_front").unwrap_or(19.0);
+                let Some(x) = servo_centre(list, unit, b.bounds.center().x) else {
+                    continue;
+                };
+                // Keep the stand-ins' numbering: a drawer without room behind its box gets no
+                // unit drawn at all.
+                if crate::standins::behind_drawer(list, num).is_none() {
+                    continue;
+                }
+                out.push(CadPlacement {
+                    name: format!("{}.Servo{}", list.cabinet, n + 1),
+                    item: h.item.clone(),
+                    article: item.article.clone(),
+                    side: side_of(x),
+                    origin: Vec3::new(x, nl + from_front, b.bounds.min.z + lift),
+                    frame,
+                });
+            }
+        } else if h.item.starts_with("blum.servo-drive.bracket-profile.") {
+            // The upright profile once: the same mounting centre and bracket line as the units,
+            // its datum 20 above the floor (measured on Blum's own session output).
+            let Some(unit) = crate::hardware::item("blum.servo-drive.drive-unit").ok() else {
+                continue;
+            };
+            let Some(first) = list.by_role(PartRole::DrawerBottom).next() else {
+                continue;
+            };
+            let Some(num) = first
+                .name
+                .rsplit_once(PartRole::DrawerBottom.code())
+                .map(|t| t.1)
+            else {
+                continue;
+            };
+            let front = format!("{}.{}{num}", list.cabinet, PartRole::DrawerFront.code());
+            let Some(nl) = crate::standins::nominal_length(list, &front) else {
+                continue;
+            };
+            let Some(x) = servo_centre(list, unit, first.bounds.center().x) else {
+                continue;
+            };
+            let floor = list
+                .by_role(PartRole::Bottom)
+                .map(|b| b.bounds.max().z)
+                .fold(f64::MIN, f64::max);
+            if floor <= f64::MIN / 2.0 {
+                continue;
+            }
+            let lift = unit.param("profile_origin_above_floor").unwrap_or(20.0);
+            let from_front = unit.param("bracket_from_front").unwrap_or(19.0);
+            out.push(CadPlacement {
+                name: format!("{}.ServoProfile", list.cabinet),
+                item: h.item.clone(),
+                article: item.article.clone(),
+                side: side_of(x),
+                origin: Vec3::new(x, nl + from_front, floor + lift),
+                frame: servo_frame(),
+            });
+        } else if h.item == "blum.servo-drive.distance-bumper" {
+            // In the front's thickness, its datum 4.5 behind the back face (measured on Blum's
+            // session output; the pin keeps Blum's 3.6 trigger gap): 2 bumpers at the front's
+            // centre height, 4 near its top and bottom (the heavy profile counts as high), 8 in
+            // from the side edges. Its model +Z points into the cabinet, unlike the units'.
+            let Some(bumper) = crate::hardware::item(&h.item).ok() else {
+                continue;
+            };
+            let inset = bumper.param("inset_from_front_edge").unwrap_or(8.0);
+            let face_offset = bumper.param("datum_behind_back_face").unwrap_or(4.5);
+            let mut bumpers = 0;
+            for f in list
+                .parts
+                .iter()
+                .filter(|p| p.role == PartRole::DrawerFront)
+            {
+                let heavy = list
+                    .hardware
+                    .iter()
+                    .find(|h| h.part == f.name && is_runner(&h.item))
+                    .and_then(|h| crate::hardware::item(&h.item).ok())
+                    .and_then(|i| i.param("max_load_kg").ok())
+                    .is_some_and(|kg| kg >= 70.0);
+                let high = f.bounds.size.z > 300.0 || heavy;
+                let zs: Vec<f64> = if high {
+                    vec![f.bounds.min.z + inset, f.bounds.max().z - inset]
+                } else {
+                    vec![f.bounds.center().z]
+                };
+                for z in zs {
+                    for sx in [f.bounds.min.x + inset, f.bounds.max().x - inset] {
+                        bumpers += 1;
+                        out.push(CadPlacement {
+                            name: format!("{}.ServoBumper{bumpers}", list.cabinet),
+                            item: h.item.clone(),
+                            article: item.article.clone(),
+                            side: side_of(sx),
+                            origin: Vec3::new(sx, f.bounds.min.y - face_offset, z),
+                            frame: Frame::Oriented {
+                                x: Vec3::new(-1.0, 0.0, 0.0),
+                                y: Vec3::new(0.0, 0.0, 1.0),
+                            },
+                        });
+                    }
+                }
+            }
         }
     }
     out
 }
 
+/// Blum's SERVO-DRIVE models come in the cabinet's own axes: X across, Y up, Z towards the
+/// front. In our frame Y runs to the back, so the model's Z flips: model X → our X, model Y →
+/// our Z, model Z → our −Y.
+fn servo_frame() -> Frame {
+    Frame::Oriented {
+        x: Vec3::new(1.0, 0.0, 0.0),
+        y: Vec3::new(0.0, 0.0, 1.0),
+    }
+}
+
+/// Where a SERVO-DRIVE part mounts across the bay at `x`: centred from LW 387, else 184 in
+/// from the left side (p.366).
+fn servo_centre(list: &PartList, unit: &cabinet_catalog::HardwareItem, x: f64) -> Option<f64> {
+    let (l, r) = list.bay_around(x)?;
+    let (left, right) = (l.bounds.max().x, r.bounds.min.x);
+    let lw = right - left;
+    Some(
+        if lw >= unit.param("mount_centred_from_lw").unwrap_or(387.0) {
+            (left + right) / 2.0
+        } else {
+            left + unit.param("mount_from_left_side").unwrap_or(184.0)
+        },
+    )
+}
+
 /// Runners, steel box cabinet profiles and drawer sides: the parts drawn per hand along a drawer.
-fn is_runner(item: &str) -> bool {
+pub(crate) fn is_runner(item: &str) -> bool {
     item.starts_with("blum.movento.7")
         || item.starts_with("blum.tandem.5")
         || item.contains(".cabinet-profile.")
@@ -480,5 +632,80 @@ mod tests {
                 );
             }
         }
+    }
+
+    /// WF-2c: SERVO-DRIVE places Blum's own models per drawer plus the bracket profile once, in
+    /// the frame measured on Blum's session output: centred across a wide bay, the datum depth
+    /// NL + 19 (the bracket line), the unit A = 45 above the drawer base's underside, the
+    /// profile 20 above the floor. Bumpers sit on each front's back face.
+    #[test]
+    fn servo_drive_models_mount_on_the_bracket_line_at_blums_datums() {
+        use crate::model::Opening;
+        let mut bank = Cabinet::new("D01", CabinetKind::DrawerBank);
+        bank.standard.opening = Opening::ServoDrive;
+        let list = build_cabinet(&bank).unwrap();
+        let p = cad_placements(&list);
+        let units: Vec<_> = p
+            .iter()
+            .filter(|c| {
+                c.name.starts_with("D01.Servo")
+                    && !c.name.contains("Profile")
+                    && !c.name.contains("Bumper")
+            })
+            .collect();
+        assert_eq!(units.len(), 3, "one drive unit per drawer: {units:?}");
+        let nl = crate::standins::nominal_length(&list, "D01.DrawerFront1").unwrap();
+        let (l, r) = list
+            .bay_around(list.part("D01.DrawerBottom1").unwrap().bounds.center().x)
+            .unwrap();
+        let centre = (l.bounds.max().x + r.bounds.min.x) / 2.0;
+        let base = list.part("D01.DrawerBottom1").unwrap().bounds.min.z;
+        for c in units.iter() {
+            assert_eq!(
+                c.frame,
+                Frame::Oriented {
+                    x: Vec3::new(1.0, 0.0, 0.0),
+                    y: Vec3::new(0.0, 0.0, 1.0)
+                }
+            );
+            assert!((c.origin.x - centre).abs() < 1e-9, "centred across the bay");
+            assert!(
+                (c.origin.y - (nl + 19.0)).abs() < 1e-9,
+                "on the bracket line NL + 19"
+            );
+        }
+        let unit = units[0];
+        assert!(
+            (unit.origin.z - (base + 45.0)).abs() < 1e-9,
+            "A = 45 above the base"
+        );
+        // The frame keeps Blum's model upright: its Y (up) is our +Z, its Z (to the front) our
+        // −Y.
+        let m = transform(unit, true, BLUM_FRONT_PLANE);
+        assert_eq!(apply(&m, Vec3::new(0.0, 10.0, 0.0)).z, unit.origin.z + 10.0);
+        assert_eq!(apply(&m, Vec3::new(0.0, 0.0, 10.0)).y, unit.origin.y - 10.0);
+        // The profile once, its datum 20 above the floor.
+        let profile = p.iter().find(|c| c.name == "D01.ServoProfile").unwrap();
+        let floor = list.part("D01.Bottom").unwrap().bounds.max().z;
+        assert!((profile.origin.x - centre).abs() < 1e-9);
+        assert!((profile.origin.y - (nl + 19.0)).abs() < 1e-9);
+        assert!((profile.origin.z - (floor + 20.0)).abs() < 1e-9);
+        // Bumpers: 2 per front at its centre, 8 in from the side edges, their datum 4.5 behind
+        // the back face, pin towards the interior (the model's +Z is our +Y).
+        let bumpers: Vec<_> = p
+            .iter()
+            .filter(|c| c.name.contains("ServoBumper"))
+            .collect();
+        assert_eq!(bumpers.len(), 6, "three fronts, two bumpers each");
+        let front = list.part("D01.DrawerFront1").unwrap();
+        for b in &bumpers {
+            assert!((b.origin.y - (front.bounds.min.y - 4.5)).abs() < 1e-9);
+            let from_left = b.origin.x - front.bounds.min.x;
+            let from_right = front.bounds.max().x - b.origin.x;
+            assert!((from_left - 8.0).abs() < 1e-9 || (from_right - 8.0).abs() < 1e-9);
+            let m = transform(b, true, BLUM_FRONT_PLANE);
+            assert_eq!(apply(&m, Vec3::new(0.0, 0.0, 2.6)).y, b.origin.y + 2.6);
+        }
+        assert!((bumpers[0].origin.z - front.bounds.center().z).abs() < 1e-9);
     }
 }

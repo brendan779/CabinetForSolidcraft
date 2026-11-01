@@ -494,11 +494,17 @@
       "family": "SERVO-DRIVE",
       "variant": "drive unit, dark grey, with lever extension (one per drawer)",
       "kind": "other",
-      "parameters": {},
+      "parameters": {
+        "lift_above_profile_bottom": 45,
+        "mount_centred_from_lw": 387,
+        "mount_from_left_side": 184,
+        "profile_origin_above_floor": 20,
+        "bracket_from_front": 19
+      },
       "source": {
-        "url": "Blum Catalogue and technical manual 2024/2025, p.364",
+        "url": "Blum Catalogue and technical manual 2024/2025, p.366-367 (standard cabinet, cross bar horizontal: A=45 above the cabinet profile for LEGRABOX with chipboard back at LW >= 287; drilling X=NL+19 chipboard back; centred from LW 387, else 184 from the side) and Blum session output 2026-10-27 (drawer base 600x870x580, LEGRABOX free C, NL 500, SERVO-DRIVE), New-cabinet parts list and measured New-cabinet.STEP",
         "document_date": "2024/2025",
-        "retrieved": "2026-10-26",
+        "retrieved": "2026-11-01",
         "verified": false
       }
     },
@@ -507,10 +513,12 @@
       "brand": "Blum",
       "article": "Z10T650AA",
       "family": "SERVO-DRIVE",
-      "variant": "bracket profile 650 mm (cut to size)",
+      "variant": "bracket profile 650 mm, ICH=660-669 mm (cut to size)",
       "kind": "other",
       "parameters": {
-        "length": 650
+        "length": 650,
+        "ich_min": 660,
+        "ich_max": 669
       },
       "source": {
         "url": "Blum Catalogue and technical manual 2024/2025, p.364",
@@ -524,10 +532,12 @@
       "brand": "Blum",
       "article": "Z10T700AA",
       "family": "SERVO-DRIVE",
-      "variant": "bracket profile 700 mm (cut to size)",
+      "variant": "bracket profile 700 mm, ICH=710-719 mm (cut to size)",
       "kind": "other",
       "parameters": {
-        "length": 700
+        "length": 700,
+        "ich_min": 710,
+        "ich_max": 719
       },
       "source": {
         "url": "Blum Catalogue and technical manual 2024/2025, p.364",
@@ -541,10 +551,12 @@
       "brand": "Blum",
       "article": "Z10T750AA",
       "family": "SERVO-DRIVE",
-      "variant": "bracket profile 750 mm (cut to size)",
+      "variant": "bracket profile 750 mm, ICH=760-769 mm (cut to size)",
       "kind": "other",
       "parameters": {
-        "length": 750
+        "length": 750,
+        "ich_min": 760,
+        "ich_max": 769
       },
       "source": {
         "url": "Blum Catalogue and technical manual 2024/2025, p.364",
@@ -558,10 +570,12 @@
       "brand": "Blum",
       "article": "Z10T800AA",
       "family": "SERVO-DRIVE",
-      "variant": "bracket profile 800 mm (cut to size)",
+      "variant": "bracket profile 800 mm, ICH=810-819 mm (cut to size)",
       "kind": "other",
       "parameters": {
-        "length": 800
+        "length": 800,
+        "ich_min": 810,
+        "ich_max": 819
       },
       "source": {
         "url": "Blum Catalogue and technical manual 2024/2025, p.364",
@@ -571,14 +585,54 @@
       }
     },
     {
+      "id": "blum.servo-drive.bracket-profile.670",
+      "brand": "Blum",
+      "article": "Z10T670AA",
+      "family": "SERVO-DRIVE",
+      "variant": "bracket profile vertical, length=670 mm, ICH=680-689 mm",
+      "kind": "other",
+      "parameters": {
+        "length": 670,
+        "ich_min": 680,
+        "ich_max": 689
+      },
+      "source": {
+        "url": "Blum session output 2026-10-27 (drawer base 600x870x580, LEGRABOX free C, NL 500, SERVO-DRIVE), New-cabinet parts list and measured New-cabinet.STEP: parts list 'bracket profile vertical, length=670 mm, ICH=680-689 mm, with cable (overlay bottom 800 mm)'",
+        "document_date": "2026-10-27",
+        "retrieved": "2026-11-01",
+        "verified": false
+      }
+    },
+    {
+      "id": "blum.servo-drive.bracket-profile.1143",
+      "brand": "Blum",
+      "article": "Z10T1143B",
+      "family": "SERVO-DRIVE",
+      "variant": "bracket profile vertical, length=1143 mm, ICH=1153-1162 mm",
+      "kind": "other",
+      "parameters": {
+        "length": 1143,
+        "ich_min": 1153,
+        "ich_max": 1162
+      },
+      "source": {
+        "url": "Blum E-SERVICES download (vendor-cad/blum/servo-drive-legrabox-m-450/Z10T1143B), length measured from the model; ICH range by PL = LH - 10 rounded down",
+        "document_date": "2026-10-27",
+        "retrieved": "2026-11-01",
+        "verified": false
+      }
+    },
+    {
       "id": "blum.servo-drive.bracket-profile.1170",
       "brand": "Blum",
       "article": "Z10T1170A",
       "family": "SERVO-DRIVE",
-      "variant": "bracket profile 1170 mm (cut to size)",
+      "variant": "bracket profile 1170 mm, ICH=1180-1189 mm (cut to size)",
       "kind": "other",
       "parameters": {
-        "length": 1170
+        "length": 1170,
+        "ich_min": 1180,
+        "ich_max": 1189
       },
       "source": {
         "url": "Blum Catalogue and technical manual 2024/2025, p.364",
@@ -655,12 +709,14 @@
       "variant": "Blum distance bumper Ø 5 mm",
       "kind": "other",
       "parameters": {
-        "diameter": 5
+        "diameter": 5,
+        "inset_from_front_edge": 8,
+        "datum_behind_back_face": 4.5
       },
       "source": {
-        "url": "Blum Catalogue and technical manual 2024/2025, p.364",
+        "url": "Blum Catalogue and technical manual 2024/2025, p.366 (front assembly: FA/2 apart, 20 +-12 from the centre; 2 pcs to FH 300, 4 from 301) and Blum session output 2026-10-27 (drawer base 600x870x580, LEGRABOX free C, NL 500, SERVO-DRIVE), New-cabinet parts list and measured New-cabinet.STEP (8 mm in from the front's side edges, datum 4.5 behind the back face, pin towards the interior)",
         "document_date": "2024/2025",
-        "retrieved": "2026-10-26",
+        "retrieved": "2026-11-01",
         "verified": false
       }
     },

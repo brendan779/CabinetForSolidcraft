@@ -141,12 +141,20 @@ pub fn stand_ins(list: &PartList) -> Vec<StandIn> {
                 });
             }
         } else if h.item == "blum.servo-drive.drive-unit" {
-            for shapes in servo_drive(list) {
+            let (units, profile) = servo_drive(list);
+            for shapes in units {
                 servos += 1;
                 out.push(StandIn {
                     name: format!("{}.Servo{servos}", list.cabinet),
                     item: h.item.clone(),
                     shapes,
+                });
+            }
+            if let Some(shapes) = profile {
+                out.push(StandIn {
+                    name: format!("{}.ServoProfile", list.cabinet),
+                    item: h.item.clone(),
+                    shapes: vec![shapes],
                 });
             }
         } else if h.item.starts_with("blum.clip-top") {
@@ -232,7 +240,7 @@ fn tip_on_door(list: &PartList, h: &HardwarePlacement) -> Option<Vec<Shape>> {
 
 /// The room behind drawer `n`'s box: from its back to the carcass back (y), from its base up
 /// (z0).
-fn behind_drawer(list: &PartList, n: &str) -> Option<(f64, f64, f64)> {
+pub(crate) fn behind_drawer(list: &PartList, n: &str) -> Option<(f64, f64, f64)> {
     let part = |role: PartRole| list.part(&format!("{}.{}{n}", list.cabinet, role.code()));
     let bottom = part(PartRole::DrawerBottom)?;
     let box_back = list
@@ -269,11 +277,11 @@ fn tip_on_blumotion(list: &PartList, h: &HardwarePlacement) -> Option<Vec<Shape>
     Some(vec![unit(left, 1.0), unit(right, -1.0)])
 }
 
-/// SERVO-DRIVE: the upright bracket profile (with the first drawer), and a drive unit per drawer
-/// between its box and the room Blum asks for behind it (NL + 33).
-fn servo_drive(list: &PartList) -> Vec<Vec<Shape>> {
+/// SERVO-DRIVE: a drive unit per drawer between its box and the room Blum asks for behind it
+/// (NL + 33), and the upright bracket profile once (its base drilling NL + 19 from the front).
+fn servo_drive(list: &PartList) -> (Vec<Vec<Shape>>, Option<Shape>) {
     let Some((left, right, _)) = interior(list) else {
-        return Vec::new();
+        return (Vec::new(), None);
     };
     let floor = list
         .by_role(PartRole::Bottom)
@@ -298,6 +306,7 @@ fn servo_drive(list: &PartList) -> Vec<Vec<Shape>> {
     };
     let (w, ht) = SERVO_UNIT;
     let mut out = Vec::new();
+    let mut profile = None;
     for b in list.by_role(PartRole::DrawerBottom) {
         let Some(n) = b
             .name
@@ -306,19 +315,9 @@ fn servo_drive(list: &PartList) -> Vec<Vec<Shape>> {
         else {
             continue;
         };
-        // The drawer's nominal length, from its cabinet profile.
+        // The drawer's nominal length, from its runner or cabinet profile (any system).
         let front = format!("{}.{}{n}", list.cabinet, PartRole::DrawerFront.code());
-        let Some(nl) = list
-            .hardware
-            .iter()
-            .filter(|h| h.part == front && h.item.contains(".cabinet-profile."))
-            .find_map(|h| {
-                crate::hardware::item(&h.item)
-                    .ok()?
-                    .param("nominal_length")
-                    .ok()
-            })
-        else {
+        let Some(nl) = nominal_length(list, &front) else {
             continue;
         };
         let Some((box_back, _, z0)) = behind_drawer(list, n) else {
@@ -326,17 +325,17 @@ fn servo_drive(list: &PartList) -> Vec<Vec<Shape>> {
         };
         let bracket = nl + 19.0;
         // The drawer's base stands in for the cabinet profile's bottom edge.
-        let mut shapes = vec![Shape::Box(boxed(
+        out.push(vec![Shape::Box(boxed(
             Vec3::new(x - w / 2.0, box_back.max(nl + 3.0), z0 + SERVO_LIFT),
             Vec3::new(
                 x + w / 2.0,
                 bracket - SERVO_PROFILE / 2.0,
                 z0 + SERVO_LIFT + ht,
             ),
-        ))];
-        if out.is_empty() && ceiling > floor {
+        ))]);
+        if profile.is_none() && ceiling > floor {
             let lh = ceiling - floor;
-            shapes.push(Shape::Box(boxed(
+            profile = Some(Shape::Box(boxed(
                 Vec3::new(
                     x - SERVO_PROFILE / 2.0,
                     bracket - SERVO_PROFILE / 2.0,
@@ -349,9 +348,21 @@ fn servo_drive(list: &PartList) -> Vec<Vec<Shape>> {
                 ),
             )));
         }
-        out.push(shapes);
     }
-    out
+    (out, profile)
+}
+
+/// A drawer front's nominal length, from the runner or cabinet profile fitted to it.
+pub(crate) fn nominal_length(list: &PartList, front: &str) -> Option<f64> {
+    list.hardware
+        .iter()
+        .filter(|h| h.part == front && crate::cad::is_runner(&h.item))
+        .find_map(|h| {
+            crate::hardware::item(&h.item)
+                .ok()?
+                .param("nominal_length")
+                .ok()
+        })
 }
 
 /// An adjustable leg from the floor to the carcass bottom: a foot, a column and a mounting plate
@@ -706,7 +717,21 @@ mod tests {
                 .into_iter()
                 .filter(|s| s.name.contains(tag))
                 .collect();
-            assert_eq!(found.len(), drawers * per_drawer, "{opening:?}");
+            let units = found
+                .iter()
+                .filter(|s| s.name != "D01.ServoProfile")
+                .count();
+            assert_eq!(units, drawers * per_drawer, "{opening:?}");
+            if opening == Opening::ServoDrive {
+                assert_eq!(
+                    found
+                        .iter()
+                        .filter(|s| s.name == "D01.ServoProfile")
+                        .count(),
+                    1,
+                    "one bracket profile"
+                );
+            }
             for st in &found {
                 for p in &list.parts {
                     for sh in &st.shapes {
