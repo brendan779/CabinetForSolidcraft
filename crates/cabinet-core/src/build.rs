@@ -6271,6 +6271,28 @@ mod tests {
 
     /// ABI-2: the chosen catalog row sets the bore centres, the hardware id and the model article.
     /// ABI names a pull by its length: the 85 mm Camille's screws are 64 apart.
+    /// ABI-4: the three timber pulls whose IFC has no mesh, at the centres on ABI's drawings, not
+    /// their named lengths.
+    #[test]
+    fn hegman_pulls_read_from_fbx_are_bored_at_abis_centres() {
+        for (id, length, centres, projection) in [
+            ("handle.abi.hegmanclassic-130.ash", 130.0, 50.0, 20.0),
+            ("handle.abi.hegmanclassic-250.ash", 250.0, 154.0, 20.0),
+            ("handle.abi.hegmanhalfmoon-90.ash", 90.0, 22.0, 25.0),
+        ] {
+            let row = crate::hardware::item(id).unwrap();
+            assert_eq!(row.param("length"), Ok(length), "{id}");
+            assert_eq!(row.param("centres"), Ok(centres), "{id}");
+            assert_eq!(row.param("projection"), Ok(projection), "{id}");
+            let xs: Vec<f64> = row.drilling.iter().map(|h| h.x).collect();
+            assert_eq!(xs, vec![-centres / 2.0, centres / 2.0], "{id}");
+            assert!(!row.source.verified);
+        }
+        // The half moon's screw line is 10 from its straight edge.
+        let moon = crate::hardware::item("handle.abi.hegmanhalfmoon-90.ash").unwrap();
+        assert_eq!(moon.param("across_high"), Ok(10.0));
+    }
+
     #[test]
     fn an_abi_handle_bores_its_own_centres_and_places_that_finish() {
         use crate::model::HandleRange;
