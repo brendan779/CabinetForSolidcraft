@@ -281,9 +281,11 @@ From the owner trying a drawer cabinet and a hinged-door base end to end.
 |---|---|---|---|
 | PLG-1 | blocked (SolidCraft has no plugin runtime yet; check #1221/#4980 weekly) | L | Port the bridge to a `command-plugin` WASM component (same commands via `engine.run`) |
 | PLG-2 | blocked (PLG-1) | L | `panel-plugin` with pins; propose an image-choice widget upstream so pickers can live in SolidCraft |
-| PLG-3 | todo | S | Weekly check: has SolidCraft merged plugin runtime work? Update this row and docs/FEASIBILITY_PLAN.md. Last check 2026-10-26: no runtime; #1221 and draft #4980 open, #4330 closed in favour of open PR #5586, latest release v0.23.0 |
+| PLG-3 | todo | S | Weekly check: has SolidCraft merged plugin runtime work? Update this row and docs/FEASIBILITY_PLAN.md. Last check 2026-11-02: no runtime merged, but PR #8987 (open, not draft, 2026-10-29) adds a native Wasm command plugin runtime: approved local packages, exact command grants, one Undo step, no installer or custom panel. #1221, draft #4980 and #5586 are open; latest release v0.29.0 |
 
 ## Log
+
+- 2026-11-02 — PLG-3: no plugin runtime merged yet. New since the last check: PR #8987 implements command plugins (WIT command world, example component, grants, budgets), which would cover PLG-1's bridge port but not PLG-2's panel. Worth reading the WIT when it merges.
 
 Agents append one line per session: date, items touched, outcome.
 
