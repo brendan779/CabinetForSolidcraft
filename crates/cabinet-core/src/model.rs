@@ -641,6 +641,13 @@ pub struct ConstructionStandard {
     pub handle_place: HandlePlace,
     /// The handles' finish.
     pub handle_finish: HandleFinish,
+    /// Generic bar handles, or a supplier range whose sizes the generic list does not cover.
+    #[serde(default)]
+    pub handle_range: HandleRange,
+    /// The chosen supplier handle: a hardware-catalog id (`handle.abi.tezra-220.brushed-brass`).
+    /// Empty with the generic range. An ABI job bores and orders this row.
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub handle_style: String,
     /// Slab fronts, or shaker (five-piece) frames with a panel.
     pub door_style: DoorStyle,
     /// What the drawers are made of and run on.
@@ -725,6 +732,8 @@ impl Default for ConstructionStandard {
             handle_size: HandleSize::Cc128,
             handle_place: HandlePlace::Corner,
             handle_finish: HandleFinish::Stainless,
+            handle_range: HandleRange::Generic,
+            handle_style: String::new(),
             door_style: DoorStyle::Slab,
             drawer_system: DrawerSystem::Legrabox,
             drawer_sides: DrawerSides::Standard,
@@ -812,6 +821,17 @@ pub enum HandleSize {
     Cc256,
     Cc320,
     Cc448,
+}
+
+/// Which handle range a job orders. The generic sizes are ours; a supplier range names one
+/// catalog row (family, centres and finish together) because its sizes are not the generic list.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum HandleRange {
+    #[default]
+    Generic,
+    /// ABI Interiors cabinetry pulls and knobs (`catalog/hardware/abi-handles.json`).
+    Abi,
 }
 
 impl HandleSize {

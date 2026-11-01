@@ -659,12 +659,18 @@ fn summary(list: PartList) -> BuildSummary {
         })
         .count() as u32;
     // Handles, from their screw holes: a bar standing off the front face (a knob a square),
-    // swinging or sliding with their front.
+    // swinging or sliding with their front. An ABI finish with a measured colour is that colour;
+    // the generic finishes stay named, which the viewport already paints.
     let finish = list
         .hardware
         .iter()
         .find(|h| h.item.starts_with("handle."))
         .map(|h| {
+            if let Ok(item) = cabinet_core::hardware::item(&h.item)
+                && let Some(rgb) = item.parameters.get("finish_colour_rgb")
+            {
+                return format!("#{:06X}", *rgb as u32);
+            }
             h.description
                 .rsplit(", ")
                 .next()
@@ -2431,5 +2437,21 @@ mod tests {
         );
         assert!((h.y + h.depth - door.y).abs() < 1e-9, "on the front face");
         assert!((h.height - (128.0 + 30.0)).abs() < 1e-9);
+    }
+
+    /// ABI-2: a measured finish colour reaches the viewport as `#RRGGBB` on the handle's board.
+    #[test]
+    fn an_abi_finish_colour_is_drawn_on_the_handle() {
+        let mut cab = Cabinet::new("B01", cabinet_core::CabinetKind::Base);
+        cab.standard.handle_range = cabinet_core::model::HandleRange::Abi;
+        cab.standard.handle_style = "handle.abi.tezra-220.brushed-brass".into();
+        let sum = summary(cabinet_core::build_cabinet(&cab).unwrap());
+        let h = sum
+            .panels
+            .iter()
+            .find(|p| p.name == "B01.Door1.Handle")
+            .unwrap();
+        assert_eq!(h.board, "handle:#CA9A3A");
+        assert!((h.height - (220.0 + 30.0)).abs() < 1e-6, "{}", h.height);
     }
 }

@@ -750,19 +750,30 @@ final class ViewportScene {
         return m
     }
 
-    /// A handle's metal, by its finish's name.
+    /// A handle's metal, by its finish's name, or by a measured `#RRGGBB` from the catalog.
     private static func handleMaterial(_ finish: Substring, selected: Bool) -> PhysicallyBasedMaterial {
-        let colour: NSColor = switch finish {
+        let measured = finish.hasPrefix("#") ? nsColor(hex: finish) : nil
+        let named: NSColor = switch finish {
         case "matt black": NSColor(calibratedWhite: 0.08, alpha: 1)
         case "brushed brass": NSColor(calibratedRed: 0.76, green: 0.6, blue: 0.33, alpha: 1)
         case "brushed nickel": NSColor(calibratedRed: 0.72, green: 0.71, blue: 0.67, alpha: 1)
         default: NSColor(calibratedWhite: 0.8, alpha: 1)
         }
+        let colour = measured ?? named
         var m = PhysicallyBasedMaterial()
         m.baseColor = .init(tint: selected ? colour : colour.blended(withFraction: 0.3, of: .gray) ?? colour)
         m.metallic = .init(floatLiteral: finish == "matt black" ? 0.2 : 1)
-        m.roughness = .init(floatLiteral: finish.hasPrefix("brushed") ? 0.45 : 0.3)
+        m.roughness = .init(floatLiteral: finish.hasPrefix("brushed") || measured != nil ? 0.45 : 0.3)
         return m
+    }
+
+    /// `#RRGGBB` as a calibrated colour. Anything else is no colour.
+    private static func nsColor(hex: Substring) -> NSColor? {
+        let digits = hex.dropFirst()
+        guard digits.count == 6, let v = UInt32(digits, radix: 16) else { return nil }
+        return NSColor(calibratedRed: CGFloat((v >> 16) & 0xff) / 255,
+                        green: CGFloat((v >> 8) & 0xff) / 255,
+                        blue: CGFloat(v & 0xff) / 255, alpha: 1)
     }
 
     private var loading: Set<String> = []

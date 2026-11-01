@@ -38,6 +38,18 @@ const TALL_DOOR: f64 = 1200.0;
 const DEEP_WOOD_DRAWER: f64 = 150.0;
 /// Screw centres along each edge an applied back is screwed to.
 const BACK_SCREW_SPACING: f64 = 150.0;
+
+/// Both screw holes (or the knob's one) sit on the front, clear of its edges.
+fn handle_fits(part: &Part, holes: &[(f64, f64)], wa: Axis) -> bool {
+    let b = part.bounds;
+    let margin = HANDLE_SCREW_DIAMETER;
+    holes.iter().all(|(w, z)| {
+        *w >= b.min.get(wa) + margin
+            && *w <= b.max().get(wa) - margin
+            && *z >= b.min.z + margin
+            && *z <= b.max().z - margin
+    })
+}
 /// Pilot for a 4 × 20 screw through a 6 mm back: short enough to stay clear of the shelf-pin row
 /// 37 mm in from the rear.
 const BACK_SCREW_PILOT_DEPTH: f64 = 15.0;
@@ -2862,6 +2874,16 @@ impl<'a> Builder<'a> {
                     .into(),
             );
         }
+        // An ABI style the catalog does not have falls back to the generic handle, and says so,
+        // rather than boring a size we invented.
+        let chosen = match crate::hardware::chosen_handle(s) {
+            Ok(c) => c,
+            Err(e) => {
+                self.list.warnings.push(e);
+                crate::hardware::generic_handle(s)
+            }
+        };
+        let mut unfit = false;
         for f in &fronts {
             let b = f.bounds;
             let ta = f.thickness_axis;
@@ -2917,7 +2939,7 @@ impl<'a> Builder<'a> {
                 } else {
                     w0 + HANDLE_EDGE_INSET
                 };
-                let span = s.handle_size.centres().unwrap_or(0.0);
+                let span = chosen.centres.unwrap_or(0.0);
                 let (lo, hi) = match s.handle_place {
                     HandlePlace::Centre => {
                         let c = (z0 + z1) / 2.0;
@@ -2925,15 +2947,20 @@ impl<'a> Builder<'a> {
                     }
                     _ if wall_hung => (z0 + HANDLE_END_INSET, z0 + HANDLE_END_INSET + span),
                     _ if matches!(cab.kind, CabinetKind::Tall | CabinetKind::Wardrobe) => {
-                        let c = TALL_HANDLE_HEIGHT.clamp(
-                            z0 + HANDLE_END_INSET + span / 2.0,
-                            z1 - HANDLE_END_INSET - span / 2.0,
-                        );
+                        // A pull longer than the door has no legal centre; the fit check below
+                        // leaves it off. `clamp` panics when its bounds are reversed.
+                        let low = z0 + HANDLE_END_INSET + span / 2.0;
+                        let high = z1 - HANDLE_END_INSET - span / 2.0;
+                        let c = if low <= high {
+                            TALL_HANDLE_HEIGHT.clamp(low, high)
+                        } else {
+                            (z0 + z1) / 2.0
+                        };
                         (c - span / 2.0, c + span / 2.0)
                     }
                     _ => (z1 - HANDLE_END_INSET - span, z1 - HANDLE_END_INSET),
                 };
-                if s.handle_size.centres().is_some() {
+                if chosen.centres.is_some() {
                     vec![(x, lo), (x, hi)]
                 } else {
                     // A knob sits where the handle's end nearest the edge would.
@@ -2955,11 +2982,23 @@ impl<'a> Builder<'a> {
                     (_, HandlePlace::Corner) if z1 - z0 > DEEP_FRONT => z1 - HANDLE_END_INSET,
                     _ => (z0 + z1) / 2.0,
                 };
-                match s.handle_size.centres() {
+                match chosen.centres {
                     Some(cc) => vec![(c - cc / 2.0, z), (c + cc / 2.0, z)],
                     None => vec![(c, z)],
                 }
             };
+            // An ABI pull keeps its named centres. One that would break out of the front is left
+            // off, once per cabinet, rather than bored past the edge.
+            if chosen.abi && !handle_fits(f, &holes, wa) {
+                if !unfit {
+                    self.list.warnings.push(format!(
+                        "{} does not fit {}; no handle bored",
+                        chosen.description, f.name
+                    ));
+                    unfit = true;
+                }
+                continue;
+            }
             if s.handle_place == HandlePlace::Sharknose {
                 if s.door_style != DoorStyle::Slab {
                     continue;
@@ -3012,22 +3051,13 @@ impl<'a> Builder<'a> {
                 });
                 continue;
             }
-            let (item, description) = match (s.handle_place, s.handle_size.centres()) {
-                (HandlePlace::EdgePull, _) => (
+            let (item, description) = if s.handle_place == HandlePlace::EdgePull {
+                (
                     "handle.edge-pull".to_string(),
                     format!("Edge pull, {}", s.handle_finish.label()),
-                ),
-                (_, Some(cc)) => (
-                    format!("handle.cc{cc:.0}"),
-                    format!(
-                        "Handle, {cc:.0} mm hole centres, {}",
-                        s.handle_finish.label()
-                    ),
-                ),
-                (_, None) => (
-                    "handle.knob".to_string(),
-                    format!("Knob, {}", s.handle_finish.label()),
-                ),
+                )
+            } else {
+                (chosen.item.clone(), chosen.description.clone())
             };
             if s.handle_place != HandlePlace::EdgePull {
                 for (w, z) in &holes {
@@ -6181,6 +6211,83 @@ mod tests {
             assert!(((h[0].x + h[1].x) / 2.0 - f.center().x).abs() < 1e-9);
             assert!((h[0].z - h[1].z).abs() < 1e-9);
         }
+    }
+
+    /// ABI-2: the chosen catalog row sets the bore centres, the hardware id and the model article.
+    /// Camille's 85.056 mm is not a generic size, so a rounded enum could not have placed it.
+    #[test]
+    fn an_abi_handle_bores_its_own_centres_and_places_that_finish() {
+        use crate::model::HandleRange;
+        let mut cab = Cabinet::new("B01", CabinetKind::Base);
+        cab.standard.handle_range = HandleRange::Abi;
+        cab.standard.handle_style = "handle.abi.camille-85.brushed-brass".into();
+        let list = build_cabinet(&cab).unwrap();
+        let h = handle_holes(&list, "B01.Door1");
+        assert_eq!(h.len(), 2);
+        let span = (h[0].z - h[1].z).abs();
+        assert!((span - 85.056).abs() < 1e-6, "{span}");
+        let row = list
+            .hardware
+            .iter()
+            .find(|h| h.item.starts_with("handle."))
+            .unwrap();
+        assert_eq!(row.item, "handle.abi.camille-85.brushed-brass");
+        assert!(row.description.contains("SKU"), "{}", row.description);
+        let placed = crate::cad::cad_placements(&list);
+        let model = placed.iter().find(|p| p.name.contains("Handle")).unwrap();
+        assert_eq!(model.article, "ABI-CAMILLE-85");
+    }
+
+    #[test]
+    fn an_abi_knob_takes_one_hole_and_a_pull_that_does_not_fit_is_left_off() {
+        use crate::model::HandleRange;
+        let mut cab = Cabinet::new("B01", CabinetKind::Base);
+        cab.standard.handle_range = HandleRange::Abi;
+        cab.standard.handle_style = "handle.abi.elsa-28.brushed-brass".into();
+        let list = build_cabinet(&cab).unwrap();
+        assert_eq!(handle_holes(&list, "B01.Door1").len(), 1);
+        assert!(
+            list.hardware
+                .iter()
+                .any(|h| h.item == "handle.abi.elsa-28.brushed-brass")
+        );
+        // 800 mm centres do not fit a base door. The generic handle must not be substituted.
+        cab.standard.handle_style = "handle.abi.rappana-800.brushed-brass".into();
+        let list = build_cabinet(&cab).unwrap();
+        assert!(handle_holes(&list, "B01.Door1").is_empty());
+        assert!(!list.hardware.iter().any(|h| h.item.starts_with("handle.")));
+        assert!(
+            list.warnings.iter().any(|w| w.contains("does not fit")),
+            "{:?}",
+            list.warnings
+        );
+    }
+
+    #[test]
+    fn an_unknown_abi_style_falls_back_to_the_generic_handle() {
+        use crate::model::HandleRange;
+        let mut cab = Cabinet::new("B01", CabinetKind::Base);
+        cab.standard.handle_range = HandleRange::Abi;
+        cab.standard.handle_style = "handle.abi.no-such".into();
+        let list = build_cabinet(&cab).unwrap();
+        assert!(list.hardware.iter().any(|h| h.item == "handle.cc128"));
+        assert!(list.warnings.iter().any(|w| w.contains("no-such")));
+    }
+
+    #[test]
+    fn a_saved_standard_without_a_handle_range_stays_generic() {
+        let mut v = serde_json::to_value(crate::model::ConstructionStandard::default()).unwrap();
+        let obj = v.as_object_mut().unwrap();
+        obj.remove("handle_range");
+        obj.remove("handle_style");
+        let s: crate::model::ConstructionStandard = serde_json::from_value(v).unwrap();
+        assert_eq!(s.handle_range, crate::model::HandleRange::Generic);
+        assert!(s.handle_style.is_empty());
+        let back = serde_json::to_value(&s).unwrap();
+        assert!(
+            back.get("handle_style").is_none(),
+            "an empty style is not stored"
+        );
     }
 
     #[test]
