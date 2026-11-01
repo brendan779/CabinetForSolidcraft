@@ -353,7 +353,11 @@ fn hinges_and_runners_show_as_one_stand_in_body_each_where_the_core_puts_them() 
         }
         let names = |prefix: &str| built.iter().filter(|(n, _)| n.contains(prefix)).count();
         assert_eq!(
-            names(".Hinge") + names(".Runner") + names(".Leg"),
+            names(".Hinge")
+                + names(".Plate")
+                + names(".Runner")
+                + names(".BoxSide")
+                + names(".Leg"),
             expected.len(),
             "{id}"
         );
@@ -623,5 +627,151 @@ fn a_sharknose_bevels_the_gripping_edge() {
             "{door}: {volume} vs {}",
             full - cut
         );
+    }
+}
+
+/// A 10 x 20 x 30 box from the origin as a binary STL, enough to see where a mesh lands.
+fn box_stl(path: &Path) {
+    let p = |x: f32, y: f32, z: f32| [x, y, z];
+    let c = [
+        p(0., 0., 0.),
+        p(10., 0., 0.),
+        p(10., 20., 0.),
+        p(0., 20., 0.),
+        p(0., 0., 30.),
+        p(10., 0., 30.),
+        p(10., 20., 30.),
+        p(0., 20., 30.),
+    ];
+    let faces = [
+        [0, 2, 1],
+        [0, 3, 2],
+        [4, 5, 6],
+        [4, 6, 7],
+        [0, 1, 5],
+        [0, 5, 4],
+        [1, 2, 6],
+        [1, 6, 5],
+        [2, 3, 7],
+        [2, 7, 6],
+        [3, 0, 4],
+        [3, 4, 7],
+    ];
+    let mut b = vec![0u8; 80];
+    b.extend((faces.len() as u32).to_le_bytes());
+    for f in faces {
+        b.extend([0u8; 12]);
+        for i in f {
+            for v in c[i] {
+                b.extend(v.to_le_bytes());
+            }
+        }
+        b.extend([0u8; 2]);
+    }
+    std::fs::write(path, b).unwrap();
+}
+
+/// What the owner found: handles sitting at the origin. An engine that lands a mesh inserted by
+/// `hardware_inserts` anywhere but its placement fails here. Older engines have no mesh insert.
+#[test]
+fn a_supplier_mesh_lands_where_its_placement_says() {
+    let Some(cli) = cli() else {
+        eprintln!("SOLIDCRAFT_CLI not set: skipped");
+        return;
+    };
+    let help = Command::new(&cli).arg("commands").output().unwrap().stdout;
+    if !String::from_utf8_lossy(&help).contains("file.insert_mesh") {
+        eprintln!("this engine has no file.insert_mesh: skipped");
+        return;
+    }
+    let dir = std::env::temp_dir().join("cabinet-headless");
+    std::fs::create_dir_all(&dir).unwrap();
+    let stl = dir.join("mesh-box.stl");
+    box_stl(&stl);
+    let model = solidcraft_bridge::vendor::VendorInstance {
+        name: "B01.Handle1".into(),
+        item: "handle.abi.tezra-220.brushed-brass".into(),
+        article: "ABI-TEST".into(),
+        step: stl.clone(),
+        stl,
+        // A quarter turn about Y, as a pull on a door stands: model X up the door.
+        transform: [
+            0.0, 0.0, 1.0, 100.0, 0.0, 1.0, 0.0, 200.0, -1.0, 0.0, 0.0, 300.0,
+        ],
+    };
+    let mut commands = vec![json!({ "command": "component.create", "params": { "name": "B01" } })];
+    commands.extend(solidcraft_bridge::hardware_inserts("B01", &[model]));
+    let got = bounds(&cli, "mesh-lands", &commands);
+    assert!(!got.is_empty(), "no body came in");
+    let (_, b) = &got[0];
+    // x = 100 + z, y = 200 + y, z = 300 - x.
+    assert_eq!(
+        b,
+        &vec![100_000, 200_000, 290_000, 130_000, 220_000, 300_000],
+        "{got:?}"
+    );
+}
+
+/// The same, the way the app does it: a whole cabinet built, then its handle models inserted into
+/// its component. Each lands on its own front's face, in the core's own placement.
+#[test]
+fn abi_handle_models_land_on_their_fronts_in_a_built_cabinet() {
+    let Some(cli) = cli() else {
+        eprintln!("SOLIDCRAFT_CLI not set: skipped");
+        return;
+    };
+    let help = Command::new(&cli).arg("commands").output().unwrap().stdout;
+    if !String::from_utf8_lossy(&help).contains("file.insert_mesh") {
+        eprintln!("this engine has no file.insert_mesh: skipped");
+        return;
+    }
+    let dir = std::env::temp_dir().join("cabinet-headless");
+    std::fs::create_dir_all(&dir).unwrap();
+    let stl = dir.join("mesh-box.stl");
+    box_stl(&stl);
+    let mut cab = Cabinet::new("S01", CabinetKind::Sink);
+    cab.standard.handle_range = cabinet_core::model::HandleRange::Abi;
+    cab.standard.handle_style = "handle.abi.tezra-220.brushed-brass".into();
+    let list = build_cabinet(&cab).unwrap();
+    let models: Vec<_> = cabinet_core::cad::cad_placements(&list)
+        .into_iter()
+        .filter(|p| p.item.starts_with("handle.abi."))
+        .map(|p| solidcraft_bridge::vendor::VendorInstance {
+            name: p.name.clone(),
+            item: p.item.clone(),
+            article: p.article.clone(),
+            step: stl.clone(),
+            stl: stl.clone(),
+            transform: cabinet_core::cad::transform(&p, false, 0.0),
+        })
+        .collect();
+    assert_eq!(models.len(), 2);
+    let real: Vec<String> = models.iter().map(|m| m.name.clone()).collect();
+    // Design is the app's default level, and the owner's handles went missing at it.
+    let mut commands = solidcraft_bridge::replace_cabinet(&list, Detail::Design, None, None, &real);
+    commands.extend(solidcraft_bridge::hardware_inserts("S01", &models));
+    let got = bounds(&cli, "abi-in-cabinet", &commands);
+    let meshes: Vec<_> = got
+        .iter()
+        .filter(|(n, b)| {
+            !list.parts.iter().any(|p| p.name == *n) && n.contains("mesh")
+                || n.contains("Handle") && b.len() == 6
+        })
+        .collect();
+    assert_eq!(
+        meshes.len(),
+        2,
+        "{:?}",
+        got.iter().map(|g| &g.0).collect::<Vec<_>>()
+    );
+    for m in &models {
+        let t = m.transform;
+        // The test box's corner at the model's origin goes to the placement's translation.
+        let want = [t[3], t[7], t[11]].map(|v| (v * 1000.0).round() as i64);
+        let hit = meshes
+            .iter()
+            .any(|(_, b)| (0..3).all(|a| b[a] <= want[a] + 5 && want[a] <= b[a + 3] + 5));
+        assert!(hit, "{}: {want:?} not on {meshes:?}", m.name);
+        assert!(t[3] > 1.0 && t[11] > 100.0, "{}: at the origin", m.name);
     }
 }

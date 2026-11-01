@@ -67,8 +67,8 @@ def pair(cc):
 SPECS = {
     'Beta Cabinetry Pull 115mm': {'holes': pair(64), 'proj': 18},
     'Beta Cabinetry Pull 400mm': {'holes': pair(355), 'proj': 18},
-    'Camille Farmhouse Cabinetry Pull': {'holes': pair(64), 'proj': 23, 'edge': 3, 'flip': True},
-    'Imes Cabinetry Pull': {'holes': pair(64), 'proj': 14, 'edge': 15, 'flip': True},
+    'Camille Farmhouse Cabinetry Pull': {'holes': pair(64), 'proj': 23, 'edge': 3},
+    'Imes Cabinetry Pull': {'holes': pair(64), 'proj': 14, 'edge': 15},
     'Kingsley Adjustable Cabinetry Pull 150mm': {'holes': pair(98), 'proj': 39, 'adjustable': (70, 120)},
     'Kingsley Adjustable Cabinetry Pull 250mm': {'holes': pair(198), 'proj': 39, 'adjustable': (100, 220)},
     'Kingsley Adjustable Cabinetry Pull 350mm': {'holes': pair(298), 'proj': 39, 'adjustable': (140, 320)},
@@ -100,9 +100,9 @@ SPECS = {
     'Elsa Cabinetry Knob': {'holes': [0], 'proj': 20},
     'Myka Cabinetry Knob 60mm': {'holes': [0], 'proj': 23},
     'Pika Cabinetry Knob': {'holes': [0], 'proj': 24},
-    'Tezra Textured Cabinetry Knob': {'holes': [0], 'proj': 35},
+    'Tezra Textured Cabinetry Knob': {'holes': [0], 'proj': 35, 'flip': True},
     'Pedra Large Knob 35mm': {'holes': [0], 'proj': 21.5},
-    'Pedra Small Knob 20mm': {'holes': [0], 'proj': 25},
+    'Pedra Small Knob 20mm': {'holes': [0], 'proj': 25, 'flip': True},
     'Hegman Round Pull - 30mm': {'holes': [0], 'proj': 19},
     'Hegman Round Pull 60mm': {'holes': [0], 'proj': 23},
     'Hegman Round Pull 90mm': {'holes': [0], 'proj': 25},
@@ -345,8 +345,8 @@ def frame(tris, spec):
 
     The length is the longest axis (for a one-screw pull or a knob, the longer axis off the
     door); the projection is the axis nearest what the drawing prints, and the door face is
-    the extreme with the least flat area (a pull's feet, a knob's base), unless `flip` says
-    the render showed otherwise.
+    the extreme further from the surface's centroid, unless `flip` says the drawing shows
+    otherwise.
     """
     pts = [p for t in tris for p in t]
     lo = [min(p[i] for p in pts) for i in range(3)]
@@ -357,15 +357,16 @@ def frame(tris, spec):
     length = max(rest, key=lambda a: size[a])
     width = next(a for a in rest if a != length)
 
-    def flat_area(val):
-        area = 0.0
-        for t in tris:
-            if all(abs(p[proj] - val) < 0.3 for p in t):
-                n = cross(sub(t[1], t[0]), sub(t[2], t[0]))
-                area += dot(n, n) ** 0.5 / 2
-        return area
-
-    door = lo[proj] if flat_area(lo[proj]) <= flat_area(hi[proj]) else hi[proj]
+    # Most of a handle's surface is what you grip, away from the door. (Flat area at each
+    # extreme does not work: a round bar touches its plane along a line, so it reads as a foot.)
+    area = moment = 0.0
+    for t in tris:
+        n = cross(sub(t[1], t[0]), sub(t[2], t[0]))
+        a = dot(n, n) ** 0.5 / 2
+        area += a
+        moment += a * sum(p[proj] for p in t) / 3
+    centroid = moment / area
+    door = lo[proj] if centroid - lo[proj] > hi[proj] - centroid else hi[proj]
     if spec.get('flip'):
         door = hi[proj] if door == lo[proj] else lo[proj]
     into = [0.0, 0.0, 0.0]
@@ -472,6 +473,9 @@ FINISH_COLOURS = {
 }
 
 
+# Finishes that are not bare metal, so the views do not draw them shining.
+MATTE = re.compile(r'marble|travertine|ash|timber|white|matte', re.I)
+
 # Through-hole for ABI's M4 screws, as the generic handles bore.
 SCREW_HOLE = 5
 # More than any front is thick: the builder bores the front through.
@@ -499,8 +503,11 @@ def write_catalog(rows, path):
                 'sku': int(f['sku']),
                 'price_aud': f['price_aud'],
             }
+            params['across_low'], params['across_high'] = r['across']
             if r['knob']:
                 params['knob'] = 1
+            if MATTE.search(f['name']):
+                params['matte'] = 1
             if r['adjustable']:
                 params['adjustable_min'], params['adjustable_max'] = r['adjustable']
             if colour:
@@ -613,6 +620,7 @@ def main():
             'measured_length': round(length_mm, 1),
             'projection': round(proj_mm, 1),
             'width': round(width_mm, 1),
+            'across': (round(min(across), 1), round(max(across), 1)),
             'colour_rgb': rgb,
             'triangles': tri_count,
             'finishes': fins,

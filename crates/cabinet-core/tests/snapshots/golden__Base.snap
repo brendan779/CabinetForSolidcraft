@@ -1688,7 +1688,7 @@ expression: list
       "at": {
         "x": 564.0,
         "y": 0.0,
-        "z": 690.0
+        "z": 818.0
       },
       "direction": {
         "axis": "Y",
@@ -1704,7 +1704,7 @@ expression: list
       "at": {
         "x": 564.0,
         "y": 0.0,
-        "z": 818.0
+        "z": 690.0
       },
       "direction": {
         "axis": "Y",

@@ -84,4 +84,6 @@ signalling the app first is caught by the debugger, and the app outlives it.
 - SolidCraft 0.22 (2026-10-26) grounds a design's first part when it is made; a grounded
   occurrence refuses `occurrence.move`. Send `occurrence.ground {occurrence, grounded: false}`
   first (works on 0.20 too). This Mac runs 0.22; MacAirServer and CI test with the 0.20 CLI.
+- `file.insert_mesh` takes no `matrix` and ignores one (unlike `file.insert_step`): a mesh lands at the
+  origin until `occurrence.move` puts it in place (checked on 0.29).
 - Preferences › Plugins only lists folders. No plugin code runs yet (issue #1221, draft PR #4980).

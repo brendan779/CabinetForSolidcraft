@@ -17,8 +17,8 @@ expression: svg
 <circle cx="34.00" cy="152.00" r="1" fill="#c0392b"/>
 <circle cx="51.66" cy="147.25" r="3.86" fill="none" stroke="#222" stroke-width="0.25"/>
 <circle cx="174.83" cy="147.25" r="3.86" fill="none" stroke="#222" stroke-width="0.25"/>
-<circle cx="153.20" cy="27.73" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
 <circle cx="181.45" cy="27.73" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
+<circle cx="153.20" cy="27.73" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
 <line class="d" x1="51.66" y1="152.00" x2="51.66" y2="153.50"/>
 <text class="o2" x="51.66" y="154.00" transform="rotate(90 51.66 154.00)">80</text>
 <line class="d" x1="153.20" y1="152.00" x2="153.20" y2="153.50"/>
@@ -36,5 +36,5 @@ expression: svg
 <text class="t" x="15.00" y="182.00">Finished 718 × 598 × 18 mm   Board: Polytec Classic White Matt 16 MR MDF</text>
 <text class="t" x="15.00" y="189.00">Job: Snapshot job   Cabinet: B01   Operations: 4   Reference corner ●   Edge tape ▬</text>
 <text class="s" x="158.50" y="172.50">Ø35 × 13 HingeCup ×2  @ 80, 21.5; 638, 21.5</text>
-<text class="s" x="158.50" y="175.40">Ø5 × 18 HandleScrew ×2  @ 540, 563; 668, 563</text>
+<text class="s" x="158.50" y="175.40">Ø5 × 18 HandleScrew ×2  @ 668, 563; 540, 563</text>
 </svg>

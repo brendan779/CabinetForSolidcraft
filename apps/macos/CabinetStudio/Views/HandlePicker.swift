@@ -92,7 +92,7 @@ struct AbiHandleSection: View {
                 picking = true
             } label: {
                 HStack(spacing: 10) {
-                    HandlePhoto(record: chosen?.record)
+                    HandlePhoto(record: chosen?.record, others: chosen?.place.size.finishes ?? [])
                         .frame(width: 44, height: 44)
                     VStack(alignment: .leading, spacing: 1) {
                         Text(title).lineLimit(1)
@@ -148,6 +148,9 @@ extension HandleRecord {
 /// `scripts/fetch_abi_photos.py`). Before those are downloaded, the finish's colour.
 struct HandlePhoto: View {
     let record: HandleRecord?
+    /// Other finishes of the same size, for a finish whose page had no photo: the shape still
+    /// shows, which is what a family tile is for.
+    var others: [HandleRecord] = []
 
     /// Loaded photos by row id; nil for one that is not there, so it is not retried each draw.
     @MainActor private static var cache: [String: NSImage?] = [:]
@@ -160,7 +163,7 @@ struct HandlePhoto: View {
     }
 
     var body: some View {
-        if let record, let image = Self.photo(record.id) {
+        if let image = ([record].compactMap { $0 } + others).lazy.compactMap({ Self.photo($0.id) }).first {
             // ABI shoots on white; the tile keeps that, not the window's dark background.
             Image(nsImage: image)
                 .resizable()
@@ -175,7 +178,7 @@ struct HandlePhoto: View {
     }
 }
 
-/// Family tiles and finishes as ABI's photos, and size chips. Every tap is the job's choice at
+/// Family tiles as ABI's photos, size chips and large finish samples. Every tap is the job's choice at
 /// once: a new family or size keeps the finish where it comes in that finish, so what the picker
 /// shows is always what the job has.
 struct AbiHandlePicker: View {
@@ -228,7 +231,7 @@ struct AbiHandlePicker: View {
                     if let record = mid?.best(for: chosenFinish) { onPick(record) }
                 } label: {
                     VStack(spacing: 5) {
-                        HandlePhoto(record: mid?.best(for: chosenFinish))
+                        HandlePhoto(record: mid?.best(for: chosenFinish), others: mid?.finishes ?? [])
                             .frame(height: 84)
                             .frame(maxWidth: .infinity)
                         Text(f.shortName).font(.caption).lineLimit(1)
@@ -275,8 +278,8 @@ struct AbiHandlePicker: View {
                         onPick(finish)
                     } label: {
                         VStack(spacing: 4) {
-                            HandlePhoto(record: finish)
-                                .frame(height: 64)
+                            FinishSample(record: finish)
+                                .frame(width: 64, height: 64)
                             Text(finish.variant.replacingOccurrences(of: " (colour to verify)", with: ""))
                                 .font(.caption2).lineLimit(1).minimumScaleFactor(0.8)
                             Text(finish.priceAud > 0 ? finish.priceAud.formatted(.currency(code: "AUD")) : "—")
@@ -312,6 +315,35 @@ struct AbiHandlePicker: View {
         .padding(.horizontal, 14)
         .padding(.vertical, 10)
         .background(.bar)
+    }
+}
+
+/// A finish as a large round sample, so its colour reads: ABI's own swatch image, from
+/// `vendor-cad/abi-web/swatches`, or its colour.
+struct FinishSample: View {
+    let record: HandleRecord
+
+    @MainActor private static var cache: [String: NSImage?] = [:]
+    @MainActor private static func swatch(_ finish: String) -> NSImage? {
+        if let known = cache[finish] { return known }
+        let slug = finish.lowercased().split(whereSeparator: { !$0.isLetter && !$0.isNumber }).joined(separator: "-")
+        let path = Preferences.vendorCADDir?.appending(path: "abi-web/swatches/\(slug).png").path
+        let image = path.flatMap { NSImage(contentsOfFile: $0) }
+        cache[finish] = .some(image)
+        return image
+    }
+
+    var body: some View {
+        Group {
+            if let image = Self.swatch(record.variant) {
+                Image(nsImage: image).resizable().interpolation(.high).scaledToFill()
+            } else {
+                Rectangle().fill(NSColor(hex: record.colour).map { Color(nsColor: $0) } ?? Color.primary.opacity(0.08))
+            }
+        }
+        .clipShape(Circle())
+        .overlay(Circle().strokeBorder(.primary.opacity(0.25)))
+        .accessibilityHidden(true)
     }
 }
 

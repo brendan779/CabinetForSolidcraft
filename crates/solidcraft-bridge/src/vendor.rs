@@ -44,6 +44,9 @@ impl VendorModel {
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct VendorInstance {
     pub name: String,
+    /// The hardware item it is, for what the file does not carry (a finish's colour).
+    #[serde(default)]
+    pub item: String,
     pub article: String,
     pub step: PathBuf,
     pub stl: PathBuf,
@@ -203,6 +206,7 @@ pub fn resolve(placements: &[CadPlacement], models: &[VendorModel]) -> Vec<Vendo
             }
             out.push(VendorInstance {
                 name: p.name.clone(),
+                item: p.item.clone(),
                 article: p.article.clone(),
                 step: m.step.clone(),
                 stl: m.stl.clone(),

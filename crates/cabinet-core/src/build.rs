@@ -39,34 +39,26 @@ const DEEP_WOOD_DRAWER: f64 = 150.0;
 /// Screw centres along each edge an applied back is screwed to.
 const BACK_SCREW_SPACING: f64 = 150.0;
 
-/// Every screw hole sits on the front, clear of its edges, and the handle's `length` stays on
-/// it: along the height on a door, along the width on a drawer.
+/// Every screw hole sits on the front, clear of its edges, and so does the handle's body:
+/// `body` is its reach along the front's width and up its height.
 fn handle_fits(
     part: &Part,
     holes: &[(f64, f64)],
     wa: Axis,
-    along_height: bool,
-    length: f64,
+    body: ((f64, f64), (f64, f64)),
 ) -> bool {
     let b = part.bounds;
     let margin = HANDLE_SCREW_DIAMETER;
-    let clear = holes.iter().all(|(w, z)| {
+    let (w, z) = body;
+    holes.iter().all(|(w, z)| {
         *w >= b.min.get(wa) + margin
             && *w <= b.max().get(wa) - margin
             && *z >= b.min.z + margin
             && *z <= b.max().z - margin
-    });
-    let along = |h: &(f64, f64)| if along_height { h.1 } else { h.0 };
-    let (lo, hi) = holes.iter().fold((f64::MAX, f64::MIN), |(lo, hi), h| {
-        (lo.min(along(h)), hi.max(along(h)))
-    });
-    let (mid, half) = ((lo + hi) / 2.0, length / 2.0);
-    let (b0, b1) = if along_height {
-        (b.min.z, b.max().z)
-    } else {
-        (b.min.get(wa), b.max().get(wa))
-    };
-    clear && mid - half >= b0 && mid + half <= b1
+    }) && w.0 >= b.min.get(wa)
+        && w.1 <= b.max().get(wa)
+        && z.0 >= b.min.z
+        && z.1 <= b.max().z
 }
 /// Pilot for a 4 × 20 screw through a 6 mm back: short enough to stay clear of the shelf-pin row
 /// 37 mm in from the rear.
@@ -87,6 +79,10 @@ const SHELF_PIN_REACH: f64 = 3.0;
 const HANDLE_SCREW_DIAMETER: f64 = 5.0;
 const HANDLE_EDGE_INSET: f64 = 35.0;
 const HANDLE_END_INSET: f64 = 50.0;
+/// Our choice: wood left between a supplier handle's body and the end or edge of its front. Long
+/// overhangs (Pedra Curve's body runs 79 past its screws) move the screws in to keep it.
+const HANDLE_BODY_CLEARANCE: f64 = 20.0;
+const HANDLE_SIDE_CLEARANCE: f64 = 10.0;
 const TALL_HANDLE_HEIGHT: f64 = 1050.0;
 const DEEP_FRONT: f64 = 200.0;
 /// Our choice: a canopy bottom keeps at least this much board round the insert's cut-out.
@@ -2902,6 +2898,12 @@ impl<'a> Builder<'a> {
             }
         };
         let mut unfit = false;
+        let span = chosen.centres.unwrap_or(0.0);
+        // One screw (a knob, a T pull): the body lies across the front, level, whatever the front.
+        let single = chosen.holes.len() == 1;
+        let (below, above) = chosen.across;
+        // How far the body runs past the outer screws along the screw line.
+        let overhang = ((chosen.length - span) / 2.0).max(0.0);
         for f in &fronts {
             let b = f.bounds;
             let ta = f.thickness_axis;
@@ -2917,6 +2919,8 @@ impl<'a> Builder<'a> {
                 b.max().get(ta)
             };
             let dir = Dir::new(ta, back_low);
+            // Which way across the front a door's model's +Z (its straight edge) points.
+            let mut toward_free = 1.0;
             // (position along the width, height) of each hole.
             let holes: Vec<(f64, f64)> = if f.role == PartRole::Door {
                 let cups: Vec<f64> = self
@@ -2952,23 +2956,27 @@ impl<'a> Builder<'a> {
                 } else {
                     continue;
                 };
+                // The body stays clear of the free edge and of the door's ends.
+                let reach = if single { chosen.length / 2.0 } else { above };
+                let edge_inset = HANDLE_EDGE_INSET.max(reach + HANDLE_SIDE_CLEARANCE);
                 let x = if hinge_low {
-                    w1 - HANDLE_EDGE_INSET
+                    w1 - edge_inset
                 } else {
-                    w0 + HANDLE_EDGE_INSET
+                    w0 + edge_inset
                 };
-                let span = chosen.centres.unwrap_or(0.0);
+                let end_reach = if single { above } else { overhang };
+                let end_inset = HANDLE_END_INSET.max(end_reach + HANDLE_BODY_CLEARANCE);
                 let (lo, hi) = match s.handle_place {
                     HandlePlace::Centre => {
                         let c = (z0 + z1) / 2.0;
                         (c - span / 2.0, c + span / 2.0)
                     }
-                    _ if wall_hung => (z0 + HANDLE_END_INSET, z0 + HANDLE_END_INSET + span),
+                    _ if wall_hung => (z0 + end_inset, z0 + end_inset + span),
                     _ if matches!(cab.kind, CabinetKind::Tall | CabinetKind::Wardrobe) => {
                         // A pull longer than the door has no legal centre; the fit check below
                         // leaves it off. `clamp` panics when its bounds are reversed.
-                        let low = z0 + HANDLE_END_INSET + span / 2.0;
-                        let high = z1 - HANDLE_END_INSET - span / 2.0;
+                        let low = z0 + end_inset + span / 2.0;
+                        let high = z1 - end_inset - span / 2.0;
                         let c = if low <= high {
                             TALL_HANDLE_HEIGHT.clamp(low, high)
                         } else {
@@ -2976,15 +2984,23 @@ impl<'a> Builder<'a> {
                         };
                         (c - span / 2.0, c + span / 2.0)
                     }
-                    _ => (z1 - HANDLE_END_INSET - span, z1 - HANDLE_END_INSET),
+                    _ => (z1 - end_inset - span, z1 - end_inset),
                 };
                 if chosen.centres.is_some() {
                     let c = (lo + hi) / 2.0;
-                    chosen
+                    let mut holes: Vec<(f64, f64)> = chosen
                         .holes
                         .iter()
                         .map(|(along, across)| (x + across, c + along))
-                        .collect()
+                        .collect();
+                    // The model's frame follows the holes in order: down the door turns its
+                    // straight edge to a left-hung door's free edge, as a pair meets at its gap.
+                    if hinge_low {
+                        holes.reverse();
+                    } else {
+                        toward_free = -1.0;
+                    }
+                    holes
                 } else {
                     // A knob sits where the handle's end nearest the edge would.
                     let z = if wall_hung { lo } else { hi };
@@ -3001,9 +3017,14 @@ impl<'a> Builder<'a> {
                 let c = (w0 + w1) / 2.0;
                 let z = match (f.role, s.handle_place) {
                     // Lift fronts are pulled up from the bottom.
-                    (PartRole::LiftFront, _) => z0 + HANDLE_END_INSET,
-                    (_, HandlePlace::Corner) if z1 - z0 > DEEP_FRONT => z1 - HANDLE_END_INSET,
-                    _ => (z0 + z1) / 2.0,
+                    (PartRole::LiftFront, _) => {
+                        z0 + HANDLE_END_INSET.max(HANDLE_BODY_CLEARANCE - below)
+                    }
+                    (_, HandlePlace::Corner) if z1 - z0 > DEEP_FRONT => {
+                        z1 - HANDLE_END_INSET.max(HANDLE_BODY_CLEARANCE + above)
+                    }
+                    // The body centred on the front, not its screw line.
+                    _ => (z0 + z1) / 2.0 - (below + above) / 2.0,
                 };
                 chosen
                     .holes
@@ -3013,8 +3034,18 @@ impl<'a> Builder<'a> {
             };
             // An ABI pull keeps its named centres. One that would break out of the front is left
             // off, once per cabinet, rather than bored past the edge.
-            let along_height = f.role == PartRole::Door;
-            if chosen.abi && !handle_fits(f, &holes, wa, along_height, chosen.length) {
+            let mean = |v: &dyn Fn(&(f64, f64)) -> f64| {
+                holes.iter().map(v).sum::<f64>() / holes.len().max(1) as f64
+            };
+            let (hw, hz) = (mean(&|h| h.0), mean(&|h| h.1));
+            let half = chosen.length / 2.0;
+            let body = if f.role == PartRole::Door && !single {
+                let (a, b) = (hw + toward_free * below, hw + toward_free * above);
+                ((a.min(b), a.max(b)), (hz - half, hz + half))
+            } else {
+                ((hw - half, hw + half), (hz + below, hz + above))
+            };
+            if chosen.abi && !handle_fits(f, &holes, wa, body) {
                 if !unfit {
                     self.list.warnings.push(format!(
                         "{} does not fit {}; no handle bored",
@@ -6332,6 +6363,138 @@ mod tests {
         bank.standard.handle_style = "handle.abi.tezra-220.brushed-brass".into();
         let list = build_cabinet(&bank).unwrap();
         assert!(handle_holes(&list, "D01.DrawerFront1").is_empty());
+    }
+
+    /// Owner's test: Pedra Curve left out of doors because its 79 mm overhang ran past the top.
+    /// Every ABI model, on every sort of front: its whole body, placed through the same transform
+    /// the views and SolidCraft use, stays on the front it is bored in, and the model stands out
+    /// of the front's face. A pull is only left off where it truly cannot fit, and says so.
+    #[test]
+    fn every_abi_handle_stays_on_every_front_it_is_bored_in() {
+        use crate::model::HandleRange;
+        let mut seen = std::collections::BTreeSet::new();
+        let styles: Vec<_> = crate::hardware::items()
+            .iter()
+            .filter(|h| h.id.starts_with("handle.abi."))
+            .filter(|h| seen.insert(h.article.clone()))
+            .collect();
+        assert!(styles.len() >= 30);
+        for style in styles {
+            let p = |k: &str| style.parameters.get(k).copied().unwrap_or(0.0);
+            for kind in [
+                CabinetKind::Base,
+                CabinetKind::DrawerBank,
+                CabinetKind::Wall,
+                CabinetKind::Tall,
+                CabinetKind::Sink,
+            ] {
+                let mut cab = Cabinet::new("C01", kind);
+                cab.standard.handle_range = HandleRange::Abi;
+                cab.standard.handle_style = style.id.clone();
+                let list = build_cabinet(&cab).unwrap();
+                let who = format!("{} on {kind:?}", style.id);
+                assert!(
+                    !list.warnings.iter().any(|w| w.contains("clash")),
+                    "{who}: {:?}",
+                    list.warnings
+                );
+                let placed: Vec<_> = crate::cad::cad_placements(&list)
+                    .into_iter()
+                    .filter(|c| c.item == style.id)
+                    .collect();
+                let bored = list
+                    .operations
+                    .iter()
+                    .filter(|o| {
+                        matches!(
+                            o,
+                            Operation::Bore {
+                                purpose: BorePurpose::HandleScrew,
+                                ..
+                            }
+                        )
+                    })
+                    .count();
+                assert_eq!(bored % style.drilling.len(), 0, "{who}");
+                assert_eq!(placed.len(), bored / style.drilling.len(), "{who}");
+                let doors: usize = list.by_role(PartRole::Door).count()
+                    + list.by_role(PartRole::DrawerFront).count();
+                if placed.len() < doors {
+                    assert!(
+                        list.warnings.iter().any(|w| w.contains("does not fit")),
+                        "{who}"
+                    );
+                }
+                for c in placed {
+                    let m = crate::cad::transform(&c, false, 0.0);
+                    let at = |x: f64, y: f64, z: f64| {
+                        Vec3::new(
+                            m[0] * x + m[1] * y + m[2] * z + m[3],
+                            m[4] * x + m[5] * y + m[6] * z + m[7],
+                            m[8] * x + m[9] * y + m[10] * z + m[11],
+                        )
+                    };
+                    // The front whose face the model's origin is on.
+                    let o = at(0.0, 0.0, 0.0);
+                    let front = list
+                        .parts
+                        .iter()
+                        .filter(|f| matches!(f.role, PartRole::Door | PartRole::DrawerFront))
+                        .find(|f| {
+                            let b = f.bounds;
+                            o.x >= b.min.x
+                                && o.x <= b.max().x
+                                && o.z >= b.min.z
+                                && o.z <= b.max().z
+                                && (o.y - b.min.y).abs() < 1e-6
+                        })
+                        .unwrap_or_else(|| panic!("{who}: model not on a front's face: {o:?}"));
+                    let b = front.bounds;
+                    let half = p("length") / 2.0;
+                    for x in [-half, half] {
+                        for z in [p("across_low"), p("across_high")] {
+                            let q = at(x, 0.0, z);
+                            assert!(
+                                q.x >= b.min.x - 1e-6
+                                    && q.x <= b.max().x + 1e-6
+                                    && q.z >= b.min.z - 1e-6
+                                    && q.z <= b.max().z + 1e-6,
+                                "{who}: {q:?} leaves {} {b:?}",
+                                front.name
+                            );
+                        }
+                    }
+                    // The model's -Y is off the door's face, out of the cabinet.
+                    assert!(
+                        at(0.0, -p("projection"), 0.0).y < o.y,
+                        "{who}: into the front"
+                    );
+                }
+            }
+        }
+    }
+
+    /// Pairs of Pedra Curve meet at the doors' gap: each one's straight edge at its free edge.
+    #[test]
+    fn a_one_straight_edged_pull_keeps_that_edge_to_the_doors_free_edge() {
+        use crate::model::HandleRange;
+        let mut cab = Cabinet::new("S01", CabinetKind::Sink);
+        cab.standard.handle_range = HandleRange::Abi;
+        cab.standard.handle_style = "handle.abi.pedracurve-320.beige-travertine".into();
+        let list = build_cabinet(&cab).unwrap();
+        let placed: Vec<_> = crate::cad::cad_placements(&list)
+            .into_iter()
+            .filter(|c| c.item.starts_with("handle."))
+            .collect();
+        assert_eq!(placed.len(), 2, "{:?}", list.warnings);
+        let mut pulls: Vec<_> = placed
+            .iter()
+            .map(|c| crate::cad::transform(c, false, 0.0))
+            .collect();
+        pulls.sort_by(|a, b| a[3].total_cmp(&b[3]));
+        // The left door's model +Z runs towards +X, the right door's towards -X.
+        assert!(pulls[0][2] > 0.5, "{:?}", pulls[0]);
+        assert!(pulls[1][2] < -0.5, "{:?}", pulls[1]);
     }
 
     #[test]

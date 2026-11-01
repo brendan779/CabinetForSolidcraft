@@ -792,7 +792,9 @@ final class ViewportScene {
 
     /// A handle's metal, by its finish's name, or by a measured `#RRGGBB` from the catalog.
     private static func handleMaterial(_ finish: Substring, selected: Bool) -> PhysicallyBasedMaterial {
-        let measured = finish.hasPrefix("#") ? nsColor(hex: finish) : nil
+        // "#RRGGBB", and " matte" for a finish that is not bare metal.
+        let measured = finish.hasPrefix("#") ? nsColor(hex: finish.prefix(7)) : nil
+        let matte = finish.hasSuffix(" matte")
         let named: NSColor = switch finish {
         case "matt black": NSColor(calibratedWhite: 0.08, alpha: 1)
         case "brushed brass": NSColor(calibratedRed: 0.76, green: 0.6, blue: 0.33, alpha: 1)
@@ -802,7 +804,7 @@ final class ViewportScene {
         let colour = measured ?? named
         var m = PhysicallyBasedMaterial()
         m.baseColor = .init(tint: selected ? colour : colour.blended(withFraction: 0.3, of: .gray) ?? colour)
-        m.metallic = .init(floatLiteral: finish == "matt black" ? 0.2 : 1)
+        m.metallic = .init(floatLiteral: finish == "matt black" || matte ? 0.2 : 1)
         m.roughness = .init(floatLiteral: finish.hasPrefix("brushed") || measured != nil ? 0.45 : 0.3)
         return m
     }

@@ -131,6 +131,9 @@ pub struct ChosenHandle {
     pub holes: Vec<(f64, f64)>,
     /// Overall length (mm), which the front must have room for. 0 where only the holes matter.
     pub length: f64,
+    /// How far the body reaches across the screw line, each way (below 0, above 0). A shape with
+    /// one straight edge has that edge on the high side.
+    pub across: (f64, f64),
     pub description: String,
     /// True when this came from the ABI range, so a size that does not fit is left off rather
     /// than bored past the front.
@@ -158,6 +161,7 @@ pub fn generic_handle(s: &crate::model::ConstructionStandard) -> ChosenHandle {
             centres: Some(cc),
             holes: vec![(-cc / 2.0, 0.0), (cc / 2.0, 0.0)],
             length: 0.0,
+            across: (0.0, 0.0),
             description: format!("Handle, {cc:.0} mm hole centres, {finish}"),
             abi: false,
         },
@@ -166,6 +170,7 @@ pub fn generic_handle(s: &crate::model::ConstructionStandard) -> ChosenHandle {
             centres: None,
             holes: vec![(0.0, 0.0)],
             length: 0.0,
+            across: (0.0, 0.0),
             description: format!("Knob, {finish}"),
             abi: false,
         },
@@ -201,6 +206,10 @@ fn abi_handle(style: &str) -> Result<ChosenHandle, String> {
         centres,
         holes: item.drilling.iter().map(|h| (h.x, h.y)).collect(),
         length,
+        across: (
+            item.parameters.get("across_low").copied().unwrap_or(0.0),
+            item.parameters.get("across_high").copied().unwrap_or(0.0),
+        ),
         description,
         abi: true,
     })

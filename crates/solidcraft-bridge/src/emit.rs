@@ -275,6 +275,22 @@ pub fn replace_cabinet(
     cmds
 }
 
+/// The supplier models a build at `detail` puts in. Handles go in at every level, as they are part
+/// of how the cabinet looks and have no stand-in; the rest of the hardware is manufacturing
+/// detail, and slow to load.
+pub fn models_for(
+    detail: Detail,
+    placements: &[cabinet_core::cad::CadPlacement],
+    index: &[crate::vendor::VendorModel],
+) -> Vec<crate::vendor::VendorInstance> {
+    let wanted: Vec<_> = placements
+        .iter()
+        .filter(|p| detail != Detail::Design || p.item.starts_with("handle."))
+        .cloned()
+        .collect();
+    crate::vendor::resolve(&wanted, index)
+}
+
 /// The supplier models for a cabinet, inserted into its component in the cabinet's own frame:
 /// one command per model, each loading a file, so they are sent one at a time (a batch refuses
 /// file loads) after the cabinet's batch. Each component is named like the stand-in it
@@ -286,28 +302,52 @@ pub fn hardware_inserts(cabinet: &str, models: &[crate::vendor::VendorInstance])
     let mut cmds =
         vec![json!({ "command": "component.activate", "params": { "component": cabinet } })];
     for m in models {
-        // A mesh-native model (the ABI handle import) enters as a mesh body.
-        let command = if m
+        let matrix: Vec<f64> = m.transform.iter().map(|v| round(*v)).collect();
+        let is_mesh = m
             .step
             .extension()
             .and_then(|x| x.to_str())
-            .is_some_and(|x| x.eq_ignore_ascii_case("stl"))
-        {
-            "file.insert_mesh"
+            .is_some_and(|x| x.eq_ignore_ascii_case("stl"));
+        if is_mesh {
+            // A mesh-native model (the ABI handle import) enters as a mesh body. `file.insert_mesh`
+            // takes no matrix and ignores one: it lands at the origin until it is moved.
+            cmds.push(json!({
+                "command": "file.insert_mesh",
+                "params": { "path": m.step, "name": m.name }
+            }));
+            cmds.push(json!({
+                "command": "occurrence.move",
+                "params": { "occurrence": format!("{}:1", m.name), "matrix": matrix }
+            }));
+            cmds.extend(finish_colour(m));
         } else {
-            "file.insert_step"
-        };
-        cmds.push(json!({
-            "command": command,
-            "params": {
-                "path": m.step,
-                "name": m.name,
-                "matrix": m.transform.iter().map(|v| round(*v)).collect::<Vec<_>>(),
-            }
-        }));
+            cmds.push(json!({
+                "command": "file.insert_step",
+                "params": { "path": m.step, "name": m.name, "matrix": matrix }
+            }));
+        }
     }
     cmds.push(json!({ "command": "component.activate", "params": { "component": "root" } }));
     cmds
+}
+
+/// A catalog finish on a model whose file carries no colour: the look the app's view draws.
+fn finish_colour(m: &crate::vendor::VendorInstance) -> Option<Value> {
+    let item = cabinet_core::hardware::item(&m.item).ok()?;
+    let rgb = *item.parameters.get("finish_colour_rgb")? as u32;
+    let metallic = if item.parameters.contains_key("matte") {
+        0.0
+    } else {
+        1.0
+    };
+    Some(json!({
+        "command": "appearance.assign",
+        "params": {
+            "components": [m.name],
+            "color": format!("#{rgb:06x}"),
+            "pbr": { "metallic": metallic, "roughness": 0.45, "dielectric_ior": 1.5 },
+        }
+    }))
 }
 
 /// A circle in sketch coordinates: centre u, centre v, diameter.
@@ -919,6 +959,7 @@ mod tests {
         assert!(names.contains(&"B01.Hinge2"));
         let model = crate::vendor::VendorInstance {
             name: "B01.Hinge1".into(),
+            item: "blum.clip-top-blumotion.110.overlay".into(),
             article: "71B3550".into(),
             step: "/cad/71B3550.step".into(),
             stl: "/cad/mesh/71B3550.stl".into(),
@@ -934,6 +975,72 @@ mod tests {
         assert_eq!(ins[2]["params"]["component"], "root");
     }
 
+    /// The owner's Design-level builds had no handles at all: only Manufacturing put models in.
+    #[test]
+    fn handles_go_in_at_every_detail_level_and_other_models_only_for_manufacturing() {
+        use crate::vendor::VendorModel;
+        let mut cab = Cabinet::new("B01", CabinetKind::Base);
+        cab.standard.handle_range = cabinet_core::model::HandleRange::Abi;
+        cab.standard.handle_style = "handle.abi.tezra-220.brushed-brass".into();
+        let list = build_cabinet(&cab).unwrap();
+        let placements = cabinet_core::cad::cad_placements(&list);
+        let hinge = placements
+            .iter()
+            .find(|p| p.name.contains("Hinge"))
+            .unwrap();
+        let model = |article: &str| VendorModel {
+            article: article.into(),
+            step: format!("/cad/{article}.stl").into(),
+            stl: format!("/cad/{article}.stl").into(),
+            min: [0.0; 3],
+            max: [1.0; 3],
+        };
+        let index = [model("ABI-TEZRA-220"), model(&hinge.article)];
+        let names = |d| {
+            models_for(d, &placements, &index)
+                .into_iter()
+                .map(|m| m.name)
+                .collect::<Vec<_>>()
+        };
+        let design = names(Detail::Design);
+        assert_eq!(design, ["B01.Handle1"]);
+        let full = names(Detail::Manufacturing);
+        assert!(full.iter().any(|n| n.contains("Handle")));
+        assert!(full.iter().any(|n| n.contains("Hinge")));
+    }
+
+    /// `file.insert_mesh` takes no matrix, so a mesh model has to be moved into place, or every
+    /// handle lands at the origin. Its finish goes on too: an STL carries no colour.
+    #[test]
+    fn a_mesh_model_is_moved_to_its_place_and_coloured_after_it_goes_in() {
+        let transform = [
+            0.0, 0.0, -1.0, 564.0, 0.0, 1.0, 0.0, -18.0, 1.0, 0.0, 0.0, 708.0,
+        ];
+        let model = crate::vendor::VendorInstance {
+            name: "B01.Handle1".into(),
+            item: "handle.abi.tezra-220.brushed-brass".into(),
+            article: "ABI-TEZRA-220".into(),
+            step: "/cad/abi/ABI-TEZRA-220.stl".into(),
+            stl: "/cad/abi/ABI-TEZRA-220.stl".into(),
+            transform,
+        };
+        let ins = hardware_inserts("B01", &[model]);
+        let names: Vec<_> = ins.iter().map(|c| c["command"].as_str().unwrap()).collect();
+        assert_eq!(
+            names,
+            [
+                "component.activate",
+                "file.insert_mesh",
+                "occurrence.move",
+                "appearance.assign",
+                "component.activate"
+            ]
+        );
+        assert_eq!(ins[2]["params"]["occurrence"], "B01.Handle1:1");
+        assert_eq!(ins[2]["params"]["matrix"][3], 564.0);
+        assert_eq!(ins[3]["params"]["color"], "#ca9a3a");
+    }
+
     #[test]
     fn manufacturing_detail_adds_a_named_grey_stand_in_per_hinge_and_runner() {
         let list = build_cabinet(&Cabinet::new("D01", CabinetKind::DrawerBank)).unwrap();
@@ -946,7 +1053,11 @@ mod tests {
             cmds.iter()
                 .filter(|c| c["params"]["operation"] == "new")
                 .filter_map(|c| c["params"]["body_name"].as_str().map(String::from))
-                .filter(|n| n.contains(".Runner") || n.contains(".Hinge"))
+                .filter(|n| {
+                    ["Runner", "BoxSide", "Hinge", "Plate"]
+                        .iter()
+                        .any(|p| n.contains(p))
+                })
                 .collect::<Vec<_>>()
         };
         let cmds = emit_cabinet(&list, Detail::Manufacturing, None);

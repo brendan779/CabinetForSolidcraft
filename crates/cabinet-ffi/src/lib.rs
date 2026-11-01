@@ -10,7 +10,9 @@ use cabinet_core::{
     build_run, laid_out,
 };
 use solidcraft_bridge::boxes::{cuboid, selected_bodies};
-use solidcraft_bridge::{Client, Detail, find_existing, hardware_inserts, replace_cabinet, vendor};
+use solidcraft_bridge::{
+    Client, Detail, find_existing, hardware_inserts, models_for, replace_cabinet, vendor,
+};
 use std::path::Path;
 
 uniffi::setup_scaffolding!();
@@ -736,7 +738,9 @@ fn summary(list: PartList) -> BuildSummary {
             if let Ok(item) = cabinet_core::hardware::item(&h.item)
                 && let Some(rgb) = item.parameters.get("finish_colour_rgb")
             {
-                return format!("#{:06X}", *rgb as u32);
+                // A stone, timber or painted finish is not bare metal, so it must not shine.
+                let matte = item.parameters.contains_key("matte");
+                return format!("#{:06X}{}", *rgb as u32, if matte { " matte" } else { "" });
             }
             h.description
                 .rsplit(", ")
@@ -1797,7 +1801,7 @@ pub fn stand_in_shapes(job: JobItems, vendor_dir: String) -> Result<Vec<StandInS
                 .map(|m| m.name)
                 .collect();
         for s in stand_ins(&list) {
-            // A stand-in hinge also covers its plate; runners are named per hand.
+            // Each part stands in on its own: a real runner keeps its box side's stand-in.
             if real.contains(&s.name) {
                 continue;
             }
@@ -1876,24 +1880,34 @@ pub fn send_to_solidcraft(
         let spec = cab
             .map(|c| serde_json::to_value(&c).map_err(invalid))
             .transpose()?;
-        let models = match (&index, detail) {
-            (Some(index), Detail::Manufacturing | Detail::Exact) => {
-                vendor::resolve(&cad_placements(&list), index)
-            }
-            _ => Vec::new(),
-        };
+        let placements = cad_placements(&list);
+        let models = index
+            .as_ref()
+            .map(|index| models_for(detail, &placements, index))
+            .unwrap_or_default();
+        // A handle with no model simply would not appear: say so rather than leave a mystery.
+        let unmodelled = placements
+            .iter()
+            .filter(|p| p.item.starts_with("handle."))
+            .filter(|p| !models.iter().any(|m| m.name == p.name))
+            .count();
+        if unmodelled > 0 {
+            report.push(format!(
+                "{}: {unmodelled} handles have no model; check the supplier folder in Settings",
+                list.cabinet
+            ));
+        }
         let real: Vec<String> = models.iter().map(|m| m.name.clone()).collect();
         let cmds = replace_cabinet(&list, detail, spec.as_ref(), existing.as_ref(), &real);
         let r = client.batch(&cmds).map_err(sc)?;
         // Supplier models load files, which a batch refuses: one request each.
         for c in hardware_inserts(&list.cabinet, &models) {
-            client
-                .execute_reading(
-                    c["command"].as_str().unwrap_or_default(),
-                    c["params"].clone(),
-                    &[vendor_path],
-                )
-                .map_err(sc)?;
+            let command = c["command"].as_str().unwrap_or_default();
+            let done = client.execute_reading(command, c["params"].clone(), &[vendor_path]);
+            // A colour the engine refuses should not lose the model already placed.
+            if command != "appearance.assign" {
+                done.map_err(sc)?;
+            }
         }
         report.push(format!(
             "{}: {} commands in {:.1} s{}",

@@ -17,6 +17,8 @@
     "width": 11.3,
     "sku": 15047,
     "price_aud": 44.9,
+    "across_low": -5.7,
+    "across_high": 5.7,
     "finish_colour_rgb": 13277754
    },
    "drilling": [
@@ -56,6 +58,8 @@
     "width": 11.3,
     "sku": 15048,
     "price_aud": 44.9,
+    "across_low": -5.7,
+    "across_high": 5.7,
     "finish_colour_rgb": 13012586
    },
    "drilling": [
@@ -95,6 +99,8 @@
     "width": 11.3,
     "sku": 15049,
     "price_aud": 44.9,
+    "across_low": -5.7,
+    "across_high": 5.7,
     "finish_colour_rgb": 4144959
    },
    "drilling": [
@@ -134,6 +140,8 @@
     "width": 11.3,
     "sku": 15055,
     "price_aud": 39.9,
+    "across_low": -5.7,
+    "across_high": 5.7,
     "finish_colour_rgb": 13488855
    },
    "drilling": [
@@ -173,6 +181,9 @@
     "width": 11.3,
     "sku": 15050,
     "price_aud": 29.9,
+    "across_low": -5.7,
+    "across_high": 5.7,
+    "matte": 1,
     "finish_colour_rgb": 986895
    },
    "drilling": [
@@ -212,6 +223,8 @@
     "width": 11.3,
     "sku": 15051,
     "price_aud": 114.9,
+    "across_low": -5.7,
+    "across_high": 5.7,
     "finish_colour_rgb": 13277754
    },
    "drilling": [
@@ -251,6 +264,8 @@
     "width": 11.3,
     "sku": 15052,
     "price_aud": 114.9,
+    "across_low": -5.7,
+    "across_high": 5.7,
     "finish_colour_rgb": 13012586
    },
    "drilling": [
@@ -290,6 +305,8 @@
     "width": 11.3,
     "sku": 15053,
     "price_aud": 114.9,
+    "across_low": -5.7,
+    "across_high": 5.7,
     "finish_colour_rgb": 4144959
    },
    "drilling": [
@@ -329,6 +346,8 @@
     "width": 11.3,
     "sku": 15056,
     "price_aud": 84.9,
+    "across_low": -5.7,
+    "across_high": 5.7,
     "finish_colour_rgb": 13488855
    },
    "drilling": [
@@ -368,6 +387,9 @@
     "width": 11.3,
     "sku": 15054,
     "price_aud": 74.9,
+    "across_low": -5.7,
+    "across_high": 5.7,
+    "matte": 1,
     "finish_colour_rgb": 986895
    },
    "drilling": [
@@ -407,6 +429,8 @@
     "width": 42.5,
     "sku": 16826,
     "price_aud": 44.9,
+    "across_low": -39.5,
+    "across_high": 3.0,
     "finish_colour_rgb": 13277754
    },
    "drilling": [
@@ -446,6 +470,8 @@
     "width": 42.5,
     "sku": 16827,
     "price_aud": 44.9,
+    "across_low": -39.5,
+    "across_high": 3.0,
     "finish_colour_rgb": 13012586
    },
    "drilling": [
@@ -485,6 +511,8 @@
     "width": 42.5,
     "sku": 16828,
     "price_aud": 44.9,
+    "across_low": -39.5,
+    "across_high": 3.0,
     "finish_colour_rgb": 4144959
    },
    "drilling": [
@@ -524,6 +552,8 @@
     "width": 42.5,
     "sku": 16829,
     "price_aud": 39.9,
+    "across_low": -39.5,
+    "across_high": 3.0,
     "finish_colour_rgb": 13488855
    },
    "drilling": [
@@ -563,6 +593,8 @@
     "width": 42.5,
     "sku": 16831,
     "price_aud": 24.9,
+    "across_low": -39.5,
+    "across_high": 3.0,
     "finish_colour_rgb": 11250347
    },
    "drilling": [
@@ -602,6 +634,9 @@
     "width": 42.5,
     "sku": 16830,
     "price_aud": 39.9,
+    "across_low": -39.5,
+    "across_high": 3.0,
+    "matte": 1,
     "finish_colour_rgb": 986895
    },
    "drilling": [
@@ -641,6 +676,8 @@
     "width": 28.0,
     "sku": 14572,
     "price_aud": 24.9,
+    "across_low": -14.0,
+    "across_high": 14.0,
     "knob": 1,
     "finish_colour_rgb": 13277754
    },
@@ -674,6 +711,8 @@
     "width": 28.0,
     "sku": 14494,
     "price_aud": 24.9,
+    "across_low": -14.0,
+    "across_high": 14.0,
     "knob": 1,
     "finish_colour_rgb": 13012586
    },
@@ -707,6 +746,8 @@
     "width": 28.0,
     "sku": 14573,
     "price_aud": 24.9,
+    "across_low": -14.0,
+    "across_high": 14.0,
     "knob": 1,
     "finish_colour_rgb": 4144959
    },
@@ -740,6 +781,8 @@
     "width": 28.0,
     "sku": 14574,
     "price_aud": 19.9,
+    "across_low": -14.0,
+    "across_high": 14.0,
     "knob": 1,
     "finish_colour_rgb": 13488855
    },
@@ -773,7 +816,10 @@
     "width": 28.0,
     "sku": 14575,
     "price_aud": 19.9,
+    "across_low": -14.0,
+    "across_high": 14.0,
     "knob": 1,
+    "matte": 1,
     "finish_colour_rgb": 986895
    },
    "drilling": [
@@ -806,7 +852,10 @@
     "width": 28.0,
     "sku": 14576,
     "price_aud": 19.9,
+    "across_low": -14.0,
+    "across_high": 14.0,
     "knob": 1,
+    "matte": 1,
     "finish_colour_rgb": 15197927
    },
    "drilling": [
@@ -839,6 +888,8 @@
     "width": 28.0,
     "sku": 17719,
     "price_aud": 29.9,
+    "across_low": -14.0,
+    "across_high": 14.0,
     "knob": 1,
     "finish_colour_rgb": 10452308
    },
@@ -872,6 +923,8 @@
     "width": 28.0,
     "sku": 17720,
     "price_aud": 29.9,
+    "across_low": -14.0,
+    "across_high": 14.0,
     "knob": 1,
     "finish_colour_rgb": 7162940
    },
@@ -905,6 +958,8 @@
     "width": 28.0,
     "sku": 17721,
     "price_aud": 29.9,
+    "across_low": -14.0,
+    "across_high": 14.0,
     "knob": 1,
     "finish_colour_rgb": 4539717
    },
@@ -938,6 +993,8 @@
     "width": 28.0,
     "sku": 17717,
     "price_aud": 29.9,
+    "across_low": -14.0,
+    "across_high": 14.0,
     "knob": 1,
     "finish_colour_rgb": 9803157
    },
@@ -971,6 +1028,9 @@
     "width": 98.5,
     "sku": 13155,
     "price_aud": 0.0,
+    "across_low": -83.5,
+    "across_high": 15.0,
+    "matte": 1,
     "finish_colour_rgb": 16043677
    },
    "drilling": [
@@ -1010,6 +1070,9 @@
     "width": 35.0,
     "sku": 13158,
     "price_aud": 0.0,
+    "across_low": -27.5,
+    "across_high": 7.5,
+    "matte": 1,
     "finish_colour_rgb": 16043677
    },
    "drilling": [
@@ -1049,7 +1112,10 @@
     "width": 30.0,
     "sku": 13150,
     "price_aud": 0.0,
+    "across_low": -15.0,
+    "across_high": 15.0,
     "knob": 1,
+    "matte": 1,
     "finish_colour_rgb": 16043677
    },
    "drilling": [
@@ -1082,6 +1148,9 @@
     "width": 197.0,
     "sku": 13153,
     "price_aud": 0.0,
+    "across_low": -98.5,
+    "across_high": 98.5,
+    "matte": 1,
     "finish_colour_rgb": 16043677
    },
    "drilling": [
@@ -1135,7 +1204,10 @@
     "width": 57.1,
     "sku": 13151,
     "price_aud": 0.0,
+    "across_low": -28.5,
+    "across_high": 28.5,
     "knob": 1,
+    "matte": 1,
     "finish_colour_rgb": 16043677
    },
    "drilling": [
@@ -1168,7 +1240,10 @@
     "width": 90.0,
     "sku": 13152,
     "price_aud": 0.0,
+    "across_low": -45.0,
+    "across_high": 45.0,
     "knob": 1,
+    "matte": 1,
     "finish_colour_rgb": 16043677
    },
    "drilling": [
@@ -1201,6 +1276,8 @@
     "width": 50.0,
     "sku": 14495,
     "price_aud": 44.9,
+    "across_low": -35.0,
+    "across_high": 15.0,
     "finish_colour_rgb": 13277754
    },
    "drilling": [
@@ -1240,6 +1317,8 @@
     "width": 50.0,
     "sku": 14496,
     "price_aud": 44.9,
+    "across_low": -35.0,
+    "across_high": 15.0,
     "finish_colour_rgb": 13012586
    },
    "drilling": [
@@ -1279,6 +1358,8 @@
     "width": 50.0,
     "sku": 14497,
     "price_aud": 44.9,
+    "across_low": -35.0,
+    "across_high": 15.0,
     "finish_colour_rgb": 4144959
    },
    "drilling": [
@@ -1318,6 +1399,8 @@
     "width": 50.0,
     "sku": 14498,
     "price_aud": 39.9,
+    "across_low": -35.0,
+    "across_high": 15.0,
     "finish_colour_rgb": 13488855
    },
    "drilling": [
@@ -1357,6 +1440,9 @@
     "width": 50.0,
     "sku": 14499,
     "price_aud": 39.9,
+    "across_low": -35.0,
+    "across_high": 15.0,
+    "matte": 1,
     "finish_colour_rgb": 986895
    },
    "drilling": [
@@ -1396,6 +1482,9 @@
     "width": 50.0,
     "sku": 14500,
     "price_aud": 44.9,
+    "across_low": -35.0,
+    "across_high": 15.0,
+    "matte": 1,
     "finish_colour_rgb": 15197927
    },
    "drilling": [
@@ -1435,6 +1524,8 @@
     "width": 17.5,
     "sku": 16354,
     "price_aud": 69.9,
+    "across_low": -8.7,
+    "across_high": 8.7,
     "adjustable_min": 70,
     "adjustable_max": 120,
     "finish_colour_rgb": 13277754
@@ -1476,6 +1567,8 @@
     "width": 17.5,
     "sku": 16916,
     "price_aud": 69.9,
+    "across_low": -8.7,
+    "across_high": 8.7,
     "adjustable_min": 70,
     "adjustable_max": 120,
     "finish_colour_rgb": 13012586
@@ -1517,6 +1610,8 @@
     "width": 17.5,
     "sku": 16355,
     "price_aud": 69.9,
+    "across_low": -8.7,
+    "across_high": 8.7,
     "adjustable_min": 70,
     "adjustable_max": 120,
     "finish_colour_rgb": 13488855
@@ -1558,6 +1653,8 @@
     "width": 17.5,
     "sku": 16357,
     "price_aud": 49.9,
+    "across_low": -8.7,
+    "across_high": 8.7,
     "adjustable_min": 70,
     "adjustable_max": 120,
     "finish_colour_rgb": 11250347
@@ -1599,6 +1696,9 @@
     "width": 17.5,
     "sku": 16356,
     "price_aud": 64.9,
+    "across_low": -8.7,
+    "across_high": 8.7,
+    "matte": 1,
     "adjustable_min": 70,
     "adjustable_max": 120,
     "finish_colour_rgb": 986895
@@ -1640,6 +1740,8 @@
     "width": 17.5,
     "sku": 20227,
     "price_aud": 69.9,
+    "across_low": -8.7,
+    "across_high": 8.7,
     "adjustable_min": 70,
     "adjustable_max": 120,
     "finish_colour_rgb": 9204560
@@ -1681,6 +1783,8 @@
     "width": 17.5,
     "sku": 16358,
     "price_aud": 79.9,
+    "across_low": -8.7,
+    "across_high": 8.7,
     "adjustable_min": 100,
     "adjustable_max": 220,
     "finish_colour_rgb": 13277754
@@ -1722,6 +1826,8 @@
     "width": 17.5,
     "sku": 16917,
     "price_aud": 79.9,
+    "across_low": -8.7,
+    "across_high": 8.7,
     "adjustable_min": 100,
     "adjustable_max": 220,
     "finish_colour_rgb": 13012586
@@ -1763,6 +1869,8 @@
     "width": 17.5,
     "sku": 16359,
     "price_aud": 79.9,
+    "across_low": -8.7,
+    "across_high": 8.7,
     "adjustable_min": 100,
     "adjustable_max": 220,
     "finish_colour_rgb": 13488855
@@ -1804,6 +1912,8 @@
     "width": 17.5,
     "sku": 16361,
     "price_aud": 59.9,
+    "across_low": -8.7,
+    "across_high": 8.7,
     "adjustable_min": 100,
     "adjustable_max": 220,
     "finish_colour_rgb": 11250347
@@ -1845,6 +1955,9 @@
     "width": 17.5,
     "sku": 16360,
     "price_aud": 74.9,
+    "across_low": -8.7,
+    "across_high": 8.7,
+    "matte": 1,
     "adjustable_min": 100,
     "adjustable_max": 220,
     "finish_colour_rgb": 986895
@@ -1886,6 +1999,8 @@
     "width": 17.5,
     "sku": 20228,
     "price_aud": 79.9,
+    "across_low": -8.7,
+    "across_high": 8.7,
     "adjustable_min": 100,
     "adjustable_max": 220,
     "finish_colour_rgb": 9204560
@@ -1927,6 +2042,8 @@
     "width": 17.5,
     "sku": 16362,
     "price_aud": 99.9,
+    "across_low": -8.7,
+    "across_high": 8.7,
     "adjustable_min": 140,
     "adjustable_max": 320,
     "finish_colour_rgb": 13277754
@@ -1968,6 +2085,8 @@
     "width": 17.5,
     "sku": 16918,
     "price_aud": 99.9,
+    "across_low": -8.7,
+    "across_high": 8.7,
     "adjustable_min": 140,
     "adjustable_max": 320,
     "finish_colour_rgb": 13012586
@@ -2009,6 +2128,8 @@
     "width": 17.5,
     "sku": 16363,
     "price_aud": 99.9,
+    "across_low": -8.7,
+    "across_high": 8.7,
     "adjustable_min": 140,
     "adjustable_max": 320,
     "finish_colour_rgb": 13488855
@@ -2050,6 +2171,8 @@
     "width": 17.5,
     "sku": 16365,
     "price_aud": 74.9,
+    "across_low": -8.7,
+    "across_high": 8.7,
     "adjustable_min": 140,
     "adjustable_max": 320,
     "finish_colour_rgb": 11250347
@@ -2091,6 +2214,9 @@
     "width": 17.5,
     "sku": 16364,
     "price_aud": 94.9,
+    "across_low": -8.7,
+    "across_high": 8.7,
+    "matte": 1,
     "adjustable_min": 140,
     "adjustable_max": 320,
     "finish_colour_rgb": 986895
@@ -2132,6 +2258,8 @@
     "width": 17.5,
     "sku": 20229,
     "price_aud": 99.9,
+    "across_low": -8.7,
+    "across_high": 8.7,
     "adjustable_min": 140,
     "adjustable_max": 320,
     "finish_colour_rgb": 9204560
@@ -2173,6 +2301,8 @@
     "width": 14.0,
     "sku": 14713,
     "price_aud": 69.9,
+    "across_low": -7.0,
+    "across_high": 7.0,
     "adjustable_min": 70,
     "adjustable_max": 120,
     "finish_colour_rgb": 13277754
@@ -2214,6 +2344,8 @@
     "width": 14.0,
     "sku": 14714,
     "price_aud": 69.9,
+    "across_low": -7.0,
+    "across_high": 7.0,
     "adjustable_min": 70,
     "adjustable_max": 120,
     "finish_colour_rgb": 13012586
@@ -2255,6 +2387,8 @@
     "width": 14.0,
     "sku": 14715,
     "price_aud": 69.9,
+    "across_low": -7.0,
+    "across_high": 7.0,
     "adjustable_min": 70,
     "adjustable_max": 120,
     "finish_colour_rgb": 4144959
@@ -2296,6 +2430,8 @@
     "width": 14.0,
     "sku": 14716,
     "price_aud": 54.9,
+    "across_low": -7.0,
+    "across_high": 7.0,
     "adjustable_min": 70,
     "adjustable_max": 120,
     "finish_colour_rgb": 13488855
@@ -2337,6 +2473,8 @@
     "width": 14.0,
     "sku": 14717,
     "price_aud": 34.9,
+    "across_low": -7.0,
+    "across_high": 7.0,
     "adjustable_min": 70,
     "adjustable_max": 120,
     "finish_colour_rgb": 11250347
@@ -2378,6 +2516,8 @@
     "width": 14.0,
     "sku": 16681,
     "price_aud": 69.9,
+    "across_low": -7.0,
+    "across_high": 7.0,
     "adjustable_min": 70,
     "adjustable_max": 120,
     "finish_colour_rgb": 9204560
@@ -2419,6 +2559,8 @@
     "width": 14.0,
     "sku": 14718,
     "price_aud": 79.9,
+    "across_low": -7.0,
+    "across_high": 7.0,
     "adjustable_min": 100,
     "adjustable_max": 220,
     "finish_colour_rgb": 13277754
@@ -2460,6 +2602,8 @@
     "width": 14.0,
     "sku": 14719,
     "price_aud": 79.9,
+    "across_low": -7.0,
+    "across_high": 7.0,
     "adjustable_min": 100,
     "adjustable_max": 220,
     "finish_colour_rgb": 13012586
@@ -2501,6 +2645,8 @@
     "width": 14.0,
     "sku": 14720,
     "price_aud": 79.9,
+    "across_low": -7.0,
+    "across_high": 7.0,
     "adjustable_min": 100,
     "adjustable_max": 220,
     "finish_colour_rgb": 4144959
@@ -2542,6 +2688,8 @@
     "width": 14.0,
     "sku": 14721,
     "price_aud": 64.9,
+    "across_low": -7.0,
+    "across_high": 7.0,
     "adjustable_min": 100,
     "adjustable_max": 220,
     "finish_colour_rgb": 13488855
@@ -2583,6 +2731,8 @@
     "width": 14.0,
     "sku": 14722,
     "price_aud": 44.9,
+    "across_low": -7.0,
+    "across_high": 7.0,
     "adjustable_min": 100,
     "adjustable_max": 220,
     "finish_colour_rgb": 11250347
@@ -2624,6 +2774,8 @@
     "width": 14.0,
     "sku": 16682,
     "price_aud": 79.9,
+    "across_low": -7.0,
+    "across_high": 7.0,
     "adjustable_min": 100,
     "adjustable_max": 220,
     "finish_colour_rgb": 9204560
@@ -2665,6 +2817,8 @@
     "width": 14.0,
     "sku": 14723,
     "price_aud": 109.9,
+    "across_low": -7.0,
+    "across_high": 7.0,
     "adjustable_min": 140,
     "adjustable_max": 320,
     "finish_colour_rgb": 13277754
@@ -2706,6 +2860,8 @@
     "width": 14.0,
     "sku": 14724,
     "price_aud": 109.9,
+    "across_low": -7.0,
+    "across_high": 7.0,
     "adjustable_min": 140,
     "adjustable_max": 320,
     "finish_colour_rgb": 13012586
@@ -2747,6 +2903,8 @@
     "width": 14.0,
     "sku": 14725,
     "price_aud": 109.9,
+    "across_low": -7.0,
+    "across_high": 7.0,
     "adjustable_min": 140,
     "adjustable_max": 320,
     "finish_colour_rgb": 4144959
@@ -2788,6 +2946,8 @@
     "width": 14.0,
     "sku": 14726,
     "price_aud": 84.9,
+    "across_low": -7.0,
+    "across_high": 7.0,
     "adjustable_min": 140,
     "adjustable_max": 320,
     "finish_colour_rgb": 13488855
@@ -2829,6 +2989,8 @@
     "width": 14.0,
     "sku": 14727,
     "price_aud": 59.9,
+    "across_low": -7.0,
+    "across_high": 7.0,
     "adjustable_min": 140,
     "adjustable_max": 320,
     "finish_colour_rgb": 11250347
@@ -2870,6 +3032,8 @@
     "width": 14.0,
     "sku": 16683,
     "price_aud": 109.9,
+    "across_low": -7.0,
+    "across_high": 7.0,
     "adjustable_min": 140,
     "adjustable_max": 320,
     "finish_colour_rgb": 9204560
@@ -2911,6 +3075,8 @@
     "width": 57.1,
     "sku": 12491,
     "price_aud": 64.9,
+    "across_low": -28.5,
+    "across_high": 28.5,
     "knob": 1,
     "finish_colour_rgb": 13277754
    },
@@ -2944,6 +3110,8 @@
     "width": 57.1,
     "sku": 12492,
     "price_aud": 64.9,
+    "across_low": -28.5,
+    "across_high": 28.5,
     "knob": 1,
     "finish_colour_rgb": 13012586
    },
@@ -2977,6 +3145,8 @@
     "width": 57.1,
     "sku": 12493,
     "price_aud": 64.9,
+    "across_low": -28.5,
+    "across_high": 28.5,
     "knob": 1,
     "finish_colour_rgb": 4144959
    },
@@ -3010,6 +3180,8 @@
     "width": 57.1,
     "sku": 12494,
     "price_aud": 54.9,
+    "across_low": -28.5,
+    "across_high": 28.5,
     "knob": 1,
     "finish_colour_rgb": 13488855
    },
@@ -3043,7 +3215,10 @@
     "width": 57.1,
     "sku": 12495,
     "price_aud": 54.9,
+    "across_low": -28.5,
+    "across_high": 28.5,
     "knob": 1,
+    "matte": 1,
     "finish_colour_rgb": 986895
    },
    "drilling": [
@@ -3076,7 +3251,10 @@
     "width": 57.1,
     "sku": 12496,
     "price_aud": 59.9,
+    "across_low": -28.5,
+    "across_high": 28.5,
     "knob": 1,
+    "matte": 1,
     "finish_colour_rgb": 15197927
    },
    "drilling": [
@@ -3109,6 +3287,9 @@
     "width": 25.0,
     "sku": 17598,
     "price_aud": 109.9,
+    "across_low": -12.5,
+    "across_high": 12.5,
+    "matte": 1,
     "finish_colour_rgb": 13218981
    },
    "drilling": [
@@ -3155,6 +3336,9 @@
     "width": 25.0,
     "sku": 17599,
     "price_aud": 109.9,
+    "across_low": -12.5,
+    "across_high": 12.5,
+    "matte": 1,
     "finish_colour_rgb": 13355979
    },
    "drilling": [
@@ -3201,6 +3385,9 @@
     "width": 25.0,
     "sku": 17600,
     "price_aud": 119.9,
+    "across_low": -12.5,
+    "across_high": 12.5,
+    "matte": 1,
     "finish_colour_rgb": 9723983
    },
    "drilling": [
@@ -3247,6 +3434,9 @@
     "width": 25.0,
     "sku": 17601,
     "price_aud": 119.9,
+    "across_low": -12.5,
+    "across_high": 12.5,
+    "matte": 1,
     "finish_colour_rgb": 2569522
    },
    "drilling": [
@@ -3293,6 +3483,9 @@
     "width": 25.0,
     "sku": 17594,
     "price_aud": 129.9,
+    "across_low": -12.5,
+    "across_high": 12.5,
+    "matte": 1,
     "finish_colour_rgb": 13218981
    },
    "drilling": [
@@ -3339,6 +3532,9 @@
     "width": 25.0,
     "sku": 17595,
     "price_aud": 129.9,
+    "across_low": -12.5,
+    "across_high": 12.5,
+    "matte": 1,
     "finish_colour_rgb": 13355979
    },
    "drilling": [
@@ -3385,6 +3581,9 @@
     "width": 25.0,
     "sku": 17596,
     "price_aud": 139.9,
+    "across_low": -12.5,
+    "across_high": 12.5,
+    "matte": 1,
     "finish_colour_rgb": 9723983
    },
    "drilling": [
@@ -3431,6 +3630,9 @@
     "width": 25.0,
     "sku": 17597,
     "price_aud": 139.9,
+    "across_low": -12.5,
+    "across_high": 12.5,
+    "matte": 1,
     "finish_colour_rgb": 2569522
    },
    "drilling": [
@@ -3477,6 +3679,9 @@
     "width": 40.0,
     "sku": 17590,
     "price_aud": 174.9,
+    "across_low": -25.0,
+    "across_high": 15.0,
+    "matte": 1,
     "finish_colour_rgb": 13218981
    },
    "drilling": [
@@ -3523,6 +3728,9 @@
     "width": 40.0,
     "sku": 17591,
     "price_aud": 174.9,
+    "across_low": -25.0,
+    "across_high": 15.0,
+    "matte": 1,
     "finish_colour_rgb": 13355979
    },
    "drilling": [
@@ -3569,6 +3777,9 @@
     "width": 40.0,
     "sku": 17592,
     "price_aud": 194.9,
+    "across_low": -25.0,
+    "across_high": 15.0,
+    "matte": 1,
     "finish_colour_rgb": 9723983
    },
    "drilling": [
@@ -3615,6 +3826,9 @@
     "width": 40.0,
     "sku": 17593,
     "price_aud": 194.9,
+    "across_low": -25.0,
+    "across_high": 15.0,
+    "matte": 1,
     "finish_colour_rgb": 2569522
    },
    "drilling": [
@@ -3661,7 +3875,10 @@
     "width": 35.0,
     "sku": 17606,
     "price_aud": 34.9,
+    "across_low": -17.5,
+    "across_high": 17.5,
     "knob": 1,
+    "matte": 1,
     "finish_colour_rgb": 13488855
    },
    "drilling": [
@@ -3694,7 +3911,10 @@
     "width": 35.0,
     "sku": 17607,
     "price_aud": 34.9,
+    "across_low": -17.5,
+    "across_high": 17.5,
     "knob": 1,
+    "matte": 1,
     "finish_colour_rgb": 13355979
    },
    "drilling": [
@@ -3727,7 +3947,10 @@
     "width": 35.0,
     "sku": 17608,
     "price_aud": 39.9,
+    "across_low": -17.5,
+    "across_high": 17.5,
     "knob": 1,
+    "matte": 1,
     "finish_colour_rgb": 9723983
    },
    "drilling": [
@@ -3760,7 +3983,10 @@
     "width": 35.0,
     "sku": 17609,
     "price_aud": 39.9,
+    "across_low": -17.5,
+    "across_high": 17.5,
     "knob": 1,
+    "matte": 1,
     "finish_colour_rgb": 2569522
    },
    "drilling": [
@@ -3793,7 +4019,10 @@
     "width": 20.0,
     "sku": 17602,
     "price_aud": 24.9,
+    "across_low": -10.0,
+    "across_high": 10.0,
     "knob": 1,
+    "matte": 1,
     "finish_colour_rgb": 13488855
    },
    "drilling": [
@@ -3826,7 +4055,10 @@
     "width": 20.0,
     "sku": 17603,
     "price_aud": 24.9,
+    "across_low": -10.0,
+    "across_high": 10.0,
     "knob": 1,
+    "matte": 1,
     "finish_colour_rgb": 13355979
    },
    "drilling": [
@@ -3859,7 +4091,10 @@
     "width": 20.0,
     "sku": 17604,
     "price_aud": 29.9,
+    "across_low": -10.0,
+    "across_high": 10.0,
     "knob": 1,
+    "matte": 1,
     "finish_colour_rgb": 9723983
    },
    "drilling": [
@@ -3892,7 +4127,10 @@
     "width": 20.0,
     "sku": 17605,
     "price_aud": 29.9,
+    "across_low": -10.0,
+    "across_high": 10.0,
     "knob": 1,
+    "matte": 1,
     "finish_colour_rgb": 2569522
    },
    "drilling": [
@@ -3925,6 +4163,8 @@
     "width": 34.8,
     "sku": 14501,
     "price_aud": 29.9,
+    "across_low": -17.4,
+    "across_high": 17.4,
     "knob": 1,
     "finish_colour_rgb": 13277754
    },
@@ -3958,6 +4198,8 @@
     "width": 34.8,
     "sku": 15424,
     "price_aud": 21.9,
+    "across_low": -17.4,
+    "across_high": 17.4,
     "knob": 1,
     "finish_colour_rgb": 13488855
    },
@@ -3991,7 +4233,10 @@
     "width": 34.8,
     "sku": 15324,
     "price_aud": 19.9,
+    "across_low": -17.4,
+    "across_high": 17.4,
     "knob": 1,
+    "matte": 1,
     "finish_colour_rgb": 986895
    },
    "drilling": [
@@ -4024,6 +4269,8 @@
     "width": 34.8,
     "sku": 16675,
     "price_aud": 29.9,
+    "across_low": -17.4,
+    "across_high": 17.4,
     "knob": 1,
     "finish_colour_rgb": 9204560
    },
@@ -4057,6 +4304,8 @@
     "width": 15.0,
     "sku": 14502,
     "price_aud": 44.9,
+    "across_low": -7.5,
+    "across_high": 7.5,
     "finish_colour_rgb": 13277754
    },
    "drilling": [
@@ -4096,6 +4345,9 @@
     "width": 15.0,
     "sku": 14687,
     "price_aud": 44.9,
+    "across_low": -7.5,
+    "across_high": 7.5,
+    "matte": 1,
     "finish_colour_rgb": 986895
    },
    "drilling": [
@@ -4135,6 +4387,8 @@
     "width": 12.0,
     "sku": 15021,
     "price_aud": 64.9,
+    "across_low": -6.0,
+    "across_high": 6.0,
     "finish_colour_rgb": 13277754
    },
    "drilling": [
@@ -4174,6 +4428,8 @@
     "width": 12.0,
     "sku": 15022,
     "price_aud": 64.9,
+    "across_low": -6.0,
+    "across_high": 6.0,
     "finish_colour_rgb": 13012586
    },
    "drilling": [
@@ -4213,6 +4469,8 @@
     "width": 12.0,
     "sku": 15023,
     "price_aud": 64.9,
+    "across_low": -6.0,
+    "across_high": 6.0,
     "finish_colour_rgb": 4144959
    },
    "drilling": [
@@ -4252,6 +4510,8 @@
     "width": 12.0,
     "sku": 15024,
     "price_aud": 39.9,
+    "across_low": -6.0,
+    "across_high": 6.0,
     "finish_colour_rgb": 13488855
    },
    "drilling": [
@@ -4291,6 +4551,8 @@
     "width": 12.0,
     "sku": 17983,
     "price_aud": 69.9,
+    "across_low": -6.0,
+    "across_high": 6.0,
     "finish_colour_rgb": 10452308
    },
    "drilling": [
@@ -4330,6 +4592,8 @@
     "width": 12.0,
     "sku": 17984,
     "price_aud": 69.9,
+    "across_low": -6.0,
+    "across_high": 6.0,
     "finish_colour_rgb": 7162940
    },
    "drilling": [
@@ -4369,6 +4633,8 @@
     "width": 12.0,
     "sku": 17985,
     "price_aud": 69.9,
+    "across_low": -6.0,
+    "across_high": 6.0,
     "finish_colour_rgb": 4539717
    },
    "drilling": [
@@ -4408,6 +4674,8 @@
     "width": 12.0,
     "sku": 17986,
     "price_aud": 69.9,
+    "across_low": -6.0,
+    "across_high": 6.0,
     "finish_colour_rgb": 9803157
    },
    "drilling": [
@@ -4447,6 +4715,8 @@
     "width": 12.0,
     "sku": 15026,
     "price_aud": 124.9,
+    "across_low": -6.0,
+    "across_high": 6.0,
     "finish_colour_rgb": 13277754
    },
    "drilling": [
@@ -4486,6 +4756,8 @@
     "width": 12.0,
     "sku": 15027,
     "price_aud": 124.9,
+    "across_low": -6.0,
+    "across_high": 6.0,
     "finish_colour_rgb": 13012586
    },
    "drilling": [
@@ -4525,6 +4797,8 @@
     "width": 12.0,
     "sku": 15029,
     "price_aud": 89.9,
+    "across_low": -6.0,
+    "across_high": 6.0,
     "finish_colour_rgb": 13488855
    },
    "drilling": [
@@ -4564,6 +4838,9 @@
     "width": 12.0,
     "sku": 15030,
     "price_aud": 79.9,
+    "across_low": -6.0,
+    "across_high": 6.0,
+    "matte": 1,
     "finish_colour_rgb": 986895
    },
    "drilling": [
@@ -4603,6 +4880,8 @@
     "width": 12.0,
     "sku": 17997,
     "price_aud": 129.9,
+    "across_low": -6.0,
+    "across_high": 6.0,
     "finish_colour_rgb": 10452308
    },
    "drilling": [
@@ -4642,6 +4921,8 @@
     "width": 12.0,
     "sku": 17998,
     "price_aud": 129.9,
+    "across_low": -6.0,
+    "across_high": 6.0,
     "finish_colour_rgb": 7162940
    },
    "drilling": [
@@ -4681,6 +4962,8 @@
     "width": 12.0,
     "sku": 17999,
     "price_aud": 129.9,
+    "across_low": -6.0,
+    "across_high": 6.0,
     "finish_colour_rgb": 4539717
    },
    "drilling": [
@@ -4720,6 +5003,8 @@
     "width": 12.0,
     "sku": 18000,
     "price_aud": 129.9,
+    "across_low": -6.0,
+    "across_high": 6.0,
     "finish_colour_rgb": 9803157
    },
    "drilling": [
@@ -4759,6 +5044,8 @@
     "width": 12.0,
     "sku": 14055,
     "price_aud": 24.4,
+    "across_low": -6.0,
+    "across_high": 6.0,
     "finish_colour_rgb": 13277754
    },
    "drilling": [
@@ -4791,6 +5078,8 @@
     "width": 12.0,
     "sku": 15017,
     "price_aud": 34.9,
+    "across_low": -6.0,
+    "across_high": 6.0,
     "finish_colour_rgb": 13012586
    },
    "drilling": [
@@ -4823,6 +5112,8 @@
     "width": 12.0,
     "sku": 15018,
     "price_aud": 34.9,
+    "across_low": -6.0,
+    "across_high": 6.0,
     "finish_colour_rgb": 4144959
    },
    "drilling": [
@@ -4855,6 +5146,9 @@
     "width": 12.0,
     "sku": 15020,
     "price_aud": 24.9,
+    "across_low": -6.0,
+    "across_high": 6.0,
+    "matte": 1,
     "finish_colour_rgb": 986895
    },
    "drilling": [
@@ -4887,6 +5181,8 @@
     "width": 12.0,
     "sku": 18002,
     "price_aud": 39.9,
+    "across_low": -6.0,
+    "across_high": 6.0,
     "finish_colour_rgb": 10452308
    },
    "drilling": [
@@ -4919,6 +5215,8 @@
     "width": 12.0,
     "sku": 18003,
     "price_aud": 39.9,
+    "across_low": -6.0,
+    "across_high": 6.0,
     "finish_colour_rgb": 7162940
    },
    "drilling": [
@@ -4951,6 +5249,8 @@
     "width": 12.0,
     "sku": 18004,
     "price_aud": 39.9,
+    "across_low": -6.0,
+    "across_high": 6.0,
     "finish_colour_rgb": 4539717
    },
    "drilling": [
@@ -4983,6 +5283,8 @@
     "width": 12.0,
     "sku": 18005,
     "price_aud": 39.9,
+    "across_low": -6.0,
+    "across_high": 6.0,
     "finish_colour_rgb": 9803157
    },
    "drilling": [
@@ -5015,6 +5317,8 @@
     "width": 28.0,
     "sku": 15601,
     "price_aud": 34.9,
+    "across_low": -14.0,
+    "across_high": 14.0,
     "knob": 1,
     "finish_colour_rgb": 13277754
    },
@@ -5048,6 +5352,8 @@
     "width": 28.0,
     "sku": 15602,
     "price_aud": 34.9,
+    "across_low": -14.0,
+    "across_high": 14.0,
     "knob": 1,
     "finish_colour_rgb": 13012586
    },
@@ -5081,6 +5387,8 @@
     "width": 28.0,
     "sku": 15603,
     "price_aud": 34.9,
+    "across_low": -14.0,
+    "across_high": 14.0,
     "knob": 1,
     "finish_colour_rgb": 4144959
    },
@@ -5114,6 +5422,8 @@
     "width": 28.0,
     "sku": 15604,
     "price_aud": 29.9,
+    "across_low": -14.0,
+    "across_high": 14.0,
     "knob": 1,
     "finish_colour_rgb": 13488855
    },
@@ -5147,7 +5457,10 @@
     "width": 28.0,
     "sku": 15605,
     "price_aud": 29.9,
+    "across_low": -14.0,
+    "across_high": 14.0,
     "knob": 1,
+    "matte": 1,
     "finish_colour_rgb": 986895
    },
    "drilling": [
@@ -5180,6 +5493,8 @@
     "width": 12.0,
     "sku": 15036,
     "price_aud": 79.9,
+    "across_low": -6.0,
+    "across_high": 6.0,
     "finish_colour_rgb": 13277754
    },
    "drilling": [
@@ -5219,6 +5534,8 @@
     "width": 12.0,
     "sku": 15037,
     "price_aud": 79.9,
+    "across_low": -6.0,
+    "across_high": 6.0,
     "finish_colour_rgb": 13012586
    },
    "drilling": [
@@ -5258,6 +5575,8 @@
     "width": 12.0,
     "sku": 15038,
     "price_aud": 79.9,
+    "across_low": -6.0,
+    "across_high": 6.0,
     "finish_colour_rgb": 4144959
    },
    "drilling": [
@@ -5297,6 +5616,8 @@
     "width": 12.0,
     "sku": 15039,
     "price_aud": 59.9,
+    "across_low": -6.0,
+    "across_high": 6.0,
     "finish_colour_rgb": 13488855
    },
    "drilling": [
@@ -5336,6 +5657,9 @@
     "width": 12.0,
     "sku": 15040,
     "price_aud": 49.9,
+    "across_low": -6.0,
+    "across_high": 6.0,
+    "matte": 1,
     "finish_colour_rgb": 986895
    },
    "drilling": [
@@ -5375,6 +5699,8 @@
     "width": 12.0,
     "sku": 15041,
     "price_aud": 149.9,
+    "across_low": -6.0,
+    "across_high": 6.0,
     "finish_colour_rgb": 13277754
    },
    "drilling": [
@@ -5414,6 +5740,8 @@
     "width": 12.0,
     "sku": 15042,
     "price_aud": 149.9,
+    "across_low": -6.0,
+    "across_high": 6.0,
     "finish_colour_rgb": 13012586
    },
    "drilling": [
@@ -5453,6 +5781,8 @@
     "width": 12.0,
     "sku": 15043,
     "price_aud": 149.9,
+    "across_low": -6.0,
+    "across_high": 6.0,
     "finish_colour_rgb": 4144959
    },
    "drilling": [
@@ -5492,6 +5822,8 @@
     "width": 12.0,
     "sku": 15044,
     "price_aud": 99.0,
+    "across_low": -6.0,
+    "across_high": 6.0,
     "finish_colour_rgb": 13488855
    },
    "drilling": [
@@ -5531,6 +5863,9 @@
     "width": 12.0,
     "sku": 15045,
     "price_aud": 89.9,
+    "across_low": -6.0,
+    "across_high": 6.0,
+    "matte": 1,
     "finish_colour_rgb": 986895
    },
    "drilling": [
@@ -5570,6 +5905,8 @@
     "width": 12.0,
     "sku": 15031,
     "price_aud": 29.9,
+    "across_low": -6.0,
+    "across_high": 6.0,
     "finish_colour_rgb": 13277754
    },
    "drilling": [
@@ -5602,6 +5939,8 @@
     "width": 12.0,
     "sku": 15032,
     "price_aud": 29.9,
+    "across_low": -6.0,
+    "across_high": 6.0,
     "finish_colour_rgb": 13012586
    },
    "drilling": [
@@ -5634,6 +5973,8 @@
     "width": 12.0,
     "sku": 15033,
     "price_aud": 29.9,
+    "across_low": -6.0,
+    "across_high": 6.0,
     "finish_colour_rgb": 4144959
    },
    "drilling": [
@@ -5666,6 +6007,8 @@
     "width": 12.0,
     "sku": 15034,
     "price_aud": 27.9,
+    "across_low": -6.0,
+    "across_high": 6.0,
     "finish_colour_rgb": 13488855
    },
    "drilling": [
@@ -5698,6 +6041,9 @@
     "width": 12.0,
     "sku": 15035,
     "price_aud": 24.9,
+    "across_low": -6.0,
+    "across_high": 6.0,
+    "matte": 1,
     "finish_colour_rgb": 986895
    },
    "drilling": [
@@ -5730,6 +6076,8 @@
     "width": 22.1,
     "sku": 17114,
     "price_aud": 59.9,
+    "across_low": -11.1,
+    "across_high": 11.1,
     "finish_colour_rgb": 13277754
    },
    "drilling": [
@@ -5769,6 +6117,8 @@
     "width": 22.1,
     "sku": 17115,
     "price_aud": 59.9,
+    "across_low": -11.1,
+    "across_high": 11.1,
     "finish_colour_rgb": 13012586
    },
    "drilling": [
@@ -5808,6 +6158,8 @@
     "width": 22.1,
     "sku": 17116,
     "price_aud": 59.9,
+    "across_low": -11.1,
+    "across_high": 11.1,
     "finish_colour_rgb": 4144959
    },
    "drilling": [
@@ -5847,6 +6199,8 @@
     "width": 22.1,
     "sku": 17117,
     "price_aud": 54.9,
+    "across_low": -11.1,
+    "across_high": 11.1,
     "finish_colour_rgb": 13488855
    },
    "drilling": [
@@ -5886,6 +6240,9 @@
     "width": 22.1,
     "sku": 17118,
     "price_aud": 49.9,
+    "across_low": -11.1,
+    "across_high": 11.1,
+    "matte": 1,
     "finish_colour_rgb": 986895
    },
    "drilling": [
@@ -5925,6 +6282,8 @@
     "width": 26.4,
     "sku": 17119,
     "price_aud": 69.9,
+    "across_low": -13.2,
+    "across_high": 13.2,
     "finish_colour_rgb": 13277754
    },
    "drilling": [
@@ -5964,6 +6323,8 @@
     "width": 26.4,
     "sku": 17120,
     "price_aud": 69.9,
+    "across_low": -13.2,
+    "across_high": 13.2,
     "finish_colour_rgb": 13012586
    },
    "drilling": [
@@ -6003,6 +6364,8 @@
     "width": 26.4,
     "sku": 17121,
     "price_aud": 69.9,
+    "across_low": -13.2,
+    "across_high": 13.2,
     "finish_colour_rgb": 4144959
    },
    "drilling": [
@@ -6042,6 +6405,8 @@
     "width": 26.4,
     "sku": 17122,
     "price_aud": 59.9,
+    "across_low": -13.2,
+    "across_high": 13.2,
     "finish_colour_rgb": 13488855
    },
    "drilling": [
@@ -6081,6 +6446,9 @@
     "width": 26.4,
     "sku": 17123,
     "price_aud": 55.9,
+    "across_low": -13.2,
+    "across_high": 13.2,
+    "matte": 1,
     "finish_colour_rgb": 986895
    },
    "drilling": [
@@ -6120,6 +6488,8 @@
     "width": 38.8,
     "sku": 17124,
     "price_aud": 95.9,
+    "across_low": -19.4,
+    "across_high": 19.4,
     "finish_colour_rgb": 13277754
    },
    "drilling": [
@@ -6159,6 +6529,8 @@
     "width": 38.8,
     "sku": 17125,
     "price_aud": 95.9,
+    "across_low": -19.4,
+    "across_high": 19.4,
     "finish_colour_rgb": 13012586
    },
    "drilling": [
@@ -6198,6 +6570,8 @@
     "width": 38.8,
     "sku": 17126,
     "price_aud": 95.9,
+    "across_low": -19.4,
+    "across_high": 19.4,
     "finish_colour_rgb": 4144959
    },
    "drilling": [
@@ -6237,6 +6611,8 @@
     "width": 38.8,
     "sku": 17127,
     "price_aud": 85.9,
+    "across_low": -19.4,
+    "across_high": 19.4,
     "finish_colour_rgb": 13488855
    },
    "drilling": [
@@ -6276,6 +6652,9 @@
     "width": 38.8,
     "sku": 17128,
     "price_aud": 75.9,
+    "across_low": -19.4,
+    "across_high": 19.4,
+    "matte": 1,
     "finish_colour_rgb": 986895
    },
    "drilling": [

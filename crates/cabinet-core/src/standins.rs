@@ -158,12 +158,19 @@ pub fn stand_ins(list: &PartList) -> Vec<StandIn> {
                 });
             }
         } else if h.item.starts_with("blum.clip-top") {
-            if let Some(shapes) = hinge(list, h) {
+            if let Some(mut shapes) = hinge(list, h) {
                 hinges += 1;
+                // Apart, as a real hinge may go in on a plate we have no model of.
+                let plate = shapes.split_off(2);
                 out.push(StandIn {
                     name: format!("{}.Hinge{hinges}", list.cabinet),
                     item: h.item.clone(),
                     shapes,
+                });
+                out.push(StandIn {
+                    name: format!("{}.Plate{hinges}", list.cabinet),
+                    item: h.item.clone(),
+                    shapes: plate,
                 });
             }
         } else if crate::cad::is_leg(&h.item) {
@@ -180,12 +187,21 @@ pub fn stand_ins(list: &PartList) -> Vec<StandIn> {
             && let Some(sides) = runners(list, h)
         {
             drawers += 1;
-            for (suffix, shapes) in ["L", "R"].into_iter().zip(sides) {
+            for (suffix, (runner, box_side)) in ["L", "R"].into_iter().zip(sides) {
                 out.push(StandIn {
                     name: format!("{}.Runner{drawers}{suffix}", list.cabinet),
                     item: h.item.clone(),
-                    shapes,
+                    shapes: runner,
                 });
+                // Apart, as a real runner may go in under a side we have no model of: the sides
+                // of a steel box are what a drawer is seen by.
+                if let Some(side) = box_side {
+                    out.push(StandIn {
+                        name: format!("{}.BoxSide{drawers}{suffix}", list.cabinet),
+                        item: h.item.clone(),
+                        shapes: vec![side],
+                    });
+                }
             }
         }
     }
@@ -476,12 +492,12 @@ fn hinge(list: &PartList, h: &HardwarePlacement) -> Option<Vec<Shape>> {
     ])
 }
 
-/// A runner along the inside of each side under the drawer's front, with the drawer's box side
-/// standing on it; left then right.
-fn runners(list: &PartList, h: &HardwarePlacement) -> Option<[Vec<Shape>; 2]> {
+/// A runner along the inside of each side under the drawer's front, and the steel box side
+/// standing on it (a wooden box's sides are panels); left then right.
+fn runners(list: &PartList, h: &HardwarePlacement) -> Option<[(Vec<Shape>, Option<Shape>); 2]> {
     let front = list.part(&h.part)?;
-    if let Some(shapes) = wood_runners(list, &h.part) {
-        return Some(shapes);
+    if let Some([l, r]) = wood_runners(list, &h.part) {
+        return Some([(l, None), (r, None)]);
     }
     let (l, r) = list.bay_around(front.bounds.center().x)?;
     let back = list
@@ -521,7 +537,7 @@ fn runners(list: &PartList, h: &HardwarePlacement) -> Option<[Vec<Shape>; 2]> {
             ),
             Vec3::new(inner + sign * RUNNER_THICKNESS, y1, top),
         );
-        vec![Shape::Box(runner), Shape::Box(box_side)]
+        (vec![Shape::Box(runner)], Some(Shape::Box(box_side)))
     };
     Some([one(l.bounds.max().x, 1.0), one(r.bounds.min.x, -1.0)])
 }
@@ -575,19 +591,22 @@ mod tests {
             .collect();
         assert_eq!(s.len(), hinges);
         assert_eq!(s[0].name, "B01.Hinge1");
-        let side = list.part("B01.RightSide").unwrap();
         let door = list.part("B01.Door1").unwrap();
         for h in &s {
             let b = h.bounds();
             // Into the door's back, never through its face, and onto the side's inner face.
             assert!(b.min.y > door.bounds.min.y && b.min.y < door.bounds.max().y);
-            // The plate stands on the side's inner face; the cup may sit in front of the side.
-            let inner = side.bounds.min.x;
-            let Shape::Box(plate) = h.shapes[2] else {
-                panic!("the plate is a box")
-            };
-            assert!((plate.max().x - inner).abs() < 1e-6);
             assert!(b.max().y > 37.0 - 1e-6);
+        }
+        // The plate stands on the side's inner face; the cup may sit in front of the side.
+        let inner = list.part("B01.RightSide").unwrap().bounds.min.x;
+        let plates: Vec<_> = stand_ins(&list)
+            .into_iter()
+            .filter(|s| s.name.contains("Plate"))
+            .collect();
+        assert_eq!(plates.len(), hinges);
+        for p in &plates {
+            assert!((p.bounds().max().x - inner).abs() < 1e-6, "{}", p.name);
         }
     }
 
@@ -742,6 +761,55 @@ mod tests {
                         });
                         assert!(!overlap, "{} runs into {}", st.name, p.name);
                     }
+                }
+            }
+        }
+    }
+
+    /// Owner's test: MERIVOBOX and TANDEMBOX drawers had no sides, as the stand-in held the
+    /// runner and the side together and a real runner model took both away. Each part must be
+    /// replaceable on its own, in every steel system.
+    #[test]
+    fn every_steel_drawer_has_a_runner_and_a_box_side_standing_in_apart_on_each_hand() {
+        use crate::model::DrawerSystem;
+        for system in [
+            DrawerSystem::Legrabox,
+            DrawerSystem::Merivobox,
+            DrawerSystem::Tandembox,
+        ] {
+            let mut cab = Cabinet::new("D01", CabinetKind::DrawerBank);
+            cab.standard.drawer_system = system;
+            let list = build_cabinet(&cab).unwrap();
+            let n = list.by_role(PartRole::DrawerFront).count();
+            assert!(n > 0);
+            let all = stand_ins(&list);
+            for d in 1..=n {
+                for hand in ["L", "R"] {
+                    for part in ["Runner", "BoxSide"] {
+                        let name = format!("D01.{part}{d}{hand}");
+                        let s: Vec<_> = all.iter().filter(|s| s.name == name).collect();
+                        assert_eq!(s.len(), 1, "{system:?} {name}");
+                        assert_eq!(s[0].shapes.len(), 1, "{system:?} {name}");
+                    }
+                }
+            }
+        }
+    }
+
+    /// The names line up with the supplier models', or a real one would not replace its stand-in
+    /// and the part would draw twice.
+    #[test]
+    fn every_supplier_model_placement_names_a_stand_in_of_its_own() {
+        for (kind, drawers) in [(CabinetKind::Base, 0), (CabinetKind::DrawerBank, 3)] {
+            let list = build_cabinet(&Cabinet::new("C01", kind)).unwrap();
+            let names: Vec<_> = stand_ins(&list).into_iter().map(|s| s.name).collect();
+            for p in crate::cad::cad_placements(&list) {
+                let hand = p.name.contains("Hinge")
+                    || p.name.contains("Plate")
+                    || p.name.contains("Runner")
+                    || p.name.contains("BoxSide");
+                if hand {
+                    assert!(names.contains(&p.name), "{} {drawers}", p.name);
                 }
             }
         }

@@ -13,7 +13,7 @@ pub mod vendor;
 
 pub use client::Client;
 pub use emit::{
-    Detail, Existing, emit_cabinet, emit_cabinet_with, find_existing, hardware_inserts,
+    Detail, Existing, emit_cabinet, emit_cabinet_with, find_existing, hardware_inserts, models_for,
     replace_cabinet,
 };
 

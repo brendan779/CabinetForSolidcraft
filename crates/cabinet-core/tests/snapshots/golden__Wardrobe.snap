@@ -2011,7 +2011,7 @@ expression: list
       "at": {
         "x": 414.0,
         "y": 0.0,
-        "z": 986.0
+        "z": 1114.0
       },
       "direction": {
         "axis": "Y",
@@ -2027,7 +2027,7 @@ expression: list
       "at": {
         "x": 414.0,
         "y": 0.0,
-        "z": 1114.0
+        "z": 986.0
       },
       "direction": {
         "axis": "Y",
