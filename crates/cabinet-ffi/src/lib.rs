@@ -59,6 +59,11 @@ pub struct PanelBox {
     /// toe-kick notch, a front's routed finger pull. Its box as min x, y, z, max x, y, z; empty
     /// without one. The part is the two boxes it leaves.
     pub rebate: Vec<f64>,
+    /// A supplier handle model to draw in place of this panel's box (ABI-3): the article naming
+    /// `vendor-cad/abi/<article>.stl`. Empty for every other panel; the box draws then.
+    pub mesh: String,
+    /// The handle model's placement: model mm → cabinet mm, row-major 3 × 4. Empty without one.
+    pub mesh_transform: Vec<f64>,
 }
 
 #[derive(uniffi::Record)]
@@ -83,6 +88,63 @@ pub struct OptionGroupRecord {
     pub field: String,
     pub title: String,
     pub choices: Vec<ChoiceRecord>,
+}
+
+/// One ABI handle finish as the app's picker shows it: a family and size (the article's model)
+/// in one finish, with its SKU, list price and measured colour.
+#[derive(uniffi::Record)]
+pub struct HandleRecord {
+    /// Hardware-catalog id, the value the job's `handle_style` takes.
+    pub id: String,
+    pub family: String,
+    /// The finish's name ("Brushed Brass"; "(colour to verify)" marks one we could not measure).
+    pub variant: String,
+    /// The model's article, naming `vendor-cad/abi/<article>.stl`.
+    pub article: String,
+    /// ABI's named overall length (mm), or a knob's diameter.
+    pub length: f64,
+    /// The span of the screw pattern (mm); 0 for a single screw.
+    pub centres: f64,
+    /// How many screws it takes.
+    pub screws: u32,
+    pub knob: bool,
+    pub sku: u32,
+    /// ABI's list price in AUD; 0 where the product page printed none.
+    pub price_aud: f64,
+    /// The finish's measured colour `#RRGGBB`, or empty where it is still to verify.
+    pub colour: String,
+}
+
+/// Every ABI handle finish in the bundled catalog, sorted by family and size, for the picker.
+#[uniffi::export]
+pub fn abi_handles() -> Vec<HandleRecord> {
+    let mut out: Vec<HandleRecord> = cabinet_core::hardware::items()
+        .iter()
+        .filter(|h| h.id.starts_with("handle.abi."))
+        .map(|h| HandleRecord {
+            id: h.id.clone(),
+            family: h.family.clone(),
+            variant: h.variant.clone(),
+            article: h.article.clone(),
+            length: h.parameters.get("length").copied().unwrap_or(0.0),
+            centres: h.parameters.get("centres").copied().unwrap_or(0.0),
+            screws: h.drilling.len() as u32,
+            knob: h.parameters.contains_key("knob"),
+            sku: h.parameters.get("sku").copied().unwrap_or(0.0) as u32,
+            price_aud: h.parameters.get("price_aud").copied().unwrap_or(0.0),
+            colour: h
+                .parameters
+                .get("finish_colour_rgb")
+                .map(|c| format!("#{:06X}", *c as u32))
+                .unwrap_or_default(),
+        })
+        .collect();
+    out.sort_by(|a, b| {
+        (&a.family, &a.variant)
+            .cmp(&(&b.family, &b.variant))
+            .then(a.length.total_cmp(&b.length))
+    });
+    out
 }
 
 #[derive(uniffi::Record)]
@@ -637,6 +699,8 @@ fn summary(list: PartList) -> BuildSummary {
                     .map(|a| format!("{a:?}").to_lowercase())
                     .unwrap_or_default(),
                 rebate: rebate(p).unwrap_or_default(),
+                mesh: String::new(),
+                mesh_transform: Vec::new(),
             }
         })
         .collect();
@@ -660,7 +724,10 @@ fn summary(list: PartList) -> BuildSummary {
         .count() as u32;
     // Handles, from their screw holes: a bar standing off the front face (a knob a square),
     // swinging or sliding with their front. An ABI finish with a measured colour is that colour;
-    // the generic finishes stay named, which the viewport already paints.
+    // the generic finishes stay named, which the viewport already paints. An ABI handle also
+    // carries its model's placement (model mm → cabinet mm), taken from the same cad placement
+    // SolidCraft's own insert uses.
+    let placements = cad_placements(&list);
     let finish = list
         .hardware
         .iter()
@@ -735,6 +802,30 @@ fn summary(list: PartList) -> BuildSummary {
             }
         };
         let (x, y, z) = (span(Axis::X), span(Axis::Y), span(Axis::Z));
+        // The model placement whose origin is this handle's face point: the midpoint of its
+        // screw holes on the front face (the cad handle frame is built from the same holes, so
+        // they agree to a rounding).
+        let mut on_face = cabinet_core::geom::Vec3::new(
+            (first.x + last.x) / 2.0,
+            (first.y + last.y) / 2.0,
+            (first.z + last.z) / 2.0,
+        );
+        on_face = on_face.with(dir.axis, face);
+        let (mesh, mesh_transform) = placements
+            .iter()
+            .find(|c| {
+                c.item.starts_with("handle.abi.")
+                    && (c.origin.x - on_face.x).abs() < 1.0
+                    && (c.origin.y - on_face.y).abs() < 1.0
+                    && (c.origin.z - on_face.z).abs() < 1.0
+            })
+            .map(|c| {
+                (
+                    c.article.clone(),
+                    cabinet_core::cad::transform(c, false, 0.0).to_vec(),
+                )
+            })
+            .unwrap_or_default();
         let front = panels.iter().find(|b| b.name == p.name);
         let (hinged, hinge_x, hinge_y) = front
             .map(|b| (b.hinged.clone(), b.hinge_x, b.hinge_y))
@@ -756,6 +847,8 @@ fn summary(list: PartList) -> BuildSummary {
             board: format!("handle:{finish}"),
             grain: String::new(),
             rebate: Vec::new(),
+            mesh,
+            mesh_transform,
         });
     }
     // Edge pulls have no screw holes: a lip centred on the gripping edge the core places them
@@ -809,6 +902,8 @@ fn summary(list: PartList) -> BuildSummary {
             board: format!("handle:{finish}"),
             grain: String::new(),
             rebate: Vec::new(),
+            mesh: String::new(),
+            mesh_transform: Vec::new(),
         });
     }
     BuildSummary {
@@ -1132,11 +1227,13 @@ fn job_quote_core(
     offcuts_json: &str,
     prices_json: &str,
 ) -> Result<cabinet_core::quote::Quote, CoreError> {
-    let prices: cabinet_core::quote::PriceList = if prices_json.trim().is_empty() {
+    let mut prices: cabinet_core::quote::PriceList = if prices_json.trim().is_empty() {
         Default::default()
     } else {
         serde_json::from_str(prices_json).map_err(invalid)?
     };
+    // The shop's own prices win; the supplier's list prices fill what the shop left unpriced.
+    prices.fill_from_hardware_catalog();
     let (nesting, _) = job_nesting(
         items,
         catalog_dir,
@@ -1291,11 +1388,12 @@ pub fn customer_quote_pdf(
     offcuts_json: String,
     prices_json: String,
 ) -> Result<Vec<u8>, CoreError> {
-    let prices: cabinet_core::quote::PriceList = if prices_json.trim().is_empty() {
+    let mut prices: cabinet_core::quote::PriceList = if prices_json.trim().is_empty() {
         Default::default()
     } else {
         serde_json::from_str(prices_json.as_str()).map_err(invalid)?
     };
+    prices.fill_from_hardware_catalog();
     let q = job_quote_core(
         &items,
         &catalog_dir,
@@ -2452,6 +2550,82 @@ mod tests {
             .find(|p| p.name == "B01.Door1.Handle")
             .unwrap();
         assert_eq!(h.board, "handle:#CA9A3A");
-        assert!((h.height - (220.0 + 30.0)).abs() < 1e-6, "{}", h.height);
+        assert!((h.height - (192.0 + 30.0)).abs() < 1e-6, "{}", h.height);
+        // ABI-3: the same panel carries its model's article and placement, so the viewport can
+        // draw the supplier's mesh where it drew the bar. The origin is the handle's face point.
+        assert_eq!(h.mesh, "ABI-TEZRA-220");
+        assert_eq!(h.mesh_transform.len(), 12);
+        let door = sum.panels.iter().find(|p| p.name == "B01.Door1").unwrap();
+        let holes = cabinet_core::build_cabinet(&cab)
+            .unwrap()
+            .operations
+            .iter()
+            .filter_map(|o| match o {
+                cabinet_core::part::Operation::Bore {
+                    part,
+                    at,
+                    purpose: cabinet_core::part::BorePurpose::HandleScrew,
+                    ..
+                } if part == "B01.Door1" => Some(*at),
+                _ => None,
+            })
+            .collect::<Vec<_>>();
+        let mid_z = (holes[0].z + holes[1].z) / 2.0;
+        let x = holes[0].x;
+        // The model's origin is the handle's face point: the screw line on the door's front face.
+        assert!((h.mesh_transform[3] - x).abs() < 0.5);
+        assert!(
+            (h.mesh_transform[7] - door.y).abs() < 0.5,
+            "{}",
+            h.mesh_transform[7]
+        );
+        assert!((h.mesh_transform[11] - mid_z).abs() < 0.5);
+    }
+
+    /// ABI-3: the picker's records, and a chosen finish quoting at its list price.
+    #[test]
+    fn abi_handle_records_list_the_catalog_and_quote_their_list_price() {
+        let all = abi_handles();
+        assert!(all.len() >= 160, "{}", all.len());
+        let tezra = all
+            .iter()
+            .find(|h| h.id == "handle.abi.tezra-220.brushed-brass")
+            .unwrap();
+        assert_eq!(tezra.article, "ABI-TEZRA-220");
+        assert!((tezra.length - 220.0).abs() < 1e-9 && !tezra.knob);
+        assert!((tezra.centres - 192.0).abs() < 1e-9 && tezra.screws == 2);
+        assert_eq!(tezra.sku, 15021);
+        assert!((tezra.price_aud - 64.9).abs() < 1e-9);
+        assert_eq!(tezra.colour, "#CA9A3A");
+        // Every finish has a colour: from its BIM model or ABI's own swatch.
+        assert!(all.iter().all(|h| !h.colour.is_empty()));
+        assert!(!all.iter().any(|h| h.variant.contains("to verify")));
+
+        let mut cab = parse(&new_cabinet("B01".into(), "base".into()).unwrap()).unwrap();
+        cab.standard.handle_range = cabinet_core::model::HandleRange::Abi;
+        cab.standard.handle_style = "handle.abi.tezra-220.brushed-brass".into();
+        let items = vec![serde_json::to_string(&cab).unwrap()];
+        let catalog = concat!(env!("CARGO_MANIFEST_DIR"), "/../../catalog").to_string();
+        let q = job_quote(
+            job(&items),
+            catalog,
+            4.4,
+            10.0,
+            false,
+            String::new(),
+            String::new(),
+        )
+        .unwrap();
+        let line = q
+            .lines
+            .iter()
+            .find(|l| l.key == "handle.abi.tezra-220.brushed-brass")
+            .unwrap();
+        assert_eq!(line.unit_price, Some(64.9), "{}", line.description);
+        assert!(
+            line.description.contains("SKU 15021"),
+            "{}",
+            line.description
+        );
     }
 }

@@ -47,6 +47,13 @@ struct InspectorView: View {
                             withAnimation(.snappy) { project.setOption(group.field, choice) }
                         }
                         StandardSizes(after: group.field, cab: cab)
+                        // ABI-3: the style picker sits under the range switch once ABI is chosen,
+                        // replacing the generic size and finish tiles the core hides.
+                        if group.field == "handle_range",
+                           project.option("handle_range", of: cab) == "abi",
+                           ["corner", "centre"].contains(project.option("handle_place", of: cab)) {
+                            AbiHandleSection(cab: cab)
+                        }
                     }
                     if let b = project.build(cab), !b.hardware.isEmpty {
                         HardwareSection(items: b.hardware)

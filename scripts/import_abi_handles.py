@@ -2,21 +2,24 @@
 """Imports ABI Interiors cabinetry handles from the BIM library (vendor-cad/abi-bim).
 
 Each product folder there (a BIMobject download) holds an IFC exported from ABI's
-Revit family: a faceted mesh in an arbitrary frame, with the finish colour, plus
-product.txt with the SKUs, finishes and prices. ABI names a pull by its screw
-centres, and its models put the mounting feet at the ends of that same span.
+Revit family: a faceted mesh in an arbitrary frame, plus product.txt with the SKUs,
+finishes and prices, and ABI's dimensioned spec drawing.
+
+ABI names a pull by its overall length, not its fixing distance (Tezra 220 is 220 long
+with screws 192 apart), and many pulls are not two-screw (Pedra has three, Rappana 800
+four, the T pulls one). SPECS below holds what each drawing prints; nothing about where
+a screw goes is inferred from the name or the mesh.
 
 For every cabinetry pull and knob this script:
 
-  1. parses the IFC mesh (IFCPOLYLOOP faces) and its IFCCOLOURRGB,
-  2. finds the mounting face (the extreme plane most vertices share), the length
-     axis across the screw span and the width axis,
-  3. re-orients the mesh into the app's handle frame — screw holes on X at
-     ±centres/2, the door face at Y = 0, the handle standing out towards -Y —
-     and writes it as a binary STL under vendor-cad/abi/<article>.stl,
-  4. records the catalog row (measured centres/projection/size, the finish list
-     from product.txt with SKUs and prices, and the model's colour as that
-     finish's preview) into catalog/hardware/abi-handles.json.
+  1. parses the IFC faces and triangulates them properly (they are n-gons, often
+     non-convex, sometimes with holes),
+  2. uses SPECS to find the axes: the length, and the projection the drawing prints,
+  3. re-orients the mesh into the app's handle frame: the screw line on X and centred on
+     0, the door face at Y = 0, the handle towards -Y, and writes a binary STL under
+     vendor-cad/abi/<article>.stl,
+  4. records the catalog row (length, projection, width, the screw pattern as `drilling`,
+     and the finishes from product.txt) into catalog/hardware/abi-handles.json.
 
 The STLs stay local (vendor-cad is never committed); the catalog holds facts
 with their source. Run from the repository root:
@@ -49,6 +52,63 @@ CABINETRY = re.compile(
 SKIP = re.compile(r'Stainless Steel|Entry Door|Flush Pull', re.I)
 
 
+def pair(cc):
+    return [-cc / 2, cc / 2]
+
+
+# From each product's spec drawing (the "*Spec*" image in its BIM folder) and product.txt.
+#   holes: screw positions along the length from the pattern's centre; (x, z) off the line
+#   proj: projection off the door, printed
+#   edge: a shape with one straight edge: its distance from the screw line, printed
+#   flip: the mesh's door face is the other extreme; set after looking at the render
+#   adjustable: ABI's recommended range for a pull whose collars slide
+#   edge_mount: sits over the front's top edge, not screwed through its face. Left out of the
+#   catalog until the builder can place and bore that (backlog ABI-5).
+SPECS = {
+    'Beta Cabinetry Pull 115mm': {'holes': pair(64), 'proj': 18},
+    'Beta Cabinetry Pull 400mm': {'holes': pair(355), 'proj': 18},
+    'Camille Farmhouse Cabinetry Pull': {'holes': pair(64), 'proj': 23, 'edge': 3, 'flip': True},
+    'Imes Cabinetry Pull': {'holes': pair(64), 'proj': 14, 'edge': 15, 'flip': True},
+    'Kingsley Adjustable Cabinetry Pull 150mm': {'holes': pair(98), 'proj': 39, 'adjustable': (70, 120)},
+    'Kingsley Adjustable Cabinetry Pull 250mm': {'holes': pair(198), 'proj': 39, 'adjustable': (100, 220)},
+    'Kingsley Adjustable Cabinetry Pull 350mm': {'holes': pair(298), 'proj': 39, 'adjustable': (140, 320)},
+    'Modi Adjustable Cabinetry Pull 150mm': {'holes': pair(96), 'proj': 36, 'adjustable': (70, 120)},
+    'Modi Adjustable Cabinetry Pull 250mm': {'holes': pair(192), 'proj': 36, 'adjustable': (100, 220)},
+    'Modi Adjustable Cabinetry Pull 350mm': {'holes': pair(288), 'proj': 36, 'adjustable': (140, 320)},
+    'Ziggy Adjustable Cabinetry Pull 150mm': {'holes': pair(100), 'proj': 36},
+    'Ziggy Adjustable Cabinetry Pull 250mm': {'holes': pair(192), 'proj': 36},
+    'Ziggy Adjustable Cabinetry Pull 350mm': {'holes': pair(280), 'proj': 36},
+    'Pedra Cabinetry Pull 220mm': {'holes': [-87, 0, 87], 'proj': 21},
+    'Pedra Cabinetry Pull 400mm': {'holes': [-180, 0, 180], 'proj': 21},
+    'Pedra Curve Cabinetry Pull 320mm (Pair)': {'holes': [-80, 0, 80], 'proj': 20, 'edge': 15},
+    'Pika Cabinetry Pull 138mm': {'holes': pair(128), 'proj': 24},
+    'Rappana Cabinetry Pull 50mm': {'holes': pair(25), 'proj': 36, 'edge_mount': True},
+    'Rappana Cabinetry Pull Extended 100mm': {'holes': pair(75), 'proj': 36, 'edge_mount': True},
+    'Rappana Cabinetry Pull Extended 500mm': {'holes': [-237, 0, 237], 'proj': 36, 'edge_mount': True},
+    'Rappana Cabinetry Pull Extended 800mm': {'holes': [-387, -129, 129, 387], 'proj': 36, 'edge_mount': True},
+    'Scalo Cabinetry Pull': {'holes': pair(32), 'proj': 35, 'edge': 10, 'edge_mount': True},
+    'Tezra Cabinetry Pull 220mm': {'holes': pair(192), 'proj': 32},
+    'Tezra Cabinetry Pull 500mm': {'holes': pair(450), 'proj': 42},
+    'Tezra Textured Cabinetry Pull 220mm': {'holes': pair(192), 'proj': 31},
+    'Tezra Textured Cabinetry Pull 500mm': {'holes': pair(450), 'proj': 41},
+    'Tezra Cabinetry T Pull': {'holes': [0], 'proj': 35},
+    'Tezra Textured Cabinetry T Pull': {'holes': [0], 'proj': 35},
+    'Hegman Half Moon Pull 200mm Pair': {'holes': pair(50), 'proj': 52, 'edge': 15},
+    'Hegman Kurve Pull 250mm Pair': {'holes': pair(110), 'proj': 26, 'edge': 7.5},
+    # Four M4 around a centre kept for an M10 through-bolt on glass, which we do not use.
+    'Hegman Round Pull 200mm': {'holes': [(-25, 0), (0, -25), (0, 25), (25, 0)], 'proj': 52},
+    'Elsa Cabinetry Knob': {'holes': [0], 'proj': 20},
+    'Myka Cabinetry Knob 60mm': {'holes': [0], 'proj': 23},
+    'Pika Cabinetry Knob': {'holes': [0], 'proj': 24},
+    'Tezra Textured Cabinetry Knob': {'holes': [0], 'proj': 35},
+    'Pedra Large Knob 35mm': {'holes': [0], 'proj': 21.5},
+    'Pedra Small Knob 20mm': {'holes': [0], 'proj': 25},
+    'Hegman Round Pull - 30mm': {'holes': [0], 'proj': 19},
+    'Hegman Round Pull 60mm': {'holes': [0], 'proj': 23},
+    'Hegman Round Pull 90mm': {'holes': [0], 'proj': 25},
+}
+
+
 def family_of(folder_name):
     """('Tezra Textured', 'Pull', 220.0) for 'BIMobject-Tezra Textured Cabinetry Pull 220mm'.
 
@@ -72,33 +132,145 @@ def family_of(folder_name):
 
 
 def parse_ifc(path):
+    """(triangles, first colour): every IFCFACE, its outer bound and any holes triangulated."""
     text = open(path, encoding='latin-1').read()
     if 'DATA;' not in text:
         return None
     data = text[text.index('DATA;'):text.index('ENDSEC;', text.index('DATA;'))]
-    pts, loops, colours = {}, [], []
+    pts, loops, bounds, faces, colours = {}, {}, {}, [], []
     for m in re.finditer(r"#(\d+)\s*=\s*(.*?);\s*(?=#|\Z)", data, re.S):
-        s = m.group(2).strip()
+        s, n = m.group(2).strip(), int(m.group(1))
         if s.startswith('IFCCARTESIANPOINT'):
             mm = re.findall(r"\(([^()]*)\)", s)
             try:
                 v = [float(x) for x in mm[-1].split(',')]
                 if len(v) == 3:
-                    pts[int(m.group(1))] = v
+                    pts[n] = v
             except ValueError:
                 pass
         elif s.startswith('IFCPOLYLOOP'):
-            lp = [pts[int(r)] for r in re.findall(r"#(\d+)", s) if int(r) in pts]
-            if len(lp) >= 3:
-                loops.append(lp)
+            loops[n] = [pts[int(r)] for r in re.findall(r"#(\d+)", s) if int(r) in pts]
+        elif s.startswith('IFCFACEOUTERBOUND') or s.startswith('IFCFACEBOUND'):
+            r = re.search(r"#(\d+)", s)
+            bounds[n] = (int(r.group(1)), s.startswith('IFCFACEOUTERBOUND'))
+        elif s.startswith('IFCFACE('):
+            faces.append([int(r) for r in re.findall(r"#(\d+)", s)])
         elif 'IFCCOLOURRGB' in s and '(' in s:
             try:
                 inner = s[s.index('(') + 1:s.rindex(')')]
-                c = [float(x) for x in inner.split(',')[-3:]]
-                colours.append(tuple(c))
+                colours.append(tuple(float(x) for x in inner.split(',')[-3:]))
             except ValueError:
                 pass
-    return (loops, colours[0] if colours else None) if loops else None
+    tris = []
+    for f in faces:
+        fb = [bounds[b] for b in f if b in bounds and len(loops.get(bounds[b][0], [])) >= 3]
+        outer = [loops[b] for b, is_outer in fb if is_outer] or [loops[b] for b, _ in fb[:1]]
+        if not outer:
+            continue
+        holes = [loops[b] for b, is_outer in fb if not is_outer and loops[b] is not outer[0]]
+        tris.extend(triangulate(outer[0], holes))
+    return (tris, colours[0] if colours else None) if tris else None
+
+
+def newell(poly):
+    n = [0.0, 0.0, 0.0]
+    for i, p in enumerate(poly):
+        q = poly[(i + 1) % len(poly)]
+        n[0] += (p[1] - q[1]) * (p[2] + q[2])
+        n[1] += (p[2] - q[2]) * (p[0] + q[0])
+        n[2] += (p[0] - q[0]) * (p[1] + q[1])
+    return n
+
+
+def triangulate(outer, holes):
+    """Ear-clips a planar n-gon with holes, keeping the outer loop's winding."""
+    n = newell(outer)
+    if sum(c * c for c in n) < 1e-18:
+        return []
+    drop = max(range(3), key=lambda i: abs(n[i]))
+    # Project so the outer loop runs counter-clockwise in 2D.
+    u, v = [i for i in range(3) if i != drop]
+    if n[drop] < 0:
+        u, v = v, u
+    if (drop == 1):
+        u, v = v, u
+    flat = lambda p: (p[u], p[v])
+
+    def signed(poly):
+        return sum(flat(poly[i])[0] * flat(poly[(i + 1) % len(poly)])[1]
+                   - flat(poly[(i + 1) % len(poly)])[0] * flat(poly[i])[1]
+                   for i in range(len(poly))) / 2
+
+    ring = list(outer)
+    flipped = signed(ring) < 0
+    if flipped:
+        ring.reverse()
+    # Bridge each hole, rightmost first, to the nearest outer vertex that can see it.
+    for hole in sorted(holes, key=lambda h: -max(flat(p)[0] for p in h)):
+        h = list(hole)
+        if signed(h) > 0:
+            h.reverse()
+        start = max(range(len(h)), key=lambda i: flat(h[i])[0])
+        hp = flat(h[start])
+
+        def crosses(a, b):
+            for poly in [ring, h]:
+                for i in range(len(poly)):
+                    c, d = flat(poly[i]), flat(poly[(i + 1) % len(poly)])
+                    if a in (c, d) or b in (c, d):
+                        continue
+                    if segments_cross(a, b, c, d):
+                        return True
+            return False
+
+        order = sorted(range(len(ring)), key=lambda i: dist2(flat(ring[i]), hp))
+        pick = next((i for i in order if not crosses(flat(ring[i]), hp)), order[0])
+        h = h[start:] + h[:start]
+        ring = ring[:pick + 1] + h + [h[0]] + ring[pick:]
+    out = []
+    idx = list(range(len(ring)))
+    guard = 0
+    while len(idx) > 3 and guard < 20000:
+        guard += 1
+        clipped = False
+        for k in range(len(idx)):
+            i0, i1, i2 = idx[k - 1], idx[k], idx[(k + 1) % len(idx)]
+            a, b, c = flat(ring[i0]), flat(ring[i1]), flat(ring[i2])
+            area = (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0])
+            if abs(area) < 1e-12:  # a straight run: drop the middle point
+                idx.pop(k)
+                clipped = True
+                break
+            if area < 0:
+                continue
+            if any(in_triangle(flat(ring[j]), a, b, c) for j in idx
+                   if j not in (i0, i1, i2) and flat(ring[j]) not in (a, b, c)):
+                continue
+            out.append([ring[i0], ring[i1], ring[i2]])
+            idx.pop(k)
+            clipped = True
+            break
+        if not clipped:  # not simple (bad source data): finish as a fan rather than lose it
+            break
+    for i in range(1, len(idx) - 1):
+        out.append([ring[idx[0]], ring[idx[i]], ring[idx[i + 1]]])
+    return [t[::-1] for t in out] if flipped else out
+
+
+def dist2(a, b):
+    return (a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2
+
+
+def segments_cross(a, b, c, d):
+    def side(p, q, r):
+        return (q[0] - p[0]) * (r[1] - p[1]) - (q[1] - p[1]) * (r[0] - p[0])
+    return side(a, b, c) * side(a, b, d) < 0 and side(c, d, a) * side(c, d, b) < 0
+
+
+def in_triangle(p, a, b, c):
+    def side(q, r):
+        return (r[0] - q[0]) * (p[1] - q[1]) - (r[1] - q[1]) * (p[0] - q[0])
+    return side(a, b) >= -1e-9 and side(b, c) >= -1e-9 and side(c, a) >= -1e-9
 
 
 def unit(v):
@@ -168,132 +340,73 @@ def components(loops):
     return [lp for g in groups.values() for lp in g]  # one product, many solids
 
 
-def frame(loops, name):
-    """The app-frame axes from the mesh: (x, y, z, origin, centres, knob) with y into the door.
+def frame(tris, spec):
+    """The handle-frame axes from the drawing: (x, y into the door, z, origin).
 
-    Candidate mounting planes are extremes with ≥ 4 vertices spanning at least
-    60 % of another axis. ABI names a pull by its screw centres, so with a named
-    size the winning candidate is the one whose feet span matches it (± 15 mm);
-    without one, the face spanning the longest axis wins, and among equals the
-    one whose vertices hug the centre of the third axis (feet, not a bar side).
-    A face spanning both other axes with no gap between the feet is a knob's
-    base: one screw at the centre.
+    The length is the longest axis (for a one-screw pull or a knob, the longer axis off the
+    door); the projection is the axis nearest what the drawing prints, and the door face is
+    the extreme with the least flat area (a pull's feet, a knob's base), unless `flip` says
+    the render showed otherwise.
     """
-    allp = [p for lp in loops for p in lp]
-    distinct = {tuple(round(c, 3) for c in p) for p in allp}
-    dv = [list(p) for p in distinct]
-    lo = [min(p[i] for p in dv) for i in range(3)]
-    hi = [max(p[i] for p in dv) for i in range(3)]
+    pts = [p for t in tris for p in t]
+    lo = [min(p[i] for p in pts) for i in range(3)]
+    hi = [max(p[i] for p in pts) for i in range(3)]
     size = [hi[i] - lo[i] for i in range(3)]
-    named = re.search(r'(\d+(?:\.\d+)?)\s*mm', name)
-    named = float(named.group(1)) if named else None
-    cands = []
-    for ax in range(3):
-        for val in (lo[ax], hi[ax]):
-            on = [p for p in dv if abs(p[ax] - val) < 0.3]
-            if len(on) < 4:
-                continue
-            spans = {}
-            for a in range(3):
-                if a == ax:
-                    continue
-                span = max(p[a] for p in on) - min(p[a] for p in on)
-                if span >= 0.6 * size[a]:
-                    spans[a] = span
-            if spans:
-                cands.append((ax, val, on, spans))
-    if not cands:
-        return None
-    # A knob: the face with the most vertices, small (its two spans under
-    # 100 mm and within 25 % of each other), its stand-off under 60 mm, and one
-    # filled disc — not two feet, which make a pull despite a square base.
-    for ax, val, on, spans in sorted(cands, key=lambda c: -len(c[2])):
-        rest = [a for a in range(3) if a != ax]
-        if (len(spans) != 2 or len(on) < 8 or max(size[a] for a in rest) > 100.0
-                or size[ax] > 60.0):
-            continue
-        if abs(size[rest[0]] - size[rest[1]]) > 0.25 * max(size[rest[0]], size[rest[1]]):
-            continue
-        feet = False
-        for a in rest:
-            xs = sorted(p[a] for p in on)
-            span = xs[-1] - xs[0]
-            mid = len(xs) // 2
-            if span > 30 and xs[mid] - xs[mid - 1] > 0.35 * span and (
-                xs[mid - 1] - xs[0] < 0.2 * span and xs[-1] - xs[mid] < 0.2 * span
-            ):
-                feet = True
-        if not feet:
-            into = [0.0, 0.0, 0.0]
-            into[ax] = 1.0 if val == hi[ax] else -1.0
-            length = max(rest, key=lambda a: size[a])
-            width = next(a for a in rest if a != length)
-            x = [0.0, 0.0, 0.0]
-            x[length] = 1.0
-            z = unit(cross(x, into))
-            origin = [(lo[a] + hi[a]) / 2.0 for a in range(3)]
-            origin[ax] = val
-            return x, into, z, origin, size, 0.0, True, length, ax, width
-    # A pull: the face whose feet span matches the named centres closest; the
-    # name is ABI's specification, the measured span is recorded beside it.
-    pick = None
-    if named is not None:
-        best_err = 1e9
-        for ax, val, on, spans in cands:
-            for a, span in spans.items():
-                if size[a] < 0.8 * named:
-                    continue
-                if abs(span - named) < best_err:
-                    best_err, pick = abs(span - named), (ax, val, a)
-    if pick is None:
-        def third_spread(c):
-            ax, on, spans = c[0], c[2], c[3]
-            thirds = [a for a in range(3) if a != ax and a not in spans]
-            if not thirds:
-                return 0.0
-            return max(p[thirds[0]] for p in on) - min(p[thirds[0]] for p in on)
+    proj = min(range(3), key=lambda a: abs(size[a] - spec['proj']))
+    rest = [a for a in range(3) if a != proj]
+    length = max(rest, key=lambda a: size[a])
+    width = next(a for a in rest if a != length)
 
-        ranked = sorted(cands, key=lambda c: (-max(c[3].values()), third_spread(c), -len(c[2])))
-        ax, val, on, spans = ranked[0]
-        a = max(spans, key=spans.get)
-        pick = (ax, val, a)
-    proj, face_val, length = pick
-    on = [p for p in dv if abs(p[proj] - face_val) < 0.3]
-    feet_span = max(p[length] for p in on) - min(p[length] for p in on)
-    centres = named if named is not None else feet_span
+    def flat_area(val):
+        area = 0.0
+        for t in tris:
+            if all(abs(p[proj] - val) < 0.3 for p in t):
+                n = cross(sub(t[1], t[0]), sub(t[2], t[0]))
+                area += dot(n, n) ** 0.5 / 2
+        return area
+
+    door = lo[proj] if flat_area(lo[proj]) <= flat_area(hi[proj]) else hi[proj]
+    if spec.get('flip'):
+        door = hi[proj] if door == lo[proj] else lo[proj]
     into = [0.0, 0.0, 0.0]
-    into[proj] = 1.0 if face_val == hi[proj] else -1.0
-    width = next(a for a in range(3) if a != proj and a != length)
+    into[proj] = 1.0 if door == hi[proj] else -1.0
     x = [0.0, 0.0, 0.0]
     x[length] = 1.0
     z = unit(cross(x, into))
     origin = [(lo[a] + hi[a]) / 2.0 for a in range(3)]
-    origin[proj] = face_val
-    return x, into, z, origin, size, centres, False, length, proj, width
+    origin[proj] = door
+    if 'edge' in spec:
+        # The straight edge runs the full length: the width extreme whose points span most.
+        def span(val):
+            on = [p[length] for p in pts if abs(p[width] - val) < 0.5]
+            return max(on) - min(on) if on else 0.0
+        straight = lo[width] if span(lo[width]) >= span(hi[width]) else hi[width]
+        # Keep it up the handle frame's +Z, and the screw line at Z = 0.
+        toward = -1.0 if straight == lo[width] else 1.0
+        if toward * z[width] < 0:
+            x = [-c for c in x]
+            z = [-c for c in z]
+        origin[width] = straight - toward * spec['edge']
+    return x, into, z, origin
 
 
-def write_stl(path, loops, x, y, z, origin):
+def write_stl(path, tris_in, x, y, z, origin):
     tris = 0
     with open(path, 'wb') as fh:
         fh.write(b'ABI Interiors handle, re-oriented by scripts/import_abi_handles.py'.ljust(80, b'\0')[:80])
         fh.write(struct.pack('<I', 0))  # count patched below
-        for lp in loops:
-            mapped = []
-            for p in lp:
-                d = sub(p, origin)
-                mapped.append((dot(d, x), dot(d, y), dot(d, z)))
-            for i in range(1, len(mapped) - 1):
-                a, b, c = mapped[0], mapped[i], mapped[i + 1]
-                # fan-triangulate the polygon
-                u, v = sub(b, a), sub(c, a)
-                n = cross(u, v)
-                nn = sum(t * t for t in n) ** 0.5
-                n = [t / nn if nn > 1e-12 else 0.0 for t in n]
-                fh.write(struct.pack('<3f', *n))
-                for t in (a, b, c):
-                    fh.write(struct.pack('<3f', *t))
-                fh.write(b'\0\0')
-                tris += 1
+        for t in tris_in:
+            a, b, c = [(dot(sub(p, origin), x), dot(sub(p, origin), y), dot(sub(p, origin), z))
+                       for p in t]
+            n = cross(sub(b, a), sub(c, a))
+            nn = dot(n, n) ** 0.5
+            if nn < 1e-9:
+                continue
+            fh.write(struct.pack('<3f', *[t / nn for t in n]))
+            for v in (a, b, c):
+                fh.write(struct.pack('<3f', *v))
+            fh.write(b'\0\0')
+            tris += 1
         fh.seek(80)
         fh.write(struct.pack('<I', tris))
     return tris
@@ -343,7 +456,26 @@ FINISH_COLOURS = {
     'brushed nickel': ((205, 210, 215), 'Pedra Large Knob 35mm model'),
     'ash': ((244, 206, 157), 'Hegman BIM models'),
     'ash timber': ((244, 206, 157), 'Hegman BIM models'),
+    # From ABI's round finish swatch on each product page (centre of the image, see
+    # scripts/fetch_abi_photos.py), for finishes no BIM model carries.
+    'brushed copper': ((198, 142, 106), "ABI's finish swatch"),
+    'chrome': ((171, 170, 171), "ABI's finish swatch"),
+    'tumbled aged brass': ((140, 115, 80), "ABI's finish swatch"),
+    'carrara marble': ((203, 203, 203), "ABI's finish swatch"),
+    'red travertine': ((148, 96, 79), "ABI's finish swatch"),
+    'verde alpi marble': ((39, 53, 50), "ABI's finish swatch"),
+    'antique aurum': ((159, 125, 84), "ABI's finish swatch"),
+    'antique bronze': ((109, 76, 60), "ABI's finish swatch"),
+    'antique slate': ((69, 69, 69), "ABI's finish swatch"),
+    'antique steel': ((149, 149, 149), "ABI's finish swatch"),
+    'white': ((231, 230, 231), "ABI's finish swatch"),
 }
+
+
+# Through-hole for ABI's M4 screws, as the generic handles bore.
+SCREW_HOLE = 5
+# More than any front is thick: the builder bores the front through.
+SCREW_REACH = 40
 
 
 def slug(s):
@@ -360,6 +492,7 @@ def write_catalog(rows, path):
                 name_l,
                 (modelled if modelled and f is r['finishes'][0] else None, None))
             params = {
+                'length': r['length'],
                 'centres': r['centres'],
                 'projection': r['projection'],
                 'width': r['width'],
@@ -368,6 +501,8 @@ def write_catalog(rows, path):
             }
             if r['knob']:
                 params['knob'] = 1
+            if r['adjustable']:
+                params['adjustable_min'], params['adjustable_max'] = r['adjustable']
             if colour:
                 params['finish_colour_rgb'] = colour[0] * 65536 + colour[1] * 256 + colour[2]
             variant = f"{f['name']}"
@@ -376,12 +511,11 @@ def write_catalog(rows, path):
             src = (
                 f"ABI Interiors {r['family']} ({r['url']}); finish {f['name']}: {f['url']}, "
                 f"SKU {f['sku']}, ${f['price_aud']:.2f} AUD (product.txt of the BIMobject "
-                f"download, 2026-10-27); geometry re-oriented from the product's IFC by "
-                f"scripts/import_abi_handles.py (screw centres {r['centres']:.0f} mm from the "
-                f"model's feet, projection {r['projection']:.1f} mm measured)"
+                f"download, 2026-10-27); screw pattern from ABI's spec drawing {r['spec_file']}; "
+                f"geometry re-oriented from the product's IFC by scripts/import_abi_handles.py"
             )
             if colour and origin:
-                src += f"; finish colour measured on {origin}"
+                src += f"; finish colour from {origin}"
             items.append({
                 'id': f"handle.abi.{slug(r['article'].removeprefix('ABI-'))}.{slug(f['name'])}",
                 'brand': 'ABI Interiors',
@@ -390,6 +524,11 @@ def write_catalog(rows, path):
                 'variant': variant,
                 'kind': 'handle',
                 'parameters': params,
+                'drilling': [
+                    {'x': hx, 'y': hz, 'diameter': SCREW_HOLE, 'depth': SCREW_REACH,
+                     'note': 'screw through the front, whatever its thickness; x along the length, y across it'}
+                    for hx, hz in r['holes']
+                ],
                 'source': {
                     'url': src,
                     'document_date': '2026-10-27',
@@ -401,11 +540,12 @@ def write_catalog(rows, path):
         'brand': 'ABI Interiors',
         'website': 'https://www.abiinteriors.com.au',
         'notes': (
-            'Facts from each product\'s product.txt (BIMobject download of 2026-10-27): SKU, '
-            'finishes, price. Geometry measured from the product IFC and re-oriented by '
-            'scripts/import_abi_handles.py. Finish colours were measured from the models where '
-            'a finish had one; rows whose variant says "colour to verify" have none. Never '
-            'commit ABI\'s BIM files or images (vendor-cad/abi-bim stays local).'
+            'SKU, finishes and price from each product\'s product.txt (BIMobject download of '
+            '2026-10-27). length is ABI\'s named size; centres is the span of the screw pattern '
+            'in drilling, both from ABI\'s spec drawings: a pull\'s name is not its fixing '
+            'distance. Geometry from the product IFC, re-oriented by '
+            'scripts/import_abi_handles.py. Never commit ABI\'s BIM files or images '
+            '(vendor-cad/abi-bim and vendor-cad/abi-web stay local).'
         ),
         'items': items,
     }
@@ -425,48 +565,62 @@ def main():
         if not fam or not ifc:
             continue
         family, kind, named = fam
+        spec = SPECS.get(name)
+        if spec is None:
+            print(f"{name:48s} NOT IN SPECS: read its spec drawing first")
+            continue
+        if spec.get('edge_mount'):
+            print(f"{name:48s} edge-mounted: left out (ABI-5)")
+            continue
         parsed = parse_ifc(ifc[0])
         if parsed is None:
-            print(f"{name:48s} NO IFC MESH — skipped (needs the FBX reader)")
+            print(f"{name:48s} NO IFC MESH: skipped (needs the FBX reader)")
             continue
-        loops, colour = parsed
-        loops = components(loops)
-        fr = frame(loops, name)
-        if fr is None:
-            print(f"{name:48s} NO MOUNTING FACE FOUND — skipped")
-            continue
-        x, y, z, origin, size, centres, knob, length, proj, width = fr
-        allp = [p for lp in loops for p in lp]
-        proj_mm = max(abs(dot(sub(p, origin), y)) for p in allp)
-        width_mm = max(abs(dot(sub(p, origin), z)) for p in allp) * 2
-        length_mm = max(abs(dot(sub(p, origin), x)) for p in allp) * 2
-        size_mm = named if (knob and named) else (centres if centres else max(length_mm, width_mm))
+        tris, colour = parsed
+        tris = components(tris)
+        x, y, z, origin = frame(tris, spec)
+        allp = [p for t in tris for p in t]
+        along = [dot(sub(p, origin), x) for p in allp]
+        off = [dot(sub(p, origin), y) for p in allp]
+        across = [dot(sub(p, origin), z) for p in allp]
+        length_mm = max(along) - min(along)
+        proj_mm = max(abs(v) for v in off)
+        width_mm = max(across) - min(across)
+        holes = [(h, 0.0) if not isinstance(h, tuple) else (float(h[0]), float(h[1]))
+                 for h in spec['holes']]
+        holes = [(float(a), float(b)) for a, b in holes]
+        centres = max(a for a, _ in holes) - min(a for a, _ in holes)
+        size_mm = named if named else length_mm
         article = f"ABI-{family.upper().replace(' ', '')}-{size_mm:.0f}"
-        model_file = f"{article}.stl"
-        tris = 0 if dry else write_stl(os.path.join(OUT_DIR, model_file), loops, x, y, z, origin)
+        tri_count = 0 if dry else write_stl(os.path.join(OUT_DIR, f"{article}.stl"), tris, x, y, z, origin)
         txt = open(glob.glob(folder + '/product.txt')[0], encoding='utf-8', errors='replace').read()
         fins = finishes_from(txt)
         rgb = tuple(round(c * 255) for c in colour) if colour else None
+        drawing = [f for f in os.listdir(folder) if 'spec' in f.lower()]
         warn = ''
-        if not knob and abs(length_mm - centres) > 6:
-            warn = f"  <-- LENGTH {length_mm:.0f} != CENTRES {centres:.0f}"
+        if abs(proj_mm - spec['proj']) > 5:
+            warn = f"  <-- PROJECTION {proj_mm:.1f} vs {spec['proj']} printed"
         rows.append({
             'folder': name,
             'article': article,
             'family': family,
             'kind': kind,
-            'knob': knob,
+            'knob': kind == 'Knob' or (centres == 0 and kind != 'TPull'),
+            'length': round(size_mm, 1),
             'centres': centres,
+            'holes': holes,
+            'adjustable': spec.get('adjustable'),
             'measured_length': round(length_mm, 1),
             'projection': round(proj_mm, 1),
             'width': round(width_mm, 1),
             'colour_rgb': rgb,
-            'triangles': tris,
+            'triangles': tri_count,
             'finishes': fins,
+            'spec_file': drawing[0] if drawing else 'none',
             'url': (re.search(r'Source URL: (\S+)', txt) or [None, ''])[1],
         })
-        print(f"{article:24s} {name[:40]:40s} cc={centres:5.0f} proj={proj_mm:5.1f} "
-              f"w={width_mm:5.1f} knob={int(knob)} colour={rgb} finishes={len(fins)}{warn}")
+        print(f"{article:26s} L={length_mm:6.1f} cc={centres:5.0f} proj={proj_mm:5.1f} "
+              f"w={width_mm:5.1f} holes={len(holes)} tris={tri_count} finishes={len(fins)}{warn}")
     if not dry:
         json.dump(rows, open(os.path.join(OUT_DIR, 'import-report.json'), 'w'), indent=1)
         n = write_catalog(rows, CATALOG)

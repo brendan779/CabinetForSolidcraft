@@ -84,6 +84,7 @@ struct ConstructionThumbnail: View {
             case "front_grain": pen.frontGrain(choice)
             case "insert_design": pen.insertDesign(choice)
             case "door_style": pen.doorStyle(choice)
+            case "handle_range": pen.handleRange(choice)
             case "handle_size": pen.handleSize(choice)
             case "handle_place": pen.handlePlace(choice)
             case "handle_finish": pen.handleFinish(choice)
@@ -438,6 +439,25 @@ private struct Pen {
                 ctx.fill(Path(r(x - 2, 19, 4, 7)), with: .color(accent.opacity(0.7)))
                 ctx.stroke(Path(hole), with: .color(accent), lineWidth: 1)
             }
+        }
+    }
+
+    // MARK: Handle range
+
+    func handleRange(_ choice: String) {
+        board(14, 8, 72, 64)
+        if choice == "abi" {
+            // A range of shapes: a half moon, a T pull and a knob.
+            var moon = Path()
+            moon.addArc(center: p(50, 18), radius: 11 * s, startAngle: .zero, endAngle: .degrees(180), clockwise: false)
+            moon.closeSubpath()
+            ctx.fill(moon, with: .color(accent))
+            ctx.fill(Path(roundedRect: r(38, 41, 24, 4), cornerRadius: 2 * s), with: .color(accent))
+            ctx.fill(Path(r(48.5, 45, 3, 5)), with: .color(accent))
+            ctx.fill(Path(ellipseIn: r(44, 55, 12, 12)), with: .color(accent))
+        } else {
+            // The plain bar.
+            ctx.fill(Path(roundedRect: r(30, 38, 40, 4), cornerRadius: 2 * s), with: .color(accent))
         }
     }
 

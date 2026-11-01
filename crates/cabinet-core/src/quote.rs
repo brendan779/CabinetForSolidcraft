@@ -52,6 +52,20 @@ impl Default for PriceList {
     }
 }
 
+impl PriceList {
+    /// Fills hardware lines the shop has not priced with the supplier's list price, where the
+    /// catalog carries one (the ABI handles): the shop's own prices always win (ABI-3).
+    pub fn fill_from_hardware_catalog(&mut self) {
+        for item in crate::hardware::items() {
+            if let Some(&p) = item.parameters.get("price_aud")
+                && p > 0.0
+            {
+                self.hardware.entry(item.id.clone()).or_insert(p);
+            }
+        }
+    }
+}
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum Section {
@@ -346,6 +360,49 @@ mod tests {
         assert_eq!(q.cost, 0.0);
         // Every board, the tape, every hardware line and the labour rate.
         assert_eq!(q.missing.len(), q.lines.len());
+    }
+
+    /// ABI-3: a catalog list price quotes a handle the shop has not priced, and the shop's own
+    /// price wins over it.
+    #[test]
+    fn catalog_prices_fill_unpriced_hardware_and_typed_prices_win() {
+        use crate::model::HandleRange;
+        let mut cab = Cabinet::new("B01", CabinetKind::Base);
+        cab.standard.handle_range = HandleRange::Abi;
+        cab.standard.handle_style = "handle.abi.tezra-220.brushed-brass".into();
+        let list = build_cabinet(&cab).unwrap();
+        let bom = crate::bom::hardware_bom(&[list]);
+        let cut = crate::cutlist::cut_list(&[build_cabinet(&cab).unwrap()], "Generic", 1.0);
+        let n = nest(
+            &cut.rows,
+            |_, _| {
+                vec![Stock {
+                    length: 2400.0,
+                    width: 1200.0,
+                    grained: false,
+                }]
+            },
+            &Settings::default(),
+        );
+        let mut prices = PriceList::default();
+        prices.fill_from_hardware_catalog();
+        let q = quote(&n, &cut, &bom, 1, &prices);
+        let handle = q
+            .lines
+            .iter()
+            .find(|l| l.key == "handle.abi.tezra-220.brushed-brass")
+            .unwrap();
+        assert_eq!(handle.unit_price, Some(64.9), "{}", handle.description);
+        prices
+            .hardware
+            .insert("handle.abi.tezra-220.brushed-brass".into(), 10.0);
+        let q = quote(&n, &cut, &bom, 1, &prices);
+        let handle = q
+            .lines
+            .iter()
+            .find(|l| l.key == "handle.abi.tezra-220.brushed-brass")
+            .unwrap();
+        assert_eq!(handle.unit_price, Some(10.0));
     }
 
     #[test]

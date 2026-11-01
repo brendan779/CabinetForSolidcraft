@@ -378,6 +378,10 @@ final class ViewportScene {
     private(set) var panels: [String: PanelBox] = [:]
     /// Each panel entity's mesh size and its offset from the pivot, as last made.
     private var shapes: [String: [SIMD3<Float>]] = [:]
+    /// Panels drawn with a supplier's mesh: the article, so a changed model rebuilds them.
+    private var meshKeys: [String: String] = [:]
+    /// The finish a supplier model was made in: its material is set when it is made.
+    private var handleTints: [String: String] = [:]
     private var wasOpen = false
 
     func update(project: ProjectModel, look: ViewportLook, hovered: String?) {
@@ -432,6 +436,8 @@ final class ViewportScene {
             e.removeFromParent()
             panels[e.name] = nil
             shapes[e.name] = nil
+            meshKeys[e.name] = nil
+            handleTints[e.name] = nil
         }
         // Keep the run centred on the origin the camera orbits.
         if minX < maxX { root.position.x = -(minX + maxX) / 2 }
@@ -570,22 +576,56 @@ final class ViewportScene {
 
     /// The panel's entity, made or remade when its size or pivot changes (a door hinged on the
     /// other side keeps its size). Its mesh is centred on its hinge edge for doors (so it swings
-    /// about it) and on its middle otherwise.
+    /// about it) and on its middle otherwise. A panel with a supplier mesh (an ABI handle) draws
+    /// that model in the model's own placement instead of the box, on the same pivot.
     private func entity(for p: PanelBox) -> ModelEntity {
         let size = SIMD3<Float>(Float(p.width), Float(p.height), Float(p.depth)) / 1000
         // The geometry sits off the entity's origin so the origin is the pivot.
         let offset = Self.mid(p) - Self.pivot(p)
-        if let e = root.findEntity(named: p.name) as? ModelEntity, shapes[p.name] == [size, offset] {
+        let supplier = supplierHandle(p)
+        if let e = root.findEntity(named: p.name) as? ModelEntity,
+           shapes[p.name] == [size, offset], meshKeys[p.name] == supplier?.0,
+           handleTints[p.name] == p.board {
             return e
         }
         root.findEntity(named: p.name)?.removeFromParent()
-        let e = ModelEntity(mesh: Self.offsetMesh(size: size, by: offset, grain: Self.grainAxis(p)), materials: [])
+        let e: ModelEntity
+        if let supplier {
+            // The model replaces the box; the box stays as the collision shape, so the front
+            // still answers the pointer where its handle is.
+            e = ModelEntity()
+            let child = ModelEntity(mesh: supplier.1)
+            // The placement is cabinet-frame mm; the entity sits at its pivot, so the model is
+            // local to it — and swings or slides with the front like the bar did.
+            var local = Self.matrix(p.meshTransform)
+            let pivot = Self.pivot(p)
+            local.columns.3.x -= pivot.x
+            local.columns.3.y -= pivot.y
+            local.columns.3.z -= pivot.z
+            child.transform = Transform(matrix: local)
+            child.model?.materials = [Self.handleMaterial(Substring(p.board.dropFirst("handle:".count)), selected: false)]
+            e.addChild(child)
+        } else {
+            e = ModelEntity(mesh: Self.offsetMesh(size: size, by: offset, grain: Self.grainAxis(p)), materials: [])
+        }
         e.name = p.name
         e.components.set(InputTargetComponent())
         e.collision = CollisionComponent(shapes: [ShapeResource.generateBox(size: size).offsetBy(translation: offset)])
         root.addChild(e)
         shapes[p.name] = [size, offset]
+        meshKeys[p.name] = supplier?.0
+        handleTints[p.name] = p.board
         return e
+    }
+
+    /// A supplier handle model to draw for `p` (ABI-3): its article and loaded mesh. Nil for
+    /// panels without one, or a mesh that will not load — the bar draws then.
+    private func supplierHandle(_ p: PanelBox) -> (String, MeshResource)? {
+        guard !p.mesh.isEmpty, p.meshTransform.count == 12,
+              let path = Preferences.vendorCADDir?.appending(path: "abi/\(p.mesh).stl").path,
+              let m = mesh(path) else { return nil }
+        // The key holds the placement: the same pull moved (a new handle place) must be redrawn.
+        return ("\(p.mesh) \(p.meshTransform)", m)
     }
 
     /// The panel's grain direction as a RealityKit axis index (x 0, y 1, z 2).

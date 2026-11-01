@@ -125,8 +125,12 @@ pub fn item(id: &str) -> Result<&'static HardwareItem, String> {
 #[derive(Clone, Debug, PartialEq)]
 pub struct ChosenHandle {
     pub item: String,
-    /// Hole centres (mm). `None` is a knob's single hole.
+    /// The span of the screw pattern (mm). `None` is a single screw: a knob or T pull.
     pub centres: Option<f64>,
+    /// Each screw from the pattern's centre, (along the handle, across it), in order along it.
+    pub holes: Vec<(f64, f64)>,
+    /// Overall length (mm), which the front must have room for. 0 where only the holes matter.
+    pub length: f64,
     pub description: String,
     /// True when this came from the ABI range, so a size that does not fit is left off rather
     /// than bored past the front.
@@ -152,12 +156,16 @@ pub fn generic_handle(s: &crate::model::ConstructionStandard) -> ChosenHandle {
         Some(cc) => ChosenHandle {
             item: format!("handle.cc{cc:.0}"),
             centres: Some(cc),
+            holes: vec![(-cc / 2.0, 0.0), (cc / 2.0, 0.0)],
+            length: 0.0,
             description: format!("Handle, {cc:.0} mm hole centres, {finish}"),
             abi: false,
         },
         None => ChosenHandle {
             item: "handle.knob".into(),
             centres: None,
+            holes: vec![(0.0, 0.0)],
+            length: 0.0,
             description: format!("Knob, {finish}"),
             abi: false,
         },
@@ -176,9 +184,12 @@ fn abi_handle(style: &str) -> Result<ChosenHandle, String> {
         .get("sku")
         .map(|n| format!("{n:.0}"))
         .unwrap_or_default();
+    // ABI names a pull by its overall length; the screws are what a maker needs to read.
+    let length = item.parameters.get("length").copied().unwrap_or(0.0);
     let size = match centres {
-        Some(cc) => format!("{cc:.0} mm"),
-        None => "knob".into(),
+        Some(cc) => format!("{length:.0} mm, screws {cc:.0} mm apart"),
+        None if item.parameters.contains_key("knob") => "knob".into(),
+        None => format!("{length:.0} mm T pull"),
     };
     let description = if sku.is_empty() {
         format!("{}, {size}, {}", item.family, item.variant)
@@ -188,6 +199,8 @@ fn abi_handle(style: &str) -> Result<ChosenHandle, String> {
     Ok(ChosenHandle {
         item: item.id.clone(),
         centres,
+        holes: item.drilling.iter().map(|h| (h.x, h.y)).collect(),
+        length,
         description,
         abi: true,
     })

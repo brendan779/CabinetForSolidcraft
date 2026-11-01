@@ -39,16 +39,34 @@ const DEEP_WOOD_DRAWER: f64 = 150.0;
 /// Screw centres along each edge an applied back is screwed to.
 const BACK_SCREW_SPACING: f64 = 150.0;
 
-/// Both screw holes (or the knob's one) sit on the front, clear of its edges.
-fn handle_fits(part: &Part, holes: &[(f64, f64)], wa: Axis) -> bool {
+/// Every screw hole sits on the front, clear of its edges, and the handle's `length` stays on
+/// it: along the height on a door, along the width on a drawer.
+fn handle_fits(
+    part: &Part,
+    holes: &[(f64, f64)],
+    wa: Axis,
+    along_height: bool,
+    length: f64,
+) -> bool {
     let b = part.bounds;
     let margin = HANDLE_SCREW_DIAMETER;
-    holes.iter().all(|(w, z)| {
+    let clear = holes.iter().all(|(w, z)| {
         *w >= b.min.get(wa) + margin
             && *w <= b.max().get(wa) - margin
             && *z >= b.min.z + margin
             && *z <= b.max().z - margin
-    })
+    });
+    let along = |h: &(f64, f64)| if along_height { h.1 } else { h.0 };
+    let (lo, hi) = holes.iter().fold((f64::MAX, f64::MIN), |(lo, hi), h| {
+        (lo.min(along(h)), hi.max(along(h)))
+    });
+    let (mid, half) = ((lo + hi) / 2.0, length / 2.0);
+    let (b0, b1) = if along_height {
+        (b.min.z, b.max().z)
+    } else {
+        (b.min.get(wa), b.max().get(wa))
+    };
+    clear && mid - half >= b0 && mid + half <= b1
 }
 /// Pilot for a 4 × 20 screw through a 6 mm back: short enough to stay clear of the shelf-pin row
 /// 37 mm in from the rear.
@@ -2961,7 +2979,12 @@ impl<'a> Builder<'a> {
                     _ => (z1 - HANDLE_END_INSET - span, z1 - HANDLE_END_INSET),
                 };
                 if chosen.centres.is_some() {
-                    vec![(x, lo), (x, hi)]
+                    let c = (lo + hi) / 2.0;
+                    chosen
+                        .holes
+                        .iter()
+                        .map(|(along, across)| (x + across, c + along))
+                        .collect()
                 } else {
                     // A knob sits where the handle's end nearest the edge would.
                     let z = if wall_hung { lo } else { hi };
@@ -2982,14 +3005,16 @@ impl<'a> Builder<'a> {
                     (_, HandlePlace::Corner) if z1 - z0 > DEEP_FRONT => z1 - HANDLE_END_INSET,
                     _ => (z0 + z1) / 2.0,
                 };
-                match chosen.centres {
-                    Some(cc) => vec![(c - cc / 2.0, z), (c + cc / 2.0, z)],
-                    None => vec![(c, z)],
-                }
+                chosen
+                    .holes
+                    .iter()
+                    .map(|(along, across)| (c + along, z + across))
+                    .collect()
             };
             // An ABI pull keeps its named centres. One that would break out of the front is left
             // off, once per cabinet, rather than bored past the edge.
-            if chosen.abi && !handle_fits(f, &holes, wa) {
+            let along_height = f.role == PartRole::Door;
+            if chosen.abi && !handle_fits(f, &holes, wa, along_height, chosen.length) {
                 if !unfit {
                     self.list.warnings.push(format!(
                         "{} does not fit {}; no handle bored",
@@ -6214,7 +6239,7 @@ mod tests {
     }
 
     /// ABI-2: the chosen catalog row sets the bore centres, the hardware id and the model article.
-    /// Camille's 85.056 mm is not a generic size, so a rounded enum could not have placed it.
+    /// ABI names a pull by its length: the 85 mm Camille's screws are 64 apart.
     #[test]
     fn an_abi_handle_bores_its_own_centres_and_places_that_finish() {
         use crate::model::HandleRange;
@@ -6225,7 +6250,7 @@ mod tests {
         let h = handle_holes(&list, "B01.Door1");
         assert_eq!(h.len(), 2);
         let span = (h[0].z - h[1].z).abs();
-        assert!((span - 85.056).abs() < 1e-6, "{span}");
+        assert!((span - 64.0).abs() < 1e-6, "{span}");
         let row = list
             .hardware
             .iter()
@@ -6251,16 +6276,62 @@ mod tests {
                 .iter()
                 .any(|h| h.item == "handle.abi.elsa-28.brushed-brass")
         );
-        // 800 mm centres do not fit a base door. The generic handle must not be substituted.
-        cab.standard.handle_style = "handle.abi.rappana-800.brushed-brass".into();
-        let list = build_cabinet(&cab).unwrap();
-        assert!(handle_holes(&list, "B01.Door1").is_empty());
+        // A 500 mm pull does not fit a 300 wide drawer. The generic handle must not be substituted.
+        let mut bank = Cabinet::new("D01", CabinetKind::DrawerBank);
+        bank.width = 300.0;
+        bank.standard.handle_range = HandleRange::Abi;
+        bank.standard.handle_style = "handle.abi.tezra-500.brushed-brass".into();
+        let list = build_cabinet(&bank).unwrap();
+        assert!(handle_holes(&list, "D01.DrawerFront1").is_empty());
         assert!(!list.hardware.iter().any(|h| h.item.starts_with("handle.")));
         assert!(
             list.warnings.iter().any(|w| w.contains("does not fit")),
             "{:?}",
             list.warnings
         );
+    }
+
+    /// ABI-3: a pull's name is its length, not its screws; several have more than two screws
+    /// and T pulls have one. From ABI's spec drawings.
+    #[test]
+    fn abi_pulls_bore_the_screw_pattern_abi_draws_not_their_name() {
+        use crate::model::HandleRange;
+        for (style, apart) in [
+            ("handle.abi.tezra-220.brushed-brass", vec![-96.0, 96.0]),
+            ("handle.abi.pika-138.brushed-brass", vec![-64.0, 64.0]),
+            (
+                "handle.abi.pedra-220.beige-travertine",
+                vec![-87.0, 0.0, 87.0],
+            ),
+            ("handle.abi.tezra-50.brushed-brass", vec![0.0]),
+        ] {
+            let mut bank = Cabinet::new("D01", CabinetKind::DrawerBank);
+            bank.standard.handle_range = HandleRange::Abi;
+            bank.standard.handle_style = style.into();
+            let list = build_cabinet(&bank).unwrap();
+            let front = list.part("D01.DrawerFront1").unwrap().bounds;
+            let xs: Vec<f64> = handle_holes(&list, "D01.DrawerFront1")
+                .iter()
+                .map(|h| h.x - front.center().x)
+                .collect();
+            assert_eq!(xs.len(), apart.len(), "{style}");
+            for (x, want) in xs.iter().zip(&apart) {
+                assert!((x - want).abs() < 1e-6, "{style}: {xs:?}");
+            }
+        }
+    }
+
+    /// ABI-3: a pull whose body would overhang the front is left off, though its screws fit.
+    #[test]
+    fn an_abi_pull_longer_than_the_front_is_left_off() {
+        use crate::model::HandleRange;
+        let mut bank = Cabinet::new("D01", CabinetKind::DrawerBank);
+        // Tezra 220: screws 192 apart, 220 long, on a front 210 wide.
+        bank.width = 212.0;
+        bank.standard.handle_range = HandleRange::Abi;
+        bank.standard.handle_style = "handle.abi.tezra-220.brushed-brass".into();
+        let list = build_cabinet(&bank).unwrap();
+        assert!(handle_holes(&list, "D01.DrawerFront1").is_empty());
     }
 
     #[test]

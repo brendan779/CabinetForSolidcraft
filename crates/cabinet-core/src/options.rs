@@ -106,6 +106,22 @@ pub fn option_groups() -> Vec<OptionGroup> {
             ],
         ),
         group(
+            "handle_range",
+            "Handle range",
+            &[
+                (
+                    "generic",
+                    "Generic",
+                    "Our bar handles and knobs at the standard centres",
+                ),
+                (
+                    "abi",
+                    "ABI Interiors",
+                    "ABI's pulls and knobs; the style picker chooses family, size and finish",
+                ),
+            ],
+        ),
+        group(
             "door_style",
             "Door style",
             &[
@@ -419,7 +435,7 @@ pub fn option_groups() -> Vec<OptionGroup> {
 /// fixing, handle pickers only with handles, leg fixing only on legs, drawer side height only for
 /// steel-sided drawers. The app hides the others.
 pub fn applies(field: &str, s: &crate::model::ConstructionStandard) -> bool {
-    use crate::model::{DrawerSystem, FixingRecipe, Opening, ToeKick};
+    use crate::model::{DrawerSystem, FixingRecipe, HandleRange, Opening, ToeKick};
     match field {
         "biscuit" => matches!(
             s.fixings,
@@ -427,7 +443,11 @@ pub fn applies(field: &str, s: &crate::model::ConstructionStandard) -> bool {
         ),
         "domino" => s.fixings == FixingRecipe::Domino,
         "dowel" | "dowel_spacing" => s.fixings == FixingRecipe::Dowel,
-        "handle_size" | "handle_finish" | "handle_place" => s.opening == Opening::Handles,
+        "handle_range" | "handle_place" => s.opening == Opening::Handles,
+        // The generic size and finish pickers; an ABI job picks family, size and finish together.
+        "handle_size" | "handle_finish" => {
+            s.opening == Opening::Handles && s.handle_range == HandleRange::Generic
+        }
         "leg_fixing" => s.toe_kick == ToeKick::LegsAndPlinth,
         "drawer_sides" => matches!(
             s.drawer_system,
@@ -459,7 +479,7 @@ mod tests {
 
     #[test]
     fn only_the_chosen_fixing_shows_its_size() {
-        use crate::model::{ConstructionStandard, FixingRecipe, Opening};
+        use crate::model::{ConstructionStandard, FixingRecipe, HandleRange, Opening};
         let mut s = ConstructionStandard {
             fixings: FixingRecipe::ScrewOnly,
             ..Default::default()
@@ -474,5 +494,12 @@ mod tests {
         s.opening = Opening::TipOn;
         assert!(!applies("handle_size", &s));
         assert!(applies("fixings", &s));
+        // ABI-3: the generic size and finish give way to the ABI style picker.
+        s.opening = Opening::Handles;
+        s.handle_range = HandleRange::Abi;
+        assert!(applies("handle_range", &s));
+        assert!(!applies("handle_size", &s) && !applies("handle_finish", &s));
+        s.handle_range = HandleRange::Generic;
+        assert!(applies("handle_size", &s) && applies("handle_finish", &s));
     }
 }

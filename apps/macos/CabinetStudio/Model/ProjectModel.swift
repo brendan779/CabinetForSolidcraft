@@ -742,6 +742,12 @@ final class ProjectModel {
         (try? standardOption(cabinetJson: cab.json, field: field)) ?? ""
     }
 
+    /// The ABI handle style the job uses (`handle_style`), or nil before one is chosen.
+    func handleStyleId(of cab: CabinetDoc) -> String? {
+        let style = cab.standard["handle_style"] as? String ?? ""
+        return style.isEmpty ? nil : style
+    }
+
     /// A number in the cabinet's construction standard (mm).
     func standardNumber(_ field: String, of cab: CabinetDoc) -> Double {
         (cab.standard[field] as? NSNumber)?.doubleValue ?? 0
@@ -763,7 +769,56 @@ final class ProjectModel {
               let json = try? setStandardOption(cabinetJson: cab.json, field: field, choice: choice) else { return }
         var edited = cab
         edited.json = json
+        // Switching to the ABI range lands on a style straight away: without one the core warns
+        // and falls back to the generic handle. Switching back clears the choice.
+        if field == "handle_range" {
+            var standard = edited.standard
+            let style = standard["handle_style"] as? String ?? ""
+            if choice == "abi" {
+                if style.isEmpty || !handleRecords.contains(where: { $0.id == style }) {
+                    standard["handle_style"] = defaultAbiStyleId
+                }
+            } else {
+                standard["handle_style"] = ""
+            }
+            edited.standard = standard
+        }
         applyStandard(from: cab, to: edited)
+    }
+
+    /// The ABI style a job starts on when the range is switched without a choice: the Tezra 220
+    /// pull in brushed brass, else whatever the catalog leads with.
+    private var defaultAbiStyleId: String {
+        handleRecords.first { $0.id == "handle.abi.tezra-220.brushed-brass" }?.id
+            ?? handleRecords.first?.id ?? ""
+    }
+
+    // MARK: Handles
+
+    /// The ABI handle catalog, loaded once (ABI-3).
+    @ObservationIgnored private var handleRecordsCache: [HandleRecord]?
+    var handleRecords: [HandleRecord] {
+        if let c = handleRecordsCache { return c }
+        let records = (try? CabinetStudio.abiHandles()) ?? []
+        handleRecordsCache = records
+        return records
+    }
+
+    /// Uses the ABI `record` (one family, size and finish) as the job's handle; fronts bore at
+    /// its centres and the bill carries its SKU and price.
+    func useHandle(_ record: HandleRecord) {
+        guard let old = selected else {
+            lastError = "Select a cabinet to choose a handle for."
+            return
+        }
+        var cab = old
+        var standard = cab.standard
+        standard["handle_range"] = "abi"
+        standard["handle_style"] = record.id
+        cab.standard = standard
+        withAnimation(.snappy) { applyStandard(from: old, to: cab) }
+        lastError = nil
+        status = "\(record.family) \(record.sizeName), \(record.variant)"
     }
 
     // MARK: Appliance library
