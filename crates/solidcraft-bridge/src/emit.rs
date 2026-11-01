@@ -286,8 +286,19 @@ pub fn hardware_inserts(cabinet: &str, models: &[crate::vendor::VendorInstance])
     let mut cmds =
         vec![json!({ "command": "component.activate", "params": { "component": cabinet } })];
     for m in models {
+        // A mesh-native model (the ABI handle import) enters as a mesh body.
+        let command = if m
+            .step
+            .extension()
+            .and_then(|x| x.to_str())
+            .is_some_and(|x| x.eq_ignore_ascii_case("stl"))
+        {
+            "file.insert_mesh"
+        } else {
+            "file.insert_step"
+        };
         cmds.push(json!({
-            "command": "file.insert_step",
+            "command": command,
             "params": {
                 "path": m.step,
                 "name": m.name,

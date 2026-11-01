@@ -37,6 +37,20 @@ Priorities: **P0** blocks most other work · **P1** MVP · **P2** commercial par
 
 ## P1 — MVP: cabinets, joinery, Blum basics, cut list, cut sheets
 
+### Hardware: ABI Interiors handles (owner-supplied BIM library, 2026-11-01)
+
+The owner supplied ABI Interiors' BIMobject library (local only, `vendor-cad/abi-bim/`):
+440 products, each an IFC mesh from ABI's Revit family, a product.txt with SKUs, finishes and
+prices, and per-finish pages. ABI names a pull by its screw centres; its models put the feet at
+the ends of that span.
+
+| id | status | size | task | done when |
+|---|---|---|---|---|
+| ABI-1 | done (night/2026-11-01: `scripts/import_abi_handles.py` parses each cabinetry product's IFC, re-orients it into the app's handle frame — holes on X at ±centres/2, the door face at Y = 0, the handle towards −Y — writes `vendor-cad/abi/<article>.stl`, and records the catalog rows. 40 models, 192 finish rows in `catalog/hardware/abi-handles.json` with SKUs, prices, sources and measured finish colours; vendor.rs indexes mesh-native models by article and inserts them into SolidCraft with `file.insert_mesh`. Hegman Classic 130/250 and Half Moon 90 have no IFC mesh: their FBX is unread so far. The adjustable pulls' feet sit inset of the named centres (Kingsley's model measures 214 at a 250 name): the named size is used and the measured span is in the import report) | M | Import the ABI cabinetry handles: parse the IFC meshes, re-orient each into the handle frame, write them as models under `vendor-cad/abi/`, and record catalog rows (family, centres, projection, finishes with SKUs and colours, sources) | an ABI handle's model resolves by article and inserts into SolidCraft as a mesh |
+| ABI-2 | todo | M | Handle choice in the model: ABI sizes beyond the generic centres (50, 57, 60, 85, 98, 115, 138, 150, 200, 220, 250, 320, 350, 400, 500, 800), a style choice (family + size) and a finish choice per job, the finish driving the bores' article and the rendered colour | a job with an ABI handle chosen bores its fronts at the ABI centres and shows that model |
+| ABI-3 | todo | L | Handle picker in the app, like the board picker: family tiles with the model drawn (the meshes are small enough to preview), size chips per family, finish swatches from `finish_colour_rgb` (81 finishes still carry no colour: `variant` says "colour to verify"), and the chosen finish's price on the quote | picking Tezra 220 in brushed brass changes the viewport, the bores and the BOM |
+| ABI-4 | todo | S | The three Hegman pulls without IFC meshes (Classic 130/250, Half Moon 90): read their FBX (Kaydara binary) or ask the owner for STEP exports from E-SERVICES-class sources | models exist for every family in the catalog |
+
 ### Core model
 
 | id | status | size | task | done when |

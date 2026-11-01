@@ -67,7 +67,7 @@ pub fn article_of(stem: &str) -> String {
     }
 }
 
-fn step_files(dir: &Path, out: &mut Vec<PathBuf>) {
+fn step_files(dir: &Path, out: &mut Vec<PathBuf>, stls: &mut Vec<PathBuf>) {
     let Ok(entries) = std::fs::read_dir(dir) else {
         return;
     };
@@ -76,14 +76,20 @@ fn step_files(dir: &Path, out: &mut Vec<PathBuf>) {
         let name = p.file_name().and_then(|n| n.to_str()).unwrap_or("");
         if p.is_dir() {
             if name != MESH_DIR && name != "catalogue" && !name.starts_with('.') {
-                step_files(&p, out);
+                step_files(&p, out, stls);
             }
-        } else if p
-            .extension()
-            .and_then(|x| x.to_str())
-            .is_some_and(|x| x.eq_ignore_ascii_case("step") || x.eq_ignore_ascii_case("stp"))
-        {
-            out.push(p);
+        } else {
+            match p
+                .extension()
+                .and_then(|x| x.to_str())
+                .map(|x| x.to_ascii_lowercase())
+            {
+                Some(x) if x == "step" || x == "stp" => out.push(p),
+                // A supplier model may already be a mesh (the ABI handle import): it is
+                // indexed as it lies, in the frame the importer oriented it to.
+                Some(x) if x == "stl" => stls.push(p),
+                _ => {}
+            }
         }
     }
 }
@@ -98,10 +104,33 @@ pub fn prepare(vendor_dir: &Path, cli: &Path) -> Result<(Vec<VendorModel>, usize
     std::fs::create_dir_all(&mesh_dir)?;
     let old: Vec<VendorModel> = load_index(vendor_dir).unwrap_or_default();
     let mut steps = Vec::new();
-    step_files(vendor_dir, &mut steps);
+    let mut stls = Vec::new();
+    step_files(vendor_dir, &mut steps, &mut stls);
     steps.sort();
+    stls.sort();
     let mut models = Vec::new();
     let mut converted = 0;
+    // Mesh models need no conversion: index them as they lie.
+    for stl in &stls {
+        let stem = stl
+            .file_stem()
+            .and_then(|s| s.to_str())
+            .unwrap_or_default()
+            .to_string();
+        if let Some(m) = old.iter().find(|m| m.stl == *stl) {
+            models.push(m.clone());
+            continue;
+        }
+        let mesh = load_stl(stl)?;
+        let (min, max) = mesh.bounds();
+        models.push(VendorModel {
+            article: article_of(&stem),
+            step: stl.clone(),
+            stl: stl.clone(),
+            min,
+            max,
+        });
+    }
     for step in steps {
         let stem = step
             .file_stem()
@@ -309,6 +338,47 @@ mod tests {
         let m = load_stl(&path).unwrap();
         assert_eq!(m.positions.len(), 9);
         assert_eq!(m.bounds(), ([0.0, 0.0, 0.0], [10.0, 10.0, 0.0]));
+        std::fs::remove_dir_all(dir).ok();
+    }
+
+    /// ABI-1: a supplier model that is already a mesh (the ABI handle import) is indexed
+    /// as it lies, named by its article, without SolidCraft's converter.
+    #[test]
+    fn a_native_stl_model_is_indexed_as_it_lies() {
+        let dir = std::env::temp_dir().join(format!("abi-stl-{}", std::process::id()));
+        std::fs::create_dir_all(&dir).unwrap();
+        let path = dir.join("ABI-TEST-96.stl");
+        let mut b = vec![0u8; 80];
+        b.extend(1u32.to_le_bytes());
+        for v in [
+            0.0f32, 0.0, 1.0, -48.0, 0.0, 0.0, 48.0, 0.0, 0.0, 0.0, -20.0, 0.0,
+        ] {
+            b.extend(v.to_le_bytes());
+        }
+        b.extend([0u8, 0]);
+        std::fs::write(&path, b).unwrap();
+        let (models, converted) = prepare(&dir, Path::new("/nonexistent/solidcraft-cli")).unwrap();
+        assert_eq!(converted, 0, "a mesh needs no conversion");
+        assert_eq!(models.len(), 1);
+        assert_eq!(models[0].article, "ABI-TEST-96");
+        assert_eq!(models[0].step, path.canonicalize().unwrap());
+        assert_eq!(models[0].min, [-48.0, -20.0, 0.0]);
+        assert_eq!(models[0].max, [48.0, 0.0, 0.0]);
+        // And it resolves like any other model.
+        let placement = CadPlacement {
+            name: "B01.Handle1".into(),
+            item: "handle.abi.test-96".into(),
+            article: "ABI-TEST-96".into(),
+            side: Side::Left,
+            origin: Vec3::default(),
+            frame: Frame::Oriented {
+                x: Vec3::new(1.0, 0.0, 0.0),
+                y: Vec3::new(0.0, 1.0, 0.0),
+            },
+        };
+        let found = resolve(&[placement], &models);
+        assert_eq!(found.len(), 1);
+        assert_eq!(found[0].stl, path.canonicalize().unwrap());
         std::fs::remove_dir_all(dir).ok();
     }
 }
