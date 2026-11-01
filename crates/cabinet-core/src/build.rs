@@ -2882,11 +2882,14 @@ impl<'a> Builder<'a> {
             HandlePlace::FingerPull | HandlePlace::Sharknose
         ) && s.door_style != DoorStyle::Slab
         {
-            self.list.warnings.push(
-                "finger pulls need slab fronts: a frame's grooves run where the grip would be; \
-                 none cut"
-                    .into(),
-            );
+            let grip = if s.handle_place == HandlePlace::Sharknose {
+                "sharknose bevels need"
+            } else {
+                "finger pulls need"
+            };
+            self.list.warnings.push(format!(
+                "{grip} slab fronts: a frame's grooves run where the grip would be; none cut"
+            ));
         }
         // An ABI style the catalog does not have falls back to the generic handle, and says so,
         // rather than boring a size we invented.
@@ -5482,6 +5485,21 @@ mod tests {
             assert!(list.operations.iter().any(|o| matches!(o,
                 Operation::BiscuitSlot { parts, .. } if parts.iter().any(|p| p == "R01.Shelf1"))));
         }
+    }
+
+    #[test]
+    fn a_framed_sharknose_front_warns_about_sharknose_not_finger_pulls() {
+        let mut cab = Cabinet::new("B01", CabinetKind::Base);
+        cab.standard.handle_place = HandlePlace::Sharknose;
+        cab.standard.door_style = DoorStyle::Shaker;
+        let list = build_cabinet(&cab).unwrap();
+        assert!(
+            list.warnings
+                .iter()
+                .any(|w| w.starts_with("sharknose bevels need slab fronts")),
+            "{:?}",
+            list.warnings
+        );
     }
 
     /// WF-3: a sharknose front is bevelled at the back of its top edge (a wall door's bottom),
