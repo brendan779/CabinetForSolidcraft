@@ -204,6 +204,17 @@ committed: they are the brands' copyright. `preview_colour` is an approximation.
 | UI-16 | needs-human (built in 8bfa5ee; not seen on screen here: add an end panel each side and look at the viewport and cut list) | M | Run items in the app: add filler and end panel to the sidebar list (drawn tiles, width/scribe chips), lay out and send the project through `cabinet_core::build_run` (FFI) instead of the Swift layout loop | a run with an end panel each side shows in the viewport, cut list and SolidCraft |
 | UI-17 | needs-human (built in dbc5e9d; not seen on screen here: change the back style for the job, then with "Only B01") | M | Project standard in the app: the construction pickers edit the project standard, with an "Only this cabinet" override switch; save through `cabinet_core::Project` (migrate the old project.json) | changing the back style for the project changes every cabinet without an override |
 
+### Owner's review of 0.7 (2026-11-02): next
+
+Not ready for prime time yet: iterate through several design styles and make sure they work. Get cabinets working well before anything on benchtops.
+
+| ID | Status | Size | Task | Done when |
+|---|---|---|---|---|
+| ROOM-2 | todo | M | Walls are configured, and then stay put, instead of following the cabinets. Today the back wall is drawn behind whatever the run is and the return walls hang off its ends. Configure the back wall's run (width) and height, and each return wall's run; cabinets are laid out against them | changing the cabinets does not move or resize a wall; each wall's run and height is set in the inspector |
+| LAYOUT-1 | todo | L, split it first | The layout engine needs to place wall cabinets properly. Every item now takes its place in one row along X, so a wall cabinet sits beside the base cabinets rather than above them at its own height. Wall cabinets need their own line over the base run, at the right height and position, including in the run strip, elevation and SolidCraft | a base run with wall cabinets over it builds and draws with each in its true position |
+| CLAD-1 | todo | S | Edge cladding stops at the base cabinet's front, not the drawer front: extend it to the drawer front's face. Check which panel the owner means first (end panels already start at the door face, `end_panel` in run.rs) and that it holds with fronts of every thickness and with drawer frames | the cladding's front edge is flush with the drawer front's face |
+| BENCH-HOLD | on hold (owner 2026-11-02) | — | Benchtops wait: BENCH-* are not to be picked up until cabinets work well | owner says go |
+
 ## P2 — Commercial parity
 
 | id | status | size | task |
@@ -490,3 +501,4 @@ Agents append one line per session: date, items touched, outcome.
 - 2026-11-02 — BLUM-6b done: TANDEM backs run down behind the base with the rear hook holes. The earlier note's "33 from the outer face" was a misreading: Blum's runner model puts the hook 7 from the side's inside face.
 - 2026-11-02 — Häfele CAD: teccad.hafele.com serves any article by number, but Chrome stops saving after the first files from a site until automatic downloads are allowed. Blum's packages hit the same limit after one.
 - 2026-11-02 — Häfele CAD: 41 shelf supports in vendor-cad/hafele/shelf-supports and 16 Loox5 models in vendor-cad/hafele/lighting. Nothing in the catalog uses them yet except 282.12.405 on the bill. Several articles gave no file: 262.37.700, 282.01.050, 282.50.053, 283.32.014, the 283.39 TRIADE family, 284.04.611, 284.11.200, 284.84.700, 833.75.170 and three sensor switches.
+- 2026-11-02 — Owner's review of 0.7: logged ROOM-2 (walls are configured and stay put), LAYOUT-1 (wall cabinets in their true position), CLAD-1 (cladding to the drawer front's face). Benchtops on hold until cabinets work well.
