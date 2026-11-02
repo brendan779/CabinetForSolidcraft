@@ -1,0 +1,25 @@
+{
+  "brand": "Häfele",
+  "website": "https://www.hafele.com.au",
+  "notes": "Shelf supports from the owner's catalogue. Models in vendor-cad/hafele/shelf-supports. Not verified by a person.",
+  "items": [
+    {
+      "id": "shelf-support.5mm",
+      "brand": "Häfele",
+      "article": "282.12.405",
+      "family": "Shelf support for wooden or glass shelves",
+      "variant": "transparent plastic with steel pin, Ø5 hole, 3.10 kg each",
+      "kind": "other",
+      "parameters": {
+        "hole_diameter": 5,
+        "load_kg": 3.1
+      },
+      "source": {
+        "url": "https://www.hafele.com.au",
+        "document_date": "Häfele The Complete 1, Furniture Fittings, TCH-FF 2018 HAA, updated 10.25, p. 3.55",
+        "retrieved": "2026-11-02",
+        "verified": false
+      }
+    }
+  ]
+}

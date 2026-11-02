@@ -125,7 +125,7 @@ pub fn stand_ins(list: &PartList) -> Vec<StandIn> {
     let mut cams = 0;
     for h in &list.hardware {
         if h.item.starts_with("hafele.minifix15.") {
-            let (Ok(row), Some((into, _))) = (crate::hardware::item(&h.item), cam_axes(list, h))
+            let (Ok(row), Some((into, _, _))) = (crate::hardware::item(&h.item), cam_axes(list, h))
             else {
                 continue;
             };
@@ -508,7 +508,7 @@ fn leg(list: &PartList, h: &HardwarePlacement) -> Option<Vec<Shape>> {
 }
 
 /// A MINIFIX housing's way into the board and the way to its bolt, as unit vectors.
-pub(crate) fn cam_axes(list: &PartList, h: &HardwarePlacement) -> Option<(Vec3, Vec3)> {
+pub(crate) fn cam_axes(list: &PartList, h: &HardwarePlacement) -> Option<(Vec3, Vec3, Vec3)> {
     let unit = |d: Dir| Vec3::default().with(d.axis, d.sign());
     let into = list.operations.iter().find_map(|o| match o {
         Operation::Bore {
@@ -535,13 +535,13 @@ pub(crate) fn cam_axes(list: &PartList, h: &HardwarePlacement) -> Option<(Vec3, 
                 let dx = at.x - h.at.x;
                 let (dy, dz) = (at.y - h.at.y, at.z - h.at.z);
                 let along = dx.abs() + dy.abs() + dz.abs();
-                Some((along - depth, *direction))
+                Some((along - depth, *direction, *at))
             }
             _ => None,
         })
         .min_by(|a, b| a.0.total_cmp(&b.0))?;
     let to_bolt = unit(Dir::new(shank.1.axis, !shank.1.positive));
-    Some((unit(into), to_bolt))
+    Some((unit(into), to_bolt, shank.2))
 }
 
 fn side(list: &PartList, role: PartRole) -> Option<&Part> {

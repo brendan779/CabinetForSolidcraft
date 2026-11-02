@@ -77,8 +77,14 @@ pub fn grid_positions(length: f64, max_spacing: f64) -> Vec<f64> {
 /// dowel in the face part where that leaves a skin, the rest in the end part, plus glue room.
 /// The MINIFIX bolt fitted: S200, its housing 24 from the end part's edge.
 pub const MINIFIX_BOLT: &str = "hafele.minifix.bolt.s200.24";
-/// The cap over a housing with an SW4 drive.
-pub const MINIFIX_CAP: &str = "hafele.minifix.cap.sw4.white";
+/// The cap for a housing: the small housings' PZ2 drive takes a different one from SW4's.
+pub fn minifix_cap(housing: &HardwareItem) -> &'static str {
+    if housing.variant.contains("SW4") {
+        "hafele.minifix.cap.sw4.white"
+    } else {
+        "hafele.minifix.cap.pz2.white"
+    }
+}
 
 /// The MINIFIX 15 housing for a board: the catalogue's wood thicknesses are minimums, so the row
 /// nearest below it.

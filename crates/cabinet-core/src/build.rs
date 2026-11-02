@@ -611,7 +611,7 @@ impl<'a> Builder<'a> {
                 for item in [
                     housing.id.as_str(),
                     crate::joinery::MINIFIX_BOLT,
-                    crate::joinery::MINIFIX_CAP,
+                    crate::joinery::minifix_cap(housing),
                 ] {
                     let row = crate::hardware::item(item);
                     self.list.hardware.push(HardwarePlacement {
@@ -5325,7 +5325,7 @@ fn axilo_set(height: f64, fixing: LegFixing) -> Option<&'static cabinet_catalog:
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::joinery::{MINIFIX_BOLT, MINIFIX_CAP, minifix_housing};
+    use crate::joinery::{MINIFIX_BOLT, minifix_cap, minifix_housing};
     use crate::model::{ConstructionStandard, DrawerSystem, FixingRecipe};
 
     fn base() -> Cabinet {
@@ -7457,7 +7457,12 @@ mod tests {
         assert!(shanks.iter().all(|c| (c.1, c.2) == (8.0, 24.0)));
         assert!(threads.iter().all(|c| (c.1, c.2) == (5.0, 11.0)));
         assert!(threads.iter().all(|c| c.0.ends_with("Side")));
-        for article in ["hafele.minifix15.from-16", MINIFIX_BOLT, MINIFIX_CAP] {
+        let housing = minifix_housing(16.0).unwrap();
+        for article in [
+            "hafele.minifix15.from-16",
+            MINIFIX_BOLT,
+            minifix_cap(housing),
+        ] {
             let n: u32 = list
                 .hardware
                 .iter()
@@ -7497,6 +7502,11 @@ mod tests {
         // 262.26.032 is struck out of the catalogue.
         assert_eq!(minifix_housing(15.0).unwrap().article, "262.26.031");
         assert_eq!(minifix_housing(33.0).unwrap().article, "262.26.036");
+        // The 13 mm housing drives with PZ2 only, so takes the other cap.
+        assert_eq!(
+            minifix_cap(minifix_housing(15.0).unwrap()),
+            "hafele.minifix.cap.pz2.white"
+        );
     }
 
     #[test]

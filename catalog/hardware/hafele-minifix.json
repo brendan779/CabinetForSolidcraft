@@ -1,7 +1,7 @@
 {
   "brand": "Häfele",
   "website": "https://www.hafele.com.au",
-  "notes": "MINIFIX 15 from the owner's catalogue. Struck out there, so left out here: 262.26.032 (from 15), 262.26.037 (from 26), 262.26.038 (from 29). Wood thickness is a minimum, so a 15 mm board takes the from-13 housing and anything over 23 the from-23 one. Dim. A is the bolt's axis below the drilled face. Not verified by a person.",
+  "notes": "MINIFIX 15 from the owner's catalogue. Struck out there, so left out here: 262.26.032 (from 15), 262.26.037 (from 26), 262.26.038 (from 29). Wood thickness is a minimum, so a 15 mm board takes the from-13 housing and anything over 23 the from-23 one. Dim. A is the bolt's axis below the drilled face. Not verified by a person. Häfele publishes no CAD for 262.26.034, so the 18 mm housing draws 262.26.035's model (owner, 2026-11-02); it is still bored and ordered as 262.26.034.",
   "items": [
     {
       "id": "hafele.minifix15.from-12",
@@ -150,6 +150,23 @@
       "article": "262.24.751",
       "family": "MINIFIX 15 cover cap",
       "variant": "white, for an SW4 drive housing, without rim",
+      "kind": "other",
+      "parameters": {
+        "diameter": 17
+      },
+      "source": {
+        "url": "https://www.hafele.com.au",
+        "document_date": "Häfele The Complete 1, Furniture Fittings, TCH-FF 2018 HAA, updated 08.26, pp. 3.5-3.7",
+        "retrieved": "2026-11-02",
+        "verified": false
+      }
+    },
+    {
+      "id": "hafele.minifix.cap.pz2.white",
+      "brand": "Häfele",
+      "article": "262.24.760",
+      "family": "MINIFIX 15 cover cap",
+      "variant": "white, for a PZ2 drive housing, without rim",
       "kind": "other",
       "parameters": {
         "diameter": 17

@@ -1,7 +1,7 @@
 {
   "brand": "Häfele",
   "website": "https://www.hafele.com.au",
-  "notes": "AXILO 78 plinth legs (owner's choice, docs/benchtops.md). A set is a tube with its adjusting foot and a mounting plate (the glide) that screws or knocks into the carcass bottom; the tube clips up into the plate, so the leg stands its nominal height, adjustable -10/+20 mm. Tube articles are known only for the sets downloaded so far. Not verified by a person.",
+  "notes": "AXILO 78 plinth legs (owner's choice, docs/benchtops.md). A set is a tube with its adjusting foot and a mounting plate (the glide) that screws or knocks into the carcass bottom; the tube clips up into the plate, so the leg stands its nominal height, adjustable -10/+20 mm. Tube articles are known only for the sets downloaded so far. Not verified by a person. Häfele's data for the 100 mm sets (637.76.404, .405) supplies tube 637.76.352, which measures 80 long, so there is no 100 tube row yet: ask Häfele.",
   "items": [
     {
       "id": "hafele.axilo.set.60.screw-on",
@@ -314,6 +314,57 @@
         "url": "Häfele CAD data for the AXILO 78 sets on hafele.com.au (set contents); length measured from the model",
         "document_date": "2026",
         "retrieved": "2026-10-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "hafele.axilo.tube.125",
+      "brand": "Häfele",
+      "article": "637.76.354",
+      "family": "AXILO 78 leg tube",
+      "variant": "125 mm, with adjusting piece",
+      "kind": "other",
+      "parameters": {
+        "length": 125
+      },
+      "source": {
+        "url": "Häfele CAD data for the AXILO 78 sets on hafele.com.au (set contents); length measured from the model",
+        "document_date": "2026",
+        "retrieved": "2026-11-02",
+        "verified": false
+      }
+    },
+    {
+      "id": "hafele.axilo.tube.180",
+      "brand": "Häfele",
+      "article": "637.76.356",
+      "family": "AXILO 78 leg tube",
+      "variant": "180 mm, with adjusting piece",
+      "kind": "other",
+      "parameters": {
+        "length": 180
+      },
+      "source": {
+        "url": "Häfele CAD data for the AXILO 78 sets on hafele.com.au (set contents); length measured from the model",
+        "document_date": "2026",
+        "retrieved": "2026-11-02",
+        "verified": false
+      }
+    },
+    {
+      "id": "hafele.axilo.tube.200",
+      "brand": "Häfele",
+      "article": "637.76.357",
+      "family": "AXILO 78 leg tube",
+      "variant": "200 mm, with adjusting piece",
+      "kind": "other",
+      "parameters": {
+        "length": 200
+      },
+      "source": {
+        "url": "Häfele CAD data for the AXILO 78 sets on hafele.com.au (set contents); length measured from the model",
+        "document_date": "2026",
+        "retrieved": "2026-11-02",
         "verified": false
       }
     },
