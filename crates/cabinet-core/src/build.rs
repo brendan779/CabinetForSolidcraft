@@ -214,6 +214,7 @@ pub fn build_cabinet(cab: &Cabinet) -> Result<PartList> {
         b.drawer_frame();
         // After the fronts, so shelf-pin holes can make way for hinge plates.
         b.shelves();
+        b.fridge_space();
         b.plinth();
         b.wall_hanging();
         b.sink();
@@ -1205,6 +1206,64 @@ impl<'a> Builder<'a> {
         if s.back == BackStyle::Applied {
             self.back_screws();
         }
+    }
+
+    /// A fridge space has no back: the fridge needs the room and the air, and the sides are held
+    /// on to the neighbouring panels. The back stops at the shelf over the space.
+    fn fridge_space(&mut self) {
+        if !self.cab.niche_at_the_floor() {
+            return;
+        }
+        self.list.notes.push(
+            "Fridge space: no back or bottom panel. Fix its sides to the neighbouring panels"
+                .into(),
+        );
+        let Some(back) = self.part(PartRole::Back) else {
+            return;
+        };
+        let cut = self
+            .list
+            .by_role(PartRole::Shelf)
+            .map(|p| p.bounds.min.z)
+            .reduce(f64::min);
+        let (y0, name) = (back.bounds.min.y, back.name.clone());
+        let sides = [
+            self.name(PartRole::LeftSide, None),
+            self.name(PartRole::RightSide, None),
+        ];
+        let Some(cut) = cut else {
+            // Nothing above the space to hold a back.
+            self.list.parts.retain(|p| p.name != name);
+            self.list.operations.retain(|o| match o {
+                Operation::Bore { part, at, .. } => {
+                    *part != name && !(sides.contains(part) && at.y >= y0)
+                }
+                Operation::Groove { part, bounds } => !(sides.contains(part) && bounds.min.y >= y0),
+                Operation::BiscuitSlot { parts, .. } => !parts.contains(&name),
+                _ => true,
+            });
+            return;
+        };
+        if let Some(p) = self.list.parts.iter_mut().find(|p| p.name == name) {
+            let top = p.bounds.max().z;
+            p.bounds.min.z = cut;
+            p.bounds.size.z = top - cut;
+        }
+        self.list.operations.retain_mut(|o| match o {
+            Operation::Bore { part, at, .. } => {
+                at.z >= cut || !(*part == name || (sides.contains(part) && at.y >= y0))
+            }
+            Operation::Groove { part, bounds } if sides.contains(part) && bounds.min.y >= y0 => {
+                let top = bounds.max().z;
+                bounds.min.z = cut;
+                bounds.size.z = top - cut;
+                true
+            }
+            Operation::BiscuitSlot { parts, bounds, .. } => {
+                bounds.min.z >= cut || !parts.contains(&name)
+            }
+            _ => true,
+        });
     }
 
     /// An applied back is screwed onto every rear edge it covers; a grooved back needs none.
@@ -11512,7 +11571,6 @@ mod tests {
             );
             assert_eq!(list.part("T01.LeftSide").unwrap().bounds.min.z, 0.0);
             assert!(list.by_role(PartRole::Bottom).next().is_none());
-            assert_eq!(list.part("T01.Back").unwrap().bounds.min.z, 0.0);
             // Nothing is left machined into a panel that is not there.
             assert!(
                 !list
@@ -11523,6 +11581,64 @@ mod tests {
                 list.operations
             );
         }
+    }
+
+    #[test]
+    fn a_fridge_space_has_no_back_and_the_back_stops_at_the_shelf_over_it() {
+        for style in [
+            BackStyle::InsetGroove,
+            BackStyle::Applied,
+            BackStyle::Structural,
+        ] {
+            let mut cab = Cabinet::new("T01", CabinetKind::Tall);
+            cab.standard.back = style;
+            cab.fronts = FrontLayout::Stack {
+                sections: vec![
+                    StackSection {
+                        kind: SectionKind::Niche,
+                        height: 1780.0,
+                    },
+                    StackSection {
+                        kind: SectionKind::Door {
+                            hinge_side: HingeSide::Left,
+                        },
+                        height: 0.0,
+                    },
+                ],
+            };
+            let list = build_cabinet(&cab).unwrap();
+            let cut = list.by_role(PartRole::Shelf).next().unwrap().bounds.min.z;
+            let back = list.part("T01.Back").unwrap().bounds;
+            assert!((back.min.z - cut).abs() < 1e-6, "{style:?}: {back:?}");
+            for o in &list.operations {
+                match o {
+                    Operation::Bore { part, at, .. } => assert!(
+                        at.z >= cut || !(part == "T01.Back" || at.y >= back.min.y),
+                        "{style:?}: {o:?}"
+                    ),
+                    Operation::Groove { part, bounds } if part.contains("Side") => assert!(
+                        bounds.min.z >= cut || bounds.min.y < back.min.y,
+                        "{style:?}: {o:?}"
+                    ),
+                    _ => {}
+                }
+            }
+            assert!(list.notes.iter().any(|n| n.contains("neighbouring")));
+        }
+    }
+
+    #[test]
+    fn a_cabinet_that_is_all_fridge_space_has_no_back_at_all() {
+        let mut cab = Cabinet::new("T01", CabinetKind::Tall);
+        cab.fronts = FrontLayout::Stack {
+            sections: vec![StackSection {
+                kind: SectionKind::Niche,
+                height: 0.0,
+            }],
+        };
+        let list = build_cabinet(&cab).unwrap();
+        assert!(list.by_role(PartRole::Back).next().is_none());
+        assert!(!format!("{:?}", list.operations).contains("\"T01.Back\""));
     }
 
     #[test]
