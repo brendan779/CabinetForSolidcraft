@@ -328,7 +328,7 @@ pub fn option_groups() -> Vec<OptionGroup> {
                 (
                     "integrated_notch",
                     "Notched sides",
-                    "Sides run to the floor with a toe-kick notch",
+                    "Sides run to the floor with a toe-kick notch; the kick board screws to a hidden block",
                 ),
                 ("none", "None", "No toe kick"),
             ],

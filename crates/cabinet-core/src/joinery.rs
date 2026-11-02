@@ -17,12 +17,12 @@ pub const END_SETBACK: f64 = 50.0;
 pub const MIN_BISCUIT_PANEL: f64 = 12.0;
 
 /// Chipboard screw: clearance hole in the face part, pilot in the end part.
-const SCREW_CLEARANCE: f64 = 4.5;
+pub(crate) const SCREW_CLEARANCE: f64 = 4.5;
 /// Countersunk head of a 4 mm chipboard screw (DIN 7997 style, 90°).
-const SCREW_HEAD: f64 = 8.0;
+pub(crate) const SCREW_HEAD: f64 = 8.0;
 /// Countersunk head of a 7 mm confirmat.
 const CONFIRMAT_HEAD: f64 = 10.0;
-const SCREW_PILOT: f64 = 3.0;
+pub(crate) const SCREW_PILOT: f64 = 3.0;
 const SCREW_PILOT_DEPTH: f64 = 35.0;
 /// Confirmat 7 × 50.
 const CONFIRMAT_CLEARANCE: f64 = 7.0;

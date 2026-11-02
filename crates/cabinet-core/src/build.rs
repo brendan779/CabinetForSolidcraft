@@ -91,6 +91,12 @@ fn handle_fits(
 /// Pilot for a 4 × 20 screw through a 6 mm back: short enough to stay clear of the shelf-pin row
 /// 37 mm in from the rear.
 const BACK_SCREW_PILOT_DEPTH: f64 = 15.0;
+/// The hidden batten behind a kick board between notched sides: our rule of thumb.
+const PLINTH_BLOCK_HEIGHT: f64 = 40.0;
+/// Its screws, at most this far apart.
+const PLINTH_BLOCK_SPACING: f64 = 300.0;
+/// How far each screw goes into the board it fixes: both are at most 18, and stop short of showing.
+const PLINTH_BLOCK_PILOT: f64 = 12.0;
 /// Clearance each side of an adjustable shelf.
 const SHELF_SIDE_CLEARANCE: f64 = 1.0;
 /// 32 mm system: shelf-pin and hinge-plate rows sit 37 mm in from the front and back.
@@ -305,6 +311,36 @@ fn l_corner(cab: &Cabinet) -> Result<PartList> {
         p.bounds.min.x = d - sb;
         p.bounds.size.x = end - p.bounds.min.x;
     }
+    // Its hidden block stops with it, and loses the screws that fell in the part cut away.
+    let start = d - sb;
+    for p in a
+        .list
+        .parts
+        .iter_mut()
+        .filter(|p| p.role == PartRole::PlinthBlock)
+    {
+        let end = p.bounds.max().x;
+        p.bounds.min.x = start;
+        p.bounds.size.x = end - start;
+    }
+    let block_name = format!("{}.{}", cab.id, PartRole::PlinthBlock.code());
+    let plinth_name = format!("{}.{}", cab.id, PartRole::Plinth.code());
+    let bottom_name = format!("{}.{}", cab.id, PartRole::Bottom.code());
+    let block_y = sb + ft + s.carcass_thickness / 2.0;
+    a.list.operations.retain(|o| match o {
+        Operation::Bore {
+            part, at, purpose, ..
+        } => {
+            let gone = at.x < start + 20.0
+                && (*part == block_name
+                    || (*part == plinth_name && *purpose == BorePurpose::ScrewPilot)
+                    || (*part == bottom_name
+                        && *purpose == BorePurpose::ScrewPilot
+                        && (at.y - block_y).abs() < 1e-6));
+            !gone
+        }
+        _ => true,
+    });
     for p in leg_b
         .parts
         .iter_mut()
@@ -5293,6 +5329,9 @@ impl<'a> Builder<'a> {
                 ..EdgeBanding::default()
             },
         );
+        if s.toe_kick == ToeKick::IntegratedNotch {
+            self.plinth_block(x0, x1, sb + ft);
+        }
         if s.toe_kick == ToeKick::LegsAndPlinth {
             let (item, description) = match axilo_set(kick, s.leg_fixing) {
                 Some(set) => (
@@ -5347,6 +5386,100 @@ impl<'a> Builder<'a> {
                     });
                 }
             }
+        }
+    }
+}
+
+impl Builder<'_> {
+    /// Between notched sides there are no legs to clip a kick board to, so it screws to a batten
+    /// on edge behind it, under the bottom panel: up through the batten into the bottom, and
+    /// through the batten into the board's back. Nothing shows in the room or inside the cabinet,
+    /// and the pilots stop short of both faces. It goes together on the bench, before the cabinet
+    /// stands: the board is then not removable.
+    fn plinth_block(&mut self, x0: f64, x1: f64, y0: f64) {
+        let s = &self.cab.standard;
+        let (t, kick, ft) = (s.carcass_thickness, s.toe_kick_height, s.front_thickness);
+        let h = PLINTH_BLOCK_HEIGHT.min(kick);
+        let (y1, z0) = (y0 + t, kick - h);
+        self.add(
+            PartRole::PlinthBlock,
+            None,
+            aabb(x0, y0, z0, x1, y1, kick),
+            Axis::Y,
+            Axis::X,
+            EdgeBanding::default(),
+        );
+        let block = self.name(PartRole::PlinthBlock, None);
+        let plinth = self.name(PartRole::Plinth, None);
+        let bottom = self.name(PartRole::Bottom, None);
+        let length = x1 - x0;
+        // Staggered, so the two sets of screws do not cross in the batten.
+        let mut up = crate::joinery::fixing_positions(
+            length,
+            crate::joinery::END_SETBACK.min(length / 4.0),
+            PLINTH_BLOCK_SPACING,
+            20.0,
+        );
+        if up.len() < 2 {
+            up = vec![length / 4.0, 3.0 * length / 4.0];
+        }
+        let across: Vec<f64> = up.windows(2).map(|w| (w[0] + w[1]) / 2.0).collect();
+        let clearance = crate::joinery::SCREW_CLEARANCE;
+        let head = crate::joinery::SCREW_HEAD;
+        let pilot = crate::joinery::SCREW_PILOT;
+        let screw = |list: &mut PartList,
+                     through: Vec3,
+                     into_part: &str,
+                     into: Vec3,
+                     dir: Dir,
+                     run: f64,
+                     pilot_depth: f64| {
+            for (d, depth, purpose, part, at) in [
+                (clearance, run, BorePurpose::Screw, block.as_str(), through),
+                (
+                    head,
+                    (head - clearance) / 2.0,
+                    BorePurpose::Countersink,
+                    block.as_str(),
+                    through,
+                ),
+                (pilot, pilot_depth, BorePurpose::ScrewPilot, into_part, into),
+            ] {
+                list.operations.push(Operation::Bore {
+                    part: part.to_string(),
+                    at,
+                    direction: dir,
+                    diameter: d,
+                    depth,
+                    purpose,
+                });
+            }
+        };
+        let y = y0 + t / 2.0;
+        for p in up {
+            let x = x0 + p;
+            screw(
+                &mut self.list,
+                Vec3::new(x, y, z0),
+                &bottom,
+                Vec3::new(x, y, kick),
+                Dir::new(Axis::Z, true),
+                h,
+                PLINTH_BLOCK_PILOT.min(t - 3.0),
+            );
+        }
+        let z = kick - h / 2.0;
+        for p in across {
+            let x = x0 + p;
+            screw(
+                &mut self.list,
+                Vec3::new(x, y1, z),
+                &plinth,
+                Vec3::new(x, y0, z),
+                Dir::new(Axis::Y, false),
+                t,
+                PLINTH_BLOCK_PILOT.min(ft - 3.0),
+            );
         }
     }
 }
@@ -7655,6 +7788,100 @@ mod tests {
             "{:?}",
             list.warnings
         );
+    }
+
+    #[test]
+    fn a_kick_board_between_notched_sides_screws_to_a_hidden_block() {
+        let mut cab = Cabinet::new("B01", CabinetKind::Base);
+        cab.standard.toe_kick = crate::model::ToeKick::IntegratedNotch;
+        let list = build_cabinet(&cab).unwrap();
+        let block = list.part("B01.PlinthBlock").unwrap();
+        let (plinth, bottom) = (
+            list.part("B01.Plinth").unwrap().bounds,
+            list.part("B01.Bottom").unwrap().bounds,
+        );
+        // Against the board's back, under the bottom, between the sides.
+        assert_eq!(block.bounds.min.y, plinth.max().y);
+        assert_eq!(block.bounds.max().z, bottom.min.z);
+        assert_eq!(block.bounds.min.x, plinth.min.x);
+        assert_eq!(block.bounds.max().x, plinth.max().x);
+        let pilots = |part: &str| -> Vec<(Dir, f64)> {
+            list.operations
+                .iter()
+                .filter_map(|o| match o {
+                    Operation::Bore {
+                        part: p,
+                        direction,
+                        depth,
+                        purpose: BorePurpose::ScrewPilot,
+                        ..
+                    } if p == part => Some((*direction, *depth)),
+                    _ => None,
+                })
+                .collect()
+        };
+        // Blind in both: nothing comes through the board's face or into the cabinet.
+        let into_plinth = pilots("B01.Plinth");
+        assert!(!into_plinth.is_empty());
+        assert!(into_plinth.iter().all(|(_, d)| *d < plinth.size.y));
+        let into_bottom: Vec<_> = pilots("B01.Bottom")
+            .into_iter()
+            .filter(|(dir, _)| dir.axis == Axis::Z && dir.positive)
+            .collect();
+        assert!(!into_bottom.is_empty());
+        assert!(into_bottom.iter().all(|(_, d)| *d < bottom.size.z));
+        assert!(
+            !list.warnings.iter().any(|w| w.starts_with("clash")),
+            "{:?}",
+            list.warnings
+        );
+    }
+
+    #[test]
+    fn a_plinth_block_fits_every_kind_mounting_and_frame_without_a_clash() {
+        use crate::model::{DoorOverlay, DrawerFrame, ToeKick};
+        let mut failures = Vec::new();
+        for kind in [
+            CabinetKind::Base,
+            CabinetKind::DrawerBank,
+            CabinetKind::Sink,
+            CabinetKind::Tall,
+            CabinetKind::BlindCorner,
+            CabinetKind::CornerBase,
+            CabinetKind::Wardrobe,
+        ] {
+            for width in [300.0, 600.0, 1200.0] {
+                for overlay in [DoorOverlay::Full, DoorOverlay::Inset] {
+                    for frame in [DrawerFrame::None, DrawerFrame::Board] {
+                        let mut cab = Cabinet::new("B01", kind);
+                        cab.width = width;
+                        cab.standard.toe_kick = ToeKick::IntegratedNotch;
+                        cab.standard.overlay = overlay;
+                        cab.standard.drawer_frame = frame;
+                        let Ok(list) = build_cabinet(&cab) else {
+                            continue;
+                        };
+                        for w in list.warnings.iter().filter(|w| w.starts_with("clash")) {
+                            failures.push(format!("{kind:?} {width} {overlay:?} {frame:?}: {w}"));
+                        }
+                    }
+                }
+            }
+        }
+        failures.sort();
+        failures.dedup();
+        assert!(
+            failures.is_empty(),
+            "{}\n{}",
+            failures.len(),
+            failures.join("\n")
+        );
+    }
+
+    #[test]
+    fn legs_take_no_plinth_block() {
+        let list = build_cabinet(&Cabinet::new("B01", CabinetKind::Base)).unwrap();
+        assert!(list.part("B01.PlinthBlock").is_none());
     }
 
     #[test]
