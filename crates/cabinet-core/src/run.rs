@@ -34,6 +34,19 @@ pub enum RunItem {
     Walls(Walls),
     /// Empty space in a line: takes length and builds nothing.
     Gap(Gap),
+    /// Tile or a sheet on the wall, from the benchtop up to the wall cabinets. It takes no run
+    /// length.
+    Splashback(Splashback),
+}
+
+/// A splashback on the wall over every stretch of base-height cabinets.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct Splashback {
+    pub id: String,
+    #[serde(flatten)]
+    pub spec: crate::tiling::TileSpec,
+    /// Tile and its adhesive, how far the face stands off the wall.
+    pub thickness: f64,
 }
 
 /// Space between cabinets in one line of the run, for a window, a rangehood's clearance or an
@@ -632,6 +645,11 @@ pub fn build_run(run: &Run) -> Result<Vec<PartList>> {
                 cabinet: g.id.clone(),
                 ..PartList::default()
             }),
+            // Built from the rest, below.
+            RunItem::Splashback(s) => out.push(PartList {
+                cabinet: s.id.clone(),
+                ..PartList::default()
+            }),
             RunItem::Walls(w) => out.push(PartList {
                 cabinet: w.id.clone(),
                 warnings: wall_warnings(w, run),
@@ -652,6 +670,7 @@ pub fn build_run(run: &Run) -> Result<Vec<PartList>> {
                     RunItem::Benchtop(_)
                     | RunItem::FloatingShelf(_)
                     | RunItem::Moulding(_)
+                    | RunItem::Splashback(_)
                     | RunItem::Walls(_) => false,
                 })
                 .collect();
@@ -668,6 +687,11 @@ pub fn build_run(run: &Run) -> Result<Vec<PartList>> {
             splashback_openings(b, &mut top, &out);
             round_ends(b, &mut top);
             out[i] = top;
+        }
+    }
+    for (i, item) in run.items.iter().enumerate() {
+        if let RunItem::Splashback(s) = item {
+            out[i] = splashback(s, run, &out, &cabinets);
         }
     }
     for (i, item) in run.items.iter().enumerate() {
@@ -909,6 +933,7 @@ fn item_id(i: &RunItem) -> &str {
         RunItem::Moulding(m) => &m.id,
         RunItem::Walls(w) => &w.id,
         RunItem::Gap(g) => &g.id,
+        RunItem::Splashback(s) => &s.id,
     }
 }
 
@@ -958,7 +983,10 @@ fn line_of(run: &Run, i: usize) -> Line {
             GapLine::Upper => Line::Upper,
             GapLine::Floor => Line::Floor,
         },
-        RunItem::Benchtop(_) | RunItem::Moulding(_) | RunItem::Walls(_) => Line::Neither,
+        RunItem::Benchtop(_)
+        | RunItem::Moulding(_)
+        | RunItem::Walls(_)
+        | RunItem::Splashback(_) => Line::Neither,
     }
 }
 
@@ -998,7 +1026,10 @@ fn item_width(run: &Run, i: usize) -> f64 {
         RunItem::EndPanel(_) => nearest(&cabinets(run), i).standard.front_thickness,
         RunItem::FloatingShelf(f) => f.width,
         RunItem::Gap(g) => g.width,
-        RunItem::Benchtop(_) | RunItem::Moulding(_) | RunItem::Walls(_) => 0.0,
+        RunItem::Benchtop(_)
+        | RunItem::Moulding(_)
+        | RunItem::Walls(_)
+        | RunItem::Splashback(_) => 0.0,
     }
 }
 
@@ -1118,6 +1149,154 @@ fn lefts(run: &Run) -> Vec<Vec3> {
             )
         })
         .collect()
+}
+
+/// Spare tiles allowed for cuts and breakages: the usual rule of thumb.
+const TILE_SPARE: f64 = 1.1;
+
+/// A splashback's fields: over each stretch of base-height cabinets, from the benchtop's top (or
+/// the cabinets', without one) to the wall cabinets over that stretch.
+fn splashback(
+    s: &Splashback,
+    run: &Run,
+    built: &[PartList],
+    cabs: &[(usize, &Cabinet)],
+) -> PartList {
+    let mut list = PartList {
+        cabinet: s.id.clone(),
+        ..PartList::default()
+    };
+    let places = lefts(run);
+    let depth = run_depth(run);
+    let top = run.items.iter().find_map(|i| match i {
+        RunItem::Benchtop(b) => Some(b),
+        _ => None,
+    });
+    if top.is_some_and(|b| b.splashback > 0.0) {
+        list.warnings.push(format!(
+            "{}: the benchtop already has a slab splashback standing in front of these tiles",
+            s.id
+        ));
+    }
+    // Stretches along the floor line, each with its extent and height.
+    let mut stretches: Vec<(f64, f64, f64)> = Vec::new();
+    let mut open = false;
+    for (j, item) in run.items.iter().enumerate() {
+        if !matches!(line_of(run, j), Line::Floor | Line::Both) {
+            continue;
+        }
+        let c = match item {
+            RunItem::Cabinet(c) => Some(c.as_ref()),
+            RunItem::Filler(_) | RunItem::EndPanel(_) => Some(nearest(cabs, j)),
+            _ => None,
+        };
+        let joins = match item {
+            RunItem::Gap(_) => open,
+            _ => c.is_some_and(takes_benchtop),
+        };
+        if !joins {
+            open = false;
+            continue;
+        }
+        let x0 = built[j]
+            .parts
+            .iter()
+            .map(|p| p.bounds.min.x)
+            .fold(places[j].x, f64::min);
+        let x1 = built[j]
+            .parts
+            .iter()
+            .map(|p| p.bounds.max().x)
+            .fold(places[j].x + item_width(run, j), f64::max);
+        let z = c.map_or(0.0, |c| places[j].z + c.origin.z + c.height);
+        match stretches.last_mut() {
+            Some(last) if open => {
+                last.1 = last.1.max(x1);
+                last.2 = last.2.max(z);
+            }
+            _ => stretches.push((x0, x1, z)),
+        }
+        open = true;
+    }
+    let bench = top.map_or(0.0, |b| b.thickness);
+    let mut area = 0.0;
+    let mut tiles = 0;
+    let many = stretches.len() > 1;
+    for (n, (x0, x1, z)) in stretches.into_iter().enumerate() {
+        let z0 = z + bench;
+        // The lowest wall cabinet over it; a canopy hangs lower over the cooktop on its own.
+        let z1 = run
+            .items
+            .iter()
+            .enumerate()
+            .filter_map(|(j, item)| match item {
+                RunItem::Cabinet(c)
+                    if line_of(run, j) == Line::Upper
+                        && c.kind != CabinetKind::Rangehood
+                        && places[j].x < x1
+                        && places[j].x + c.width > x0 =>
+                {
+                    Some(places[j].z + c.origin.z)
+                }
+                _ => None,
+            })
+            .fold(f64::MAX, f64::min);
+        let z1 = if z1 == f64::MAX {
+            wall_cabinet_bottom(run)
+        } else {
+            z1
+        };
+        if z1 - z0 < 1.0 {
+            list.warnings.push(format!(
+                "{}: no wall left between the top and the wall cabinets",
+                s.id
+            ));
+            continue;
+        }
+        let name = if many {
+            format!("{}.Tiles{}", s.id, n + 1)
+        } else {
+            format!("{}.Tiles", s.id)
+        };
+        let (w, h) = (x1 - x0, z1 - z0);
+        list.warnings.extend(s.spec.warnings(&name, w, h));
+        tiles += s.spec.layout(w, h).len();
+        area += w * h / 1e6;
+        list.tile_fields.push(crate::tiling::TileField {
+            name,
+            bounds: Aabb::new(
+                Vec3::new(x0, run.origin.y + depth - s.thickness, z0),
+                Vec3::new(w, s.thickness, h),
+            ),
+            spec: s.spec.clone(),
+        });
+    }
+    if area > 0.0 {
+        let (item, description, quantity) = if s.spec.is_sheet() {
+            (
+                "splashback.sheet".to_string(),
+                format!("Splashback sheet, {area:.2} m²"),
+                list.tile_fields.len() as u32,
+            )
+        } else {
+            (
+                format!("tile.{}x{}", s.spec.tile_width, s.spec.tile_height),
+                format!(
+                    "Tile {} × {}, {area:.2} m², {:.0} mm grout, with 10 % spare",
+                    s.spec.tile_width, s.spec.tile_height, s.spec.grout
+                ),
+                (tiles as f64 * TILE_SPARE).ceil() as u32,
+            )
+        };
+        list.hardware.push(crate::part::HardwarePlacement {
+            item,
+            description,
+            at: list.tile_fields[0].bounds.center(),
+            part: list.tile_fields[0].name.clone(),
+            quantity,
+        });
+    }
+    list
 }
 
 fn walls(run: &Run) -> Option<&Walls> {
@@ -3398,5 +3577,83 @@ mod tests {
                 .iter()
                 .any(|r| r.cabinet == "B1" && r.part.contains("SeenEndRight"))
         );
+    }
+
+    fn tiled(items: Vec<RunItem>) -> Vec<PartList> {
+        let mut all = items;
+        all.push(RunItem::Splashback(Splashback {
+            id: "S1".into(),
+            spec: crate::tiling::TileSpec {
+                tile_width: 300.0,
+                tile_height: 75.0,
+                grout: 2.0,
+                pattern: crate::tiling::TilePattern::Stack,
+                colour: "#FFFFFF".into(),
+                grout_colour: "#888888".into(),
+            },
+            thickness: 10.0,
+        }));
+        build_run(&line_up(all)).unwrap()
+    }
+
+    #[test]
+    fn a_splashback_runs_from_the_cabinets_top_to_the_wall_cabinets_on_the_wall() {
+        let base = Cabinet::new("B1", CabinetKind::Base);
+        let (w, h, d) = (base.width, base.height, base.depth);
+        let lists = tiled(vec![
+            RunItem::Cabinet(Box::new(base)),
+            cab("U1", CabinetKind::Wall),
+        ]);
+        let field = &lists[2].tile_fields[0];
+        assert_eq!(field.bounds.min.z, h);
+        assert_eq!(
+            field.bounds.max().z,
+            lists[1].parts[0].bounds.min.z.min(h + 630.0)
+        );
+        assert_eq!(field.bounds.max().y, d, "on the wall");
+        assert_eq!(field.bounds.size.y, 10.0);
+        assert_eq!(field.bounds.size.x, w);
+        assert!(lists[2].parts.is_empty(), "tile is not cut from board");
+    }
+
+    #[test]
+    fn a_splashback_stands_on_the_benchtop() {
+        let lists = tiled(vec![
+            cab("B1", CabinetKind::Base),
+            RunItem::Benchtop(Benchtop {
+                id: "T1".into(),
+                ..serde_json::from_str(
+                    r#"{"id":"T1","thickness":33,"front_overhang":20,"side_overhang":0}"#,
+                )
+                .unwrap()
+            }),
+        ]);
+        assert_eq!(lists[2].tile_fields[0].bounds.min.z, 870.0 + 33.0);
+    }
+
+    #[test]
+    fn a_tall_cabinet_breaks_a_splashback_into_two_fields() {
+        let lists = tiled(vec![
+            cab("B1", CabinetKind::Base),
+            cab("T1", CabinetKind::Tall),
+            cab("B2", CabinetKind::Base),
+        ]);
+        let names: Vec<_> = lists[3]
+            .tile_fields
+            .iter()
+            .map(|f| f.name.as_str())
+            .collect();
+        assert_eq!(names, ["S1.Tiles1", "S1.Tiles2"]);
+    }
+
+    #[test]
+    fn the_tiles_are_on_the_hardware_list_with_spares_and_the_cut_list_has_none() {
+        let lists = tiled(vec![cab("B1", CabinetKind::Base)]);
+        let row = &lists[1].hardware[0];
+        let f = &lists[1].tile_fields[0];
+        let laid = f.spec.layout(f.bounds.size.x, f.bounds.size.z).len() as f64;
+        assert_eq!(row.quantity, (laid * 1.1).ceil() as u32);
+        let list = crate::cutlist::cut_list(&lists, "board", 1.0);
+        assert!(!list.rows.iter().any(|r| r.cabinet == "S1"));
     }
 }

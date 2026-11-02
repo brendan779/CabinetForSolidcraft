@@ -149,6 +149,30 @@ pub fn elevation_svg(lists: &[PartList], walls: Option<&Walls>, job: &str) -> Op
         px(room_x0),
         px(room_x1)
     );
+    // Tiles on the wall, behind everything, with their joints.
+    for f in lists.iter().flat_map(|l| &l.tile_fields) {
+        let b = &f.bounds;
+        let _ = writeln!(
+            svg,
+            r##"<rect x="{:.2}" y="{:.2}" width="{:.2}" height="{:.2}" fill="{}"/>"##,
+            px(b.min.x),
+            py(b.max().z),
+            b.size.x * scale,
+            b.size.z * scale,
+            esc(&f.spec.grout_colour)
+        );
+        for t in f.spec.layout(b.size.x, b.size.z) {
+            let _ = writeln!(
+                svg,
+                r##"<rect x="{:.2}" y="{:.2}" width="{:.2}" height="{:.2}" fill="{}"/>"##,
+                px(b.min.x + t.x),
+                py(b.min.z + t.z + t.height),
+                t.width * scale,
+                t.height * scale,
+                esc(&f.spec.colour)
+            );
+        }
+    }
     for p in &d.parts {
         let b = &p.bounds;
         let fill = if p.role.is_front() {

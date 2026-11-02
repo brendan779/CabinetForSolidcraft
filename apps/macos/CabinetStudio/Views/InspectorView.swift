@@ -398,7 +398,9 @@ struct PieceSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            if cab.kind == "gap" {
+            if cab.kind == "splashback" {
+                SplashbackSection(cab: cab)
+            } else if cab.kind == "gap" {
                 SectionTitle("Gap")
                 HStack(spacing: 6) {
                     ForEach([true, false], id: \.self) { upper in
@@ -647,7 +649,7 @@ struct PieceSection: View {
                     }
                 }
             }
-            if !["benchtop", "floating_shelf", "cornice", "light_rail", "walls", "gap"].contains(cab.kind) {
+            if !["benchtop", "floating_shelf", "cornice", "light_rail", "walls", "gap", "splashback"].contains(cab.kind) {
                 chips("Scribe", value: cab.scribe, presets: [0, 10, 20, 30, 40]) { c, v in c.scribe = v }
                 Text("The scribe is extra board, cut off on site to follow the wall. It is not part of the run's length.")
                     .font(.caption)
@@ -678,6 +680,160 @@ struct PieceSection: View {
                 .accessibilityLabel("\(title) \(unit.format(p))")
             }
         }
+    }
+}
+
+/// A splashback's finish, each choice a picture of itself: tile sizes, the way they are laid, the
+/// grout and the colours. Tile or sheet, the field fills the wall from the top to the wall cabinets.
+struct SplashbackSection: View {
+    @Environment(ProjectModel.self) private var project
+    let cab: CabinetDoc
+
+    private static let sizes: [(w: Double, h: Double, name: String)] = [
+        (300, 75, "Subway"), (300, 100, "Subway"), (200, 100, "Brick"), (600, 300, "Large"),
+        (100, 100, "Square"), (200, 200, "Square"), (300, 300, "Square"), (50, 50, "Mosaic"),
+    ]
+    private static let tileColours = ["#F2EFE8", "#FFFFFF", "#D9D4C8", "#8A8F8C", "#3B3F42", "#5E7466", "#2F4858", "#B98D6B"]
+    private static let groutColours = ["#FFFFFF", "#D9D4C8", "#B9B4AA", "#8A8780", "#55524D", "#2A2826"]
+
+    private func set(_ change: (inout CabinetDoc) -> Void) {
+        var c = cab
+        change(&c)
+        withAnimation(.snappy) { project.selected = c }
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            SectionTitle("Splashback")
+            HStack(spacing: 8) {
+                kindTile("Tile", selected: cab.tileWidth > 0) { $0.tileWidth = 300; $0.tileHeight = 75 }
+                kindTile("One sheet", selected: cab.tileWidth <= 0) { $0.tileWidth = 0; $0.tileHeight = 0 }
+            }
+            if cab.tileWidth > 0 {
+                SectionTitle("Tile size")
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 6), count: 4), spacing: 6) {
+                    ForEach(Self.sizes.indices, id: \.self) { i in
+                        let size = Self.sizes[i]
+                        Button {
+                            set { $0.tileWidth = size.w; $0.tileHeight = size.h }
+                        } label: {
+                            VStack(spacing: 4) {
+                                TileThumbnail(width: size.w, height: size.h, grout: 3, brick: false,
+                                              tile: cab.tileColour, joint: cab.groutColour)
+                                    .frame(height: 34)
+                                Text("\(Int(size.w))×\(Int(size.h))").font(.caption2).monospacedDigit()
+                            }
+                            .padding(5)
+                        }
+                        .buttonStyle(TileStyle(selected: cab.tileWidth == size.w && cab.tileHeight == size.h))
+                        .help("\(size.name), \(Int(size.w)) × \(Int(size.h)) mm")
+                    }
+                }
+                NumberField(title: "Width", value: cab.tileWidth) { v in set { $0.tileWidth = max(v, 10) } }
+                    .id("tile width")
+                NumberField(title: "Height", value: cab.tileHeight) { v in set { $0.tileHeight = max(v, 10) } }
+                    .id("tile height")
+                SectionTitle("Laid")
+                HStack(spacing: 8) {
+                    ForEach([("stack", "Stacked"), ("brick", "Brick bond")], id: \.0) { id, title in
+                        Button {
+                            set { $0.tilePattern = id }
+                        } label: {
+                            VStack(spacing: 4) {
+                                TileThumbnail(width: 120, height: 45, grout: 3, brick: id == "brick",
+                                              tile: cab.tileColour, joint: cab.groutColour)
+                                    .frame(height: 40)
+                                Text(title).font(.caption)
+                            }
+                            .padding(6)
+                            .frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(TileStyle(selected: cab.tilePattern == id))
+                    }
+                }
+                ChipRow("Grout") {
+                    ForEach([1.5, 2, 3, 5], id: \.self) { g in
+                        Button(String(format: "%g", g)) { set { $0.grout = g } }
+                            .buttonStyle(ChipStyle(selected: cab.grout == g))
+                            .accessibilityLabel("Grout \(g) millimetres")
+                    }
+                }
+                swatches("Grout colour", Self.groutColours, chosen: cab.groutColour) { $0.groutColour = $1 }
+            }
+            swatches(cab.tileWidth > 0 ? "Tile colour" : "Colour", Self.tileColours, chosen: cab.tileColour) { $0.tileColour = $1 }
+            ChipRow("Thickness") {
+                ForEach([6.0, 10, 12, 20], id: \.self) { t in
+                    Button(String(format: "%g", t)) { set { $0.setNumber("thickness", t) } }
+                        .buttonStyle(ChipStyle(selected: cab.number("thickness") == t))
+                        .accessibilityLabel("Thickness \(Int(t)) millimetres")
+                }
+            }
+            Text("Goes on the wall from the benchtop up to the wall cabinets, over the base cabinets. Whole rows start at the benchtop and the ends are cut evenly. The tiles, with 10 % spare, are on the hardware list.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    private func kindTile(_ title: String, selected: Bool, _ change: @escaping (inout CabinetDoc) -> Void) -> some View {
+        Button { set(change) } label: {
+            Text(title).frame(maxWidth: .infinity).padding(.vertical, 6)
+        }
+        .buttonStyle(TileStyle(selected: selected))
+    }
+
+    private func swatches(_ title: String, _ colours: [String], chosen: String,
+                          set change: @escaping (inout CabinetDoc, String) -> Void) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(title).foregroundStyle(.secondary)
+            HStack(spacing: 6) {
+                ForEach(colours, id: \.self) { hex in
+                    Button {
+                        set { change(&$0, hex) }
+                    } label: {
+                        RoundedRectangle(cornerRadius: 5)
+                            .fill(Color(nsColor: NSColor(hex: hex) ?? .gray))
+                            .frame(width: 26, height: 26)
+                            .overlay(RoundedRectangle(cornerRadius: 5)
+                                .strokeBorder(chosen == hex ? Theme.accent : Theme.border, lineWidth: chosen == hex ? 2 : 1))
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("\(title) \(hex)")
+                }
+            }
+        }
+    }
+}
+
+/// A few tiles of a size, to scale with each other, with their joints.
+struct TileThumbnail: View {
+    let width: Double
+    let height: Double
+    let grout: Double
+    let brick: Bool
+    let tile: String
+    let joint: String
+
+    var body: some View {
+        Canvas { ctx, size in
+            ctx.fill(Path(CGRect(origin: .zero, size: size)), with: .color(Color(nsColor: NSColor(hex: joint) ?? .gray)))
+            // 600 mm of wall fits across, so sizes compare at a glance.
+            let k = size.width / 600
+            let (w, h, g) = (width * k, height * k, max(grout * k * 2, 1))
+            let fill = Color(nsColor: NSColor(hex: tile) ?? .white)
+            var y = 0.0, row = 0
+            while y < size.height {
+                var x = brick && row % 2 == 1 ? -(w + g) / 2 : 0
+                while x < size.width {
+                    ctx.fill(Path(CGRect(x: x, y: y, width: w, height: h)), with: .color(fill))
+                    x += w + g
+                }
+                y += h + g
+                row += 1
+            }
+        }
+        .clipShape(RoundedRectangle(cornerRadius: 3))
+        .accessibilityHidden(true)
     }
 }
 

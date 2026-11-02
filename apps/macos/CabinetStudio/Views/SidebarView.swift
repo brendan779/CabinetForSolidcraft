@@ -29,7 +29,7 @@ struct SidebarView: View {
                             }
                         }
                         Divider()
-                        ForEach(["gap", "filler", "end_panel", "benchtop", "floating_shelf", "cornice", "light_rail"], id: \.self) { type in
+                        ForEach(["gap", "filler", "end_panel", "benchtop", "splashback", "floating_shelf", "cornice", "light_rail"], id: \.self) { type in
                             Button {
                                 project.addPiece(type)
                             } label: {
@@ -94,6 +94,7 @@ struct CabinetRow: View {
         case "benchtop": "\(unit.format(cab.topThickness)) thick, \(unit.format(cab.frontOverhang, suffix: false)) overhang"
         case "floating_shelf": "\(unit.format(cab.width)) × \(unit.format(cab.shelfDepth, suffix: false))"
         case "cornice", "light_rail": "\(unit.format(cab.mouldingHeight)) high\(cab.returns ? ", returned" : "")"
+        case "splashback": cab.tileWidth > 0 ? "\(Int(cab.tileWidth)) × \(Int(cab.tileHeight)) tile" : "One sheet"
         case "gap": "\(unit.format(cab.width)), \(cab.gapIsUpper ? "wall cabinets" : "floor cabinets")"
         case "walls":
             switch (cab.wallLeft, cab.wallRight) {

@@ -30,6 +30,7 @@ pub mod quote;
 pub mod run;
 pub mod splits;
 pub mod standins;
+pub mod tiling;
 
 pub use build::build_cabinet;
 pub use model::{Cabinet, CabinetKind, ConstructionStandard};

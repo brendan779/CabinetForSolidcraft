@@ -214,6 +214,9 @@ pub fn emit_cabinet_with(
             json!({ "command": "appearance.assign", "params": { "bodies": bodies, "color": c } }),
         );
     }
+    for field in &list.tile_fields {
+        emit_tiles(field, &mut cmds);
+    }
     if let Some(spec) = spec {
         cmds.push(json!({
             "command": "component.metadata.set",
@@ -299,6 +302,59 @@ pub fn replace_cabinet(
         }));
     }
     cmds
+}
+
+/// Beyond this a field is one slab in the tile's colour: each tile is a body, and a mosaic has
+/// thousands. The viewport draws every joint whatever the count.
+const MOST_TILE_BODIES: usize = 1500;
+/// The bed behind the tiles, in the grout's colour: it shows through the joints.
+const TILE_BED: f64 = 2.0;
+
+/// A splashback: a bed in the grout's colour on the wall, with each tile on it, so the joints are
+/// real gaps between bodies.
+fn emit_tiles(field: &cabinet_core::tiling::TileField, cmds: &mut Vec<Value>) {
+    let b = field.bounds;
+    let tiles = field.spec.layout(b.size.x, b.size.z);
+    let slab = |name: String, min: Vec3, size: Vec3| {
+        json!({
+            "command": "solid.box",
+            "params": {
+                "length": round(size.x),
+                "width": round(size.y),
+                "height": round(size.z),
+                "corner": arr(min),
+                "operation": "new",
+                "body_name": name,
+                "name": name,
+            }
+        })
+    };
+    let assign = |bodies: Vec<String>, colour: &str| json!({ "command": "appearance.assign", "params": { "bodies": bodies, "color": colour } });
+    if field.spec.is_sheet() || tiles.len() > MOST_TILE_BODIES {
+        cmds.push(slab(field.name.clone(), b.min, b.size));
+        cmds.push(assign(vec![field.name.clone()], &field.spec.colour));
+        return;
+    }
+    let bed = TILE_BED.min(b.size.y / 2.0);
+    let face = b.size.y - bed;
+    let bed_name = format!("{}.Bed", field.name);
+    cmds.push(slab(
+        bed_name.clone(),
+        Vec3::new(b.min.x, b.min.y + face, b.min.z),
+        Vec3::new(b.size.x, bed, b.size.z),
+    ));
+    cmds.push(assign(vec![bed_name], &field.spec.grout_colour));
+    let mut names = Vec::with_capacity(tiles.len());
+    for (n, t) in tiles.iter().enumerate() {
+        let name = format!("{}.{}", field.name, n + 1);
+        cmds.push(slab(
+            name.clone(),
+            Vec3::new(b.min.x + t.x, b.min.y, b.min.z + t.z),
+            Vec3::new(t.width, face, t.height),
+        ));
+        names.push(name);
+    }
+    cmds.push(assign(names, &field.spec.colour));
 }
 
 /// The supplier models a build at `detail` puts in. Handles go in at every level, as they are part
@@ -1354,5 +1410,38 @@ mod tests {
             );
             assert_eq!(cross, Vec3::default().with(axis, 1.0));
         }
+    }
+
+    #[test]
+    fn a_tiled_splashback_is_a_bed_with_a_body_per_tile_and_real_joints() {
+        use cabinet_core::tiling::{TileField, TilePattern, TileSpec};
+        let field = TileField {
+            name: "S1.Tiles".into(),
+            bounds: cabinet_core::geom::Aabb::new(
+                Vec3::new(0.0, 570.0, 900.0),
+                Vec3::new(604.0, 10.0, 202.0),
+            ),
+            spec: TileSpec {
+                tile_width: 300.0,
+                tile_height: 100.0,
+                grout: 2.0,
+                pattern: TilePattern::Stack,
+                colour: "#FFFFFF".into(),
+                grout_colour: "#888888".into(),
+            },
+        };
+        let mut cmds = Vec::new();
+        emit_tiles(&field, &mut cmds);
+        let boxes: Vec<_> = cmds
+            .iter()
+            .filter(|c| c["command"] == "solid.box")
+            .collect();
+        assert_eq!(boxes.len(), 1 + field.spec.layout(604.0, 202.0).len());
+        let colours: Vec<_> = cmds
+            .iter()
+            .filter(|c| c["command"] == "appearance.assign")
+            .map(|c| c["params"]["color"].as_str().unwrap())
+            .collect();
+        assert_eq!(colours, ["#888888", "#FFFFFF"]);
     }
 }

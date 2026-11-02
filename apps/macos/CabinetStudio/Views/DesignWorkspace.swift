@@ -218,7 +218,7 @@ struct RunStrip: View {
 
     private var items: [CabinetDoc] {
         project.cabinets.filter {
-            $0.placed != true && !["end_panel", "benchtop", "cornice", "light_rail", "walls"].contains($0.kind)
+            $0.placed != true && !["end_panel", "benchtop", "cornice", "light_rail", "walls", "splashback"].contains($0.kind)
         }
     }
 
@@ -1125,6 +1125,9 @@ final class ViewportScene {
         if p.board.hasPrefix("handle:") {
             return Self.handleMaterial(p.board.dropFirst("handle:".count), selected: selected)
         }
+        if p.board.hasPrefix("tile:") {
+            return tileMaterial(p, selected: selected, hovered: hovered)
+        }
         let colour = board?.displayColour ?? generic
         var m = PhysicallyBasedMaterial()
         let tint = selected ? NSColor.white : NSColor(calibratedWhite: 0.72, alpha: 1)
@@ -1153,6 +1156,69 @@ final class ViewportScene {
             m.emissiveIntensity = hovered ? 0.6 : 0.12
         }
         return m
+    }
+
+    /// A tiled field: its whole layout as one picture, to scale, so the cuts and joints fall where
+    /// the core puts them. The box's texture coordinates are in `grainRepeat`s from its corner.
+    private func tileMaterial(_ p: PanelBox, selected: Bool, hovered: Bool) -> PhysicallyBasedMaterial {
+        var m = PhysicallyBasedMaterial()
+        let parts = p.board.split(separator: ":").map(String.init)
+        let colour = parts.count > 1 ? NSColor(hex: parts[1]) : nil
+        if let texture = tileTexture(p) {
+            let sampler = MTLSamplerDescriptor()
+            sampler.minFilter = .linear
+            sampler.magFilter = .linear
+            sampler.mipFilter = .linear
+            m.baseColor = .init(tint: .white, texture: .init(texture, sampler: .init(sampler)))
+            m.textureCoordinateTransform = .init(scale: [
+                Self.grainRepeat / Float(p.width / 1000),
+                Self.grainRepeat / Float(p.height / 1000),
+            ])
+        } else {
+            m.baseColor = .init(tint: colour ?? Theme.carcass)
+        }
+        m.roughness = 0.35
+        if selected || hovered {
+            m.emissiveColor = .init(color: NSColor(hex: 0xE8845E))
+            m.emissiveIntensity = hovered ? 0.6 : 0.06
+        }
+        return m
+    }
+
+    private func tileTexture(_ p: PanelBox) -> TextureResource? {
+        let key = "\(p.board)|\(p.width)|\(p.height)"
+        if let t = grainTextures[key] { return t }
+        guard !loading.contains(key), let image = Self.tilePicture(p) else { return nil }
+        loading.insert(key)
+        Task {
+            let t = try? await TextureResource(image: image, options: .init(semantic: .color, mipmapsMode: .allocateAndGenerateAll))
+            grainTextures[key] = t
+            loading.remove(key)
+            onTextureLoaded?()
+        }
+        return nil
+    }
+
+    /// The field drawn at up to 2 pixels a millimetre, within what a texture can hold.
+    static func tilePicture(_ p: PanelBox) -> CGImage? {
+        let f = p.board.split(separator: ":").map(String.init)
+        guard f.count == 7, p.width > 0, p.height > 0,
+              let tile = NSColor(hex: f[1])?.usingColorSpace(.sRGB),
+              let grout = NSColor(hex: f[2])?.usingColorSpace(.sRGB)
+        else { return nil }
+        let scale = min(2, 4096 / max(p.width, p.height))
+        let w = Int(p.width * scale), h = Int(p.height * scale)
+        guard let ctx = CGContext(data: nil, width: w, height: h, bitsPerComponent: 8, bytesPerRow: 0,
+                                  space: CGColorSpace(name: CGColorSpace.sRGB)!,
+                                  bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)
+        else { return nil }
+        ctx.setFillColor(grout.cgColor)
+        ctx.fill(CGRect(x: 0, y: 0, width: w, height: h))
+        ctx.setFillColor(tile.cgColor)
+        for t in tileRects(board: p.board, width: p.width, height: p.height) {
+            ctx.fill(CGRect(x: t.x * scale, y: t.z * scale, width: t.width * scale, height: t.height * scale))
+        }
+        return ctx.makeImage()
     }
 
     /// A handle's metal, by its finish's name, or by a measured `#RRGGBB` from the catalog.

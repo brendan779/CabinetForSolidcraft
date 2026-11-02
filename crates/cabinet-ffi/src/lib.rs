@@ -191,6 +191,58 @@ const HANDLE_END: f64 = 15.0;
 /// gripping edge, this far down the face and this proud of it.
 const EDGE_PULL: (f64, f64, f64) = (150.0, 25.0, 3.0);
 
+/// A tiled field's spec as a panel's board: `tile:<tile colour>:<grout colour>:<w>:<h>:<grout>:<pattern>`.
+fn tile_board(s: &cabinet_core::tiling::TileSpec) -> String {
+    let pattern = if s.pattern == cabinet_core::tiling::TilePattern::Brick {
+        "brick"
+    } else {
+        "stack"
+    };
+    format!(
+        "tile:{}:{}:{}:{}:{}:{pattern}",
+        s.colour, s.grout_colour, s.tile_width, s.tile_height, s.grout
+    )
+}
+
+/// One tile on a field, for the viewport's picture of it.
+#[derive(uniffi::Record)]
+pub struct TileRectRecord {
+    pub x: f64,
+    pub z: f64,
+    pub width: f64,
+    pub height: f64,
+}
+
+/// The tiles of a field drawn from its panel's board, whole and cut, from its bottom left corner.
+#[uniffi::export]
+pub fn tile_rects(board: String, width: f64, height: f64) -> Vec<TileRectRecord> {
+    let f: Vec<&str> = board.split(':').collect();
+    let [_, colour, grout_colour, w, h, g, pattern] = f[..] else {
+        return Vec::new();
+    };
+    let spec = cabinet_core::tiling::TileSpec {
+        tile_width: w.parse().unwrap_or(0.0),
+        tile_height: h.parse().unwrap_or(0.0),
+        grout: g.parse().unwrap_or(0.0),
+        pattern: if pattern == "brick" {
+            cabinet_core::tiling::TilePattern::Brick
+        } else {
+            cabinet_core::tiling::TilePattern::Stack
+        },
+        colour: colour.into(),
+        grout_colour: grout_colour.into(),
+    };
+    spec.layout(width, height)
+        .into_iter()
+        .map(|t| TileRectRecord {
+            x: t.x,
+            z: t.z,
+            width: t.width,
+            height: t.height,
+        })
+        .collect()
+}
+
 /// A job's items in the sidebar's order: cabinets (cabinet JSON) and the fillers and end panels
 /// between them (run item JSON, `type` `filler` or `end_panel`). Cabinets named in `placed` keep
 /// their own position; everything else is one run along X from the origin.
@@ -205,7 +257,8 @@ fn parse_item(json: &str) -> Result<RunItem, CoreError> {
     let v: serde_json::Value = serde_json::from_str(json).map_err(invalid)?;
     match v.get("type").and_then(|t| t.as_str()) {
         Some(
-            "filler" | "end_panel" | "benchtop" | "floating_shelf" | "moulding" | "walls" | "gap",
+            "filler" | "end_panel" | "benchtop" | "floating_shelf" | "moulding" | "walls" | "gap"
+            | "splashback",
         ) => serde_json::from_value(v).map_err(invalid),
         _ => Ok(RunItem::Cabinet(Box::new(
             serde_json::from_value(v).map_err(invalid)?,
@@ -224,6 +277,7 @@ fn item_id(item: &RunItem) -> &str {
         RunItem::Moulding(m) => &m.id,
         RunItem::Walls(w) => &w.id,
         RunItem::Gap(g) => &g.id,
+        RunItem::Splashback(s) => &s.id,
     }
 }
 
@@ -955,6 +1009,36 @@ fn summary(list: PartList) -> BuildSummary {
             tilt: Vec::new(),
             mesh,
             mesh_transform,
+        });
+    }
+    // Tiled stretches of wall: the viewport draws their joints from the board's spec.
+    for f in &list.tile_fields {
+        panels.push(PanelBox {
+            name: f.name.clone(),
+            role: if f.spec.is_sheet() {
+                "Splashback"
+            } else {
+                "Tiles"
+            }
+            .into(),
+            x: f.bounds.min.x,
+            y: f.bounds.min.y,
+            z: f.bounds.min.z,
+            width: f.bounds.size.x,
+            depth: f.bounds.size.y,
+            height: f.bounds.size.z,
+            is_front: false,
+            hinged: String::new(),
+            hinge_x: 0.0,
+            hinge_y: 0.0,
+            board: tile_board(&f.spec),
+            grain: String::new(),
+            rebate: Vec::new(),
+            bevel: Vec::new(),
+            openings: Vec::new(),
+            tilt: Vec::new(),
+            mesh: String::new(),
+            mesh_transform: Vec::new(),
         });
     }
     // Edge pulls have no screw holes: a lip centred on the gripping edge the core places them

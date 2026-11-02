@@ -6,6 +6,7 @@
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
+use cabinet_core::geom::Vec3;
 use cabinet_core::{Cabinet, CabinetKind, build_cabinet};
 use serde_json::{Value, json};
 use solidcraft_bridge::{Detail, emit_cabinet, find_existing, replace_cabinet};
@@ -1065,4 +1066,37 @@ fn abi_handle_models_land_on_their_fronts_in_a_built_cabinet() {
         assert!(hit, "{}: {want:?} not on {meshes:?}", m.name);
         assert!(t[3] > 1.0 && t[11] > 100.0, "{}: at the origin", m.name);
     }
+}
+
+#[test]
+fn a_tiled_splashback_builds_with_a_body_for_each_tile() {
+    use cabinet_core::run::{Run, RunItem, Splashback, build_run};
+    use cabinet_core::tiling::{TilePattern, TileSpec};
+    let Some(cli) = cli() else {
+        return;
+    };
+    let run_items = Run {
+        origin: Vec3::new(0.0, 0.0, 0.0),
+        items: vec![
+            RunItem::Cabinet(Box::new(Cabinet::new("B01", CabinetKind::Base))),
+            RunItem::Splashback(Splashback {
+                id: "S1".into(),
+                spec: TileSpec {
+                    tile_width: 200.0,
+                    tile_height: 100.0,
+                    grout: 2.0,
+                    pattern: TilePattern::Brick,
+                    colour: "#F2EFE8".into(),
+                    grout_colour: "#555555".into(),
+                },
+                thickness: 10.0,
+            }),
+        ],
+    };
+    let lists = build_run(&run_items).unwrap();
+    let field = lists[1].tile_fields[0].clone();
+    let commands = emit_cabinet(&lists[1], Detail::Design, None);
+    let bodies = bounds(&cli, "tiled", &commands);
+    let tiles = field.spec.layout(field.bounds.size.x, field.bounds.size.z);
+    assert_eq!(bodies.len(), tiles.len() + 1, "one bed and every tile");
 }

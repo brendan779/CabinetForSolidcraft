@@ -51,10 +51,37 @@ struct CabinetDoc: Identifiable, Hashable, Codable {
         case "floating_shelf": #"{"id":"\#(id)","type":"floating_shelf","width":900,"depth":250,"thickness":40,"height":1500}"#
         case "cornice", "light_rail": #"{"id":"\#(id)","type":"moulding","kind":"\#(type)","height":60,"returns":true}"#
         case "gap": #"{"id":"\#(id)","type":"gap","width":600,"line":"upper"}"#
+        case "splashback": ##"{"id":"\##(id)","type":"splashback","tile_width":300,"tile_height":75,"grout":2,"pattern":"stack","colour":"#F2EFE8","grout_colour":"#B9B4AA","thickness":10}"##
         case "walls": #"{"id":"\#(id)","type":"walls","left":true,"right":false,"length":3600,"height":2400,"left_run":600,"right_run":600,"offset":0}"#
         default: #"{"id":"\#(id)","scribe":20,"to_floor":true,"type":"end_panel"}"#
         }
         return CabinetDoc(id: id, json: json)
+    }
+
+    // A splashback's finish. A tile width of 0 is one sheet with no joints.
+    var tileWidth: Double {
+        get { number("tile_width") }
+        set { setNumber("tile_width", newValue) }
+    }
+    var tileHeight: Double {
+        get { number("tile_height") }
+        set { setNumber("tile_height", newValue) }
+    }
+    var grout: Double {
+        get { number("grout") }
+        set { setNumber("grout", newValue) }
+    }
+    var tilePattern: String {
+        get { object["pattern"] as? String ?? "stack" }
+        set { update { $0["pattern"] = newValue } }
+    }
+    var tileColour: String {
+        get { object["colour"] as? String ?? "#F2EFE8" }
+        set { update { $0["colour"] = newValue } }
+    }
+    var groutColour: String {
+        get { object["grout_colour"] as? String ?? "#B9B4AA" }
+        set { update { $0["grout_colour"] = newValue } }
     }
 
     /// Return walls: at the run's left and right ends, and the gap between them (0: not measured).
@@ -757,6 +784,7 @@ final class ProjectModel {
         case "cornice": "CO"
         case "light_rail": "LR"
         case "walls": "WL"
+        case "splashback": "SB"
         case "gap": "G"
         default: "E"
         }
@@ -768,7 +796,7 @@ final class ProjectModel {
             piece.gapIsUpper = false
         }
         // A benchtop or moulding takes no place in the run: it goes last.
-        let at = ["benchtop", "cornice", "light_rail", "walls"].contains(type)
+        let at = ["benchtop", "cornice", "light_rail", "walls", "splashback"].contains(type)
             ? cabinets.count
             : cabinets.firstIndex { $0.id == selection }.map { $0 + 1 } ?? 0
         withAnimation(.snappy) {
@@ -1409,6 +1437,7 @@ extension CabinetDoc {
         case "cornice": "Cornice"
         case "light_rail": "Light rail"
         case "walls": "Return walls"
+        case "splashback": "Splashback"
         case "gap": "Gap"
         default: kind.capitalized
         }
@@ -1434,6 +1463,7 @@ extension CabinetDoc {
         case "cornice": "rectangle.topthird.inset.filled"
         case "light_rail": "rectangle.bottomthird.inset.filled"
         case "walls": "square.leftthird.inset.filled"
+        case "splashback": "square.grid.3x3.fill"
         case "gap": "square.dashed"
         default: "cube"
         }

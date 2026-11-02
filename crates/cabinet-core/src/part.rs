@@ -406,6 +406,9 @@ pub struct PartList {
     /// it is cut; this turns it into place.
     #[serde(default, skip_serializing_if = "std::collections::BTreeMap::is_empty")]
     pub tilts: std::collections::BTreeMap<String, Tilt>,
+    /// Tiled stretches of wall. Not parts: nothing here is cut from board or drawn on a cut sheet.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub tile_fields: Vec<crate::tiling::TileField>,
 }
 
 /// A turn about a line across the cabinet (along X): the back of the board rises by `degrees`.
