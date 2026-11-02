@@ -3487,7 +3487,10 @@ impl<'a> Builder<'a> {
         let mut cups = Vec::new();
         for &x in &xs {
             let r = hinge_cup.0 / 2.0;
-            cups.push((upper_name.clone(), top - tb - r, hinge_cup));
+            // On an inset front the cup would fall above its top edge: nothing to drill.
+            if tb >= 0.0 {
+                cups.push((upper_name.clone(), top - tb - r, hinge_cup));
+            }
             let rc = centre_cup.0 / 2.0;
             cups.push((upper_name.clone(), upper.min.z + tb_centre + rc, centre_cup));
             cups.push((
@@ -7493,6 +7496,145 @@ mod tests {
             }
         }
         assert!(failures.is_empty(), "{failures:#?}");
+    }
+
+    /// Every kind of front, in every mounting and style, with and without a drawer frame: the side
+    /// boards reach the fronts' face, nothing stands in front of it, and nothing clashes.
+    #[test]
+    fn side_boards_meet_every_type_of_front() {
+        use crate::model::{DoorOverlay, DoorStyle, DrawerFrame, HandlePlace, LiftKind};
+        let door = || FrontLayout::Door {
+            hinge_side: HingeSide::Left,
+        };
+        let drawers = || FrontLayout::Drawers {
+            ratios: vec![1.0, 1.0, 2.0],
+        };
+        let row = |front: SectionFront| Section {
+            height: 0.0,
+            front,
+            ..serde_json::from_str(r#"{}"#).unwrap()
+        };
+        let layouts: Vec<(&str, FrontLayout)> = vec![
+            ("door", door()),
+            ("pair", FrontLayout::DoorPair),
+            ("drawers", drawers()),
+            ("open", FrontLayout::Open),
+            (
+                "lift",
+                FrontLayout::Lift {
+                    kind: LiftKind::default(),
+                    handle_weight: 0.5,
+                },
+            ),
+            ("bifold", FrontLayout::BiFoldLift { handle_weight: 0.5 }),
+            (
+                "sections",
+                FrontLayout::Sections {
+                    columns: vec![
+                        SectionColumn {
+                            width: 0.0,
+                            rows: vec![row(SectionFront::DoorPair), row(SectionFront::Open)],
+                        },
+                        SectionColumn {
+                            width: 0.0,
+                            rows: vec![row(SectionFront::Drawers {
+                                count: 2,
+                                ratios: Vec::new(),
+                                system: None,
+                                box_height: Default::default(),
+                                nominal_length: Default::default(),
+                            })],
+                        },
+                    ],
+                },
+            ),
+        ];
+        let mut failures = Vec::new();
+        for (name, layout) in &layouts {
+            for overlay in [DoorOverlay::Full, DoorOverlay::Half, DoorOverlay::Inset] {
+                for frame in [DrawerFrame::None, DrawerFrame::Board] {
+                    for style in [DoorStyle::Slab, DoorStyle::Shaker] {
+                        for place in [HandlePlace::Corner, HandlePlace::Sharknose] {
+                            let mut cab = Cabinet::new("C1", CabinetKind::Tall);
+                            cab.height = 1200.0;
+                            cab.width = 900.0;
+                            cab.fronts = layout.clone();
+                            cab.standard.overlay = overlay;
+                            cab.standard.drawer_frame = frame;
+                            cab.standard.door_style = style;
+                            cab.standard.handle_place = place;
+                            cab.exposed.left = true;
+                            let what = format!("{name} {overlay:?} {frame:?} {style:?} {place:?}");
+                            let list = match build_cabinet(&cab) {
+                                Ok(l) => l,
+                                Err(e) => {
+                                    failures.push(format!("{what}: does not build: {e}"));
+                                    continue;
+                                }
+                            };
+                            let fronts = || {
+                                list.parts.iter().filter(|p| {
+                                    matches!(
+                                        p.role,
+                                        PartRole::Door
+                                            | PartRole::DrawerFront
+                                            | PartRole::LiftFront
+                                            | PartRole::FrameStile
+                                            | PartRole::FrameRail
+                                    )
+                                })
+                            };
+                            let face = fronts().map(|p| p.bounds.min.y).fold(f64::MAX, f64::min);
+                            let carcass = list.part("C1.LeftSide").unwrap().bounds.min.y;
+                            let expect = if face == f64::MAX { carcass } else { face };
+                            let board = list.part("C1.SeenEndLeft").unwrap();
+                            if (board.bounds.min.y - expect).abs() > 1e-6 {
+                                failures.push(format!(
+                                    "{what}: board at {} but the face at {expect}",
+                                    board.bounds.min.y
+                                ));
+                            }
+                            for p in list.parts.iter().filter(|p| p.bounds.min.y < expect - 1e-6) {
+                                failures.push(format!(
+                                    "{what}: {} at {} proud of {expect}",
+                                    p.name, p.bounds.min.y
+                                ));
+                            }
+                            for w in list.warnings.iter().filter(|w| w.starts_with("clash")) {
+                                failures.push(format!("{what}: {w}"));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        failures.sort();
+        failures.dedup();
+        assert!(
+            failures.is_empty(),
+            "{} failures\n{}",
+            failures.len(),
+            failures.join("\n")
+        );
+    }
+
+    #[test]
+    fn an_inset_bi_fold_warns_instead_of_drilling_above_its_top_edge() {
+        let mut cab = Cabinet::new("W01", CabinetKind::Wall);
+        cab.width = 900.0;
+        cab.fronts = FrontLayout::BiFoldLift { handle_weight: 0.4 };
+        cab.standard.overlay = crate::model::DoorOverlay::Inset;
+        let list = build_cabinet(&cab).unwrap();
+        assert!(
+            list.warnings.iter().any(|w| w.contains("120° hinges")),
+            "{:?}",
+            list.warnings
+        );
+        assert!(
+            !list.warnings.iter().any(|w| w.starts_with("clash")),
+            "{:?}",
+            list.warnings
+        );
     }
 
     #[test]
