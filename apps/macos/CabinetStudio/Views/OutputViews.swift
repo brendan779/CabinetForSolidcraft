@@ -2,6 +2,20 @@ import SwiftUI
 import UniformTypeIdentifiers
 import WebKit
 
+/// The bar under a workspace's content: what it adds up to on the left, its actions on the right.
+struct ActionBar<Content: View>: View {
+    @ViewBuilder var content: Content
+
+    var body: some View {
+        HStack(spacing: 10) { content }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .frame(minWidth: 0, maxWidth: .infinity)
+            .background(Theme.strip)
+            .overlay(alignment: .top) { Theme.hairline.frame(height: 1) }
+    }
+}
+
 /// The Cut List workspace: the parts to cut, or the hardware to order.
 struct CutListView: View {
     @State private var showing = "Parts"
@@ -24,9 +38,10 @@ struct CutListView: View {
                 .help("Parts to cut, the parts nested on stock sheets, hardware to order, what the job costs, or the run drawn from the front")
                 Spacer()
             }
-            .padding(.horizontal, 10)
-            .padding(.vertical, 6)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
             .background(Theme.strip)
+            .overlay(alignment: .bottom) { Theme.hairline.frame(height: 1) }
             switch showing {
             case "Parts": PartsListView()
             case "Sheets": NestingView()
@@ -57,7 +72,7 @@ struct ElevationView: View {
                 }
             }
             .frame(minWidth: 0, maxWidth: .infinity, maxHeight: .infinity)
-            HStack(spacing: 10) {
+            ActionBar {
                 Spacer(minLength: 0)
                 Button("PDF…", systemImage: "doc.richtext") {
                     save("elevation", .pdf) { try elevationPdf(items: project.jobItems, job: project.jobName) }
@@ -81,8 +96,6 @@ struct ElevationView: View {
                 .disabled(makingStep)
                 .help("The whole job in 3D as a STEP file, for any CAD program, at the detail chosen in the SolidCraft menu. Panels only: suppliers' hardware models stay out.")
             }
-            .padding(8)
-            .background(Theme.strip)
         }
         .fileExporter(isPresented: Binding(get: { export != nil }, set: { if !$0 { export = nil } }),
                       document: export?.doc, contentType: export?.type ?? .data,
@@ -202,9 +215,11 @@ struct NestingView: View {
                     .help("Offcuts kept from earlier jobs: nest on them first, and after cutting this job keep its leftovers (the kept offcuts it used are taken off)")
                 }
             }
-            .padding(10)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
             .frame(minWidth: 0, maxWidth: .infinity)
             .background(Theme.strip)
+            .overlay(alignment: .top) { Theme.hairline.frame(height: 1) }
         }
         .onChange(of: pages.count) { page = min(page, max(0, pages.count - 1)) }
         .fileExporter(isPresented: Binding(get: { export != nil }, set: { if !$0 { export = nil } }),
@@ -312,8 +327,7 @@ struct QuoteView: View {
                 .width(80)
                 TableColumn("Total") { Text(String(format: "%.2f", $0.total)).monospacedDigit() }.width(80)
             }
-            .padding(.bottom, StatusBar.height)
-            HStack(spacing: 12) {
+            ActionBar {
                 if let q {
                     Text("Cost \(money(q.cost)) · markup \(money(q.markup)) · tax \(money(q.tax)) · **\(q.currency) \(money(q.total))**")
                         .monospacedDigit()
@@ -333,9 +347,6 @@ struct QuoteView: View {
                 .fixedSize()
                 .help("The costing line by line, or the customer's quote: a price per cabinet, tax included")
             }
-            .padding(10)
-            .frame(minWidth: 0, maxWidth: .infinity)
-            .background(Theme.strip)
         }
         .fileExporter(isPresented: Binding(get: { export != nil }, set: { if !$0 { export = nil } }),
                       document: export, contentType: .pdf,
@@ -439,8 +450,7 @@ struct HardwareListView: View {
                 TableColumn("Item") { Text($0.item).monospaced().foregroundStyle(.secondary) }
                 TableColumn("Cabinets", value: \.cabinets).width(120)
             }
-            .padding(.bottom, StatusBar.height)
-            HStack {
+            ActionBar {
                 let missing = rows.filter { $0.brand.isEmpty }.count
                 Text("\(rows.reduce(0) { $0 + Int($1.quantity) }) items in \(rows.count) lines"
                      + (missing > 0 ? " · \(missing) without an article number yet" : ""))
@@ -449,8 +459,6 @@ struct HardwareListView: View {
                 Button("Export CSV…", systemImage: "square.and.arrow.up") { make(pdf: false) }
                 Button("Export PDF…", systemImage: "doc.richtext") { make(pdf: true) }
             }
-            .padding(10)
-            .background(Theme.strip)
         }
         .fileExporter(isPresented: Binding(get: { export != nil }, set: { if !$0 { export = nil } }),
                       document: export?.doc, contentType: export?.type ?? .data,
@@ -492,18 +500,17 @@ struct PartsListView: View {
         let rows = self.rows
         VStack(spacing: 0) {
             Table(rows, sortOrder: $sort) {
-                TableColumn("Part", value: \.part) { Text($0.part).monospaced() }
-                TableColumn("Description", value: \.description)
-                TableColumn("Board", value: \.board)
+                TableColumn("Part", value: \.part) { Text($0.part).monospaced() }.width(min: 110, ideal: 140)
+                TableColumn("Description", value: \.description).width(min: 90, ideal: 150)
+                TableColumn("Board", value: \.board).width(min: 90, ideal: 170)
                 TableColumn("T", value: \.thickness) { Text(mm($0.thickness)) }.width(40)
-                TableColumn("Length", value: \.length) { Text(mm($0.length)) }.width(70)
-                TableColumn("Width", value: \.width) { Text(mm($0.width)) }.width(70)
-                TableColumn("Cut L", value: \.cutLength) { Text(mm($0.cutLength)).foregroundStyle(.secondary) }.width(70)
-                TableColumn("Cut W", value: \.cutWidth) { Text(mm($0.cutWidth)).foregroundStyle(.secondary) }.width(70)
-                TableColumn("Edges", value: \.edges).width(90)
+                TableColumn("Length", value: \.length) { Text(mm($0.length)).monospacedDigit() }.width(60)
+                TableColumn("Width", value: \.width) { Text(mm($0.width)).monospacedDigit() }.width(60)
+                TableColumn("Cut L", value: \.cutLength) { Text(mm($0.cutLength)).monospacedDigit().foregroundStyle(.secondary) }.width(60)
+                TableColumn("Cut W", value: \.cutWidth) { Text(mm($0.cutWidth)).monospacedDigit().foregroundStyle(.secondary) }.width(60)
+                TableColumn("Edges", value: \.edges).width(min: 80, ideal: 100)
             }
-            .padding(.bottom, StatusBar.height)
-            HStack {
+            ActionBar {
                 let area = rows.reduce(0) { $0 + $1.length * $1.width } / 1e6
                 let tape = rows.reduce(0) { $0 + $1.edgeMetres }
                 Text("\(rows.count) parts · \(String(format: "%.2f", area)) m² · \(String(format: "%.1f", tape)) m edge tape")
@@ -515,8 +522,6 @@ struct PartsListView: View {
                     export = (DataDocument(data: Data(csv.utf8)), .commaSeparatedText, "\(project.jobName) cut list")
                 }
             }
-            .padding(10)
-            .background(Theme.strip)
         }
         .fileExporter(isPresented: Binding(get: { export != nil }, set: { if !$0 { export = nil } }),
                       document: export?.doc, contentType: export?.type ?? .data,
@@ -598,9 +603,11 @@ struct CutSheetsView: View {
             }
             // The status bar is a safe-area inset AppKit-backed lists and tables here do not see:
             // they stop above it, so their last row (a benchtop's) can be scrolled into view.
+            .scrollContentBackground(.hidden)
+            .background(Theme.panel)
             .padding(.bottom, StatusBar.height)
             .frame(width: 220)
-            Divider()
+            Theme.hairline.frame(width: 1)
             VStack(spacing: 0) {
                 actions
                 Group {
@@ -614,6 +621,11 @@ struct CutSheetsView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
+        }
+        // A sheet from the start, not an empty page.
+        .onAppear {
+            guard part == nil, let first = project.cabinets.first else { return }
+            part = project.build(first)?.panels.first { !$0.board.hasPrefix("handle:") }?.name
         }
         .fileExporter(isPresented: Binding(get: { pdf != nil }, set: { if !$0 { pdf = nil } }),
                       document: pdf?.doc, contentType: .pdf,
@@ -652,14 +664,18 @@ struct CutSheetsView: View {
             buttons.labelStyle(.titleAndIcon)
             buttons.labelStyle(.iconOnly)
         }
-        .padding(.horizontal, 10)
-        .padding(.vertical, 6)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
         .frame(minWidth: 0, maxWidth: .infinity)
         .background(Theme.strip)
+        .overlay(alignment: .bottom) { Theme.hairline.frame(height: 1) }
     }
 
     private var buttons: some View {
         HStack {
+            if let part {
+                Text(part).monospaced().foregroundStyle(.secondary).lineLimit(1)
+            }
             Spacer(minLength: 0)
             Button("Labels…", systemImage: "qrcode") {
                 do {

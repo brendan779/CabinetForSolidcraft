@@ -83,7 +83,8 @@ struct BoardPicker<Accessory: View>: View {
             filters
                 .padding(.horizontal, 14)
                 .padding(.vertical, 10)
-            Divider()
+                .background(Theme.strip)
+            Theme.hairline.frame(height: 1)
             let groups = self.groups
             ScrollView {
                 if groups.isEmpty {

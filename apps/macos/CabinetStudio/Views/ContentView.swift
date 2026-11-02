@@ -21,20 +21,18 @@ struct ContentView: View {
             }
             // Fixed size rules for both split view columns, whatever they show. When a column's
             // minimum followed its content (the Boards grid, or the inspector switching to
-            // "No inspector" without a width), AppKit's split view re-measured endlessly and crashed.
+            // a placeholder without a width), AppKit's split view re-measured endlessly and crashed.
             .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity)
             .background(Theme.panel)
-            .inspector(isPresented: $showInspector) {
-                Group {
-                    if project.workspace == .design {
-                        InspectorView()
-                    } else {
-                        ContentUnavailableView("No inspector", systemImage: "sidebar.right",
-                                               description: Text("Select the Design workspace to edit cabinets."))
-                    }
-                }
-                .background(Theme.panel)
-                .inspectorColumnWidth(min: 300, ideal: 340, max: 420)
+            // Only Design has anything to inspect: the other workspaces get the room. The user's
+            // choice stands for when they come back, so hiding it here must not change it.
+            .inspector(isPresented: Binding(
+                get: { showInspector && project.workspace == .design },
+                set: { if project.workspace == .design { showInspector = $0 } }
+            )) {
+                InspectorView()
+                    .background(Theme.panel)
+                    .inspectorColumnWidth(min: 300, ideal: 340, max: 420)
             }
         }
         .toolbar {
@@ -57,6 +55,7 @@ struct ContentView: View {
                 } label: {
                     Label("Inspector", systemImage: "sidebar.right")
                 }
+                .disabled(project.workspace != .design)
             }
         }
         .toolbarBackground(Theme.appBar, for: .windowToolbar)
