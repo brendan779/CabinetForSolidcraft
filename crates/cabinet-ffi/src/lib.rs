@@ -54,6 +54,9 @@ pub struct PanelBox {
     /// The hinge line (x, y at the front face) the door swings about, when `hinged` is set.
     pub hinge_x: f64,
     pub hinge_y: f64,
+    /// Part of a drawer: it slides out with the drawer in the open view. A shaker drawer front's
+    /// members and its handle go too.
+    pub slides: bool,
     /// Catalog board id, or empty for the standard's generic board.
     pub board: String,
     /// The axis the decor's grain runs along in the cabinet frame (`x`, `y`, `z`), or empty.
@@ -836,19 +839,21 @@ fn summary(list: PartList) -> BuildSummary {
         .iter()
         .map(|p| {
             let (hinged, hinge_x, hinge_y) = hinge(&door_of(p)).unwrap_or_default();
+            let shown = list.visible_bounds(p);
             PanelBox {
                 name: p.name.clone(),
                 role: p.role.label().to_string(),
-                x: p.bounds.min.x,
-                y: p.bounds.min.y,
-                z: p.bounds.min.z,
-                width: list.visible_bounds(p).size.x,
-                depth: list.visible_bounds(p).size.y,
-                height: list.visible_bounds(p).size.z,
+                x: shown.min.x,
+                y: shown.min.y,
+                z: shown.min.z,
+                width: shown.size.x,
+                depth: shown.size.y,
+                height: shown.size.z,
                 is_front: p.role.is_front(),
                 hinged,
                 hinge_x,
                 hinge_y,
+                slides: false,
                 // A framed door's panel with no board of its own looks like its frame.
                 board: if p.board.is_empty() && p.role == cabinet_core::part::PartRole::FramePanel {
                     list.by_role(cabinet_core::part::PartRole::FrameStile)
@@ -1053,6 +1058,7 @@ fn summary(list: PartList) -> BuildSummary {
             hinged,
             hinge_x,
             hinge_y,
+            slides: false,
             board: format!("handle:{finish}"),
             grain: String::new(),
             rebate: Vec::new(),
@@ -1083,6 +1089,7 @@ fn summary(list: PartList) -> BuildSummary {
             hinged: String::new(),
             hinge_x: 0.0,
             hinge_y: 0.0,
+            slides: false,
             board: tile_board(&f.spec),
             grain: String::new(),
             rebate: Vec::new(),
@@ -1134,6 +1141,7 @@ fn summary(list: PartList) -> BuildSummary {
             hinged,
             hinge_x,
             hinge_y,
+            slides: false,
             board: format!("handle:{finish}"),
             grain: String::new(),
             rebate: Vec::new(),
@@ -1190,6 +1198,7 @@ fn summary(list: PartList) -> BuildSummary {
             hinged,
             hinge_x,
             hinge_y,
+            slides: false,
             board: format!("handle:{finish}"),
             grain: String::new(),
             rebate: Vec::new(),
@@ -1199,6 +1208,16 @@ fn summary(list: PartList) -> BuildSummary {
             mesh: String::new(),
             mesh_transform: Vec::new(),
         });
+    }
+    for p in &mut panels {
+        p.slides = match p.role.as_str() {
+            "Drawer front" | "Drawer bottom" | "Drawer back" | "Drawer side"
+            | "Drawer box front" | "Drawer handle" => true,
+            "Frame stile" | "Frame rail" | "Frame panel" => {
+                cabinet_core::part::drawer_number(&p.name).is_some()
+            }
+            _ => false,
+        };
     }
     BuildSummary {
         panels,
@@ -2675,6 +2694,53 @@ mod tests {
                 .iter()
                 .filter(|p| p.role == "Left side")
                 .all(|p| p.hinged.is_empty())
+        );
+    }
+
+    #[test]
+    fn a_shaker_rail_is_drawn_between_its_stiles() {
+        let mut cab = Cabinet::new("B01", cabinet_core::CabinetKind::Base);
+        cab.standard.door_style = cabinet_core::model::DoorStyle::Shaker;
+        let sum = summary(cabinet_core::build_cabinet(&cab).unwrap());
+        let piece = |name: &str| sum.panels.iter().find(|p| p.name == name).unwrap();
+        let (left, right) = (piece("B01.Door1Stile1"), piece("B01.Door1Stile2"));
+        for rail in ["B01.Door1Rail1", "B01.Door1Rail2"] {
+            let rail = piece(rail);
+            assert!(
+                (rail.x - (left.x + left.width)).abs() < 1e-6,
+                "{}",
+                rail.name
+            );
+            assert!(
+                (rail.x + rail.width - right.x).abs() < 1e-6,
+                "{}",
+                rail.name
+            );
+        }
+    }
+
+    #[test]
+    fn a_shaker_drawer_front_slides_out_whole_with_its_drawer() {
+        let mut cab = Cabinet::new("D01", cabinet_core::CabinetKind::DrawerBank);
+        cab.standard.door_style = cabinet_core::model::DoorStyle::Shaker;
+        let sum = summary(cabinet_core::build_cabinet(&cab).unwrap());
+        let front: Vec<&PanelBox> = sum
+            .panels
+            .iter()
+            .filter(|p| p.name.contains(".DrawerFront"))
+            .collect();
+        assert!(front.iter().any(|p| p.role == "Frame stile"));
+        assert!(front.iter().any(|p| p.role == "Drawer handle"));
+        assert!(
+            front.iter().all(|p| p.slides),
+            "every piece of the front goes"
+        );
+        // The carcass stays where it is.
+        assert!(
+            sum.panels
+                .iter()
+                .filter(|p| p.role == "Left side" || p.role == "Bottom")
+                .all(|p| !p.slides)
         );
     }
 
