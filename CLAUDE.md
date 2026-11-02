@@ -28,6 +28,7 @@ scripts/check.sh               # the gate: fmt, clippy -D warnings, tests, app b
 scripts/build-core.sh          # Rust → CabinetCore.xcframework + Swift bindings
 cargo insta review             # accept changed golden part lists / cut sheet snapshots (cargo install cargo-insta)
 cd apps/macos && xcodegen      # regenerate the Xcode project
+scripts/set-version.sh 0.3.0   # new version: on main, GitHub builds and publishes its release
 cargo run -q -p solidcraft-bridge --example emit_base   # live build into the running SolidCraft
 cargo run -q -p solidcraft-bridge --example emit_base -- --script target/run.json \
   && /Applications/SolidCraft.app/Contents/MacOS/solidcraft-cli run target/run.json --out target/run.step  # headless

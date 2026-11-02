@@ -96,7 +96,7 @@ checksum = "fc652a48c352aef3ea3aed32080501cf3ef6ed5da78602a020c991775b0aff04"
 
 [[package]]
 name = "cabinet-catalog"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "serde",
  "serde_json",
@@ -105,7 +105,7 @@ dependencies = [
 
 [[package]]
 name = "cabinet-core"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "cabinet-catalog",
  "insta",
@@ -116,7 +116,7 @@ dependencies = [
 
 [[package]]
 name = "cabinet-ffi"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "cabinet-catalog",
  "cabinet-core",
@@ -129,7 +129,7 @@ dependencies = [
 
 [[package]]
 name = "cabinet-sheets"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "cabinet-core",
  "insta",
@@ -542,7 +542,7 @@ checksum = "e8e2fb0f499abb4d162f2bedad68f5ef91a1682b5a03596ddb67efd37768d100"
 
 [[package]]
 name = "solidcraft-bridge"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "cabinet-core",
  "serde",

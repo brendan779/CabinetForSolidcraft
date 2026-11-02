@@ -1,0 +1,71 @@
+# Builds and publishes a release when main carries a version with no release yet. The version is
+# the workspace's in Cargo.toml: set it with scripts/set-version.sh.
+name: Release
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  version:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.read.outputs.version }}
+      new: ${{ steps.read.outputs.new }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: read
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version=$(sed -nE '/^\[workspace\.package\]/,/^\[/ s/^version = "(.*)"/\1/p' Cargo.toml)
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          if gh release view "v$version" > /dev/null 2>&1; then
+            echo "new=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "new=true" >> "$GITHUB_OUTPUT"
+          fi
+  release:
+    needs: version
+    if: needs.version.outputs.new == 'true'
+    runs-on: macos-latest
+    env:
+      VERSION: ${{ needs.version.outputs.version }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Tools
+        run: |
+          brew install xcodegen cargo-deny
+          rustup default stable
+          rustup component add rustfmt clippy
+      - name: Check
+        run: scripts/check.sh
+      - name: Build
+        working-directory: apps/macos
+        run: |
+          xcodegen -q
+          xcodebuild -project CabinetStudio.xcodeproj -scheme CabinetStudio \
+            -configuration Release -derivedDataPath build \
+            MARKETING_VERSION="$VERSION" CURRENT_PROJECT_VERSION="$GITHUB_RUN_NUMBER" \
+            ONLY_ACTIVE_ARCH=NO build
+      - name: Package
+        run: |
+          ditto -c -k --keepParent "apps/macos/build/Build/Products/Release/Cabinet Studio.app" \
+            "Cabinet-Studio-$VERSION.zip"
+          shasum -a 256 "Cabinet-Studio-$VERSION.zip" > "Cabinet-Studio-$VERSION.zip.sha256"
+      - name: Publish
+        run: |
+          cat > notes.md <<NOTES
+          Unzip and move **Cabinet Studio** to Applications. Needs macOS 15 or later.
+
+          The app isn't notarized. The first time, Control-click it and choose Open.
+
+          Supplier CAD isn't included: the app draws stand-ins until you point it at your own
+          supplier folder.
+          NOTES
+          gh release create "v$VERSION" "Cabinet-Studio-$VERSION.zip" \
+            "Cabinet-Studio-$VERSION.zip.sha256" \
+            --title "Cabinet Studio $VERSION" --target "$GITHUB_SHA" \
+            --notes-file notes.md --generate-notes
