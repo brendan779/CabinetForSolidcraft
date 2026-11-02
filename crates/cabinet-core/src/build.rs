@@ -4773,6 +4773,7 @@ impl<'a> Builder<'a> {
         let glass_style = s.door_style == DoorStyle::GlassFrame;
         let front_board = s.front_board.clone();
         let panel_board = s.shaker_panel_board.clone();
+        let s_grain = s.front_grain;
         let (f, p, g, play) = (
             s.shaker_frame_width,
             s.shaker_panel_thickness,
@@ -4883,7 +4884,14 @@ impl<'a> Builder<'a> {
                     role,
                     bounds,
                     thickness_axis: ta,
-                    grain_axis: Some(grain),
+                    // A chosen direction turns the panel; a frame's members run along their length.
+                    grain_axis: if role == PartRole::FramePanel
+                        && matches!(s_grain, FrontGrain::Upright | FrontGrain::Across)
+                    {
+                        front.grain_axis.or(Some(grain))
+                    } else {
+                        Some(grain)
+                    },
                     board: if role == PartRole::FramePanel {
                         panel_board.clone()
                     } else {
@@ -11446,6 +11454,119 @@ mod tests {
         assert_eq!(panel(&cab), "");
         cab.standard.shaker_panel_board = "panel".into();
         assert_eq!(panel(&cab), "panel");
+    }
+
+    #[test]
+    fn a_chosen_grain_turns_a_shaker_panel_and_leaves_its_frame_alone() {
+        let axis = |g: FrontGrain| {
+            let mut cab = Cabinet::new("B01", CabinetKind::Base);
+            cab.standard.door_style = DoorStyle::Shaker;
+            cab.standard.front_grain = g;
+            let list = build_cabinet(&cab).unwrap();
+            let of = |r| list.by_role(r).next().unwrap().grain_axis;
+            (
+                of(PartRole::FramePanel),
+                of(PartRole::FrameStile),
+                of(PartRole::FrameRail),
+            )
+        };
+        assert_eq!(axis(FrontGrain::Upright).0, Some(Axis::Z));
+        assert_eq!(axis(FrontGrain::Across).0, Some(Axis::X));
+        assert_eq!(axis(FrontGrain::Across).1, Some(Axis::Z));
+        assert_eq!(axis(FrontGrain::Across).2, Some(Axis::X));
+    }
+
+    #[test]
+    fn a_niche_at_the_bottom_stands_on_the_floor_with_no_plinth_or_legs() {
+        let mut cab = Cabinet::new("T01", CabinetKind::Tall);
+        cab.standard.toe_kick = ToeKick::LegsAndPlinth;
+        cab.fronts = FrontLayout::Stack {
+            sections: vec![
+                StackSection {
+                    kind: SectionKind::Niche,
+                    height: 0.0,
+                },
+                StackSection {
+                    kind: SectionKind::Door {
+                        hinge_side: HingeSide::Left,
+                    },
+                    height: 350.0,
+                },
+            ],
+        };
+        for cab in [cab.clone(), cab.clone().sectioned()] {
+            let list = build_cabinet(&cab).unwrap();
+            assert!(list.by_role(PartRole::Plinth).next().is_none());
+            assert!(
+                !list
+                    .hardware
+                    .iter()
+                    .any(|h| h.part.contains("Leg") || h.item.contains("leg"))
+            );
+            assert_eq!(list.part("T01.LeftSide").unwrap().bounds.min.z, 0.0);
+        }
+    }
+
+    #[test]
+    fn a_niche_higher_up_keeps_the_plinth() {
+        let mut cab = Cabinet::new("T01", CabinetKind::Tall);
+        cab.standard.toe_kick = ToeKick::LegsAndPlinth;
+        cab.fronts = FrontLayout::Stack {
+            sections: vec![
+                StackSection {
+                    kind: SectionKind::Drawers { count: 2 },
+                    height: 0.0,
+                },
+                StackSection {
+                    kind: SectionKind::Niche,
+                    height: 600.0,
+                },
+            ],
+        };
+        assert!(
+            build_cabinet(&cab)
+                .unwrap()
+                .by_role(PartRole::Plinth)
+                .next()
+                .is_some()
+        );
+    }
+
+    #[test]
+    fn a_tall_cabinets_section_set_from_the_floor_lines_up_with_a_base_cabinet() {
+        let base = build_cabinet(&Cabinet::new("B01", CabinetKind::Base)).unwrap();
+        let top = base.by_role(PartRole::Door).next().unwrap().bounds.max().z;
+        let mut tall = Cabinet::new("T01", CabinetKind::Tall);
+        let floor = crate::splits::floor_allowance(&tall);
+        let row = |height, hinge_side| Section {
+            height,
+            front: SectionFront::Door { hinge_side },
+            inside: Default::default(),
+            shelf_above: true,
+            opening: None,
+        };
+        tall.fronts = FrontLayout::Sections {
+            columns: vec![SectionColumn {
+                width: 0.0,
+                rows: vec![
+                    row(
+                        base.parts
+                            .iter()
+                            .map(|p| p.bounds.max().z)
+                            .fold(0.0, f64::max)
+                            - floor,
+                        HingeSide::Left,
+                    ),
+                    row(0.0, HingeSide::Left),
+                ],
+            }],
+        };
+        let list = build_cabinet(&tall).unwrap();
+        let lowest = list
+            .by_role(PartRole::Door)
+            .map(|d| d.bounds.max().z)
+            .fold(f64::MAX, f64::min);
+        assert!((lowest - top).abs() < 1e-6, "{lowest} vs {top}");
     }
 
     #[test]

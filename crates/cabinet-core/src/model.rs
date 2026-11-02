@@ -472,6 +472,25 @@ impl Cabinet {
         self
     }
 
+    /// Every column's lowest section is a niche: a fridge rolls in from the floor, so the cabinet
+    /// stands on the floor with no plinth or legs.
+    pub fn niche_at_the_floor(&self) -> bool {
+        match &self.fronts {
+            FrontLayout::Stack { sections } => sections
+                .first()
+                .is_some_and(|s| s.kind == SectionKind::Niche),
+            FrontLayout::Sections { columns } => {
+                !columns.is_empty()
+                    && columns.iter().all(|c| {
+                        c.rows
+                            .first()
+                            .is_some_and(|r| r.front == SectionFront::Niche)
+                    })
+            }
+            _ => false,
+        }
+    }
+
     pub fn has_toe_kick(&self) -> bool {
         matches!(
             self.kind,
@@ -483,6 +502,7 @@ impl Cabinet {
                 | CabinetKind::Sink
                 | CabinetKind::Wardrobe
         ) && self.standard.toe_kick != ToeKick::None
+            && !self.niche_at_the_floor()
     }
 }
 

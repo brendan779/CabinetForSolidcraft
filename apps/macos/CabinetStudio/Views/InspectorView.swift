@@ -204,7 +204,12 @@ struct InspectorView: View {
 
     @ViewBuilder private func fittingsTab(_ cab: CabinetDoc) -> some View {
         options(cab, in: .fittings)
-        LightsSection(cab: cab)
+        // Lighting is on hold (LIGHT-HOLD): a job saved with strips can still take them off.
+        if !cab.lights.isEmpty {
+            Button("Remove this cabinet's lights") {
+                withAnimation(.snappy) { var c = cab; c.lights = []; project.selected = c }
+            }
+        }
         if let b = project.build(cab), !b.hardware.isEmpty {
             HardwareSection(items: b.hardware)
         }
@@ -489,25 +494,10 @@ struct PieceSection: View {
                 chips("Depth", value: cab.shelfDepth, presets: [200, 250, 300]) { c, v in c.shelfDepth = v }
                 chips("Thick", value: cab.topThickness, presets: [30, 40, 50]) { c, v in c.topThickness = v }
                 chips("Height", value: cab.shelfHeight, presets: [1300, 1400, 1500, 1600]) { c, v in c.shelfHeight = v }
-                HStack(spacing: 6) {
-                    Text("LED").foregroundStyle(.secondary)
-                    Spacer()
-                    ForEach([0.0, 4.8, 9.6], id: \.self) { w in
-                        Button(w == 0 ? "None" : String(format: "%.1f W/m", w)) {
-                            withAnimation(.snappy) { var c = cab; c.shelfLight = w; project.selected = c }
-                        }
-                        .buttonStyle(ChipStyle(selected: abs(cab.shelfLight - w) < 0.05))
-                    }
-                }
+                // Lighting is on hold (LIGHT-HOLD).
                 if cab.shelfLight > 0 {
-                    SectionTitle("LED profile")
-                    LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 6), count: 3), spacing: 6) {
-                        shelfProfileTile(id: "", title: "Bare strip", help: "No profile: the strip stuck under the shelf", surface: true, width: 0, depth: 0)
-                        ForEach(lightProfiles(), id: \.id) { p in
-                            shelfProfileTile(id: p.id, title: p.name.replacingOccurrences(of: "Loox5 profile ", with: ""),
-                                             help: "\(p.name), Häfele \(p.article). \(p.variant)",
-                                             surface: p.surface, width: p.width, depth: p.depth)
-                        }
+                    Button("Remove this shelf's light") {
+                        withAnimation(.snappy) { var c = cab; c.shelfLight = 0; project.selected = c }
                     }
                 }
                 ShelfBoardButton(cab: cab)

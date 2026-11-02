@@ -472,8 +472,12 @@ struct SectionsEditor: View {
         if let s = sectionSplits(json: cab.json), c < s.heights.count, r < s.heights[c].count {
             HStack(spacing: 12) {
                 if s.heights[c].count > 1 {
-                    sizeField("Height", value: s.heights[c][r]) {
-                        setSize($0, of: r, in: s.heights[c], total: s.heightTotal, gap: s.rowGap, column: c)
+                    // The lowest section reads from the floor, as a cabinet's height does, so it
+                    // takes the number of the base cabinet it lines up with. A niche's is its opening.
+                    let fromFloor = r == 0 && s.floor > 0 && columns[c].rows[r].front != "niche"
+                    let floor = fromFloor ? s.floor : 0
+                    sizeField(fromFloor ? "From floor" : "Height", value: s.heights[c][r] + floor) {
+                        setSize($0 - floor, of: r, in: s.heights[c], total: s.heightTotal, gap: s.rowGap, column: c)
                     }
                 }
                 if s.widths.count > 1 {

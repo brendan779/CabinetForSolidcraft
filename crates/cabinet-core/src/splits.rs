@@ -22,6 +22,18 @@ pub struct SplitLayout {
     pub heights: Vec<Vec<f64>>,
 }
 
+/// What a bottom section's fronts height leaves out of its height from the floor: the toe kick
+/// and bottom gap under it, and the gap a base cabinet leaves over its fronts. So a tall cabinet's
+/// section set to 870 from the floor lines up with an 870 base cabinet. 0 with no toe kick.
+pub fn floor_allowance(cab: &Cabinet) -> f64 {
+    let s = &cab.standard;
+    if cab.has_toe_kick() {
+        s.toe_kick_height + s.bottom_gap + s.top_gap
+    } else {
+        0.0
+    }
+}
+
 fn row_asks(rows: &[Section], t: f64, g: f64) -> Vec<f64> {
     rows.iter()
         .map(|r| match r.front {

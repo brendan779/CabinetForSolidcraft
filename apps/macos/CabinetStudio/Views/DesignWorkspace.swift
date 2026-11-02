@@ -402,6 +402,7 @@ struct PartTooltip: View {
 /// Counts for the selected cabinet, floating over the viewport.
 struct BuildBadge: View {
     let summary: BuildSummary
+    @State private var showingNotes = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
@@ -409,10 +410,25 @@ struct BuildBadge: View {
             Label("\(summary.biscuits) biscuits · \(summary.screws) screws", systemImage: "link")
             Label("\(summary.operations) machining ops", systemImage: "circle.grid.cross")
             if !summary.warnings.isEmpty {
-                Label(summary.warnings.count == 1 ? "1 note" : "\(summary.warnings.count) notes",
-                      systemImage: "exclamationmark.bubble")
-                    .foregroundStyle(Theme.warning)
-                    .help(summary.warnings.joined(separator: "\n"))
+                Button { showingNotes.toggle() } label: {
+                    Label(summary.warnings.count == 1 ? "1 note" : "\(summary.warnings.count) notes",
+                          systemImage: "exclamationmark.bubble")
+                        .foregroundStyle(Theme.warning)
+                }
+                .buttonStyle(.plain)
+                .help("Show the notes")
+                .popover(isPresented: $showingNotes, arrowEdge: .trailing) {
+                    ScrollView {
+                        VStack(alignment: .leading, spacing: 8) {
+                            ForEach(summary.warnings, id: \.self) { note in
+                                Text(note).fixedSize(horizontal: false, vertical: true)
+                            }
+                        }
+                        .padding(12)
+                    }
+                    .frame(width: 340)
+                    .frame(maxHeight: 300)
+                }
             }
         }
         .font(.callout)
@@ -863,8 +879,10 @@ final class ViewportScene {
         // The geometry sits off the entity's origin so the origin is the pivot.
         let offset = Self.mid(p) - Self.pivot(p)
         let supplier = supplierHandle(p)
+        // The grain and arch are in the mesh: a change of either makes a new one.
+        let meshKey = supplier?.0 ?? "\(p.grain) \(p.arch)"
         if let e = root.findEntity(named: p.name) as? ModelEntity,
-           shapes[p.name] == [size, offset], meshKeys[p.name] == supplier?.0,
+           shapes[p.name] == [size, offset], meshKeys[p.name] == meshKey,
            handleTints[p.name] == p.board {
             return e
         }
@@ -888,6 +906,8 @@ final class ViewportScene {
         } else {
             let mesh = p.name.hasSuffix("~bevel") && p.bevel.count == 3
                 ? Self.wedgeMesh(p, size: size, by: offset)
+                : p.arch.count == 3
+                ? Self.archedMesh(p, size: size, by: offset)
                 : Self.offsetMesh(size: size, by: offset, grain: Self.grainAxis(p))
             e = ModelEntity(mesh: mesh, materials: [])
         }
@@ -896,7 +916,7 @@ final class ViewportScene {
         e.collision = CollisionComponent(shapes: [ShapeResource.generateBox(size: size).offsetBy(translation: offset)])
         root.addChild(e)
         shapes[p.name] = [size, offset]
-        meshKeys[p.name] = supplier?.0
+        meshKeys[p.name] = meshKey
         handleTints[p.name] = p.board
         return e
     }
@@ -962,6 +982,56 @@ final class ViewportScene {
                 let (j, k) = (UInt32(i), UInt32(i + 1))
                 indices += outward ? [base, base + j, base + k] : [base, base + k, base + j]
             }
+        }
+        var desc = MeshDescriptor()
+        desc.positions = MeshBuffers.Positions(positions)
+        desc.normals = MeshBuffers.Normals(normals)
+        desc.textureCoordinates = MeshBuffers.TextureCoordinates(uvs)
+        desc.primitives = .triangles(indices)
+        return (try? MeshResource.generate(from: [desc])) ?? .generateBox(size: size)
+    }
+
+    /// A door with an arched top: its outline across the front, thick as the door.
+    private static func archedMesh(_ p: PanelBox, size: SIMD3<Float>, by offset: SIMD3<Float>) -> MeshResource {
+        let h = size / 2
+        let steps = 32
+        // Anticlockwise from the viewer: along the bottom, then back across the arc.
+        var outline: [SIMD2<Float>] = [[-h.x, -h.y], [h.x, -h.y]]
+        for i in 0...steps {
+            let x = h.x - size.x * Float(i) / Float(steps)
+            let mm = p.x + p.width / 2 + Double(x) * 1000
+            let run = mm - p.arch[0]
+            let top = p.arch[1] + (p.arch[2] * p.arch[2] - run * run).squareRoot()
+            outline.append([x, min(Float((top - (p.z + p.height / 2)) / 1000), h.y)])
+        }
+        let g = grainAxis(p)
+        var positions: [SIMD3<Float>] = [], normals: [SIMD3<Float>] = [], uvs: [SIMD2<Float>] = []
+        var indices: [UInt32] = []
+        func add(_ face: [SIMD3<Float>], normal n: SIMD3<Float>) {
+            let base = UInt32(positions.count)
+            let axis = abs(n.x) > max(abs(n.y), abs(n.z)) ? 0 : abs(n.y) > abs(n.z) ? 1 : 2
+            var plane = [0, 1, 2].filter { $0 != axis }
+            if let g, plane.contains(g), plane[0] != g { plane.reverse() }
+            for c in face {
+                positions.append(c + offset)
+                normals.append(n)
+                let at = c + h
+                uvs.append([at[plane[0]], at[plane[1]]] / grainRepeat)
+            }
+            let turning = simd_dot(simd_cross(face[1] - face[0], face[2] - face[0]), n) > 0
+            for i in 1..<(face.count - 1) {
+                let (j, k) = (UInt32(i), UInt32(i + 1))
+                indices += turning ? [base, base + j, base + k] : [base, base + k, base + j]
+            }
+        }
+        add(outline.map { [$0.x, $0.y, h.z] }, normal: [0, 0, 1])
+        add(outline.reversed().map { [$0.x, $0.y, -h.z] }, normal: [0, 0, -1])
+        for i in outline.indices {
+            let (a, b) = (outline[i], outline[(i + 1) % outline.count])
+            let edge = b - a
+            guard simd_length(edge) > 1e-6 else { continue }
+            let out = simd_normalize(SIMD2<Float>(edge.y, -edge.x))
+            add([[a.x, a.y, h.z], [a.x, a.y, -h.z], [b.x, b.y, -h.z], [b.x, b.y, h.z]], normal: [out.x, out.y, 0])
         }
         var desc = MeshDescriptor()
         desc.positions = MeshBuffers.Positions(positions)

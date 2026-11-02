@@ -57,6 +57,8 @@ pub struct PanelBox {
     /// Part of a drawer: it slides out with the drawer in the open view. A shaker drawer front's
     /// members and its handle go too.
     pub slides: bool,
+    /// An arched top: the arch's centre x and z and its radius. Empty on a square top.
+    pub arch: Vec<f64>,
     /// Catalog board id, or empty for the standard's generic board.
     pub board: String,
     /// The axis the decor's grain runs along in the cabinet frame (`x`, `y`, `z`), or empty.
@@ -465,12 +467,16 @@ pub struct SectionSplits {
     pub row_gap: f64,
     pub widths: Vec<f64>,
     pub heights: Vec<Vec<f64>>,
+    /// Added to a bottom section's height to give its height from the floor.
+    pub floor: f64,
 }
 
 #[uniffi::export]
 pub fn section_splits(json: String) -> Option<SectionSplits> {
-    let l = cabinet_core::splits::layout(&serde_json::from_str::<Cabinet>(&json).ok()?)?;
+    let cab = serde_json::from_str::<Cabinet>(&json).ok()?;
+    let l = cabinet_core::splits::layout(&cab)?;
     Some(SectionSplits {
+        floor: cabinet_core::splits::floor_allowance(&cab),
         width_total: l.width_total,
         height_total: l.height_total,
         gap: l.gap,
@@ -854,6 +860,18 @@ fn summary(list: PartList) -> BuildSummary {
                 hinge_x,
                 hinge_y,
                 slides: false,
+                arch: list
+                    .operations
+                    .iter()
+                    .find_map(|o| match o {
+                        Operation::Arch {
+                            part,
+                            centre,
+                            radius,
+                        } if *part == p.name => Some(vec![centre.x, centre.z, *radius]),
+                        _ => None,
+                    })
+                    .unwrap_or_default(),
                 // A framed door's panel with no board of its own looks like its frame.
                 board: if p.board.is_empty() && p.role == cabinet_core::part::PartRole::FramePanel {
                     list.by_role(cabinet_core::part::PartRole::FrameStile)
@@ -1059,6 +1077,7 @@ fn summary(list: PartList) -> BuildSummary {
             hinge_x,
             hinge_y,
             slides: false,
+            arch: Vec::new(),
             board: format!("handle:{finish}"),
             grain: String::new(),
             rebate: Vec::new(),
@@ -1090,6 +1109,7 @@ fn summary(list: PartList) -> BuildSummary {
             hinge_x: 0.0,
             hinge_y: 0.0,
             slides: false,
+            arch: Vec::new(),
             board: tile_board(&f.spec),
             grain: String::new(),
             rebate: Vec::new(),
@@ -1142,6 +1162,7 @@ fn summary(list: PartList) -> BuildSummary {
             hinge_x,
             hinge_y,
             slides: false,
+            arch: Vec::new(),
             board: format!("handle:{finish}"),
             grain: String::new(),
             rebate: Vec::new(),
@@ -1199,6 +1220,7 @@ fn summary(list: PartList) -> BuildSummary {
             hinge_x,
             hinge_y,
             slides: false,
+            arch: Vec::new(),
             board: format!("handle:{finish}"),
             grain: String::new(),
             rebate: Vec::new(),
@@ -2742,6 +2764,17 @@ mod tests {
                 .filter(|p| p.role == "Left side" || p.role == "Bottom")
                 .all(|p| !p.slides)
         );
+    }
+
+    #[test]
+    fn an_arched_door_tells_the_viewport_its_arch() {
+        let mut cab = Cabinet::new("W01", cabinet_core::CabinetKind::Wall);
+        cab.arched_top = 60.0;
+        let sum = summary(cabinet_core::build_cabinet(&cab).unwrap());
+        let door = sum.panels.iter().find(|p| p.role == "Door").unwrap();
+        assert_eq!(door.arch.len(), 3);
+        let top = door.arch[1] + door.arch[2];
+        assert!((top - (door.z + door.height)).abs() < 1e-6);
     }
 
     #[test]
