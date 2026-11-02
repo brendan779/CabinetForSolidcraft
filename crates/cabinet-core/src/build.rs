@@ -138,6 +138,11 @@ const SHAKER_PLAY: f64 = 1.0;
 /// Glass frames: the glass, and the rebate at the frame's back that takes it and its bead.
 const GLASS_THICKNESS: f64 = 4.0;
 const GLASS_REBATE_DEPTH: f64 = 12.0;
+/// Our choice: a light's profile runs this far back from the panel's front edge, to light the
+/// bench rather than the wall.
+const LIGHT_PROFILE_SETBACK: f64 = 50.0;
+/// Our choice: the least board to leave behind a routed profile.
+const LIGHT_PROFILE_MIN_LEFT: f64 = 3.0;
 /// Generic until a supplier's shelf support is catalogued (HAF-3).
 pub(crate) const SHELF_SUPPORT: &str = "shelf-support.5mm";
 /// Our choice, not Blum's: an AVENTOS HF bi-fold's end hinges sit this far in from the fronts'
@@ -5246,10 +5251,60 @@ impl<'a> Builder<'a> {
                     strip.length, strip.watts, light.watts_per_metre
                 ),
                 at: Vec3::new(cab.width / 2.0, y, z),
-                part: panel.name,
+                part: panel.name.clone(),
                 quantity: 1,
             });
+            self.light_profile(light, strip.length, &panel);
         }
+    }
+
+    /// A strip's aluminium profile on the panel's underside, near its front edge. A recessed one
+    /// has its groove routed to the catalogue's size, so it is on the cut sheet.
+    fn light_profile(&mut self, light: &crate::model::Light, length: f64, panel: &Part) {
+        if light.profile.is_empty() {
+            return;
+        }
+        let item = match crate::hardware::item(&light.profile) {
+            Ok(item) => item,
+            Err(e) => {
+                self.list.warnings.push(e);
+                return;
+            }
+        };
+        let b = panel.bounds;
+        let y = b.min.y + LIGHT_PROFILE_SETBACK;
+        if item.param("surface").unwrap_or(1.0) == 0.0 {
+            let (Ok(width), Ok(depth)) = (item.param("routing_width"), item.param("routing_depth"))
+            else {
+                return;
+            };
+            if depth > b.size.z - LIGHT_PROFILE_MIN_LEFT {
+                self.list.warnings.push(format!(
+                    "{} needs a {depth:.1} mm deep groove: {:.0} mm thick {} leaves too little. Use a surface mounted profile",
+                    item.family, b.size.z, panel.name
+                ));
+                return;
+            }
+            let x0 = b.center().x - length / 2.0;
+            self.list.operations.push(Operation::Groove {
+                part: panel.name.clone(),
+                bounds: aabb(
+                    x0,
+                    y - width / 2.0,
+                    b.min.z,
+                    x0 + length,
+                    y + width / 2.0,
+                    b.min.z + depth,
+                ),
+            });
+        }
+        self.list.hardware.push(HardwarePlacement {
+            item: item.id.clone(),
+            description: format!("{}, cut to {length:.0} mm", item.family),
+            at: Vec3::new(b.center().x, y, b.min.z),
+            part: panel.name.clone(),
+            quantity: 1,
+        });
     }
 
     /// A sink cabinet's pipe cut-out in the back and its waterproof liner.
@@ -10344,6 +10399,7 @@ mod tests {
             zone,
             voltage: Voltage::V24,
             watts_per_metre: 10.0,
+            profile: String::new(),
         };
         let cases = [
             (
@@ -10413,6 +10469,7 @@ mod tests {
             zone: LightZone::UnderCabinet,
             voltage: Voltage::V12,
             watts_per_metre: 4.8,
+            profile: String::new(),
         }];
         let list = build_cabinet(&cab).unwrap();
         assert!(list.warnings.iter().any(|w| w.contains("does not fit")));
@@ -10879,5 +10936,60 @@ mod tests {
             .filter(|z| *z < shelf.min.z)
             .fold(f64::MIN, f64::max);
         assert!((shelf.min.z - under - SHELF_PIN_DIAMETER / 2.0).abs() < 1e-9);
+    }
+
+    fn lit(profile: &str) -> PartList {
+        let mut cab = Cabinet::new("W01", CabinetKind::Wall);
+        cab.lights = vec![crate::model::Light {
+            zone: crate::model::LightZone::UnderCabinet,
+            voltage: crate::model::Voltage::V24,
+            watts_per_metre: 9.6,
+            profile: profile.into(),
+        }];
+        build_cabinet(&cab).unwrap()
+    }
+
+    #[test]
+    fn a_recessed_light_profile_routes_its_groove_in_the_panels_underside() {
+        let list = lit("hafele.loox5.profile.1103");
+        let bottom = list.part("W01.Bottom").unwrap().bounds;
+        let groove = list
+            .operations
+            .iter()
+            .find_map(|o| match o {
+                // The bottom has a groove for the back as well.
+                Operation::Groove { part, bounds }
+                    if part == "W01.Bottom" && (bounds.size.y - 13.9).abs() < 1e-6 =>
+                {
+                    Some(*bounds)
+                }
+                _ => None,
+            })
+            .expect("a groove");
+        assert_eq!(groove.min.z, bottom.min.z);
+        assert_eq!(groove.size.z, 12.0);
+        assert!((groove.size.y - 13.9).abs() < 1e-6);
+        assert!(
+            list.hardware
+                .iter()
+                .any(|h| h.item == "hafele.loox5.profile.1103")
+        );
+    }
+
+    #[test]
+    fn a_surface_light_profile_cuts_nothing() {
+        let list = lit("hafele.loox5.profile.2190");
+        let grooves = |l: &PartList| {
+            l.operations
+                .iter()
+                .filter(|o| matches!(o, Operation::Groove { part, .. } if part == "W01.Bottom"))
+                .count()
+        };
+        assert_eq!(grooves(&list), grooves(&lit("")));
+        assert!(
+            list.hardware
+                .iter()
+                .any(|h| h.item == "hafele.loox5.profile.2190")
+        );
     }
 }

@@ -517,7 +517,9 @@ struct CabinetDoc: Identifiable, Hashable, Codable {
         if hasLight(zone) {
             lights = lights.filter { $0["zone"] as? String != zone }
         } else {
-            lights.append(["zone": zone, "voltage": lightVoltage, "watts_per_metre": lightWatts])
+            var light: [String: Any] = ["zone": zone, "voltage": lightVoltage, "watts_per_metre": lightWatts]
+            if !lightProfile.isEmpty { light["profile"] = lightProfile }
+            lights.append(light)
         }
     }
 
@@ -530,6 +532,18 @@ struct CabinetDoc: Identifiable, Hashable, Codable {
     var lightWatts: Double {
         get { (lights.first?["watts_per_metre"] as? NSNumber)?.doubleValue ?? 9.6 }
         set { lights = lights.map { var l = $0; l["watts_per_metre"] = newValue; return l } }
+    }
+
+    /// The catalog's aluminium profile every strip of the cabinet sits in; empty for bare strips.
+    var lightProfile: String {
+        get { lights.first?["profile"] as? String ?? "" }
+        set {
+            lights = lights.map {
+                var l = $0
+                l["profile"] = newValue.isEmpty ? nil : newValue
+                return l
+            }
+        }
     }
 
     /// The catalog board id the cabinet uses for `slot` (carcass, front, back); empty for generic.

@@ -1,0 +1,191 @@
+{
+  "brand": "Häfele",
+  "website": "https://www.hafele.com.au",
+  "notes": "Loox5 aluminium profiles for strips. Models in vendor-cad/hafele/lighting are short samples, repeated along the strip. Not verified by a person. Profile 1105 and corner profile 2195 are left out until their way up is confirmed. Drivers are not listed: the extracted catalogue text has no plain 12/24 V driver table.",
+  "items": [
+    {
+      "id": "hafele.loox5.profile.1103",
+      "brand": "Häfele",
+      "article": "833.72.711",
+      "family": "Loox5 profile 1103",
+      "variant": "Recess mounted. Black, anodised, opal diffuser, 5 mm strip",
+      "kind": "other",
+      "parameters": {
+        "routing_width": 13.9,
+        "routing_depth": 12,
+        "surface": 0,
+        "model_along_y": 0,
+        "model_z_min": -11.5,
+        "model_z_max": 0.5,
+        "section": 200,
+        "width": 17
+      },
+      "source": {
+        "url": "https://www.hafele.com.au",
+        "document_date": "Häfele LED Lighting Solutions catalogue, profile pages 35-61; model_* and section measured from Häfele's STEP sample",
+        "retrieved": "2026-11-02",
+        "verified": false
+      }
+    },
+    {
+      "id": "hafele.loox5.profile.1104",
+      "brand": "Häfele",
+      "article": "833.94.103",
+      "family": "Loox5 profile 1104",
+      "variant": "Recess mounted. Black, anodised, opal diffuser, 5 mm strip",
+      "kind": "other",
+      "parameters": {
+        "routing_width": 10.9,
+        "routing_depth": 12,
+        "surface": 0,
+        "model_along_y": 1,
+        "model_z_min": -1,
+        "model_z_max": 12,
+        "section": 100,
+        "width": 14
+      },
+      "source": {
+        "url": "https://www.hafele.com.au",
+        "document_date": "Häfele LED Lighting Solutions catalogue, profile pages 35-61; model_* and section measured from Häfele's STEP sample",
+        "retrieved": "2026-11-02",
+        "verified": false
+      }
+    },
+    {
+      "id": "hafele.loox5.profile.1107",
+      "brand": "Häfele",
+      "article": "833.94.109",
+      "family": "Loox5 profile 1107",
+      "variant": "Recess mounted. Black, anodised, opal diffuser",
+      "kind": "other",
+      "parameters": {
+        "routing_width": 23.5,
+        "routing_depth": 11,
+        "surface": 0,
+        "model_along_y": 1,
+        "model_z_min": -1,
+        "model_z_max": 10,
+        "section": 100,
+        "width": 26.5
+      },
+      "source": {
+        "url": "https://www.hafele.com.au",
+        "document_date": "Häfele LED Lighting Solutions catalogue, profile pages 35-61; model_* and section measured from Häfele's STEP sample",
+        "retrieved": "2026-11-02",
+        "verified": false
+      }
+    },
+    {
+      "id": "hafele.loox5.profile.1190",
+      "brand": "Häfele",
+      "article": "833.72.844",
+      "family": "Loox5 profile 1190",
+      "variant": "Recess mounted. Silver, anodised, opal diffuser",
+      "kind": "other",
+      "parameters": {
+        "routing_width": 18,
+        "routing_depth": 6.5,
+        "surface": 0,
+        "model_along_y": 0,
+        "model_z_min": -9.4,
+        "model_z_max": 0,
+        "section": 200,
+        "width": 18
+      },
+      "source": {
+        "url": "https://www.hafele.com.au",
+        "document_date": "Häfele LED Lighting Solutions catalogue, profile pages 35-61; model_* and section measured from Häfele's STEP sample",
+        "retrieved": "2026-11-02",
+        "verified": false
+      }
+    },
+    {
+      "id": "hafele.loox5.profile.2101",
+      "brand": "Häfele",
+      "article": "833.94.110",
+      "family": "Loox5 profile 2101",
+      "variant": "Surface mounted. Silver, anodised, opal diffuser",
+      "kind": "other",
+      "parameters": {
+        "surface": 1,
+        "model_along_y": 1,
+        "model_z_min": -1,
+        "model_z_max": 10.7,
+        "section": 100,
+        "width": 13
+      },
+      "source": {
+        "url": "https://www.hafele.com.au",
+        "document_date": "Häfele LED Lighting Solutions catalogue, profile pages 35-61; model_* and section measured from Häfele's STEP sample",
+        "retrieved": "2026-11-02",
+        "verified": false
+      }
+    },
+    {
+      "id": "hafele.loox5.profile.2102",
+      "brand": "Häfele",
+      "article": "833.72.757",
+      "family": "Loox5 profile 2102",
+      "variant": "Surface mounted. Black, anodised, opal diffuser",
+      "kind": "other",
+      "parameters": {
+        "surface": 1,
+        "model_along_y": 0,
+        "model_z_min": -1,
+        "model_z_max": 12,
+        "section": 200,
+        "width": 13
+      },
+      "source": {
+        "url": "https://www.hafele.com.au",
+        "document_date": "Häfele LED Lighting Solutions catalogue, profile pages 35-61; model_* and section measured from Häfele's STEP sample",
+        "retrieved": "2026-11-02",
+        "verified": false
+      }
+    },
+    {
+      "id": "hafele.loox5.profile.2190",
+      "brand": "Häfele",
+      "article": "833.72.840",
+      "family": "Loox5 profile 2190",
+      "variant": "Surface mounted. Silver, anodised, opal diffuser",
+      "kind": "other",
+      "parameters": {
+        "surface": 1,
+        "model_along_y": 0,
+        "model_z_min": -9.5,
+        "model_z_max": 0,
+        "section": 200,
+        "width": 18
+      },
+      "source": {
+        "url": "https://www.hafele.com.au",
+        "document_date": "Häfele LED Lighting Solutions catalogue, profile pages 35-61; model_* and section measured from Häfele's STEP sample",
+        "retrieved": "2026-11-02",
+        "verified": false
+      }
+    },
+    {
+      "id": "hafele.loox5.profile.2194",
+      "brand": "Häfele",
+      "article": "833.74.835",
+      "family": "Loox5 profile 2194",
+      "variant": "Surface mounted. Silver, anodised, milky diffuser",
+      "kind": "other",
+      "parameters": {
+        "surface": 1,
+        "model_along_y": 0,
+        "model_z_min": -12.5,
+        "model_z_max": 0,
+        "section": 200,
+        "width": 18
+      },
+      "source": {
+        "url": "https://www.hafele.com.au",
+        "document_date": "Häfele LED Lighting Solutions catalogue, profile pages 35-61; model_* and section measured from Häfele's STEP sample",
+        "retrieved": "2026-11-02",
+        "verified": false
+      }
+    }
+  ]
+}

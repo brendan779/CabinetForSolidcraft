@@ -376,7 +376,10 @@ pub fn models_for(
     let wanted: Vec<_> = placements
         .iter()
         .filter(|p| {
-            detail != Detail::Design || p.item.starts_with("handle.") || opening_hardware(&p.item)
+            detail != Detail::Design
+                || p.item.starts_with("handle.")
+                || p.item.starts_with("hafele.loox5.")
+                || opening_hardware(&p.item)
         })
         .cloned()
         .collect();

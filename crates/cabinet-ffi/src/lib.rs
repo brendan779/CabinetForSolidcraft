@@ -204,6 +204,36 @@ fn tile_board(s: &cabinet_core::tiling::TileSpec) -> String {
     )
 }
 
+/// A strip's aluminium profile to choose from.
+#[derive(uniffi::Record)]
+pub struct LightProfileRecord {
+    pub id: String,
+    pub article: String,
+    pub name: String,
+    pub variant: String,
+    pub surface: bool,
+    pub width: f64,
+    pub depth: f64,
+}
+
+/// The catalog's light profiles.
+#[uniffi::export]
+pub fn light_profiles() -> Vec<LightProfileRecord> {
+    cabinet_core::hardware::items()
+        .iter()
+        .filter(|i| i.id.starts_with("hafele.loox5.profile."))
+        .map(|i| LightProfileRecord {
+            id: i.id.clone(),
+            article: i.article.clone(),
+            name: i.family.clone(),
+            variant: i.variant.clone(),
+            surface: i.param("surface").unwrap_or(1.0) == 1.0,
+            width: i.param("width").unwrap_or(0.0),
+            depth: i.param("model_z_max").unwrap_or(0.0) - i.param("model_z_min").unwrap_or(0.0),
+        })
+        .collect()
+}
+
 /// One tile on a field, for the viewport's picture of it.
 #[derive(uniffi::Record)]
 pub struct TileRectRecord {

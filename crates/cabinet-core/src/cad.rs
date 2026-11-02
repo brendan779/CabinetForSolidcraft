@@ -301,6 +301,52 @@ pub fn cad_placements(list: &PartList) -> Vec<CadPlacement> {
                     frame: Frame::Oriented { x, y },
                 });
             }
+        } else if h.item.starts_with("hafele.loox5.profile.") {
+            // Häfele's model is a short sample of the profile, so samples lie end to end along
+            // the strip, overlapping to fit. Every one lights towards its +Z, here down.
+            let Some(panel) = list.part(&h.part).map(|p| p.bounds) else {
+                continue;
+            };
+            let (Ok(section), Ok(z_min), Ok(z_max)) = (
+                item.param("section"),
+                item.param("model_z_min"),
+                item.param("model_z_max"),
+            ) else {
+                continue;
+            };
+            let length = panel.size.x - 2.0 * crate::lighting::STRIP_END_CLEARANCE;
+            let count = (length / section).ceil().max(1.0);
+            let pitch = if count > 1.0 {
+                (length - section) / (count - 1.0)
+            } else {
+                0.0
+            };
+            // A surface profile's back on the panel; a recessed one's face flush with it.
+            let surface = item.param("surface").unwrap_or(1.0) == 1.0;
+            let z = panel.min.z + if surface { z_min } else { z_max };
+            let frame = if item.param("model_along_y").unwrap_or(0.0) == 1.0 {
+                Frame::Oriented {
+                    x: Vec3::new(0.0, 1.0, 0.0),
+                    y: Vec3::new(1.0, 0.0, 0.0),
+                }
+            } else {
+                Frame::Oriented {
+                    x: Vec3::new(1.0, 0.0, 0.0),
+                    y: Vec3::new(0.0, -1.0, 0.0),
+                }
+            };
+            let start = panel.min.x + crate::lighting::STRIP_END_CLEARANCE;
+            for i in 0..count as usize {
+                let n = next("LightProfile");
+                out.push(CadPlacement {
+                    name: format!("{}.LightProfile{n}", list.cabinet),
+                    item: h.item.clone(),
+                    article: item.article.clone(),
+                    side: side_of(h.at.x),
+                    origin: Vec3::new(start + i as f64 * pitch, h.at.y, z),
+                    frame,
+                });
+            }
         } else if h.item.starts_with("hafele.axilo.set.") {
             // Both pieces under the leg's name, so they replace its stand-in together.
             let n = next("Leg");
@@ -685,6 +731,55 @@ mod tests {
         assert_eq!(plate.origin.z, bottom - 25.6);
         let m = transform(tube, true, BLUM_FRONT_PLANE);
         assert_eq!(apply(&m, Vec3::new(0.0, 0.0, -150.0)).z, 0.0);
+    }
+
+    #[test]
+    fn a_light_profile_runs_along_the_panels_underside_lighting_down() {
+        for (id, recessed) in [
+            ("hafele.loox5.profile.1104", true),
+            ("hafele.loox5.profile.2190", false),
+        ] {
+            let mut cab = Cabinet::new("W01", CabinetKind::Wall);
+            cab.lights = vec![crate::model::Light {
+                zone: crate::model::LightZone::UnderCabinet,
+                voltage: crate::model::Voltage::V24,
+                watts_per_metre: 9.6,
+                profile: id.into(),
+            }];
+            let list = build_cabinet(&cab).unwrap();
+            let bottom = list.part("W01.Bottom").unwrap().bounds;
+            let item = crate::hardware::item(id).unwrap();
+            let (z_min, z_max) = (
+                item.param("model_z_min").unwrap(),
+                item.param("model_z_max").unwrap(),
+            );
+            let along_y = item.param("model_along_y").unwrap() == 1.0;
+            let section = item.param("section").unwrap();
+            let pieces: Vec<_> = cad_placements(&list)
+                .into_iter()
+                .filter(|c| c.name.contains("LightProfile"))
+                .collect();
+            assert!(pieces.len() >= 2);
+            for c in &pieces {
+                let m = transform(c, true, BLUM_FRONT_PLANE);
+                let light = apply(&m, Vec3::new(0.0, 0.0, z_max)).z;
+                let back = apply(&m, Vec3::new(0.0, 0.0, z_min)).z;
+                assert!(light < back, "lights downwards");
+                let end = if along_y {
+                    Vec3::new(0.0, section, 0.0)
+                } else {
+                    Vec3::new(section, 0.0, 0.0)
+                };
+                let (a, b) = (apply(&m, Vec3::new(0.0, 0.0, 0.0)), apply(&m, end));
+                assert!(b.x > a.x, "runs along the cabinet");
+                assert!(b.x <= bottom.max().x + 1e-6);
+                if recessed {
+                    assert_eq!(light, bottom.min.z, "flush with the panel");
+                } else {
+                    assert_eq!(back, bottom.min.z, "its back on the panel");
+                }
+            }
+        }
     }
 
     #[test]

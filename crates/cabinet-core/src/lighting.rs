@@ -296,11 +296,13 @@ mod tests {
                 zone: LightZone::UnderCabinet,
                 voltage: Voltage::V24,
                 watts_per_metre: 10.0,
+                profile: String::new(),
             },
             Light {
                 zone: LightZone::Plinth,
                 voltage: Voltage::V24,
                 watts_per_metre: 10.0,
+                profile: String::new(),
             },
         ];
         let s = strips(&wall);

@@ -380,6 +380,7 @@ fn the_new_cabinets_build_every_part_where_the_core_puts_it() {
         zone,
         voltage: Voltage::V24,
         watts_per_metre: 10.0,
+        profile: String::new(),
     };
     let mut corner_wall = Cabinet::new("C03", CabinetKind::CornerWall);
     corner_wall.lights = vec![light(LightZone::UnderCabinet), light(LightZone::InCabinet)];

@@ -1633,8 +1633,60 @@ struct LightsSection: View {
                         .help("The strip's power per metre, from its data sheet")
                     }
                 }
+                SectionTitle("Profile")
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 6), count: 3), spacing: 6) {
+                    profileTile(id: "", title: "Bare strip", help: "No profile: the strip stuck to the panel", thumbnail: ProfileThumbnail(surface: true, width: 0, depth: 0))
+                    ForEach(lightProfiles(), id: \.id) { p in
+                        profileTile(id: p.id, title: p.name.replacingOccurrences(of: "Loox5 profile ", with: ""),
+                                    help: "\(p.name), Häfele \(p.article). \(p.variant)",
+                                    thumbnail: ProfileThumbnail(surface: p.surface, width: p.width, depth: p.depth))
+                    }
+                }
             }
         }
+    }
+
+    private func profileTile(id: String, title: String, help: String, thumbnail: ProfileThumbnail) -> some View {
+        Button {
+            withAnimation(.snappy) { var c = cab; c.lightProfile = id; project.selected = c }
+        } label: {
+            VStack(spacing: 4) {
+                thumbnail.frame(height: 34)
+                Text(title).font(.caption2).lineLimit(1)
+            }
+            .padding(5)
+            .frame(maxWidth: .infinity)
+        }
+        .buttonStyle(TileStyle(selected: cab.lightProfile == id))
+        .help(help)
+        .accessibilityLabel(id.isEmpty ? title : "Profile \(title)")
+    }
+}
+
+/// A profile end on, to scale, under the panel it fixes to: let into it, or on its face.
+struct ProfileThumbnail: View {
+    let surface: Bool
+    let width: Double
+    let depth: Double
+
+    var body: some View {
+        Canvas { ctx, size in
+            let face = size.height * 0.45
+            let k = 1.1
+            let panel = CGRect(x: 0, y: 0, width: size.width, height: face)
+            ctx.fill(Path(panel), with: .color(Color.primary.opacity(0.18)))
+            let (w, d) = (CGFloat(width) * k, CGFloat(depth) * k)
+            let x = (size.width - w) / 2
+            if width > 0 {
+                let body = CGRect(x: x, y: surface ? face : face - d, width: w, height: d)
+                ctx.fill(Path(body), with: .color(.secondary))
+                let glow = CGRect(x: x, y: body.maxY - 2, width: w, height: 2)
+                ctx.fill(Path(glow), with: .color(Theme.accent))
+            } else {
+                ctx.fill(Path(CGRect(x: size.width * 0.35, y: face, width: size.width * 0.3, height: 2)), with: .color(Theme.accent))
+            }
+        }
+        .accessibilityHidden(true)
     }
 }
 

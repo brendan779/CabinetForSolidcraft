@@ -80,12 +80,15 @@ pub struct Cabinet {
 }
 
 /// An LED strip light on a cabinet (see `lighting`).
-#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Light {
     pub zone: LightZone,
     pub voltage: Voltage,
     /// The strip's power per metre, from its data sheet.
     pub watts_per_metre: f64,
+    /// The catalog's aluminium profile the strip sits in; empty for a bare strip.
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub profile: String,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
