@@ -288,7 +288,9 @@ pub fn replace_cabinet(
 /// How a front opens is a design choice, so Design detail shows it, as it shows handles: a build
 /// with SERVO-DRIVE or TIP-ON picked must look different from one without.
 fn opening_hardware(item: &str) -> bool {
-    item.starts_with("blum.servo-drive.") || item.starts_with("blum.tip-on")
+    item.starts_with("blum.servo-drive.")
+        || item.starts_with("blum.tip-on")
+        || item.contains("sliding-track")
 }
 
 pub fn models_for(

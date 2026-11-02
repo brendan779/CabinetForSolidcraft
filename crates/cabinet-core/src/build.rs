@@ -17,6 +17,8 @@ use crate::part::{
 };
 use crate::{Error, Result};
 
+/// Our choice: a sliding door narrower than this is no use as a door.
+const MIN_SLIDING_DOOR: f64 = 200.0;
 /// Our choice: the least wood in front of a runner's screw.
 const MIN_SCREW_FROM_EDGE: f64 = 8.0;
 /// Depth of the grooves an inset back sits in.
@@ -395,6 +397,8 @@ struct Builder<'a> {
     box_pick_now: drawers::BoxPick,
     /// Fronts whose section opens differently from the job, by name.
     front_openings: std::collections::BTreeMap<String, Opening>,
+    /// Doors that slide: they have neither hinges nor a handle or opening hardware of their own.
+    sliding_fronts: std::collections::BTreeSet<String>,
     /// The drawer frame's openings, collected as the fronts are built.
     frame_openings: Vec<Aabb>,
     /// A section's pin rows, drilled after the fronts so they keep off the hinge plates.
@@ -481,6 +485,7 @@ impl<'a> Builder<'a> {
             system_now: None,
             box_pick_now: drawers::BoxPick::default(),
             front_openings: Default::default(),
+            sliding_fronts: Default::default(),
             frame_openings: Vec::new(),
             pending_pins: Vec::new(),
         }
@@ -596,6 +601,7 @@ impl<'a> Builder<'a> {
             .iter()
             .filter(|p| matches!(p.role, PartRole::Door | PartRole::DrawerFront))
             .filter(|p| self.opening_of(&p.name) != Opening::Handles)
+            .filter(|p| !self.sliding_fronts.contains(&p.name))
             .cloned()
             .collect();
         let lw = self.cab.width - 2.0 * self.cab.standard.carcass_thickness;
@@ -2077,6 +2083,16 @@ impl<'a> Builder<'a> {
                 counts.doors += 2;
             }
             SectionFront::Niche => {}
+            SectionFront::Sliding {
+                count,
+                overlap,
+                track,
+            } => self.sliding_doors(
+                (*count, *overlap, track),
+                (x0, x1, y0, y1),
+                (fz0, fz1),
+                counts,
+            ),
             SectionFront::Lift {
                 kind,
                 handle_weight,
@@ -2103,6 +2119,87 @@ impl<'a> Builder<'a> {
                     (fz0, fz1),
                     (floor, ceiling),
                 );
+            }
+        }
+    }
+
+    /// Sliding doors across a section: every other one in the front plane, overlapping its
+    /// neighbours, between a top track and a bottom guide. They hang on the track, so no hinges,
+    /// and take a flush pull, as a handle would foul the door passing it.
+    fn sliding_doors(
+        &mut self,
+        (count, overlap, track): (u32, f64, &str),
+        (x0, x1, y0, y1): (f64, f64, f64, f64),
+        (z0, z1): (f64, f64),
+        counts: &mut SectionCounts,
+    ) {
+        let numbers = (|| {
+            let top = crate::hardware::item(&format!("{track}.top"))?;
+            let bottom = crate::hardware::item(&format!("{track}.bottom"))?;
+            let roller = crate::hardware::item(&format!("{track}.roller"))?;
+            let pull = crate::hardware::item(&format!("{track}.pull"))?;
+            Ok::<_, String>((
+                (top, bottom, roller, pull),
+                top.param("height")?,
+                bottom.param("height")?,
+                top.param("plane_gap")?,
+            ))
+        })();
+        let ((top, bottom, roller, pull), over, under, plane_gap) = match numbers {
+            Ok(n) => n,
+            Err(e) => {
+                self.list.warnings.push(format!("sliding doors: {e}"));
+                return;
+            }
+        };
+        let n = count.max(2) as f64;
+        let w = ((x1 - x0) + (n - 1.0) * overlap) / n;
+        if w < MIN_SLIDING_DOOR {
+            self.list.warnings.push(format!(
+                "{n} sliding doors {w:.0} wide are too narrow: left out"
+            ));
+            return;
+        }
+        let ft = y1 - y0;
+        let (door_z0, door_z1) = (z0 + under, z1 - over);
+        let mut names = Vec::new();
+        for i in 0..count.max(2) as usize {
+            let x = x0 + i as f64 * (w - overlap);
+            let plane = if i % 2 == 1 { ft + plane_gap } else { 0.0 };
+            counts.doors += 1;
+            let b = aabb(x, y0 - plane, door_z0, x + w, y1 - plane, door_z1);
+            self.add(
+                PartRole::Door,
+                Some(counts.doors),
+                b,
+                Axis::Y,
+                Axis::Z,
+                EdgeBanding::all(),
+            );
+            let name = self.name(PartRole::Door, Some(counts.doors));
+            self.sliding_fronts.insert(name.clone());
+            names.push((name, b));
+        }
+        let mid = (x0 + x1) / 2.0;
+        let bottom_panel = self.name(PartRole::Bottom, None);
+        for (item, z) in [(top, z1 - over / 2.0), (bottom, z0 + under / 2.0)] {
+            self.list.hardware.push(HardwarePlacement {
+                item: item.id.clone(),
+                description: format!("{} {}; cut to {:.0} mm", item.family, item.variant, x1 - x0),
+                at: Vec3::new(mid, (y1 + y0 - ft - plane_gap) / 2.0, z),
+                part: bottom_panel.clone(),
+                quantity: 1,
+            });
+        }
+        for (name, b) in names {
+            for item in [roller, pull] {
+                self.list.hardware.push(HardwarePlacement {
+                    item: item.id.clone(),
+                    description: format!("{} {}", item.family, item.variant),
+                    at: b.center(),
+                    part: name.clone(),
+                    quantity: 1,
+                });
             }
         }
     }
@@ -3491,6 +3588,7 @@ impl<'a> Builder<'a> {
                 )
             })
             .filter(|p| self.opening_of(&p.name) == Opening::Handles)
+            .filter(|p| !self.sliding_fronts.contains(&p.name))
             .cloned()
             .collect();
         let wall_hung = matches!(
@@ -6240,6 +6338,94 @@ mod tests {
         let list = build_cabinet(&cab).unwrap();
         assert!(list.warnings.iter().any(|w| w.contains("box that fits")));
         assert!(list.part("D01.DrawerBottom1").is_some());
+    }
+
+    fn sliding_wardrobe(count: u32, overlap: f64) -> Cabinet {
+        let mut cab = Cabinet::new("R01", CabinetKind::Wardrobe);
+        cab.width = 1800.0;
+        cab = cab.sectioned();
+        let FrontLayout::Sections { columns } = &mut cab.fronts else {
+            panic!("sections");
+        };
+        columns[0].rows[0].front = SectionFront::Sliding {
+            count,
+            overlap,
+            track: "generic.sliding-track".into(),
+        };
+        cab
+    }
+
+    #[test]
+    fn sliding_doors_overlap_on_two_planes_and_share_the_opening() {
+        let list = build_cabinet(&sliding_wardrobe(2, 30.0)).unwrap();
+        let doors: Vec<_> = list.by_role(PartRole::Door).map(|p| p.bounds).collect();
+        assert_eq!(doors.len(), 2);
+        assert!(
+            (doors[0].max().x - doors[1].min.x - 30.0).abs() < 1e-9,
+            "overlap"
+        );
+        assert!(
+            doors[1].max().y <= doors[0].min.y,
+            "the second passes in front"
+        );
+        assert_eq!(doors[0].size.x, doors[1].size.x);
+        assert!(
+            list.warnings.iter().all(|w| !w.contains("clash")),
+            "{:?}",
+            list.warnings
+        );
+    }
+
+    #[test]
+    fn three_sliding_doors_put_the_middle_one_in_front() {
+        let list = build_cabinet(&sliding_wardrobe(3, 40.0)).unwrap();
+        let doors: Vec<_> = list.by_role(PartRole::Door).map(|p| p.bounds).collect();
+        assert_eq!(doors.len(), 3);
+        assert_eq!(doors[0].min.y, doors[2].min.y);
+        assert!(doors[1].max().y <= doors[0].min.y);
+    }
+
+    #[test]
+    fn sliding_doors_hang_on_a_track_with_no_hinges_or_handles() {
+        let mut cab = sliding_wardrobe(2, 30.0);
+        cab.standard.opening = Opening::TipOn;
+        let list = build_cabinet(&cab).unwrap();
+        let count = |prefix: &str| {
+            list.hardware
+                .iter()
+                .filter(|h| h.item.starts_with(prefix))
+                .count()
+        };
+        assert_eq!(count("blum.clip-top"), 0);
+        assert_eq!(count("blum.tip-on"), 0);
+        assert_eq!(count("generic.sliding-track.top"), 1);
+        assert_eq!(count("generic.sliding-track.bottom"), 1);
+        assert_eq!(count("generic.sliding-track.roller"), 2);
+        assert_eq!(count("generic.sliding-track.pull"), 2);
+        let mut with_handles = sliding_wardrobe(2, 30.0);
+        with_handles.standard.opening = Opening::Handles;
+        let list = build_cabinet(&with_handles).unwrap();
+        assert!(list.operations.iter().all(|o| !matches!(
+            o,
+            Operation::Bore {
+                purpose: BorePurpose::HandleScrew,
+                ..
+            }
+        )));
+        assert!(
+            list.hardware
+                .iter()
+                .any(|h| h.description.contains("cut to"))
+        );
+    }
+
+    #[test]
+    fn sliding_doors_too_narrow_are_left_out_and_say_so() {
+        let mut cab = sliding_wardrobe(3, 30.0);
+        cab.width = 500.0;
+        let list = build_cabinet(&cab).unwrap();
+        assert_eq!(list.by_role(PartRole::Door).count(), 0);
+        assert!(list.warnings.iter().any(|w| w.contains("too narrow")));
     }
 
     fn framed_bank() -> Cabinet {

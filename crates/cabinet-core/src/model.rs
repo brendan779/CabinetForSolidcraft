@@ -652,8 +652,27 @@ pub enum SectionFront {
     BiFold {
         handle_weight: f64,
     },
+    /// Doors sliding past each other on a track, in two planes, the track on the carcass's front.
+    Sliding {
+        count: u32,
+        /// How far one door passes behind the next when closed.
+        #[serde(default = "default_sliding_overlap")]
+        overlap: f64,
+        /// The track system's id in the hardware catalog.
+        #[serde(default = "default_sliding_track")]
+        track: String,
+    },
     /// No front, and the section's height is its clear opening: an oven or a fridge goes in.
     Niche,
+}
+
+/// Our choice, for the maker to set: no supplier's system is catalogued yet.
+fn default_sliding_overlap() -> f64 {
+    30.0
+}
+
+fn default_sliding_track() -> String {
+    "generic.sliding-track".into()
 }
 
 impl SectionFront {

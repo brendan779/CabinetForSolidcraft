@@ -88,6 +88,10 @@ const FILES: &[(&str, &str)] = &[
         include_str!("../../../catalog/hardware/benchtop-materials.json"),
     ),
     (
+        "generic-sliding-track.json",
+        include_str!("../../../catalog/hardware/generic-sliding-track.json"),
+    ),
+    (
         "generic-handles.json",
         include_str!("../../../catalog/hardware/generic-handles.json"),
     ),

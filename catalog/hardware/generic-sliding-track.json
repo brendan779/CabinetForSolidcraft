@@ -1,0 +1,74 @@
+{
+  "brand": "Generic",
+  "website": "",
+  "notes": "A generic top-hung sliding door track, until a supplier's system is chosen. Add a system as rows with ids <family>.top, .bottom, .roller and .pull: a section names its family in `track`.",
+  "items": [
+    {
+      "id": "generic.sliding-track.top",
+      "brand": "Generic",
+      "article": "GEN-ST-TOP",
+      "family": "Generic sliding track",
+      "variant": "top track, two runs, cut to the opening",
+      "kind": "other",
+      "parameters": {
+        "height": 30,
+        "depth": 44,
+        "plane_gap": 4
+      },
+      "source": {
+        "url": "Our own generic default (WARD-2): not a supplier's system. Sizes are our choice, for the maker to check against the track bought",
+        "document_date": "2026",
+        "retrieved": "2026-11-02",
+        "verified": false
+      }
+    },
+    {
+      "id": "generic.sliding-track.bottom",
+      "brand": "Generic",
+      "article": "GEN-ST-BOT",
+      "family": "Generic sliding track",
+      "variant": "bottom guide, two runs, cut to the opening",
+      "kind": "other",
+      "parameters": {
+        "height": 12,
+        "depth": 44
+      },
+      "source": {
+        "url": "Our own generic default (WARD-2): not a supplier's system. Sizes are our choice, for the maker to check against the track bought",
+        "document_date": "2026",
+        "retrieved": "2026-11-02",
+        "verified": false
+      }
+    },
+    {
+      "id": "generic.sliding-track.roller",
+      "brand": "Generic",
+      "article": "GEN-ST-ROL",
+      "family": "Generic sliding track",
+      "variant": "hanger set for one door, with stops",
+      "kind": "other",
+      "parameters": {},
+      "source": {
+        "url": "Our own generic default (WARD-2): not a supplier's system. Sizes are our choice, for the maker to check against the track bought",
+        "document_date": "2026",
+        "retrieved": "2026-11-02",
+        "verified": false
+      }
+    },
+    {
+      "id": "generic.sliding-track.pull",
+      "brand": "Generic",
+      "article": "GEN-ST-PUL",
+      "family": "Generic sliding track",
+      "variant": "flush finger pull: a handle would foul the door passing it",
+      "kind": "other",
+      "parameters": {},
+      "source": {
+        "url": "Our own generic default (WARD-2): not a supplier's system. Sizes are our choice, for the maker to check against the track bought",
+        "document_date": "2026",
+        "retrieved": "2026-11-02",
+        "verified": false
+      }
+    }
+  ]
+}

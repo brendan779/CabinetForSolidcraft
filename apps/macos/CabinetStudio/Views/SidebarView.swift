@@ -147,6 +147,11 @@ struct CabinetGlyph: View {
                         line(CGPoint(x: cell.midX, y: cell.minY), CGPoint(x: cell.midX, y: cell.maxY))
                     case "bi_fold":
                         line(CGPoint(x: cell.minX, y: cell.midY), CGPoint(x: cell.maxX, y: cell.midY))
+                    case "sliding":
+                        for k in 1..<max(row.slidingCount, 2) {
+                            let sx = cell.minX + cell.width * CGFloat(k) / CGFloat(max(row.slidingCount, 2))
+                            line(CGPoint(x: sx, y: cell.minY), CGPoint(x: sx, y: cell.maxY))
+                        }
                     case "drawers":
                         let ratios = row.drawerRatios
                         let total = ratios.reduce(0, +)

@@ -51,7 +51,7 @@ struct SectionsEditor: View {
 
     private let fronts: [(id: String, title: String)] = [
         ("open", "Open"), ("door_left", "Door L"), ("door_right", "Door R"), ("door_pair", "Pair"),
-        ("drawers", "Drawers"), ("lift", "Lift"), ("bi_fold", "Bi-fold"), ("niche", "Niche"),
+        ("drawers", "Drawers"), ("lift", "Lift"), ("bi_fold", "Bi-fold"), ("sliding", "Sliding"), ("niche", "Niche"),
     ]
 
     private let systems: [(id: String, title: String)] = [
@@ -65,7 +65,7 @@ struct SectionsEditor: View {
 
     private var layouts: [(id: String, title: String)] {
         var l = [("door", "Door"), ("door_pair", "Pair"), ("drawers", "Drawers"),
-                 ("lift", "Lift"), ("bi_fold", "Bi-fold"), ("open", "Open")]
+                 ("lift", "Lift"), ("bi_fold", "Bi-fold"), ("sliding", "Sliding"), ("open", "Open")]
         if cab.kind == "tall" { l += [("oven", "Oven"), ("fridge", "Fridge")] }
         return l
     }
@@ -136,6 +136,21 @@ struct SectionsEditor: View {
                 if !["movento", "tandem"].contains(cell.system ?? project.option("drawer_system", of: cab)) {
                     boxChips(cell, c, r)
                 }
+            }
+            if cell.front == "sliding" {
+                ChipRow("Doors") {
+                    ForEach(2...4, id: \.self) { n in
+                        Button("\(n)") { editCell(c, r) { $0.slidingCount = n } }
+                            .buttonStyle(ChipStyle(selected: cell.slidingCount == n))
+                    }
+                }
+                ChipRow("Overlap") {
+                    ForEach([20.0, 30, 40, 50], id: \.self) { o in
+                        Button("\(Int(o))") { editCell(c, r) { $0.slidingOverlap = o } }
+                            .buttonStyle(ChipStyle(selected: cell.slidingOverlap == o))
+                    }
+                }
+                .help("How far each door passes behind the next when closed")
             }
             if cell.front == "lift" {
                 LiftKindPicker(selected: cell.liftKind) { id in editCell(c, r) { $0.liftKind = id } }
@@ -553,6 +568,15 @@ struct SectionCellThumbnail: View {
                 line(CGPoint(x: r.midX, y: r.minY), CGPoint(x: r.midX, y: r.maxY), edge)
                 handle(r.midX - 4, r.midY, vertical: true)
                 handle(r.midX + 4, r.midY, vertical: true)
+            case "sliding":
+                // Overlapping doors, with the track along the top.
+                line(CGPoint(x: r.minX, y: r.minY + 3), CGPoint(x: r.maxX, y: r.minY + 3), accent, 2)
+                let n = max(cell.slidingCount, 2)
+                for i in 1..<n {
+                    let x = r.minX + r.width * CGFloat(i) / CGFloat(n)
+                    line(CGPoint(x: x - 2, y: r.minY + 3), CGPoint(x: x - 2, y: r.maxY), edge)
+                    line(CGPoint(x: x + 2, y: r.minY + 3), CGPoint(x: x + 2, y: r.maxY), faint)
+                }
             case "drawers":
                 let ratios = cell.drawerRatios
                 let total = ratios.reduce(0, +)

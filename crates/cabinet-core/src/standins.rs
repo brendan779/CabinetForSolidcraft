@@ -121,6 +121,7 @@ pub fn stand_ins(list: &PartList) -> Vec<StandIn> {
     let mut out = Vec::new();
     let (mut hinges, mut drawers, mut legs) = (0, 0, 0);
     let (mut pushes, mut servos, mut brackets) = (0, 0, 0);
+    let mut tracks = 0;
     for h in &list.hardware {
         if h.item.starts_with("blum.tip-on.door") {
             if let Some(shapes) = tip_on_door(list, h) {
@@ -156,6 +157,17 @@ pub fn stand_ins(list: &PartList) -> Vec<StandIn> {
             if let Some(shape) = compartments.get(n).and_then(|c| servo_profile(list, c)) {
                 out.push(StandIn {
                     name: servo_profile_name(&list.cabinet, n),
+                    item: h.item.clone(),
+                    shapes: vec![shape],
+                });
+            }
+        } else if h.item.contains("sliding-track")
+            && (h.item.ends_with(".top") || h.item.ends_with(".bottom"))
+        {
+            if let Some(shape) = sliding_track(list, h) {
+                tracks += 1;
+                out.push(StandIn {
+                    name: format!("{}.Track{tracks}", list.cabinet),
                     item: h.item.clone(),
                     shapes: vec![shape],
                 });
@@ -294,6 +306,21 @@ fn tip_on_blumotion(list: &PartList, h: &HardwarePlacement) -> Option<Vec<Shape>
         ))
     };
     Some(vec![unit(left, 1.0), unit(right, -1.0)])
+}
+
+/// A sliding door track across its section, at its height and depth in the catalog.
+fn sliding_track(list: &PartList, h: &HardwarePlacement) -> Option<Shape> {
+    let item = crate::hardware::item(&h.item).ok()?;
+    let (height, depth) = (item.param("height").ok()?, item.param("depth").ok()?);
+    let (l, r) = list.bay_around(h.at.x)?;
+    Some(Shape::Box(boxed(
+        Vec3::new(l.bounds.min.x, h.at.y - depth / 2.0, h.at.z - height / 2.0),
+        Vec3::new(
+            r.bounds.max().x,
+            h.at.y + depth / 2.0,
+            h.at.z + height / 2.0,
+        ),
+    )))
 }
 
 /// One bracket profile's compartment: its bay and heights, and the driven drawer that sets the

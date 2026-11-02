@@ -47,6 +47,13 @@ Section
   per compartment holding driven drawers, where a compartment runs between fixed shelves; one power
   supply per cabinet. An adjustable shelf in the way of a bracket gets a warning.
 
+## Sliding doors
+
+A `sliding` section has 2 to 4 doors sharing its width, each overlapping the next by `overlap`, every
+other one in the front plane, between a top track and a bottom guide. `track` names a family of
+hardware rows (`<family>.top`, `.bottom`, `.roller`, `.pull`); only the generic one exists yet, with
+sizes of our choosing. They stand further forward than hinged fronts by a door and the plane gap.
+
 ## Drawer boxes
 
 A section of drawers can pick `box_height` (n, m, k, c or f) and `nominal_length`; left out, it takes

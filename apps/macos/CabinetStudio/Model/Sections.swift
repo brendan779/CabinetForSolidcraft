@@ -4,7 +4,7 @@ import Foundation
 /// widths of 0 share what the others leave.
 struct SectionCell: Equatable {
     var height: Double = 0
-    /// open, door_left, door_right, door_pair, drawers, lift, bi_fold, niche.
+    /// open, door_left, door_right, door_pair, drawers, lift, bi_fold, sliding, niche.
     var front = "open"
     var drawers = 2
     /// The drawers' height proportions, top to bottom. Empty: all the same.
@@ -26,6 +26,12 @@ struct SectionCell: Equatable {
     var shelfAbove = false
     /// How its fronts open, where it differs from the job's: handles, tip_on, servo_drive.
     var opening: String?
+
+    /// Sliding doors: how many, and how far each overlaps the next.
+    var slidingCount = 2
+    var slidingOverlap = 30.0
+    /// The track system, kept as it came.
+    var slidingTrack = "generic.sliding-track"
 
     /// The owner's typical 400 g handle.
     static let defaultHandleWeight = 0.4
@@ -56,6 +62,11 @@ struct SectionCell: Equatable {
             front = "bi_fold"
             handleWeight = (f["handle_weight"] as? NSNumber)?.doubleValue ?? Self.defaultHandleWeight
         case "niche": front = "niche"
+        case "sliding":
+            front = "sliding"
+            slidingCount = (f["count"] as? NSNumber)?.intValue ?? 2
+            slidingOverlap = (f["overlap"] as? NSNumber)?.doubleValue ?? 30
+            slidingTrack = f["track"] as? String ?? slidingTrack
         default: front = "open"
         }
         let i = json["inside"] as? [String: Any] ?? [:]
@@ -82,6 +93,7 @@ struct SectionCell: Equatable {
         case "lift": f = ["type": "lift", "kind": liftKind, "handle_weight": handleWeight]
         case "bi_fold": f = ["type": "bi_fold", "handle_weight": handleWeight]
         case "niche": f = ["type": "niche"]
+        case "sliding": f = ["type": "sliding", "count": slidingCount, "overlap": slidingOverlap, "track": slidingTrack]
         default: f = ["type": "open"]
         }
         var i: [String: Any] = ["type": inside]
@@ -163,6 +175,7 @@ enum Sections {
             return one(c)
         case "lift": return one(SectionCell(front: "lift"))
         case "bi_fold": return one(SectionCell(front: "bi_fold"))
+        case "sliding": return one(SectionCell(front: "sliding"))
         case "oven":
             // Two drawers, a 600 mm oven niche, a door above, on fixed shelves.
             var drawers = SectionCell(front: "drawers")

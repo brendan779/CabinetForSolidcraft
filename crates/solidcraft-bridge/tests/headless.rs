@@ -652,6 +652,42 @@ fn a_drawer_frame_is_cut_out_for_each_drawer() {
 }
 
 #[test]
+fn a_sliding_wardrobe_builds_with_its_doors_overlapping() {
+    let Some(cli) = cli() else {
+        eprintln!("SOLIDCRAFT_CLI not set: skipped");
+        return;
+    };
+    use cabinet_core::model::{FrontLayout, SectionFront};
+    let mut cab = Cabinet::new("R01", CabinetKind::Wardrobe);
+    cab.width = 1800.0;
+    let mut cab = cab.sectioned();
+    let FrontLayout::Sections { columns } = &mut cab.fronts else {
+        panic!("sections");
+    };
+    columns[0].rows[0].front = SectionFront::Sliding {
+        count: 2,
+        overlap: 30.0,
+        track: "generic.sliding-track".into(),
+    };
+    let list = build_cabinet(&cab).unwrap();
+    let r = run(
+        &cli,
+        "sliding",
+        &emit_cabinet(&list, Detail::Design, None),
+        &["eval"],
+    );
+    let names: Vec<&str> = r["bodies"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .filter_map(|b| b["name"].as_str())
+        .collect();
+    for door in ["R01.Door1", "R01.Door2"] {
+        assert!(names.contains(&door), "{names:?}");
+    }
+}
+
+#[test]
 fn a_door_is_bevelled_on_the_edge_chosen_with_a_rail_behind_it() {
     let Some(cli) = cli() else {
         eprintln!("SOLIDCRAFT_CLI not set: skipped");
