@@ -191,8 +191,19 @@ pub fn load_index(vendor_dir: &Path) -> Option<Vec<VendorModel>> {
 pub fn resolve(placements: &[CadPlacement], models: &[VendorModel]) -> Vec<VendorInstance> {
     let mut out = Vec::new();
     for p in placements {
-        let mut files: Vec<&VendorModel> =
-            models.iter().filter(|m| m.article == p.article).collect();
+        let mut files: Vec<&VendorModel> = Vec::new();
+        // Blum repeats a model under several ids: one to a shape, or they draw on top of each
+        // other. A left and a right have different boxes.
+        for m in models.iter().filter(|m| m.article == p.article) {
+            let same =
+                |a: [f64; 3], b: [f64; 3]| a.iter().zip(b).all(|(x, y)| (x - y).abs() < 0.05);
+            if !files
+                .iter()
+                .any(|f| same(f.min, m.min) && same(f.max, m.max))
+            {
+                files.push(m);
+            }
+        }
         // An upright part is one model; the same file comes in several downloaded sets.
         if p.frame != Frame::Blum {
             files.truncate(1);
@@ -290,6 +301,21 @@ mod tests {
             min: [x0, -10.0, -500.0],
             max: [x1, 10.0, 35.0],
         }
+    }
+
+    #[test]
+    fn a_model_repeated_under_several_ids_is_drawn_once() {
+        let list = build_cabinet(&Cabinet::new("B01", CabinetKind::Base)).unwrap();
+        let place = cad_placements(&list);
+        let hinge = place.iter().find(|p| p.name.contains("Hinge")).unwrap();
+        let (mut a, mut b) = (
+            model(&hinge.article, 0.0, 50.0),
+            model(&hinge.article, 0.0, 50.0),
+        );
+        a.step = "a.step".into();
+        b.step = "b.step".into();
+        let found = resolve(std::slice::from_ref(hinge), &[a, b]);
+        assert_eq!(found.len(), 1);
     }
 
     #[test]
