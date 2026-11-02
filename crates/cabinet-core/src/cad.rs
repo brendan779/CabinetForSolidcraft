@@ -75,6 +75,23 @@ pub struct CadPlacement {
     pub frame: Frame,
 }
 
+/// The lift system whose holes a mechanism or lever arm model is placed by, if we place it.
+fn lift_family(item: &str) -> Option<&'static str> {
+    if item.starts_with("blum.aventos.hk-top.mechanism.") {
+        Some("blum.aventos.hk-top")
+    } else if item.starts_with("blum.aventos.hk-s.mechanism.")
+        || item.starts_with("blum.aventos.hk-s.tip-on.mechanism.")
+    {
+        Some("blum.aventos.hk-s")
+    } else if item.starts_with("blum.aventos.hf-top.mechanism.")
+        || item.starts_with("blum.aventos.hf-top.lever-arm.")
+    {
+        Some("blum.aventos.hf-top")
+    } else {
+        None
+    }
+}
+
 /// An AXILO plate is longer on its +X side, so it turns to keep that towards the cabinet's middle:
 /// otherwise a leg by the right side would have its fixings off the end of the bottom panel.
 pub(crate) fn leg_plate_turned(x: f64, panel_centre: f64) -> bool {
@@ -295,6 +312,62 @@ pub fn cad_placements(list: &PartList) -> Vec<CadPlacement> {
                         Frame::Oriented { x: along, y: into },
                     ));
                 }
+            }
+        } else if let Some(family) = lift_family(&h.item) {
+            // Blum draws a mechanism where it mounts: its screws in the side, at a known point of
+            // its frame. So it goes where the side's own holes are: on each side, by the front
+            // top hole. A lever arm shares its mechanism's frame.
+            let Ok(sys) = crate::hardware::item(family) else {
+                continue;
+            };
+            let (Ok(hole_y), Ok(hole_z)) = (sys.param("model_hole_y"), sys.param("model_hole_z"))
+            else {
+                continue;
+            };
+            let hole_of = |part: &str| {
+                list.operations
+                    .iter()
+                    .filter_map(|o| match o {
+                        Operation::Bore {
+                            part: p,
+                            at,
+                            purpose: BorePurpose::LiftMechanism,
+                            ..
+                        } if p == part => Some(*at),
+                        _ => None,
+                    })
+                    .reduce(|a, b| {
+                        // The highest, then the nearest the front.
+                        if b.z > a.z + 1e-6 || ((b.z - a.z).abs() < 1e-6 && b.y < a.y) {
+                            b
+                        } else {
+                            a
+                        }
+                    })
+            };
+            let kind = if h.item.contains("lever-arm") {
+                "LiftArm"
+            } else {
+                "LiftMechanism"
+            };
+            for (side, panel) in [(Side::Left, left), (Side::Right, right)] {
+                let Some(hole) = hole_of(&panel.name) else {
+                    continue;
+                };
+                let n = next(kind);
+                out.push(CadPlacement {
+                    name: format!("{}.{kind}{n}", list.cabinet),
+                    item: h.item.clone(),
+                    article: item.article.clone(),
+                    side,
+                    // transform() adds the front plane; undo it, as this frame is the hole's.
+                    origin: Vec3::new(
+                        inner(side),
+                        hole.y + hole_z - BLUM_FRONT_PLANE,
+                        hole.z - hole_y,
+                    ),
+                    frame: Frame::Blum,
+                });
             }
         } else if h.item == crate::build::SHELF_SUPPORT {
             // One row of the hardware list stands for all the shelf's supports: the holes it
@@ -771,6 +844,92 @@ mod tests {
         assert_eq!(plate.origin.z, bottom - 25.0);
         let m = transform(tube, true, BLUM_FRONT_PLANE);
         assert_eq!(apply(&m, Vec3::new(0.0, 0.0, -150.0)).z, 0.0);
+    }
+
+    #[test]
+    fn a_lift_mechanism_model_has_its_screws_in_the_sides_own_holes() {
+        use crate::model::LiftKind;
+        let layouts = [
+            (
+                "blum.aventos.hk-top",
+                FrontLayout::Lift {
+                    kind: LiftKind::StayLift,
+                    handle_weight: 0.4,
+                },
+                300.0,
+            ),
+            (
+                "blum.aventos.hk-s",
+                FrontLayout::Lift {
+                    kind: LiftKind::SmallStayLift,
+                    handle_weight: 0.4,
+                },
+                300.0,
+            ),
+            (
+                "blum.aventos.hf-top",
+                FrontLayout::BiFoldLift { handle_weight: 0.4 },
+                720.0,
+            ),
+        ];
+        for (family, fronts, height) in layouts {
+            let mut cab = Cabinet::new("W01", CabinetKind::Wall);
+            cab.height = height;
+            cab.fronts = fronts;
+            let list = build_cabinet(&cab).unwrap();
+            let sys = crate::hardware::item(family).unwrap();
+            let hole = Vec3::new(
+                0.0,
+                sys.param("model_hole_y").unwrap(),
+                sys.param("model_hole_z").unwrap(),
+            );
+            let placed: Vec<_> = cad_placements(&list)
+                .into_iter()
+                .filter(|c| c.name.contains("LiftMechanism"))
+                .collect();
+            assert_eq!(placed.len(), 2, "{family}");
+            for c in &placed {
+                let side = if c.side == Side::Left {
+                    "W01.LeftSide"
+                } else {
+                    "W01.RightSide"
+                };
+                let at = apply(&transform(c, c.side == Side::Left, BLUM_FRONT_PLANE), hole);
+                let top = list
+                    .operations
+                    .iter()
+                    .filter_map(|o| match o {
+                        Operation::Bore {
+                            part,
+                            at,
+                            purpose: BorePurpose::LiftMechanism,
+                            ..
+                        } if part == side => Some(*at),
+                        _ => None,
+                    })
+                    .fold(f64::MIN, |z, a| z.max(a.z));
+                let holes: Vec<Vec3> = list
+                    .operations
+                    .iter()
+                    .filter_map(|o| match o {
+                        Operation::Bore {
+                            part,
+                            at,
+                            purpose: BorePurpose::LiftMechanism,
+                            ..
+                        } if part == side => Some(*at),
+                        _ => None,
+                    })
+                    .collect();
+                assert_eq!(at.z, top, "{family}");
+                assert!(
+                    holes
+                        .iter()
+                        .any(|h| (h.y - at.y).abs() < 1e-6 && (h.z - at.z).abs() < 1e-6),
+                    "{family}: {at:?} not in {holes:?}"
+                );
+            }
+        }
     }
 
     #[test]

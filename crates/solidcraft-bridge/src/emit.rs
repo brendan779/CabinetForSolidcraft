@@ -381,6 +381,7 @@ fn emit_tiles(field: &cabinet_core::tiling::TileField, cmds: &mut Vec<Value>) {
 /// with SERVO-DRIVE or TIP-ON picked must look different from one without.
 fn opening_hardware(item: &str) -> bool {
     item.starts_with("blum.servo-drive.")
+        || item.starts_with("blum.aventos.")
         || item.starts_with("blum.tip-on")
         || item.contains("sliding-track")
 }

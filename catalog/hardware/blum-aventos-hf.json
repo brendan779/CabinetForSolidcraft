@@ -35,7 +35,9 @@
         "hinge_120_special_boss_overlay": 13,
         "mechanism_hole_below_top_short": 93.5,
         "mechanism_hole_below_top": 116,
-        "mechanism_short_below_height": 520
+        "mechanism_short_below_height": 520,
+        "model_hole_y": 16.5,
+        "model_hole_z": -59
       },
       "tables": {
         "mechanism_hole_below_top": {

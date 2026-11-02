@@ -21,7 +21,9 @@
         "front_hole_adds_overlay": 1,
         "front_hole_pitch": 32,
         "front_hole_count": 4,
-        "front_hole_inset": 12.5
+        "front_hole_inset": 12.5,
+        "model_hole_y": 0,
+        "model_hole_z": 32
       },
       "source": {
         "url": "Blum Catalogue and technical manual 2024/2025, p.46, web code DQHFJY; mechanism side drilling and front assembly p.48, read from its drawings: the 36's top reference is our reading",

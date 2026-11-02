@@ -27,7 +27,61 @@ expression: svg
 <line x1="145.64" y1="109.17" x2="138.76" y2="109.17" stroke="#7a3fa0" stroke-width="0.59"/>
 <line x1="145.64" y1="79.16" x2="138.76" y2="79.16" stroke="#7a3fa0" stroke-width="0.59"/>
 <line x1="145.64" y1="49.16" x2="138.76" y2="49.16" stroke="#7a3fa0" stroke-width="0.59"/>
-<text class="s" x="34.00" y="18.00">Face</text>
+<text class="s" x="34.00" y="18.00">Inside face</text>
+<rect class="o" x="163.50" y="20.00" width="111.64" height="114.00"/>
+<line class="e" x1="275.14" y1="134.00" x2="163.50" y2="134.00"/>
+<line class="d" x1="275.14" y1="141.00" x2="163.50" y2="141.00"/>
+<text class="t" x="219.32" y="145.00" text-anchor="middle">568</text>
+<line class="d" x1="156.50" y1="134.00" x2="156.50" y2="20.00"/>
+<text class="t" x="154.50" y="77.00" text-anchor="middle" transform="rotate(-90 154.50 77.00)">580</text>
+<circle cx="275.14" cy="134.00" r="1" fill="#c0392b"/>
+<rect x="272.68" y="117.67" width="2.46" height="13.00" fill="#e8c27a" stroke="#222" stroke-width="0.15"/>
+<rect x="272.68" y="87.67" width="2.46" height="13.00" fill="#e8c27a" stroke="#222" stroke-width="0.15"/>
+<rect x="272.68" y="57.66" width="2.46" height="13.00" fill="#e8c27a" stroke="#222" stroke-width="0.15"/>
+<rect x="272.68" y="27.65" width="2.46" height="13.00" fill="#e8c27a" stroke="#222" stroke-width="0.15"/>
+<line x1="275.14" y1="109.17" x2="268.26" y2="109.17" stroke="#7a3fa0" stroke-width="0.59"/>
+<line x1="275.14" y1="79.16" x2="268.26" y2="79.16" stroke="#7a3fa0" stroke-width="0.59"/>
+<line x1="275.14" y1="49.16" x2="268.26" y2="49.16" stroke="#7a3fa0" stroke-width="0.59"/>
+<rect x="163.50" y="117.67" width="2.46" height="13.00" fill="#e8c27a" stroke="#222" stroke-width="0.15"/>
+<rect x="163.50" y="87.67" width="2.46" height="13.00" fill="#e8c27a" stroke="#222" stroke-width="0.15"/>
+<rect x="163.50" y="57.66" width="2.46" height="13.00" fill="#e8c27a" stroke="#222" stroke-width="0.15"/>
+<rect x="163.50" y="27.65" width="2.46" height="13.00" fill="#e8c27a" stroke="#222" stroke-width="0.15"/>
+<line x1="163.50" y1="109.17" x2="170.38" y2="109.17" stroke="#7a3fa0" stroke-width="0.59"/>
+<line x1="163.50" y1="79.16" x2="170.38" y2="79.16" stroke="#7a3fa0" stroke-width="0.59"/>
+<line x1="163.50" y1="49.16" x2="170.38" y2="49.16" stroke="#7a3fa0" stroke-width="0.59"/>
+<circle cx="255.09" cy="115.52" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
+<circle cx="255.09" cy="106.09" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
+<circle cx="267.67" cy="115.52" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
+<circle cx="267.67" cy="106.09" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
+<circle cx="255.09" cy="38.48" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
+<circle cx="255.09" cy="29.04" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
+<circle cx="267.67" cy="38.48" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
+<circle cx="267.67" cy="29.04" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
+<circle cx="183.55" cy="115.52" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
+<circle cx="183.55" cy="106.09" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
+<circle cx="170.97" cy="115.52" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
+<circle cx="170.97" cy="106.09" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
+<circle cx="183.55" cy="38.48" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
+<circle cx="183.55" cy="29.04" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
+<circle cx="170.97" cy="38.48" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
+<circle cx="170.97" cy="29.04" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
+<line class="d" x1="170.97" y1="134.00" x2="170.97" y2="135.50"/>
+<text class="o2" x="170.97" y="136.00" transform="rotate(90 170.97 136.00)">530</text>
+<line class="d" x1="183.55" y1="134.00" x2="183.55" y2="135.50"/>
+<text class="o2" x="183.55" y="136.00" transform="rotate(90 183.55 136.00)">466</text>
+<line class="d" x1="255.09" y1="134.00" x2="255.09" y2="135.50"/>
+<text class="o2" x="255.09" y="136.00" transform="rotate(90 255.09 136.00)">102</text>
+<line class="d" x1="267.67" y1="134.00" x2="267.67" y2="135.50"/>
+<text class="o2" x="267.67" y="136.00" transform="rotate(90 267.67 136.00)">38</text>
+<line class="d" x1="162.00" y1="115.52" x2="163.50" y2="115.52"/>
+<text class="o2" x="161.50" y="116.12" text-anchor="end">94</text>
+<line class="d" x1="162.00" y1="106.09" x2="163.50" y2="106.09"/>
+<text class="o2" x="161.50" y="106.69" text-anchor="end">142</text>
+<line class="d" x1="162.00" y1="38.48" x2="163.50" y2="38.48"/>
+<text class="o2" x="161.50" y="39.08" text-anchor="end">486</text>
+<line class="d" x1="162.00" y1="29.04" x2="163.50" y2="29.04"/>
+<text class="o2" x="161.50" y="29.64" text-anchor="end">534</text>
+<text class="s" x="163.50" y="18.00">Outside face, turned over (left and right swap)</text>
 <rect class="o" x="34.00" y="150.00" width="114.00" height="4.00"/>
 <text class="s" x="150.00" y="152.80">Left edge</text>
 <circle cx="58.83" cy="152.00" r="0.60" fill="none" stroke="#7a3fa0" stroke-width="0.25"/>
@@ -41,13 +95,14 @@ expression: svg
 <rect x="12" y="168.00" width="273.00" height="30" fill="none" stroke="#222" stroke-width="0.3"/>
 <text class="t" x="15.00" y="175.00">B01.Bottom  —  Bottom</text>
 <text class="t" x="15.00" y="182.00">Finished 568 × 580 × 16 mm   Board: Polytec Classic White Matt 16 MR MDF</text>
-<text class="t" x="15.00" y="189.00">Job: Snapshot job   Cabinet: B01   Operations: 15   Reference corner ●   Edge tape ▬</text>
+<text class="t" x="15.00" y="189.00">Job: Snapshot job   Cabinet: B01   Operations: 31   Reference corner ●   Edge tape ▬</text>
 <text class="s" x="158.50" y="172.50">Edge Ø3 × 35 (Left) @ 0, 126.3</text>
 <text class="s" x="158.50" y="175.40">Edge Ø3 × 35 (Left) @ 0, 279</text>
 <text class="s" x="158.50" y="178.30">Edge Ø3 × 35 (Left) @ 0, 431.7</text>
 <text class="s" x="158.50" y="181.20">Edge Ø3 × 35 (Right) @ 568, 126.3</text>
 <text class="s" x="158.50" y="184.10">Edge Ø3 × 35 (Right) @ 568, 279</text>
 <text class="s" x="158.50" y="187.00">Edge Ø3 × 35 (Right) @ 568, 431.7</text>
-<text class="s" x="158.50" y="189.90">groove 568 × 6 ×1  @ 0, 558</text>
-<text class="s" x="158.50" y="192.80">biscuit 12.5 × 66.1 ×8  @ 0, 16.9; 0, 169.6; …</text>
+<text class="s" x="158.50" y="189.90">in groove 568 × 6 ×1  @ 0, 558</text>
+<text class="s" x="158.50" y="192.80">in biscuit 12.5 × 66.1 ×8  @ 0, 16.9; 0, 169.6; …</text>
+<text class="s" x="158.50" y="195.70">out Ø3 × 5 LegPlate ×16  @ 102, 94; 102, 142; …</text>
 </svg>

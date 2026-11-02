@@ -19,7 +19,9 @@
         "front_hole_less_gap": 1,
         "front_hole_pitch": 32,
         "front_hole_count": 2,
-        "front_hole_inset": 12.5
+        "front_hole_inset": 12.5,
+        "model_hole_y": 0,
+        "model_hole_z": 0
       },
       "source": {
         "url": "Blum Catalogue and technical manual 2024/2025, p.57, web code DQDD6M; peg positions and front assembly p.57, read from its drawings",
