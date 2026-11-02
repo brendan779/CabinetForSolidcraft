@@ -120,7 +120,7 @@ impl StandIn {
 pub fn stand_ins(list: &PartList) -> Vec<StandIn> {
     let mut out = Vec::new();
     let (mut hinges, mut drawers, mut legs) = (0, 0, 0);
-    let (mut pushes, mut servos) = (0, 0);
+    let (mut pushes, mut servos, mut brackets) = (0, 0, 0);
     for h in &list.hardware {
         if h.item.starts_with("blum.tip-on.door") {
             if let Some(shapes) = tip_on_door(list, h) {
@@ -141,8 +141,7 @@ pub fn stand_ins(list: &PartList) -> Vec<StandIn> {
                 });
             }
         } else if h.item == "blum.servo-drive.drive-unit" {
-            let (units, profile) = servo_drive(list);
-            for shapes in units {
+            if let Some(shapes) = servo_unit(list, &h.part) {
                 servos += 1;
                 out.push(StandIn {
                     name: format!("{}.Servo{servos}", list.cabinet),
@@ -150,11 +149,15 @@ pub fn stand_ins(list: &PartList) -> Vec<StandIn> {
                     shapes,
                 });
             }
-            if let Some(shapes) = profile {
+        } else if h.item.starts_with("blum.servo-drive.bracket-profile.") {
+            let n = brackets;
+            brackets += 1;
+            let compartments = servo_compartments(list);
+            if let Some(shape) = compartments.get(n).and_then(|c| servo_profile(list, c)) {
                 out.push(StandIn {
-                    name: format!("{}.ServoProfile", list.cabinet),
+                    name: servo_profile_name(&list.cabinet, n),
                     item: h.item.clone(),
-                    shapes: vec![shapes],
+                    shapes: vec![shape],
                 });
             }
         } else if h.item.starts_with("blum.clip-top") {
@@ -293,79 +296,116 @@ fn tip_on_blumotion(list: &PartList, h: &HardwarePlacement) -> Option<Vec<Shape>
     Some(vec![unit(left, 1.0), unit(right, -1.0)])
 }
 
-/// SERVO-DRIVE: a drive unit per drawer between its box and the room Blum asks for behind it
-/// (NL + 33), and the upright bracket profile once (its base drilling NL + 19 from the front).
-fn servo_drive(list: &PartList) -> (Vec<Vec<Shape>>, Option<Shape>) {
-    let Some((left, right, _)) = interior(list) else {
-        return (Vec::new(), None);
-    };
-    let floor = list
-        .by_role(PartRole::Bottom)
-        .map(|b| b.bounds.max().z)
-        .fold(f64::MIN, f64::max);
-    let ceiling = list
-        .parts
-        .iter()
-        .filter(|p| {
-            matches!(
-                p.role,
-                PartRole::Top | PartRole::FrontRail | PartRole::BackRail
-            )
-        })
-        .map(|p| p.bounds.min.z)
-        .fold(f64::MAX, f64::min);
-    let lw = right - left;
-    let x = if lw >= SERVO_CENTRED_FROM {
+/// One bracket profile's compartment: its bay and heights, and the driven drawer that sets the
+/// bracket line.
+pub(crate) struct ServoCompartment {
+    pub x: f64,
+    pub floor: f64,
+    pub ceiling: f64,
+    pub front: String,
+}
+
+/// The compartments holding driven drawers, in the order the builder lists their brackets.
+pub(crate) fn servo_compartments(list: &PartList) -> Vec<ServoCompartment> {
+    let mut out: Vec<ServoCompartment> = Vec::new();
+    for h in &list.hardware {
+        if h.item != "blum.servo-drive.drive-unit" {
+            continue;
+        }
+        let Some(b) = servo_base(list, &h.part) else {
+            continue;
+        };
+        let x = b.bounds.center().x;
+        let Some((floor, ceiling)) = list.compartment_around(x, b.bounds.min.z) else {
+            continue;
+        };
+        // The same compartment: the same heights in the same bay.
+        let bay = |x: f64| {
+            list.bay_around(x)
+                .map(|(l, r)| (l.name.clone(), r.name.clone()))
+        };
+        if !out
+            .iter()
+            .any(|c| c.floor == floor && c.ceiling == ceiling && bay(c.x) == bay(x))
+        {
+            out.push(ServoCompartment {
+                x,
+                floor,
+                ceiling,
+                front: h.part.clone(),
+            });
+        }
+    }
+    out
+}
+
+/// The base of the drawer behind `front`.
+fn servo_base<'a>(list: &'a PartList, front: &str) -> Option<&'a Part> {
+    let n = front.rsplit_once(PartRole::DrawerFront.code())?.1;
+    list.part(&format!(
+        "{}.{}{n}",
+        list.cabinet,
+        PartRole::DrawerBottom.code()
+    ))
+}
+
+/// The upright's X in the bay at `x`: the bay's centre, or a set distance from a narrow bay's left
+/// side.
+fn servo_x(list: &PartList, x: f64) -> Option<f64> {
+    let (l, r) = list.bay_around(x)?;
+    let (left, right) = (l.bounds.max().x, r.bounds.min.x);
+    Some(if right - left >= SERVO_CENTRED_FROM {
         (left + right) / 2.0
     } else {
         left + SERVO_SIDE_INSET
-    };
+    })
+}
+
+/// A driven drawer's drive unit, between its box and the room Blum asks for behind it (NL + 33).
+fn servo_unit(list: &PartList, front: &str) -> Option<Vec<Shape>> {
+    let n = front.rsplit_once(PartRole::DrawerFront.code())?.1;
+    let nl = nominal_length(list, front)?;
+    let (box_back, _, z0) = behind_drawer(list, n)?;
+    let x = servo_x(list, servo_base(list, front)?.bounds.center().x)?;
     let (w, ht) = SERVO_UNIT;
-    let mut out = Vec::new();
-    let mut profile = None;
-    for b in list.by_role(PartRole::DrawerBottom) {
-        let Some(n) = b
-            .name
-            .rsplit_once(PartRole::DrawerBottom.code())
-            .map(|t| t.1)
-        else {
-            continue;
-        };
-        // The drawer's nominal length, from its runner or cabinet profile (any system).
-        let front = format!("{}.{}{n}", list.cabinet, PartRole::DrawerFront.code());
-        let Some(nl) = nominal_length(list, &front) else {
-            continue;
-        };
-        let Some((box_back, _, z0)) = behind_drawer(list, n) else {
-            continue;
-        };
-        let bracket = nl + 19.0;
-        // The drawer's base stands in for the cabinet profile's bottom edge.
-        out.push(vec![Shape::Box(boxed(
-            Vec3::new(x - w / 2.0, box_back.max(nl + 3.0), z0 + SERVO_LIFT),
-            Vec3::new(
-                x + w / 2.0,
-                bracket - SERVO_PROFILE / 2.0,
-                z0 + SERVO_LIFT + ht,
-            ),
-        ))]);
-        if profile.is_none() && ceiling > floor {
-            let lh = ceiling - floor;
-            profile = Some(Shape::Box(boxed(
-                Vec3::new(
-                    x - SERVO_PROFILE / 2.0,
-                    bracket - SERVO_PROFILE / 2.0,
-                    floor,
-                ),
-                Vec3::new(
-                    x + SERVO_PROFILE / 2.0,
-                    bracket + SERVO_PROFILE / 2.0,
-                    floor + lh - 10.0,
-                ),
-            )));
-        }
+    let bracket = nl + 19.0;
+    // The drawer's base stands in for the cabinet profile's bottom edge.
+    Some(vec![Shape::Box(boxed(
+        Vec3::new(x - w / 2.0, box_back.max(nl + 3.0), z0 + SERVO_LIFT),
+        Vec3::new(
+            x + w / 2.0,
+            bracket - SERVO_PROFILE / 2.0,
+            z0 + SERVO_LIFT + ht,
+        ),
+    ))])
+}
+
+/// A compartment's upright bracket profile, LH − 10 long (its base drilling NL + 19 from the
+/// front).
+fn servo_profile(list: &PartList, c: &ServoCompartment) -> Option<Shape> {
+    let x = servo_x(list, c.x)?;
+    let bracket = nominal_length(list, &c.front)? + 19.0;
+    Some(Shape::Box(boxed(
+        Vec3::new(
+            x - SERVO_PROFILE / 2.0,
+            bracket - SERVO_PROFILE / 2.0,
+            c.floor,
+        ),
+        Vec3::new(
+            x + SERVO_PROFILE / 2.0,
+            bracket + SERVO_PROFILE / 2.0,
+            c.ceiling - 10.0,
+        ),
+    )))
+}
+
+/// A bracket profile's name: the first keeps the plain name it has always had.
+pub(crate) fn servo_profile_name(cabinet: &str, n: usize) -> String {
+    if n == 0 {
+        format!("{cabinet}.ServoProfile")
+    } else {
+        format!("{cabinet}.ServoProfile{}", n + 1)
     }
-    (out, profile)
 }
 
 /// A drawer front's nominal length, from the runner or cabinet profile fitted to it.

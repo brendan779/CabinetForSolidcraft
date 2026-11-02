@@ -449,6 +449,11 @@ struct CabinetDoc: Identifiable, Hashable, Codable {
         set { update { $0["fronts"] = ["type": "sections", "columns": newValue.map(\.json)] } }
     }
 
+    /// Whether any section has this front, for options that only mean something with it.
+    func hasFront(_ front: String) -> Bool {
+        sectionColumns.contains { $0.rows.contains { $0.front.hasPrefix(front) } }
+    }
+
     /// The front layout's type: open, door, door_pair, drawers, lift, bi_fold_lift, sections.
     var frontType: String {
         get {
@@ -477,26 +482,6 @@ struct CabinetDoc: Identifiable, Hashable, Codable {
                     ["type": "niche", "height": 0],
                     ["type": "door", "hinge_side": "left", "height": 350],
                 ] as [[String: Any]]]
-                case "sections":
-                    // One section holding what the cabinet has now; its shelves move into it.
-                    var cell = SectionCell()
-                    let fronts = o["fronts"] as? [String: Any] ?? [:]
-                    switch fronts["type"] as? String {
-                    case "door": cell.front = (fronts["hinge_side"] as? String) == "right" ? "door_right" : "door_left"
-                    case "door_pair": cell.front = "door_pair"
-                    case "drawers":
-                        cell.front = "drawers"
-                        cell.drawers = max((fronts["ratios"] as? [Any])?.count ?? 3, 1)
-                    default: break
-                    }
-                    let shelves = (o["adjustable_shelves"] as? NSNumber)?.intValue ?? 0
-                    if shelves > 0, cell.front != "drawers" {
-                        cell.inside = "shelves"
-                        cell.insideCount = shelves
-                    }
-                    o["fronts"] = ["type": "sections", "columns": [SectionColumnDoc(rows: [cell]).json]]
-                    o["adjustable_shelves"] = 0
-                    o["inner_drawers"] = 0
                 default: o["fronts"] = ["type": "open"]
                 }
                 // The stacked sections bring their own fixed shelves.
@@ -1302,7 +1287,7 @@ struct JobContents: Sendable {
         }
         let legacy = try JSONDecoder().decode(Legacy.self, from: data)
         name = legacy.jobName
-        cabinets = legacy.cabinets
+        cabinets = legacy.cabinets.map { var c = $0; c.json = sectionedCabinet(json: c.json); return c }
         // The first cabinet's standard becomes the job's; the others keep theirs as overrides.
         if let first = legacy.cabinets.first,
            let data = try? JSONSerialization.data(withJSONObject: first.standard, options: [.sortedKeys]) {

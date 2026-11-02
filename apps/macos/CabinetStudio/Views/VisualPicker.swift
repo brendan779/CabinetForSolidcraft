@@ -87,6 +87,9 @@ struct ConstructionThumbnail: View {
             case "handle_range": pen.handleRange(choice)
             case "handle_size": pen.handleSize(choice)
             case "handle_place": pen.handlePlace(choice)
+            case "sharknose_angle": pen.sharknoseAngle(choice)
+            case "sharknose_door_edge": pen.sharknoseEdge(choice)
+            case "drawer_frame": pen.drawerFrame(choice)
             case "handle_finish": pen.handleFinish(choice)
             case "overlay": pen.overlayPlan(choice)
             case "hinge_boss": pen.hingeBoss(choice)
@@ -287,6 +290,35 @@ private struct Pen {
         }
         ctx.fill(Path(roundedRect: r(64, 14, 4, 26), cornerRadius: 2 * s), with: .color(colour))
         ctx.stroke(Path(roundedRect: r(64, 14, 4, 26), cornerRadius: 2 * s), with: .color(.primary.opacity(0.6)), lineWidth: 0.8)
+    }
+
+    /// A door hinged on the left, its bevelled edge marked.
+    func sharknoseEdge(_ choice: String) {
+        let (x0, x1, y0, y1): (CGFloat, CGFloat, CGFloat, CGFloat) = (28, 72, 8, 72)
+        board(x0, y0, x1 - x0, y1 - y0)
+        switch choice {
+        case "bottom": line(p(x0, y1 - 4), p(x1, y1 - 4), colour: accent, width: 2)
+        case "opening": line(p(x1 - 4, y0), p(x1 - 4, y1), colour: accent, width: 2)
+        default: line(p(x0, y0 + 4), p(x1, y0 + 4), colour: accent, width: 2)
+        }
+    }
+
+    /// Three drawers in a carcass, the board behind them showing in the gaps.
+    func drawerFrame(_ choice: String) {
+        if choice == "board" { board(18, 6, 64, 68, hot: true) }
+        for y in [10.0, 32.0, 54.0] as [CGFloat] { board(22, y, 56, 18) }
+    }
+
+    /// A front cut through, face to the left: the bevel falls away from the top at the back.
+    func sharknoseAngle(_ choice: String) {
+        let down: CGFloat = choice == "bevel_30" ? 30 : choice == "bevel_45" ? 17 : 10
+        let (x0, x1, top, bottom): (CGFloat, CGFloat, CGFloat, CGFloat) = (40, 60, 8, 54)
+        let nose = x0 + 3
+        line(p(x0, top), p(x0, bottom))
+        line(p(x0, bottom), p(x1, bottom))
+        line(p(x1, bottom), p(x1, top + down))
+        line(p(x0, top), p(nose, top))
+        line(p(nose, top), p(x1, top + down), colour: accent, width: 2)
     }
 
     /// A base door hinged on the left and a drawer, with the handles where the choice puts them.

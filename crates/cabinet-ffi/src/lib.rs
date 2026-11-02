@@ -61,6 +61,11 @@ pub struct PanelBox {
     /// toe-kick notch, a front's routed finger pull. Its box as min x, y, z, max x, y, z; empty
     /// without one. The part is the two boxes it leaves.
     pub rebate: Vec<f64>,
+    /// A sharknose: a point on the edge the bevel cuts off, in `rebate`'s box (x, y, z), so the
+    /// part keeps the slope, not the step. Empty without one.
+    pub bevel: Vec<f64>,
+    /// Openings right through it, four numbers each: min x, min z, max x, max z (a drawer frame's).
+    pub openings: Vec<f64>,
     /// A supplier handle model to draw in place of this panel's box (ABI-3): the article naming
     /// `vendor-cad/abi/<article>.stl`. Empty for every other panel; the box draws then.
     pub mesh: String,
@@ -343,7 +348,63 @@ pub fn cabinet_kinds() -> Vec<String> {
 pub fn new_cabinet(id: String, kind: String) -> Result<String, CoreError> {
     let kind: CabinetKind =
         serde_json::from_value(serde_json::Value::String(kind)).map_err(invalid)?;
-    serde_json::to_string(&Cabinet::new(id, kind)).map_err(invalid)
+    serde_json::to_string(&Cabinet::new(id, kind).sectioned()).map_err(invalid)
+}
+
+/// A cabinet's JSON with its fronts as sections, the only form the app edits. Anything that is not
+/// a cabinet (a filler, say) comes back as it was.
+#[uniffi::export]
+pub fn sectioned_cabinet(json: String) -> String {
+    serde_json::from_str::<Cabinet>(&json)
+        .ok()
+        .and_then(|c| serde_json::to_string(&c.sectioned()).ok())
+        .unwrap_or(json)
+}
+
+/// The sections' resolved sizes (mm), for drawing and moving their splits.
+#[derive(uniffi::Record)]
+pub struct SectionSplits {
+    pub width_total: f64,
+    pub height_total: f64,
+    pub gap: f64,
+    pub row_gap: f64,
+    pub widths: Vec<f64>,
+    pub heights: Vec<Vec<f64>>,
+}
+
+#[uniffi::export]
+pub fn section_splits(json: String) -> Option<SectionSplits> {
+    let l = cabinet_core::splits::layout(&serde_json::from_str::<Cabinet>(&json).ok()?)?;
+    Some(SectionSplits {
+        width_total: l.width_total,
+        height_total: l.height_total,
+        gap: l.gap,
+        row_gap: l.row_gap,
+        widths: l.widths,
+        heights: l.heights,
+    })
+}
+
+/// Where a split snaps while dragged. `others`: the same kind of line in other columns.
+#[uniffi::export]
+pub fn section_split_snaps(sizes: Vec<f64>, line: u32, gap: f64, others: Vec<f64>) -> Vec<f64> {
+    cabinet_core::splits::snaps(&sizes, line as usize, gap, &others)
+}
+
+/// The cabinet with a split moved: between columns with `column` nil, else between rows `line`
+/// and `line + 1` of that column.
+#[uniffi::export]
+pub fn move_section_split(json: String, column: Option<u32>, line: u32, position: f64) -> String {
+    let Ok(mut cab) = serde_json::from_str::<Cabinet>(&json) else {
+        return json;
+    };
+    cabinet_core::splits::move_split(
+        &mut cab,
+        column.map(|c| c as usize),
+        line as usize,
+        position,
+    );
+    serde_json::to_string(&cab).unwrap_or(json)
 }
 
 /// Sets one field of the cabinet's construction standard to a picker choice id.
@@ -446,7 +507,7 @@ pub fn open_project(json: String) -> Result<ProjectRecord, CoreError> {
         .resolved()
         .map_err(invalid)?
         .iter()
-        .map(|c| serde_json::to_string(c).map_err(invalid))
+        .map(|c| serde_json::to_string(&c.clone().sectioned()).map_err(invalid))
         .collect::<Result<_, _>>()?;
     for piece in &p.pieces {
         let at = piece.index.min(items_json.len());
@@ -652,7 +713,8 @@ fn summary(list: PartList) -> BuildSummary {
     use cabinet_core::geom::Axis;
     let rebate = |p: &cabinet_core::Part| {
         list.operations.iter().find_map(|o| match o {
-            // A sharknose bevel is drawn as the box it cuts the corner off: a step, not a slope.
+            // A sharknose bevel's box is the corner it cuts: `bevel` tells the view to keep the
+            // slope inside it.
             Operation::Groove { part, bounds } | Operation::Chamfer { part, bounds, .. }
                 if *part == p.name =>
             {
@@ -701,6 +763,30 @@ fn summary(list: PartList) -> BuildSummary {
                     .map(|a| format!("{a:?}").to_lowercase())
                     .unwrap_or_default(),
                 rebate: rebate(p).unwrap_or_default(),
+                bevel: list
+                    .operations
+                    .iter()
+                    .find_map(|o| match o {
+                        Operation::Chamfer { part, at, .. } if *part == p.name => {
+                            Some(vec![at.x, at.y, at.z])
+                        }
+                        _ => None,
+                    })
+                    .unwrap_or_default(),
+                openings: if p.role == cabinet_core::part::PartRole::DrawerFrame {
+                    list.operations
+                        .iter()
+                        .filter_map(|o| match o {
+                            Operation::Cutout { part, bounds, .. } if *part == p.name => {
+                                Some([bounds.min.x, bounds.min.z, bounds.max().x, bounds.max().z])
+                            }
+                            _ => None,
+                        })
+                        .flatten()
+                        .collect()
+                } else {
+                    Vec::new()
+                },
                 mesh: String::new(),
                 mesh_transform: Vec::new(),
             }
@@ -851,6 +937,8 @@ fn summary(list: PartList) -> BuildSummary {
             board: format!("handle:{finish}"),
             grain: String::new(),
             rebate: Vec::new(),
+            bevel: Vec::new(),
+            openings: Vec::new(),
             mesh,
             mesh_transform,
         });
@@ -906,6 +994,8 @@ fn summary(list: PartList) -> BuildSummary {
             board: format!("handle:{finish}"),
             grain: String::new(),
             rebate: Vec::new(),
+            bevel: Vec::new(),
+            openings: Vec::new(),
             mesh: String::new(),
             mesh_transform: Vec::new(),
         });
@@ -1972,7 +2062,7 @@ pub fn cabinets_from_selection(port: u16, taken_ids: Vec<String>) -> Result<BoxI
         taken.push(id.clone());
         out.cabinets.push(DrawnCabinet {
             id,
-            json: serde_json::to_string(&cab).map_err(invalid)?,
+            json: serde_json::to_string(&cab.clone().sectioned()).map_err(invalid)?,
             source: body,
         });
     }
@@ -2004,7 +2094,7 @@ pub fn cabinets_in_design(port: u16) -> Result<Vec<String>, CoreError> {
         .map_err(sc)?
         .into_iter()
         .filter_map(|v| serde_json::from_value::<Cabinet>(v).ok())
-        .filter_map(|c| serde_json::to_string(&c).ok())
+        .filter_map(|c| serde_json::to_string(&c.sectioned()).ok())
         .collect())
 }
 

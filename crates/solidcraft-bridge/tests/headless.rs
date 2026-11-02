@@ -593,18 +593,144 @@ fn an_arched_top_cuts_both_doors() {
 /// WF-3: a sharknose door and a wall door come out of SolidCraft with their gripping edge's
 /// back corner bevelled off: the 20 × 12 mm triangle less than the box.
 #[test]
+fn a_drawer_frame_is_cut_out_for_each_drawer() {
+    let Some(cli) = cli() else {
+        eprintln!("SOLIDCRAFT_CLI not set: skipped");
+        return;
+    };
+    use cabinet_core::model::DoorOverlay;
+    for overlay in [DoorOverlay::Full, DoorOverlay::Half, DoorOverlay::Inset] {
+        let mut cab = Cabinet::new("D01", CabinetKind::DrawerBank).sectioned();
+        cab.standard.drawer_frame = cabinet_core::model::DrawerFrame::Board;
+        cab.standard.overlay = overlay;
+        let list = build_cabinet(&cab).unwrap();
+        let r = run(
+            &cli,
+            "drawer-frame",
+            &emit_cabinet(&list, Detail::Design, None),
+            &["eval"],
+        );
+        // Inset, it's rails with nothing to cut: every one comes through as one solid.
+        if overlay == DoorOverlay::Inset {
+            for p in list.by_role(cabinet_core::part::PartRole::DrawerFrame) {
+                let body = r["bodies"]
+                    .as_array()
+                    .unwrap()
+                    .iter()
+                    .find(|b| b["name"] == p.name)
+                    .unwrap();
+                let full = p.bounds.size.x * p.bounds.size.y * p.bounds.size.z;
+                assert!((full - body["volume_mm3"].as_f64().unwrap()).abs() < 50.0);
+            }
+            continue;
+        }
+        let p = list.part("D01.DrawerFrame").unwrap();
+        let cut: f64 = list
+            .operations
+            .iter()
+            .filter_map(|o| match o {
+                cabinet_core::part::Operation::Cutout { part, bounds, .. } if *part == p.name => {
+                    Some(bounds.size.x * bounds.size.y * bounds.size.z)
+                }
+                _ => None,
+            })
+            .sum();
+        assert!(cut > 0.0);
+        let body = r["bodies"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|b| b["name"] == p.name)
+            .unwrap();
+        let full = p.bounds.size.x * p.bounds.size.y * p.bounds.size.z;
+        let volume = body["volume_mm3"].as_f64().unwrap();
+        assert!(
+            (full - cut - volume).abs() < 50.0,
+            "{volume} of {full} less {cut}"
+        );
+    }
+}
+
+#[test]
+fn a_door_is_bevelled_on_the_edge_chosen_with_a_rail_behind_it() {
+    let Some(cli) = cli() else {
+        eprintln!("SOLIDCRAFT_CLI not set: skipped");
+        return;
+    };
+    use cabinet_core::model::SharknoseEdge;
+    use cabinet_core::model::{FrontLayout, HingeSide};
+    // The down leg is longer than the door is thick: legs the wrong way round fail outright.
+    for (edge, hinge_side) in [
+        (SharknoseEdge::Top, HingeSide::Left),
+        (SharknoseEdge::Bottom, HingeSide::Left),
+        (SharknoseEdge::Opening, HingeSide::Left),
+        (SharknoseEdge::Opening, HingeSide::Right),
+    ] {
+        let mut cab = Cabinet::new("B01", CabinetKind::Base);
+        cab.fronts = FrontLayout::Door { hinge_side };
+        cab.standard.handle_place = cabinet_core::model::HandlePlace::Sharknose;
+        cab.standard.sharknose_door_edge = edge;
+        let list = build_cabinet(&cab).unwrap();
+        let r = run(
+            &cli,
+            "door-edge",
+            &emit_cabinet(&list, Detail::Design, None),
+            &["eval"],
+        );
+        let bodies = r["bodies"].as_array().unwrap();
+        let p = list.part("B01.Door1").unwrap();
+        let body = bodies.iter().find(|b| b["name"] == "B01.Door1").unwrap();
+        let (into, down) = (12.0, 12.0 * 3f64.sqrt());
+        let length = if edge == SharknoseEdge::Opening {
+            p.bounds.size.z
+        } else {
+            p.bounds.size.x
+        };
+        let full = p.bounds.size.x * p.bounds.size.y * p.bounds.size.z;
+        let volume = body["volume_mm3"].as_f64().unwrap();
+        let cut = length * into * down / 2.0;
+        assert!(
+            (full - cut - volume).abs() < 50.0,
+            "{edge:?}: {volume} of {full} less {cut}"
+        );
+        assert!(
+            bodies.iter().any(|b| b["name"] == "B01.GripRail1"),
+            "{edge:?}"
+        );
+    }
+}
+
+#[test]
 fn a_sharknose_bevels_the_gripping_edge() {
     let Some(cli) = cli() else {
         eprintln!("SOLIDCRAFT_CLI not set: skipped");
         return;
     };
-    for (kind, door) in [
-        (CabinetKind::Base, "B01.Door1"),
-        (CabinetKind::Wall, "W01.Door1"),
+    use cabinet_core::model::SharknoseAngle;
+    for (kind, door, angle, down) in [
+        (
+            CabinetKind::Base,
+            "B01.Door1",
+            SharknoseAngle::Bevel30,
+            12.0 * 3f64.sqrt(),
+        ),
+        (
+            CabinetKind::Wall,
+            "W01.Door1",
+            SharknoseAngle::Bevel30,
+            12.0 * 3f64.sqrt(),
+        ),
+        (
+            CabinetKind::Base,
+            "B01.Door1",
+            SharknoseAngle::Bevel45,
+            12.0,
+        ),
     ] {
         let id = &door[..3];
         let mut cab = Cabinet::new(id, kind);
         cab.standard.handle_place = cabinet_core::model::HandlePlace::Sharknose;
+        cab.standard.sharknose_angle = angle;
         let list = build_cabinet(&cab).unwrap();
         let r = run(
             &cli,
@@ -620,11 +746,11 @@ fn a_sharknose_bevels_the_gripping_edge() {
             .find(|b| b["name"] == door)
             .unwrap();
         let full = p.bounds.size.x * p.bounds.size.y * p.bounds.size.z;
-        let cut = p.bounds.size.x * 20.0 * 12.0 / 2.0;
+        let cut = p.bounds.size.x * down * 12.0 / 2.0;
         let volume = body["volume_mm3"].as_f64().unwrap();
         assert!(
             (full - cut - volume).abs() < 50.0,
-            "{door}: {volume} vs {}",
+            "{door} {angle:?}: {volume} vs {}",
             full - cut
         );
     }

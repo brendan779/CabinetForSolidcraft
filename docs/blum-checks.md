@@ -68,3 +68,48 @@ Blum's in everything above but the hinge count and the shelf's height:
    articles, and EXPANDO and INSERTA drill the two Ø8 boss holes.
 5. **Cover caps.** Add 70.1503.BP (one per hinge) to the hardware list.
 6. **Shelf on its pins.** The shelf's underside sits a pin radius (2.5) above the hole centre.
+
+## Check 2: drawer base, built section by section (2026-11-02)
+
+Blum's session of 2026-10-27 (screen recording and output files, local only:
+`vendor-cad/blum-sessions/2026-10-27-drawer-base.zip`). A 600 wide, 870 high, 580 deep base with
+three LEGRABOX drawers, all on SERVO-DRIVE, and one fixed shelf over the bottom one. Ours rebuilt
+as sections with the same settings.
+
+How Blum's configurator works, and what SEC-3 took from it:
+
+- The cabinet comes first, then **Fronts** splits it into A/1, A/2, A/3, each with a height and an
+  open-compartment toggle. **Internal design** (fixed shelf, central panel, adjustable shelf, line
+  drilling) is a separate step, so a split between fronts doesn't imply a shelf. Ours: `shelf_above`
+  on each section.
+- **Fittings** are chosen per section: lift, hinge or box system, each drawer with its own motion.
+  Ours: `opening` and the drawers' `system` on each section.
+
+| Item | Blum's session | Ours | Result |
+|---|---|---|---|
+| Fronts | 287.33 × 597 | same | match |
+| Driven drawer | NL 500, base 490 × 533, back 530 wide | same | match: SERVO-DRIVE takes the shorter box |
+| Front fixing | 28.5 from the front's edge, first hole 67 | same | match |
+| Cross members | 568 × 80 | same | match |
+| Bracket | one per compartment, clear height − 10 | was one for the whole cabinet | **fixed** |
+| Bracket stock | Z10T670AA for both cuts | was the shortest that reaches (650) | **fixed**: shortest stock is catalog data |
+| Parts per bracket | 1 attachment, 1 cable, 1 node | 2, 1 and 1 per cabinet | **fixed** |
+| Drive units, bumpers | 3 units, 8 bumpers (2 + 4 + 2) | 3 units, per each front's height and runner | match by rule; ours gives 6 here because all three of ours are on the 40 kg profile |
+| Bumper position | datum on the front's back face (582.5), shank in the front, head towards the carcass | was outside the front's outer face | **fixed** (2026-11-02): the owner saw them as stray screws |
+| Upright's datum | 4 above its floor (20 over a 16 base, 591.17 over a shelf top at 587.17) | was 20 | **fixed**. Z10T670AA is drawn as Blum's model where it fits uncut, otherwise a bar at its cut length |
+| Front to carcass | fronts' back 2.5 off the carcass (582.5, carcass front at 580) | 0 | **differs**: the bumper's 2.6 head needs that gap; all our fronts sit on the carcass |
+| Power supply | not listed | 1 per cabinet | ours stays: a cabinet can't run without one, and Blum's session may leave it to the room |
+| Fixed shelf height | 282.83 to 298.83, cuts 256.83 and 545.16 | 290.33 to 306.33, cuts 264.3 and 537.7 | **differs**: Blum's sits 7.5 lower; ours keeps every drawer's base the same height above its front |
+| Cabinet profile holes | drilled on the sides: 37 from the front, the third hole at 54, 328.33 and 625.17 | not drilled | **missing**: logged as SEC-4 |
+| Box height, length | the user picked C (back height 148) and NL 500 on all drawers | auto: K, and NL 550 on drawers without SERVO-DRIVE | **differs**: logged as SEC-4 |
+| Carcass | sides 870, base and cross members between them | a construction choice in `bottom_joint` | ours to choose |
+| Glass design elements, AMBIA-LINE | listed | not modelled | the user's choices, not a fault |
+
+### Still to confirm
+
+- Attachments: Blum's catalogue calls Z10D01E0.01 "top/bottom", and this session lists one per
+  bracket on two brackets. We follow the session. A session with one tall bracket would settle
+  whether one is always enough.
+- The 650's own ICH range (660 to 669) still picks the 650, per the catalogue. Blum's choice of 670
+  for much shorter cuts is one observation. `verified` stays false.
+

@@ -411,7 +411,7 @@ final class ViewportScene {
                 }
                 // A rebate along an edge (a side's toe-kick notch, a front's finger pull): the two
                 // boxes it leaves.
-                let pieces = Self.split(box, by: p.rebate)
+                let pieces = p.openings.isEmpty ? Self.split(box, by: p.rebate) : Self.around(box, openings: p.openings)
                 let board = project.boardsById[p.board]
                 for piece in pieces {
                     seen.insert(piece.name)
@@ -458,10 +458,12 @@ final class ViewportScene {
         func visible(_ name: String, x: Double) -> Bool {
             if let cut = sectionX, x < cut { return false }
             if name.contains(".Hinge") { return look.showFronts && !look.open }
+            // In the back of a drawer front: it goes with the front.
+            if name.contains(".ServoBumper") { return look.showFronts }
             return true
         }
         func slid(_ t: Transform, _ name: String) -> Transform {
-            guard look.open, name.contains(".BoxSide") else { return t }
+            guard look.open, name.contains(".BoxSide") || name.contains(".ServoBumper") else { return t }
             var t = t
             t.translation.z += Self.drawerTravel
             return t
@@ -606,7 +608,10 @@ final class ViewportScene {
             child.model?.materials = [Self.handleMaterial(Substring(p.board.dropFirst("handle:".count)), selected: false)]
             e.addChild(child)
         } else {
-            e = ModelEntity(mesh: Self.offsetMesh(size: size, by: offset, grain: Self.grainAxis(p)), materials: [])
+            let mesh = p.name.hasSuffix("~bevel") && p.bevel.count == 3
+                ? Self.wedgeMesh(p, size: size, by: offset)
+                : Self.offsetMesh(size: size, by: offset, grain: Self.grainAxis(p))
+            e = ModelEntity(mesh: mesh, materials: [])
         }
         e.name = p.name
         e.components.set(InputTargetComponent())
@@ -636,6 +641,56 @@ final class ViewportScene {
         case "z": 1
         default: nil
         }
+    }
+
+    /// What a sharknose keeps of the box its bevel cuts: the half away from the cut edge, a
+    /// wedge along the front's width, each face flat-shaded.
+    private static func wedgeMesh(_ p: PanelBox, size: SIMD3<Float>, by offset: SIMD3<Float>) -> MeshResource {
+        let h = size / 2
+        // The cut corner in the mesh's frame: its side of the box on each cut axis.
+        let edge = point(p.bevel[0], p.bevel[1], p.bevel[2]) - mid(p)
+        // The edge's mark is halfway along it.
+        let along = (0..<3).min { abs(edge[$0]) < abs(edge[$1]) } ?? 0
+        let (u, v) = along == 1 ? (0, 2) : (along == 0 ? 2 : 0, 1)
+        func corner(_ su: Float, _ sv: Float, _ sa: Float) -> SIMD3<Float> {
+            var c = SIMD3<Float>(repeating: 0)
+            c[u] = su * h[u]; c[v] = sv * h[v]; c[along] = sa * h[along]
+            return c + offset
+        }
+        let (eu, ev): (Float, Float) = (edge[u] >= 0 ? 1 : -1, edge[v] >= 0 ? 1 : -1)
+        // The triangle left once the corner at (eu, ev) is gone.
+        let tri: [(Float, Float)] = [(-eu, -ev), (eu, -ev), (-eu, ev)]
+        var faces: [[SIMD3<Float>]] = []
+        faces.append(tri.map { corner($0.0, $0.1, -1) })
+        faces.append(tri.map { corner($0.0, $0.1, 1) })
+        for i in 0..<3 {
+            let (a, b) = (tri[i], tri[(i + 1) % 3])
+            faces.append([corner(a.0, a.1, -1), corner(b.0, b.1, -1), corner(b.0, b.1, 1), corner(a.0, a.1, 1)])
+        }
+        let centre = (tri.reduce(SIMD3<Float>(repeating: 0)) { $0 + corner($1.0, $1.1, 0) }) / 3
+        var positions: [SIMD3<Float>] = [], normals: [SIMD3<Float>] = [], uvs: [SIMD2<Float>] = []
+        var indices: [UInt32] = []
+        for face in faces {
+            var n = simd_normalize(simd_cross(face[1] - face[0], face[2] - face[0]))
+            let outward = simd_dot(n, face[0] - centre) > 0
+            if !outward { n = -n }
+            let base = UInt32(positions.count)
+            for c in face {
+                positions.append(c)
+                normals.append(n)
+                uvs.append([c[along], c[v]] / Self.grainRepeat)
+            }
+            for i in 1..<(face.count - 1) {
+                let (j, k) = (UInt32(i), UInt32(i + 1))
+                indices += outward ? [base, base + j, base + k] : [base, base + k, base + j]
+            }
+        }
+        var desc = MeshDescriptor()
+        desc.positions = MeshBuffers.Positions(positions)
+        desc.normals = MeshBuffers.Normals(normals)
+        desc.textureCoordinates = MeshBuffers.TextureCoordinates(uvs)
+        desc.primitives = .triangles(indices)
+        return (try? MeshResource.generate(from: [desc])) ?? .generateBox(size: size)
     }
 
     /// A box mesh whose texture coordinates are in metres along each face, the first one along the
@@ -722,7 +777,37 @@ final class ViewportScene {
         let (a, c) = (cut[0], cut[1])
         let first = piece(box.name, [a: beside(a)])
         let second = piece(box.name + "~rebate", [a: (rlo[a], rhi[a]), c: beside(c)])
-        return [first, second].filter { $0.width > eps && $0.depth > eps && $0.height > eps }
+        var pieces = [first, second]
+        // A bevel keeps the slope inside the rebate's box: a wedge of its own.
+        if box.bevel.count == 3 {
+            pieces.append(piece(box.name + "~bevel", [a: (rlo[a], rhi[a]), c: (rlo[c], rhi[c])]))
+        }
+        return pieces.filter { $0.width > eps && $0.depth > eps && $0.height > eps }
+    }
+
+    /// `box` around rectangular openings right through it (min x, min z, max x, max z each): the
+    /// strips across it, bottom to top, each broken where an opening passes.
+    static func around(_ box: PanelBox, openings o: [Double]) -> [PanelBox] {
+        let holes = stride(from: 0, to: o.count - 3, by: 4).map { (x0: o[$0], z0: o[$0 + 1], x1: o[$0 + 2], z1: o[$0 + 3]) }
+        let (left, right) = (box.x, box.x + box.width)
+        let zs = Set(holes.flatMap { [$0.z0, $0.z1] } + [box.z, box.z + box.height]).sorted()
+        var pieces: [PanelBox] = []
+        for (z0, z1) in zip(zs, zs.dropFirst()) {
+            let crossing = holes.filter { $0.z0 < z1 && $0.z1 > z0 }.sorted { $0.x0 < $1.x0 }
+            var x = left
+            for edge in crossing.map({ ($0.x0, $0.x1) }) + [(right, right)] {
+                let end = min(edge.0, right)
+                if end > x + 1e-6 {
+                    var b = box
+                    b.name = pieces.isEmpty ? box.name : "\(box.name)~\(pieces.count)"
+                    b.x = x; b.width = end - x
+                    b.z = z0; b.height = z1 - z0
+                    pieces.append(b)
+                }
+                x = max(x, min(edge.1, right))
+            }
+        }
+        return pieces
     }
 
     /// How far an open drawer slides out, m.

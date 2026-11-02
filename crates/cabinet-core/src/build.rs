@@ -7,10 +7,10 @@ use crate::hinges::{self, HingeNeed};
 use crate::joinery::ButtJoint;
 use crate::lift;
 use crate::model::{
-    BackStyle, BottomJoint, Cabinet, CabinetKind, DoorOverlay, DoorStyle, DrawerSides,
+    BackStyle, BottomJoint, Cabinet, CabinetKind, DoorOverlay, DoorStyle, DrawerFrame, DrawerSides,
     DrawerSystem, Exposed, FrontCore, FrontGrain, FrontLayout, HandlePlace, Hanging, HingeSide,
     InsertDesign, LegFixing, LiftKind, LightZone, Opening, Section, SectionColumn, SectionFront,
-    SectionInside, SectionKind, StackSection, ToeKick, TopJoint, WallHanging,
+    SectionInside, SectionKind, SharknoseEdge, StackSection, ToeKick, TopJoint, WallHanging,
 };
 use crate::part::{
     BorePurpose, Dir, EdgeBanding, HardwarePlacement, Operation, Part, PartList, PartRole,
@@ -91,9 +91,10 @@ const CANOPY_CUTOUT_MARGIN: f64 = 20.0;
 /// deep into the front it goes.
 const FINGER_PULL_HEIGHT: f64 = 25.0;
 const FINGER_PULL_DEPTH: f64 = 10.0;
-/// Our choices for a sharknose bevel: how far down the back of the front and how far into it.
-const SHARKNOSE_DOWN: f64 = 20.0;
+/// How far a sharknose bevel goes into the front, our choice, and the nose it must leave at the
+/// face so the edge doesn't chip.
 const SHARKNOSE_INTO: f64 = 12.0;
+const SHARKNOSE_NOSE: f64 = 4.0;
 /// Our choice: double hanging's lower rail needs at least this much drop above whatever is under
 /// it. The wardrobe's other sizes are the standard's.
 const MIN_LOWER_HANGING: f64 = 300.0;
@@ -104,7 +105,7 @@ const SHAKER_PLAY: f64 = 1.0;
 const GLASS_THICKNESS: f64 = 4.0;
 const GLASS_REBATE_DEPTH: f64 = 12.0;
 /// Generic until a supplier's shelf support is catalogued (HAF-3).
-const SHELF_SUPPORT: &str = "shelf-support.5mm";
+pub(crate) const SHELF_SUPPORT: &str = "shelf-support.5mm";
 /// Our choice, not Blum's: an AVENTOS HF bi-fold's end hinges sit this far in from the fronts'
 /// sides. A door's come from [`HINGE_POSITION`].
 const HINGE_END_OFFSET: f64 = 100.0;
@@ -136,8 +137,14 @@ const CABLE_HOLE_BACK_INSET: f64 = 25.0;
 const INNER_DRAWER_HINGE: &str = "blum.clip-top-blumotion.155.overlay";
 
 /// Builds the part list for one cabinet.
+/// How sizes share a length with gaps between them: 0 takes an even part of what the rest leave.
+pub(crate) fn share(total: f64, asks: &[f64], gap: f64) -> Option<Vec<f64>> {
+    Builder::share(total, asks, gap)
+}
+
 pub fn build_cabinet(cab: &Cabinet) -> Result<PartList> {
     validate(cab)?;
+    let mut frame = 0.0;
     let mut list = if matches!(cab.kind, CabinetKind::CornerBase | CabinetKind::CornerWall) {
         l_corner(cab)?
     } else if cab.kind == CabinetKind::Rangehood {
@@ -147,9 +154,16 @@ pub fn build_cabinet(cab: &Cabinet) -> Result<PartList> {
         b.cover_caps();
         b.list
     } else {
-        let mut b = Builder::new(cab);
+        // A drawer frame takes its thickness off the carcass, which moves back behind it: the
+        // fronts and the back stay where they are. Built with the frame's back on the usual
+        // front plane, then all of it moved back.
+        frame = Builder::new(cab).frame_shift();
+        let mut carcass = cab.clone();
+        carcass.depth -= frame;
+        let mut b = Builder::new(&carcass);
         b.carcass();
         b.fronts();
+        b.drawer_frame();
         // After the fronts, so shelf-pin holes can make way for hinge plates.
         b.shelves();
         b.plinth();
@@ -159,6 +173,7 @@ pub fn build_cabinet(cab: &Cabinet) -> Result<PartList> {
         b.cladding();
         b.cover_caps();
         b.opening();
+        b.door_rails();
         b.drawer_inserts();
         b.lock();
         b.arched_top();
@@ -168,11 +183,11 @@ pub fn build_cabinet(cab: &Cabinet) -> Result<PartList> {
         b.shaker_fronts();
         b.list
     };
+    let o = cab.origin + Vec3::new(0.0, frame, 0.0);
     for p in &mut list.parts {
-        let o = cab.origin;
         p.bounds.min = p.bounds.min + o;
     }
-    offset_operations(&mut list, cab.origin);
+    offset_operations(&mut list, o);
     // Whatever the rules above missed shows to the user rather than at the machine.
     let clashes = crate::collisions::check(&list);
     list.warnings
@@ -371,6 +386,15 @@ fn aabb(x0: f64, y0: f64, z0: f64, x1: f64, y1: f64, z1: f64) -> Aabb {
 }
 
 struct Builder<'a> {
+    /// While a section's fronts are built: its own opening and drawer system, if it has them.
+    opening_now: Option<Opening>,
+    system_now: Option<DrawerSystem>,
+    /// Fronts whose section opens differently from the job, by name.
+    front_openings: std::collections::BTreeMap<String, Opening>,
+    /// The drawer frame's openings, collected as the fronts are built.
+    frame_openings: Vec<Aabb>,
+    /// A section's pin rows, drilled after the fronts so they keep off the hinge plates.
+    pending_pins: Vec<PinRows>,
     cab: &'a Cabinet,
     list: PartList,
     /// Bottom of the carcass (top of the toe kick).
@@ -390,6 +414,7 @@ struct Builder<'a> {
 /// Numbers already given in a sectioned cabinet, so part names stay unique across columns.
 #[derive(Default)]
 struct SectionCounts {
+    lifts: usize,
     doors: usize,
     drawers: usize,
     shelves: usize,
@@ -406,6 +431,15 @@ struct Bay {
     /// The panel on that hand is a divider, which doors share (half overlay).
     left_divider: bool,
     right_divider: bool,
+}
+
+/// The shelf pin holes one bay of shelves asks for.
+struct PinRows {
+    bay: Bay,
+    z: (f64, f64),
+    /// Centres of its fixed shelves, and its adjustable shelves' pin holes.
+    fixed: Vec<f64>,
+    loose: Vec<f64>,
 }
 
 /// What the opening hardware needs to know about a drawer's box.
@@ -439,6 +473,11 @@ impl<'a> Builder<'a> {
             drawer_fits: Vec::new(),
             bay: None,
             inner_hinge: false,
+            opening_now: None,
+            system_now: None,
+            front_openings: Default::default(),
+            frame_openings: Vec::new(),
+            pending_pins: Vec::new(),
         }
     }
 
@@ -524,35 +563,55 @@ impl<'a> Builder<'a> {
         self.list.operations.extend(ops);
     }
 
-    /// Handleless opening hardware: a TIP-ON unit on an adapter plate per door (two on tall
-    /// doors) and per drawer, or a SERVO-DRIVE unit per drawer plus the cabinet's power supply.
-    /// Drawer units keep generic ids until BLUM-13 catalogues them.
+    /// How the fronts being built open: their section's way, or the job's.
+    fn opening_now(&self) -> Opening {
+        self.opening_now.unwrap_or(self.cab.standard.opening)
+    }
+
+    /// How a built front opens.
+    fn opening_of(&self, front: &str) -> Opening {
+        self.front_openings
+            .get(front)
+            .copied()
+            .unwrap_or(self.cab.standard.opening)
+    }
+
+    /// How each front opens: handles on those with handles, and handleless hardware on the rest:
+    /// a TIP-ON unit on an adapter plate per door (two on tall doors) and per drawer, or a
+    /// SERVO-DRIVE unit per drawer plus the cabinet's power supply. Drawer units keep generic ids
+    /// until BLUM-13 catalogues them.
     fn opening(&mut self) {
-        let opening = self.cab.standard.opening;
-        if opening == Opening::Handles {
+        let by_section = !self.front_openings.is_empty();
+        if self.cab.standard.opening == Opening::Handles || by_section {
             self.handles();
-            return;
         }
         let fronts: Vec<Part> = self
             .list
             .parts
             .iter()
             .filter(|p| matches!(p.role, PartRole::Door | PartRole::DrawerFront))
+            .filter(|p| self.opening_of(&p.name) != Opening::Handles)
             .cloned()
             .collect();
         let lw = self.cab.width - 2.0 * self.cab.standard.carcass_thickness;
-        let mut servo_fronts: Vec<f64> = Vec::new();
-        let mut servo_heavy = false;
+        let mut any_servo = false;
         for f in &fronts {
+            let opening = self.opening_of(&f.name);
             let fit = self.drawer_fits.iter().find(|d| d.front == f.name);
             let rows: Vec<(String, String, u32)> = match (f.role, opening, fit) {
                 // SERVO-DRIVE is one system for the box systems and MOVENTO/TANDEM (p.364, p.464);
                 // only the box systems' heavy profiles take extra bumpers.
                 (PartRole::DrawerFront, Opening::ServoDrive, Some(d)) => {
-                    servo_fronts.push(d.front_height);
-                    servo_heavy |= d.heavy_runner
+                    any_servo = true;
+                    let heavy = d.heavy_runner
                         && matches!(d.system, "legrabox" | "merivobox" | "tandembox");
-                    Vec::new()
+                    match self.servo_drawer(d.front_height, heavy) {
+                        Ok(items) => items,
+                        Err(e) => {
+                            self.list.warnings.push(format!("{}: {e}", f.name));
+                            Vec::new()
+                        }
+                    }
                 }
                 (PartRole::DrawerFront, _, Some(d)) => match self.drawer_tip_on(d, lw) {
                     Ok(items) => items,
@@ -586,28 +645,96 @@ impl<'a> Builder<'a> {
                 });
             }
         }
-        if opening == Opening::ServoDrive && fronts.iter().any(|f| f.role == PartRole::Door) {
+        let servo_door = fronts
+            .iter()
+            .any(|f| f.role == PartRole::Door && self.opening_of(&f.name) == Opening::ServoDrive);
+        if servo_door {
             self.list
                 .warnings
                 .push("SERVO-DRIVE does not open hinged doors: they get TIP-ON".into());
         }
-        if !servo_fronts.is_empty() {
+        if any_servo {
             let bottom = self.name(PartRole::Bottom, None);
             let at = Vec3::new(self.cab.width / 2.0, self.interior_back, self.carcass_z0);
-            let inside = self.opening_z.1 - self.opening_z.0;
-            match drawers::servo_drive(inside, &servo_fronts, servo_heavy) {
+            self.servo_brackets(&bottom);
+            let supply = crate::hardware::item("blum.servo-drive.power-supply.au");
+            match supply {
+                Ok(i) => self.list.hardware.push(HardwarePlacement {
+                    item: i.id.clone(),
+                    description: format!("{} {}", i.family, i.variant),
+                    at,
+                    part: bottom,
+                    quantity: 1,
+                }),
+                Err(e) => self.list.warnings.push(e),
+            }
+        }
+    }
+
+    /// What one driven drawer carries: its drive unit and distance bumpers.
+    fn servo_drawer(
+        &self,
+        front_height: f64,
+        heavy: bool,
+    ) -> std::result::Result<Vec<(String, String, u32)>, String> {
+        let row = |i: &cabinet_catalog::HardwareItem, n: u32| {
+            (i.id.clone(), format!("{} {}", i.family, i.variant), n)
+        };
+        Ok(vec![
+            row(crate::hardware::item("blum.servo-drive.drive-unit")?, 1),
+            row(
+                crate::hardware::item("blum.servo-drive.distance-bumper")?,
+                drawers::servo_bumpers(front_height, heavy)?,
+            ),
+        ])
+    }
+
+    /// A bracket, with its attachment, cable and node, per compartment holding driven drawers. An
+    /// adjustable shelf in the way of the upright asks for a fixed shelf to stop it.
+    fn servo_brackets(&mut self, bottom: &str) {
+        for c in crate::standins::servo_compartments(&self.list) {
+            let clear = c.ceiling - c.floor;
+            let at = Vec3::new(c.x, self.interior_back, c.floor);
+            match drawers::servo_bracket(clear) {
                 Ok(items) => {
                     for (i, quantity) in items {
+                        let cut = if i.id.contains("bracket-profile") {
+                            format!(", cut to {:.1} mm", clear - 10.0)
+                        } else {
+                            String::new()
+                        };
                         self.list.hardware.push(HardwarePlacement {
                             item: i.id.clone(),
-                            description: format!("{} {}", i.family, i.variant),
+                            description: format!("{} {}{cut}", i.family, i.variant),
                             at,
-                            part: bottom.clone(),
+                            part: bottom.to_string(),
                             quantity,
                         });
                     }
                 }
                 Err(e) => self.list.warnings.push(e),
+            }
+            let line = crate::standins::nominal_length(&self.list, &c.front)
+                .map(|nl| nl + 19.0 - self.frame_shift());
+            let blocked: Vec<String> = self
+                .list
+                .hardware
+                .iter()
+                .filter(|h| h.item == SHELF_SUPPORT)
+                .filter_map(|h| self.list.part(&h.part))
+                .filter(|p| {
+                    p.bounds.min.x <= c.x
+                        && c.x <= p.bounds.max().x
+                        && (c.floor..c.ceiling).contains(&p.bounds.min.z)
+                        && line.is_some_and(|y| p.bounds.max().y >= y)
+                })
+                .map(|p| p.name.clone())
+                .collect();
+            for shelf in blocked {
+                self.list.warnings.push(format!(
+                    "{shelf} is in the way of the SERVO-DRIVE bracket behind the drawers: put a \
+                     fixed shelf above them"
+                ));
             }
         }
     }
@@ -988,8 +1115,20 @@ impl<'a> Builder<'a> {
     fn shelves(&mut self) {
         let cab = self.cab;
         // A stacked front's or sectioned cabinet's sections bring their own fixed shelves.
-        if matches!(cab.fronts, FrontLayout::Sections { .. }) {
-            if cab.adjustable_shelves > 0 || cab.inner_drawers > 0 {
+        if let FrontLayout::Sections { columns } = &cab.fronts {
+            let wardrobe = columns
+                .iter()
+                .flat_map(|c| &c.rows)
+                .any(|r| r.inside == SectionInside::Wardrobe);
+            if wardrobe {
+                if columns.len() > 1 {
+                    self.list
+                        .warnings
+                        .push("a wardrobe interior needs the whole cabinet; left out".into());
+                } else {
+                    self.wardrobe();
+                }
+            } else if cab.adjustable_shelves > 0 || cab.inner_drawers > 0 {
                 self.list
                     .warnings
                     .push("shelves and inner drawers left out: each section sets its own".into());
@@ -1017,106 +1156,136 @@ impl<'a> Builder<'a> {
             self.inner_drawers();
             return;
         }
-        let n = cab.adjustable_shelves as usize;
-        let s = &cab.standard;
-        let (w, t) = (cab.width, s.carcass_thickness);
-        let (z0, z1) = self.opening_z;
+        let bay = self.bay();
+        let z = self.opening_z;
+        let pins = self.shelves_in(
+            1,
+            cab.adjustable_shelves as usize,
+            &cab.fixed_shelves,
+            &bay,
+            z,
+        );
+        self.shelf_pin_rows(&pins);
+    }
+
+    /// `n` shelves evenly spaced on the 32 mm grid over `z`, numbered from `first`, across `bay`:
+    /// on pins, or jointed where `fixed` says (from 1, bottom up). Returns the holes they want.
+    fn shelves_in(
+        &mut self,
+        first: usize,
+        n: usize,
+        fixed: &[u32],
+        bay: &Bay,
+        (z0, z1): (f64, f64),
+    ) -> PinRows {
+        let s = &self.cab.standard;
+        let t = s.carcass_thickness;
         let y1 = self.interior_back - 2.0;
         let mut fixed_z = Vec::new();
         let mut loose_z = Vec::new();
-        if n > 0 {
-            let step = (z1 - z0) / (n + 1) as f64;
-            for i in 1..=n {
-                // Snap to the 32 mm grid so a shelf rests on real pin holes: on top of the pins,
-                // a pin's radius above the holes' centres (Blum's configurator, 2026-10-27).
-                let raw = z0 + step * i as f64;
-                let hole = z0 + ((raw - z0) / SYSTEM32_PITCH).round() * SYSTEM32_PITCH;
-                let fixed = cab.fixed_shelves.contains(&(i as u32));
-                let z = if fixed {
-                    hole
-                } else {
-                    hole + SHELF_PIN_DIAMETER / 2.0
+        let step = (z1 - z0) / (n + 1) as f64;
+        for i in 1..=n {
+            // Snap to the 32 mm grid so a shelf rests on real pin holes: on top of the pins,
+            // a pin's radius above the holes' centres (Blum's configurator, 2026-10-27).
+            let raw = z0 + step * i as f64;
+            let hole = z0 + ((raw - z0) / SYSTEM32_PITCH).round() * SYSTEM32_PITCH;
+            let is_fixed = fixed.contains(&(i as u32));
+            let z = if is_fixed {
+                hole
+            } else {
+                hole + SHELF_PIN_DIAMETER / 2.0
+            };
+            // A fixed shelf fills the width and reaches the back, like a bottom.
+            let bounds = if is_fixed {
+                aabb(
+                    bay.left,
+                    self.shelf_setback(),
+                    z,
+                    bay.right,
+                    self.interior_back,
+                    z + t,
+                )
+            } else {
+                aabb(
+                    bay.left + SHELF_SIDE_CLEARANCE,
+                    self.shelf_setback(),
+                    z,
+                    bay.right - SHELF_SIDE_CLEARANCE,
+                    y1,
+                    z + t,
+                )
+            };
+            let number = first + i - 1;
+            self.add(
+                PartRole::Shelf,
+                Some(number),
+                bounds,
+                Axis::Z,
+                Axis::X,
+                EdgeBanding::front_only(),
+            );
+            if is_fixed {
+                fixed_z.push(z + t / 2.0);
+                let shelf = self.list.parts.last().cloned().unwrap();
+                let panel = |b: &Self, name: &str| {
+                    b.list
+                        .parts
+                        .iter()
+                        .find(|p| p.name == name)
+                        .cloned()
+                        .unwrap()
                 };
-                // A fixed shelf fills the width and reaches the back, like a bottom.
-                let bounds = if fixed {
-                    aabb(
-                        t,
-                        s.shelf_front_setback,
-                        z,
-                        w - t,
-                        self.interior_back,
-                        z + t,
-                    )
-                } else {
-                    aabb(
-                        t + SHELF_SIDE_CLEARANCE,
-                        s.shelf_front_setback,
-                        z,
-                        w - t - SHELF_SIDE_CLEARANCE,
-                        y1,
-                        z + t,
-                    )
-                };
-                self.add(
-                    PartRole::Shelf,
-                    Some(i),
-                    bounds,
-                    Axis::Z,
-                    Axis::X,
-                    EdgeBanding::front_only(),
-                );
-                if !fixed {
-                    loose_z.push(hole);
-                }
-                if fixed {
-                    fixed_z.push(z + t / 2.0);
-                    let shelf = self.list.parts.last().cloned().unwrap();
-                    let (left, right) = (
-                        self.part(PartRole::LeftSide).unwrap(),
-                        self.part(PartRole::RightSide).unwrap(),
-                    );
-                    self.joint_parts(&left, &shelf, Dir::new(Axis::X, true), Axis::Y);
-                    self.joint_parts(&right, &shelf, Dir::new(Axis::X, false), Axis::Y);
-                } else {
-                    // One in each front and back pin row, both sides.
-                    self.list.hardware.push(HardwarePlacement {
-                        item: SHELF_SUPPORT.into(),
-                        description: "Shelf support for 5 mm holes".into(),
-                        at: bounds.center(),
-                        part: self.name(PartRole::Shelf, Some(i)),
-                        quantity: 4,
-                    });
-                }
+                let (left, right) = (panel(self, &bay.left_panel), panel(self, &bay.right_panel));
+                self.joint_parts(&left, &shelf, Dir::new(Axis::X, true), Axis::Y);
+                self.joint_parts(&right, &shelf, Dir::new(Axis::X, false), Axis::Y);
+            } else {
+                // One in each front and back pin row, both sides.
+                loose_z.push(hole);
+                self.list.hardware.push(HardwarePlacement {
+                    item: SHELF_SUPPORT.into(),
+                    description: "Shelf support for 5 mm holes".into(),
+                    at: bounds.center(),
+                    part: self.name(PartRole::Shelf, Some(number)),
+                    quantity: 4,
+                });
             }
-            if fixed_z.len() < n {
-                self.shelf_pin_rows(&fixed_z, &loose_z);
-            }
+        }
+        PinRows {
+            bay: bay.clone(),
+            z: (z0, z1),
+            fixed: fixed_z,
+            loose: loose_z,
         }
     }
 
-    /// Shelf-pin holes on the inside of both sides: a front and a back row on the 32 mm grid,
-    /// within [`SHELF_PIN_REACH`] steps of each adjustable shelf (its pins' holes in `loose_z`),
-    /// and left out within a pitch of a fixed shelf (centres in `fixed_z`), where its fixings are.
-    fn shelf_pin_rows(&mut self, fixed_z: &[f64], loose_z: &[f64]) {
-        let cab = self.cab;
-        let t = cab.standard.carcass_thickness;
-        let (z0, z1) = self.opening_z;
+    /// Shelf-pin holes on the inside of a bay's panels: a front and a back row on the 32 mm grid,
+    /// within [`SHELF_PIN_REACH`] steps of each adjustable shelf, and left out within a pitch of a
+    /// fixed shelf, where its fixings are.
+    fn shelf_pin_rows(&mut self, pins: &PinRows) {
+        if pins.loose.is_empty() {
+            return;
+        }
+        let t = self.cab.standard.carcass_thickness;
+        let bay = &pins.bay;
+        let (z0, z1) = pins.z;
         let rows = [SYSTEM32_SETBACK, self.interior_back - SYSTEM32_SETBACK];
-        let first = z0 + 2.0 * SYSTEM32_PITCH;
-        let left = self.name(PartRole::LeftSide, None);
-        let right = self.name(PartRole::RightSide, None);
-        let mut z = first;
+        let mut z = z0 + 2.0 * SYSTEM32_PITCH;
         let mut skipped = 0;
+        let hands = [
+            (&bay.left_panel, bay.left, false, bay.left_divider),
+            (&bay.right_panel, bay.right, true, bay.right_divider),
+        ];
         while z <= z1 - 2.0 * SYSTEM32_PITCH {
-            let near_shelf = loose_z
+            let near_shelf = pins
+                .loose
                 .iter()
                 .any(|l| (z - l).abs() <= SHELF_PIN_REACH * SYSTEM32_PITCH + 1e-6);
-            if !near_shelf || fixed_z.iter().any(|f| (z - f).abs() < SYSTEM32_PITCH) {
+            if !near_shelf || pins.fixed.iter().any(|f| (z - f).abs() < SYSTEM32_PITCH) {
                 z += SYSTEM32_PITCH;
                 continue;
             }
             for y in rows {
-                for (part, x, positive) in [(&left, t, false), (&right, cab.width - t, true)] {
+                for (part, x, positive, divider) in hands {
                     let at = Vec3::new(x, y, z);
                     // A plate screw's hole on the row serves as this pin hole too.
                     let shared = self.list.operations.iter().any(|o| match o {
@@ -1137,16 +1306,36 @@ impl<'a> Builder<'a> {
                     if shared {
                         continue;
                     }
-                    if self.bore_clashes(part, at, SHELF_PIN_DIAMETER) {
+                    // A divider is drilled from both faces: what is behind this hole counts.
+                    let behind = divider
+                        && self.list.operations.iter().any(|o| match o {
+                            Operation::Bore {
+                                part: p,
+                                at: h,
+                                diameter: d,
+                                ..
+                            } if p == part && (h.x - x).abs() > 1e-6 => {
+                                let dist = ((h.y - y).powi(2) + (h.z - z).powi(2)).sqrt();
+                                dist < (SHELF_PIN_DIAMETER + d) / 2.0 + 3.0
+                                    && (d - SHELF_PIN_DIAMETER).abs() > 1e-6
+                            }
+                            _ => false,
+                        });
+                    if behind || self.bore_clashes(part, at, SHELF_PIN_DIAMETER) {
                         skipped += 1;
                         continue;
                     }
                     self.list.operations.push(Operation::Bore {
                         part: part.clone(),
-                        at: Vec3::new(x, y, z),
+                        at,
                         direction: Dir::new(Axis::X, positive),
                         diameter: SHELF_PIN_DIAMETER,
-                        depth: SHELF_PIN_DEPTH,
+                        // Holes meet from both faces of a divider only if they run over half.
+                        depth: if divider {
+                            SHELF_PIN_DEPTH.min((t - 1.0) / 2.0)
+                        } else {
+                            SHELF_PIN_DEPTH
+                        },
                         purpose: BorePurpose::ShelfPin,
                     });
                 }
@@ -1187,6 +1376,282 @@ impl<'a> Builder<'a> {
         })
     }
 
+    /// How much a drawer frame takes off the carcass's depth: 0 without one. Hinged and lifting
+    /// fronts need the carcass edge the board would cover, and inset fronts sit inside it.
+    fn drawer_frame_thickness(&self) -> f64 {
+        let s = &self.cab.standard;
+        if s.drawer_frame == DrawerFrame::None || !self.takes_drawer_frame() {
+            return 0.0;
+        }
+        s.drawer_frame_thickness
+    }
+
+    /// How far a drawer frame moves the carcass back. Inset fronts have the board inside the
+    /// carcass, behind them, so nothing moves.
+    fn frame_shift(&self) -> f64 {
+        if self.cab.standard.overlay == DoorOverlay::Inset {
+            0.0
+        } else {
+            self.drawer_frame_thickness()
+        }
+    }
+
+    /// The front and back of the drawer frame, before the carcass moves back.
+    fn frame_y(&self) -> (f64, f64) {
+        let f = self.drawer_frame_thickness();
+        if self.cab.standard.overlay == DoorOverlay::Inset {
+            let ft = self.cab.standard.front_thickness;
+            (ft, ft + f)
+        } else {
+            (-f, 0.0)
+        }
+    }
+
+    fn takes_drawer_frame(&self) -> bool {
+        let cab = self.cab;
+        cab.kind != CabinetKind::BlindCorner
+            && match &cab.fronts {
+                FrontLayout::Drawers { .. } => true,
+                FrontLayout::Sections { columns } => {
+                    // Inset, the board stands inside the carcass, where dividers would cross it.
+                    if cab.standard.overlay == DoorOverlay::Inset && columns.len() > 1 {
+                        return false;
+                    }
+                    let rows = || columns.iter().flat_map(|c| &c.rows);
+                    rows().any(|r| matches!(r.front, SectionFront::Drawers { .. }))
+                        && rows().all(|r| {
+                            matches!(
+                                r.front,
+                                SectionFront::Drawers { .. }
+                                    | SectionFront::Open
+                                    | SectionFront::Niche
+                            )
+                        })
+                }
+                _ => false,
+            }
+    }
+
+    /// The drawer frame: one board over the carcass's front, behind the fronts, with an opening
+    /// cut for each drawer and each open section.
+    fn drawer_frame(&mut self) {
+        let cab = self.cab;
+        if cab.standard.drawer_frame == DrawerFrame::None {
+            return;
+        }
+        let f = self.drawer_frame_thickness();
+        if f <= 0.0 {
+            self.list.warnings.push(
+                "a drawer frame needs fronts that are all drawers, or open sections, and inset in \
+                 one column: left off"
+                    .into(),
+            );
+            return;
+        }
+        let s = &cab.standard;
+        if s.is_sharknose() {
+            let into = SHARKNOSE_INTO.min(s.front_thickness - SHARKNOSE_NOSE);
+            let down = into / s.sharknose_angle.degrees().to_radians().tan();
+            if s.drawer_frame_overlap < down {
+                self.list.warnings.push(format!(
+                    "the drawer frame's rails stop above the {down:.0} mm sharknose bevel: the \
+                     inside shows through the gap"
+                ));
+            }
+        }
+        let (y0, y1) = self.frame_y();
+        // Inset, the openings run from side to side: what is left is separate rails between them.
+        if cab.standard.overlay == DoorOverlay::Inset {
+            let t = cab.standard.carcass_thickness;
+            let (z0, z1) = self.opening_z;
+            let mut openings = std::mem::take(&mut self.frame_openings);
+            openings.sort_by(|a, b| a.min.z.total_cmp(&b.min.z));
+            let mut from = z0;
+            let mut rails = Vec::new();
+            for o in &openings {
+                if o.min.z > from + 1e-6 {
+                    rails.push((from, o.min.z));
+                }
+                from = from.max(o.max().z);
+            }
+            if z1 > from + 1e-6 {
+                rails.push((from, z1));
+            }
+            for (i, (a, b)) in rails.into_iter().enumerate() {
+                self.add(
+                    PartRole::DrawerFrame,
+                    Some(i + 1),
+                    aabb(t, y0, a, cab.width - t, y1, b),
+                    Axis::Y,
+                    Axis::X,
+                    EdgeBanding::all(),
+                );
+            }
+            return;
+        }
+        let bounds = aabb(0.0, y0, self.carcass_z0, cab.width, y1, cab.height);
+        self.add(
+            PartRole::DrawerFrame,
+            None,
+            bounds,
+            Axis::Y,
+            Axis::Z,
+            EdgeBanding::all(),
+        );
+        let part = self.name(PartRole::DrawerFrame, None);
+        for cut in std::mem::take(&mut self.frame_openings) {
+            self.list.operations.push(Operation::Cutout {
+                part: part.clone(),
+                bounds: cut,
+                radius: 0.0,
+                note: String::new(),
+            });
+        }
+    }
+
+    /// The rail behind a sharknose door's bevelled edge, and only there: without it the inside
+    /// shows down the bevel. It stands inside the opening, behind the door, so the hinges and the
+    /// carcass stay as they are.
+    fn door_rails(&mut self) {
+        let s = &self.cab.standard;
+        let (t, overlap) = (s.drawer_frame_thickness, s.drawer_frame_overlap);
+        let half_gap = s.sharknose_gap / 2.0;
+        let cuts: Vec<(Part, Vec3)> = self
+            .list
+            .operations
+            .iter()
+            .filter_map(|o| match o {
+                Operation::Chamfer { part, at, .. } => {
+                    let p = self.list.part(part)?;
+                    (p.role == PartRole::Door && p.thickness_axis == Axis::Y)
+                        .then(|| (p.clone(), *at))
+                }
+                _ => None,
+            })
+            .collect();
+        let mut n = 0;
+        let mut short = false;
+        for (door, at) in cuts {
+            let d = door.bounds;
+            let mid = d.center();
+            let Some((l, r)) = self.list.bay_around(mid.x) else {
+                continue;
+            };
+            let (left, right) = (l.bounds.max().x, r.bounds.min.x);
+            let Some((floor, ceiling)) = self.list.compartment_around(mid.x, mid.z) else {
+                continue;
+            };
+            let (x0, x1) = (d.min.x.max(left), d.max().x.min(right));
+            let (z0, z1) = (d.min.z.max(floor), d.max().z.min(ceiling));
+            let (box_x, box_z) = if (at.z - d.max().z).abs() < 1e-6 {
+                let top = d.max().z;
+                let reach = (top + s.sharknose_gap).min(ceiling);
+                ((x0, x1), (top - overlap, reach))
+            } else if (at.z - d.min.z).abs() < 1e-6 {
+                let bottom = d.min.z;
+                let reach = (bottom - s.sharknose_gap).max(floor);
+                ((x0, x1), (reach, bottom + overlap))
+            } else if (at.x - d.max().x).abs() < 1e-6 {
+                let edge = d.max().x;
+                (
+                    ((edge - overlap).max(left), (edge + half_gap).min(right)),
+                    (z0, z1),
+                )
+            } else {
+                let edge = d.min.x;
+                (
+                    ((edge - half_gap).max(left), (edge + overlap).min(right)),
+                    (z0, z1),
+                )
+            };
+            let into = SHARKNOSE_INTO.min(s.front_thickness - SHARKNOSE_NOSE);
+            short |= overlap < into / s.sharknose_angle.degrees().to_radians().tan();
+            // Nothing to cover where the carcass already reaches past the bevel.
+            if box_x.1 - box_x.0 < 1.0 || box_z.1 - box_z.0 < 1.0 {
+                continue;
+            }
+            n += 1;
+            let y = d.max().y;
+            self.add(
+                PartRole::GripRail,
+                Some(n),
+                aabb(box_x.0, y, box_z.0, box_x.1, y + t, box_z.1),
+                Axis::Y,
+                if box_x.1 - box_x.0 > box_z.1 - box_z.0 {
+                    Axis::X
+                } else {
+                    Axis::Z
+                },
+                EdgeBanding::all(),
+            );
+        }
+        if short {
+            self.list.warnings.push(
+                "the rails behind the sharknose doors stop short of the bevel: the inside shows \
+                 through the gap"
+                    .into(),
+            );
+        }
+    }
+
+    /// Whether the top front needs a finger gap over it: drawers do, and doors gripped there.
+    fn finger_gap_on_top(&self) -> bool {
+        let cab = self.cab;
+        let s = &cab.standard;
+        if !s.is_sharknose() {
+            return false;
+        }
+        let drawers = match &cab.fronts {
+            FrontLayout::Drawers { .. } => true,
+            FrontLayout::Stack { sections } => sections
+                .iter()
+                .any(|x| matches!(x.kind, SectionKind::Drawers { .. })),
+            FrontLayout::Sections { columns } => columns
+                .iter()
+                .flat_map(|c| &c.rows)
+                .any(|r| matches!(r.front, SectionFront::Drawers { .. })),
+            _ => false,
+        };
+        drawers
+            || !matches!(
+                s.sharknose_door_edge,
+                SharknoseEdge::Bottom | SharknoseEdge::Opening
+            )
+    }
+
+    /// How far a shelf stands back from the cabinet's front: clear of a rail down the door's
+    /// opening side.
+    fn shelf_setback(&self) -> f64 {
+        let s = &self.cab.standard;
+        if s.is_sharknose() && s.sharknose_door_edge == SharknoseEdge::Opening {
+            let inset = if s.overlay == DoorOverlay::Inset {
+                s.front_thickness
+            } else {
+                0.0
+            };
+            s.shelf_front_setback
+                .max(inset + s.drawer_frame_thickness + 2.0)
+        } else {
+            s.shelf_front_setback
+        }
+    }
+
+    /// An opening in the drawer frame, across the bay from `z0` to `z1`.
+    fn frame_opening(&mut self, z0: f64, z1: f64) {
+        let f = self.drawer_frame_thickness();
+        if f > 0.0 {
+            let bay = self.bay();
+            self.frame_openings.push(aabb(
+                bay.left,
+                self.frame_y().0,
+                z0,
+                bay.right,
+                self.frame_y().1,
+                z1,
+            ));
+        }
+    }
+
     /// The area the fronts cover, as (x0, x1, z0, z1, y0, y1).
     fn front_region(&self) -> (f64, f64, f64, f64, f64, f64) {
         let cab = self.cab;
@@ -1206,14 +1671,31 @@ impl<'a> Builder<'a> {
                 | CabinetKind::Sink
         );
         // Blum's configurator sets these apart from the gap between fronts.
-        let top_gap = if under_bench { s.top_gap } else { 0.0 };
+        let top_gap = if under_bench && self.finger_gap_on_top() {
+            s.top_gap.max(s.sharknose_gap)
+        } else if under_bench {
+            s.top_gap
+        } else {
+            0.0
+        };
         let z0 = self.carcass_z0 + s.bottom_gap;
         match s.overlay {
-            DoorOverlay::Full => (g / 2.0, w - g / 2.0, z0, h - top_gap, -ft, 0.0),
-            DoorOverlay::Half => (t / 2.0, w - t / 2.0, z0, h - top_gap, -ft, 0.0),
+            DoorOverlay::Full => {
+                let f = self.frame_shift();
+                (g / 2.0, w - g / 2.0, z0, h - top_gap, -ft - f, -f)
+            }
+            DoorOverlay::Half => {
+                let f = self.frame_shift();
+                (t / 2.0, w - t / 2.0, z0, h - top_gap, -ft - f, -f)
+            }
             DoorOverlay::Inset => {
                 let (z0, z1) = self.opening_z;
-                (t + g, w - t - g, z0 + g, z1 - g, 0.0, ft)
+                let over = if self.finger_gap_on_top() {
+                    s.sharknose_gap.max(g)
+                } else {
+                    g
+                };
+                (t + g, w - t - g, z0 + g, z1 - over, 0.0, ft)
             }
         }
     }
@@ -1293,6 +1775,7 @@ impl<'a> Builder<'a> {
         if columns.is_empty() {
             return;
         }
+        self.list.section_zone = Some((x1 - x0, z1 - z0));
         let asks: Vec<f64> = columns.iter().map(|c| c.width).collect();
         let Some(widths) = Self::share(x1 - x0, &asks, g) else {
             self.list.warnings.push(
@@ -1355,6 +1838,9 @@ impl<'a> Builder<'a> {
             }
         }
         self.bay = None;
+        for pins in std::mem::take(&mut self.pending_pins) {
+            self.shelf_pin_rows(&pins);
+        }
     }
 
     /// One column's rows, bottom to top, as `stack_fronts` lays a stack out: what is inside each
@@ -1368,11 +1854,18 @@ impl<'a> Builder<'a> {
     ) {
         let cab = self.cab;
         let s = &cab.standard;
-        let (g, t) = (s.front_gap, s.carcass_thickness);
+        let (g, t) = (s.row_gap(), s.carcass_thickness);
         if rows.is_empty() {
             return;
         }
-        let asks: Vec<f64> = rows.iter().map(|r| r.height).collect();
+        // A niche's height is its clear opening: add the shelf under it, less the gap fronts have.
+        let asks: Vec<f64> = rows
+            .iter()
+            .map(|r| match r.front {
+                SectionFront::Niche if r.height > 0.0 => r.height + t - g,
+                _ => r.height,
+            })
+            .collect();
         let Some(heights) = Self::share(z1 - z0, &asks, g) else {
             if !fronts {
                 self.list.warnings.push(
@@ -1389,56 +1882,56 @@ impl<'a> Builder<'a> {
         for (i, (row, h)) in rows.iter().zip(&heights).enumerate() {
             let fz1 = fz0 + h;
             let last = i + 1 == rows.len();
+            // A shelf over it has its top where the next fronts start, as the bottom panel sits
+            // under the lowest front. Without one, the next section's floor is this one's top.
+            let next_floor = fz1 + g + lift;
             let ceiling = if last {
                 self.opening_z.1
+            } else if row.shelf_above {
+                next_floor - t
             } else {
-                fz1 + g + lift - t
+                next_floor
             };
             let behind_drawers = matches!(row.front, SectionFront::Drawers { .. });
             if fronts {
                 // Inner drawers take the 0-protrusion hinge on the doors in front of them.
                 self.inner_hinge =
                     matches!(row.inside, SectionInside::InnerDrawers { .. }) && !behind_drawers;
+                self.opening_now = row.opening;
+                self.system_now = match row.front {
+                    SectionFront::Drawers { system, .. } => system,
+                    _ => None,
+                };
+                let before = self.list.parts.len();
                 self.row_fronts(row, (x0, x1, y0, y1), (fz0, fz1), (floor, ceiling), counts);
+                if matches!(row.front, SectionFront::Open | SectionFront::Niche) {
+                    self.frame_opening(floor, ceiling);
+                }
+                if let Some(opening) = row.opening {
+                    for p in &self.list.parts[before..] {
+                        self.front_openings.insert(p.name.clone(), opening);
+                    }
+                }
                 self.inner_hinge = false;
+                self.opening_now = None;
+                self.system_now = None;
                 if !last {
-                    floor = ceiling + t;
+                    floor = next_floor;
                 }
                 fz0 = fz1 + g;
                 continue;
             }
             match &row.inside {
                 SectionInside::Empty => {}
-                SectionInside::Shelves { count } => {
+                SectionInside::Shelves { count, fixed } => {
                     let n = *count as usize;
-                    for k in 1..=n {
-                        let z = floor + (ceiling - floor) * k as f64 / (n + 1) as f64 - t / 2.0;
-                        counts.shelves += 1;
-                        let bounds = aabb(
-                            bay.left + SHELF_SIDE_CLEARANCE,
-                            s.shelf_front_setback,
-                            z,
-                            bay.right - SHELF_SIDE_CLEARANCE,
-                            self.interior_back - 2.0,
-                            z + t,
-                        );
-                        self.add(
-                            PartRole::Shelf,
-                            Some(counts.shelves),
-                            bounds,
-                            Axis::Z,
-                            Axis::X,
-                            EdgeBanding::front_only(),
-                        );
-                        self.list.hardware.push(HardwarePlacement {
-                            item: SHELF_SUPPORT.into(),
-                            description: "Shelf support for 5 mm holes".into(),
-                            at: bounds.center(),
-                            part: self.name(PartRole::Shelf, Some(counts.shelves)),
-                            quantity: 4,
-                        });
-                    }
+                    let pins =
+                        self.shelves_in(counts.shelves + 1, n, fixed, &bay, (floor, ceiling));
+                    counts.shelves += n;
+                    self.pending_pins.push(pins);
                 }
+                // Built with the cabinet's shelves: it is the whole cabinet's interior.
+                SectionInside::Wardrobe => {}
                 SectionInside::ShoeShelves { count } => {
                     let n = *count as usize;
                     for k in 1..=n {
@@ -1504,18 +1997,36 @@ impl<'a> Builder<'a> {
                 }
             }
             if !last {
-                counts.shelves += 1;
-                self.fixed_shelf(
-                    counts.shelves,
-                    &bay,
-                    ceiling,
-                    panel(self, &bay.left_panel),
-                    panel(self, &bay.right_panel),
-                );
-                floor = ceiling + t;
+                if row.shelf_above {
+                    counts.shelves += 1;
+                    self.fixed_shelf(
+                        counts.shelves,
+                        &bay,
+                        ceiling,
+                        panel(self, &bay.left_panel),
+                        panel(self, &bay.right_panel),
+                    );
+                }
+                floor = next_floor;
             }
             fz0 = fz1 + g;
         }
+    }
+
+    /// AVENTOS is sized from the cabinet and fitted to its sides: one lift to a cabinet, across the
+    /// top of it. Says why not.
+    fn lift_section_fits(&mut self, counts: &mut SectionCounts, top: f64) -> bool {
+        let bay = self.bay();
+        let whole_width = !bay.left_divider && !bay.right_divider;
+        let at_top = (top - self.front_region().3).abs() < 1e-6;
+        if counts.lifts > 0 || !whole_width || !at_top {
+            self.list.warnings.push(
+                "a lift goes across the top of the cabinet, one to a cabinet; left out".into(),
+            );
+            return false;
+        }
+        counts.lifts += 1;
+        true
     }
 
     /// A section row's fronts across `x`, `fz` high, opening onto `inside` (floor, ceiling).
@@ -1548,8 +2059,26 @@ impl<'a> Builder<'a> {
                 );
                 counts.doors += 2;
             }
-            SectionFront::Drawers { count } => {
-                let ratios = vec![1.0; (*count).max(1) as usize];
+            SectionFront::Niche => {}
+            SectionFront::Lift {
+                kind,
+                handle_weight,
+            } => {
+                if self.lift_section_fits(counts, fz1) {
+                    self.single_lift(*kind, aabb(x0, y0, fz0, x1, y1, fz1), *handle_weight);
+                }
+            }
+            SectionFront::BiFold { handle_weight } => {
+                if self.lift_section_fits(counts, fz1) {
+                    self.bi_fold_lift(aabb(x0, y0, fz0, x1, y1, fz1), *handle_weight);
+                }
+            }
+            SectionFront::Drawers { count, ratios, .. } => {
+                let ratios = if ratios.is_empty() {
+                    vec![1.0; (*count).max(1) as usize]
+                } else {
+                    ratios.clone()
+                };
                 counts.drawers += self.drawer_fronts(
                     counts.drawers + 1,
                     &ratios,
@@ -1601,7 +2130,7 @@ impl<'a> Builder<'a> {
         (z0, z1): (f64, f64),
         (floor, ceiling): (f64, f64),
     ) -> usize {
-        let g = self.cab.standard.front_gap;
+        let g = self.cab.standard.row_gap();
         let ratios: Vec<f64> = ratios.iter().copied().filter(|r| *r > 0.0).collect();
         if ratios.is_empty() {
             self.list
@@ -1632,7 +2161,17 @@ impl<'a> Builder<'a> {
         let datums: Vec<f64> = fronts.iter().map(|b| b.min.z + lift).collect();
         for (i, b) in fronts.iter().enumerate() {
             let above = if i == 0 { ceiling } else { datums[i - 1] };
-            self.drawer_box(first + i, *b, datums[i], above - datums[i]);
+            // A frame's rail comes down behind the front, past any bevel, and the box stays under
+            // it.
+            let framed = self.drawer_frame_thickness() > 0.0;
+            let opening_top = b.max().z - self.cab.standard.drawer_frame_overlap;
+            let space = if framed {
+                (above - datums[i]).min(opening_top - datums[i])
+            } else {
+                above - datums[i]
+            };
+            self.drawer_box(first + i, *b, datums[i], space);
+            self.frame_opening(datums[i], opening_top.min(above));
         }
         fronts.len()
     }
@@ -1648,7 +2187,7 @@ impl<'a> Builder<'a> {
     ) {
         let cab = self.cab;
         let s = &cab.standard;
-        let (g, t) = (s.front_gap, s.carcass_thickness);
+        let (g, t) = (s.row_gap(), s.carcass_thickness);
         if sections.is_empty() {
             return;
         }
@@ -1762,7 +2301,8 @@ impl<'a> Builder<'a> {
     /// The drawer system's box behind drawer front `n`: base and back parts, front fixing bores
     /// and the system's hardware. `datum` is the height its runners stand on.
     fn drawer_box(&mut self, n: usize, front: Aabb, datum: f64, space: f64) {
-        let runner = match self.cab.standard.drawer_system {
+        let system = self.system_now.unwrap_or(self.cab.standard.drawer_system);
+        let runner = match system {
             DrawerSystem::Legrabox => {
                 return self.steel_box(BoxSystem::Legrabox, n, front, datum, space);
             }
@@ -1792,7 +2332,7 @@ impl<'a> Builder<'a> {
             self.interior_back - fy,
             space,
             s.drawer_board_thickness,
-            s.opening == Opening::TipOn,
+            self.opening_now() == Opening::TipOn,
         ) {
             Ok(b) => b,
             Err(e) => {
@@ -1875,7 +2415,7 @@ impl<'a> Builder<'a> {
             DrawerSides::Standard => BoxRange::Drawers,
             DrawerSides::HighFronted => BoxRange::HighFronted,
         };
-        let servo = cab.standard.opening == Opening::ServoDrive;
+        let servo = self.opening_now() == Opening::ServoDrive;
         let lb = match drawers::steel_box(
             kind,
             range,
@@ -2025,14 +2565,7 @@ impl<'a> Builder<'a> {
             _ => return,
         };
         for (i, &z) in shelves.iter().enumerate() {
-            let bounds = aabb(
-                t,
-                s.shelf_front_setback,
-                z,
-                w - t,
-                self.interior_back,
-                z + t,
-            );
+            let bounds = aabb(t, self.shelf_setback(), z, w - t, self.interior_back, z + t);
             self.add(
                 PartRole::Shelf,
                 Some(i + 1),
@@ -2072,7 +2605,7 @@ impl<'a> Builder<'a> {
             let n = shelves.len() + 1;
             let bounds = aabb(
                 t,
-                s.shelf_front_setback,
+                self.shelf_setback(),
                 top,
                 w - t,
                 self.interior_back,
@@ -2461,7 +2994,25 @@ impl<'a> Builder<'a> {
         open
     }
 
-    fn door(&mut self, n: usize, b: Aabb, hinge: HingeSide) {
+    fn door(&mut self, n: usize, mut b: Aabb, hinge: HingeSide) {
+        let s = &self.cab.standard;
+        // Gripped at the opening side: the finger gap comes off that edge, half each for a pair.
+        if s.is_sharknose() && s.sharknose_door_edge == SharknoseEdge::Opening {
+            let bay = self.bay();
+            let free = if hinge == HingeSide::Left {
+                b.max().x
+            } else {
+                b.min.x
+            };
+            let at_a_side = free > bay.right - s.carcass_thickness - s.front_gap
+                || free < bay.left + s.carcass_thickness + s.front_gap;
+            let extra = (s.sharknose_gap - s.front_gap).max(0.0);
+            let trim = if at_a_side { extra } else { extra / 2.0 };
+            b.size.x -= trim;
+            if hinge != HingeSide::Left {
+                b.min.x += trim;
+            }
+        }
         self.add(
             PartRole::Door,
             Some(n),
@@ -2537,7 +3088,7 @@ impl<'a> Builder<'a> {
             door_thickness: b.size.y,
             side_thickness: t,
             gap: s.front_gap,
-            sprung: s.opening == Opening::Handles,
+            sprung: self.opening_now() == Opening::Handles,
             boss: s.hinge_boss,
         };
         let chosen = match hinge_id {
@@ -2871,6 +3422,7 @@ impl<'a> Builder<'a> {
                     PartRole::Door | PartRole::DrawerFront | PartRole::LiftFront
                 )
             })
+            .filter(|p| self.opening_of(&p.name) == Opening::Handles)
             .cloned()
             .collect();
         let wall_hung = matches!(
@@ -3059,17 +3611,55 @@ impl<'a> Builder<'a> {
                 if s.door_style != DoorStyle::Slab {
                     continue;
                 }
+                let into = SHARKNOSE_INTO.min(f.thickness() - SHARKNOSE_NOSE);
+                let down = into / s.sharknose_angle.degrees().to_radians().tan();
+                // A door may be gripped on the side opposite its hinges instead.
+                if f.role == PartRole::Door
+                    && s.sharknose_door_edge == SharknoseEdge::Opening
+                    && ta == Axis::Y
+                {
+                    let hinge = self
+                        .list
+                        .hardware
+                        .iter()
+                        .find(|h| h.part == f.name && h.item.starts_with("blum.clip-top"));
+                    let right = hinge.is_none_or(|h| h.at.x < b.center().x);
+                    let (xl, xh, xe) = if right {
+                        (w1 - down, w1, w1)
+                    } else {
+                        (w0, w0 + down, w0)
+                    };
+                    let (t_lo, t_hi) = if back_low {
+                        (back, back + into)
+                    } else {
+                        (back - into, back)
+                    };
+                    self.list.operations.push(Operation::Chamfer {
+                        part: f.name.clone(),
+                        at: Vec3::new(xe, back, (z0 + z1) / 2.0),
+                        bounds: aabb(xl, t_lo, z0, xh, t_hi, z1),
+                    });
+                    continue;
+                }
                 // The gripping edge's back corner, bevelled across the front's width.
-                let top = !(wall_hung && f.role != PartRole::DrawerFront);
-                let (zl, zh, ze) = if top {
-                    (z1 - SHARKNOSE_DOWN, z1, z1)
+                let top = if f.role == PartRole::Door {
+                    match s.sharknose_door_edge {
+                        SharknoseEdge::Top => true,
+                        SharknoseEdge::Bottom => false,
+                        _ => !wall_hung,
+                    }
                 } else {
-                    (z0, z0 + SHARKNOSE_DOWN, z0)
+                    !(wall_hung && f.role != PartRole::DrawerFront)
+                };
+                let (zl, zh, ze) = if top {
+                    (z1 - down, z1, z1)
+                } else {
+                    (z0, z0 + down, z0)
                 };
                 let (t_lo, t_hi) = if back_low {
-                    (back, back + SHARKNOSE_INTO)
+                    (back, back + into)
                 } else {
-                    (back - SHARKNOSE_INTO, back)
+                    (back - into, back)
                 };
                 let lo = Vec3::new(0.0, 0.0, zl).with(wa, w0).with(ta, t_lo);
                 let hi = Vec3::new(0.0, 0.0, zh).with(wa, w1).with(ta, t_hi);
@@ -3940,10 +4530,16 @@ impl<'a> Builder<'a> {
         } else {
             (0.0, w)
         };
+        // In line with its neighbours' behind a drawer frame, unless it fits in the sides' notch.
+        let forward = if s.toe_kick == ToeKick::IntegratedNotch {
+            0.0
+        } else {
+            self.frame_shift()
+        };
         self.add(
             PartRole::Plinth,
             None,
-            aabb(x0, sb, 0.0, x1, sb + ft, kick),
+            aabb(x0, sb - forward, 0.0, x1, sb - forward + ft, kick),
             Axis::Y,
             Axis::X,
             EdgeBanding {
@@ -3974,7 +4570,8 @@ impl<'a> Builder<'a> {
             };
             let bottom = self.name(PartRole::Bottom, None);
             for x in xs {
-                for y in [sb + ft + 50.0, cab.depth - 50.0] {
+                // The front ones clip to the plinth.
+                for y in [sb - forward + ft + 50.0, cab.depth - 50.0] {
                     self.list.hardware.push(HardwarePlacement {
                         item: item.clone(),
                         description: description.clone(),
@@ -4738,7 +5335,7 @@ mod tests {
         };
         assert_eq!(count("blum.servo-drive.drive-unit"), 3);
         assert_eq!(count("blum.servo-drive.power-supply.au"), 1);
-        assert_eq!(count("blum.servo-drive.bracket-attachment"), 2);
+        assert_eq!(count("blum.servo-drive.bracket-attachment"), 1);
         // Wooden drawers on MOVENTO take the same SERVO-DRIVE parts.
         bank.standard.drawer_system = DrawerSystem::Movento;
         let wood = build_cabinet(&bank).unwrap();
@@ -5484,6 +6081,467 @@ mod tests {
         }
     }
 
+    fn framed_bank() -> Cabinet {
+        let mut cab = Cabinet::new("D01", CabinetKind::DrawerBank).sectioned();
+        cab.standard.drawer_frame = DrawerFrame::Board;
+        cab
+    }
+
+    fn frame_openings(list: &PartList) -> Vec<Aabb> {
+        list.operations
+            .iter()
+            .filter_map(|o| match o {
+                Operation::Cutout { part, bounds, .. } if part == "D01.DrawerFrame" => {
+                    Some(*bounds)
+                }
+                _ => None,
+            })
+            .collect()
+    }
+
+    /// The owner's installed sharknose drawers: one board, an opening per drawer, the rails
+    /// closing the gaps between the fronts.
+    #[test]
+    fn a_drawer_frame_is_one_board_with_an_opening_for_each_drawer() {
+        let cab = framed_bank();
+        let list = build_cabinet(&cab).unwrap();
+        let frame = list.part("D01.DrawerFrame").expect("the frame");
+        let t = cab.standard.drawer_frame_thickness;
+        assert_eq!((frame.bounds.min.y, frame.bounds.max().y), (0.0, t));
+        assert_eq!((frame.bounds.min.x, frame.bounds.max().x), (0.0, cab.width));
+        assert_eq!(frame.bounds.max().z, cab.height);
+        let fronts: Vec<_> = list.by_role(PartRole::DrawerFront).collect();
+        let openings = frame_openings(&list);
+        assert_eq!(openings.len(), fronts.len());
+        let side = cab.standard.carcass_thickness;
+        for (front, hole) in fronts.iter().zip(&openings) {
+            assert_eq!((hole.min.x, hole.max().x), (side, cab.width - side));
+            assert_eq!((hole.min.y, hole.max().y), (0.0, t));
+            assert!(
+                hole.max().z < front.bounds.max().z,
+                "a rail behind the front"
+            );
+            assert!(hole.min.z >= frame.bounds.min.z);
+        }
+        // A rail between each pair of openings, covering the gap between their fronts.
+        for pair in openings.windows(2) {
+            assert!(pair[0].min.z > pair[1].max().z, "a rail between them");
+        }
+        assert!(
+            list.warnings
+                .iter()
+                .all(|w| !w.contains("frame") && !w.contains("clash")),
+            "{:?}",
+            list.warnings
+        );
+    }
+
+    fn sharknose_door(edge: SharknoseEdge) -> Cabinet {
+        let mut cab = Cabinet::new("B01", CabinetKind::Base).sectioned();
+        cab.standard.handle_place = crate::model::HandlePlace::Sharknose;
+        cab.standard.sharknose_door_edge = edge;
+        cab
+    }
+
+    fn grip_rails(list: &PartList) -> Vec<Aabb> {
+        list.by_role(PartRole::GripRail).map(|p| p.bounds).collect()
+    }
+
+    /// The owner's picture: a dark slit under the top rail, down the door's bevel.
+    #[test]
+    fn a_sharknose_door_gets_a_rail_behind_its_top_edge_only() {
+        let cab = sharknose_door(SharknoseEdge::Auto);
+        let list = build_cabinet(&cab).unwrap();
+        let door = list.part("B01.Door1").unwrap().bounds;
+        let rails = grip_rails(&list);
+        assert_eq!(rails.len(), 1);
+        let rail = rails[0];
+        let t = cab.standard.carcass_thickness;
+        assert_eq!((rail.min.x, rail.max().x), (t, cab.width - t));
+        assert_eq!(rail.min.y, door.max().y, "behind the door");
+        assert_eq!(rail.min.z, door.max().z - cab.standard.drawer_frame_overlap);
+        assert!(rail.max().z <= cab.height - t, "up to the carcass");
+        assert!(
+            list.warnings.iter().all(|w| !w.contains("clash")),
+            "{:?}",
+            list.warnings
+        );
+    }
+
+    #[test]
+    fn a_door_can_be_gripped_on_its_bottom_edge() {
+        let list = build_cabinet(&sharknose_door(SharknoseEdge::Bottom)).unwrap();
+        let door = list.part("B01.Door1").unwrap().bounds;
+        let rail = grip_rails(&list)[0];
+        assert_eq!(rail.max().z, door.min.z + 25.0);
+        assert!(rail.size.z < 25.0, "only what the bottom panel leaves");
+        assert!(list.operations.iter().any(|o| matches!(
+            o,
+            Operation::Chamfer { part, at, .. } if part == "B01.Door1" && at.z == door.min.z
+        )));
+        let top_gap = sharknose_door(SharknoseEdge::Bottom).height - door.max().z;
+        assert!(top_gap < 15.0, "no finger gap at the top");
+    }
+
+    #[test]
+    fn a_door_gripped_on_its_opening_side_has_a_rail_only_down_that_side() {
+        let cab = sharknose_door(SharknoseEdge::Opening);
+        let plain = build_cabinet(&sharknose_door(SharknoseEdge::Auto)).unwrap();
+        let list = build_cabinet(&cab).unwrap();
+        let door = list.part("B01.Door1").unwrap().bounds;
+        let s = &cab.standard;
+        assert!(
+            (plain.part("B01.Door1").unwrap().bounds.size.x
+                - door.size.x
+                - (s.sharknose_gap - s.front_gap))
+                .abs()
+                < 1e-9,
+            "the finger gap comes off the free edge"
+        );
+        let rails = grip_rails(&list);
+        assert_eq!(rails.len(), 1);
+        let rail = rails[0];
+        assert_eq!(
+            rail.max().x,
+            cab.width - s.carcass_thickness,
+            "at the far side"
+        );
+        assert_eq!(rail.min.x, door.max().x - s.drawer_frame_overlap);
+        assert!(rail.size.z > door.size.z * 0.8, "down the door's height");
+        assert!(
+            list.by_role(PartRole::Shelf)
+                .all(|p| p.bounds.min.y >= rail.max().y),
+            "shelves stand behind it"
+        );
+        assert!(
+            list.warnings.iter().all(|w| !w.contains("clash")),
+            "{:?}",
+            list.warnings
+        );
+    }
+
+    #[test]
+    fn a_door_pair_gripped_where_it_meets_gets_a_rail_each() {
+        let mut cab = Cabinet::new("B01", CabinetKind::Base);
+        cab.fronts = FrontLayout::DoorPair;
+        cab.standard.handle_place = crate::model::HandlePlace::Sharknose;
+        cab.standard.sharknose_door_edge = SharknoseEdge::Opening;
+        let list = build_cabinet(&cab).unwrap();
+        let rails = grip_rails(&list);
+        assert_eq!(rails.len(), 2);
+        assert!(
+            (rails[0].max().x - rails[1].min.x).abs() < 1e-9,
+            "they meet"
+        );
+        assert!((rails[0].max().x - cab.width / 2.0).abs() < 1e-9);
+    }
+
+    #[test]
+    fn doors_with_handles_get_no_rail() {
+        let list = build_cabinet(&Cabinet::new("B01", CabinetKind::Base).sectioned()).unwrap();
+        assert!(grip_rails(&list).is_empty());
+    }
+
+    #[test]
+    fn a_drawer_frame_works_with_half_overlay_fronts() {
+        let mut cab = framed_bank();
+        cab.standard.overlay = DoorOverlay::Half;
+        let list = build_cabinet(&cab).unwrap();
+        let frame = list.part("D01.DrawerFrame").expect("the frame").bounds;
+        let t = cab.standard.drawer_frame_thickness;
+        assert_eq!((frame.min.y, frame.max().y), (0.0, t));
+        let side = list.part("D01.LeftSide").unwrap().bounds;
+        assert_eq!(side.min.y, t, "the carcass moves back");
+        assert_eq!(frame_openings(&list).len(), 3);
+    }
+
+    #[test]
+    fn an_inset_drawer_frame_is_rails_between_the_sides_behind_the_fronts() {
+        let mut cab = framed_bank();
+        cab.standard.overlay = DoorOverlay::Inset;
+        let list = build_cabinet(&cab).unwrap();
+        let rails: Vec<_> = list.by_role(PartRole::DrawerFrame).collect();
+        assert_eq!(rails.len(), 3, "one over each of three drawers");
+        let (ft, t) = (
+            cab.standard.front_thickness,
+            cab.standard.drawer_frame_thickness,
+        );
+        let side = list.part("D01.LeftSide").unwrap().bounds;
+        assert_eq!(side.min.y, 0.0, "the carcass stays");
+        for rail in &rails {
+            assert_eq!((rail.bounds.min.y, rail.bounds.max().y), (ft, ft + t));
+            assert_eq!(rail.bounds.min.x, side.max().x, "between the sides");
+        }
+        let front = list.part("D01.DrawerFront1").unwrap().bounds;
+        assert_eq!(front.max().y, ft);
+        for n in 1..=3 {
+            let f = list.part(&format!("D01.DrawerFront{n}")).unwrap().bounds;
+            assert!(
+                rails.iter().any(|r| r.bounds.min.z < f.max().z
+                    && r.bounds.min.z > f.max().z - cab.standard.drawer_frame_overlap - 1.0),
+                "a rail behind drawer {n}'s top"
+            );
+        }
+        assert!(
+            list.warnings
+                .iter()
+                .all(|w| !w.contains("clash") && !w.contains("frame")),
+            "{:?}",
+            list.warnings
+        );
+    }
+
+    /// The owner's inset test: hinges and runner ends stood proud of the fronts' faces.
+    #[test]
+    fn inset_fronts_keep_blums_models_behind_their_back_face() {
+        for (kind, name) in [
+            (CabinetKind::Base, "B01.Door1"),
+            (CabinetKind::DrawerBank, "D01.DrawerFront1"),
+        ] {
+            let mut cab = Cabinet::new(&name[..3], kind);
+            cab.standard.overlay = DoorOverlay::Inset;
+            let list = build_cabinet(&cab).unwrap();
+            let back = list.part(name).unwrap().bounds.max().y;
+            let places = crate::cad::cad_placements(&list);
+            let blum: Vec<_> = places
+                .iter()
+                .filter(|p| p.frame == crate::cad::Frame::Blum)
+                .collect();
+            assert!(!blum.is_empty());
+            assert!(blum.iter().all(|p| p.origin.y == back), "{name}");
+        }
+    }
+
+    #[test]
+    fn inset_sharknose_fronts_leave_their_finger_gap_at_the_top() {
+        let mut cab = framed_bank();
+        cab.standard.overlay = DoorOverlay::Inset;
+        cab.standard.handle_place = crate::model::HandlePlace::Sharknose;
+        let list = build_cabinet(&cab).unwrap();
+        let top_rail = list
+            .by_role(PartRole::DrawerFrame)
+            .map(|p| p.bounds.max().z)
+            .fold(0.0, f64::max);
+        let top = list.part("D01.DrawerFront1").unwrap().bounds.max().z;
+        assert_eq!(top_rail - top, cab.standard.sharknose_gap);
+    }
+
+    /// The owner's picture: over a sharknose's finger gap, the inside showed past the rail, down
+    /// the bevel.
+    #[test]
+    fn a_drawer_frames_rail_comes_down_behind_the_front_past_a_sharknose_bevel() {
+        let mut cab = framed_bank();
+        cab.standard.handle_place = crate::model::HandlePlace::Sharknose;
+        let list = build_cabinet(&cab).unwrap();
+        let overlap = cab.standard.drawer_frame_overlap;
+        let fronts: Vec<_> = list.by_role(PartRole::DrawerFront).collect();
+        for (front, hole) in fronts.iter().zip(&frame_openings(&list)) {
+            assert!((front.bounds.max().z - overlap - hole.max().z).abs() < 1e-9);
+            let bevel = list
+                .operations
+                .iter()
+                .find_map(|o| match o {
+                    Operation::Chamfer { part, bounds, .. } if *part == front.name => Some(*bounds),
+                    _ => None,
+                })
+                .expect("a bevel");
+            assert!(hole.max().z <= bevel.min.z, "the rail covers the bevel");
+        }
+        assert!(list.warnings.iter().all(|w| !w.contains("rails")));
+        // Too short a rail says so.
+        cab.standard.drawer_frame_overlap = 5.0;
+        let short = build_cabinet(&cab).unwrap();
+        assert!(
+            short
+                .warnings
+                .iter()
+                .any(|w| w.contains("rails stop above"))
+        );
+    }
+
+    #[test]
+    fn a_framed_drawers_box_stays_under_the_rail() {
+        for overlap in [0.0, 25.0, 40.0] {
+            let mut cab = framed_bank();
+            cab.standard.drawer_frame_overlap = overlap;
+            let list = build_cabinet(&cab).unwrap();
+            for (n, hole) in frame_openings(&list).iter().enumerate() {
+                let back = list.part(&format!("D01.DrawerBack{}", n + 1)).unwrap();
+                assert!(back.bounds.max().z <= hole.max().z, "drawer {}", n + 1);
+            }
+        }
+    }
+
+    #[test]
+    fn a_framed_cabinets_plinth_stays_in_line_with_its_neighbours() {
+        let framed = framed_bank();
+        let mut plain = framed.clone();
+        plain.standard.drawer_frame = DrawerFrame::None;
+        let y = |c: &Cabinet| {
+            build_cabinet(c)
+                .unwrap()
+                .part("D01.Plinth")
+                .unwrap()
+                .bounds
+                .min
+                .y
+        };
+        assert_eq!(y(&framed), y(&plain));
+    }
+
+    /// The owner's call: the carcass makes room, so nothing around the cabinet moves.
+    #[test]
+    fn a_drawer_frame_moves_the_carcass_back_and_leaves_the_fronts_and_back_alone() {
+        let framed = framed_bank();
+        let mut plain = framed.clone();
+        plain.standard.drawer_frame = DrawerFrame::None;
+        let (with, without) = (
+            build_cabinet(&framed).unwrap(),
+            build_cabinet(&plain).unwrap(),
+        );
+        let t = framed.standard.drawer_frame_thickness;
+        let (a, b) = (
+            with.part("D01.DrawerFront1").unwrap(),
+            without.part("D01.DrawerFront1").unwrap(),
+        );
+        assert_eq!(a.bounds.min.y, b.bounds.min.y, "the fronts stay");
+        assert_eq!(a.bounds.max().y, b.bounds.max().y);
+        let (a, b) = (
+            with.part("D01.LeftSide").unwrap(),
+            without.part("D01.LeftSide").unwrap(),
+        );
+        assert_eq!(a.bounds.min.y, b.bounds.min.y + t, "the sides move back");
+        assert_eq!(a.bounds.max().y, b.bounds.max().y, "to the same back");
+        let bottom = |l: &PartList| l.part("D01.Bottom").unwrap().bounds.min.y;
+        assert_eq!(
+            bottom(&with),
+            bottom(&without) + t,
+            "and the bottom with them"
+        );
+    }
+
+    #[test]
+    fn framed_drawers_run_through_their_openings_and_keep_their_hardware_on_the_front() {
+        let mut framed = framed_bank();
+        framed.standard.opening = Opening::ServoDrive;
+        let list = build_cabinet(&framed).unwrap();
+        let base = list.part("D01.DrawerBottom1").unwrap();
+        assert_eq!(base.bounds.min.y, 0.0, "the box starts at the front's back");
+        let hole = frame_openings(&list)[0];
+        assert!(hole.min.z <= base.bounds.min.z && base.bounds.max().z <= hole.max().z);
+        let front = list.part("D01.DrawerFront1").unwrap();
+        let places = crate::cad::cad_placements(&list);
+        let bumper = places
+            .iter()
+            .find(|p| p.name.contains("ServoBumper"))
+            .unwrap();
+        assert_eq!(bumper.origin.y, front.bounds.max().y);
+        let nl = crate::standins::nominal_length(&list, &front.name).unwrap();
+        let unit = places
+            .iter()
+            .find(|p| p.name == "D01.Servo1")
+            .expect("the drive unit");
+        assert_eq!(unit.origin.y, nl + 19.0);
+        let back = list.part("D01.LeftSide").unwrap().bounds.max().y;
+        assert!(unit.origin.y < back, "inside the carcass");
+    }
+
+    #[test]
+    fn a_drawer_frame_is_left_off_a_cabinet_with_doors_and_says_so() {
+        let mut cab = Cabinet::new("B01", CabinetKind::Base).sectioned();
+        cab.standard.drawer_frame = DrawerFrame::Board;
+        let list = build_cabinet(&cab).unwrap();
+        assert!(list.part("B01.DrawerFrame").is_none());
+        assert!(list.warnings.iter().any(|w| w.contains("drawer frame")));
+        let door = list.by_role(PartRole::Door).next().unwrap();
+        assert_eq!(door.bounds.max().y, 0.0, "the doors stay on the carcass");
+    }
+
+    #[test]
+    fn an_open_section_keeps_its_opening_in_the_frame() {
+        let mut cab = framed_bank();
+        let FrontLayout::Sections { columns } = &mut cab.fronts else {
+            panic!("sections");
+        };
+        let mut open = columns[0].rows[0].clone();
+        open.front = SectionFront::Open;
+        columns[0].rows.push(open);
+        let list = build_cabinet(&cab).unwrap();
+        let drawers = list.by_role(PartRole::DrawerFront).count();
+        let openings = frame_openings(&list);
+        assert_eq!(openings.len(), drawers + 1);
+        // The open section's opening is its clear height, from the drawers up to the top.
+        let tallest = openings.iter().map(|o| o.max().z).fold(0.0, f64::max);
+        assert!(
+            tallest
+                > list
+                    .by_role(PartRole::DrawerFront)
+                    .map(|f| f.bounds.max().z)
+                    .fold(0.0, f64::max)
+        );
+    }
+
+    #[test]
+    fn a_sharknose_angle_sets_how_far_the_bevel_runs_down() {
+        use crate::model::SharknoseAngle;
+        let down = |angle| {
+            let mut cab = Cabinet::new("B01", CabinetKind::Base);
+            cab.standard.handle_place = HandlePlace::Sharknose;
+            cab.standard.sharknose_angle = angle;
+            let list = build_cabinet(&cab).unwrap();
+            list.operations
+                .iter()
+                .find_map(|o| match o {
+                    Operation::Chamfer { bounds, .. } => Some(bounds.size.z),
+                    _ => None,
+                })
+                .unwrap()
+        };
+        assert!((down(SharknoseAngle::Bevel45) - SHARKNOSE_INTO).abs() < 1e-9);
+        assert!(down(SharknoseAngle::Bevel30) > down(SharknoseAngle::Bevel45));
+        assert!(down(SharknoseAngle::Bevel60) < down(SharknoseAngle::Bevel45));
+    }
+
+    #[test]
+    fn a_thin_sharknose_front_keeps_a_nose_at_its_face() {
+        let mut cab = Cabinet::new("B01", CabinetKind::Base);
+        cab.standard.handle_place = HandlePlace::Sharknose;
+        cab.standard.front_thickness = 12.0;
+        let list = build_cabinet(&cab).unwrap();
+        let into = list.operations.iter().find_map(|o| match o {
+            Operation::Chamfer { bounds, .. } => Some(bounds.size.y),
+            _ => None,
+        });
+        assert_eq!(into, Some(12.0 - SHARKNOSE_NOSE));
+    }
+
+    /// Without room above it a reverse bevel can't be gripped: 3 mm stops fingers.
+    #[test]
+    fn sharknose_fronts_leave_a_finger_gap_above_each_front() {
+        let mut bank = Cabinet::new("D01", CabinetKind::DrawerBank).sectioned();
+        bank.standard.handle_place = HandlePlace::Sharknose;
+        bank.standard.sharknose_gap = 18.0;
+        let list = build_cabinet(&bank).unwrap();
+        let mut fronts: Vec<_> = list.by_role(PartRole::DrawerFront).collect();
+        fronts.sort_by(|a, b| a.bounds.min.z.total_cmp(&b.bounds.min.z));
+        for pair in fronts.windows(2) {
+            let gap = pair[1].bounds.min.z - pair[0].bounds.max().z;
+            assert!((gap - 18.0).abs() < 1e-6, "{gap}");
+        }
+        let top = fronts.last().unwrap().bounds.max().z;
+        assert!(
+            (bank.height - top - 18.0).abs() < 1e-6,
+            "under the benchtop"
+        );
+        // Handles keep the usual gaps.
+        bank.standard.handle_place = HandlePlace::Corner;
+        let list = build_cabinet(&bank).unwrap();
+        let mut fronts: Vec<_> = list.by_role(PartRole::DrawerFront).collect();
+        fronts.sort_by(|a, b| a.bounds.min.z.total_cmp(&b.bounds.min.z));
+        let gap = fronts[1].bounds.min.z - fronts[0].bounds.max().z;
+        assert!((gap - bank.standard.front_gap).abs() < 1e-6);
+    }
+
     /// WF-3: a sharknose front is bevelled at the back of its top edge (a wall door's bottom),
     /// across its width, and gets no handle.
     #[test]
@@ -5524,7 +6582,11 @@ mod tests {
                     fb.max().z
                 };
                 assert_eq!(at.z, edge, "{}", f.name);
-                assert_eq!((b.size.y, b.size.z), (SHARKNOSE_INTO, SHARKNOSE_DOWN));
+                assert_eq!(b.size.y, SHARKNOSE_INTO);
+                assert!(
+                    (b.size.z - SHARKNOSE_INTO * 3f64.sqrt()).abs() < 1e-9,
+                    "30° from the face"
+                );
             }
         }
     }
@@ -5648,6 +6710,8 @@ mod tests {
             height,
             front,
             inside,
+            shelf_above: true,
+            opening: None,
         }
     }
 
@@ -5660,11 +6724,7 @@ mod tests {
             columns: vec![
                 SectionColumn {
                     width: 450.0,
-                    rows: vec![section(
-                        0.0,
-                        SectionFront::Drawers { count: 3 },
-                        SectionInside::Empty,
-                    )],
+                    rows: vec![section(0.0, SectionFront::drawers(3), SectionInside::Empty)],
                 },
                 SectionColumn {
                     width: 0.0,
@@ -5673,7 +6733,7 @@ mod tests {
                         SectionFront::Door {
                             hinge_side: HingeSide::Left,
                         },
-                        SectionInside::Shelves { count: 1 },
+                        SectionInside::shelves(1),
                     )],
                 },
             ],
@@ -5689,6 +6749,450 @@ mod tests {
                 .any(|w| w.contains("clash") || w.contains("need") || w.contains("left out")),
             "{:?}",
             list.warnings
+        );
+    }
+
+    /// SEC-3: the app only edits sections, so every old layout must convert to the same cabinet:
+    /// the same parts, machining, hardware and notes, whichever order they were made in.
+    #[test]
+    fn every_old_layout_builds_the_same_cabinet_as_its_sections() {
+        use crate::model::{LiftKind, SectionKind};
+        let sorted = |list: &PartList| {
+            let v = serde_json::to_value(list).unwrap();
+            let mut out = Vec::new();
+            for key in ["parts", "operations", "hardware", "warnings"] {
+                let mut rows: Vec<String> = v[key]
+                    .as_array()
+                    .unwrap()
+                    .iter()
+                    .map(|r| r.to_string())
+                    .collect();
+                rows.sort();
+                out.push(rows);
+            }
+            out
+        };
+        let hinge_side = HingeSide::Right;
+        let layouts = [
+            FrontLayout::Open,
+            FrontLayout::Door { hinge_side },
+            FrontLayout::DoorPair,
+            FrontLayout::Drawers {
+                ratios: vec![1.0, 1.0, 1.0],
+            },
+            FrontLayout::Drawers {
+                ratios: vec![1.0, 2.0],
+            },
+            FrontLayout::Lift {
+                kind: LiftKind::StayLift,
+                handle_weight: 0.4,
+            },
+            FrontLayout::BiFoldLift { handle_weight: 0.4 },
+            FrontLayout::Stack {
+                sections: vec![
+                    StackSection {
+                        height: 0.0,
+                        kind: SectionKind::Drawers { count: 2 },
+                    },
+                    StackSection {
+                        height: 600.0,
+                        kind: SectionKind::Niche,
+                    },
+                    StackSection {
+                        height: 0.0,
+                        kind: SectionKind::Door { hinge_side },
+                    },
+                ],
+            },
+        ];
+        let mut compared = 0;
+        for kind in CabinetKind::ALL {
+            for layout in &layouts {
+                let lifting = matches!(
+                    layout,
+                    FrontLayout::Lift { .. } | FrontLayout::BiFoldLift { .. }
+                );
+                for shelves in [0, 2] {
+                    let mut old = Cabinet::new("C01", kind);
+                    old.fronts = layout.clone();
+                    // A front's shelves: drawers and stacks change what was behind them.
+                    let room = !matches!(
+                        layout,
+                        FrontLayout::Drawers { .. } | FrontLayout::Stack { .. }
+                    );
+                    old.adjustable_shelves = if room { shelves } else { 0 };
+                    if lifting && kind != CabinetKind::Wall {
+                        continue;
+                    }
+                    let new = old.clone().sectioned();
+                    let (Ok(a), Ok(b)) = (build_cabinet(&old), build_cabinet(&new)) else {
+                        continue;
+                    };
+                    let (a, b) = (sorted(&a), sorted(&b));
+                    for (x, what) in a.iter().zip(&b).zip(["parts", "ops", "hardware", "notes"]) {
+                        let (x, y) = x;
+                        let only_a: Vec<_> = x.iter().filter(|r| !y.contains(r)).collect();
+                        let only_b: Vec<_> = y.iter().filter(|r| !x.contains(r)).collect();
+                        assert!(
+                            only_a.is_empty() && only_b.is_empty(),
+                            "{kind:?} {layout:?} shelves {shelves}: {what}\n only old: {only_a:?}\n only new: {only_b:?}"
+                        );
+                    }
+                    compared += 1;
+                }
+            }
+        }
+        assert!(compared > 40, "{compared}");
+    }
+
+    /// The owner's test: picking drawers left an adjustable shelf behind them. Sections have none.
+    #[test]
+    fn a_drawer_cabinet_converted_to_sections_has_no_shelf_behind_its_drawers() {
+        let mut cab = base();
+        cab.fronts = FrontLayout::Drawers {
+            ratios: vec![1.0, 1.0],
+        };
+        cab.adjustable_shelves = 1;
+        let list = build_cabinet(&cab.sectioned()).unwrap();
+        assert_eq!(list.by_role(PartRole::Shelf).count(), 0);
+        assert_eq!(list.by_role(PartRole::DrawerFront).count(), 2);
+    }
+
+    /// As in Blum's configurator: splitting the fronts implies no shelf; the owner adds one.
+    #[test]
+    fn a_split_between_sections_makes_a_fixed_shelf_only_when_asked() {
+        let rows = |shelf_above| {
+            let mut cab = base();
+            cab.adjustable_shelves = 0;
+            cab.fronts = FrontLayout::Sections {
+                columns: vec![SectionColumn {
+                    width: 0.0,
+                    rows: vec![
+                        Section {
+                            shelf_above,
+                            ..section(0.0, SectionFront::drawers(1), SectionInside::Empty)
+                        },
+                        section(0.0, SectionFront::drawers(1), SectionInside::Empty),
+                    ],
+                }],
+            };
+            build_cabinet(&cab).unwrap()
+        };
+        assert_eq!(rows(false).by_role(PartRole::Shelf).count(), 0);
+        assert_eq!(rows(true).by_role(PartRole::Shelf).count(), 1);
+        // Both drawers get a box either way, and more room without the shelf.
+        let box_height = |list: &PartList| {
+            list.by_role(PartRole::DrawerBack)
+                .map(|p| p.bounds.size.z)
+                .fold(0.0, f64::max)
+        };
+        assert_eq!(rows(false).by_role(PartRole::DrawerBottom).count(), 2);
+        assert!(box_height(&rows(false)) >= box_height(&rows(true)));
+    }
+
+    /// Blum's session: one drawer SERVO-DRIVE beside drawers with handles. The driven one has no
+    /// handle and a shorter box, for the drive behind it; the others are untouched.
+    #[test]
+    fn one_section_can_be_servo_drive_beside_sections_with_handles() {
+        let mut cab = base();
+        cab.adjustable_shelves = 0;
+        cab.fronts = FrontLayout::Sections {
+            columns: vec![SectionColumn {
+                width: 0.0,
+                rows: vec![
+                    Section {
+                        opening: Some(Opening::ServoDrive),
+                        shelf_above: false,
+                        ..section(0.0, SectionFront::drawers(1), SectionInside::Empty)
+                    },
+                    Section {
+                        shelf_above: false,
+                        ..section(0.0, SectionFront::drawers(1), SectionInside::Empty)
+                    },
+                ],
+            }],
+        };
+        let list = build_cabinet(&cab).unwrap();
+        assert!(
+            !list.warnings.iter().any(|w| w.contains("clash")),
+            "{:?}",
+            list.warnings
+        );
+        let handled = |n: usize| !handle_holes(&list, &format!("B01.DrawerFront{n}")).is_empty();
+        assert!(!handled(1), "the driven drawer has no handle");
+        assert!(handled(2));
+        assert_eq!(
+            list.hardware
+                .iter()
+                .filter(|h| h.item == "blum.servo-drive.drive-unit")
+                .map(|h| h.quantity)
+                .sum::<u32>(),
+            1
+        );
+        let length = |n: usize| {
+            list.part(&format!("B01.DrawerBottom{n}"))
+                .unwrap()
+                .bounds
+                .size
+                .y
+        };
+        assert!(length(1) < length(2), "{} {}", length(1), length(2));
+    }
+
+    /// A section's own drawer system beside the job's.
+    /// Blum's 2026-10-27 session: three 287.33 fronts, a fixed shelf over the bottom one, all
+    /// driven: 2 brackets, each clear height − 10, each with its own attachment, cable and node.
+    /// (Blum's shelf sits 7.5 lower than ours, so its cuts are 256.83 and 545.16: blum-checks.md.)
+    #[test]
+    fn each_compartment_of_driven_drawers_has_its_own_bracket() {
+        let mut cab = Cabinet::new("B01", CabinetKind::Base);
+        cab.width = 600.0;
+        cab.depth = 580.0;
+        cab.height = 870.0;
+        cab.standard.toe_kick = ToeKick::None;
+        cab.standard.top_joint = TopJoint::Rails;
+        cab.standard.bottom_joint = BottomJoint::UnderSides;
+        cab.standard.back = BackStyle::Applied;
+        cab.standard.back_thickness = 16.0;
+        cab.standard.front_gap = 3.0;
+        cab.standard.top_gap = 2.0;
+        cab.standard.bottom_gap = 0.0;
+        cab.standard.opening = Opening::ServoDrive;
+        let row = |shelf_above: bool| Section {
+            height: 0.0,
+            front: SectionFront::drawers(1),
+            inside: SectionInside::Empty,
+            shelf_above,
+            opening: None,
+        };
+        cab.fronts = FrontLayout::Sections {
+            columns: vec![SectionColumn {
+                width: 0.0,
+                rows: vec![row(true), row(false), row(false)],
+            }],
+        };
+        let list = build_cabinet(&cab).unwrap();
+        let count = |id: &str| {
+            list.hardware
+                .iter()
+                .filter(|h| h.item == id)
+                .map(|h| h.quantity)
+                .sum::<u32>()
+        };
+        assert_eq!(count("blum.servo-drive.drive-unit"), 3);
+        assert_eq!(count("blum.servo-drive.bracket-profile.670"), 2);
+        assert_eq!(count("blum.servo-drive.bracket-attachment"), 2);
+        assert_eq!(count("blum.servo-drive.distribution-cable"), 2);
+        assert_eq!(count("blum.servo-drive.connecting-node"), 2);
+        assert_eq!(count("blum.servo-drive.distance-bumper"), 6);
+        assert_eq!(count("blum.servo-drive.power-supply.au"), 1);
+        let cuts: Vec<&str> = list
+            .hardware
+            .iter()
+            .filter(|h| h.item == "blum.servo-drive.bracket-profile.670")
+            .map(|h| h.description.as_str())
+            .collect();
+        assert!(cuts[0].ends_with("cut to 264.3 mm"), "{cuts:?}");
+        assert!(cuts[1].ends_with("cut to 537.7 mm"), "{cuts:?}");
+        // The whole inside is shared out, less the shelf.
+        let compartments = crate::standins::servo_compartments(&list);
+        let clear: Vec<f64> = compartments.iter().map(|c| c.ceiling - c.floor).collect();
+        assert!(
+            (clear[0] + clear[1] + 16.0 - 838.0).abs() < 1e-6,
+            "{clear:?}"
+        );
+        // One upright drawn per compartment, each from its own floor: cut short of Blum's model,
+        // so as stand-ins.
+        let uprights: Vec<_> = crate::standins::stand_ins(&list)
+            .into_iter()
+            .filter(|s| s.name.contains("ServoProfile"))
+            .collect();
+        assert_eq!(uprights.len(), 2);
+        assert_eq!(uprights[0].name, "B01.ServoProfile");
+        assert_eq!(uprights[1].name, "B01.ServoProfile2");
+        let crate::standins::Shape::Box(upper) = uprights[1].shapes[0] else {
+            panic!("a box");
+        };
+        assert!((upper.min.z - compartments[1].floor).abs() < 1e-9);
+    }
+
+    #[test]
+    fn only_driven_drawers_and_their_compartment_get_servo_drive() {
+        let mut cab = Cabinet::new("B01", CabinetKind::Base);
+        let row = |shelf_above: bool, opening: Option<Opening>| Section {
+            height: 0.0,
+            front: SectionFront::drawers(1),
+            inside: SectionInside::Empty,
+            shelf_above,
+            opening,
+        };
+        cab.fronts = FrontLayout::Sections {
+            columns: vec![SectionColumn {
+                width: 0.0,
+                rows: vec![row(true, None), row(false, Some(Opening::ServoDrive))],
+            }],
+        };
+        let list = build_cabinet(&cab).unwrap();
+        let on_front2 = list
+            .hardware
+            .iter()
+            .find(|h| h.item == "blum.servo-drive.drive-unit")
+            .unwrap();
+        let top_front = list
+            .by_role(PartRole::DrawerFront)
+            .max_by(|a, b| a.bounds.min.z.total_cmp(&b.bounds.min.z))
+            .unwrap();
+        assert_eq!(on_front2.part, top_front.name);
+        let shelf = list.by_role(PartRole::Shelf).next().unwrap();
+        let drawn = crate::cad::cad_placements(&list);
+        let units: Vec<_> = drawn
+            .iter()
+            .filter(|c| c.item == "blum.servo-drive.drive-unit")
+            .collect();
+        assert_eq!(units.len(), 1);
+        assert!(units[0].origin.z > shelf.bounds.max().z);
+        let profile = crate::standins::stand_ins(&list)
+            .into_iter()
+            .find(|s| s.name.contains("ServoProfile"))
+            .unwrap();
+        let crate::standins::Shape::Box(bar) = profile.shapes[0] else {
+            panic!("a box");
+        };
+        assert!(
+            (bar.min.z - shelf.bounds.max().z).abs() < 1e-9,
+            "stands on the fixed shelf"
+        );
+    }
+
+    #[test]
+    fn an_adjustable_shelf_in_the_way_of_the_bracket_asks_for_a_fixed_one() {
+        let mut cab = Cabinet::new("B01", CabinetKind::Base);
+        cab.standard.opening = Opening::ServoDrive;
+        let rows = |shelf_above: bool| {
+            vec![
+                Section {
+                    height: 0.0,
+                    front: SectionFront::drawers(1),
+                    inside: SectionInside::Empty,
+                    shelf_above,
+                    opening: None,
+                },
+                Section {
+                    height: 0.0,
+                    front: SectionFront::Open,
+                    inside: SectionInside::shelves(1),
+                    shelf_above: false,
+                    opening: None,
+                },
+            ]
+        };
+        let warned = |shelf_above: bool| {
+            let mut c = cab.clone();
+            c.fronts = FrontLayout::Sections {
+                columns: vec![SectionColumn {
+                    width: 0.0,
+                    rows: rows(shelf_above),
+                }],
+            };
+            build_cabinet(&c)
+                .unwrap()
+                .warnings
+                .iter()
+                .any(|w| w.contains("SERVO-DRIVE bracket"))
+        };
+        assert!(warned(false));
+        assert!(!warned(true));
+    }
+
+    #[test]
+    fn a_section_can_use_another_drawer_system() {
+        let mut cab = base();
+        cab.adjustable_shelves = 0;
+        cab.fronts = FrontLayout::Sections {
+            columns: vec![SectionColumn {
+                width: 0.0,
+                rows: vec![section(
+                    0.0,
+                    SectionFront::Drawers {
+                        count: 2,
+                        ratios: Vec::new(),
+                        system: Some(DrawerSystem::Merivobox),
+                    },
+                    SectionInside::Empty,
+                )],
+            }],
+        };
+        let list = build_cabinet(&cab).unwrap();
+        assert!(list.hardware.iter().any(|h| h.item.contains("merivobox")));
+        assert!(!list.hardware.iter().any(|h| h.item.contains("legrabox")));
+    }
+
+    /// SEC-2's pin holes: adjustable shelves in a column rest on holes in the side and the divider,
+    /// not run through from the divider's other face.
+    #[test]
+    fn adjustable_shelves_in_a_column_get_pin_holes_in_its_panels() {
+        let list = build_cabinet(&sectioned_base()).unwrap();
+        let divider = list.by_role(PartRole::Divider).next().unwrap().name.clone();
+        let pins = |part: &str| bores(&list, part, BorePurpose::ShelfPin);
+        assert!(!pins(&divider).is_empty());
+        assert!(!pins("B01.RightSide").is_empty());
+        assert!(pins("B01.LeftSide").is_empty(), "drawers on that side");
+        let t = cab_thickness(&list);
+        for o in &list.operations {
+            if let Operation::Bore {
+                part,
+                depth,
+                purpose: BorePurpose::ShelfPin,
+                ..
+            } = o
+                && *part == divider
+            {
+                assert!(depth * 2.0 < t, "{depth}");
+            }
+        }
+    }
+
+    fn cab_thickness(list: &PartList) -> f64 {
+        list.part("B01.LeftSide").unwrap().bounds.size.x
+    }
+
+    /// AVENTOS is sized from the cabinet: a lift only across its top, and one of them.
+    #[test]
+    fn a_lift_section_goes_across_the_top_of_the_cabinet_or_says_why_not() {
+        use crate::model::LiftKind;
+        let lift = SectionFront::Lift {
+            kind: LiftKind::StayLift,
+            handle_weight: 0.4,
+        };
+        let mut cab = Cabinet::new("W01", CabinetKind::Wall);
+        cab.adjustable_shelves = 0;
+        let build = |cab: &mut Cabinet, rows: Vec<Section>| {
+            cab.fronts = FrontLayout::Sections {
+                columns: vec![SectionColumn { width: 0.0, rows }],
+            };
+            build_cabinet(cab).unwrap()
+        };
+        let top = build(
+            &mut cab,
+            vec![
+                section(0.0, SectionFront::Open, SectionInside::Empty),
+                section(300.0, lift.clone(), SectionInside::Empty),
+            ],
+        );
+        assert_eq!(top.by_role(PartRole::LiftFront).count(), 1);
+        let under = build(
+            &mut cab,
+            vec![
+                section(300.0, lift.clone(), SectionInside::Empty),
+                section(0.0, SectionFront::Open, SectionInside::Empty),
+            ],
+        );
+        assert_eq!(under.by_role(PartRole::LiftFront).count(), 0);
+        assert!(
+            under
+                .warnings
+                .iter()
+                .any(|w| w.contains("lift goes across"))
         );
     }
 
@@ -5777,17 +7281,9 @@ mod tests {
             columns: vec![SectionColumn {
                 width: 0.0,
                 rows: vec![
-                    section(
-                        500.0,
-                        SectionFront::Drawers { count: 2 },
-                        SectionInside::Empty,
-                    ),
+                    section(500.0, SectionFront::drawers(2), SectionInside::Empty),
                     section(0.0, SectionFront::Open, SectionInside::Hanging),
-                    section(
-                        400.0,
-                        SectionFront::DoorPair,
-                        SectionInside::Shelves { count: 1 },
-                    ),
+                    section(400.0, SectionFront::DoorPair, SectionInside::shelves(1)),
                 ],
             }],
         };

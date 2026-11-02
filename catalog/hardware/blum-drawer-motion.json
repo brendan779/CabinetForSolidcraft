@@ -476,12 +476,13 @@
       "kind": "other",
       "parameters": {
         "bracket_deduction": 10,
+        "bracket_shortest_cut_stock": 670,
         "bumpers_low_front": 2,
         "bumpers_high_front": 4,
         "low_front_max": 300
       },
       "source": {
-        "url": "Blum Catalogue and technical manual 2024/2025, p.364",
+        "url": "Blum Catalogue and technical manual 2024/2025, p.364; bracket_shortest_cut_stock from Blum E-SERVICES session 2026-10-27 (cuts of 256.83 and 545.16 from Z10T670AA)",
         "document_date": "2024/2025",
         "retrieved": "2026-10-26",
         "verified": false
@@ -498,7 +499,7 @@
         "lift_above_profile_bottom": 45,
         "mount_centred_from_lw": 387,
         "mount_from_left_side": 184,
-        "profile_origin_above_floor": 20,
+        "profile_origin_above_floor": 4,
         "bracket_from_front": 19
       },
       "source": {
@@ -710,11 +711,10 @@
       "kind": "other",
       "parameters": {
         "diameter": 5,
-        "inset_from_front_edge": 8,
-        "datum_behind_back_face": 4.5
+        "inset_from_front_edge": 8
       },
       "source": {
-        "url": "Blum Catalogue and technical manual 2024/2025, p.366 (front assembly: FA/2 apart, 20 +-12 from the centre; 2 pcs to FH 300, 4 from 301) and Blum session output 2026-10-27 (drawer base 600x870x580, LEGRABOX free C, NL 500, SERVO-DRIVE), New-cabinet parts list and measured New-cabinet.STEP (8 mm in from the front's side edges, datum 4.5 behind the back face, pin towards the interior)",
+        "url": "Blum Catalogue and technical manual 2024/2025, p.366 (front assembly: FA/2 apart, 20 +-12 from the centre; 2 pcs to FH 300, 4 from 301) and Blum session output 2026-10-27 (drawer base 600x870x580, LEGRABOX free C, NL 500, SERVO-DRIVE), New-cabinet parts list and measured New-cabinet.STEP (8 mm in from the front's side edges, datum on the front's back face at 582.5, head towards the interior; Blum's fronts stand 2.5 off the carcass)",
         "document_date": "2024/2025",
         "retrieved": "2026-11-01",
         "verified": false

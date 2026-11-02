@@ -126,38 +126,49 @@ struct CabinetGlyph: View {
             let w = min(size.width, h * aspect)
             let r = CGRect(x: (size.width - w) / 2, y: 0, width: w, height: h)
             ctx.stroke(Path(roundedRect: r, cornerRadius: 1.5), with: .color(.primary.opacity(0.8)), lineWidth: 1)
-            switch doc.frontType {
-            case "door_pair":
+            // The cabinet's sections, as in the inspector's drawing.
+            let columns = doc.sectionColumns
+            let widths = Sections.shares(columns.map(\.width), of: r.width)
+            var x = r.minX
+            func line(_ a: CGPoint, _ b: CGPoint, _ opacity: Double = 0.6) {
                 var p = Path()
-                p.move(to: CGPoint(x: r.midX, y: r.minY))
-                p.addLine(to: CGPoint(x: r.midX, y: r.maxY))
-                ctx.stroke(p, with: .color(.primary.opacity(0.6)), lineWidth: 0.8)
-            case "bi_fold_lift":
-                var p = Path()
-                p.move(to: CGPoint(x: r.minX, y: r.midY))
-                p.addLine(to: CGPoint(x: r.maxX, y: r.midY))
-                ctx.stroke(p, with: .color(.primary.opacity(0.6)), lineWidth: 0.8)
-            case "drawers":
-                let ratios = doc.drawerRatios
-                let total = ratios.reduce(0, +)
-                var y = r.minY
-                for ratio in ratios.dropLast() {
-                    y += r.height * ratio / max(total, 0.001)
-                    var p = Path()
-                    p.move(to: CGPoint(x: r.minX, y: y))
-                    p.addLine(to: CGPoint(x: r.maxX, y: y))
-                    ctx.stroke(p, with: .color(.primary.opacity(0.6)), lineWidth: 0.8)
+                p.move(to: a)
+                p.addLine(to: b)
+                ctx.stroke(p, with: .color(.primary.opacity(opacity)), lineWidth: 0.8)
+            }
+            for (i, column) in columns.enumerated() {
+                let heights = Sections.shares(column.rows.map(\.height), of: r.height)
+                var y = r.maxY
+                for (row, h) in zip(column.rows, heights) {
+                    if y < r.maxY { line(CGPoint(x: x, y: y), CGPoint(x: x + widths[i], y: y)) }
+                    let cell = CGRect(x: x, y: y - h, width: widths[i], height: h)
+                    switch row.front {
+                    case "door_pair":
+                        line(CGPoint(x: cell.midX, y: cell.minY), CGPoint(x: cell.midX, y: cell.maxY))
+                    case "bi_fold":
+                        line(CGPoint(x: cell.minX, y: cell.midY), CGPoint(x: cell.maxX, y: cell.midY))
+                    case "drawers":
+                        let ratios = row.drawerRatios
+                        let total = ratios.reduce(0, +)
+                        var dy = cell.minY
+                        for ratio in ratios.dropLast() {
+                            dy += cell.height * ratio / max(total, 0.001)
+                            line(CGPoint(x: cell.minX, y: dy), CGPoint(x: cell.maxX, y: dy))
+                        }
+                    case "open":
+                        if row.inside == "shelves" || row.inside == "shoe_shelves" {
+                            for k in 1...max(row.insideCount, 1) {
+                                let sy = cell.maxY - cell.height * CGFloat(k) / CGFloat(max(row.insideCount, 1) + 1)
+                                line(CGPoint(x: cell.minX + 2, y: sy), CGPoint(x: cell.maxX - 2, y: sy), 0.4)
+                            }
+                        }
+                    default:
+                        break
+                    }
+                    y -= h
                 }
-            case "open":
-                for i in 1..<3 {
-                    let y = r.minY + r.height * CGFloat(i) / 3
-                    var p = Path()
-                    p.move(to: CGPoint(x: r.minX + 2, y: y))
-                    p.addLine(to: CGPoint(x: r.maxX - 2, y: y))
-                    ctx.stroke(p, with: .color(.primary.opacity(0.4)), lineWidth: 0.8)
-                }
-            default:
-                break
+                x += widths[i]
+                if i + 1 < columns.count { line(CGPoint(x: x, y: r.minY), CGPoint(x: x, y: r.maxY)) }
             }
         }
         .accessibilityHidden(true)

@@ -28,6 +28,7 @@ pub mod part;
 pub mod project;
 pub mod quote;
 pub mod run;
+pub mod splits;
 pub mod standins;
 
 pub use build::build_cabinet;

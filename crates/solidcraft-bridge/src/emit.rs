@@ -94,10 +94,15 @@ pub fn emit_cabinet_with(
                     .map(|p| (bounds.size.get(p.thickness_axis), bounds.size.z))
                     .unwrap_or((bounds.size.y, bounds.size.z));
                 let top = p.is_none_or(|p| (at.z - p.bounds.max().z).abs() < 1e-6);
+                let bottom = p.is_some_and(|p| (at.z - p.bounds.min.z).abs() < 1e-6);
                 let (d1, d2) = if top {
                     (along_t, along_z)
-                } else {
+                } else if bottom {
                     (along_z, along_t)
+                } else {
+                    // Up a door's opening side: neither face looks up, and SolidCraft takes the
+                    // one across the door's width first.
+                    (bounds.size.x, along_t)
                 };
                 cmds.push(json!({
                     "command": "solid.chamfer",
@@ -156,7 +161,9 @@ pub fn emit_cabinet_with(
         };
         let hardware: Vec<StandIn> = stand_ins(list)
             .into_iter()
-            .filter(|s| detail != Detail::Design || s.name.contains(".Leg"))
+            .filter(|s| {
+                detail != Detail::Design || s.name.contains(".Leg") || opening_hardware(&s.item)
+            })
             .filter(|s| !real.contains(&s.name))
             .collect();
         cmds.extend(hardware.iter().flat_map(stand_in));
@@ -278,6 +285,12 @@ pub fn replace_cabinet(
 /// The supplier models a build at `detail` puts in. Handles go in at every level, as they are part
 /// of how the cabinet looks and have no stand-in; the rest of the hardware is manufacturing
 /// detail, and slow to load.
+/// How a front opens is a design choice, so Design detail shows it, as it shows handles: a build
+/// with SERVO-DRIVE or TIP-ON picked must look different from one without.
+fn opening_hardware(item: &str) -> bool {
+    item.starts_with("blum.servo-drive.") || item.starts_with("blum.tip-on")
+}
+
 pub fn models_for(
     detail: Detail,
     placements: &[cabinet_core::cad::CadPlacement],
@@ -285,7 +298,9 @@ pub fn models_for(
 ) -> Vec<crate::vendor::VendorInstance> {
     let wanted: Vec<_> = placements
         .iter()
-        .filter(|p| detail != Detail::Design || p.item.starts_with("handle."))
+        .filter(|p| {
+            detail != Detail::Design || p.item.starts_with("handle.") || opening_hardware(&p.item)
+        })
         .cloned()
         .collect();
     crate::vendor::resolve(&wanted, index)
@@ -1007,6 +1022,18 @@ mod tests {
         let full = names(Detail::Manufacturing);
         assert!(full.iter().any(|n| n.contains("Handle")));
         assert!(full.iter().any(|n| n.contains("Hinge")));
+    }
+
+    #[test]
+    fn design_detail_builds_the_opening_hardware_that_was_picked() {
+        use cabinet_core::model::Opening;
+        for (opening, tag) in [(Opening::ServoDrive, ".Servo"), (Opening::TipOn, ".TipOn")] {
+            let mut bank = Cabinet::new("D01", CabinetKind::DrawerBank);
+            bank.standard.opening = opening;
+            let list = build_cabinet(&bank).unwrap();
+            let text = serde_json::to_string(&emit_cabinet(&list, Detail::Design, None)).unwrap();
+            assert!(text.contains(&format!("D01{tag}")), "{opening:?}");
+        }
     }
 
     /// `file.insert_mesh` takes no matrix, so a mesh model has to be moved into place, or every

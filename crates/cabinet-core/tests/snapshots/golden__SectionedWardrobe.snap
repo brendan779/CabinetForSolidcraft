@@ -336,7 +336,7 @@ expression: list
         "min": {
           "x": 611.0,
           "y": 2.0,
-          "z": 1398.6666666666667
+          "z": 1422.5
         },
         "size": {
           "x": 572.0,
@@ -363,7 +363,7 @@ expression: list
         "min": {
           "x": 611.0,
           "y": 2.0,
-          "z": 1737.3333333333335
+          "z": 1742.5
         },
         "size": {
           "x": 572.0,
@@ -4976,6 +4976,902 @@ expression: list
     },
     {
       "type": "bore",
+      "part": "W01.Divider1",
+      "at": {
+        "x": 610.0,
+        "y": 37.0,
+        "z": 1324.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 5.0,
+      "depth": 7.5,
+      "purpose": "shelf_pin"
+    },
+    {
+      "type": "bore",
+      "part": "W01.RightSide",
+      "at": {
+        "x": 1184.0,
+        "y": 37.0,
+        "z": 1324.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 5.0,
+      "depth": 10.0,
+      "purpose": "shelf_pin"
+    },
+    {
+      "type": "bore",
+      "part": "W01.Divider1",
+      "at": {
+        "x": 610.0,
+        "y": 521.0,
+        "z": 1324.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 5.0,
+      "depth": 7.5,
+      "purpose": "shelf_pin"
+    },
+    {
+      "type": "bore",
+      "part": "W01.RightSide",
+      "at": {
+        "x": 1184.0,
+        "y": 521.0,
+        "z": 1324.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 5.0,
+      "depth": 10.0,
+      "purpose": "shelf_pin"
+    },
+    {
+      "type": "bore",
+      "part": "W01.Divider1",
+      "at": {
+        "x": 610.0,
+        "y": 37.0,
+        "z": 1356.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 5.0,
+      "depth": 7.5,
+      "purpose": "shelf_pin"
+    },
+    {
+      "type": "bore",
+      "part": "W01.RightSide",
+      "at": {
+        "x": 1184.0,
+        "y": 37.0,
+        "z": 1356.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 5.0,
+      "depth": 10.0,
+      "purpose": "shelf_pin"
+    },
+    {
+      "type": "bore",
+      "part": "W01.Divider1",
+      "at": {
+        "x": 610.0,
+        "y": 521.0,
+        "z": 1356.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 5.0,
+      "depth": 7.5,
+      "purpose": "shelf_pin"
+    },
+    {
+      "type": "bore",
+      "part": "W01.RightSide",
+      "at": {
+        "x": 1184.0,
+        "y": 521.0,
+        "z": 1356.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 5.0,
+      "depth": 10.0,
+      "purpose": "shelf_pin"
+    },
+    {
+      "type": "bore",
+      "part": "W01.Divider1",
+      "at": {
+        "x": 610.0,
+        "y": 37.0,
+        "z": 1388.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 5.0,
+      "depth": 7.5,
+      "purpose": "shelf_pin"
+    },
+    {
+      "type": "bore",
+      "part": "W01.RightSide",
+      "at": {
+        "x": 1184.0,
+        "y": 37.0,
+        "z": 1388.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 5.0,
+      "depth": 10.0,
+      "purpose": "shelf_pin"
+    },
+    {
+      "type": "bore",
+      "part": "W01.Divider1",
+      "at": {
+        "x": 610.0,
+        "y": 521.0,
+        "z": 1388.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 5.0,
+      "depth": 7.5,
+      "purpose": "shelf_pin"
+    },
+    {
+      "type": "bore",
+      "part": "W01.RightSide",
+      "at": {
+        "x": 1184.0,
+        "y": 521.0,
+        "z": 1388.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 5.0,
+      "depth": 10.0,
+      "purpose": "shelf_pin"
+    },
+    {
+      "type": "bore",
+      "part": "W01.Divider1",
+      "at": {
+        "x": 610.0,
+        "y": 37.0,
+        "z": 1420.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 5.0,
+      "depth": 7.5,
+      "purpose": "shelf_pin"
+    },
+    {
+      "type": "bore",
+      "part": "W01.RightSide",
+      "at": {
+        "x": 1184.0,
+        "y": 37.0,
+        "z": 1420.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 5.0,
+      "depth": 10.0,
+      "purpose": "shelf_pin"
+    },
+    {
+      "type": "bore",
+      "part": "W01.Divider1",
+      "at": {
+        "x": 610.0,
+        "y": 521.0,
+        "z": 1420.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 5.0,
+      "depth": 7.5,
+      "purpose": "shelf_pin"
+    },
+    {
+      "type": "bore",
+      "part": "W01.RightSide",
+      "at": {
+        "x": 1184.0,
+        "y": 521.0,
+        "z": 1420.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 5.0,
+      "depth": 10.0,
+      "purpose": "shelf_pin"
+    },
+    {
+      "type": "bore",
+      "part": "W01.Divider1",
+      "at": {
+        "x": 610.0,
+        "y": 37.0,
+        "z": 1452.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 5.0,
+      "depth": 7.5,
+      "purpose": "shelf_pin"
+    },
+    {
+      "type": "bore",
+      "part": "W01.RightSide",
+      "at": {
+        "x": 1184.0,
+        "y": 37.0,
+        "z": 1452.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 5.0,
+      "depth": 10.0,
+      "purpose": "shelf_pin"
+    },
+    {
+      "type": "bore",
+      "part": "W01.Divider1",
+      "at": {
+        "x": 610.0,
+        "y": 521.0,
+        "z": 1452.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 5.0,
+      "depth": 7.5,
+      "purpose": "shelf_pin"
+    },
+    {
+      "type": "bore",
+      "part": "W01.RightSide",
+      "at": {
+        "x": 1184.0,
+        "y": 521.0,
+        "z": 1452.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 5.0,
+      "depth": 10.0,
+      "purpose": "shelf_pin"
+    },
+    {
+      "type": "bore",
+      "part": "W01.Divider1",
+      "at": {
+        "x": 610.0,
+        "y": 37.0,
+        "z": 1484.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 5.0,
+      "depth": 7.5,
+      "purpose": "shelf_pin"
+    },
+    {
+      "type": "bore",
+      "part": "W01.RightSide",
+      "at": {
+        "x": 1184.0,
+        "y": 37.0,
+        "z": 1484.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 5.0,
+      "depth": 10.0,
+      "purpose": "shelf_pin"
+    },
+    {
+      "type": "bore",
+      "part": "W01.Divider1",
+      "at": {
+        "x": 610.0,
+        "y": 521.0,
+        "z": 1484.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 5.0,
+      "depth": 7.5,
+      "purpose": "shelf_pin"
+    },
+    {
+      "type": "bore",
+      "part": "W01.RightSide",
+      "at": {
+        "x": 1184.0,
+        "y": 521.0,
+        "z": 1484.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 5.0,
+      "depth": 10.0,
+      "purpose": "shelf_pin"
+    },
+    {
+      "type": "bore",
+      "part": "W01.Divider1",
+      "at": {
+        "x": 610.0,
+        "y": 37.0,
+        "z": 1516.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 5.0,
+      "depth": 7.5,
+      "purpose": "shelf_pin"
+    },
+    {
+      "type": "bore",
+      "part": "W01.RightSide",
+      "at": {
+        "x": 1184.0,
+        "y": 37.0,
+        "z": 1516.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 5.0,
+      "depth": 10.0,
+      "purpose": "shelf_pin"
+    },
+    {
+      "type": "bore",
+      "part": "W01.Divider1",
+      "at": {
+        "x": 610.0,
+        "y": 521.0,
+        "z": 1516.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 5.0,
+      "depth": 7.5,
+      "purpose": "shelf_pin"
+    },
+    {
+      "type": "bore",
+      "part": "W01.RightSide",
+      "at": {
+        "x": 1184.0,
+        "y": 521.0,
+        "z": 1516.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 5.0,
+      "depth": 10.0,
+      "purpose": "shelf_pin"
+    },
+    {
+      "type": "bore",
+      "part": "W01.Divider1",
+      "at": {
+        "x": 610.0,
+        "y": 37.0,
+        "z": 1644.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 5.0,
+      "depth": 7.5,
+      "purpose": "shelf_pin"
+    },
+    {
+      "type": "bore",
+      "part": "W01.RightSide",
+      "at": {
+        "x": 1184.0,
+        "y": 37.0,
+        "z": 1644.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 5.0,
+      "depth": 10.0,
+      "purpose": "shelf_pin"
+    },
+    {
+      "type": "bore",
+      "part": "W01.Divider1",
+      "at": {
+        "x": 610.0,
+        "y": 521.0,
+        "z": 1644.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 5.0,
+      "depth": 7.5,
+      "purpose": "shelf_pin"
+    },
+    {
+      "type": "bore",
+      "part": "W01.RightSide",
+      "at": {
+        "x": 1184.0,
+        "y": 521.0,
+        "z": 1644.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 5.0,
+      "depth": 10.0,
+      "purpose": "shelf_pin"
+    },
+    {
+      "type": "bore",
+      "part": "W01.Divider1",
+      "at": {
+        "x": 610.0,
+        "y": 37.0,
+        "z": 1676.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 5.0,
+      "depth": 7.5,
+      "purpose": "shelf_pin"
+    },
+    {
+      "type": "bore",
+      "part": "W01.RightSide",
+      "at": {
+        "x": 1184.0,
+        "y": 37.0,
+        "z": 1676.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 5.0,
+      "depth": 10.0,
+      "purpose": "shelf_pin"
+    },
+    {
+      "type": "bore",
+      "part": "W01.Divider1",
+      "at": {
+        "x": 610.0,
+        "y": 521.0,
+        "z": 1676.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 5.0,
+      "depth": 7.5,
+      "purpose": "shelf_pin"
+    },
+    {
+      "type": "bore",
+      "part": "W01.RightSide",
+      "at": {
+        "x": 1184.0,
+        "y": 521.0,
+        "z": 1676.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 5.0,
+      "depth": 10.0,
+      "purpose": "shelf_pin"
+    },
+    {
+      "type": "bore",
+      "part": "W01.Divider1",
+      "at": {
+        "x": 610.0,
+        "y": 37.0,
+        "z": 1708.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 5.0,
+      "depth": 7.5,
+      "purpose": "shelf_pin"
+    },
+    {
+      "type": "bore",
+      "part": "W01.RightSide",
+      "at": {
+        "x": 1184.0,
+        "y": 37.0,
+        "z": 1708.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 5.0,
+      "depth": 10.0,
+      "purpose": "shelf_pin"
+    },
+    {
+      "type": "bore",
+      "part": "W01.Divider1",
+      "at": {
+        "x": 610.0,
+        "y": 521.0,
+        "z": 1708.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 5.0,
+      "depth": 7.5,
+      "purpose": "shelf_pin"
+    },
+    {
+      "type": "bore",
+      "part": "W01.RightSide",
+      "at": {
+        "x": 1184.0,
+        "y": 521.0,
+        "z": 1708.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 5.0,
+      "depth": 10.0,
+      "purpose": "shelf_pin"
+    },
+    {
+      "type": "bore",
+      "part": "W01.Divider1",
+      "at": {
+        "x": 610.0,
+        "y": 37.0,
+        "z": 1740.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 5.0,
+      "depth": 7.5,
+      "purpose": "shelf_pin"
+    },
+    {
+      "type": "bore",
+      "part": "W01.RightSide",
+      "at": {
+        "x": 1184.0,
+        "y": 37.0,
+        "z": 1740.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 5.0,
+      "depth": 10.0,
+      "purpose": "shelf_pin"
+    },
+    {
+      "type": "bore",
+      "part": "W01.Divider1",
+      "at": {
+        "x": 610.0,
+        "y": 521.0,
+        "z": 1740.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 5.0,
+      "depth": 7.5,
+      "purpose": "shelf_pin"
+    },
+    {
+      "type": "bore",
+      "part": "W01.RightSide",
+      "at": {
+        "x": 1184.0,
+        "y": 521.0,
+        "z": 1740.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 5.0,
+      "depth": 10.0,
+      "purpose": "shelf_pin"
+    },
+    {
+      "type": "bore",
+      "part": "W01.Divider1",
+      "at": {
+        "x": 610.0,
+        "y": 37.0,
+        "z": 1772.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 5.0,
+      "depth": 7.5,
+      "purpose": "shelf_pin"
+    },
+    {
+      "type": "bore",
+      "part": "W01.RightSide",
+      "at": {
+        "x": 1184.0,
+        "y": 37.0,
+        "z": 1772.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 5.0,
+      "depth": 10.0,
+      "purpose": "shelf_pin"
+    },
+    {
+      "type": "bore",
+      "part": "W01.Divider1",
+      "at": {
+        "x": 610.0,
+        "y": 521.0,
+        "z": 1772.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 5.0,
+      "depth": 7.5,
+      "purpose": "shelf_pin"
+    },
+    {
+      "type": "bore",
+      "part": "W01.RightSide",
+      "at": {
+        "x": 1184.0,
+        "y": 521.0,
+        "z": 1772.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 5.0,
+      "depth": 10.0,
+      "purpose": "shelf_pin"
+    },
+    {
+      "type": "bore",
+      "part": "W01.Divider1",
+      "at": {
+        "x": 610.0,
+        "y": 37.0,
+        "z": 1804.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 5.0,
+      "depth": 7.5,
+      "purpose": "shelf_pin"
+    },
+    {
+      "type": "bore",
+      "part": "W01.RightSide",
+      "at": {
+        "x": 1184.0,
+        "y": 37.0,
+        "z": 1804.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 5.0,
+      "depth": 10.0,
+      "purpose": "shelf_pin"
+    },
+    {
+      "type": "bore",
+      "part": "W01.Divider1",
+      "at": {
+        "x": 610.0,
+        "y": 521.0,
+        "z": 1804.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 5.0,
+      "depth": 7.5,
+      "purpose": "shelf_pin"
+    },
+    {
+      "type": "bore",
+      "part": "W01.RightSide",
+      "at": {
+        "x": 1184.0,
+        "y": 521.0,
+        "z": 1804.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 5.0,
+      "depth": 10.0,
+      "purpose": "shelf_pin"
+    },
+    {
+      "type": "bore",
+      "part": "W01.Divider1",
+      "at": {
+        "x": 610.0,
+        "y": 37.0,
+        "z": 1836.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 5.0,
+      "depth": 7.5,
+      "purpose": "shelf_pin"
+    },
+    {
+      "type": "bore",
+      "part": "W01.RightSide",
+      "at": {
+        "x": 1184.0,
+        "y": 37.0,
+        "z": 1836.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 5.0,
+      "depth": 10.0,
+      "purpose": "shelf_pin"
+    },
+    {
+      "type": "bore",
+      "part": "W01.Divider1",
+      "at": {
+        "x": 610.0,
+        "y": 521.0,
+        "z": 1836.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 5.0,
+      "depth": 7.5,
+      "purpose": "shelf_pin"
+    },
+    {
+      "type": "bore",
+      "part": "W01.RightSide",
+      "at": {
+        "x": 1184.0,
+        "y": 521.0,
+        "z": 1836.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 5.0,
+      "depth": 10.0,
+      "purpose": "shelf_pin"
+    },
+    {
+      "type": "bore",
       "part": "W01.DrawerFront1",
       "at": {
         "x": 237.0,
@@ -5196,7 +6092,7 @@ expression: list
       "at": {
         "x": 897.0,
         "y": 279.0,
-        "z": 1406.6666666666667
+        "z": 1430.5
       },
       "part": "W01.Shelf6",
       "quantity": 4
@@ -5207,7 +6103,7 @@ expression: list
       "at": {
         "x": 897.0,
         "y": 279.0,
-        "z": 1745.3333333333335
+        "z": 1750.5
       },
       "part": "W01.Shelf7",
       "quantity": 4

@@ -23,7 +23,7 @@ struct InspectorView: View {
                     if cab.kind == "sink" {
                         SinkSection(cab: cab)
                     }
-                    if cab.kind == "wardrobe", cab.frontType != "sections" {
+                    if cab.kind == "wardrobe" {
                         WardrobeSection(cab: cab)
                     }
                     if cab.kind == "corner_base" || cab.kind == "corner_wall" {
@@ -167,6 +167,14 @@ struct StandardSizes: View {
             rows([("Front gap", "front_gap", [2, 3, 4]),
                   ("Top gap", "top_gap", [0, 2, 3]),
                   ("Bottom gap", "bottom_gap", [0, 2])])
+        case "sharknose_angle":
+            rows([("Finger gap", "sharknose_gap", [10, 15, 20, 25, 30]),
+                  ("Rail thickness", "drawer_frame_thickness", [16, 18]),
+                  ("Rail behind front", "drawer_frame_overlap", [0, 10, 15, 25, 40])])
+        case "drawer_frame" where project.option("drawer_frame", of: cab) == "board"
+            && project.option("handle_place", of: cab) != "sharknose":
+            rows([("Thickness", "drawer_frame_thickness", [16, 18]),
+                  ("Rail behind front", "drawer_frame_overlap", [0, 10, 15, 25, 40])])
         case "door_style" where ["shaker", "glass_frame"].contains(project.option("door_style", of: cab)):
             rows([("Frame", "shaker_frame_width", [50, 60, 70, 80, 90]),
                   ("Panel", "shaker_panel_thickness", [6, 9, 12]),
@@ -602,7 +610,8 @@ struct SizeSection: View {
                     .monospacedDigit()
                 }
             }
-            if ["door", "door_pair", "open"].contains(cab.frontType), cab.kind != "sink" {
+            // A wardrobe's drawers belong to its interior; everywhere else, to a section.
+            if cab.kind == "wardrobe" {
                 HStack {
                     Text("Inner drawers").foregroundStyle(.secondary)
                     Spacer()
@@ -1374,47 +1383,11 @@ struct FrontsSection: View {
     @Environment(ProjectModel.self) private var project
     let cab: CabinetDoc
 
-    private var layouts: [(id: String, title: String)] {
-        var l: [(String, String)] = [
-            ("door", "Door"), ("door_pair", "Pair"), ("drawers", "Drawers"), ("lift", "Lift"), ("bi_fold_lift", "Bi-fold"), ("open", "Open"),
-            ("sections", "Sections"),
-        ]
-        if cab.kind == "tall" {
-            l += [("oven_tower", "Oven"), ("fridge", "Fridge")]
-        }
-        return l
-    }
-
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             SectionTitle("Fronts")
-            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 3), spacing: 8) {
-                ForEach(layouts, id: \.id) { layout in
-                    let selected = cab.frontType == layout.id
-                    Button {
-                        withAnimation(.snappy) { var c = cab; c.frontType = layout.id; project.selected = c }
-                    } label: {
-                        VStack(spacing: 6) {
-                            FrontThumbnail(layout: layout.id, hinge: cab.hingeSide, ratios: [1, 1, 1])
-                                .frame(width: 44, height: 52)
-                            Text(layout.title).font(.caption)
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 8)
-                    }
-                    .buttonStyle(TileStyle(selected: selected))
-                }
-            }
-            if cab.frontType == "door" {
-                Picker("Hinge", selection: Binding(get: { cab.hingeSide }, set: { v in
-                    var c = cab; c.hingeSide = v; project.selected = c
-                })) {
-                    Label("Left", systemImage: "arrow.left.to.line").tag("left")
-                    Label("Right", systemImage: "arrow.right.to.line").tag("right")
-                }
-                .pickerStyle(.segmented)
-            }
-            if ["door", "door_pair"].contains(cab.frontType) {
+            SectionsEditor(cab: cab)
+            if cab.hasFront("door") {
                 HStack(spacing: 6) {
                     Text("Arch").foregroundStyle(.secondary)
                     Spacer()
@@ -1428,10 +1401,7 @@ struct FrontsSection: View {
                 }
                 .help("An arched top across the doors: this many millimetres higher in the middle than at the sides (slab doors)")
             }
-            if cab.frontType == "drawers" {
-                DrawerStackPicker(cab: cab)
-            }
-            if ["drawers", "oven_tower"].contains(cab.frontType) {
+            if cab.hasFront("drawers") {
                 Toggle("Drawer inserts", isOn: Binding(get: { cab.drawerInserts }, set: { v in
                     withAnimation(.snappy) { var c = cab; c.drawerInserts = v; project.selected = c }
                 }))
@@ -1441,20 +1411,14 @@ struct FrontsSection: View {
                 }))
                 .help("Blum CABLOXX: one locking bar locks every drawer (up to five); fit a cylinder lock, bought separately")
             }
-            if cab.frontType == "lift" {
-                LiftKindPicker(cab: cab)
-            }
-            if cab.frontType == "sections" {
-                SectionsEditor(cab: cab)
-            }
         }
     }
 }
 
 /// How a lifting front moves, drawn from the side: each picks its AVENTOS family.
 struct LiftKindPicker: View {
-    @Environment(ProjectModel.self) private var project
-    let cab: CabinetDoc
+    let selected: String
+    let onPick: (String) -> Void
 
     private let kinds: [(id: String, title: String, help: String)] = [
         ("stay_lift", "Stay lift", "Swings up about its top edge and stays open (AVENTOS HK top)"),
@@ -1469,7 +1433,7 @@ struct LiftKindPicker: View {
         LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 3), spacing: 8) {
             ForEach(kinds, id: \.id) { kind in
                 Button {
-                    withAnimation(.snappy) { var c = cab; c.liftKind = kind.id; project.selected = c }
+                    onPick(kind.id)
                 } label: {
                     VStack(spacing: 6) {
                         LiftKindThumbnail(kind: kind.id).frame(width: 52, height: 44)
@@ -1478,7 +1442,7 @@ struct LiftKindPicker: View {
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 8)
                 }
-                .buttonStyle(TileStyle(selected: cab.liftKind == kind.id))
+                .buttonStyle(TileStyle(selected: selected == kind.id))
                 .help(kind.help)
                 .accessibilityLabel("Lift: \(kind.title)")
                 .accessibilityHint(kind.help)
@@ -1533,24 +1497,24 @@ struct LiftKindThumbnail: View {
 
 /// Drawer stacks as pictures: pick a stack instead of typing ratios.
 struct DrawerStackPicker: View {
-    @Environment(ProjectModel.self) private var project
-    let cab: CabinetDoc
+    let selected: [Double]
+    let onPick: ([Double]) -> Void
 
-    private let stacks: [[Double]] = [[1, 1], [1, 1, 1], [1, 1, 1, 1], [1, 2], [1, 1, 2], [1, 2, 3], [1, 1, 1, 2]]
+    private let stacks: [[Double]] = [[1], [1, 1], [1, 1, 1], [1, 1, 1, 1], [1, 2], [1, 1, 2], [1, 2, 3], [1, 1, 1, 2]]
 
     var body: some View {
         LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 4), spacing: 8) {
             ForEach(stacks.indices, id: \.self) { i in
                 let stack = stacks[i]
                 Button {
-                    withAnimation(.snappy) { var c = cab; c.drawerRatios = stack; project.selected = c }
+                    onPick(stack)
                 } label: {
                     FrontThumbnail(layout: "drawers", hinge: "left", ratios: stack)
                         .frame(width: 34, height: 42)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 6)
                 }
-                .buttonStyle(TileStyle(selected: cab.drawerRatios == stack))
+                .buttonStyle(TileStyle(selected: selected == stack))
                 .accessibilityLabel("\(stack.count) drawers, heights \(stack.map { String(Int($0)) }.joined(separator: " to "))")
             }
         }

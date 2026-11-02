@@ -195,6 +195,41 @@ pub fn option_groups() -> Vec<OptionGroup> {
             ],
         ),
         group(
+            "sharknose_angle",
+            "Sharknose bevel",
+            &[
+                (
+                    "bevel_30",
+                    "30°",
+                    "A long slope down the back of the edge: the deepest grip",
+                ),
+                ("bevel_45", "45°", "The usual reverse bevel"),
+                ("bevel_60", "60°", "A short, steep slope"),
+            ],
+        ),
+        group(
+            "sharknose_door_edge",
+            "Sharknose on doors",
+            &[
+                ("auto", "Usual", "Top of a base door, bottom of a wall door"),
+                ("top", "Top", "The door's top edge"),
+                ("bottom", "Bottom", "The door's bottom edge"),
+                ("opening", "Opening side", "The side opposite the hinges"),
+            ],
+        ),
+        group(
+            "drawer_frame",
+            "Drawer frame",
+            &[
+                ("none", "No frame", "The carcass shows between the fronts"),
+                (
+                    "board",
+                    "Frame",
+                    "One board behind the fronts, cut out for each drawer",
+                ),
+            ],
+        ),
+        group(
             "drawer_system",
             "Drawers",
             &[
@@ -444,9 +479,12 @@ pub fn applies(field: &str, s: &crate::model::ConstructionStandard) -> bool {
         "domino" => s.fixings == FixingRecipe::Domino,
         "dowel" | "dowel_spacing" => s.fixings == FixingRecipe::Dowel,
         "handle_range" | "handle_place" => s.opening == Opening::Handles,
+        "sharknose_angle" | "sharknose_door_edge" => s.is_sharknose(),
         // The generic size and finish pickers; an ABI job picks family, size and finish together.
         "handle_size" | "handle_finish" => {
-            s.opening == Opening::Handles && s.handle_range == HandleRange::Generic
+            s.opening == Opening::Handles
+                && s.handle_range == HandleRange::Generic
+                && !s.is_sharknose()
         }
         "leg_fixing" => s.toe_kick == ToeKick::LegsAndPlinth,
         "drawer_sides" => matches!(
@@ -461,6 +499,17 @@ pub fn applies(field: &str, s: &crate::model::ConstructionStandard) -> bool {
 mod tests {
     use super::*;
     use crate::ConstructionStandard;
+
+    #[test]
+    fn a_sharknose_front_asks_for_its_bevel_and_no_handle_size() {
+        let mut s = ConstructionStandard::default();
+        assert!(!applies("sharknose_angle", &s));
+        assert!(applies("handle_size", &s));
+        s.handle_place = crate::model::HandlePlace::Sharknose;
+        assert!(applies("sharknose_angle", &s));
+        assert!(!applies("handle_size", &s));
+        assert!(!applies("handle_finish", &s));
+    }
 
     /// Every choice id must deserialize into its field, or the app would write bad JSON.
     #[test]

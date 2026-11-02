@@ -318,6 +318,116 @@ impl Cabinet {
         cab
     }
 
+    /// This cabinet with its fronts as sections, the form the app edits: every old layout as a
+    /// column of sections, its shelves or inner drawers inside them. It builds the same cabinet,
+    /// but that a drawer front no longer keeps the shelf behind it. Corner cabinets and canopies
+    /// have fronts of their own and stay as they are.
+    pub fn sectioned(mut self) -> Self {
+        if matches!(
+            self.kind,
+            CabinetKind::CornerBase | CabinetKind::CornerWall | CabinetKind::Rangehood
+        ) {
+            return self;
+        }
+        let row = |front, inside| Section {
+            height: 0.0,
+            front,
+            inside,
+            shelf_above: true,
+            opening: None,
+        };
+        let wardrobe = self.kind == CabinetKind::Wardrobe;
+        let inside = if wardrobe {
+            SectionInside::Wardrobe
+        } else if self.inner_drawers > 0 {
+            SectionInside::InnerDrawers {
+                count: self.inner_drawers,
+            }
+        } else if self.adjustable_shelves > 0 {
+            SectionInside::Shelves {
+                count: self.adjustable_shelves,
+                fixed: self.fixed_shelves.clone(),
+            }
+        } else {
+            SectionInside::Empty
+        };
+        let rows = match &self.fronts {
+            FrontLayout::Sections { .. } => return self,
+            FrontLayout::Open => vec![row(SectionFront::Open, inside)],
+            FrontLayout::Door { hinge_side } => vec![row(
+                SectionFront::Door {
+                    hinge_side: *hinge_side,
+                },
+                inside,
+            )],
+            FrontLayout::DoorPair => vec![row(SectionFront::DoorPair, inside)],
+            FrontLayout::Lift {
+                kind,
+                handle_weight,
+            } => vec![row(
+                SectionFront::Lift {
+                    kind: *kind,
+                    handle_weight: *handle_weight,
+                },
+                inside,
+            )],
+            FrontLayout::BiFoldLift { handle_weight } => vec![row(
+                SectionFront::BiFold {
+                    handle_weight: *handle_weight,
+                },
+                inside,
+            )],
+            // Drawers leave no room for what used to be behind them.
+            FrontLayout::Drawers { ratios } => {
+                let equal = ratios.windows(2).all(|w| (w[0] - w[1]).abs() < 1e-9);
+                vec![row(
+                    SectionFront::Drawers {
+                        count: ratios.len() as u32,
+                        ratios: if equal { Vec::new() } else { ratios.clone() },
+                        system: None,
+                    },
+                    if wardrobe {
+                        inside
+                    } else {
+                        SectionInside::Empty
+                    },
+                )]
+            }
+            FrontLayout::Stack { sections } => sections
+                .iter()
+                .enumerate()
+                .map(|(i, sec)| Section {
+                    height: sec.height,
+                    ..row(
+                        match &sec.kind {
+                            SectionKind::Drawers { count } => SectionFront::drawers(*count),
+                            SectionKind::Door { hinge_side } => SectionFront::Door {
+                                hinge_side: *hinge_side,
+                            },
+                            SectionKind::DoorPair => SectionFront::DoorPair,
+                            SectionKind::Niche => SectionFront::Niche,
+                        },
+                        // A wardrobe's interior is the whole cabinet's, whatever its fronts.
+                        if wardrobe && i == 0 {
+                            SectionInside::Wardrobe
+                        } else {
+                            SectionInside::Empty
+                        },
+                    )
+                })
+                .collect(),
+        };
+        self.fronts = FrontLayout::Sections {
+            columns: vec![SectionColumn { width: 0.0, rows }],
+        };
+        if !wardrobe {
+            self.adjustable_shelves = 0;
+            self.inner_drawers = 0;
+        }
+        self.fixed_shelves.clear();
+        self
+    }
+
     pub fn has_toe_kick(&self) -> bool {
         matches!(
             self.kind,
@@ -493,6 +603,18 @@ pub struct Section {
     pub front: SectionFront,
     #[serde(default)]
     pub inside: SectionInside,
+    /// A fixed shelf between this section and the one above. Splitting the fronts does not imply
+    /// one, as in Blum's configurator; a job saved before the choice existed had them all.
+    #[serde(default = "shelf_above_by_default")]
+    pub shelf_above: bool,
+    /// How this section's fronts open, where it differs from the job's (Blum sets a drawer's
+    /// motion per drawer).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub opening: Option<Opening>,
+}
+
+fn shelf_above_by_default() -> bool {
+    true
 }
 
 #[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
@@ -506,7 +628,35 @@ pub enum SectionFront {
     DoorPair,
     Drawers {
         count: u32,
+        /// Their heights' proportions, top to bottom. Empty: all the same.
+        #[serde(default, skip_serializing_if = "Vec::is_empty")]
+        ratios: Vec<f64>,
+        /// The drawer system, where it differs from the job's.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        system: Option<DrawerSystem>,
     },
+    /// One lifting front. Only one to a cabinet: AVENTOS is sized from the cabinet.
+    Lift {
+        kind: LiftKind,
+        handle_weight: f64,
+    },
+    /// Two fronts folding up (AVENTOS HF).
+    BiFold {
+        handle_weight: f64,
+    },
+    /// No front, and the section's height is its clear opening: an oven or a fridge goes in.
+    Niche,
+}
+
+impl SectionFront {
+    /// `count` drawers of one height, in the job's system.
+    pub fn drawers(count: u32) -> Self {
+        Self::Drawers {
+            count,
+            ratios: Vec::new(),
+            system: None,
+        }
+    }
 }
 
 #[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
@@ -514,14 +664,31 @@ pub enum SectionFront {
 pub enum SectionInside {
     #[default]
     Empty,
-    /// Adjustable shelves, evenly spaced.
-    Shelves { count: u32 },
+    /// Shelves evenly spaced on the 32 mm grid, on pins.
+    Shelves {
+        count: u32,
+        /// Which of them (from 1, bottom up) are fixed instead.
+        #[serde(default, skip_serializing_if = "Vec::is_empty")]
+        fixed: Vec<u32>,
+    },
     /// Fixed shoe shelves at an even pitch.
     ShoeShelves { count: u32 },
     /// A wardrobe rail under the section's top.
     Hanging,
     /// LEGRABOX inner drawers from the section's floor.
     InnerDrawers { count: u32 },
+    /// The wardrobe interior the cabinet's `wardrobe` setting describes: hat shelf and rails.
+    Wardrobe,
+}
+
+impl SectionInside {
+    /// `count` adjustable shelves.
+    pub fn shelves(count: u32) -> Self {
+        Self::Shelves {
+            count,
+            fixed: Vec::new(),
+        }
+    }
 }
 
 /// One section of a stacked front.
@@ -616,6 +783,20 @@ pub struct ConstructionStandard {
     pub top_gap: f64,
     /// Overlay fronts: their gap above the carcass bottom. Blum's default: 0.
     pub bottom_gap: f64,
+    /// A sharknose front's bevel, measured from its face.
+    pub sharknose_angle: SharknoseAngle,
+    /// Room for fingers over a sharknose front: above each stacked front and under a benchtop.
+    /// Our choice, to be set by the maker: no supplier publishes one.
+    pub sharknose_gap: f64,
+    /// Which edge of a door a sharknose bevels. Drawers always take their top edge.
+    pub sharknose_door_edge: SharknoseEdge,
+    /// A board behind the drawer fronts, cut out for each drawer, so no carcass or dark gap shows
+    /// between them. The carcass moves back by its thickness; the fronts stay.
+    pub drawer_frame: DrawerFrame,
+    pub drawer_frame_thickness: f64,
+    /// How far the frame's rails come down behind a drawer front: past a sharknose's bevel, so
+    /// the inside doesn't show. Our choice: the 30° bevel runs 21 down.
+    pub drawer_frame_overlap: f64,
     /// How hinges fix into the door's cup bore: screwed, or Blum's EXPANDO or INSERTA bosses.
     pub hinge_boss: HingeBoss,
     pub fixings: FixingRecipe,
@@ -674,6 +855,22 @@ pub enum BoardSlot {
 }
 
 impl ConstructionStandard {
+    /// Fronts gripped by a sharknose bevel: slab fronts with handles' place set so.
+    pub fn is_sharknose(&self) -> bool {
+        self.opening == Opening::Handles
+            && self.handle_place == HandlePlace::Sharknose
+            && self.door_style == DoorStyle::Slab
+    }
+
+    /// The gap above a front in a stack: a sharknose needs room for fingers.
+    pub fn row_gap(&self) -> f64 {
+        if self.is_sharknose() {
+            self.sharknose_gap
+        } else {
+            self.front_gap
+        }
+    }
+
     /// Uses catalog board `id` for `slot`. The thickness follows the board: a cabinet is built
     /// from the boards it is made of.
     pub fn set_board(&mut self, slot: BoardSlot, id: impl Into<String>, thickness: f64) {
@@ -716,6 +913,12 @@ impl Default for ConstructionStandard {
             overlay: DoorOverlay::Full,
             front_gap: 2.0,
             top_gap: 2.0,
+            sharknose_angle: SharknoseAngle::default(),
+            sharknose_gap: 15.0,
+            sharknose_door_edge: SharknoseEdge::Auto,
+            drawer_frame: DrawerFrame::None,
+            drawer_frame_thickness: 16.0,
+            drawer_frame_overlap: 25.0,
             bottom_gap: 0.0,
             hinge_boss: HingeBoss::ScrewOn,
             fixings: FixingRecipe::BiscuitAndScrew,
@@ -906,6 +1109,50 @@ pub enum HandlePlace {
     FingerPull,
     /// Handleless: the same edge bevelled at the back to pull on (a sharknose front).
     Sharknose,
+}
+
+/// The angle of a sharknose bevel from the front's face: shallow runs further down its back.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+pub enum SharknoseAngle {
+    #[default]
+    #[serde(rename = "bevel_30")]
+    Bevel30,
+    #[serde(rename = "bevel_45")]
+    Bevel45,
+    #[serde(rename = "bevel_60")]
+    Bevel60,
+}
+
+impl SharknoseAngle {
+    pub fn degrees(self) -> f64 {
+        match self {
+            Self::Bevel30 => 30.0,
+            Self::Bevel45 => 45.0,
+            Self::Bevel60 => 60.0,
+        }
+    }
+}
+
+/// Which edge of a door is gripped by its sharknose.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum SharknoseEdge {
+    /// The top of a base or tall door, the bottom of a wall door.
+    #[default]
+    Auto,
+    Top,
+    Bottom,
+    /// The side opposite the hinges.
+    Opening,
+}
+
+/// What stands behind drawer fronts.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum DrawerFrame {
+    #[default]
+    None,
+    Board,
 }
 
 /// How a single lifting front moves.

@@ -50,6 +50,10 @@ pub enum PartRole {
     Splashback,
     /// A lining board on a face seen from the room: `CladLeft`, `CladRight`, `CladBack`.
     Cladding,
+    /// One board on the carcass's front, behind the drawer fronts, with an opening for each.
+    DrawerFrame,
+    /// A strip behind a sharknose door's bevelled edge, closing the view inside.
+    GripRail,
     /// A rangehood canopy's fixed front.
     CanopyFront,
     /// A cornice board over wall-height cabinets, and its returns.
@@ -87,6 +91,8 @@ impl PartRole {
             PartRole::Benchtop => "Benchtop",
             PartRole::Splashback => "Splashback",
             PartRole::Cladding => "Cladding",
+            PartRole::DrawerFrame => "Drawer frame",
+            PartRole::GripRail => "Sharknose rail",
             PartRole::CanopyFront => "Canopy front",
             PartRole::Cornice => "Cornice",
             PartRole::LightRail => "Light rail",
@@ -123,6 +129,8 @@ impl PartRole {
             PartRole::Benchtop => "Benchtop",
             PartRole::Splashback => "Splashback",
             PartRole::Cladding => "Clad",
+            PartRole::DrawerFrame => "DrawerFrame",
+            PartRole::GripRail => "GripRail",
             PartRole::CanopyFront => "CanopyFront",
             PartRole::Cornice => "Cornice",
             PartRole::LightRail => "LightRail",
@@ -144,6 +152,8 @@ impl PartRole {
                 | PartRole::Filler
                 | PartRole::EndPanel
                 | PartRole::Cladding
+                | PartRole::DrawerFrame
+                | PartRole::GripRail
                 | PartRole::CanopyFront
                 | PartRole::Cornice
                 | PartRole::LightRail
@@ -363,6 +373,9 @@ pub struct PartList {
     /// stacked fronts), each group in order from the top.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub grain_matched: Vec<Vec<String>>,
+    /// A sectioned cabinet's fronts' zone (width, height), for moving its splits. Not a result.
+    #[serde(skip)]
+    pub section_zone: Option<(f64, f64)>,
 }
 
 impl PartList {
@@ -391,5 +404,43 @@ impl PartList {
             .filter(|p| p.bounds.center().x > x)
             .min_by(|a, b| a.bounds.min.x.total_cmp(&b.bounds.min.x))?;
         Some((left, right))
+    }
+
+    /// The clear height around `z` in the bay at `x`: from the bottom or fixed shelf below it to
+    /// the top, rails or fixed shelf above it. Adjustable shelves, which sit on supports, divide
+    /// nothing.
+    pub fn compartment_around(&self, x: f64, z: f64) -> Option<(f64, f64)> {
+        let spans = |p: &&Part| p.bounds.min.x <= x && x <= p.bounds.max().x;
+        let adjustable = |p: &Part| {
+            self.hardware
+                .iter()
+                .any(|h| h.item == crate::build::SHELF_SUPPORT && h.part == p.name)
+        };
+        let floor = self
+            .parts
+            .iter()
+            .filter(spans)
+            .filter(|p| matches!(p.role, PartRole::Bottom | PartRole::Shelf) && !adjustable(p))
+            .map(|p| p.bounds.max().z)
+            .filter(|top| *top <= z + 1e-6)
+            .fold(None, |best: Option<f64>, top| {
+                Some(best.map_or(top, |b| b.max(top)))
+            })?;
+        let ceiling = self
+            .parts
+            .iter()
+            .filter(spans)
+            .filter(|p| {
+                matches!(
+                    p.role,
+                    PartRole::Top | PartRole::FrontRail | PartRole::BackRail | PartRole::Shelf
+                ) && !adjustable(p)
+            })
+            .map(|p| p.bounds.min.z)
+            .filter(|underside| *underside >= z)
+            .fold(None, |best: Option<f64>, u| {
+                Some(best.map_or(u, |b| b.min(u)))
+            })?;
+        Some((floor, ceiling))
     }
 }

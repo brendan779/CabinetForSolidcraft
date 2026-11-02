@@ -498,19 +498,29 @@ pub fn tip_on_blumotion(
     Ok(out)
 }
 
-/// SERVO-DRIVE for a cabinet of drawers (any Blum box system, or MOVENTO/TANDEM, p.464) with
-/// fronts `front_heights` high (`heavy` per front: the 70 kg profile / 60–70 kg runner): a drive
-/// unit and distance bumpers per drawer, and for the cabinet the bracket profile (PL = LH − 10,
-/// the row whose ICH range fits, else the shortest article that cuts to it), its attachments,
-/// cabling and the power supply (p.364).
-pub fn servo_drive(
-    inside_height: f64,
-    front_heights: &[f64],
-    heavy_runner: bool,
-) -> Result<Vec<(&'static HardwareItem, u32)>, String> {
+/// A driven drawer's distance bumpers: 2 on a front to 300 mm, 4 above it or on a heavy runner
+/// (p.366; per front, as Blum's configurator does: the 70 kg drawer of the 2026-10-27 session got
+/// 4, the 40 kg ones 2).
+pub fn servo_bumpers(front_height: f64, heavy_runner: bool) -> Result<u32, String> {
     let plan = hardware::item("blum.servo-drive.legrabox")?;
-    let p = |k: &str| plan.param(k);
-    let pl = inside_height - p("bracket_deduction")?;
+    let low = front_height <= plan.param("low_front_max")? && !heavy_runner;
+    let key = if low {
+        "bumpers_low_front"
+    } else {
+        "bumpers_high_front"
+    };
+    Ok(plan.param(key)? as u32)
+}
+
+/// SERVO-DRIVE for one compartment of drawers (any Blum box system, or MOVENTO/TANDEM, p.464): a
+/// fixed shelf stops the upright, so each compartment `clear_height` high has its own bracket
+/// profile (PL = LH − 10, the row whose ICH range fits, else the shortest article that cuts to
+/// it), attachment, cable and node, as Blum's 2026-10-27 session lists them. Blum cuts short
+/// brackets from its 670, not its 650.
+pub fn servo_bracket(clear_height: f64) -> Result<Vec<(&'static HardwareItem, u32)>, String> {
+    let plan = hardware::item("blum.servo-drive.legrabox")?;
+    let pl = clear_height - plan.param("bracket_deduction")?;
+    let shortest = plan.param("bracket_shortest_cut_stock")?;
     let mut profiles: Vec<&HardwareItem> = hardware::items()
         .iter()
         .filter(|i| i.id.starts_with("blum.servo-drive.bracket-profile."))
@@ -524,38 +534,21 @@ pub fn servo_drive(
         .find(|i| {
             matches!(
                 (i.param("ich_min"), i.param("ich_max")),
-                (Ok(lo), Ok(hi)) if (lo..=hi).contains(&inside_height)
+                (Ok(lo), Ok(hi)) if (lo..=hi).contains(&clear_height)
             )
         })
         .or_else(|| {
             profiles
                 .iter()
-                .find(|i| i.param("length").is_ok_and(|l| l >= pl))
+                .find(|i| i.param("length").is_ok_and(|l| l >= pl && l >= shortest))
         })
         .ok_or_else(|| format!("no SERVO-DRIVE bracket profile reaches {pl:.0} mm"))?;
-    // 2 bumpers on a front to 300 mm, 4 above it or on a heavy runner (p.366; per front, as
-    // Blum's configurator does: the 70 kg drawer of the 2026-10-27 session got 4, the 40 kg
-    // ones 2).
-    let bumpers: u32 = front_heights
-        .iter()
-        .map(|h| {
-            if *h <= p("low_front_max").unwrap_or(0.0) && !heavy_runner {
-                p("bumpers_low_front").unwrap_or(0.0) as u32
-            } else {
-                p("bumpers_high_front").unwrap_or(0.0) as u32
-            }
-        })
-        .sum();
-    let n = front_heights.len() as u32;
     let item = hardware::item;
     Ok(vec![
-        (item("blum.servo-drive.drive-unit")?, n),
-        (item("blum.servo-drive.distance-bumper")?, bumpers),
         (profile, 1),
-        (item("blum.servo-drive.bracket-attachment")?, 2),
+        (item("blum.servo-drive.bracket-attachment")?, 1),
         (item("blum.servo-drive.distribution-cable")?, 1),
         (item("blum.servo-drive.connecting-node")?, 1),
-        (item("blum.servo-drive.power-supply.au")?, 1),
     ])
 }
 
@@ -784,26 +777,22 @@ mod tests {
 
     #[test]
     fn servo_drive_cuts_the_bracket_from_the_shortest_profile_that_reaches() {
-        let parts = servo_drive(700.0, &[238.0, 238.0, 238.0], false).unwrap();
-        let get = |art: &str| {
-            parts
-                .iter()
-                .find(|(i, _)| i.article == art)
-                .map(|(_, n)| *n)
-        };
+        let article = |clear: f64| servo_bracket(clear).unwrap()[0].0.article.clone();
         // PL = 700 − 10 = 690: the 700 profile.
-        assert_eq!(get("Z10T700AA"), Some(1));
-        assert_eq!(get("Z10A3000.04"), Some(3));
-        assert_eq!(get("993.0530"), Some(3 * 2));
-        assert_eq!(get("Z10NE04KI"), Some(1));
-        let tall = servo_drive(700.0, &[400.0], false).unwrap();
-        assert_eq!(
-            tall.iter()
-                .find(|(i, _)| i.article == "993.0530")
-                .unwrap()
-                .1,
-            4
-        );
+        assert_eq!(article(700.0), "Z10T700AA");
+        // Blum's session cut both 256.83 and 545.16 from the 670, not the 650.
+        assert_eq!(article(266.83), "Z10T670AA");
+        assert_eq!(article(555.16), "Z10T670AA");
+        // But the catalogue's own range for the 650 stands.
+        assert_eq!(article(665.0), "Z10T650AA");
+        assert!(servo_bracket(2000.0).is_err());
+    }
+
+    #[test]
+    fn servo_drive_bumpers_go_by_each_fronts_height_and_runner() {
+        assert_eq!(servo_bumpers(238.0, false), Ok(2));
+        assert_eq!(servo_bumpers(400.0, false), Ok(4));
+        assert_eq!(servo_bumpers(238.0, true), Ok(4));
     }
 
     /// BLUM-5: MERIVOBOX (p.257) and TANDEMBOX antaro (p.297) cut sizes and the three heights.
