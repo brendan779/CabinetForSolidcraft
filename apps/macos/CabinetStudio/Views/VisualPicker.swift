@@ -24,7 +24,7 @@ struct VisualPicker: View {
                             .font(.caption2.weight(.semibold))
                     }
                     .buttonStyle(.borderless)
-                    .foregroundStyle(.orange)
+                    .foregroundStyle(Theme.warning)
                     .help("This cabinet has its own choice here. Click to follow the job's standard.")
                 }
                 Spacer()
@@ -439,7 +439,7 @@ private struct Pen {
             board(x0 + set, floor - kick, x1 - x0 - set, kick, hot: true)
         case "integrated_notch":
             let notch = r(x0, floor - kick, set, kick)
-            ctx.fill(Path(notch), with: .color(Color(nsColor: .windowBackgroundColor)))
+            ctx.fill(Path(notch), with: .color(Theme.panel))
             ctx.stroke(Path(notch), with: .color(accent), lineWidth: 1.4)
         default:
             break
@@ -467,7 +467,7 @@ private struct Pen {
             // Spigots on the plate's top in bored holes.
             for x: CGFloat in [35, 65] {
                 let hole = r(x - 2.5, 18, 5, 8)
-                ctx.fill(Path(hole), with: .color(Color(nsColor: .windowBackgroundColor)))
+                ctx.fill(Path(hole), with: .color(Theme.panel))
                 ctx.fill(Path(r(x - 2, 19, 4, 7)), with: .color(accent.opacity(0.7)))
                 ctx.stroke(Path(hole), with: .color(accent), lineWidth: 1)
             }
@@ -499,7 +499,7 @@ private struct Pen {
         // The door's back with its hinged edge on the left; the cup, and the boss across it.
         board(6, 6, 88, 68)
         let cup = r(18, 26, 28, 28)
-        ctx.fill(Path(ellipseIn: cup), with: .color(Color(nsColor: .windowBackgroundColor)))
+        ctx.fill(Path(ellipseIn: cup), with: .color(Theme.panel))
         ctx.stroke(Path(ellipseIn: cup), with: .color(.primary.opacity(0.7)), lineWidth: 1)
         // The boss's flange over the cup, its fixings 45 apart and set back from the cup.
         ctx.fill(Path(roundedRect: r(36, 10, 12, 60), cornerRadius: 3 * s), with: .color(accent.opacity(0.25)))
@@ -515,7 +515,7 @@ private struct Pen {
             case "expando":
                 // A screw in a split dowel: the hole, and the split.
                 ctx.fill(Path(ellipseIn: r(37, y - 5, 10, 10)), with: .color(accent.opacity(0.6)))
-                line(p(42, y - 5), p(42, y + 5), colour: Color(nsColor: .windowBackgroundColor), width: 1.4)
+                line(p(42, y - 5), p(42, y + 5), colour: Theme.panel, width: 1.4)
             default:
                 // A pressed-in dowel: the hole, solid.
                 ctx.fill(Path(ellipseIn: r(37, y - 5, 10, 10)), with: .color(accent))

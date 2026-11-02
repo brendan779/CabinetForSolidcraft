@@ -26,7 +26,7 @@ struct CutListView: View {
             }
             .padding(.horizontal, 10)
             .padding(.vertical, 6)
-            .background(.bar)
+            .background(Theme.strip)
             switch showing {
             case "Parts": PartsListView()
             case "Sheets": NestingView()
@@ -82,7 +82,7 @@ struct ElevationView: View {
                 .help("The whole job in 3D as a STEP file, for any CAD program, at the detail chosen in the SolidCraft menu. Panels only: suppliers' hardware models stay out.")
             }
             .padding(8)
-            .background(.bar)
+            .background(Theme.strip)
         }
         .fileExporter(isPresented: Binding(get: { export != nil }, set: { if !$0 { export = nil } }),
                       document: export?.doc, contentType: export?.type ?? .data,
@@ -204,7 +204,7 @@ struct NestingView: View {
             }
             .padding(10)
             .frame(minWidth: 0, maxWidth: .infinity)
-            .background(.bar)
+            .background(Theme.strip)
         }
         .onChange(of: pages.count) { page = min(page, max(0, pages.count - 1)) }
         .fileExporter(isPresented: Binding(get: { export != nil }, set: { if !$0 { export = nil } }),
@@ -318,7 +318,7 @@ struct QuoteView: View {
                     Text("Cost \(money(q.cost)) · markup \(money(q.markup)) · tax \(money(q.tax)) · **\(q.currency) \(money(q.total))**")
                         .monospacedDigit()
                     if !q.missing.isEmpty {
-                        Text("\(q.missing.count) without a price").foregroundStyle(.orange)
+                        Text("\(q.missing.count) without a price").foregroundStyle(Theme.warning)
                     }
                 }
                 Spacer(minLength: 0)
@@ -335,7 +335,7 @@ struct QuoteView: View {
             }
             .padding(10)
             .frame(minWidth: 0, maxWidth: .infinity)
-            .background(.bar)
+            .background(Theme.strip)
         }
         .fileExporter(isPresented: Binding(get: { export != nil }, set: { if !$0 { export = nil } }),
                       document: export, contentType: .pdf,
@@ -450,7 +450,7 @@ struct HardwareListView: View {
                 Button("Export PDF…", systemImage: "doc.richtext") { make(pdf: true) }
             }
             .padding(10)
-            .background(.bar)
+            .background(Theme.strip)
         }
         .fileExporter(isPresented: Binding(get: { export != nil }, set: { if !$0 { export = nil } }),
                       document: export?.doc, contentType: export?.type ?? .data,
@@ -516,7 +516,7 @@ struct PartsListView: View {
                 }
             }
             .padding(10)
-            .background(.bar)
+            .background(Theme.strip)
         }
         .fileExporter(isPresented: Binding(get: { export != nil }, set: { if !$0 { export = nil } }),
                       document: export?.doc, contentType: export?.type ?? .data,
@@ -655,7 +655,7 @@ struct CutSheetsView: View {
         .padding(.horizontal, 10)
         .padding(.vertical, 6)
         .frame(minWidth: 0, maxWidth: .infinity)
-        .background(.bar)
+        .background(Theme.strip)
     }
 
     private var buttons: some View {

@@ -80,6 +80,8 @@ struct SettingsView: View {
             JobSettings().tabItem { Label("Jobs", systemImage: "doc.on.doc") }
             FolderSettings().tabItem { Label("Folders", systemImage: "folder") }
         }
+        .preferredColorScheme(.dark)
+        .tint(Theme.accent)
         .frame(width: 480)
     }
 }

@@ -23,6 +23,7 @@ struct ContentView: View {
             // minimum followed its content (the Boards grid, or the inspector switching to
             // "No inspector" without a width), AppKit's split view re-measured endlessly and crashed.
             .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity)
+            .background(Theme.panel)
             .inspector(isPresented: $showInspector) {
                 Group {
                     if project.workspace == .design {
@@ -32,6 +33,7 @@ struct ContentView: View {
                                                description: Text("Select the Design workspace to edit cabinets."))
                     }
                 }
+                .background(Theme.panel)
                 .inspectorColumnWidth(min: 300, ideal: 340, max: 420)
             }
         }
@@ -57,6 +59,8 @@ struct ContentView: View {
                 }
             }
         }
+        .toolbarBackground(Theme.appBar, for: .windowToolbar)
+        .toolbarBackground(.visible, for: .windowToolbar)
         // Below the split view, not an inset on it: its columns ignore one and run under the bar.
         .modifier(StatusBarBelow())
         // An overlay, not .sheet: dismissing an AppKit sheet over this split view + inspector sent
@@ -68,7 +72,7 @@ struct ContentView: View {
                         .ignoresSafeArea()
                         .onTapGesture {}
                     WelcomeSheet()
-                        .background(.regularMaterial, in: .rect(cornerRadius: 16))
+                        .background(Theme.panel, in: .rect(cornerRadius: 18))
                         .shadow(color: .black.opacity(0.3), radius: 24, y: 8)
                 }
                 .transition(.opacity)
@@ -151,8 +155,8 @@ struct ConnectionDot: View {
 
     private var colour: Color {
         switch project.connection {
-        case .connected: .green
-        case .offline: .red
+        case .connected: Theme.ok
+        case .offline: Theme.error
         case .unknown: .secondary
         }
     }
@@ -175,10 +179,10 @@ struct StatusBar: View {
     var body: some View {
         HStack(spacing: 10) {
             if let err = project.lastError {
-                Image(systemName: "exclamationmark.triangle.fill").foregroundStyle(.orange)
+                Image(systemName: "exclamationmark.triangle.fill").foregroundStyle(Theme.warning)
                 Text(err).lineLimit(1).truncationMode(.middle)
             } else if project.connection == .offline {
-                Image(systemName: "bolt.horizontal.circle").foregroundStyle(.red)
+                Image(systemName: "bolt.horizontal.circle").foregroundStyle(Theme.error)
                 Text("SolidCraft is not connected")
                 Button("Open SolidCraft") { Task { await project.openSolidCraft() } }
                     .buttonStyle(.link)
@@ -193,7 +197,7 @@ struct StatusBar: View {
         .foregroundStyle(.secondary)
         .padding(.horizontal, 14)
         .padding(.vertical, 6)
-        .background(.bar)
+        .background(Theme.appBar)
     }
 }
 

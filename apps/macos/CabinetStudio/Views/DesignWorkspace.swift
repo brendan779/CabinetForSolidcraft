@@ -5,12 +5,20 @@ struct DesignWorkspace: View {
     @Environment(ProjectModel.self) private var project
     @State private var look = ViewportLook()
     @State private var hovered: HoveredPart?
+    @State private var tool = ViewTool.orbit
+    @State private var scene = ViewportScene()
 
     var body: some View {
         ZStack(alignment: .topLeading) {
-            CabinetViewport(look: look, hovered: $hovered)
+            CabinetViewport(look: look, tool: tool, scene: scene, hovered: $hovered)
             VStack(alignment: .leading, spacing: 8) {
-                ViewportControls(look: $look)
+                HStack(alignment: .top, spacing: 8) {
+                    ViewToolbar(tool: $tool, scene: scene)
+                    VStack(alignment: .leading, spacing: 8) {
+                        ViewportControls(look: $look)
+                        ViewPresets(scene: scene)
+                    }
+                }
                 if let cab = project.selected, let b = project.build(cab) {
                     BuildBadge(summary: b)
                 }
@@ -42,8 +50,12 @@ struct DesignWorkspace: View {
             project.deleteSelection()
             return .handled
         }
+        .onKeyPress(characters: CharacterSet(charactersIn: "fF")) { _ in
+            scene.fit()
+            return .handled
+        }
         .background(
-            LinearGradient(colors: [Color(white: 0.20), Color(white: 0.11)], startPoint: .top, endPoint: .bottom)
+            LinearGradient(colors: [Theme.viewportTop, Theme.viewportBottom], startPoint: .top, endPoint: .bottom)
         )
     }
 }
@@ -68,44 +80,126 @@ struct HoveredPart: Equatable {
     static func == (a: Self, b: Self) -> Bool { a.panel.name == b.panel.name && a.at == b.at }
 }
 
+/// What dragging in the viewport does. Middle-drag or Shift-drag always pans.
+enum ViewTool: String, CaseIterable, Identifiable {
+    case orbit = "Orbit"
+    case pan = "Pan"
+    case zoom = "Zoom"
+
+    var id: String { rawValue }
+
+    var symbol: String {
+        switch self {
+        case .orbit: "rotate.3d"
+        case .pan: "hand.draw"
+        case .zoom: "plus.magnifyingglass"
+        }
+    }
+}
+
+struct ViewToolbar: View {
+    @Binding var tool: ViewTool
+    let scene: ViewportScene
+
+    var body: some View {
+        VStack(spacing: 2) {
+            ForEach(ViewTool.allCases) { t in
+                Button {
+                    tool = t
+                } label: {
+                    Image(systemName: t.symbol).frame(width: 24, height: 20)
+                }
+                .buttonStyle(ChipStyle(selected: tool == t))
+                .help("\(t.rawValue): drag in the view. Middle-drag or Shift-drag pans, scroll zooms, F fits.")
+                .accessibilityLabel(t.rawValue)
+            }
+            Button {
+                scene.fit()
+            } label: {
+                Image(systemName: "arrow.up.left.and.down.right.magnifyingglass").frame(width: 24, height: 20)
+            }
+            .buttonStyle(ChipStyle(selected: false))
+            .help("Fit the job in the view (F)")
+            .accessibilityLabel("Fit")
+        }
+        .padding(4)
+        .floatingPanel()
+        .fixedSize()
+    }
+}
+
+/// Standard views.
+struct ViewPresets: View {
+    let scene: ViewportScene
+
+    var body: some View {
+        HStack(spacing: 2) {
+            ForEach(ViewPreset.allCases) { p in
+                Button(p.rawValue) { scene.show(p) }
+                    .buttonStyle(ChipStyle(selected: false))
+                    .help("Look at the job from \(p.rawValue.lowercased())")
+            }
+        }
+        .padding(4)
+        .floatingPanel()
+        .fixedSize()
+    }
+}
+
+enum ViewPreset: String, CaseIterable, Identifiable {
+    case iso = "3D"
+    case front = "Front"
+    case left = "Left"
+    case right = "Right"
+    case top = "Top"
+
+    var id: String { rawValue }
+
+    /// (yaw, pitch) in radians. Yaw 0 looks at the fronts.
+    var angles: (Float, Float) {
+        switch self {
+        case .iso: (-0.46, 0.29)
+        case .front: (0, 0.03)
+        case .left: (-.pi / 2, 0.03)
+        case .right: (.pi / 2, 0.03)
+        case .top: (0, ViewportScene.maxPitch)
+        }
+    }
+}
+
 struct ViewportControls: View {
     @Binding var look: ViewportLook
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            HStack(spacing: 6) {
-                Toggle(isOn: $look.showFronts.animation(.snappy)) {
-                    Label("Fronts", systemImage: "door.left.hand.closed")
-                }
-                .help("Show doors and drawer fronts")
-                Toggle(isOn: $look.open) {
-                    Label("Open", systemImage: "door.left.hand.open")
-                }
-                .disabled(!look.showFronts)
-                .help("Swing the doors open and pull the drawers out")
-                Toggle(isOn: $look.section) {
-                    Label("Section", systemImage: "square.split.diagonal")
-                }
-                .help("Cut the run through the middle of the selected cabinet")
-                Toggle(isOn: $look.showHardware.animation(.snappy)) {
-                    Label("Hardware", systemImage: "gearshape.2")
-                }
-                .help("Show hinges, runners and legs (Blum's own models where the supplier CAD is prepared)")
+            HStack(spacing: 4) {
+                Button("Fronts") { withAnimation(.snappy) { look.showFronts.toggle() } }
+                    .buttonStyle(ChipStyle(selected: look.showFronts))
+                    .help("Show doors and drawer fronts")
+                Button("Open") { look.open.toggle() }
+                    .buttonStyle(ChipStyle(selected: look.open))
+                    .disabled(!look.showFronts)
+                    .help("Swing the doors open and pull the drawers out")
+                Button("Section") { look.section.toggle() }
+                    .buttonStyle(ChipStyle(selected: look.section))
+                    .help("Cut the run through the middle of the selected cabinet")
+                Button("Hardware") { withAnimation(.snappy) { look.showHardware.toggle() } }
+                    .buttonStyle(ChipStyle(selected: look.showHardware))
+                    .help("Show hinges, runners and legs (Blum's own models where the supplier CAD is prepared)")
             }
-            .toggleStyle(.button)
-            .labelStyle(.iconOnly)
             HStack(spacing: 6) {
                 Image(systemName: "arrow.up.left.and.arrow.down.right")
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Theme.textDim)
                     .help("Explode: pull the panels apart")
                 Slider(value: $look.explode, in: 0...1)
                     .frame(width: 110)
                     .accessibilityLabel("Explode")
             }
+            .controlSize(.small)
         }
-        .controlSize(.small)
         .padding(8)
-        .glassBackground()
+        .floatingPanel()
+        .fixedSize()
     }
 }
 
@@ -144,7 +238,7 @@ struct RunStrip: View {
         }
         .frame(height: 34)
         .padding(6)
-        .glassBackground()
+        .floatingPanel()
         .accessibilityElement(children: .contain)
         .accessibilityLabel("Run")
     }
@@ -153,8 +247,8 @@ struct RunStrip: View {
         let selected = c.id == project.selection
         return ZStack(alignment: .trailing) {
             RoundedRectangle(cornerRadius: 5)
-                .fill(selected ? Color.accentColor.opacity(0.45) : Color.primary.opacity(c.isPiece ? 0.06 : 0.12))
-                .overlay(RoundedRectangle(cornerRadius: 5).strokeBorder(selected ? Color.accentColor : .primary.opacity(0.25)))
+                .fill(selected ? Theme.selected : (c.isPiece ? Theme.strip : Theme.control))
+                .overlay(RoundedRectangle(cornerRadius: 5).strokeBorder(selected ? Theme.accent : Theme.border))
                 .overlay {
                     if width > 46 {
                         VStack(spacing: 0) {
@@ -263,7 +357,7 @@ struct PartTooltip: View {
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 6)
-        .glassBackground()
+        .floatingPanel()
         .fixedSize()
     }
 }
@@ -280,32 +374,87 @@ struct BuildBadge: View {
             if !summary.warnings.isEmpty {
                 Label(summary.warnings.count == 1 ? "1 note" : "\(summary.warnings.count) notes",
                       systemImage: "exclamationmark.bubble")
-                    .foregroundStyle(.orange)
+                    .foregroundStyle(Theme.warning)
                     .help(summary.warnings.joined(separator: "\n"))
             }
         }
         .font(.callout)
         .padding(10)
-        .glassBackground()
+        .floatingPanel()
     }
 }
 
 extension View {
-    /// Liquid Glass where the system has it, a material elsewhere.
-    @ViewBuilder func glassBackground() -> some View {
-        if #available(macOS 26.0, *) {
-            self.glassEffect(.regular, in: .rect(cornerRadius: 12))
-        } else {
-            self.background(.regularMaterial, in: .rect(cornerRadius: 12))
+    /// A panel floating over the viewport.
+    func floatingPanel() -> some View {
+        background(Theme.overlay, in: .rect(cornerRadius: 9))
+            .overlay(RoundedRectangle(cornerRadius: 9).strokeBorder(Theme.border))
+    }
+}
+
+/// Pointer input RealityView's own gestures do not cover: the wheel, pinch and the middle button.
+/// Local monitors, since SwiftUI has no gesture for them; only acts in this view's window while
+/// the pointer is over the viewport.
+@MainActor
+final class ViewportEvents {
+    weak var window: NSWindow?
+    var inside = false
+    private var monitor: Any?
+
+    func start(scene: ViewportScene) {
+        guard monitor == nil else { return }
+        monitor = NSEvent.addLocalMonitorForEvents(
+            matching: [.scrollWheel, .magnify, .otherMouseDown, .otherMouseDragged]
+        ) { [weak self, weak scene] event in
+            guard let self, let scene, event.window === self.window, self.inside else { return event }
+            switch event.type {
+            case .scrollWheel:
+                // A mouse wheel's notches are coarse next to a trackpad's points.
+                let step: CGFloat = event.hasPreciseScrollingDeltas ? 1 : 10
+                if event.modifierFlags.contains(.shift) {
+                    scene.pan(dx: event.scrollingDeltaX * step, dy: event.scrollingDeltaY * step)
+                } else {
+                    scene.zoom(by: exp(Float(-event.scrollingDeltaY * step) * 0.006))
+                }
+            case .magnify:
+                scene.zoom(by: 1 / max(0.2, 1 + Float(event.magnification)))
+            case .otherMouseDragged:
+                scene.pan(dx: event.deltaX, dy: event.deltaY)
+            default:
+                break
+            }
+            return nil
         }
     }
+
+    func stop() {
+        if let monitor { NSEvent.removeMonitor(monitor) }
+        monitor = nil
+    }
+}
+
+/// Hands back the window its view is in.
+private struct WindowReader: NSViewRepresentable {
+    let found: (NSWindow?) -> Void
+
+    func makeNSView(context: Context) -> NSView {
+        let v = NSView()
+        DispatchQueue.main.async { [weak v] in found(v?.window) }
+        return v
+    }
+
+    func updateNSView(_ v: NSView, context: Context) {}
 }
 
 struct CabinetViewport: View {
     @Environment(ProjectModel.self) private var project
     let look: ViewportLook
+    let tool: ViewTool
+    let scene: ViewportScene
     @Binding var hovered: HoveredPart?
-    @State private var scene = ViewportScene()
+    @State private var events = ViewportEvents()
+    /// The drag so far, to turn its running total into steps.
+    @State private var dragged = CGSize.zero
     /// Bumped when a texture finishes loading, to update the scene.
     @State private var textures = 0
 
@@ -328,12 +477,12 @@ struct CabinetViewport: View {
 
                 // A three-quarter view from front left, far enough back to see a short run.
                 scene.camera.camera.fieldOfViewInDegrees = 35
-                scene.camera.look(at: [0, 0.55, -0.3], from: [-2.3, 2.1, 4.3], relativeTo: nil)
+                scene.applyCamera()
                 content.add(scene.camera)
 
                 let floor = ModelEntity(
                     mesh: .generatePlane(width: 12, depth: 12),
-                    materials: [SimpleMaterial(color: NSColor(white: 0.32, alpha: 1), roughness: 0.9, isMetallic: false)]
+                    materials: [SimpleMaterial(color: Theme.floor, roughness: 0.9, isMetallic: false)]
                 )
                 floor.position.y = -0.0005
                 content.add(floor)
@@ -341,9 +490,25 @@ struct CabinetViewport: View {
                 _ = textures
                 scene.update(project: project, look: look, hovered: hovered?.panel.name)
             }
-            .realityViewCameraControls(.orbit)
+            .simultaneousGesture(
+                DragGesture(minimumDistance: 2)
+                    .onChanged { v in
+                        let dx = v.translation.width - dragged.width
+                        let dy = v.translation.height - dragged.height
+                        dragged = v.translation
+                        drag(dx: dx, dy: dy)
+                    }
+                    .onEnded { _ in dragged = .zero }
+            )
+            .background(WindowReader { events.window = $0 })
+            .onAppear {
+                scene.viewSize = geo.size
+                events.start(scene: scene)
+            }
+            .onDisappear { events.stop() }
+            .onChange(of: geo.size) { scene.viewSize = geo.size }
             .accessibilityLabel("3D view of the job")
-            .accessibilityHint("Drag to orbit. Click a cabinet to select it; the arrow keys step through cabinets.")
+            .accessibilityHint("Drag to orbit, Shift-drag to pan, scroll to zoom, F to fit. Click a cabinet to select it; the arrow keys step through cabinets.")
             .gesture(
                 SpatialTapGesture().targetedToAnyEntity().onEnded { value in
                     if let id = scene.cabinet(of: value.entity, in: project) {
@@ -354,6 +519,7 @@ struct CabinetViewport: View {
             .onContinuousHover { phase in
                 switch phase {
                 case .active(let point):
+                    events.inside = true
                     if let name = scene.part(at: point, size: geo.size),
                        let panel = scene.panels[name] {
                         hovered = HoveredPart(panel: panel, at: point)
@@ -361,9 +527,21 @@ struct CabinetViewport: View {
                         hovered = nil
                     }
                 case .ended:
+                    events.inside = false
                     hovered = nil
                 }
             }
+        }
+    }
+
+    private func drag(dx: CGFloat, dy: CGFloat) {
+        let panning = tool == .pan || NSEvent.modifierFlags.contains(.shift)
+        if panning {
+            scene.pan(dx: dx, dy: dy)
+        } else if tool == .zoom {
+            scene.zoom(by: exp(Float(dy) * 0.006))
+        } else {
+            scene.orbit(dx: dx, dy: dy)
         }
     }
 }
@@ -374,6 +552,16 @@ struct CabinetViewport: View {
 final class ViewportScene {
     let root = Entity()
     let camera = PerspectiveCamera()
+    nonisolated static let maxPitch: Float = 1.5
+    /// What the camera looks at, and from where around it: yaw 0 faces the fronts, pitch 0 level.
+    private var target: SIMD3<Float> = [0, 0.55, -0.3]
+    private var yaw = ViewPreset.iso.angles.0
+    private var pitch = ViewPreset.iso.angles.1
+    private var distance: Float = 5.4
+    /// The viewport's size in points, for turning a drag into a distance.
+    var viewSize = CGSize(width: 800, height: 600)
+    /// The run as last built, in metres: its width, height and depth.
+    private var extent: SIMD3<Float> = [1.8, 0.9, 0.6]
     /// What the walls were last made for.
     private var wallsKey = ""
     /// The panels shown, by part name, as last built.
@@ -443,7 +631,12 @@ final class ViewportScene {
             handleTints[e.name] = nil
         }
         // Keep the run centred on the origin the camera orbits.
-        if minX < maxX { root.position.x = -(minX + maxX) / 2 }
+        if minX < maxX {
+            root.position.x = -(minX + maxX) / 2
+            let height = panels.values.map { Float($0.z + $0.height) }.max() ?? extent.y
+            let depth = panels.values.map { Float($0.y + $0.depth) }.max() ?? extent.z
+            extent = [maxX - minX, height / 1000, depth / 1000]
+        }
     }
 
     // MARK: Hardware
@@ -470,7 +663,7 @@ final class ViewportScene {
         root.children.first { $0.name == "walls" }?.removeFromParent()
         let group = Entity()
         group.name = "walls"
-        let paint = SimpleMaterial(color: NSColor(white: 0.85, alpha: 0.45), roughness: 0.9, isMetallic: false)
+        let paint = SimpleMaterial(color: Theme.wall, roughness: 0.9, isMetallic: false)
         func wall(_ x0: Float, _ x1: Float, _ front: Float, _ rear: Float) {
             let e = ModelEntity(mesh: .generateBox(size: [x1 - x0, height, rear - front]), materials: [paint])
             e.position = [(x0 + x1) / 2, height / 2, -(front + rear) / 2]
@@ -887,9 +1080,7 @@ final class ViewportScene {
     /// The board's preview colour (generic colours without a board), with a woodgrain texture for
     /// grained decors. Cabinets other than the selected one are greyed a little.
     private func material(_ p: PanelBox, board: BoardRecord?, selected: Bool, hovered: Bool) -> PhysicallyBasedMaterial {
-        let generic: NSColor = p.isFront
-            ? NSColor(calibratedRed: 0.78, green: 0.65, blue: 0.48, alpha: 1)
-            : NSColor(calibratedWhite: p.role == "Back" ? 0.78 : 0.93, alpha: 1)
+        let generic: NSColor = p.isFront ? Theme.front : (p.role == "Back" ? Theme.carcassBack : Theme.carcass)
         if p.board.hasPrefix("handle:") {
             return Self.handleMaterial(p.board.dropFirst("handle:".count), selected: selected)
         }
@@ -917,7 +1108,7 @@ final class ViewportScene {
         m.roughness = board?.finish.lowercased().contains("gloss") == true ? 0.2 : 0.65
         // The selected cabinet glows faintly in the accent colour; the panel under the pointer more.
         if selected || hovered {
-            m.emissiveColor = .init(color: .controlAccentColor)
+            m.emissiveColor = .init(color: NSColor(hex: 0xE8845E))
             m.emissiveIntensity = hovered ? 0.6 : 0.12
         }
         return m
@@ -1074,6 +1265,50 @@ final class ViewportScene {
     /// The cabinet an entity in the viewport belongs to: its part names start with the id.
     func cabinet(of entity: Entity, in project: ProjectModel) -> String? {
         project.cabinets.first { entity.name.hasPrefix($0.id + ".") }?.id
+    }
+
+    // MARK: Camera
+
+    func applyCamera() {
+        let from = target + distance * SIMD3<Float>(sin(yaw) * cos(pitch), sin(pitch), cos(yaw) * cos(pitch))
+        camera.look(at: target, from: from, relativeTo: nil)
+    }
+
+    func orbit(dx: CGFloat, dy: CGFloat) {
+        yaw -= Float(dx) * 0.008
+        pitch = min(Self.maxPitch, max(-0.2, pitch + Float(dy) * 0.008))
+        applyCamera()
+    }
+
+    /// Moves what the camera looks at so the view follows the pointer.
+    func pan(dx: CGFloat, dy: CGFloat) {
+        let fov = camera.camera.fieldOfViewInDegrees * .pi / 180
+        let perPoint = 2 * distance * tan(fov / 2) / Float(max(viewSize.height, 1))
+        let m = camera.transformMatrix(relativeTo: nil)
+        let right = simd_make_float3(m.columns.0)
+        let up = simd_make_float3(m.columns.1)
+        target += (-Float(dx) * right + Float(dy) * up) * perPoint
+        applyCamera()
+    }
+
+    func zoom(by factor: Float) {
+        distance = min(30, max(0.15, distance * factor))
+        applyCamera()
+    }
+
+    /// Frames the whole run, keeping the angle.
+    func fit() {
+        let fov = camera.camera.fieldOfViewInDegrees * .pi / 180
+        let aspect = Float(max(viewSize.width, 1) / max(viewSize.height, 1))
+        let span = max(extent.x / max(aspect, 0.1), extent.y)
+        distance = max(0.5, span / (2 * tan(fov / 2)) * 1.5 + extent.z / 2)
+        target = [0, extent.y / 2, -extent.z / 2]
+        applyCamera()
+    }
+
+    func show(_ preset: ViewPreset) {
+        (yaw, pitch) = preset.angles
+        fit()
     }
 
     /// The part under a point of the view, by a ray from the camera through it.

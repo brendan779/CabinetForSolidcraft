@@ -60,6 +60,9 @@ struct JobWindow: View {
 
     var body: some View {
         ContentView()
+            .preferredColorScheme(.dark)
+            .tint(Theme.accent)
+            .foregroundStyle(Theme.text)
             .environment(project)
             .focusedSceneValue(\.project, project)
             .frame(minWidth: 1100, minHeight: 700)

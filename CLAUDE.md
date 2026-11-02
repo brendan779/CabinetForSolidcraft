@@ -48,9 +48,9 @@ Rust is installed through Homebrew's rustup: `export PATH="$HOME/.cargo/bin:/opt
   a test. A rule change also changes the golden part lists (`crates/cabinet-core/tests/snapshots`):
   review the diff, then accept it with `cargo insta review`.
 - Comments explain why, briefly. Match the density of the file you're in.
-- The UI is the product: every option is a picture, not a number field. Use system materials and
-  controls, Liquid Glass on macOS 26 through `glassBackground()`, and animate changes with
-  `.snappy`.
+- The UI is the product: every option is a picture, not a number field. The look is SolidCraft's
+  Clay Dark, extended in `Views/Theme.swift`: take colours from `Theme`, never new literals. Floating
+  panels use `floatingPanel()`. Animate changes with `.snappy`.
 
 ## macOS layout rules (each one crashed the app)
 

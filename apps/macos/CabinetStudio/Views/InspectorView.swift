@@ -1,7 +1,117 @@
 import SwiftUI
 
+/// The inspector's levels of detail.
+enum InspectorTab: String, CaseIterable, Identifiable {
+    case cabinet = "Cabinet"
+    case fronts = "Fronts"
+    case fittings = "Fittings"
+    case build = "Build"
+    case benchtop = "Benchtop"
+
+    var id: String { rawValue }
+
+    /// The core's option groups under this tab. A new group falls under Build until it is given
+    /// a home.
+    func holds(_ field: String) -> Bool {
+        let fronts: Set = [
+            "opening", "handle_range", "door_style", "handle_size", "handle_finish", "handle_place",
+            "sharknose_angle", "sharknose_door_edge", "drawer_frame", "front_grain", "overlay",
+        ]
+        let cabinet: Set = ["toe_kick", "leg_fixing", "wall_hanging"]
+        let fittings: Set = ["drawer_system", "drawer_sides", "insert_design", "hinge_boss"]
+        switch self {
+        case .cabinet: return cabinet.contains(field)
+        case .fronts: return fronts.contains(field)
+        case .fittings: return fittings.contains(field)
+        case .build: return !cabinet.contains(field) && !fronts.contains(field) && !fittings.contains(field)
+        case .benchtop: return false
+        }
+    }
+}
+
+struct InspectorTabBar: View {
+    @Binding var tab: InspectorTab
+
+    var body: some View {
+        HStack(spacing: 0) {
+            ForEach(InspectorTab.allCases) { t in
+                Button {
+                    withAnimation(.snappy) { tab = t }
+                } label: {
+                    Text(t.rawValue)
+                        .font(.caption.weight(t == tab ? .semibold : .regular))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 10)
+                        .foregroundStyle(t == tab ? Theme.text : Theme.textDim)
+                        .overlay(alignment: .bottom) {
+                            Rectangle().fill(t == tab ? Theme.accent : .clear).frame(height: 2)
+                        }
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityAddTraits(t == tab ? .isSelected : [])
+            }
+        }
+        .padding(.horizontal, 6)
+        .background(Theme.strip)
+    }
+}
+
+/// What a choice changes, always in view: the whole job, or only this cabinet.
+struct ScopeSwitch: View {
+    @Environment(ProjectModel.self) private var project
+    let cab: CabinetDoc
+
+    var body: some View {
+        HStack(spacing: 2) {
+            ForEach([false, true], id: \.self) { only in
+                Button(only ? "Only \(cab.id)" : "Whole job") {
+                    withAnimation(.snappy) { project.onlyThisCabinet = only }
+                }
+                .buttonStyle(.plain)
+                .font(.caption2.weight(project.onlyThisCabinet == only ? .semibold : .regular))
+                .lineLimit(1)
+                .padding(.horizontal, 7)
+                .padding(.vertical, 4)
+                .background(project.onlyThisCabinet == only ? Theme.control : .clear, in: .rect(cornerRadius: 4))
+                .foregroundStyle(project.onlyThisCabinet == only ? Theme.text : Theme.textDim)
+                .help(only ? "Choices change only \(cab.id); the rest of the job keeps the job's standard."
+                           : "Choices change every cabinet in the job, except where a cabinet has its own choice.")
+                .accessibilityLabel(only ? "Change only \(cab.id)" : "Change the whole job")
+                .accessibilityAddTraits(project.onlyThisCabinet == only ? .isSelected : [])
+            }
+        }
+        .padding(2)
+        .background(Theme.strip, in: .rect(cornerRadius: 6))
+        .overlay(RoundedRectangle(cornerRadius: 6).strokeBorder(Theme.hairline))
+        .fixedSize()
+    }
+}
+
+/// The job's benchtop, wherever the selection is: there is one for the job, not one per cabinet.
+struct BenchtopTab: View {
+    @Environment(ProjectModel.self) private var project
+
+    var body: some View {
+        if let top = project.cabinets.first(where: { $0.kind == "benchtop" }) {
+            PieceSection(cab: top)
+        } else {
+            VStack(alignment: .leading, spacing: 10) {
+                SectionTitle("Benchtop")
+                Text("This job has no benchtop yet.")
+                    .foregroundStyle(Theme.textDim)
+                Button("Add a benchtop") { project.addPiece("benchtop") }
+                    .buttonStyle(ChipStyle(selected: false))
+            }
+        }
+    }
+}
+
 struct InspectorView: View {
     @Environment(ProjectModel.self) private var project
+    @AppStorage("inspectorTab") private var tab: InspectorTab = .cabinet
 
     var body: some View {
         if let cab = project.selected, cab.isPiece {
@@ -13,57 +123,93 @@ struct InspectorView: View {
                 .padding(16)
             }
         } else if let cab = project.selected {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 22) {
+            VStack(spacing: 0) {
+                HStack(alignment: .center) {
                     header(cab)
-                    SizeSection(cab: cab)
-                    if cab.kind == "blind_corner" {
-                        BlindSection(cab: cab)
-                    }
-                    if cab.kind == "sink" {
-                        SinkSection(cab: cab)
-                    }
-                    if cab.kind == "wardrobe" {
-                        WardrobeSection(cab: cab)
-                    }
-                    if cab.kind == "corner_base" || cab.kind == "corner_wall" {
-                        CornerSection(cab: cab)
-                    } else if cab.kind == "rangehood" {
-                        InsertSection(cab: cab)
-                    } else {
-                        FrontsSection(cab: cab)
-                    }
-                    LightsSection(cab: cab)
-                    CladdingSection(cab: cab)
-                    BoardsSection(cab: cab)
-                    ConstructionScope(cab: cab)
-                    let overrides = project.overrides(of: cab)
-                    // Only the pickers that mean something for the choices made (the core says which).
-                    let groups = optionGroups().filter { optionApplies(cabinetJson: cab.json, field: $0.field) }
-                    ForEach(groups, id: \.field) { group in
-                        VisualPicker(group: group, selected: project.option(group.field, of: cab),
-                                     overridden: overrides.contains(group.field),
-                                     onReset: { project.resetToProject([group.field]) }) { choice in
-                            withAnimation(.snappy) { project.setOption(group.field, choice) }
-                        }
-                        StandardSizes(after: group.field, cab: cab)
-                        // ABI-3: the style picker sits under the range switch once ABI is chosen,
-                        // replacing the generic size and finish tiles the core hides.
-                        if group.field == "handle_range",
-                           project.option("handle_range", of: cab) == "abi",
-                           ["corner", "centre"].contains(project.option("handle_place", of: cab)) {
-                            AbiHandleSection(cab: cab)
-                        }
-                    }
-                    if let b = project.build(cab), !b.hardware.isEmpty {
-                        HardwareSection(items: b.hardware)
-                    }
+                    Spacer(minLength: 8)
+                    ScopeSwitch(cab: cab)
                 }
-                .padding(16)
+                .padding(.horizontal, 14)
+                .padding(.vertical, 10)
+                InspectorTabBar(tab: $tab)
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 22) {
+                        switch tab {
+                        case .cabinet: cabinetTab(cab)
+                        case .fronts: frontsTab(cab)
+                        case .fittings: fittingsTab(cab)
+                        case .build: buildTab(cab)
+                        case .benchtop: BenchtopTab()
+                        }
+                    }
+                    .padding(14)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                }
             }
         } else {
             ContentUnavailableView("No cabinet selected", systemImage: "cube.transparent",
                                    description: Text("Pick a cabinet in the sidebar or the viewport."))
+        }
+    }
+
+    @ViewBuilder private func cabinetTab(_ cab: CabinetDoc) -> some View {
+        SizeSection(cab: cab)
+        if cab.kind == "blind_corner" { BlindSection(cab: cab) }
+        if cab.kind == "sink" { SinkSection(cab: cab) }
+        if cab.kind == "wardrobe" { WardrobeSection(cab: cab) }
+        if cab.kind == "corner_base" || cab.kind == "corner_wall" {
+            CornerSection(cab: cab)
+        } else if cab.kind == "rangehood" {
+            InsertSection(cab: cab)
+        }
+        options(cab, in: .cabinet)
+        CladdingSection(cab: cab)
+    }
+
+    @ViewBuilder private func frontsTab(_ cab: CabinetDoc) -> some View {
+        if cab.kind != "corner_base", cab.kind != "corner_wall", cab.kind != "rangehood" {
+            FrontsSection(cab: cab)
+        }
+        options(cab, in: .fronts)
+    }
+
+    @ViewBuilder private func fittingsTab(_ cab: CabinetDoc) -> some View {
+        options(cab, in: .fittings)
+        LightsSection(cab: cab)
+        if let b = project.build(cab), !b.hardware.isEmpty {
+            HardwareSection(items: b.hardware)
+        }
+    }
+
+    @ViewBuilder private func buildTab(_ cab: CabinetDoc) -> some View {
+        ConstructionScope(cab: cab)
+        BoardsSection(cab: cab)
+        options(cab, in: .build)
+    }
+
+    /// The core's pickers for this tab: only those that mean something for the choices made (the
+    /// core says which).
+    @ViewBuilder private func options(_ cab: CabinetDoc, in tab: InspectorTab) -> some View {
+        let overrides = project.overrides(of: cab)
+        let groups = optionGroups().filter {
+            tab.holds($0.field) && optionApplies(cabinetJson: cab.json, field: $0.field)
+                // A job-wide choice, but only wall cabinets hang.
+                && ($0.field != "wall_hanging" || cab.kind.contains("wall"))
+        }
+        ForEach(groups, id: \.field) { group in
+            VisualPicker(group: group, selected: project.option(group.field, of: cab),
+                         overridden: overrides.contains(group.field),
+                         onReset: { project.resetToProject([group.field]) }) { choice in
+                withAnimation(.snappy) { project.setOption(group.field, choice) }
+            }
+            StandardSizes(after: group.field, cab: cab)
+            // ABI-3: the style picker sits under the range switch once ABI is chosen, replacing
+            // the generic size and finish tiles the core hides.
+            if group.field == "handle_range",
+               project.option("handle_range", of: cab) == "abi",
+               ["corner", "centre"].contains(project.option("handle_place", of: cab)) {
+                AbiHandleSection(cab: cab)
+            }
         }
     }
 
@@ -77,7 +223,7 @@ struct InspectorView: View {
             Spacer()
             if let err = project.error(for: cab) {
                 Image(systemName: "exclamationmark.triangle.fill")
-                    .foregroundStyle(.orange)
+                    .foregroundStyle(Theme.warning)
                     .help(err)
             }
         }
@@ -260,7 +406,7 @@ struct PieceSection: View {
                 ForEach(project.build(cab)?.warnings ?? [], id: \.self) { note in
                     Label(note, systemImage: "exclamationmark.triangle")
                         .font(.caption)
-                        .foregroundStyle(.orange)
+                        .foregroundStyle(Theme.warning)
                         .fixedSize(horizontal: false, vertical: true)
                 }
             } else if ["cornice", "light_rail"].contains(cab.kind) {
@@ -583,24 +729,6 @@ struct ConstructionScope: View {
                     .help("\(cab.id) differs from the job in \(overrides.count) choices. Click to follow the job's standard again.")
                 }
             }
-            HStack(spacing: 8) {
-                ForEach([false, true], id: \.self) { only in
-                    Button {
-                        withAnimation(.snappy) { project.onlyThisCabinet = only }
-                    } label: {
-                        VStack(spacing: 6) {
-                            RunThumbnail(lit: only ? .one : .all).frame(width: 64, height: 30)
-                            Text(only ? "Only \(cab.id)" : "Whole job").font(.caption)
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 8)
-                    }
-                    .buttonStyle(TileStyle(selected: project.onlyThisCabinet == only))
-                    .help(only ? "Choices below change only \(cab.id); the rest of the job keeps the job's standard."
-                               : "Choices below change every cabinet in the job, except where a cabinet has its own choice.")
-                    .accessibilityLabel(only ? "Change only \(cab.id)" : "Change the whole job")
-                }
-            }
             StandardPresets()
         }
     }
@@ -908,7 +1036,7 @@ struct MaterialSection: View {
             }
             let rules = (try? benchtopRules(itemJson: cab.json)) ?? []
             if rules.isEmpty {
-                Text("No rules for this material in the catalog.").font(.caption).foregroundStyle(.orange)
+                Text("No rules for this material in the catalog.").font(.caption).foregroundStyle(Theme.warning)
             } else {
                 DisclosureGroup(isExpanded: $open) {
                     Grid(alignment: .leading, horizontalSpacing: 8, verticalSpacing: 4) {
@@ -1663,13 +1791,15 @@ struct ChipStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .accessibilityAddTraits(selected ? .isSelected : [])
-            .font(.caption.monospacedDigit())
+            .font(.caption.monospacedDigit().weight(selected ? .semibold : .regular))
             .padding(.horizontal, 9)
             .padding(.vertical, 4)
             .background(
-                Capsule().fill(selected ? Color.accentColor : Color.primary.opacity(configuration.isPressed ? 0.16 : 0.07))
+                RoundedRectangle(cornerRadius: 6)
+                    .fill(selected ? Theme.accent : (configuration.isPressed ? Theme.hover : Theme.control))
             )
-            .foregroundStyle(selected ? Color.white : Color.primary)
+            .overlay(RoundedRectangle(cornerRadius: 6).strokeBorder(selected ? Theme.accent : Theme.border))
+            .foregroundStyle(selected ? Theme.onAccent : Theme.text)
     }
 }
 
@@ -1680,14 +1810,14 @@ struct TileStyle: ButtonStyle {
         configuration.label
             .accessibilityAddTraits(selected ? .isSelected : [])
             .background(
-                RoundedRectangle(cornerRadius: 10)
-                    .fill(Color.primary.opacity(configuration.isPressed ? 0.12 : 0.04))
+                RoundedRectangle(cornerRadius: 9)
+                    .fill(selected ? Theme.selected : (configuration.isPressed ? Theme.hover : Theme.strip))
             )
             .overlay(
-                RoundedRectangle(cornerRadius: 10)
-                    .strokeBorder(selected ? Color.accentColor : Color.primary.opacity(0.12), lineWidth: selected ? 2 : 1)
+                RoundedRectangle(cornerRadius: 9)
+                    .strokeBorder(selected ? Theme.accent : Theme.border, lineWidth: selected ? 1.5 : 1)
             )
-            .contentShape(RoundedRectangle(cornerRadius: 10))
+            .contentShape(RoundedRectangle(cornerRadius: 9))
             .scaleEffect(configuration.isPressed ? 0.97 : 1)
             .animation(.snappy(duration: 0.15), value: configuration.isPressed)
     }

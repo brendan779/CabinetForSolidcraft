@@ -28,7 +28,7 @@ struct WelcomeSheet: View {
                     Spacer()
                     if project.connection == .connected {
                         Label("Ready", systemImage: "checkmark.circle.fill")
-                            .foregroundStyle(.green)
+                            .foregroundStyle(Theme.ok)
                     } else {
                         Button("Open SolidCraft") { Task { await project.openSolidCraft() } }
                         Button("Check Again") { Task { await project.checkConnection() } }

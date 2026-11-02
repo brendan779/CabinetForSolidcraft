@@ -214,7 +214,7 @@ struct AbiHandlePicker: View {
             Divider()
             footer(now)
         }
-        .background(.background)
+        .background(Theme.panel)
     }
 
     private func familyTiles(selected family: AbiHandleFamily) -> some View {
@@ -314,7 +314,7 @@ struct AbiHandlePicker: View {
         .font(.callout)
         .padding(.horizontal, 14)
         .padding(.vertical, 10)
-        .background(.bar)
+        .background(Theme.strip)
     }
 }
 

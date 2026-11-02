@@ -54,6 +54,8 @@ struct SidebarView: View {
             }
         }
         .listStyle(.sidebar)
+        .scrollContentBackground(.hidden)
+        .background(Theme.panel)
     }
 }
 
@@ -78,7 +80,7 @@ struct CabinetRow: View {
             }
             Spacer()
             if project.error(for: cab) != nil {
-                Image(systemName: "exclamationmark.triangle.fill").foregroundStyle(.orange)
+                Image(systemName: "exclamationmark.triangle.fill").foregroundStyle(Theme.warning)
             }
         }
         .padding(.vertical, 2)
