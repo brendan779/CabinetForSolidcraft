@@ -122,8 +122,34 @@ pub fn stand_ins(list: &PartList) -> Vec<StandIn> {
     let (mut hinges, mut drawers, mut legs) = (0, 0, 0);
     let (mut pushes, mut servos, mut brackets) = (0, 0, 0);
     let mut tracks = 0;
+    let mut cams = 0;
     for h in &list.hardware {
-        if h.item.starts_with("blum.tip-on.door") {
+        if h.item.starts_with("hafele.minifix15.") {
+            let (Ok(row), Some((into, _))) = (crate::hardware::item(&h.item), cam_axes(list, h))
+            else {
+                continue;
+            };
+            let (Ok(diameter), Ok(height)) = (row.param("diameter"), row.param("drill_depth"))
+            else {
+                continue;
+            };
+            let axis = [Axis::X, Axis::Y, Axis::Z]
+                .into_iter()
+                .find(|a| into.get(*a) != 0.0)
+                .map(|a| Dir::new(a, into.get(a) > 0.0))
+                .unwrap_or(Dir::new(Axis::Z, true));
+            cams += 1;
+            out.push(StandIn {
+                name: format!("{}.Cam{cams}", list.cabinet),
+                item: h.item.clone(),
+                shapes: vec![Shape::Cylinder {
+                    base: h.at,
+                    axis,
+                    diameter,
+                    height,
+                }],
+            });
+        } else if h.item.starts_with("blum.tip-on.door") {
             if let Some(shapes) = tip_on_door(list, h) {
                 pushes += 1;
                 out.push(StandIn {
@@ -479,6 +505,43 @@ fn leg(list: &PartList, h: &HardwarePlacement) -> Option<Vec<Shape>> {
             Vec3::new(x + LEG_PLATE / 2.0, y + LEG_PLATE / 2.0, bottom),
         )),
     ])
+}
+
+/// A MINIFIX housing's way into the board and the way to its bolt, as unit vectors.
+pub(crate) fn cam_axes(list: &PartList, h: &HardwarePlacement) -> Option<(Vec3, Vec3)> {
+    let unit = |d: Dir| Vec3::default().with(d.axis, d.sign());
+    let into = list.operations.iter().find_map(|o| match o {
+        Operation::Bore {
+            part,
+            at,
+            direction,
+            purpose: BorePurpose::CamHousing,
+            ..
+        } if part == &h.part && *at == h.at => Some(*direction),
+        _ => None,
+    })?;
+    let shank = list
+        .operations
+        .iter()
+        .filter_map(|o| match o {
+            Operation::Bore {
+                part,
+                at,
+                direction,
+                depth,
+                purpose: BorePurpose::CamShank,
+                ..
+            } if part == &h.part => {
+                let dx = at.x - h.at.x;
+                let (dy, dz) = (at.y - h.at.y, at.z - h.at.z);
+                let along = dx.abs() + dy.abs() + dz.abs();
+                Some((along - depth, *direction))
+            }
+            _ => None,
+        })
+        .min_by(|a, b| a.0.total_cmp(&b.0))?;
+    let to_bolt = unit(Dir::new(shank.1.axis, !shank.1.positive));
+    Some((unit(into), to_bolt))
 }
 
 fn side(list: &PartList, role: PartRole) -> Option<&Part> {

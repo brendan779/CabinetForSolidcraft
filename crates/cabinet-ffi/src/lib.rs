@@ -5,6 +5,7 @@ use cabinet_core::cad::cad_placements;
 use cabinet_core::cutlist::{cut_list, to_csv};
 use cabinet_core::model::BoardSlot;
 use cabinet_core::project::Piece;
+use cabinet_core::run::Walls;
 use cabinet_core::{
     Cabinet, CabinetKind, ConstructionStandard, PartList, Project, Run, RunItem, build_cabinet,
     build_run, laid_out,
@@ -203,7 +204,7 @@ pub struct JobItems {
 fn parse_item(json: &str) -> Result<RunItem, CoreError> {
     let v: serde_json::Value = serde_json::from_str(json).map_err(invalid)?;
     match v.get("type").and_then(|t| t.as_str()) {
-        Some("filler" | "end_panel" | "benchtop" | "floating_shelf" | "moulding") => {
+        Some("filler" | "end_panel" | "benchtop" | "floating_shelf" | "moulding" | "walls") => {
             serde_json::from_value(v).map_err(invalid)
         }
         _ => Ok(RunItem::Cabinet(Box::new(
@@ -221,6 +222,7 @@ fn item_id(item: &RunItem) -> &str {
         RunItem::Benchtop(b) => &b.id,
         RunItem::FloatingShelf(f) => &f.id,
         RunItem::Moulding(m) => &m.id,
+        RunItem::Walls(w) => &w.id,
     }
 }
 
@@ -1627,6 +1629,61 @@ pub fn benchtops_pdf(items: JobItems, job: String) -> Result<Vec<u8>, CoreError>
 pub fn assembly_pdf(items: JobItems, job: String) -> Result<Vec<u8>, CoreError> {
     let lists: Vec<PartList> = job_lists(&items)?.into_iter().map(|(l, _)| l).collect();
     Ok(cabinet_sheets::assembly::assembly_pdf(&lists, &job))
+}
+
+/// The run's lists (not cabinets kept where they were drawn) and its return walls.
+fn run_for_drawing(items: &JobItems) -> Result<(Vec<PartList>, Option<Walls>), CoreError> {
+    let walls = items.items_json.iter().find_map(|j| match parse_item(j) {
+        Ok(RunItem::Walls(w)) => Some(w),
+        _ => None,
+    });
+    let lists = job_lists(items)?
+        .into_iter()
+        .map(|(l, _)| l)
+        .filter(|l| !items.placed.contains(&l.cabinet))
+        .collect();
+    Ok((lists, walls))
+}
+
+/// The run's front elevation as SVG; empty with nothing in the run.
+#[uniffi::export]
+pub fn elevation_svg(items: JobItems, job: String) -> Result<String, CoreError> {
+    let (lists, walls) = run_for_drawing(&items)?;
+    Ok(cabinet_sheets::elevation::elevation_svg(&lists, walls.as_ref(), &job).unwrap_or_default())
+}
+
+/// The run's front elevation as a PDF.
+#[uniffi::export]
+pub fn elevation_pdf(items: JobItems, job: String) -> Result<Vec<u8>, CoreError> {
+    let (lists, walls) = run_for_drawing(&items)?;
+    cabinet_sheets::elevation::elevation_pdf(&lists, walls.as_ref(), &job)
+        .ok_or_else(|| invalid("nothing in the run to draw"))
+}
+
+/// The run's front elevation as a DXF file.
+#[uniffi::export]
+pub fn elevation_dxf(items: JobItems) -> Result<String, CoreError> {
+    let (lists, walls) = run_for_drawing(&items)?;
+    cabinet_sheets::elevation::elevation_dxf(&lists, walls.as_ref())
+        .ok_or_else(|| invalid("nothing in the run to draw"))
+}
+
+/// The whole job as one STEP file, made with `cli` (`solidcraft-cli`). Blocking: call it off the
+/// main thread.
+#[uniffi::export]
+pub fn job_step(items: JobItems, detail: String, cli: String) -> Result<Vec<u8>, CoreError> {
+    let detail = match detail.as_str() {
+        "design" => Detail::Design,
+        "manufacturing" => Detail::Manufacturing,
+        "exact" => Detail::Exact,
+        other => return Err(invalid(format!("unknown detail level {other}"))),
+    };
+    let lists: Vec<PartList> = job_lists(&items)?.into_iter().map(|(l, _)| l).collect();
+    solidcraft_bridge::step::job_step(&lists, detail, Path::new(&cli)).map_err(|e| {
+        CoreError::SolidCraft {
+            message: e.to_string(),
+        }
+    })
 }
 
 /// One part's DXF file for CNC (see `cabinet_sheets::dxf` for the layers).

@@ -9,7 +9,7 @@ use cabinet_catalog::HardwareItem;
 use crate::geom::{Aabb, Axis, Vec3};
 use crate::hardware;
 use crate::model::{ConstructionStandard, DowelSize, DowelSpacing, FixingRecipe};
-use crate::part::{BorePurpose, Dir, Operation, Part};
+use crate::part::{BorePurpose, Dir, Operation, Part, PartRole};
 
 /// Distance from each end of the joint to the first fixing.
 pub const END_SETBACK: f64 = 50.0;
@@ -75,6 +75,20 @@ pub fn grid_positions(length: f64, max_spacing: f64) -> Vec<f64> {
 
 /// Hole depths for a dowel in the face part (thickness `face`) and the end part: half the
 /// dowel in the face part where that leaves a skin, the rest in the end part, plus glue room.
+/// The MINIFIX bolt fitted: S200, its housing 24 from the end part's edge.
+pub const MINIFIX_BOLT: &str = "hafele.minifix.bolt.s200.24";
+/// The cap over a housing with an SW4 drive.
+pub const MINIFIX_CAP: &str = "hafele.minifix.cap.sw4.white";
+
+/// The MINIFIX 15 housing for a board: the catalogue's wood thicknesses are minimums, so the row
+/// nearest below it.
+pub fn minifix_housing(thickness: f64) -> Result<&'static HardwareItem, String> {
+    (12..=thickness.floor() as i64)
+        .rev()
+        .find_map(|t| hardware::item(&format!("hafele.minifix15.from-{t}")).ok())
+        .ok_or_else(|| format!("no MINIFIX 15 housing for {thickness} mm board"))
+}
+
 pub fn dowel_depths(size: DowelSize, face: f64) -> (f64, f64) {
     let face_d = (size.length() / 2.0).min(face - MIN_SKIN);
     (face_d, size.length() - face_d + DOWEL_GLUE_ROOM)
@@ -238,13 +252,118 @@ impl ButtJoint<'_> {
                     ops.extend(self.dowel(std.dowel, lo + p));
                 }
             }
-            FixingRecipe::CamLock => warnings.push(format!(
-                "{} to {}: cam-lock fixings are not generated yet",
-                self.end_part.name, self.face_part.name
-            )),
+            FixingRecipe::CamLock => match self.minifix(std, lo, length) {
+                Ok(c) => ops.extend(c),
+                Err(e) => warnings.push(format!(
+                    "{} to {}: {e}",
+                    self.end_part.name, self.face_part.name
+                )),
+            },
             _ => {}
         }
         ops
+    }
+
+    /// MINIFIX 15 fittings along the joint: the bolt screwed into the face part, its shank in a
+    /// hole from the end part's edge, its head turned tight by the housing in the end part's face.
+    fn minifix(
+        &self,
+        std: &ConstructionStandard,
+        lo: f64,
+        length: f64,
+    ) -> Result<Vec<Operation>, String> {
+        let (face_t, end_t) = (self.face_part.thickness(), self.end_part.thickness());
+        let bolt = hardware::item(MINIFIX_BOLT)?;
+        let reach = bolt.param("distance")?;
+        let thread = bolt.param("thread_length")?;
+        if end_t < bolt.param("from_thickness")? {
+            return Err(format!(
+                "the MINIFIX bolt needs at least 15 mm board, not {end_t}"
+            ));
+        }
+        if face_t < thread + MIN_SKIN {
+            return Err(format!(
+                "its {thread} mm thread leaves less than {MIN_SKIN} mm in {face_t} mm board"
+            ));
+        }
+        let housing = minifix_housing(end_t)?;
+        let (radius, cup) = (
+            housing.param("diameter")? / 2.0,
+            housing.param("drill_depth")?,
+        );
+        let axis_below = housing.param("axis_from_face")?;
+        let run = self.end_part.bounds.size.get(self.normal.axis);
+        if run < reach + radius {
+            return Err(format!(
+                "its {run} mm is too short for a housing {reach} in"
+            ));
+        }
+        let positions = fixing_positions(
+            length,
+            END_SETBACK.min(length / 4.0),
+            std.fixing_density.max_spacing(),
+            2.0 * radius + 10.0,
+        );
+        if positions.is_empty() {
+            return Err("too short for a MINIFIX housing".into());
+        }
+        let (face_at, into) = self.housing_face();
+        let axis_at = face_at + into.sign() * axis_below;
+        let t = self.end_part.thickness_axis;
+        let c = self.contact();
+        let back = Dir::new(self.normal.axis, !self.normal.positive);
+        let mut ops = Vec::new();
+        for p in positions {
+            let on_axis = self.point(c, lo + p).with(t, axis_at);
+            ops.extend([
+                Operation::Bore {
+                    part: self.face_part.name.clone(),
+                    at: on_axis,
+                    direction: back,
+                    diameter: bolt.param("thread_hole")?,
+                    depth: thread,
+                    purpose: BorePurpose::CamThread,
+                },
+                // To the housing's centre: inside its cup, which is deeper than this hole's lower
+                // edge in every row of the table.
+                Operation::Bore {
+                    part: self.end_part.name.clone(),
+                    at: on_axis,
+                    direction: self.normal,
+                    diameter: bolt.param("shank_hole")?,
+                    depth: reach,
+                    purpose: BorePurpose::CamShank,
+                },
+                Operation::Bore {
+                    part: self.end_part.name.clone(),
+                    at: on_axis
+                        .with(self.normal.axis, c + self.normal.sign() * reach)
+                        .with(t, face_at),
+                    direction: into,
+                    diameter: 2.0 * radius,
+                    depth: cup,
+                    purpose: BorePurpose::CamHousing,
+                },
+            ]);
+        }
+        Ok(ops)
+    }
+
+    /// The end part's face a housing is drilled in, and the way into it: the side seen least. A
+    /// bottom and a shelf from below, anything else lying flat from above, a rail on edge from
+    /// the back, an upright from its right.
+    fn housing_face(&self) -> (f64, Dir) {
+        let b = &self.end_part.bounds;
+        let t = self.end_part.thickness_axis;
+        let from_low = match t {
+            Axis::Z => matches!(self.end_part.role, PartRole::Bottom | PartRole::Shelf),
+            Axis::Y | Axis::X => false,
+        };
+        if from_low {
+            (b.min.get(t), Dir::new(t, true))
+        } else {
+            (b.max().get(t), Dir::new(t, false))
+        }
     }
 
     /// Chipboard screws alone, at most `spacing` apart, piloted `pilot_depth` into the end part:

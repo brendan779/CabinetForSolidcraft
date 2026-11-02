@@ -9,6 +9,7 @@ pub mod boxes;
 pub mod client;
 pub mod design;
 pub mod emit;
+pub mod step;
 pub mod vendor;
 
 pub use client::Client;

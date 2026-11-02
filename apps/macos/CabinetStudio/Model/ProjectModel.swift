@@ -50,10 +50,26 @@ struct CabinetDoc: Identifiable, Hashable, Codable {
         case "benchtop": #"{"id":"\#(id)","type":"benchtop","thickness":33,"front_overhang":20,"side_overhang":0}"#
         case "floating_shelf": #"{"id":"\#(id)","type":"floating_shelf","width":900,"depth":250,"thickness":40,"height":1500}"#
         case "cornice", "light_rail": #"{"id":"\#(id)","type":"moulding","kind":"\#(type)","height":60,"returns":true}"#
+        case "walls": #"{"id":"\#(id)","type":"walls","left":true,"right":false,"length":0,"height":2400}"#
         default: #"{"id":"\#(id)","scribe":20,"to_floor":true,"type":"end_panel"}"#
         }
         return CabinetDoc(id: id, json: json)
     }
+
+    /// Return walls: at the run's left and right ends, and the gap between them (0: not measured).
+    var wallLeft: Bool {
+        get { (object["left"] as? Bool) ?? false }
+        set { update { $0["left"] = newValue } }
+    }
+    var wallRight: Bool {
+        get { (object["right"] as? Bool) ?? false }
+        set { update { $0["right"] = newValue } }
+    }
+    var wallLength: Double {
+        get { number("length") }
+        set { setNumber("length", newValue) }
+    }
+    var wallHeight: Double { (object["height"] as? NSNumber)?.doubleValue ?? 2400 }
 
     /// Benchtop: thickness and overhangs.
     var topThickness: Double {
@@ -645,6 +661,14 @@ final class ProjectModel {
         return i < b.count ? b[i].error : nil
     }
 
+    /// The job's whole STEP file, at the detail chosen. SolidCraft need not be open.
+    func stepFile() async throws -> Data {
+        let job = jobItems
+        let level = detail.core
+        let cli = Preferences.solidcraftCLI
+        return try await Task.detached { try jobStep(items: job, detail: level, cli: cli) }.value
+    }
+
     /// From the left end of the run to its right end.
     var runLength: Double {
         let xs = zip(cabinets, built).filter { $0.0.placed != true }
@@ -678,13 +702,14 @@ final class ProjectModel {
         case "floating_shelf": "FS"
         case "cornice": "CO"
         case "light_rail": "LR"
+        case "walls": "WL"
         default: "E"
         }
         var n = 1
         while cabinets.contains(where: { $0.id == String(format: "%@%02d", prefix, n) }) { n += 1 }
         let piece = CabinetDoc.piece(type, id: String(format: "%@%02d", prefix, n))
         // A benchtop or moulding takes no place in the run: it goes last.
-        let at = ["benchtop", "cornice", "light_rail"].contains(type)
+        let at = ["benchtop", "cornice", "light_rail", "walls"].contains(type)
             ? cabinets.count
             : cabinets.firstIndex { $0.id == selection }.map { $0 + 1 } ?? 0
         withAnimation(.snappy) {
@@ -1324,6 +1349,7 @@ extension CabinetDoc {
         case "floating_shelf": "Floating shelf"
         case "cornice": "Cornice"
         case "light_rail": "Light rail"
+        case "walls": "Return walls"
         default: kind.capitalized
         }
     }
@@ -1347,6 +1373,7 @@ extension CabinetDoc {
         case "floating_shelf": "minus.rectangle"
         case "cornice": "rectangle.topthird.inset.filled"
         case "light_rail": "rectangle.bottomthird.inset.filled"
+        case "walls": "square.leftthird.inset.filled"
         default: "cube"
         }
     }

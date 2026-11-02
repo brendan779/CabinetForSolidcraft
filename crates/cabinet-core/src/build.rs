@@ -599,6 +599,33 @@ impl<'a> Builder<'a> {
             hidden,
         };
         let ops = joint.operations(&self.cab.standard, &mut self.list.warnings);
+        for op in &ops {
+            if let Operation::Bore {
+                part,
+                at,
+                purpose: BorePurpose::CamHousing,
+                ..
+            } = op
+                && let Ok(housing) = crate::joinery::minifix_housing(end.thickness())
+            {
+                for item in [
+                    housing.id.as_str(),
+                    crate::joinery::MINIFIX_BOLT,
+                    crate::joinery::MINIFIX_CAP,
+                ] {
+                    let row = crate::hardware::item(item);
+                    self.list.hardware.push(HardwarePlacement {
+                        item: item.into(),
+                        description: row
+                            .map(|r| format!("{} {}, {}", r.family, r.article, r.variant))
+                            .unwrap_or_else(|_| item.into()),
+                        at: *at,
+                        part: part.clone(),
+                        quantity: 1,
+                    });
+                }
+            }
+        }
         self.list.operations.extend(ops);
     }
 
@@ -5270,6 +5297,7 @@ fn axilo_set(height: f64, fixing: LegFixing) -> Option<&'static cabinet_catalog:
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::joinery::{MINIFIX_BOLT, MINIFIX_CAP, minifix_housing};
     use crate::model::{ConstructionStandard, DrawerSystem, FixingRecipe};
 
     fn base() -> Cabinet {
@@ -7299,6 +7327,89 @@ mod tests {
     }
 
     /// The owner: up to 8, for a 2400 high cabinet.
+    #[test]
+    fn cam_locks_are_bored_from_hafeles_table_with_bolt_housing_and_cap_counted() {
+        let mut cab = base();
+        cab.standard.fixings = FixingRecipe::CamLock;
+        let list = build_cabinet(&cab).unwrap();
+        assert!(
+            !list
+                .warnings
+                .iter()
+                .any(|w| w.contains("cam") || w.contains("MINIFIX")),
+            "{:?}",
+            list.warnings
+        );
+        let bores = |want: BorePurpose| -> Vec<(String, f64, f64)> {
+            list.operations
+                .iter()
+                .filter_map(|o| match o {
+                    Operation::Bore {
+                        part,
+                        diameter,
+                        depth,
+                        purpose,
+                        ..
+                    } if *purpose == want => Some((part.clone(), *diameter, *depth)),
+                    _ => None,
+                })
+                .collect()
+        };
+        let (cups, shanks, threads) = (
+            bores(BorePurpose::CamHousing),
+            bores(BorePurpose::CamShank),
+            bores(BorePurpose::CamThread),
+        );
+        assert!(!cups.is_empty());
+        assert_eq!(cups.len(), shanks.len());
+        assert_eq!(cups.len(), threads.len());
+        // 16 mm board: p. 3.6's 262.26.033.
+        assert!(cups.iter().all(|c| (c.1, c.2) == (15.0, 12.5)), "{cups:?}");
+        assert!(shanks.iter().all(|c| (c.1, c.2) == (8.0, 24.0)));
+        assert!(threads.iter().all(|c| (c.1, c.2) == (5.0, 11.0)));
+        assert!(threads.iter().all(|c| c.0.ends_with("Side")));
+        for article in ["hafele.minifix15.from-16", MINIFIX_BOLT, MINIFIX_CAP] {
+            let n: u32 = list
+                .hardware
+                .iter()
+                .filter(|h| h.item == article)
+                .map(|h| h.quantity)
+                .sum();
+            assert_eq!(n as usize, cups.len(), "{article}");
+        }
+    }
+
+    #[test]
+    fn a_cam_housing_keeps_its_bolt_line_a_from_the_face_it_is_drilled_in() {
+        let mut cab = base();
+        cab.standard.fixings = FixingRecipe::CamLock;
+        let list = build_cabinet(&cab).unwrap();
+        let bottom = list.part(&format!("{}.Bottom", cab.id)).unwrap();
+        let (mouth, shank) = list.operations.iter().fold((None, None), |acc, o| match o {
+            Operation::Bore {
+                part, at, purpose, ..
+            } if part == &bottom.name => match purpose {
+                BorePurpose::CamHousing if acc.0.is_none() => (Some(*at), acc.1),
+                BorePurpose::CamShank if acc.1.is_none() => (acc.0, Some(*at)),
+                _ => acc,
+            },
+            _ => acc,
+        });
+        let (mouth, shank) = (mouth.unwrap(), shank.unwrap());
+        // Drilled from below, so nothing shows inside the cabinet.
+        assert_eq!(mouth.z, bottom.bounds.min.z);
+        assert_eq!(shank.z, bottom.bounds.min.z + 8.0);
+        assert_eq!((mouth.x - shank.x).abs(), 24.0);
+    }
+
+    #[test]
+    fn an_18_mm_board_takes_the_next_housing_and_a_15_the_one_below() {
+        assert_eq!(minifix_housing(18.0).unwrap().article, "262.26.034");
+        // 262.26.032 is struck out of the catalogue.
+        assert_eq!(minifix_housing(15.0).unwrap().article, "262.26.031");
+        assert_eq!(minifix_housing(33.0).unwrap().article, "262.26.036");
+    }
+
     #[test]
     fn eight_sloped_shelves_fit_a_2400_high_cabinet() {
         for angle in [5.0, 15.0] {

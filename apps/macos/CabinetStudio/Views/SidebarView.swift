@@ -36,6 +36,13 @@ struct SidebarView: View {
                                 Label(CabinetDoc.kindTitle(type), systemImage: CabinetDoc.kindSymbol(type))
                             }
                         }
+                        Divider()
+                        Button {
+                            project.addPiece("walls")
+                        } label: {
+                            Label(CabinetDoc.kindTitle("walls"), systemImage: CabinetDoc.kindSymbol("walls"))
+                        }
+                        .disabled(project.cabinets.contains { $0.kind == "walls" })
                     } label: {
                         Image(systemName: "plus")
                     }
@@ -85,6 +92,13 @@ struct CabinetRow: View {
         case "benchtop": "\(unit.format(cab.topThickness)) thick, \(unit.format(cab.frontOverhang, suffix: false)) overhang"
         case "floating_shelf": "\(unit.format(cab.width)) × \(unit.format(cab.shelfDepth, suffix: false))"
         case "cornice", "light_rail": "\(unit.format(cab.mouldingHeight)) high\(cab.returns ? ", returned" : "")"
+        case "walls":
+            switch (cab.wallLeft, cab.wallRight) {
+            case (true, true): cab.wallLength > 0 ? "\(unit.format(cab.wallLength)) between" : "Both ends"
+            case (true, false): "Left end"
+            case (false, true): "Right end"
+            default: "Back wall only"
+            }
         default: [cab.width, cab.height, cab.depth].map { unit.format($0, suffix: false) }.joined(separator: " × ")
         }
     }
@@ -96,6 +110,10 @@ struct CabinetGlyph: View {
 
     var body: some View {
         Canvas { ctx, size in
+            if doc.kind == "walls" {
+                WallPlan.draw(ctx, size, left: doc.wallLeft, right: doc.wallRight)
+                return
+            }
             if ["benchtop", "cornice", "light_rail"].contains(doc.kind) {
                 let y = switch doc.kind {
                 case "cornice": size.height * 0.05

@@ -85,7 +85,7 @@ pub fn check(list: &PartList) -> Vec<Clash> {
         }
         for (i, a) in cuts.iter().enumerate() {
             for b in &cuts[i + 1..] {
-                if intersects(a, b) && !seat_and_hole(a, b) {
+                if intersects(a, b) && !seat_and_hole(a, b) && !shank_and_housing(a, b) {
                     out.push(Clash {
                         part: part.name.clone(),
                         what: format!("{} runs into {}", a.label(), b.label()),
@@ -203,6 +203,13 @@ fn leaves_part(part: &Part, cut: &Cut) -> Option<String> {
 }
 
 /// A countersink and the clearance hole it is the seat of: one axis, one mouth.
+/// A MINIFIX bolt's shank hole is meant to open into its housing's cup.
+fn shank_and_housing(a: &Cut, b: &Cut) -> bool {
+    let (a, b) = (a.label(), b.label());
+    (a.starts_with("CamShank") && b.starts_with("CamHousing"))
+        || (a.starts_with("CamHousing") && b.starts_with("CamShank"))
+}
+
 fn seat_and_hole(a: &Cut, b: &Cut) -> bool {
     match (a, b) {
         (

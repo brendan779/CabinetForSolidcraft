@@ -211,6 +211,36 @@ pub fn cad_placements(list: &PartList) -> Vec<CadPlacement> {
                 origin,
                 frame: Frame::Oriented { x, y },
             });
+        } else if h.item.starts_with("hafele.minifix15.") {
+            let n = next("Cam");
+            if let Some((into, to_bolt)) = crate::standins::cam_axes(list, h) {
+                // Häfele draws the housing with its mouth at Z = 0 and Z into the wood; its cup
+                // opens 60° clockwise of +X. Turn that opening to the bolt.
+                let across = Vec3::new(
+                    into.y * to_bolt.z - into.z * to_bolt.y,
+                    into.z * to_bolt.x - into.x * to_bolt.z,
+                    into.x * to_bolt.y - into.y * to_bolt.x,
+                );
+                let (cos, sin) = (0.5, 3f64.sqrt() / 2.0);
+                let blend = |a: f64, b: f64| {
+                    Vec3::new(
+                        a * to_bolt.x + b * across.x,
+                        a * to_bolt.y + b * across.y,
+                        a * to_bolt.z + b * across.z,
+                    )
+                };
+                out.push(CadPlacement {
+                    name: format!("{}.Cam{n}", list.cabinet),
+                    item: h.item.clone(),
+                    article: item.article.clone(),
+                    side: side_of(h.at.x),
+                    origin: h.at,
+                    frame: Frame::Oriented {
+                        x: blend(cos, sin),
+                        y: blend(-sin, cos),
+                    },
+                });
+            }
         } else if h.item.starts_with("hafele.axilo.set.") {
             // Both pieces under the leg's name, so they replace its stand-in together.
             let n = next("Leg");

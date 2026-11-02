@@ -33,6 +33,15 @@ struct JobCommands: Commands {
                 }
             }
             .disabled(project == nil)
+            Menu("New Run Item") {
+                ForEach(["filler", "end_panel", "benchtop", "floating_shelf", "cornice", "light_rail"], id: \.self) { type in
+                    Button(CabinetDoc.kindTitle(type)) { project?.addPiece(type) }
+                }
+                Divider()
+                Button(CabinetDoc.kindTitle("walls")) { project?.addPiece("walls") }
+                    .disabled(project?.cabinets.contains { $0.kind == "walls" } ?? true)
+            }
+            .disabled(project == nil)
         }
         CommandGroup(after: .pasteboard) {
             Button("Delete Cabinet") { project?.deleteSelection() }

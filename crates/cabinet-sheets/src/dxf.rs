@@ -28,12 +28,12 @@ pub struct DxfFile {
     pub contents: String,
 }
 
-struct Dxf {
+pub(crate) struct Dxf {
     out: String,
 }
 
 impl Dxf {
-    fn new() -> Self {
+    pub(crate) fn new() -> Self {
         let mut out = String::new();
         for (code, value) in [
             ("0", "SECTION"),
@@ -76,7 +76,7 @@ impl Dxf {
     }
 
     /// A closed rectangle from `(x, y)`, `w` × `h`.
-    fn rect(&mut self, layer: &str, x: f64, y: f64, w: f64, h: f64) {
+    pub(crate) fn rect(&mut self, layer: &str, x: f64, y: f64, w: f64, h: f64) {
         self.pair(0, "POLYLINE");
         self.pair(8, layer);
         self.pair(66, 1);
@@ -210,7 +210,7 @@ impl Dxf {
         self.pair(8, layer);
     }
 
-    fn finish(mut self) -> String {
+    pub(crate) fn finish(mut self) -> String {
         self.pair(0, "ENDSEC");
         self.pair(0, "EOF");
         self.out

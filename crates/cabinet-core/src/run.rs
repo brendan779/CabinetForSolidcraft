@@ -4,7 +4,7 @@
 use serde::{Deserialize, Serialize};
 
 use crate::geom::{Aabb, Axis, Vec3};
-use crate::model::Cabinet;
+use crate::model::{Cabinet, FrontLayout};
 use crate::part::{EdgeBanding, Part, PartList, PartRole};
 use crate::{Error, Result, build_cabinet};
 
@@ -30,6 +30,31 @@ pub enum RunItem {
     /// A cornice over, or a light rail under, every stretch of wall-height cabinets. It takes no
     /// run length.
     Moulding(Moulding),
+    /// The room around a straight run: return walls at its ends. It takes no run length.
+    Walls(Walls),
+}
+
+/// The run stands along a back wall; a return wall closes either end of it, so the cabinet there
+/// abuts a wall on its back and its side. `length` is measured between the two return walls.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct Walls {
+    pub id: String,
+    #[serde(default)]
+    pub left: bool,
+    #[serde(default)]
+    pub right: bool,
+    /// Between the return walls (0: not measured yet).
+    #[serde(default)]
+    pub length: f64,
+    /// Only for drawing them.
+    #[serde(default = "Walls::default_height")]
+    pub height: f64,
+}
+
+impl Walls {
+    fn default_height() -> f64 {
+        2400.0
+    }
 }
 
 /// A flat board moulding along a stretch's door faces: a cornice standing on the cabinets' tops
@@ -536,7 +561,9 @@ pub fn build_run(run: &Run) -> Result<Vec<PartList>> {
     let mut out = Vec::new();
     for (i, (item, at)) in run.items.iter().zip(lefts(run, &neighbour)).enumerate() {
         match item {
-            RunItem::Cabinet(c) => out.push(build_cabinet(&placed(c, at))?),
+            RunItem::Cabinet(c) => {
+                out.push(build_cabinet(&walled(placed(c, at), run, i))?);
+            }
             RunItem::Filler(f) => out.push(filler(f, neighbour(i), at)?),
             RunItem::EndPanel(e) => out.push(end_panel(e, neighbour(i), at)),
             // Built from the rest, below.
@@ -547,6 +574,11 @@ pub fn build_run(run: &Run) -> Result<Vec<PartList>> {
             RunItem::FloatingShelf(f) => out.push(floating_shelf(f, at, neighbour(i).depth)),
             RunItem::Moulding(m) => out.push(PartList {
                 cabinet: m.id.clone(),
+                ..PartList::default()
+            }),
+            RunItem::Walls(w) => out.push(PartList {
+                cabinet: w.id.clone(),
+                warnings: wall_warnings(w, run, &neighbour),
                 ..PartList::default()
             }),
         }
@@ -560,12 +592,13 @@ pub fn build_run(run: &Run) -> Result<Vec<PartList>> {
                 .map(|(j, it)| match it {
                     RunItem::Cabinet(c) => takes_benchtop(c),
                     RunItem::Filler(_) | RunItem::EndPanel(_) => takes_benchtop(neighbour(j)),
-                    RunItem::Benchtop(_) | RunItem::FloatingShelf(_) | RunItem::Moulding(_) => {
-                        false
-                    }
+                    RunItem::Benchtop(_)
+                    | RunItem::FloatingShelf(_)
+                    | RunItem::Moulding(_)
+                    | RunItem::Walls(_) => false,
                 })
                 .collect();
-            let mut top = benchtop(b, &out, &under);
+            let mut top = benchtop(b, &out, &under, wall_ends(run, &neighbour));
             cutouts(b, &mut top, &out);
             splashback_openings(b, &mut top, &out);
             round_ends(b, &mut top);
@@ -600,7 +633,14 @@ pub fn build_run(run: &Run) -> Result<Vec<PartList>> {
                 .iter()
                 .map(|it| !matches!(it, RunItem::Benchtop(_) | RunItem::Moulding(_)))
                 .collect();
-            out[i] = moulding(m, &out, &line, &solid, &neighbour);
+            out[i] = moulding(
+                m,
+                &out,
+                &line,
+                &solid,
+                &neighbour,
+                wall_ends(run, &neighbour),
+            );
         }
     }
     Ok(out)
@@ -628,6 +668,7 @@ fn moulding<'a>(
     line: &[Option<f64>],
     solid: &[bool],
     neighbour: &dyn Fn(usize) -> &'a Cabinet,
+    wall_x: (Option<f64>, Option<f64>),
 ) -> PartList {
     let mut out = PartList {
         cabinet: m.id.clone(),
@@ -698,8 +739,11 @@ fn moulding<'a>(
                 k = k.checked_add_signed(step).filter(|&k| k < lists.len())?;
             }
         };
-        let left_open = !closed(a.checked_sub(1), -1).unwrap_or(false);
-        let right_open = !closed(Some(b + 1).filter(|&k| k < lists.len()), 1).unwrap_or(false);
+        // A return wall closes an end too.
+        let walled_at = |x: f64, end: Option<f64>| end.is_some_and(|e| (e - x).abs() < 1.0);
+        let left_open = !walled_at(x0, wall_x.0) && !closed(a.checked_sub(1), -1).unwrap_or(false);
+        let right_open = !walled_at(x1, wall_x.1)
+            && !closed(Some(b + 1).filter(|&k| k < lists.len()), 1).unwrap_or(false);
         let name = format!("{}.{}{}", m.id, role.code(), n + 1);
         out.parts.push(Part {
             name: name.clone(),
@@ -754,6 +798,11 @@ pub fn laid_out(run: &Run) -> Run {
                 RunItem::Cabinet(c) => RunItem::Cabinet(Box::new(placed(c, at))),
                 other => other.clone(),
             })
+            .enumerate()
+            .map(|(i, item)| match item {
+                RunItem::Cabinet(c) => RunItem::Cabinet(Box::new(walled(*c, run, i))),
+                other => other,
+            })
             .collect()
     };
     Run {
@@ -794,12 +843,126 @@ fn lefts<'a>(run: &Run, neighbour: &dyn Fn(usize) -> &'a Cabinet) -> Vec<Vec3> {
                 RunItem::Cabinet(c) => c.width,
                 RunItem::Filler(f) => f.width,
                 RunItem::EndPanel(_) => neighbour(i).standard.front_thickness,
-                RunItem::Benchtop(_) | RunItem::Moulding(_) => 0.0,
+                RunItem::Benchtop(_) | RunItem::Moulding(_) | RunItem::Walls(_) => 0.0,
                 RunItem::FloatingShelf(f) => f.width,
             };
             at
         })
         .collect()
+}
+
+fn walls(run: &Run) -> Option<&Walls> {
+    run.items.iter().find_map(|i| match i {
+        RunItem::Walls(w) => Some(w),
+        _ => None,
+    })
+}
+
+/// The first and last items that take run length.
+fn run_ends(run: &Run) -> Option<(usize, usize)> {
+    let solid = |i: &RunItem| {
+        matches!(
+            i,
+            RunItem::Cabinet(_)
+                | RunItem::Filler(_)
+                | RunItem::EndPanel(_)
+                | RunItem::FloatingShelf(_)
+        )
+    };
+    let first = run.items.iter().position(solid)?;
+    let last = run.items.iter().rposition(solid)?;
+    Some((first, last))
+}
+
+/// From the run's left end to its right end.
+fn run_length<'a>(run: &Run, neighbour: &dyn Fn(usize) -> &'a Cabinet) -> f64 {
+    run.items
+        .iter()
+        .enumerate()
+        .map(|(i, item)| match item {
+            RunItem::Cabinet(c) => c.width,
+            RunItem::Filler(f) => f.width,
+            RunItem::EndPanel(_) => neighbour(i).standard.front_thickness,
+            RunItem::FloatingShelf(f) => f.width,
+            RunItem::Benchtop(_) | RunItem::Moulding(_) | RunItem::Walls(_) => 0.0,
+        })
+        .sum()
+}
+
+/// A side against a return wall is not seen, whatever the cabinet was set to.
+fn walled(mut c: Cabinet, run: &Run, i: usize) -> Cabinet {
+    if let (Some(w), Some((first, last))) = (walls(run), run_ends(run)) {
+        if w.left && i == first {
+            c.exposed.left = false;
+        }
+        if w.right && i == last {
+            c.exposed.right = false;
+        }
+    }
+    c
+}
+
+/// The X of the run's ends that stand against a return wall.
+fn wall_ends<'a>(
+    run: &Run,
+    neighbour: &dyn Fn(usize) -> &'a Cabinet,
+) -> (Option<f64>, Option<f64>) {
+    let Some(w) = walls(run) else {
+        return (None, None);
+    };
+    (
+        w.left.then_some(run.origin.x),
+        w.right.then(|| run.origin.x + run_length(run, neighbour)),
+    )
+}
+
+/// What a return wall asks of the run: a front needs room to open, a wall is rarely straight, and
+/// the cabinets have to fit between the walls.
+fn wall_warnings<'a>(
+    w: &Walls,
+    run: &Run,
+    neighbour: &dyn Fn(usize) -> &'a Cabinet,
+) -> Vec<String> {
+    let mut out = Vec::new();
+    let Some((first, last)) = run_ends(run) else {
+        return out;
+    };
+    let check = |i: usize, side: &str, out: &mut Vec<String>| match &run.items[i] {
+        RunItem::Cabinet(c) if c.fronts != FrontLayout::Open => out.push(format!(
+            "{} is hard against the {side} wall: its fronts and handles need room to open, so \
+             add a filler there",
+            c.id
+        )),
+        RunItem::Filler(f) if f.scribe <= 0.0 => out.push(format!(
+            "{} against the {side} wall has no scribe: walls are rarely straight",
+            f.id
+        )),
+        RunItem::EndPanel(e) => out.push(format!(
+            "{} is against the {side} wall, where nobody sees it",
+            e.id
+        )),
+        _ => {}
+    };
+    if w.left {
+        check(first, "left", &mut out);
+    }
+    if w.right {
+        check(last, "right", &mut out);
+    }
+    if w.left && w.right && w.length > 0.0 {
+        let spare = w.length - run_length(run, neighbour);
+        if spare < -0.5 {
+            out.push(format!(
+                "the run is {:.0} mm too long for {:.0} mm between the walls",
+                -spare, w.length
+            ));
+        } else if spare > 0.5 {
+            out.push(format!(
+                "{spare:.0} mm is left between the walls: take it up with a filler"
+            ));
+        }
+    }
+    out
 }
 
 fn placed(c: &Cabinet, at: Vec3) -> Cabinet {
@@ -870,7 +1033,12 @@ fn takes_benchtop(c: &Cabinet) -> bool {
 /// One benchtop part per stretch of consecutive items `under` marks, from their built parts:
 /// across their width (plus the side overhangs), from the door faces less the front overhang to
 /// the back less the clearance, on top.
-fn benchtop(b: &Benchtop, lists: &[PartList], under: &[bool]) -> PartList {
+fn benchtop(
+    b: &Benchtop,
+    lists: &[PartList],
+    under: &[bool],
+    wall_x: (Option<f64>, Option<f64>),
+) -> PartList {
     let mut out = PartList {
         cabinet: b.id.clone(),
         ..PartList::default()
@@ -903,8 +1071,14 @@ fn benchtop(b: &Benchtop, lists: &[PartList], under: &[bool]) -> PartList {
         let leg: Vec<&&Part> = parts.iter().filter(|p| p.bounds.min.y < -100.0).collect();
         let lo = |f: fn(&Part) -> f64| in_line.iter().map(|p| f(p)).fold(f64::MAX, f64::min);
         let hi = |f: fn(&Part) -> f64| in_line.iter().map(|p| f(p)).fold(f64::MIN, f64::max);
-        let x0 = lo(|p| p.bounds.min.x) - b.side_overhang;
-        let x1 = hi(|p| p.bounds.max().x) + b.side_overhang;
+        // No overhang into a return wall: the top runs to it.
+        let walled_at = |x: f64, end: Option<f64>| end.is_some_and(|e| (e - x).abs() < 1.0);
+        let (at_left, at_right) = (
+            walled_at(lo(|p| p.bounds.min.x), wall_x.0),
+            walled_at(hi(|p| p.bounds.max().x), wall_x.1),
+        );
+        let x0 = lo(|p| p.bounds.min.x) - if at_left { 0.0 } else { b.side_overhang };
+        let x1 = hi(|p| p.bounds.max().x) + if at_right { 0.0 } else { b.side_overhang };
         let y0 = lo(|p| p.bounds.min.y) - b.front_overhang;
         // The cabinets' backs: end panels and fillers carry a scribe allowance.
         let y1 = in_line
@@ -930,8 +1104,8 @@ fn benchtop(b: &Benchtop, lists: &[PartList], under: &[bool]) -> PartList {
             board: b.board.clone(),
             edges: EdgeBanding {
                 front: true,
-                left: b.side_overhang > 0.0,
-                right: b.side_overhang > 0.0,
+                left: b.side_overhang > 0.0 && !at_left,
+                right: b.side_overhang > 0.0 && !at_right,
                 ..EdgeBanding::default()
             },
         });
@@ -2305,5 +2479,196 @@ mod tests {
                 .iter()
                 .any(|h| h.item == "lighting.strip.24v")
         );
+    }
+
+    fn walled_run(left: bool, right: bool, length: f64, items: Vec<RunItem>) -> Run {
+        let mut items = items;
+        items.push(RunItem::Walls(Walls {
+            id: "W1".into(),
+            left,
+            right,
+            length,
+            height: 2400.0,
+        }));
+        Run {
+            origin: Vec3::default(),
+            items,
+        }
+    }
+
+    fn wall_notes(run: &Run) -> Vec<String> {
+        build_run(run)
+            .unwrap()
+            .into_iter()
+            .find(|l| l.cabinet == "W1")
+            .unwrap()
+            .warnings
+    }
+
+    #[test]
+    fn return_walls_add_no_parts_and_take_no_run_length() {
+        let bare = Run {
+            origin: Vec3::default(),
+            items: vec![cab("B1", CabinetKind::Base), cab("B2", CabinetKind::Base)],
+        };
+        let walled = walled_run(
+            true,
+            true,
+            0.0,
+            vec![cab("B1", CabinetKind::Base), cab("B2", CabinetKind::Base)],
+        );
+        let count =
+            |r: &Run| -> usize { build_run(r).unwrap().iter().map(|l| l.parts.len()).sum() };
+        assert_eq!(count(&bare), count(&walled));
+        assert!(matches!(
+            &laid_out(&walled).items[1],
+            RunItem::Cabinet(c) if c.origin.x == Cabinet::new("B1", CabinetKind::Base).width
+        ));
+    }
+
+    #[test]
+    fn a_cabinet_against_a_return_wall_has_no_seen_end_on_that_side_only() {
+        let mut c = Cabinet::new("B1", CabinetKind::Base);
+        c.exposed.left = true;
+        c.exposed.right = true;
+        let run = walled_run(true, false, 0.0, vec![RunItem::Cabinet(Box::new(c))]);
+        let RunItem::Cabinet(placed) = &laid_out(&run).items[0] else {
+            panic!()
+        };
+        assert!(!placed.exposed.left);
+        assert!(placed.exposed.right);
+    }
+
+    #[test]
+    fn fronts_hard_against_a_return_wall_ask_for_a_filler_and_a_filler_settles_it() {
+        let notes = wall_notes(&walled_run(
+            true,
+            false,
+            0.0,
+            vec![cab("B1", CabinetKind::Base)],
+        ));
+        assert!(
+            notes
+                .iter()
+                .any(|n| n.contains("B1") && n.contains("filler")),
+            "{notes:?}"
+        );
+        let filler = RunItem::Filler(Filler {
+            id: "F1".into(),
+            width: 50.0,
+            scribe: 10.0,
+        });
+        assert!(
+            wall_notes(&walled_run(
+                true,
+                false,
+                0.0,
+                vec![filler, cab("B1", CabinetKind::Base)]
+            ))
+            .is_empty()
+        );
+    }
+
+    #[test]
+    fn a_filler_against_a_wall_without_a_scribe_is_questioned() {
+        let filler = RunItem::Filler(Filler {
+            id: "F1".into(),
+            width: 50.0,
+            scribe: 0.0,
+        });
+        let notes = wall_notes(&walled_run(
+            true,
+            false,
+            0.0,
+            vec![filler, cab("B1", CabinetKind::Base)],
+        ));
+        assert!(notes.iter().any(|n| n.contains("scribe")), "{notes:?}");
+    }
+
+    #[test]
+    fn the_run_is_measured_against_the_gap_between_two_return_walls() {
+        let f = |id: &str| {
+            RunItem::Filler(Filler {
+                id: id.into(),
+                width: 50.0,
+                scribe: 10.0,
+            })
+        };
+        let width = Cabinet::new("B1", CabinetKind::Base).width;
+        let notes = |length: f64| {
+            wall_notes(&walled_run(
+                true,
+                true,
+                length,
+                vec![f("F1"), cab("B1", CabinetKind::Base), f("F2")],
+            ))
+        };
+        assert!(notes(width + 100.0).is_empty());
+        assert!(
+            notes(width + 90.0)
+                .iter()
+                .any(|n| n.contains("10 mm too long"))
+        );
+        assert!(
+            notes(width + 130.0)
+                .iter()
+                .any(|n| n.contains("30 mm is left"))
+        );
+    }
+
+    #[test]
+    fn a_benchtop_stops_at_a_return_wall_and_overhangs_the_open_end() {
+        let top = RunItem::Benchtop(Benchtop {
+            side_overhang: 20.0,
+            ..serde_json::from_str(r#"{"id":"T1"}"#).unwrap()
+        });
+        let run = walled_run(true, false, 0.0, vec![cab("B1", CabinetKind::Base), top]);
+        let lists = build_run(&run).unwrap();
+        let part = lists
+            .iter()
+            .flat_map(|l| &l.parts)
+            .find(|p| p.role == PartRole::Benchtop);
+        let part = part.unwrap();
+        let width = Cabinet::new("B1", CabinetKind::Base).width;
+        assert_eq!(part.bounds.min.x, 0.0);
+        assert_eq!(part.bounds.max().x, width + 20.0);
+        assert!(!part.edges.left && part.edges.right);
+    }
+
+    #[test]
+    fn a_cornice_takes_no_return_into_a_return_wall() {
+        let wall = RunItem::Cabinet(Box::new(Cabinet::new("W1C", CabinetKind::Wall)));
+        let cornice = RunItem::Moulding(Moulding {
+            id: "C1".into(),
+            kind: MouldingKind::Cornice,
+            height: 60.0,
+            board: String::new(),
+            returns: true,
+        });
+        let run = walled_run(true, false, 0.0, vec![wall, cornice]);
+        let lists = build_run(&run).unwrap();
+        let names: Vec<&str> = lists
+            .iter()
+            .flat_map(|l| &l.parts)
+            .filter(|p| p.role == PartRole::Cornice)
+            .map(|p| p.name.as_str())
+            .collect();
+        assert!(names.iter().any(|n| n.ends_with("ReturnR")), "{names:?}");
+        assert!(!names.iter().any(|n| n.ends_with("ReturnL")), "{names:?}");
+    }
+
+    #[test]
+    fn return_walls_survive_a_trip_through_a_job_file() {
+        let item = RunItem::Walls(Walls {
+            id: "WL01".into(),
+            left: true,
+            right: true,
+            length: 3210.0,
+            height: 2700.0,
+        });
+        let text = serde_json::to_string(&item).unwrap();
+        assert_eq!(serde_json::from_str::<RunItem>(&text).unwrap(), item);
+        let bare: RunItem = serde_json::from_str(r#"{"type":"walls","id":"WL01"}"#).unwrap();
+        assert!(matches!(bare, RunItem::Walls(w) if !w.left && w.height == 2400.0));
     }
 }

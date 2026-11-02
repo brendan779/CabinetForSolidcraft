@@ -221,7 +221,49 @@ struct PieceSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            if ["cornice", "light_rail"].contains(cab.kind) {
+            if cab.kind == "walls" {
+                SectionTitle("Walls at the run's ends")
+                HStack(spacing: 8) {
+                    ForEach(WallPlan.choices, id: \.title) { choice in
+                        Button {
+                            withAnimation(.snappy) {
+                                var c = cab
+                                c.wallLeft = choice.left
+                                c.wallRight = choice.right
+                                project.selected = c
+                            }
+                        } label: {
+                            VStack(spacing: 6) {
+                                Canvas { ctx, size in WallPlan.draw(ctx, size, left: choice.left, right: choice.right) }
+                                    .frame(width: 44, height: 40)
+                                    .accessibilityHidden(true)
+                                Text(choice.title).font(.caption)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 8)
+                        }
+                        .buttonStyle(TileStyle(selected: cab.wallLeft == choice.left && cab.wallRight == choice.right))
+                        .help(choice.help)
+                    }
+                }
+                if cab.wallLeft && cab.wallRight {
+                    NumberField(title: "Between the walls", value: cab.wallLength) { v in
+                        var c = cab
+                        c.wallLength = v
+                        project.selected = c
+                    }
+                }
+                Text("The cabinets stand on the back wall. A return wall hides that cabinet's side, stops the benchtop and any cornice at it, and needs a filler so fronts can open.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                ForEach(project.build(cab)?.warnings ?? [], id: \.self) { note in
+                    Label(note, systemImage: "exclamationmark.triangle")
+                        .font(.caption)
+                        .foregroundStyle(.orange)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            } else if ["cornice", "light_rail"].contains(cab.kind) {
                 let cornice = cab.kind == "cornice"
                 SectionTitle(cornice ? "Cornice" : "Light rail")
                 chips("Height", value: cab.mouldingHeight, presets: [40, 60, 80, 100]) { c, v in c.mouldingHeight = v }
@@ -412,7 +454,7 @@ struct PieceSection: View {
                     }
                 }
             }
-            if !["benchtop", "floating_shelf", "cornice", "light_rail"].contains(cab.kind) {
+            if !["benchtop", "floating_shelf", "cornice", "light_rail", "walls"].contains(cab.kind) {
                 chips("Scribe", value: cab.scribe, presets: [0, 10, 20, 30, 40]) { c, v in c.scribe = v }
                 Text("The scribe is extra board, cut off on site to follow the wall. It is not part of the run's length.")
                     .font(.caption)
@@ -433,6 +475,69 @@ struct PieceSection: View {
                 .accessibilityLabel("\(title) \(unit.format(p))")
             }
         }
+    }
+}
+
+/// A plan of the run from above: the back wall, a return wall at either end, the cabinets.
+enum WallPlan {
+    struct Choice {
+        let title: String
+        let left: Bool
+        let right: Bool
+        let help: String
+    }
+
+    static let choices = [
+        Choice(title: "Back only", left: false, right: false, help: "Only the back wall: both ends of the run are open."),
+        Choice(title: "Left", left: true, right: false, help: "A return wall at the left end: that cabinet abuts walls on its back and its side."),
+        Choice(title: "Right", left: false, right: true, help: "A return wall at the right end: that cabinet abuts walls on its back and its side."),
+        Choice(title: "Both", left: true, right: true, help: "Between two walls: the run has to fit the gap."),
+    ]
+
+    static func draw(_ ctx: GraphicsContext, _ size: CGSize, left: Bool, right: Bool) {
+        let w = size.width, h = size.height, t = max(2, h * 0.08)
+        let inset = w * 0.12
+        let run = CGRect(x: inset, y: t, width: w - 2 * inset, height: h * 0.45)
+        ctx.fill(Path(run), with: .color(.primary.opacity(0.12)))
+        ctx.stroke(Path(run), with: .color(.primary.opacity(0.5)), lineWidth: 1)
+        var walls = Path()
+        walls.addRect(CGRect(x: left ? inset - t : 0, y: 0,
+                             width: w - (left ? inset - t : 0) - (right ? inset - t : 0), height: t))
+        if left { walls.addRect(CGRect(x: inset - t, y: 0, width: t, height: h)) }
+        if right { walls.addRect(CGRect(x: w - inset, y: 0, width: t, height: h)) }
+        ctx.fill(walls, with: .color(.accentColor))
+    }
+}
+
+/// A length typed in, for what no preset can guess: a measured room.
+struct NumberField: View {
+    let title: String
+    let value: Double
+    let set: (Double) -> Void
+    @AppStorage(LengthUnit.key) private var unit: LengthUnit = .millimetres
+    @State private var text = ""
+    @FocusState private var focused: Bool
+
+    var body: some View {
+        HStack(spacing: 6) {
+            Text(title).foregroundStyle(.secondary)
+            Spacer()
+            TextField(title, text: $text)
+                .labelsHidden()
+                .multilineTextAlignment(.trailing)
+                .frame(width: 80)
+                .focused($focused)
+                .onAppear { text = value > 0 ? String(Int(value)) : "" }
+                .onChange(of: value) { if !focused { text = value > 0 ? String(Int(value)) : "" } }
+                .onSubmit { commit() }
+                .onChange(of: focused) { if !focused { commit() } }
+            Text("mm").foregroundStyle(.secondary)
+        }
+    }
+
+    private func commit() {
+        let v = Double(text.trimmingCharacters(in: .whitespaces)) ?? 0
+        if abs(v - value) > 0.01 { set(max(v, 0)) }
     }
 }
 

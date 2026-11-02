@@ -653,6 +653,28 @@ fn a_drawer_frame_is_cut_out_for_each_drawer() {
 
 /// SolidCraft's own box round each tilted board against the maths that placed it.
 #[test]
+fn a_job_exports_as_one_step_file_with_every_cabinet_in_it() {
+    let Some(cli) = cli() else { return };
+    use cabinet_core::run::{Run, RunItem, build_run};
+    let run = Run {
+        origin: Default::default(),
+        items: vec![
+            RunItem::Cabinet(Box::new(Cabinet::new("B01", CabinetKind::Base))),
+            RunItem::Cabinet(Box::new(Cabinet::new("D01", CabinetKind::DrawerBank))),
+        ],
+    };
+    let lists = build_run(&run).unwrap();
+    let step = solidcraft_bridge::step::job_step(&lists, Detail::Design, &cli).unwrap();
+    let text = String::from_utf8_lossy(&step);
+    assert!(
+        text.starts_with("ISO-10303-21"),
+        "{}",
+        &text[..40.min(text.len())]
+    );
+    assert!(text.contains("B01.LeftSide") && text.contains("D01.LeftSide"));
+}
+
+#[test]
 fn a_sloped_shoe_shelf_lands_where_the_maths_puts_it() {
     let Some(cli) = cli() else {
         eprintln!("SOLIDCRAFT_CLI not set: skipped");

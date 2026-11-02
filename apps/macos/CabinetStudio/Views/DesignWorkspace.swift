@@ -124,7 +124,7 @@ struct RunStrip: View {
 
     private var items: [CabinetDoc] {
         project.cabinets.filter {
-            $0.placed != true && !["end_panel", "benchtop", "cornice", "light_rail"].contains($0.kind)
+            $0.placed != true && !["end_panel", "benchtop", "cornice", "light_rail", "walls"].contains($0.kind)
         }
     }
 
@@ -374,6 +374,8 @@ struct CabinetViewport: View {
 final class ViewportScene {
     let root = Entity()
     let camera = PerspectiveCamera()
+    /// What the walls were last made for.
+    private var wallsKey = ""
     /// The panels shown, by part name, as last built.
     private(set) var panels: [String: PanelBox] = [:]
     /// Each panel entity's mesh size and its offset from the pivot, as last made.
@@ -430,6 +432,7 @@ final class ViewportScene {
             }
         }
         addHardware(project: project, look: look, sectionX: look.section ? sectionX : nil, seen: &seen)
+        updateWalls(project: project, minX: minX, maxX: maxX, seen: &seen)
         // A copy: removing from `root.children` while walking it skips the entity after each one
         // removed (a door's handle, say).
         for e in Array(root.children) where !seen.contains(e.name) {
@@ -452,6 +455,33 @@ final class ViewportScene {
     /// Supplier models and stand-in shapes. They sit on the carcass, so they are left out of an
     /// exploded view; hinges show only with the fronts closed, drawer box sides slide out with
     /// their drawers, and nothing shows on the cut-away side of a section.
+    /// The back wall and any return walls, behind and beside the run. Glassy, because the camera
+    /// often looks through one; not selectable.
+    private func updateWalls(project: ProjectModel, minX: Float, maxX: Float, seen: inout Set<String>) {
+        guard let w = project.cabinets.first(where: { $0.kind == "walls" }), minX <= maxX else { return }
+        let panels = project.cabinets.filter { $0.placed != true }.compactMap { project.build($0) }.flatMap(\.panels)
+        let back = Float(panels.map { $0.y + $0.depth }.max() ?? 0) / 1000
+        let height = Float(w.wallHeight) / 1000
+        let t: Float = 0.1, reach: Float = 0.3
+        let key = "\(w.wallLeft) \(w.wallRight) \(minX) \(maxX) \(back) \(height)"
+        seen.insert("walls")
+        guard key != wallsKey else { return }
+        wallsKey = key
+        root.children.first { $0.name == "walls" }?.removeFromParent()
+        let group = Entity()
+        group.name = "walls"
+        let paint = SimpleMaterial(color: NSColor(white: 0.85, alpha: 0.45), roughness: 0.9, isMetallic: false)
+        func wall(_ x0: Float, _ x1: Float, _ front: Float, _ rear: Float) {
+            let e = ModelEntity(mesh: .generateBox(size: [x1 - x0, height, rear - front]), materials: [paint])
+            e.position = [(x0 + x1) / 2, height / 2, -(front + rear) / 2]
+            group.addChild(e)
+        }
+        wall(minX - (w.wallLeft ? t : 0), maxX + (w.wallRight ? t : 0), back, back + t)
+        if w.wallLeft { wall(minX - t, minX, -reach, back) }
+        if w.wallRight { wall(maxX, maxX + t, -reach, back) }
+        root.addChild(group)
+    }
+
     private func addHardware(project: ProjectModel, look: ViewportLook, sectionX: Double?, seen: inout Set<String>) {
         guard look.showHardware, look.explode < 0.001 else { return }
         let (models, shapes) = project.hardware()

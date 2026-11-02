@@ -322,6 +322,12 @@ pub enum BorePurpose {
     HingeBoss,
     HingePlate,
     Dowel,
+    /// A MINIFIX housing's cup, in the end part's face.
+    CamHousing,
+    /// The hole a MINIFIX bolt's shank lies in, from the end part's edge to its housing.
+    CamShank,
+    /// The hole a MINIFIX bolt screws into, in the face part.
+    CamThread,
     /// A drawer system's front fixing (LEGRABOX EXPANDO bracket), in the back of a drawer front.
     FrontFixing,
     /// A cabinet profile's screw, in the side or divider beside a drawer.

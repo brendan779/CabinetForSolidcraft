@@ -1,0 +1,165 @@
+{
+  "brand": "Häfele",
+  "website": "https://www.hafele.com.au",
+  "notes": "MINIFIX 15 from the owner's catalogue. Struck out there, so left out here: 262.26.032 (from 15), 262.26.037 (from 26), 262.26.038 (from 29). Wood thickness is a minimum, so a 15 mm board takes the from-13 housing and anything over 23 the from-23 one. Dim. A is the bolt's axis below the drilled face. Not verified by a person.",
+  "items": [
+    {
+      "id": "hafele.minifix15.from-12",
+      "brand": "Häfele",
+      "article": "262.26.070",
+      "family": "MINIFIX 15 connector housing",
+      "variant": "without rim, wood from 12 mm, PZ2 or flat blade",
+      "kind": "other",
+      "parameters": {
+        "from_thickness": 12,
+        "diameter": 15,
+        "drill_depth": 9.5,
+        "axis_from_face": 6
+      },
+      "source": {
+        "url": "https://www.hafele.com.au",
+        "document_date": "Häfele The Complete 1, Furniture Fittings, TCH-FF 2018 HAA, updated 08.26, pp. 3.5-3.7",
+        "retrieved": "2026-11-02",
+        "verified": false
+      }
+    },
+    {
+      "id": "hafele.minifix15.from-13",
+      "brand": "Häfele",
+      "article": "262.26.031",
+      "family": "MINIFIX 15 connector housing",
+      "variant": "without rim, wood from 13 mm, PZ2 or flat blade",
+      "kind": "other",
+      "parameters": {
+        "from_thickness": 13,
+        "diameter": 15,
+        "drill_depth": 11,
+        "axis_from_face": 6.5
+      },
+      "source": {
+        "url": "https://www.hafele.com.au",
+        "document_date": "Häfele The Complete 1, Furniture Fittings, TCH-FF 2018 HAA, updated 08.26, pp. 3.5-3.7",
+        "retrieved": "2026-11-02",
+        "verified": false
+      }
+    },
+    {
+      "id": "hafele.minifix15.from-16",
+      "brand": "Häfele",
+      "article": "262.26.033",
+      "family": "MINIFIX 15 connector housing",
+      "variant": "without rim, wood from 16 mm, PZ2, flat blade or SW4",
+      "kind": "other",
+      "parameters": {
+        "from_thickness": 16,
+        "diameter": 15,
+        "drill_depth": 12.5,
+        "axis_from_face": 8
+      },
+      "source": {
+        "url": "https://www.hafele.com.au",
+        "document_date": "Häfele The Complete 1, Furniture Fittings, TCH-FF 2018 HAA, updated 08.26, pp. 3.5-3.7",
+        "retrieved": "2026-11-02",
+        "verified": false
+      }
+    },
+    {
+      "id": "hafele.minifix15.from-18",
+      "brand": "Häfele",
+      "article": "262.26.034",
+      "family": "MINIFIX 15 connector housing",
+      "variant": "without rim, wood from 18 mm, PZ2, flat blade or SW4",
+      "kind": "other",
+      "parameters": {
+        "from_thickness": 18,
+        "diameter": 15,
+        "drill_depth": 13.5,
+        "axis_from_face": 9
+      },
+      "source": {
+        "url": "https://www.hafele.com.au",
+        "document_date": "Häfele The Complete 1, Furniture Fittings, TCH-FF 2018 HAA, updated 08.26, pp. 3.5-3.7",
+        "retrieved": "2026-11-02",
+        "verified": false
+      }
+    },
+    {
+      "id": "hafele.minifix15.from-19",
+      "brand": "Häfele",
+      "article": "262.26.035",
+      "family": "MINIFIX 15 connector housing",
+      "variant": "without rim, wood from 19 mm, PZ2, flat blade or SW4",
+      "kind": "other",
+      "parameters": {
+        "from_thickness": 19,
+        "diameter": 15,
+        "drill_depth": 14,
+        "axis_from_face": 9.5
+      },
+      "source": {
+        "url": "https://www.hafele.com.au",
+        "document_date": "Häfele The Complete 1, Furniture Fittings, TCH-FF 2018 HAA, updated 08.26, pp. 3.5-3.7",
+        "retrieved": "2026-11-02",
+        "verified": false
+      }
+    },
+    {
+      "id": "hafele.minifix15.from-23",
+      "brand": "Häfele",
+      "article": "262.26.036",
+      "family": "MINIFIX 15 connector housing",
+      "variant": "without rim, wood from 23 mm, PZ2, PZ3, flat blade or SW4",
+      "kind": "other",
+      "parameters": {
+        "from_thickness": 23,
+        "diameter": 15,
+        "drill_depth": 16,
+        "axis_from_face": 11.5
+      },
+      "source": {
+        "url": "https://www.hafele.com.au",
+        "document_date": "Häfele The Complete 1, Furniture Fittings, TCH-FF 2018 HAA, updated 08.26, pp. 3.5-3.7",
+        "retrieved": "2026-11-02",
+        "verified": false
+      }
+    },
+    {
+      "id": "hafele.minifix.bolt.s200.24",
+      "brand": "Häfele",
+      "article": "262.27.679",
+      "family": "MINIFIX connecting bolt S200",
+      "variant": "for a Ø5 hole, special thread, drilling distance 24",
+      "kind": "other",
+      "parameters": {
+        "from_thickness": 15,
+        "thread_length": 11,
+        "thread_hole": 5,
+        "shank_hole": 8,
+        "distance": 24
+      },
+      "source": {
+        "url": "https://www.hafele.com.au",
+        "document_date": "Häfele The Complete 1, Furniture Fittings, TCH-FF 2018 HAA, updated 08.26, pp. 3.5-3.7",
+        "retrieved": "2026-11-02",
+        "verified": false
+      }
+    },
+    {
+      "id": "hafele.minifix.cap.sw4.white",
+      "brand": "Häfele",
+      "article": "262.24.751",
+      "family": "MINIFIX 15 cover cap",
+      "variant": "white, for an SW4 drive housing, without rim",
+      "kind": "other",
+      "parameters": {
+        "diameter": 17
+      },
+      "source": {
+        "url": "https://www.hafele.com.au",
+        "document_date": "Häfele The Complete 1, Furniture Fittings, TCH-FF 2018 HAA, updated 08.26, pp. 3.5-3.7",
+        "retrieved": "2026-11-02",
+        "verified": false
+      }
+    }
+  ]
+}

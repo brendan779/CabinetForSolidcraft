@@ -56,6 +56,10 @@ const FILES: &[(&str, &str)] = &[
         include_str!("../../../catalog/hardware/blum-drawer-motion.json"),
     ),
     (
+        "hafele-minifix.json",
+        include_str!("../../../catalog/hardware/hafele-minifix.json"),
+    ),
+    (
         "festool-domino.json",
         include_str!("../../../catalog/hardware/festool-domino.json"),
     ),

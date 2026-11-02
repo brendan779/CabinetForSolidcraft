@@ -16,11 +16,12 @@ struct CutListView: View {
                     Text("Sheets").tag("Sheets")
                     Text("Hardware").tag("Hardware")
                     Text("Quote").tag("Quote")
+                    Text("Elevation").tag("Elevation")
                 }
                 .pickerStyle(.segmented)
                 .labelsHidden()
                 .fixedSize()
-                .help("Parts to cut, the parts nested on stock sheets, hardware to order, or what the job costs")
+                .help("Parts to cut, the parts nested on stock sheets, hardware to order, what the job costs, or the run drawn from the front")
                 Spacer()
             }
             .padding(.horizontal, 10)
@@ -30,8 +31,84 @@ struct CutListView: View {
             case "Parts": PartsListView()
             case "Sheets": NestingView()
             case "Quote": QuoteView()
+            case "Elevation": ElevationView()
             default: HardwareListView()
             }
+        }
+    }
+}
+
+/// The run drawn flat from the front, and the job as files any CAD program opens: the drawing as
+/// PDF or DXF, and the whole job in 3D as STEP.
+struct ElevationView: View {
+    @Environment(ProjectModel.self) private var project
+    @State private var export: (doc: DataDocument, name: String, type: UTType)?
+    @State private var makingStep = false
+
+    var body: some View {
+        let svg = (try? elevationSvg(items: project.jobItems, job: project.jobName)) ?? ""
+        VStack(spacing: 0) {
+            Group {
+                if svg.isEmpty {
+                    ContentUnavailableView("Nothing in the run", systemImage: "rectangle.split.3x1",
+                                           description: Text("Add cabinets to see them drawn from the front."))
+                } else {
+                    SVGView(svg: svg)
+                }
+            }
+            .frame(minWidth: 0, maxWidth: .infinity, maxHeight: .infinity)
+            HStack(spacing: 10) {
+                Spacer(minLength: 0)
+                Button("PDF…", systemImage: "doc.richtext") {
+                    save("elevation", .pdf) { try elevationPdf(items: project.jobItems, job: project.jobName) }
+                }
+                .help("This drawing as a PDF")
+                Button("DXF…", systemImage: "square.and.pencil") {
+                    save("elevation", UTType(filenameExtension: "dxf") ?? .data) {
+                        Data(try elevationDxf(items: project.jobItems).utf8)
+                    }
+                }
+                .help("This drawing at full size as a DXF, for any 2D CAD program")
+                Button {
+                    makeStep()
+                } label: {
+                    if makingStep {
+                        ProgressView().controlSize(.small)
+                    } else {
+                        Label("STEP…", systemImage: "cube")
+                    }
+                }
+                .disabled(makingStep)
+                .help("The whole job in 3D as a STEP file, for any CAD program, at the detail chosen in the SolidCraft menu. Panels only: suppliers' hardware models stay out.")
+            }
+            .padding(8)
+            .background(.bar)
+        }
+        .fileExporter(isPresented: Binding(get: { export != nil }, set: { if !$0 { export = nil } }),
+                      document: export?.doc, contentType: export?.type ?? .data,
+                      defaultFilename: export?.name ?? "") { result in
+            if case .success(let url) = result { project.status = "Saved \(url.lastPathComponent)" }
+        }
+    }
+
+    private func save(_ what: String, _ type: UTType, _ make: () throws -> Data) {
+        do {
+            export = (DataDocument(data: try make()), "\(project.jobName) \(what)", type)
+        } catch {
+            project.lastError = "Could not make the \(what): \(error)"
+        }
+    }
+
+    private func makeStep() {
+        makingStep = true
+        Task {
+            do {
+                let data = try await project.stepFile()
+                export = (DataDocument(data: data), project.jobName, UTType(filenameExtension: "step") ?? .data)
+            } catch {
+                project.lastError = "Could not make the STEP file: \(error)"
+            }
+            makingStep = false
         }
     }
 }
