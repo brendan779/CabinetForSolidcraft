@@ -57,7 +57,8 @@ struct ContentView: View {
                 }
             }
         }
-        .safeAreaInset(edge: .bottom) { StatusBar() }
+        // Below the split view, not an inset on it: its columns ignore one and run under the bar.
+        .modifier(StatusBarBelow())
         // An overlay, not .sheet: dismissing an AppKit sheet over this split view + inspector sent
         // AppKit into an endless constraint-update loop that crashed the app.
         .overlay {
@@ -193,5 +194,14 @@ struct StatusBar: View {
         .padding(.horizontal, 14)
         .padding(.vertical, 6)
         .background(.bar)
+    }
+}
+
+private struct StatusBarBelow: ViewModifier {
+    func body(content: Content) -> some View {
+        VStack(spacing: 0) {
+            content
+            StatusBar()
+        }
     }
 }

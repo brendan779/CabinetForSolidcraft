@@ -641,7 +641,7 @@ struct SVGView: NSViewRepresentable {
         let html = """
         <html><head><meta name="viewport" content="width=device-width"><style>
         body{margin:0;display:flex;align-items:center;justify-content:center;height:100vh;background:transparent}
-        svg{width:96%;height:auto;max-height:96vh;box-shadow:0 8px 30px rgba(0,0,0,.25);border-radius:4px}
+        svg{background:#fff;width:96%;height:auto;max-height:96vh;box-shadow:0 8px 30px rgba(0,0,0,.25);border-radius:4px}
         </style></head><body>\(svg)</body></html>
         """
         v.loadHTMLString(html, baseURL: nil)

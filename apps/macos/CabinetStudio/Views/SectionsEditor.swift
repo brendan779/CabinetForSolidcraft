@@ -170,7 +170,8 @@ struct SectionsEditor: View {
             }
             if ["shelves", "shoe_shelves", "inner_drawers"].contains(cell.inside) {
                 ChipRow(cell.inside == "inner_drawers" ? "Drawers" : "Shelves") {
-                    ForEach(1...5, id: \.self) { n in
+                    // Shoe shelves run to 8, for a 2400 high cabinet.
+                    ForEach(1...(cell.inside == "shoe_shelves" ? 8 : 5), id: \.self) { n in
                         Button("\(n)") { editCell(c, r) { $0.insideCount = n } }
                             .buttonStyle(ChipStyle(selected: cell.insideCount == n))
                     }

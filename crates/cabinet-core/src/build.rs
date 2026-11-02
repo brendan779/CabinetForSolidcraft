@@ -34,6 +34,10 @@ const MIN_SHOE_ROOM: f64 = 100.0;
 const SHOE_SHELF_SCREW_CLEARANCE: f64 = 4.5;
 const SHOE_SHELF_PILOT: f64 = 3.0;
 const SHOE_SHELF_PILOT_DEPTH: f64 = 25.0;
+/// A cruciform plate's system screws, as a door's (Blum's session, check 1).
+const PLATE_HOLE_OFFSET: f64 = 16.0;
+const PLATE_HOLE_DIAMETER: f64 = 5.0;
+const PLATE_HOLE_DEPTH: f64 = 11.5;
 /// Our choice: a pilot for the chipboard screws (609.1x00) in a lift bracket.
 const LIFT_BRACKET_PILOT: f64 = 2.5;
 const LIFT_BRACKET_PILOT_DEPTH: f64 = 10.0;
@@ -2177,11 +2181,18 @@ impl<'a> Builder<'a> {
         let pitch = (ceiling - floor) / n as f64;
         // The lip's front corner dips below the pivot as it turns.
         let dip = t * sin + SHOE_SHELF_FLOOR_GAP;
+        // The shelves are parallel, so the slope takes no room from the shoes: only the board does.
+        // The slope does have to fit under the ceiling over the top one.
         let rise = length * sin + t * cos;
-        if pitch < rise + dip + lip + MIN_SHOE_ROOM {
+        if pitch - t / cos < MIN_SHOE_ROOM {
             self.list.warnings.push(format!(
-                "{n} shoe shelves at {angle:.0}° leave too little room for shoes: try fewer or a \
-                 shallower slope"
+                "{n} shoe shelves leave too little room for shoes between them: try fewer"
+            ));
+        }
+        if pitch < dip + rise {
+            self.list.warnings.push(format!(
+                "the top shoe shelf's back rises into what is above it at {angle:.0}°: try fewer \
+                 shelves or a shallower slope"
             ));
         }
         let (left, right) = (bay.left_panel.clone(), bay.right_panel.clone());
@@ -3096,6 +3107,84 @@ impl<'a> Builder<'a> {
             self.hki_recesses();
         }
         self.lift_drilling(kind, front, &name);
+        if kind == LiftKind::HingedStayLift {
+            self.top_hinges(front, &name);
+        }
+    }
+
+    /// AVENTOS HK-XS hangs its front on ordinary hinges along the top: cups in the front, plates
+    /// under the top panel, their count from the lift's parts, spaced as a door's along its edge.
+    fn top_hinges(&mut self, front: Aabb, name: &str) {
+        let s = &self.cab.standard;
+        let count = self
+            .list
+            .hardware
+            .iter()
+            .filter(|h| h.part == name && h.item.starts_with("blum.clip-top"))
+            .map(|h| h.quantity)
+            .sum::<u32>() as usize;
+        let need = HingeNeed {
+            overlay: DoorOverlay::Full,
+            front_overlay: front.max().z - self.opening_z.1,
+            door_thickness: front.size.y,
+            side_thickness: s.carcass_thickness,
+            gap: s.front_gap,
+            sprung: true,
+            boss: s.hinge_boss,
+        };
+        let numbers = hinges::select(&need).and_then(|choice| {
+            Ok::<_, String>((
+                choice.cup_inset()?,
+                choice.hinge.param("cup_diameter")?,
+                choice.hinge.param("cup_depth")?,
+                choice.plate.param("setback")?,
+                crate::hardware::item(HINGE_POSITION)?.param("end_distance")?,
+            ))
+        });
+        let (inset, diameter, depth, setback, ends) = match numbers {
+            Ok(n) => n,
+            Err(e) => {
+                self.list
+                    .warnings
+                    .push(format!("{name}: {e}; hinges not drilled"));
+                return;
+            }
+        };
+        let Some(over) = self
+            .list
+            .parts
+            .iter()
+            .find(|p| matches!(p.role, PartRole::Top | PartRole::FrontRail))
+            .map(|p| p.name.clone())
+        else {
+            return;
+        };
+        if count < 2 {
+            return;
+        }
+        let span = front.size.x - 2.0 * ends;
+        let underside = self.opening_z.1;
+        for k in 0..count {
+            let x = front.min.x + ends + span * k as f64 / (count - 1) as f64;
+            self.list.operations.push(Operation::Bore {
+                part: name.to_string(),
+                at: Vec3::new(x, front.max().y, front.max().z - inset),
+                direction: Dir::new(Axis::Y, false),
+                diameter,
+                depth,
+                purpose: BorePurpose::HingeCup,
+            });
+            for along in [-PLATE_HOLE_OFFSET, PLATE_HOLE_OFFSET] {
+                self.list.operations.push(Operation::Bore {
+                    part: over.clone(),
+                    at: Vec3::new(x + along, setback, underside),
+                    direction: Dir::new(Axis::Z, true),
+                    diameter: PLATE_HOLE_DIAMETER,
+                    depth: PLATE_HOLE_DEPTH,
+                    purpose: BorePurpose::HingePlate,
+                });
+            }
+        }
     }
 
     /// A stay lift's mechanism: its holes in the sides, and its bracket's pilots in the back of
@@ -6975,6 +7064,51 @@ mod tests {
         );
     }
 
+    #[test]
+    fn an_hk_xs_hangs_on_hinges_along_the_top_with_plates_under_it() {
+        let list = build_cabinet(&wall_lift(LiftKind::HingedStayLift)).unwrap();
+        let front = list.part("W01.LiftFront1").unwrap().bounds;
+        let cups: Vec<Vec3> = list
+            .operations
+            .iter()
+            .filter_map(|o| match o {
+                Operation::Bore {
+                    part,
+                    at,
+                    purpose: BorePurpose::HingeCup,
+                    ..
+                } if part == "W01.LiftFront1" => Some(*at),
+                _ => None,
+            })
+            .collect();
+        assert_eq!(cups.len(), 2);
+        assert!(
+            cups.iter().all(|c| c.z > front.max().z - 40.0),
+            "along the top"
+        );
+        assert_eq!(cups[0].x, front.min.x + 80.0);
+        assert_eq!(cups[1].x, front.max().x - 80.0);
+        let plates = list
+            .operations
+            .iter()
+            .filter(|o| {
+                matches!(
+                    o,
+                    Operation::Bore {
+                        purpose: BorePurpose::HingePlate,
+                        ..
+                    }
+                )
+            })
+            .count();
+        assert_eq!(plates, 4, "two screws to a plate");
+        assert!(
+            list.warnings.iter().all(|w| !w.contains("clash")),
+            "{:?}",
+            list.warnings
+        );
+    }
+
     /// p.24: a rectangle 128 × 64, 101 from the front, H below the cabinet's top by its height.
     #[test]
     fn an_hf_drills_four_holes_each_side_at_the_height_for_its_cabinet() {
@@ -7158,10 +7292,34 @@ mod tests {
     }
 
     #[test]
-    fn too_many_steep_shelves_warn_about_the_room_for_shoes() {
-        let cab = shoe_rack(12, 15.0, 30.0);
+    fn too_many_shelves_warn_about_the_room_for_shoes() {
+        let cab = shoe_rack(20, 15.0, 30.0);
         let list = build_cabinet(&cab).unwrap();
         assert!(list.warnings.iter().any(|w| w.contains("room for shoes")));
+    }
+
+    /// The owner: up to 8, for a 2400 high cabinet.
+    #[test]
+    fn eight_sloped_shelves_fit_a_2400_high_cabinet() {
+        for angle in [5.0, 15.0] {
+            let mut cab = shoe_rack(8, angle, 30.0);
+            cab.height = 2400.0;
+            let list = build_cabinet(&cab).unwrap();
+            assert_eq!(list.by_role(PartRole::ShoeShelf).count(), 8);
+            assert!(
+                list.warnings
+                    .iter()
+                    .all(|w| !w.contains("shoe") && !w.contains("clash")),
+                "{angle}: {:?}",
+                list.warnings
+            );
+            let (_, ceiling) = (0.0, list.part("R01.LeftSide").unwrap().bounds.max().z);
+            let top = list
+                .by_role(PartRole::ShoeShelf)
+                .map(|s| list.tilts[&s.name].reach(s.bounds).1.z)
+                .fold(f64::MIN, f64::max);
+            assert!(top <= ceiling, "{angle}: {top} over {ceiling}");
+        }
     }
 
     #[test]
