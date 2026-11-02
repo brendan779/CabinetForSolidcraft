@@ -209,11 +209,41 @@
         "max_load_kg": 30
       },
       "source": {
-        "url": "Blum Catalogue and technical manual 2024/2025, p.512, web code DQEEHC",
+        "url": "Blum Catalogue and technical manual 2024/2025, p.512, web code DQEEHC; screw positions taken as the plain 560H's (p.460, height p.592): the catalogue gives no separate table",
         "document_date": "2024/2025",
         "retrieved": "2026-10-26",
         "verified": false
-      }
+      },
+      "drilling": [
+        {
+          "x": 19.0,
+          "y": 37.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 37.0,
+          "y": 37.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 69.0,
+          "y": 37.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 133.0,
+          "y": 37.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        }
+      ]
     },
     {
       "id": "blum.tandem.560h-tip-on.270",
@@ -227,11 +257,41 @@
         "max_load_kg": 30
       },
       "source": {
-        "url": "Blum Catalogue and technical manual 2024/2025, p.512, web code DQEEHC",
+        "url": "Blum Catalogue and technical manual 2024/2025, p.512, web code DQEEHC; screw positions taken as the plain 560H's (p.460, height p.592): the catalogue gives no separate table",
         "document_date": "2024/2025",
         "retrieved": "2026-10-26",
         "verified": false
-      }
+      },
+      "drilling": [
+        {
+          "x": 19.0,
+          "y": 37.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 37.0,
+          "y": 37.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 69.0,
+          "y": 37.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 133.0,
+          "y": 37.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        }
+      ]
     },
     {
       "id": "blum.tandem.560h-tip-on.300",
@@ -245,11 +305,48 @@
         "max_load_kg": 30
       },
       "source": {
-        "url": "Blum Catalogue and technical manual 2024/2025, p.512, web code DQEEHC",
+        "url": "Blum Catalogue and technical manual 2024/2025, p.512, web code DQEEHC; screw positions taken as the plain 560H's (p.460, height p.592): the catalogue gives no separate table",
         "document_date": "2024/2025",
         "retrieved": "2026-10-26",
         "verified": false
-      }
+      },
+      "drilling": [
+        {
+          "x": 19.0,
+          "y": 37.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 37.0,
+          "y": 37.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 69.0,
+          "y": 37.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 165.0,
+          "y": 37.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 261.0,
+          "y": 37.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        }
+      ]
     },
     {
       "id": "blum.tandem.560h-tip-on.320",
@@ -263,11 +360,48 @@
         "max_load_kg": 30
       },
       "source": {
-        "url": "Blum Catalogue and technical manual 2024/2025, p.512, web code DQEEHC",
+        "url": "Blum Catalogue and technical manual 2024/2025, p.512, web code DQEEHC; screw positions taken as the plain 560H's (p.460, height p.592): the catalogue gives no separate table",
         "document_date": "2024/2025",
         "retrieved": "2026-10-26",
         "verified": false
-      }
+      },
+      "drilling": [
+        {
+          "x": 19.0,
+          "y": 37.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 37.0,
+          "y": 37.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 69.0,
+          "y": 37.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 165.0,
+          "y": 37.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 261.0,
+          "y": 37.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        }
+      ]
     },
     {
       "id": "blum.tandem.560h-tip-on.350",
@@ -281,11 +415,48 @@
         "max_load_kg": 30
       },
       "source": {
-        "url": "Blum Catalogue and technical manual 2024/2025, p.512, web code DQEEHC",
+        "url": "Blum Catalogue and technical manual 2024/2025, p.512, web code DQEEHC; screw positions taken as the plain 560H's (p.460, height p.592): the catalogue gives no separate table",
         "document_date": "2024/2025",
         "retrieved": "2026-10-26",
         "verified": false
-      }
+      },
+      "drilling": [
+        {
+          "x": 19.0,
+          "y": 37.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 37.0,
+          "y": 37.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 69.0,
+          "y": 37.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 165.0,
+          "y": 37.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 261.0,
+          "y": 37.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        }
+      ]
     },
     {
       "id": "blum.tandem.560h-tip-on.380",
@@ -299,11 +470,48 @@
         "max_load_kg": 30
       },
       "source": {
-        "url": "Blum Catalogue and technical manual 2024/2025, p.512, web code DQEEHC",
+        "url": "Blum Catalogue and technical manual 2024/2025, p.512, web code DQEEHC; screw positions taken as the plain 560H's (p.460, height p.592): the catalogue gives no separate table",
         "document_date": "2024/2025",
         "retrieved": "2026-10-26",
         "verified": false
-      }
+      },
+      "drilling": [
+        {
+          "x": 19.0,
+          "y": 37.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 37.0,
+          "y": 37.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 69.0,
+          "y": 37.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 165.0,
+          "y": 37.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 261.0,
+          "y": 37.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        }
+      ]
     },
     {
       "id": "blum.tandem.560h-tip-on.400",
@@ -317,11 +525,48 @@
         "max_load_kg": 30
       },
       "source": {
-        "url": "Blum Catalogue and technical manual 2024/2025, p.512, web code DQEEHC",
+        "url": "Blum Catalogue and technical manual 2024/2025, p.512, web code DQEEHC; screw positions taken as the plain 560H's (p.460, height p.592): the catalogue gives no separate table",
         "document_date": "2024/2025",
         "retrieved": "2026-10-26",
         "verified": false
-      }
+      },
+      "drilling": [
+        {
+          "x": 19.0,
+          "y": 37.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 37.0,
+          "y": 37.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 69.0,
+          "y": 37.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 165.0,
+          "y": 37.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 229.0,
+          "y": 37.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        }
+      ]
     },
     {
       "id": "blum.tandem.560h-tip-on.420",
@@ -335,11 +580,48 @@
         "max_load_kg": 30
       },
       "source": {
-        "url": "Blum Catalogue and technical manual 2024/2025, p.512, web code DQEEHC",
+        "url": "Blum Catalogue and technical manual 2024/2025, p.512, web code DQEEHC; screw positions taken as the plain 560H's (p.460, height p.592): the catalogue gives no separate table",
         "document_date": "2024/2025",
         "retrieved": "2026-10-26",
         "verified": false
-      }
+      },
+      "drilling": [
+        {
+          "x": 19.0,
+          "y": 37.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 37.0,
+          "y": 37.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 69.0,
+          "y": 37.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 165.0,
+          "y": 37.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 229.0,
+          "y": 37.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        }
+      ]
     },
     {
       "id": "blum.tandem.560h-tip-on.450",
@@ -353,11 +635,48 @@
         "max_load_kg": 30
       },
       "source": {
-        "url": "Blum Catalogue and technical manual 2024/2025, p.512, web code DQEEHC",
+        "url": "Blum Catalogue and technical manual 2024/2025, p.512, web code DQEEHC; screw positions taken as the plain 560H's (p.460, height p.592): the catalogue gives no separate table",
         "document_date": "2024/2025",
         "retrieved": "2026-10-26",
         "verified": false
-      }
+      },
+      "drilling": [
+        {
+          "x": 19.0,
+          "y": 37.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 37.0,
+          "y": 37.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 69.0,
+          "y": 37.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 165.0,
+          "y": 37.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 261.0,
+          "y": 37.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        }
+      ]
     },
     {
       "id": "blum.tandem.560h-tip-on.480",
@@ -371,11 +690,48 @@
         "max_load_kg": 30
       },
       "source": {
-        "url": "Blum Catalogue and technical manual 2024/2025, p.512, web code DQEEHC",
+        "url": "Blum Catalogue and technical manual 2024/2025, p.512, web code DQEEHC; screw positions taken as the plain 560H's (p.460, height p.592): the catalogue gives no separate table",
         "document_date": "2024/2025",
         "retrieved": "2026-10-26",
         "verified": false
-      }
+      },
+      "drilling": [
+        {
+          "x": 19.0,
+          "y": 37.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 37.0,
+          "y": 37.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 69.0,
+          "y": 37.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 165.0,
+          "y": 37.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 261.0,
+          "y": 37.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        }
+      ]
     },
     {
       "id": "blum.tandem.560h-tip-on.500",
@@ -389,11 +745,55 @@
         "max_load_kg": 30
       },
       "source": {
-        "url": "Blum Catalogue and technical manual 2024/2025, p.512, web code DQEEHC",
+        "url": "Blum Catalogue and technical manual 2024/2025, p.512, web code DQEEHC; screw positions taken as the plain 560H's (p.460, height p.592): the catalogue gives no separate table",
         "document_date": "2024/2025",
         "retrieved": "2026-10-26",
         "verified": false
-      }
+      },
+      "drilling": [
+        {
+          "x": 19.0,
+          "y": 37.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 37.0,
+          "y": 37.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 69.0,
+          "y": 37.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 243.0,
+          "y": 37.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 261.0,
+          "y": 37.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 284.0,
+          "y": 37.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        }
+      ]
     },
     {
       "id": "blum.tandem.560h-tip-on.520",
@@ -407,11 +807,55 @@
         "max_load_kg": 30
       },
       "source": {
-        "url": "Blum Catalogue and technical manual 2024/2025, p.512, web code DQEEHC",
+        "url": "Blum Catalogue and technical manual 2024/2025, p.512, web code DQEEHC; screw positions taken as the plain 560H's (p.460, height p.592): the catalogue gives no separate table",
         "document_date": "2024/2025",
         "retrieved": "2026-10-26",
         "verified": false
-      }
+      },
+      "drilling": [
+        {
+          "x": 19.0,
+          "y": 37.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 37.0,
+          "y": 37.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 69.0,
+          "y": 37.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 243.0,
+          "y": 37.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 261.0,
+          "y": 37.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 284.0,
+          "y": 37.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        }
+      ]
     },
     {
       "id": "blum.tandem.560h-tip-on.550",
@@ -425,11 +869,55 @@
         "max_load_kg": 30
       },
       "source": {
-        "url": "Blum Catalogue and technical manual 2024/2025, p.512, web code DQEEHC",
+        "url": "Blum Catalogue and technical manual 2024/2025, p.512, web code DQEEHC; screw positions taken as the plain 560H's (p.460, height p.592): the catalogue gives no separate table",
         "document_date": "2024/2025",
         "retrieved": "2026-10-26",
         "verified": false
-      }
+      },
+      "drilling": [
+        {
+          "x": 19.0,
+          "y": 37.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 37.0,
+          "y": 37.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 69.0,
+          "y": 37.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 243.0,
+          "y": 37.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 261.0,
+          "y": 37.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 284.0,
+          "y": 37.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        }
+      ]
     },
     {
       "id": "blum.tandem.560h-tip-on.600",
@@ -443,11 +931,55 @@
         "max_load_kg": 30
       },
       "source": {
-        "url": "Blum Catalogue and technical manual 2024/2025, p.512, web code DQEEHC",
+        "url": "Blum Catalogue and technical manual 2024/2025, p.512, web code DQEEHC; screw positions taken as the plain 560H's (p.460, height p.592): the catalogue gives no separate table",
         "document_date": "2024/2025",
         "retrieved": "2026-10-26",
         "verified": false
-      }
+      },
+      "drilling": [
+        {
+          "x": 19.0,
+          "y": 37.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 37.0,
+          "y": 37.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 69.0,
+          "y": 37.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 243.0,
+          "y": 37.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 261.0,
+          "y": 37.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 325.0,
+          "y": 37.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        }
+      ]
     },
     {
       "id": "blum.tandem.tip-on-sync",
