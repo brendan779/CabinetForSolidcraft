@@ -315,6 +315,20 @@ From the owner trying a drawer cabinet and a hinged-door base end to end.
 | SEC-9 | in test | M | Drawer frame (the owner's installed sharknose drawers): one board over the carcass's front, behind the fronts, with an opening for each drawer and open section, so rails close the gaps and come down behind the fronts past a sharknose's bevel (25 by default, adjustable). The carcass moves back behind the board and loses its thickness (16 or 18) from its depth, so the fronts, the back and the cabinet's depth stay put; left off with a warning where a cabinet has hinged or lifting fronts, or inset fronts. To settle with the owner: doors beside framed drawers. Runners stand proud of the sides by the board's thickness: the owner accepted this, not yet checked against Blum | a framed bank builds in SolidCraft with its openings cut, and the drawers run through them |
 | SEC-10 | in test | M | Sharknose doors: choose the bevelled edge (usual, top, bottom or the opening side, whose finger gap comes off the door), with a rail only behind that edge, inside the opening, so hinges and carcass don't change. Drawer frames also on half overlay (as full) and inset (separate rails behind the fronts). Blum's models stand behind inset fronts' back face. The carcass's own edges show in the finger gap in the carcass colour, on purpose: the owner makes the carcass decorative for these jobs. Still to settle: drawers in a cabinet with doors have no rail yet | a door's bevel on each edge shows no inside, and no frame is missing on any overlay |
 
+## P3 — Rendering (owner 2026-11-02: post 1.0)
+
+The owner's idea: photo-real boards, edge tape and a render button with a choice of scenes. Candidate renderer: [Metal PathTracer](https://github.com/dariopagliaricci/Metal-PathTracer-arm64) (MIT, Apple Silicon, glTF with normal maps, headless, denoiser; young, about 45 stars). Read about only so far, not built or run. Run it as a separate program behind a glTF export, not inside the app, so a crash can't lose a job and Blender Cycles could replace it.
+
+| ID | Status | Size | Task | Done when |
+|---|---|---|---|---|
+| RENDER-1 | later, first step | S | Spike: export one cabinet to glTF and render it headless with Metal PathTracer on the owner's M4. Note build effort, speed and quality, and compare Cycles if it disappoints | a keep-or-replace decision, with a sample image |
+| RENDER-2 | 👤 later, needs the owner | M | Ask Polytec, Laminex and EGGER what decor images exist and what their licences allow: the repo and releases are public, so images may not be redistributable. All 2,311 catalog boards have only a preview colour today | a written answer per supplier on source, resolution and use |
+| RENDER-3 | later, after 1 and 2 | L | Materials: colour map per decor, plus one normal and roughness set per finish (Woodmatt, Natural, Ravine...), about 20 boards the owner uses first. Aim for 0.25 mm a pixel at full sheet size (about 9,600 × 4,800), downloaded when a board is first used, not shipped in the app | those boards render with true scale, grain direction and surface |
+| RENDER-4 | later, after 3 | M | The same maps in the live viewport (RealityKit normal and roughness), so designing looks better whichever renderer is kept | the viewport shows a chosen board's surface and it moves with the light |
+| RENDER-5 | later, after 1 | M | Edges in the render export only, so the viewport stays fast: panels with a small radius, tape as its own material at its catalog thickness, a fine joint line. Microscopic detail only if a close-up still needs it | a close-up shows edges catching the light and the tape reading as tape |
+| RENDER-6 | later, after 1 | M | Materials for hardware models (handles, hinges, runners, legs), which are bare meshes, and glowing Loox5 strips in renders only: strips stay unmodelled in the CAD | a render shows metal as metal, and lit strips |
+| RENDER-7 | later, after 3 to 6 | L | Render button: pick a scene (daylight, evening with the lights on, close-up) and get an image in the app, without blocking design work. Fuller rooms wait on L and U rooms, angled walls, doors and windows | a job renders in each scene from the app and the image can be saved |
+
 ## P3 — SolidCraft plugin
 
 | id | status | size | task |
@@ -325,6 +339,7 @@ From the owner trying a drawer cabinet and a hinged-door base end to end.
 
 ## Log
 
+- 2026-11-02 — Owner's post-1.0 idea logged as RENDER-1 to RENDER-7. Nothing built.
 - 2026-11-02 — BLUM-7c: AVENTOS mechanism holes for HK top, HK-S, HK-XS and HF, bracket pilots for the stay lifts. Read from drawings, so `verified: false`; HK top's 36 and HK-S's 74 are taken from the top panel's underside, our reading.
 - 2026-11-02 — BLUM-7d: HK-XS's cups and plates along the top. Shoe shelves run to 8 for a 2400 high cabinet; the room warning now counts the gap between parallel shelves, not the slope.
 - 2026-11-02 — SEC-2c: sloped shoe shelves. A part can now stand at an angle (`PartList.tilts`): its bounds and operations stay the flat board, for the cut list and sheets, and the view and SolidCraft turn it into place. 5 or 15 degrees, of the front board, each with a toe lip on its low edge, screwed through the panels where the slope lands.
