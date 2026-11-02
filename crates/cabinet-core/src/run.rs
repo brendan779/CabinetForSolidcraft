@@ -3972,4 +3972,63 @@ mod tests {
         assert_eq!(blocks[1].bounds.max().x, filler.max().x);
         assert!(blocks.iter().all(|b| !b.bounds.overlaps(&filler)));
     }
+
+    /// The owner's pictures: on a wall cabinet, which stands back on the wall, hinges on framed
+    /// doors and HS and HL mechanisms stood a floor cabinet's depth in front of it.
+    #[test]
+    fn hardware_stays_with_a_wall_cabinet_standing_back_on_the_wall() {
+        use crate::model::{DoorStyle, FrontLayout, LiftKind};
+        let lift = |kind, height| {
+            let mut c = Cabinet::new("U1", CabinetKind::Wall);
+            c.height = height;
+            c.fronts = FrontLayout::Lift {
+                kind,
+                handle_weight: 0.4,
+            };
+            c
+        };
+        let mut shaker = Cabinet::new("U1", CabinetKind::Wall);
+        shaker.width = 800.0;
+        shaker.fronts = FrontLayout::DoorPair;
+        shaker.standard.door_style = DoorStyle::Shaker;
+        let cases = [
+            shaker,
+            lift(LiftKind::StayLift, 450.0),
+            lift(LiftKind::UpAndOver, 720.0),
+            lift(LiftKind::LiftUp, 450.0),
+            lift(LiftKind::SmallStayLift, 300.0),
+            lift(LiftKind::HingedStayLift, 450.0),
+        ];
+        for c in cases {
+            let run = line_up(vec![
+                cab("B1", CabinetKind::Base),
+                RunItem::Cabinet(Box::new(c)),
+            ]);
+            let lists = build_run(&run).unwrap();
+            let side = lists[1].part("U1.LeftSide").unwrap().bounds;
+            assert!(side.min.y > 100.0, "it stands back: {}", side.min.y);
+            for p in crate::cad::cad_placements(&lists[1]) {
+                let m = crate::cad::transform(
+                    &p,
+                    p.side == crate::cad::Side::Left,
+                    crate::cad::BLUM_FRONT_PLANE,
+                );
+                let at = crate::cad::apply(&m, Vec3::default());
+                assert!(
+                    at.y > side.min.y - 60.0 && at.y < side.max().y + 60.0,
+                    "{} at y {} against {}..{}",
+                    p.name,
+                    at.y,
+                    side.min.y,
+                    side.max().y
+                );
+                assert!(
+                    at.x > side.min.x - 60.0 && at.x < side.min.x + 860.0,
+                    "{} at x {}",
+                    p.name,
+                    at.x
+                );
+            }
+        }
+    }
 }

@@ -126,7 +126,7 @@ struct CabinetDoc: Identifiable, Hashable, Codable {
 
     /// Hung above the floor line, not standing on it.
     var isUpper: Bool {
-        kind == "gap" ? gapIsUpper : ["wall", "corner_wall", "rangehood"].contains(kind)
+        kind == "gap" ? gapIsUpper : ["wall", "corner_wall", "rangehood", "floating_shelf"].contains(kind)
     }
 
     /// Gap: among the wall cabinets, or among the floor cabinets.

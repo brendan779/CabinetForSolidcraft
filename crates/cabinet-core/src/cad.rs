@@ -184,6 +184,12 @@ fn light_profile(
         .collect()
 }
 
+/// A hinge or plate listed against a lift's front, with no place of its own to draw it.
+fn lift_row(h: &crate::part::HardwarePlacement) -> bool {
+    (h.item.starts_with("blum.clip-top") || h.item.starts_with("blum.mounting-plate"))
+        && h.part.contains(PartRole::LiftFront.code())
+}
+
 /// The part Blum models a lift set by, for the sets it only models as parts: a look at the
 /// mechanism, whichever strength was chosen, as they share one shape.
 fn lift_model_article<'a>(item: &'a str, article: &'a str) -> &'a str {
@@ -290,12 +296,23 @@ pub fn cad_placements(list: &PartList) -> Vec<CadPlacement> {
         return out;
     };
     // Blum's models measure from the back of the front: inset, that stands inside the carcass.
+    // A framed front's members and a lift's front count too, and with none at all it's the
+    // cabinet's own front: a wall cabinet stands well back of the floor cabinets' line.
     let inset = list
         .parts
         .iter()
-        .filter(|p| matches!(p.role, PartRole::Door | PartRole::DrawerFront))
+        .filter(|p| {
+            matches!(
+                p.role,
+                PartRole::Door
+                    | PartRole::DrawerFront
+                    | PartRole::LiftFront
+                    | PartRole::FrameStile
+                    | PartRole::FrameRail
+            )
+        })
         .map(|p| p.bounds.max().y)
-        .fold(0.0, f64::max);
+        .fold(left.bounds.min.y, f64::max);
     let inner = |side: Side| match side {
         Side::Left => left.bounds.max().x,
         Side::Right => right.bounds.min.x,
@@ -509,7 +526,7 @@ pub fn cad_placements(list: &PartList) -> Vec<CadPlacement> {
                     };
                     (hole.y + hole_z, hole.z - hole_y)
                 } else if let Some((below, from)) = read {
-                    (from, panel.bounds.max().z - below)
+                    (panel.bounds.min.y + from, panel.bounds.max().z - below)
                 } else {
                     continue;
                 };
@@ -602,6 +619,8 @@ pub fn cad_placements(list: &PartList) -> Vec<CadPlacement> {
                 }
                 out.push(plate);
             }
+        } else if lift_row(h) {
+            // A lift's hinges and plates are listed against the front, not placed yet.
         } else if h.item.starts_with("blum.clip-top") {
             let n = next("Hinge");
             out.push(place(
