@@ -3404,6 +3404,17 @@ expression: list
       "quantity": 1
     },
     {
+      "item": "hafele.axilo.plinth-clip.screw",
+      "description": "AXILO plinth clip 637.38.054, for screw fixing to the back of the plinth, white plastic",
+      "at": {
+        "x": 50.0,
+        "y": 68.0,
+        "z": 75.0
+      },
+      "part": "C01.Plinth",
+      "quantity": 1
+    },
+    {
       "item": "hafele.axilo.set.150.screw-on",
       "description": "Häfele AXILO 78 leg, 150 mm, screw-on (637.76.408)",
       "at": {
@@ -3423,6 +3434,17 @@ expression: list
         "z": 0.0
       },
       "part": "C01.Bottom",
+      "quantity": 1
+    },
+    {
+      "item": "hafele.axilo.plinth-clip.screw",
+      "description": "AXILO plinth clip 637.38.054, for screw fixing to the back of the plinth, white plastic",
+      "at": {
+        "x": 550.0,
+        "y": 68.0,
+        "z": 75.0
+      },
+      "part": "C01.Plinth",
       "quantity": 1
     },
     {

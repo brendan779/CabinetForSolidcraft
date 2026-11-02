@@ -90,7 +90,7 @@ struct ScopeSwitch: View {
     }
 }
 
-/// Where a wall cabinet hangs: how high, and any empty wall before it in the upper line.
+/// How high a wall cabinet hangs.
 struct HangSection: View {
     @Environment(ProjectModel.self) private var project
     @AppStorage(LengthUnit.key) private var unit: LengthUnit = .millimetres
@@ -107,9 +107,6 @@ struct HangSection: View {
                     Button(unit.format(z, suffix: false)) { update { $0.hangHeight = z } }
                         .buttonStyle(ChipStyle(selected: abs(cab.hangHeight - z) < 0.5))
                 }
-            }
-            NumberField(title: "Gap before it", value: cab.gapBefore) { v in
-                update { $0.gapBefore = v }
             }
         }
     }
@@ -227,6 +224,8 @@ struct InspectorView: View {
             tab.holds($0.field) && optionApplies(cabinetJson: cab.json, field: $0.field)
                 // A job-wide choice, but only wall cabinets hang.
                 && ($0.field != "wall_hanging" || cab.kind.contains("wall"))
+                // Nothing that hangs stands on a base.
+                && (!["toe_kick", "leg_fixing"].contains($0.field) || !cab.isUpper)
         }
         ForEach(groups, id: \.field) { group in
             VisualPicker(group: group, selected: project.option(group.field, of: cab),
@@ -399,7 +398,23 @@ struct PieceSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            if cab.kind == "walls" {
+            if cab.kind == "gap" {
+                SectionTitle("Gap")
+                HStack(spacing: 6) {
+                    ForEach([true, false], id: \.self) { upper in
+                        Button(upper ? "Wall cabinets" : "Floor cabinets") {
+                            withAnimation(.snappy) { var c = cab; c.gapIsUpper = upper; project.selected = c }
+                        }
+                        .buttonStyle(ChipStyle(selected: cab.gapIsUpper == upper))
+                    }
+                }
+                chips("Width", value: cab.width, presets: [150, 300, 450, 600, 900, 1200]) { c, v in c.width = v }
+                wallField("Exact width", cab.width) { $0.width = $1 }
+                Text("Empty space between cabinets in that line, for a window, a rangehood or an appliance. It builds nothing and is not on the cut list. Move it in the sidebar. A benchtop runs on over a gap among the floor cabinets.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            } else if cab.kind == "walls" {
                 SectionTitle("Walls at the run's ends")
                 HStack(spacing: 8) {
                     ForEach(WallPlan.choices, id: \.title) { choice in
@@ -632,7 +647,7 @@ struct PieceSection: View {
                     }
                 }
             }
-            if !["benchtop", "floating_shelf", "cornice", "light_rail", "walls"].contains(cab.kind) {
+            if !["benchtop", "floating_shelf", "cornice", "light_rail", "walls", "gap"].contains(cab.kind) {
                 chips("Scribe", value: cab.scribe, presets: [0, 10, 20, 30, 40]) { c, v in c.scribe = v }
                 Text("The scribe is extra board, cut off on site to follow the wall. It is not part of the run's length.")
                     .font(.caption)

@@ -5315,14 +5315,34 @@ impl<'a> Builder<'a> {
                 vec![50.0, w - 50.0]
             };
             let bottom = self.name(PartRole::Bottom, None);
+            let plinth = self.name(PartRole::Plinth, None);
+            let clip = crate::hardware::item("hafele.axilo.plinth-clip.screw").ok();
+            if let Some(from) = clip.and_then(|c| c.param("from_height").ok())
+                && kick < from
+            {
+                self.list.warnings.push(format!(
+                    "the plinth clip is for a plinth from {from:.0} mm, not {kick:.0} mm"
+                ));
+            }
             for x in xs {
-                // The front ones clip to the plinth.
-                for y in [sb - forward + ft + 50.0, cab.depth - 50.0] {
+                let front_leg = sb - forward + ft + 50.0;
+                for y in [front_leg, cab.depth - 50.0] {
                     self.list.hardware.push(HardwarePlacement {
                         item: item.clone(),
                         description: description.clone(),
                         at: Vec3::new(x, y, 0.0),
                         part: bottom.clone(),
+                        quantity: 1,
+                    });
+                }
+                // The plinth clips to the front legs, screwed to its back where nothing shows, and
+                // pulls off for access to them.
+                if let Some(c) = clip {
+                    self.list.hardware.push(HardwarePlacement {
+                        item: c.id.clone(),
+                        description: format!("{} {}, {}", c.family, c.article, c.variant),
+                        at: Vec3::new(x, sb - forward + ft, kick / 2.0),
+                        part: plinth.clone(),
                         quantity: 1,
                     });
                 }
@@ -7635,6 +7655,33 @@ mod tests {
             "{:?}",
             list.warnings
         );
+    }
+
+    #[test]
+    fn a_plinth_on_legs_clips_to_each_front_leg_from_behind() {
+        let cab = Cabinet::new("B01", CabinetKind::Base);
+        let list = build_cabinet(&cab).unwrap();
+        let clips: Vec<_> = list
+            .hardware
+            .iter()
+            .filter(|h| h.item == "hafele.axilo.plinth-clip.screw")
+            .collect();
+        let legs = list
+            .hardware
+            .iter()
+            .filter(|h| h.item.starts_with("hafele.axilo.set."))
+            .count();
+        assert_eq!(clips.len(), legs / 2);
+        let plinth = list.part("B01.Plinth").unwrap().bounds;
+        assert!(clips.iter().all(|c| c.part == "B01.Plinth"));
+        // On the plinth's back face, where it does not show.
+        assert!(clips.iter().all(|c| c.at.y == plinth.max().y));
+    }
+
+    #[test]
+    fn a_job_saved_with_a_plinth_box_opens_on_legs_and_plinth() {
+        let kick: crate::model::ToeKick = serde_json::from_str(r#""plinth_box""#).unwrap();
+        assert_eq!(kick, crate::model::ToeKick::LegsAndPlinth);
     }
 
     #[test]

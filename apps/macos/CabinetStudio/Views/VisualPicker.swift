@@ -435,8 +435,6 @@ private struct Pen {
         case "legs_and_plinth":
             for x in [x0 + 14, x1 - 10] { board(x, floor - kick, 4, kick, hot: true) }
             board(x0 + set, floor - kick + 1, 3, kick - 1, hot: true)
-        case "plinth_box":
-            board(x0 + set, floor - kick, x1 - x0 - set, kick, hot: true)
         case "integrated_notch":
             let notch = r(x0, floor - kick, set, kick)
             ctx.fill(Path(notch), with: .color(Theme.panel))

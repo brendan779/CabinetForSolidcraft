@@ -29,7 +29,7 @@ struct SidebarView: View {
                             }
                         }
                         Divider()
-                        ForEach(["filler", "end_panel", "benchtop", "floating_shelf", "cornice", "light_rail"], id: \.self) { type in
+                        ForEach(["gap", "filler", "end_panel", "benchtop", "floating_shelf", "cornice", "light_rail"], id: \.self) { type in
                             Button {
                                 project.addPiece(type)
                             } label: {
@@ -94,6 +94,7 @@ struct CabinetRow: View {
         case "benchtop": "\(unit.format(cab.topThickness)) thick, \(unit.format(cab.frontOverhang, suffix: false)) overhang"
         case "floating_shelf": "\(unit.format(cab.width)) × \(unit.format(cab.shelfDepth, suffix: false))"
         case "cornice", "light_rail": "\(unit.format(cab.mouldingHeight)) high\(cab.returns ? ", returned" : "")"
+        case "gap": "\(unit.format(cab.width)), \(cab.gapIsUpper ? "wall cabinets" : "floor cabinets")"
         case "walls":
             switch (cab.wallLeft, cab.wallRight) {
             case (true, true): cab.wallLength > 0 ? "\(unit.format(cab.wallLength)) between" : "Both ends"
@@ -112,6 +113,12 @@ struct CabinetGlyph: View {
 
     var body: some View {
         Canvas { ctx, size in
+            if doc.kind == "gap" {
+                let r = CGRect(x: size.width * 0.15, y: 0, width: size.width * 0.7, height: size.height)
+                ctx.stroke(Path(roundedRect: r, cornerRadius: 1.5), with: .color(.primary.opacity(0.6)),
+                           style: StrokeStyle(lineWidth: 1, dash: [3, 2]))
+                return
+            }
             if doc.kind == "walls" {
                 WallPlan.draw(ctx, size, left: doc.wallLeft, right: doc.wallRight)
                 return

@@ -204,9 +204,9 @@ pub struct JobItems {
 fn parse_item(json: &str) -> Result<RunItem, CoreError> {
     let v: serde_json::Value = serde_json::from_str(json).map_err(invalid)?;
     match v.get("type").and_then(|t| t.as_str()) {
-        Some("filler" | "end_panel" | "benchtop" | "floating_shelf" | "moulding" | "walls") => {
-            serde_json::from_value(v).map_err(invalid)
-        }
+        Some(
+            "filler" | "end_panel" | "benchtop" | "floating_shelf" | "moulding" | "walls" | "gap",
+        ) => serde_json::from_value(v).map_err(invalid),
         _ => Ok(RunItem::Cabinet(Box::new(
             serde_json::from_value(v).map_err(invalid)?,
         ))),
@@ -223,6 +223,7 @@ fn item_id(item: &RunItem) -> &str {
         RunItem::FloatingShelf(f) => &f.id,
         RunItem::Moulding(m) => &m.id,
         RunItem::Walls(w) => &w.id,
+        RunItem::Gap(g) => &g.id,
     }
 }
 

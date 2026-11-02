@@ -326,11 +326,6 @@ pub fn option_groups() -> Vec<OptionGroup> {
                     "Adjustable legs with a clip-on plinth",
                 ),
                 (
-                    "plinth_box",
-                    "Plinth box",
-                    "The carcass sits on a separate plinth",
-                ),
-                (
                     "integrated_notch",
                     "Notched sides",
                     "Sides run to the floor with a toe-kick notch",

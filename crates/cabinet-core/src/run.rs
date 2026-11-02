@@ -32,6 +32,28 @@ pub enum RunItem {
     Moulding(Moulding),
     /// The room around a straight run: return walls at its ends. It takes no run length.
     Walls(Walls),
+    /// Empty space in a line: takes length and builds nothing.
+    Gap(Gap),
+}
+
+/// Space between cabinets in one line of the run, for a window, a rangehood's clearance or an
+/// appliance: a cabinet with no geometry.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct Gap {
+    pub id: String,
+    pub width: f64,
+    #[serde(default)]
+    pub line: GapLine,
+}
+
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum GapLine {
+    /// Among the wall cabinets.
+    #[default]
+    Upper,
+    /// Among the floor cabinets. The benchtop runs on over it, as over a dishwasher.
+    Floor,
 }
 
 /// The room around a straight run: the walls as measured, which stay put whatever the cabinets
@@ -568,7 +590,12 @@ fn yes() -> bool {
 pub fn build_run(run: &Run) -> Result<Vec<PartList>> {
     let cabinets = cabinets(run);
     // Walls with nothing against them yet are a fine start to a job.
-    if cabinets.is_empty() && run.items.iter().all(|i| matches!(i, RunItem::Walls(_))) {
+    if cabinets.is_empty()
+        && run
+            .items
+            .iter()
+            .all(|i| matches!(i, RunItem::Walls(_) | RunItem::Gap(_)))
+    {
         return Ok(run
             .items
             .iter()
@@ -601,6 +628,10 @@ pub fn build_run(run: &Run) -> Result<Vec<PartList>> {
                 cabinet: m.id.clone(),
                 ..PartList::default()
             }),
+            RunItem::Gap(g) => out.push(PartList {
+                cabinet: g.id.clone(),
+                ..PartList::default()
+            }),
             RunItem::Walls(w) => out.push(PartList {
                 cabinet: w.id.clone(),
                 warnings: wall_warnings(w, run),
@@ -617,6 +648,7 @@ pub fn build_run(run: &Run) -> Result<Vec<PartList>> {
                 .map(|(j, it)| match it {
                     RunItem::Cabinet(c) => takes_benchtop(c),
                     RunItem::Filler(_) | RunItem::EndPanel(_) => takes_benchtop(neighbour(j)),
+                    RunItem::Gap(g) => g.line == GapLine::Floor,
                     RunItem::Benchtop(_)
                     | RunItem::FloatingShelf(_)
                     | RunItem::Moulding(_)
@@ -876,6 +908,7 @@ fn item_id(i: &RunItem) -> &str {
         RunItem::FloatingShelf(f) => &f.id,
         RunItem::Moulding(m) => &m.id,
         RunItem::Walls(w) => &w.id,
+        RunItem::Gap(g) => &g.id,
     }
 }
 
@@ -921,6 +954,10 @@ fn line_of(run: &Run, i: usize) -> Line {
             }
         }
         RunItem::FloatingShelf(_) => Line::Upper,
+        RunItem::Gap(g) => match g.line {
+            GapLine::Upper => Line::Upper,
+            GapLine::Floor => Line::Floor,
+        },
         RunItem::Benchtop(_) | RunItem::Moulding(_) | RunItem::Walls(_) => Line::Neither,
     }
 }
@@ -930,7 +967,6 @@ fn against_left(run: &Run, i: usize) -> bool {
     let line = line_of(run, i);
     walls(run).is_some_and(|w| w.left)
         && line != Line::Neither
-        && !matches!(&run.items[i], RunItem::Cabinet(c) if c.gap_before > 0.0)
         && (0..i).all(|j| !line_of(run, j).shares(line))
 }
 
@@ -961,6 +997,7 @@ fn item_width(run: &Run, i: usize) -> f64 {
         RunItem::Filler(f) => f.width,
         RunItem::EndPanel(_) => nearest(&cabinets(run), i).standard.front_thickness,
         RunItem::FloatingShelf(f) => f.width,
+        RunItem::Gap(g) => g.width,
         RunItem::Benchtop(_) | RunItem::Moulding(_) | RunItem::Walls(_) => 0.0,
     }
 }
@@ -983,7 +1020,7 @@ fn lay(run: &Run, start: f64, stop: usize) -> Vec<Laid> {
             Line::Upper => upper,
             Line::Both => floor.max(upper),
         };
-        let (gap, board_left, board_right) = match &run.items[i] {
+        let (board_left, board_right) = match &run.items[i] {
             RunItem::Cabinet(c) => {
                 let t = c.standard.front_thickness;
                 let takes = !matches!(c.kind, CabinetKind::CornerBase | CabinetKind::CornerWall);
@@ -993,15 +1030,11 @@ fn lay(run: &Run, start: f64, stop: usize) -> Vec<Laid> {
                     && c.exposed.right
                     && !c.cladding.right
                     && !against_right(run, i);
-                (
-                    c.gap_before,
-                    if left { t } else { 0.0 },
-                    if right { t } else { 0.0 },
-                )
+                (if left { t } else { 0.0 }, if right { t } else { 0.0 })
             }
-            _ => (0.0, 0.0, 0.0),
+            _ => (0.0, 0.0),
         };
-        let left = from + gap + board_left;
+        let left = from + board_left;
         let end = left + item_width(run, i) + board_right;
         match line {
             Line::Floor => floor = end,
@@ -3060,16 +3093,136 @@ mod tests {
         assert_eq!(origin_of(&run, 3).x, base + tall);
     }
 
+    fn gap(id: &str, width: f64, line: GapLine) -> RunItem {
+        RunItem::Gap(Gap {
+            id: id.into(),
+            width,
+            line,
+        })
+    }
+
     #[test]
-    fn a_gap_before_a_wall_cabinet_moves_it_along_its_line_only() {
-        let mut upper = Cabinet::new("W1", CabinetKind::Wall);
-        upper.gap_before = 900.0;
+    fn a_gap_spaces_out_the_cabinets_in_its_own_line_only() {
+        let upper = Cabinet::new("W1", CabinetKind::Wall).width;
         let run = line_up(vec![
-            RunItem::Cabinet(Box::new(upper)),
+            cab("W1", CabinetKind::Wall),
+            gap("G1", 900.0, GapLine::Upper),
+            cab("W2", CabinetKind::Wall),
             cab("B1", CabinetKind::Base),
+            cab("B2", CabinetKind::Base),
         ]);
-        assert_eq!(origin_of(&run, 0).x, 900.0);
-        assert_eq!(origin_of(&run, 1).x, 0.0);
+        assert_eq!(origin_of(&run, 2).x, upper + 900.0);
+        let base = Cabinet::new("B1", CabinetKind::Base).width;
+        assert_eq!(origin_of(&run, 4).x, base);
+    }
+
+    #[test]
+    fn a_gap_builds_nothing() {
+        let run = line_up(vec![
+            cab("W1", CabinetKind::Wall),
+            gap("G1", 900.0, GapLine::Upper),
+        ]);
+        let lists = build_run(&run).unwrap();
+        assert_eq!(lists[1].cabinet, "G1");
+        assert!(lists[1].parts.is_empty() && lists[1].operations.is_empty());
+    }
+
+    #[test]
+    fn a_gap_first_in_a_line_moves_a_wall_cabinet_off_the_return_wall() {
+        let mut upper = Cabinet::new("U1", CabinetKind::Wall);
+        upper.exposed.left = true;
+        let run = walled_run(
+            true,
+            false,
+            0.0,
+            vec![
+                gap("G1", 300.0, GapLine::Upper),
+                RunItem::Cabinet(Box::new(upper)),
+            ],
+        );
+        let lists = build_run(&run).unwrap();
+        // Off the wall, its side is seen and takes its board again.
+        assert!(lists[1].parts.iter().any(|p| p.name == "U1.SeenEndLeft"));
+        assert!(!wall_notes(&run).iter().any(|n| n.contains("U1")));
+    }
+
+    #[test]
+    fn a_benchtop_runs_on_over_a_floor_gap() {
+        let top: Benchtop = serde_json::from_str(r#"{"id":"T1"}"#).unwrap();
+        let base = Cabinet::new("B1", CabinetKind::Base).width;
+        let run = line_up(vec![
+            cab("B1", CabinetKind::Base),
+            gap("G1", 600.0, GapLine::Floor),
+            cab("B2", CabinetKind::Base),
+            RunItem::Benchtop(top),
+        ]);
+        let lists = build_run(&run).unwrap();
+        let tops: Vec<&Part> = lists
+            .iter()
+            .flat_map(|l| &l.parts)
+            .filter(|p| p.role == PartRole::Benchtop)
+            .collect();
+        assert_eq!(tops.len(), 1);
+        assert_eq!(tops[0].bounds.size.x, 2.0 * base + 600.0);
+    }
+
+    #[test]
+    fn a_cornice_stops_either_side_of_a_gap_with_returns() {
+        let cornice = RunItem::Moulding(Moulding {
+            id: "C1".into(),
+            kind: MouldingKind::Cornice,
+            height: 60.0,
+            board: String::new(),
+            returns: true,
+        });
+        let run = line_up(vec![
+            cab("W1", CabinetKind::Wall),
+            gap("G1", 900.0, GapLine::Upper),
+            cab("W2", CabinetKind::Wall),
+            cornice,
+        ]);
+        let lists = build_run(&run).unwrap();
+        let parts: Vec<&str> = lists
+            .iter()
+            .flat_map(|l| &l.parts)
+            .filter(|p| p.role == PartRole::Cornice)
+            .map(|p| p.name.as_str())
+            .collect();
+        assert_eq!(
+            parts.iter().filter(|n| !n.contains("Return")).count(),
+            2,
+            "{parts:?}"
+        );
+        assert_eq!(
+            parts.iter().filter(|n| n.contains("Return")).count(),
+            4,
+            "{parts:?}"
+        );
+    }
+
+    #[test]
+    fn a_gap_counts_towards_the_run_against_a_wall() {
+        let width = Cabinet::new("U1", CabinetKind::Wall).width;
+        let notes = wall_notes(&walled_run(
+            true,
+            true,
+            width + 899.0,
+            vec![
+                gap("G1", 900.0, GapLine::Upper),
+                cab("U1", CabinetKind::Wall),
+            ],
+        ));
+        assert!(notes.iter().any(|n| n.contains("too long")), "{notes:?}");
+    }
+
+    #[test]
+    fn a_gap_survives_a_trip_through_a_job_file() {
+        let g = gap("G1", 450.0, GapLine::Floor);
+        let text = serde_json::to_string(&g).unwrap();
+        assert_eq!(serde_json::from_str::<RunItem>(&text).unwrap(), g);
+        let bare: RunItem =
+            serde_json::from_str(r#"{"type":"gap","id":"G1","width":300}"#).unwrap();
+        assert!(matches!(bare, RunItem::Gap(g) if g.line == GapLine::Upper));
     }
 
     #[test]

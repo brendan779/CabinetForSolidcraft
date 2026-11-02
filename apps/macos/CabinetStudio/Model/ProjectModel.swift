@@ -50,6 +50,7 @@ struct CabinetDoc: Identifiable, Hashable, Codable {
         case "benchtop": #"{"id":"\#(id)","type":"benchtop","thickness":33,"front_overhang":20,"side_overhang":0}"#
         case "floating_shelf": #"{"id":"\#(id)","type":"floating_shelf","width":900,"depth":250,"thickness":40,"height":1500}"#
         case "cornice", "light_rail": #"{"id":"\#(id)","type":"moulding","kind":"\#(type)","height":60,"returns":true}"#
+        case "gap": #"{"id":"\#(id)","type":"gap","width":600,"line":"upper"}"#
         case "walls": #"{"id":"\#(id)","type":"walls","left":true,"right":false,"length":3600,"height":2400,"left_run":600,"right_run":600,"offset":0}"#
         default: #"{"id":"\#(id)","scribe":20,"to_floor":true,"type":"end_panel"}"#
         }
@@ -87,7 +88,15 @@ struct CabinetDoc: Identifiable, Hashable, Codable {
     }
 
     /// Hung above the floor line, not standing on it.
-    var isUpper: Bool { ["wall", "corner_wall", "rangehood"].contains(kind) }
+    var isUpper: Bool {
+        kind == "gap" ? gapIsUpper : ["wall", "corner_wall", "rangehood"].contains(kind)
+    }
+
+    /// Gap: among the wall cabinets, or among the floor cabinets.
+    var gapIsUpper: Bool {
+        get { (object["line"] as? String ?? "upper") == "upper" }
+        set { update { $0["line"] = newValue ? "upper" : "floor" } }
+    }
 
     /// A wall cabinet's height off the floor, 0 for the job's usual one.
     var hangHeight: Double {
@@ -101,11 +110,6 @@ struct CabinetDoc: Identifiable, Hashable, Codable {
         }
     }
 
-    /// Empty wall before this cabinet in its line of the run.
-    var gapBefore: Double {
-        get { number("gap_before") }
-        set { setNumber("gap_before", newValue) }
-    }
 
     /// Benchtop: thickness and overhangs.
     var topThickness: Double {
@@ -739,11 +743,16 @@ final class ProjectModel {
         case "cornice": "CO"
         case "light_rail": "LR"
         case "walls": "WL"
+        case "gap": "G"
         default: "E"
         }
         var n = 1
         while cabinets.contains(where: { $0.id == String(format: "%@%02d", prefix, n) }) { n += 1 }
-        let piece = CabinetDoc.piece(type, id: String(format: "%@%02d", prefix, n))
+        var piece = CabinetDoc.piece(type, id: String(format: "%@%02d", prefix, n))
+        // A gap belongs in the line of what it follows.
+        if type == "gap", let s = selected, ["base", "drawer_bank", "sink", "blind_corner", "corner_base"].contains(s.kind) {
+            piece.gapIsUpper = false
+        }
         // A benchtop or moulding takes no place in the run: it goes last.
         let at = ["benchtop", "cornice", "light_rail", "walls"].contains(type)
             ? cabinets.count
@@ -1386,6 +1395,7 @@ extension CabinetDoc {
         case "cornice": "Cornice"
         case "light_rail": "Light rail"
         case "walls": "Return walls"
+        case "gap": "Gap"
         default: kind.capitalized
         }
     }
@@ -1410,6 +1420,7 @@ extension CabinetDoc {
         case "cornice": "rectangle.topthird.inset.filled"
         case "light_rail": "rectangle.bottomthird.inset.filled"
         case "walls": "square.leftthird.inset.filled"
+        case "gap": "square.dashed"
         default: "cube"
         }
     }

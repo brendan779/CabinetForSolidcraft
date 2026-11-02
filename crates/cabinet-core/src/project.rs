@@ -141,10 +141,10 @@ mod tests {
     #[test]
     fn changing_the_project_standard_reaches_cabinets_that_do_not_override_it() {
         let mut p = Project::new("Kitchen", ConstructionStandard::default(), &kitchen()).unwrap();
-        p.standard.toe_kick = ToeKick::PlinthBox;
+        p.standard.toe_kick = ToeKick::IntegratedNotch;
         p.standard.back = BackStyle::Structural;
         let cabs = p.resolved().unwrap();
-        assert_eq!(cabs[0].standard.toe_kick, ToeKick::PlinthBox);
+        assert_eq!(cabs[0].standard.toe_kick, ToeKick::IntegratedNotch);
         assert_eq!(cabs[0].standard.back, BackStyle::Structural);
         assert_eq!(
             cabs[1].standard.back,

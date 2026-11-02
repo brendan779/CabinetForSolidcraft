@@ -420,6 +420,40 @@
         "retrieved": "2026-10-27",
         "verified": false
       }
+    },
+    {
+      "id": "hafele.axilo.plinth-clip.screw",
+      "brand": "Häfele",
+      "article": "637.38.054",
+      "family": "AXILO plinth clip",
+      "variant": "for screw fixing to the back of the plinth, white plastic",
+      "kind": "other",
+      "parameters": {
+        "from_height": 80
+      },
+      "source": {
+        "url": "Häfele The Complete 1, Furniture Fittings, TCH-FF 2018 HAA, updated 08.21, p. 8.178A",
+        "document_date": "08.21",
+        "retrieved": "2026-11-02",
+        "verified": false
+      }
+    },
+    {
+      "id": "hafele.axilo.plinth-clip.groove",
+      "brand": "Häfele",
+      "article": "637.38.063",
+      "family": "AXILO plinth clip",
+      "variant": "for groove mounting or press fitting, white plastic",
+      "kind": "other",
+      "parameters": {
+        "from_height": 80
+      },
+      "source": {
+        "url": "Häfele The Complete 1, Furniture Fittings, TCH-FF 2018 HAA, updated 08.21, p. 8.178A",
+        "document_date": "08.21",
+        "retrieved": "2026-11-02",
+        "verified": false
+      }
     }
   ]
 }

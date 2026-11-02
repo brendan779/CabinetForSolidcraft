@@ -34,7 +34,7 @@ struct JobCommands: Commands {
             }
             .disabled(project == nil)
             Menu("New Run Item") {
-                ForEach(["filler", "end_panel", "benchtop", "floating_shelf", "cornice", "light_rail"], id: \.self) { type in
+                ForEach(["gap", "filler", "end_panel", "benchtop", "floating_shelf", "cornice", "light_rail"], id: \.self) { type in
                     Button(CabinetDoc.kindTitle(type)) { project?.addPiece(type) }
                 }
                 Divider()

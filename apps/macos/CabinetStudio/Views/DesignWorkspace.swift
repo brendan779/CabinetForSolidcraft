@@ -231,7 +231,7 @@ struct RunStrip: View {
     }
 
     private func length(_ line: [CabinetDoc]) -> Double {
-        line.reduce(0) { $0 + width($1) + $1.gapBefore }
+        line.reduce(0) { $0 + width($1) }
     }
 
     var body: some View {
@@ -254,9 +254,6 @@ struct RunStrip: View {
     private func row(_ line: [CabinetDoc], scale: CGFloat) -> some View {
         HStack(spacing: 2) {
             ForEach(line) { c in
-                if c.gapBefore > 0 {
-                    Color.clear.frame(width: CGFloat(c.gapBefore) * scale)
-                }
                 block(c, width: CGFloat(width(c)) * scale, scale: scale, line: line)
             }
             Spacer(minLength: 0)
@@ -269,7 +266,13 @@ struct RunStrip: View {
         return ZStack(alignment: .trailing) {
             RoundedRectangle(cornerRadius: 5)
                 .fill(selected ? Theme.selected : (c.isPiece ? Theme.strip : Theme.control))
-                .overlay(RoundedRectangle(cornerRadius: 5).strokeBorder(selected ? Theme.accent : Theme.border))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 5).strokeBorder(
+                        selected ? Theme.accent : Theme.border,
+                        // A gap is empty wall: dashed, so it does not read as a cabinet.
+                        style: StrokeStyle(lineWidth: 1, dash: c.kind == "gap" ? [4, 3] : [])
+                    )
+                )
                 .overlay {
                     if width > 46 {
                         VStack(spacing: 0) {
