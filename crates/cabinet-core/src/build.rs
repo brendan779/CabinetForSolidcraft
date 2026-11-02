@@ -975,7 +975,8 @@ impl<'a> Builder<'a> {
             side_depth
         };
 
-        let bottom_under = s.bottom_joint == BottomJoint::UnderSides && !notch;
+        let no_bottom = cab.niche_at_the_floor();
+        let bottom_under = s.bottom_joint == BottomJoint::UnderSides && !notch && !no_bottom;
         let top_over = s.top_joint == TopJoint::OverSides;
         let side_z0 = if notch {
             0.0
@@ -1014,14 +1015,16 @@ impl<'a> Builder<'a> {
         }
 
         let (bx0, bx1) = if bottom_under { (0.0, w) } else { (t, w - t) };
-        self.add(
-            PartRole::Bottom,
-            None,
-            aabb(bx0, 0.0, kick, bx1, horiz_depth, kick + t),
-            Axis::Z,
-            Axis::X,
-            EdgeBanding::front_only(),
-        );
+        if !no_bottom {
+            self.add(
+                PartRole::Bottom,
+                None,
+                aabb(bx0, 0.0, kick, bx1, horiz_depth, kick + t),
+                Axis::Z,
+                Axis::X,
+                EdgeBanding::front_only(),
+            );
+        }
 
         match s.top_joint {
             TopJoint::Rails => {
@@ -1072,13 +1075,15 @@ impl<'a> Builder<'a> {
                 );
             }
         }
-        self.opening_z = (kick + t, h - t);
+        // What stands on the bottom panel, or on the floor without one.
+        let floor = if no_bottom { 0.0 } else { kick + t };
+        self.opening_z = (floor, h - t);
 
         // Back panel.
         let groove = BACK_GROOVE_DEPTH.min(t / 2.0);
         match s.back {
             BackStyle::InsetGroove => {
-                let z0 = kick + t - groove;
+                let z0 = if no_bottom { 0.0 } else { kick + t - groove };
                 let z1 = if s.top_joint == TopJoint::Rails {
                     h
                 } else {
@@ -1110,10 +1115,12 @@ impl<'a> Builder<'a> {
                         side_z1,
                     ),
                 });
-                self.list.operations.push(Operation::Groove {
-                    part: bottom,
-                    bounds: aabb(t, back_y0, kick + t - groove, w - t, back_y0 + bt, kick + t),
-                });
+                if !no_bottom {
+                    self.list.operations.push(Operation::Groove {
+                        part: bottom,
+                        bounds: aabb(t, back_y0, kick + t - groove, w - t, back_y0 + bt, kick + t),
+                    });
+                }
                 if s.top_joint != TopJoint::Rails {
                     let top = self.name(PartRole::Top, None);
                     self.list.operations.push(Operation::Groove {
@@ -1136,7 +1143,7 @@ impl<'a> Builder<'a> {
                 self.add(
                     PartRole::Back,
                     None,
-                    aabb(t, d - t, kick + t, w - t, d, h - t),
+                    aabb(t, d - t, floor, w - t, d, h - t),
                     Axis::Y,
                     Axis::Z,
                     EdgeBanding::default(),
@@ -11477,7 +11484,7 @@ mod tests {
     }
 
     #[test]
-    fn a_niche_at_the_bottom_stands_on_the_floor_with_no_plinth_or_legs() {
+    fn a_niche_at_the_bottom_stands_on_the_floor_with_no_plinth_legs_or_bottom() {
         let mut cab = Cabinet::new("T01", CabinetKind::Tall);
         cab.standard.toe_kick = ToeKick::LegsAndPlinth;
         cab.fronts = FrontLayout::Stack {
@@ -11504,7 +11511,70 @@ mod tests {
                     .any(|h| h.part.contains("Leg") || h.item.contains("leg"))
             );
             assert_eq!(list.part("T01.LeftSide").unwrap().bounds.min.z, 0.0);
+            assert!(list.by_role(PartRole::Bottom).next().is_none());
+            assert_eq!(list.part("T01.Back").unwrap().bounds.min.z, 0.0);
+            // Nothing is left machined into a panel that is not there.
+            assert!(
+                !list
+                    .operations
+                    .iter()
+                    .any(|o| format!("{o:?}").contains("T01.Bottom")),
+                "{:?}",
+                list.operations
+            );
         }
+    }
+
+    #[test]
+    fn a_niche_at_the_bottom_of_a_wall_cabinet_keeps_its_bottom() {
+        let mut cab = Cabinet::new("W01", CabinetKind::Wall);
+        cab.fronts = FrontLayout::Stack {
+            sections: vec![
+                StackSection {
+                    kind: SectionKind::Niche,
+                    height: 300.0,
+                },
+                StackSection {
+                    kind: SectionKind::Door {
+                        hinge_side: HingeSide::Left,
+                    },
+                    height: 0.0,
+                },
+            ],
+        };
+        assert!(
+            build_cabinet(&cab)
+                .unwrap()
+                .by_role(PartRole::Bottom)
+                .next()
+                .is_some()
+        );
+    }
+
+    #[test]
+    fn a_fridge_spaces_clear_height_runs_from_the_floor_to_the_shelf_over_it() {
+        let mut cab = Cabinet::new("T01", CabinetKind::Tall);
+        cab.fronts = FrontLayout::Stack {
+            sections: vec![
+                StackSection {
+                    kind: SectionKind::Niche,
+                    height: 1780.0,
+                },
+                StackSection {
+                    kind: SectionKind::Door {
+                        hinge_side: HingeSide::Left,
+                    },
+                    height: 0.0,
+                },
+            ],
+        };
+        let list = build_cabinet(&cab).unwrap();
+        let shelf = list.by_role(PartRole::Shelf).next().unwrap();
+        assert!(
+            (shelf.bounds.min.z - 1780.0).abs() < 1e-6,
+            "{:?}",
+            shelf.bounds
+        );
     }
 
     #[test]

@@ -479,7 +479,23 @@ fn the_new_cabinets_build_every_part_where_the_core_puts_it() {
     let legrabox = Cabinet::new("D02", CabinetKind::DrawerBank);
     let mut tandembox = Cabinet::new("D03", CabinetKind::DrawerBank);
     tandembox.standard.drawer_system = DrawerSystem::Tandembox;
+    let mut fridge = Cabinet::new("T03", CabinetKind::Tall);
+    fridge.fronts = FrontLayout::Stack {
+        sections: vec![
+            cabinet_core::model::StackSection {
+                kind: cabinet_core::model::SectionKind::Niche,
+                height: 0.0,
+            },
+            cabinet_core::model::StackSection {
+                kind: cabinet_core::model::SectionKind::Door {
+                    hinge_side: cabinet_core::model::HingeSide::Left,
+                },
+                height: 350.0,
+            },
+        ],
+    };
     for cab in [
+        fridge,
         corner,
         right,
         corner_wall,

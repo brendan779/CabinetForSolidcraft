@@ -472,9 +472,15 @@ impl Cabinet {
         self
     }
 
-    /// Every column's lowest section is a niche: a fridge rolls in from the floor, so the cabinet
-    /// stands on the floor with no plinth or legs.
+    /// Every column's lowest section is a niche, on a cabinet that stands on the floor: a fridge
+    /// rolls in, so there is no plinth, legs or bottom panel in its way.
     pub fn niche_at_the_floor(&self) -> bool {
+        if !matches!(
+            self.kind,
+            CabinetKind::Base | CabinetKind::Tall | CabinetKind::DrawerBank | CabinetKind::Wardrobe
+        ) {
+            return false;
+        }
         match &self.fronts {
             FrontLayout::Stack { sections } => sections
                 .first()
