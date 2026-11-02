@@ -23,7 +23,9 @@ enum LengthUnit: String, CaseIterable, Identifiable {
     func format(_ mm: Double, suffix: Bool = true) -> String {
         switch self {
         case .millimetres:
-            let s = mm.rounded() == mm ? String(Int(mm)) : String(format: "%.1f", mm)
+            // Round first: 100.96 is "101", not "101.0" beside its whole-numbered neighbours.
+            let tenths = (mm * 10).rounded() / 10
+            let s = tenths.rounded() == tenths ? String(Int(tenths)) : String(format: "%.1f", tenths)
             return suffix ? "\(s) mm" : s
         case .inches:
             let sixteenths = Int((mm / 25.4 * 16).rounded())
@@ -102,6 +104,7 @@ struct GeneralSettings: View {
             LabeledContent("SolidCraft port") {
                 HStack {
                     TextField("Port", value: $port, format: .number.grouping(.never))
+                        .labelsHidden()
                         .frame(width: 70)
                         .multilineTextAlignment(.trailing)
                     Stepper("Port", value: $port, in: 1024...65535).labelsHidden()
