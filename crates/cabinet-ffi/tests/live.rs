@@ -39,7 +39,14 @@ fn a_job_builds_in_solidcraft_and_renders_to_a_png() {
         items_json: items.clone(),
         placed: Vec::new(),
     };
-    let report = send_to_solidcraft(job(), "design".into(), port, String::new()).unwrap();
+    let report = send_to_solidcraft(
+        job(),
+        "design".into(),
+        port,
+        String::new(),
+        Default::default(),
+    )
+    .unwrap();
     assert_eq!(report.lines().count(), 3, "{report}");
     let path = std::env::temp_dir().join("cabinet-live-render.png");
     let _ = std::fs::remove_file(&path);
@@ -110,6 +117,7 @@ fn boxes_selected_in_solidcraft_become_cabinets_that_load_back() {
         "design".into(),
         port,
         String::new(),
+        Default::default(),
     )
     .unwrap();
     hide_bodies(

@@ -60,10 +60,10 @@ pub fn emit_cabinet_with(
         cmds.push(json!({
             "command": "solid.box",
             "params": {
-                "length": round(p.bounds.size.x),
-                "width": round(p.bounds.size.y),
-                "height": round(p.bounds.size.z),
-                "corner": arr(p.bounds.min),
+                "length": round(list.visible_bounds(p).size.x),
+                "width": round(list.visible_bounds(p).size.y),
+                "height": round(list.visible_bounds(p).size.z),
+                "corner": arr(list.visible_bounds(p).min),
                 "operation": "new",
                 "body_name": p.name,
                 "name": p.name,
@@ -318,6 +318,39 @@ pub fn replace_cabinet(
             "params": { "occurrence": format!("{}:1", list.cabinet), "space": "world", "matrix": m }
         }));
     }
+    cmds
+}
+
+/// The boards' own colours on a built cabinet, where the catalog has them: `colours` maps a board
+/// id to `#RRGGBB`. A framed door's panel with no board of its own takes its frame's.
+pub fn board_colours(
+    list: &PartList,
+    colours: &std::collections::BTreeMap<String, String>,
+) -> Vec<Value> {
+    let mut by_colour = std::collections::BTreeMap::<&str, Vec<&str>>::new();
+    let frame = list
+        .by_role(PartRole::FrameStile)
+        .next()
+        .map(|p| p.board.as_str());
+    for p in &list.parts {
+        let board = if p.board.is_empty() && p.role == PartRole::FramePanel {
+            frame.unwrap_or_default()
+        } else {
+            p.board.as_str()
+        };
+        if let Some(colour) = colours.get(board) {
+            by_colour.entry(colour).or_default().push(&p.name);
+        }
+    }
+    if by_colour.is_empty() {
+        return Vec::new();
+    }
+    let mut cmds =
+        vec![json!({ "command": "component.activate", "params": { "component": list.cabinet } })];
+    for (colour, bodies) in by_colour {
+        cmds.push(json!({ "command": "appearance.assign", "params": { "bodies": bodies, "color": colour } }));
+    }
+    cmds.push(json!({ "command": "component.activate", "params": { "component": "root" } }));
     cmds
 }
 
@@ -1506,5 +1539,29 @@ mod tests {
             .map(|c| c["params"]["occurrence"].as_str().unwrap())
             .collect();
         assert_eq!(moved, ["W01.LiftArm1:1", "W01.LiftArm1 2:1"]);
+    }
+
+    #[test]
+    fn a_built_cabinet_takes_its_boards_colours_with_a_panel_following_its_frame() {
+        let mut cab = cabinet_core::Cabinet::new("B01", cabinet_core::CabinetKind::Base);
+        cab.standard.door_style = cabinet_core::model::DoorStyle::Shaker;
+        cab.standard.front_board = "green".into();
+        let list = cabinet_core::build_cabinet(&cab).unwrap();
+        let colours = [("green".to_string(), "#00ff00".to_string())]
+            .into_iter()
+            .collect();
+        let cmds = board_colours(&list, &colours);
+        let bodies = cmds
+            .iter()
+            .find(|c| c["command"] == "appearance.assign")
+            .unwrap()["params"]["bodies"]
+            .as_array()
+            .unwrap();
+        assert!(
+            bodies
+                .iter()
+                .any(|b| b.as_str().unwrap().ends_with("Panel"))
+        );
+        assert!(bodies.iter().any(|b| b.as_str().unwrap().contains("Stile")));
     }
 }

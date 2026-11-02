@@ -371,7 +371,7 @@ pub fn cad_placements(list: &PartList) -> Vec<CadPlacement> {
         } else if h.item.starts_with("handle.") && h.item != "handle.edge-pull" {
             // Between its screw holes on the front's face, the bar along them, standing out of
             // the face the screws come through.
-            let holes: Vec<(Vec3, crate::part::Dir, f64)> = list
+            let holes: Vec<(Vec3, crate::part::Dir, String)> = list
                 .operations
                 .iter()
                 .filter_map(|o| match o {
@@ -382,22 +382,33 @@ pub fn cad_placements(list: &PartList) -> Vec<CadPlacement> {
                         depth,
                         purpose: crate::part::BorePurpose::HandleScrew,
                         ..
-                    } if *part == h.part => Some((*at, *direction, *depth)),
+                    } if crate::part::front_base(part) == crate::part::front_base(&h.part) => {
+                        Some((*at, *direction, part.clone()))
+                    }
                     _ => None,
                 })
                 .collect();
-            let (Some(&(first, dir, depth)), Some(&(last, ..))) = (holes.first(), holes.last())
+            let (Some((first, dir, hole_part)), Some((last, ..))) = (holes.first(), holes.last())
             else {
                 continue;
             };
             let n = next("Handle");
+            let (first, last, dir) = (*first, *last, *dir);
             let sign = dir.sign();
+            // On the face of the part the screws go through: a shaker panel's is set back.
+            let face = list.part(hole_part).map_or(first.get(dir.axis), |p| {
+                if sign > 0.0 {
+                    p.bounds.max().get(dir.axis)
+                } else {
+                    p.bounds.min.get(dir.axis)
+                }
+            });
             let mut origin = Vec3::new(
                 (first.x + last.x) / 2.0,
                 (first.y + last.y) / 2.0,
                 (first.z + last.z) / 2.0,
             );
-            origin = origin.with(dir.axis, first.get(dir.axis) + sign * depth);
+            origin = origin.with(dir.axis, face);
             let d = Vec3::new(last.x - first.x, last.y - first.y, last.z - first.z);
             let len = (d.x * d.x + d.y * d.y + d.z * d.z).sqrt();
             let x = if len > 1e-6 {
@@ -1068,6 +1079,8 @@ mod tests {
             (CabinetKind::DrawerBank, Opening::ServoDrive),
             (CabinetKind::DrawerBank, Opening::TipOn),
             (CabinetKind::Base, Opening::TipOn),
+            (CabinetKind::Base, Opening::Handles),
+            (CabinetKind::DrawerBank, Opening::Handles),
         ] {
             let names = |style| {
                 let mut cab = Cabinet::new("C1", kind);

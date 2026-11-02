@@ -186,6 +186,10 @@ struct DecorCard<Accessory: View>: View {
                     .fill(Color(nsColor: b.displayColour))
                     .overlay {
                         if b.grained { GrainPattern().clipShape(RoundedRectangle(cornerRadius: 10)) }
+                        if b.profileModule > 0 {
+                            ProfileSwatch(shape: b.profileShape, module: b.profileModule, groove: b.profileGroove)
+                                .clipShape(RoundedRectangle(cornerRadius: 10))
+                        }
                     }
                     .overlay(alignment: .topTrailing) {
                         HStack(spacing: 4) {
@@ -213,11 +217,12 @@ struct DecorCard<Accessory: View>: View {
             .buttonStyle(.plain)
             .accessibilityLabel("\(b.decor) \(b.finish), \(Int(b.thickness)) mm\(b.colourIsGuessed ? ", colour approximate" : "")")
             HStack {
-                Text(b.decor).font(.headline).lineLimit(1)
+                // A lining is known by its profile; a board by its decor.
+                Text(b.kind == "lining" ? b.finish : b.decor).font(.headline).lineLimit(1)
                 Spacer()
                 accessory(b)
             }
-            Text("\(b.brand) · \(b.finish)").font(.subheadline).foregroundStyle(.secondary).lineLimit(1)
+            Text(b.kind == "lining" ? "\(b.brand) · \(b.decor)" : "\(b.brand) · \(b.finish)").font(.subheadline).foregroundStyle(.secondary).lineLimit(1)
             HStack(spacing: 4) {
                 ForEach(group.boards, id: \.id) { t in
                     Button("\(Int(t.thickness))") { withAnimation(.snappy) { chosen = t.id } }
@@ -349,5 +354,41 @@ extension BoardsSection {
             }
             .frame(width: 640, height: 560)
         }
+    }
+}
+
+/// A lining's routed profile on its swatch, about 300 mm of it across, with the grooves upright
+/// as they stand on a wall.
+struct ProfileSwatch: View {
+    let shape: String
+    let module: Double
+    let groove: Double
+
+    var body: some View {
+        Canvas { ctx, size in
+            let k = size.width / 300
+            let pitch = CGFloat(module) * k
+            guard pitch > 1 else { return }
+            let band = max(CGFloat(groove) * k, 1)
+            var x: CGFloat = 0
+            while x < size.width {
+                switch shape {
+                case "scallop", "round":
+                    // Light at one edge of each module and dark at the other: a curved face.
+                    let steps = 12
+                    for s in 0..<steps {
+                        let f = CGFloat(s) / CGFloat(steps)
+                        let shade = shape == "round" ? 0.5 - 0.5 * cos(f * 2 * .pi) : f
+                        ctx.fill(Path(CGRect(x: x + f * pitch, y: 0, width: pitch / CGFloat(steps) + 0.5, height: size.height)),
+                                 with: .color(.black.opacity(0.28 * shade)))
+                    }
+                default:
+                    ctx.fill(Path(CGRect(x: x, y: 0, width: band, height: size.height)), with: .color(.black.opacity(0.38)))
+                    ctx.fill(Path(CGRect(x: x + band, y: 0, width: 1, height: size.height)), with: .color(.white.opacity(0.3)))
+                }
+                x += pitch
+            }
+        }
+        .accessibilityHidden(true)
     }
 }

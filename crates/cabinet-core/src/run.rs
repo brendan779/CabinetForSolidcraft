@@ -1440,8 +1440,23 @@ fn filler(f: &Filler, c: &Cabinet, at: Vec3, (first, last): (bool, bool)) -> Res
         Axis::Z,
         &c.standard.front_board,
     );
-    // Upright strips behind it, one at each edge, for its neighbours to screw through into.
+    // A board under it, back to the wall: the bottom panels stop either side, and without one the
+    // toe space opens up behind the filler.
     let t = c.standard.carcass_thickness;
+    let base = Aabb::new(
+        Vec3::new(at.x, y + ft, at.z + z0),
+        Vec3::new(f.width, (at.y + c.depth - y - ft).max(0.0), t),
+    );
+    list.parts.push(Part {
+        name: format!("{}.{}Base", f.id, PartRole::FillerBlock.code()),
+        role: PartRole::FillerBlock,
+        bounds: base,
+        thickness_axis: Axis::Z,
+        grain_axis: Some(Axis::Y),
+        board: c.standard.carcass_board.clone(),
+        edges: EdgeBanding::default(),
+    });
+    // Upright strips behind it, one at each edge, for its neighbours to screw through into.
     let xs = if f.width >= 2.0 * t {
         vec![at.x, at.x + f.width - t]
     } else if f.width >= t {
@@ -1463,8 +1478,8 @@ fn filler(f: &Filler, c: &Cabinet, at: Vec3, (first, last): (bool, bool)) -> Res
             name: format!("{}.{}{suffix}", f.id, PartRole::FillerBlock.code()),
             role: PartRole::FillerBlock,
             bounds: Aabb::new(
-                Vec3::new(x, y + ft, at.z + z0),
-                Vec3::new(t, FILLER_BLOCK_DEPTH, z1 - z0),
+                Vec3::new(x, y + ft, at.z + z0 + t),
+                Vec3::new(t, FILLER_BLOCK_DEPTH, z1 - z0 - t),
             ),
             thickness_axis: Axis::X,
             grain_axis: Some(Axis::Z),
@@ -1475,8 +1490,8 @@ fn filler(f: &Filler, c: &Cabinet, at: Vec3, (first, last): (bool, bool)) -> Res
     Ok(list)
 }
 
-/// The longest toe kick board. Our choice, the long sheet most decors come in: past it, a join.
-const LONGEST_KICK: f64 = 3600.0;
+/// The longest toe kick board. The owner's: not every board comes longer than 2700.
+const LONGEST_KICK: f64 = 2700.0;
 
 /// One toe kick board along each stretch of legged base cabinets, as a kitchen is really fitted,
 /// not one per cabinet: it passes fillers, and stops at anything that reaches the floor in its way.
@@ -3903,11 +3918,13 @@ mod tests {
         ))
         .unwrap();
         let k = kicks(&lists);
-        assert_eq!(k.len(), 2, "{k:?}");
+        assert!(k.len() >= 3, "{k:?}");
         assert_eq!(k[0].1, 0.0);
-        assert_eq!(k[1].2, 6300.0);
-        assert_eq!(k[0].2, k[1].1, "they meet");
-        assert!(k[0].2 - k[0].1 <= LONGEST_KICK);
+        assert_eq!(k.last().unwrap().2, 6300.0);
+        for pair in k.windows(2) {
+            assert_eq!(pair[0].2, pair[1].1, "they meet");
+        }
+        assert!(k.iter().all(|b| b.2 - b.1 <= LONGEST_KICK), "{k:?}");
         let legs: Vec<f64> = lists
             .iter()
             .flat_map(|l| &l.hardware)
@@ -3968,9 +3985,12 @@ mod tests {
         );
         assert!(!filler.overlaps(&end));
         let blocks: Vec<_> = lists[1].by_role(PartRole::FillerBlock).collect();
-        assert_eq!(blocks.len(), 2, "one for each neighbour");
-        assert_eq!(blocks[1].bounds.max().x, filler.max().x);
+        assert_eq!(blocks.len(), 3, "a base, and a strip for each neighbour");
         assert!(blocks.iter().all(|b| !b.bounds.overlaps(&filler)));
+        let base = lists[1].part("F1.FillerBlockBase").unwrap().bounds;
+        assert_eq!(base.min.z, filler.min.z, "it closes under the filler");
+        assert_eq!(base.size.x, 50.0);
+        assert!(base.max().y >= 500.0, "back to the wall");
     }
 
     /// The owner's pictures: on a wall cabinet, which stands back on the wall, hinges on framed

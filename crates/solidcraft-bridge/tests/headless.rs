@@ -456,7 +456,9 @@ fn the_new_cabinets_build_every_part_where_the_core_puts_it() {
         );
         let um = |v: f64| (v * 1000.0).round() as i64;
         for p in &list.parts {
-            let (lo, hi) = (p.bounds.min, p.bounds.max());
+            // A shaker rail is drawn between its stiles: its tenons are inside them.
+            let shown = list.visible_bounds(p);
+            let (lo, hi) = (shown.min, shown.max());
             let want = vec![um(lo.x), um(lo.y), um(lo.z), um(hi.x), um(hi.y), um(hi.z)];
             let got = &built
                 .iter()

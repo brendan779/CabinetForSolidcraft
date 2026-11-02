@@ -842,9 +842,9 @@ fn summary(list: PartList) -> BuildSummary {
                 x: p.bounds.min.x,
                 y: p.bounds.min.y,
                 z: p.bounds.min.z,
-                width: p.bounds.size.x,
-                depth: p.bounds.size.y,
-                height: p.bounds.size.z,
+                width: list.visible_bounds(p).size.x,
+                depth: list.visible_bounds(p).size.y,
+                height: list.visible_bounds(p).size.z,
                 is_front: p.role.is_front(),
                 hinged,
                 hinge_x,
@@ -939,7 +939,10 @@ fn summary(list: PartList) -> BuildSummary {
                 .to_string()
         })
         .unwrap_or_default();
+    // A framed front's holes may fall in different members: one handle per front.
+    let mut handled = std::collections::BTreeSet::new();
     for p in &list.parts {
+        let family = cabinet_core::part::front_base(&p.name);
         let holes: Vec<_> = list
             .operations
             .iter()
@@ -951,17 +954,29 @@ fn summary(list: PartList) -> BuildSummary {
                     depth,
                     purpose: BorePurpose::HandleScrew,
                     ..
-                } if *part == p.name => Some((*at, *direction, *depth)),
+                } if cabinet_core::part::front_base(part) == family => {
+                    Some((*at, *direction, part.clone()))
+                }
                 _ => None,
             })
             .collect();
-        let Some(&(first, dir, depth)) = holes.first() else {
+        let Some((first, dir, hole_part)) = holes.first() else {
             continue;
         };
+        if !handled.insert(family.to_string()) {
+            continue;
+        }
+        let (first, dir) = (*first, *dir);
         let last = holes.last().unwrap().0;
         let sign = if dir.positive { 1.0 } else { -1.0 };
         // The front face, and outwards from it.
-        let face = first.get(dir.axis) + sign * depth;
+        let face = list.part(hole_part).map_or(first.get(dir.axis), |q| {
+            if dir.positive {
+                q.bounds.max().get(dir.axis)
+            } else {
+                q.bounds.min.get(dir.axis)
+            }
+        });
         let (lo, hi) = (
             cabinet_core::geom::Vec3::new(
                 first.x.min(last.x),
@@ -1024,9 +1039,9 @@ fn summary(list: PartList) -> BuildSummary {
         let (hinged, hinge_x, hinge_y) = front
             .map(|b| (b.hinged.clone(), b.hinge_x, b.hinge_y))
             .unwrap_or_default();
-        let on_drawer = p.role == cabinet_core::part::PartRole::DrawerFront;
+        let on_drawer = family.contains(cabinet_core::part::PartRole::DrawerFront.code());
         panels.push(PanelBox {
-            name: format!("{}.Handle", p.name),
+            name: format!("{family}.Handle"),
             role: if on_drawer { "Drawer handle" } else { "Handle" }.into(),
             x: x.0,
             y: y.0,
@@ -2189,7 +2204,9 @@ pub fn send_to_solidcraft(
     detail: String,
     port: u16,
     vendor_dir: String,
+    board_colours: std::collections::HashMap<String, String>,
 ) -> Result<String, CoreError> {
+    let colours: std::collections::BTreeMap<String, String> = board_colours.into_iter().collect();
     let sc = |e: solidcraft_bridge::Error| CoreError::SolidCraft {
         message: e.to_string(),
     };
@@ -2230,6 +2247,11 @@ pub fn send_to_solidcraft(
         let real: Vec<String> = models.iter().map(|m| m.name.clone()).collect();
         let cmds = replace_cabinet(&list, detail, spec.as_ref(), existing.as_ref(), &real);
         let r = client.batch(&cmds).map_err(sc)?;
+        // The boards' own colours. One the engine refuses should not lose the build.
+        let painted = solidcraft_bridge::board_colours(&list, &colours);
+        if !painted.is_empty() {
+            let _ = client.batch(&painted);
+        }
         // Supplier models load files, which a batch refuses: one request each.
         for c in hardware_inserts(&list.cabinet, &models) {
             let command = c["command"].as_str().unwrap_or_default();

@@ -1,0 +1,295 @@
+{
+  "brand": "Polytec",
+  "notes": "Easycraft linings, from the availability guide pp. 28-31 (sizes as printed on its drawings: the name's number is not always the module). Contours and Ikara print only their cover width, so module is that and the groove and depth are our approximation of the drawing. V grooves' depth is ours too. Not verified.",
+  "profiles": [
+    {
+      "id": "polytec.easycraft.channel-25",
+      "brand": "Polytec",
+      "name": "Channel 25",
+      "shape": "batten",
+      "module": 37.5,
+      "thickness": 16,
+      "face": 27.5,
+      "groove": 10,
+      "groove_depth": 6,
+      "source": {
+        "url": "https://www.polytec.com.au/docs/technical/polytec-technical-availability-guide.pdf",
+        "document_date": "2026-10-23",
+        "retrieved": "2026-11-02",
+        "verified": false
+      }
+    },
+    {
+      "id": "polytec.easycraft.cove-38",
+      "brand": "Polytec",
+      "name": "Cove 38",
+      "shape": "scallop",
+      "module": 33.3,
+      "thickness": 16,
+      "face": 29.8,
+      "groove": 3.5,
+      "groove_depth": 6,
+      "source": {
+        "url": "https://www.polytec.com.au/docs/technical/polytec-technical-availability-guide.pdf",
+        "document_date": "2026-10-23",
+        "retrieved": "2026-11-02",
+        "verified": false
+      }
+    },
+    {
+      "id": "polytec.easycraft.convex-35",
+      "brand": "Polytec",
+      "name": "Convex 35",
+      "shape": "round",
+      "module": 37,
+      "thickness": 16,
+      "face": 35,
+      "groove": 2,
+      "groove_depth": 10,
+      "source": {
+        "url": "https://www.polytec.com.au/docs/technical/polytec-technical-availability-guide.pdf",
+        "document_date": "2026-10-23",
+        "retrieved": "2026-11-02",
+        "verified": false
+      }
+    },
+    {
+      "id": "polytec.easycraft.cove-50",
+      "brand": "Polytec",
+      "name": "Cove 50",
+      "shape": "scallop",
+      "module": 57,
+      "thickness": 16,
+      "face": 53,
+      "groove": 4,
+      "groove_depth": 8,
+      "source": {
+        "url": "https://www.polytec.com.au/docs/technical/polytec-technical-availability-guide.pdf",
+        "document_date": "2026-10-23",
+        "retrieved": "2026-11-02",
+        "verified": false
+      }
+    },
+    {
+      "id": "polytec.easycraft.easyvj-100",
+      "brand": "Polytec",
+      "name": "easyVJ 100",
+      "shape": "vj",
+      "module": 100,
+      "thickness": 9,
+      "face": 93,
+      "groove": 7,
+      "groove_depth": 3,
+      "source": {
+        "url": "https://www.polytec.com.au/docs/technical/polytec-technical-availability-guide.pdf",
+        "document_date": "2026-10-23",
+        "retrieved": "2026-11-02",
+        "verified": false
+      }
+    },
+    {
+      "id": "polytec.easycraft.easyvj-150",
+      "brand": "Polytec",
+      "name": "easyVJ 150",
+      "shape": "vj",
+      "module": 150,
+      "thickness": 9,
+      "face": 143,
+      "groove": 7,
+      "groove_depth": 3,
+      "source": {
+        "url": "https://www.polytec.com.au/docs/technical/polytec-technical-availability-guide.pdf",
+        "document_date": "2026-10-23",
+        "retrieved": "2026-11-02",
+        "verified": false
+      }
+    },
+    {
+      "id": "polytec.easycraft.easyregency-150",
+      "brand": "Polytec",
+      "name": "easyREGENCY 150",
+      "shape": "vj",
+      "module": 150,
+      "thickness": 9,
+      "face": 136,
+      "groove": 14,
+      "groove_depth": 3,
+      "source": {
+        "url": "https://www.polytec.com.au/docs/technical/polytec-technical-availability-guide.pdf",
+        "document_date": "2026-10-23",
+        "retrieved": "2026-11-02",
+        "verified": false
+      }
+    },
+    {
+      "id": "polytec.easycraft.channel-woodmatt",
+      "brand": "Polytec",
+      "name": "Channel Woodmatt",
+      "shape": "batten",
+      "module": 105,
+      "thickness": 15,
+      "face": 95,
+      "groove": 10,
+      "groove_depth": 5,
+      "source": {
+        "url": "https://www.polytec.com.au/docs/technical/polytec-technical-availability-guide.pdf",
+        "document_date": "2026-10-23",
+        "retrieved": "2026-11-02",
+        "verified": false
+      }
+    },
+    {
+      "id": "polytec.easycraft.convex-woodmatt",
+      "brand": "Polytec",
+      "name": "Convex Woodmatt",
+      "shape": "round",
+      "module": 118,
+      "thickness": 15,
+      "face": 116,
+      "groove": 2,
+      "groove_depth": 5,
+      "source": {
+        "url": "https://www.polytec.com.au/docs/technical/polytec-technical-availability-guide.pdf",
+        "document_date": "2026-10-23",
+        "retrieved": "2026-11-02",
+        "verified": false
+      }
+    },
+    {
+      "id": "polytec.easycraft.cirque",
+      "brand": "Polytec",
+      "name": "Cirque",
+      "shape": "scallop",
+      "module": 78,
+      "thickness": 21,
+      "face": 76,
+      "groove": 2,
+      "groove_depth": 4,
+      "source": {
+        "url": "https://www.polytec.com.au/docs/technical/polytec-technical-availability-guide.pdf",
+        "document_date": "2026-10-23",
+        "retrieved": "2026-11-02",
+        "verified": false
+      }
+    },
+    {
+      "id": "polytec.easycraft.riverine",
+      "brand": "Polytec",
+      "name": "Riverine",
+      "shape": "scallop",
+      "module": 78,
+      "thickness": 21,
+      "face": 76,
+      "groove": 2,
+      "groove_depth": 4,
+      "source": {
+        "url": "https://www.polytec.com.au/docs/technical/polytec-technical-availability-guide.pdf",
+        "document_date": "2026-10-23",
+        "retrieved": "2026-11-02",
+        "verified": false
+      }
+    },
+    {
+      "id": "polytec.easycraft.strata",
+      "brand": "Polytec",
+      "name": "Strata",
+      "shape": "batten",
+      "module": 78,
+      "thickness": 21,
+      "face": 72,
+      "groove": 6,
+      "groove_depth": 4,
+      "source": {
+        "url": "https://www.polytec.com.au/docs/technical/polytec-technical-availability-guide.pdf",
+        "document_date": "2026-10-23",
+        "retrieved": "2026-11-02",
+        "verified": false
+      }
+    },
+    {
+      "id": "polytec.easycraft.shade",
+      "brand": "Polytec",
+      "name": "Shade",
+      "shape": "scallop",
+      "module": 78,
+      "thickness": 21,
+      "face": 76,
+      "groove": 2,
+      "groove_depth": 4,
+      "source": {
+        "url": "https://www.polytec.com.au/docs/technical/polytec-technical-availability-guide.pdf",
+        "document_date": "2026-10-23",
+        "retrieved": "2026-11-02",
+        "verified": false
+      }
+    },
+    {
+      "id": "polytec.easycraft.groove",
+      "brand": "Polytec",
+      "name": "Groove",
+      "shape": "batten",
+      "module": 78,
+      "thickness": 21,
+      "face": 72,
+      "groove": 6,
+      "groove_depth": 4,
+      "source": {
+        "url": "https://www.polytec.com.au/docs/technical/polytec-technical-availability-guide.pdf",
+        "document_date": "2026-10-23",
+        "retrieved": "2026-11-02",
+        "verified": false
+      }
+    },
+    {
+      "id": "polytec.easycraft.isthmus",
+      "brand": "Polytec",
+      "name": "Isthmus",
+      "shape": "batten",
+      "module": 78,
+      "thickness": 21,
+      "face": 72,
+      "groove": 6,
+      "groove_depth": 4,
+      "source": {
+        "url": "https://www.polytec.com.au/docs/technical/polytec-technical-availability-guide.pdf",
+        "document_date": "2026-10-23",
+        "retrieved": "2026-11-02",
+        "verified": false
+      }
+    },
+    {
+      "id": "polytec.easycraft.pinnacle",
+      "brand": "Polytec",
+      "name": "Pinnacle",
+      "shape": "batten",
+      "module": 78,
+      "thickness": 21,
+      "face": 72,
+      "groove": 6,
+      "groove_depth": 4,
+      "source": {
+        "url": "https://www.polytec.com.au/docs/technical/polytec-technical-availability-guide.pdf",
+        "document_date": "2026-10-23",
+        "retrieved": "2026-11-02",
+        "verified": false
+      }
+    },
+    {
+      "id": "polytec.easycraft.wave",
+      "brand": "Polytec",
+      "name": "Wave",
+      "shape": "scallop",
+      "module": 78,
+      "thickness": 21,
+      "face": 76,
+      "groove": 2,
+      "groove_depth": 4,
+      "source": {
+        "url": "https://www.polytec.com.au/docs/technical/polytec-technical-availability-guide.pdf",
+        "document_date": "2026-10-23",
+        "retrieved": "2026-11-02",
+        "verified": false
+      }
+    }
+  ]
+}

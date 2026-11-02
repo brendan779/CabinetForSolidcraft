@@ -50,6 +50,12 @@ extension Color {
 }
 
 extension NSColor {
+    /// `#RRGGBB`, for SolidCraft.
+    var hexString: String {
+        let c = usingColorSpace(.sRGB) ?? self
+        return String(format: "#%02X%02X%02X", Int(c.redComponent * 255), Int(c.greenComponent * 255), Int(c.blueComponent * 255))
+    }
+
     convenience init(hex: UInt32, alpha: CGFloat = 1) {
         self.init(
             srgbRed: CGFloat((hex >> 16) & 0xFF) / 255,

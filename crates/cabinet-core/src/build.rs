@@ -11447,4 +11447,26 @@ mod tests {
         cab.standard.shaker_panel_board = "panel".into();
         assert_eq!(panel(&cab), "panel");
     }
+
+    #[test]
+    fn a_shaker_rail_shows_only_between_its_stiles() {
+        let mut cab = Cabinet::new("B01", CabinetKind::Base);
+        cab.standard.door_style = DoorStyle::Shaker;
+        let list = build_cabinet(&cab).unwrap();
+        for rail in list.by_role(PartRole::FrameRail) {
+            let seen = list.visible_bounds(rail);
+            assert!(
+                seen.size.x < rail.bounds.size.x,
+                "the tenons are in the grooves"
+            );
+            for stile in list.by_role(PartRole::FrameStile) {
+                assert!(
+                    !seen.overlaps(&stile.bounds),
+                    "{} in {}",
+                    rail.name,
+                    stile.name
+                );
+            }
+        }
+    }
 }

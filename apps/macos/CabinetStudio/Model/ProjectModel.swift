@@ -1137,6 +1137,8 @@ final class ProjectModel {
     }
 
     func sendToSolidCraft() async {
+        // The colours the viewport shows, so SolidCraft looks the same.
+        let colours = Dictionary(uniqueKeysWithValues: boards.map { ($0.id, $0.displayColour.hexString) })
         isSending = true
         lastError = nil
         status = "Building \(cabinets.count) cabinets in SolidCraft…"
@@ -1145,7 +1147,7 @@ final class ProjectModel {
         let port = self.port
         let vendor = Preferences.vendorCADDir?.path ?? ""
         let result = await Task.detached { () -> Result<String, Error> in
-            Result { try sendToSolidcraft(job: job, detail: level, port: port, vendorDir: vendor) }
+            Result { try sendToSolidcraft(job: job, detail: level, port: port, vendorDir: vendor, boardColours: colours) }
         }.value
         isSending = false
         switch result {

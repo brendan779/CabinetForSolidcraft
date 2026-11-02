@@ -422,8 +422,8 @@ pub struct FrontBox {
     pub bounds: Aabb,
 }
 
-/// `B01.DrawerFront2FrameStile1` → `B01.DrawerFront2`: a framed front's name, from a member's.
-fn front_base(name: &str) -> &str {
+/// `B01.DrawerFront2Stile1` → `B01.DrawerFront2`: a framed front's name, from a member's.
+pub fn front_base(name: &str) -> &str {
     for code in [
         PartRole::FrameStile,
         PartRole::FrameRail,
@@ -492,6 +492,39 @@ impl Tilt {
 impl PartList {
     pub fn part(&self, name: &str) -> Option<&Part> {
         self.parts.iter().find(|p| p.name == name)
+    }
+
+    /// What shows of a part. A framed door's rail runs into its stiles' grooves, but it is modelled
+    /// full thickness: drawn whole it would stand in the stiles' faces.
+    pub fn visible_bounds(&self, part: &Part) -> Aabb {
+        if part.role != PartRole::FrameRail {
+            return part.bounds;
+        }
+        let base = front_base(&part.name);
+        let along = if part.thickness_axis == Axis::X {
+            Axis::Y
+        } else {
+            Axis::X
+        };
+        let (lo, hi) = (part.bounds.min.get(along), part.bounds.max().get(along));
+        let mut low = lo;
+        let mut high = hi;
+        for stile in self
+            .parts
+            .iter()
+            .filter(|p| p.role == PartRole::FrameStile && front_base(&p.name) == base)
+        {
+            let (s0, s1) = (stile.bounds.min.get(along), stile.bounds.max().get(along));
+            if s1 <= (lo + hi) / 2.0 {
+                low = low.max(s1);
+            } else if s0 >= (lo + hi) / 2.0 {
+                high = high.min(s0);
+            }
+        }
+        Aabb::new(
+            part.bounds.min.with(along, low),
+            part.bounds.size.with(along, high - low),
+        )
     }
 
     /// The whole front a hardware row belongs to, whichever part names it: a framed front is
