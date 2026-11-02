@@ -136,6 +136,22 @@ pub fn emit_cabinet_with(
         }
     }
     if detail != Detail::Design {
+        // Before the grooves: the rail's own groove runs on through its tenons.
+        for p in &list.parts {
+            for t in list.rail_tenons(p) {
+                cmds.push(json!({
+                    "command": "solid.box",
+                    "params": {
+                        "length": round(t.size.x),
+                        "width": round(t.size.y),
+                        "height": round(t.size.z),
+                        "corner": arr(t.min),
+                        "operation": "join",
+                        "targets": [p.name],
+                    }
+                }));
+            }
+        }
         for op in &list.operations {
             match op {
                 Operation::Groove { part, bounds } | Operation::Mortise { part, bounds, .. } => {

@@ -527,6 +527,36 @@ impl PartList {
         )
     }
 
+    /// A shaker rail's stub tenons: the ends of its length that lie in the stiles, as thick as
+    /// the groove. They fill the stiles' grooves, which run out through the stile ends.
+    pub fn rail_tenons(&self, part: &Part) -> Vec<Aabb> {
+        if part.role != PartRole::FrameRail {
+            return Vec::new();
+        }
+        let Some(groove) = self.operations.iter().find_map(|o| match o {
+            Operation::Groove { part: p, bounds } if *p == part.name => Some(*bounds),
+            _ => None,
+        }) else {
+            return Vec::new();
+        };
+        let ta = part.thickness_axis;
+        let along = if ta == Axis::X { Axis::Y } else { Axis::X };
+        let (full, shown) = (part.bounds, self.visible_bounds(part));
+        [
+            (full.min.get(along), shown.min.get(along)),
+            (shown.max().get(along), full.max().get(along)),
+        ]
+        .into_iter()
+        .filter(|(lo, hi)| hi - lo > 1e-6)
+        .map(|(lo, hi)| {
+            Aabb::new(
+                full.min.with(along, lo).with(ta, groove.min.get(ta)),
+                full.size.with(along, hi - lo).with(ta, groove.size.get(ta)),
+            )
+        })
+        .collect()
+    }
+
     /// The whole front a hardware row belongs to, whichever part names it: a framed front is
     /// made of members, and its hardware names the member it fixes to.
     pub fn front_box(&self, name: &str) -> Option<FrontBox> {

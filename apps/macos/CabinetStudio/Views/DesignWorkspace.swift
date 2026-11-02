@@ -1168,6 +1168,10 @@ final class ViewportScene {
         if selected || hovered {
             m.emissiveColor = .init(color: NSColor(hex: 0xE8845E))
             m.emissiveIntensity = hovered ? 0.6 : 0.12
+        } else {
+            // Said outright: a new material that leaves this unset keeps the entity's old glow.
+            m.emissiveColor = .init(color: .black)
+            m.emissiveIntensity = 0
         }
         return m
     }
@@ -1195,6 +1199,9 @@ final class ViewportScene {
         if selected || hovered {
             m.emissiveColor = .init(color: NSColor(hex: 0xE8845E))
             m.emissiveIntensity = hovered ? 0.6 : 0.06
+        } else {
+            m.emissiveColor = .init(color: .black)
+            m.emissiveIntensity = 0
         }
         return m
     }

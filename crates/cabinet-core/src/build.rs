@@ -11449,6 +11449,45 @@ mod tests {
     }
 
     #[test]
+    fn a_shaker_rails_tenons_fill_the_stile_grooves_to_the_stile_ends() {
+        for style in [DoorStyle::Shaker, DoorStyle::GlassFrame] {
+            let mut cab = Cabinet::new("B01", CabinetKind::Base);
+            cab.standard.door_style = style;
+            let list = build_cabinet(&cab).unwrap();
+            let grooves: Vec<Aabb> = list
+                .operations
+                .iter()
+                .filter_map(|o| match o {
+                    Operation::Groove { part, bounds } if part.contains("Stile") => Some(*bounds),
+                    _ => None,
+                })
+                .collect();
+            for rail in list.by_role(PartRole::FrameRail) {
+                let tenons = list.rail_tenons(rail);
+                assert_eq!(tenons.len(), 2, "{}", rail.name);
+                for t in tenons {
+                    let g = grooves
+                        .iter()
+                        .find(|g| g.overlaps(&t))
+                        .expect("in a stile's groove");
+                    for (a, b) in [(t.min.x, g.min.x), (t.size.x, g.size.x)]
+                        .into_iter()
+                        .chain([(t.min.y, g.min.y), (t.size.y, g.size.y)])
+                    {
+                        assert!((a - b).abs() < 1e-6, "{}: {t:?} vs {g:?}", rail.name);
+                    }
+                    // Flush with the front's end, so nothing of the groove shows there.
+                    assert!(
+                        (t.min.z - g.min.z).abs() < 1e-6 || (t.max().z - g.max().z).abs() < 1e-6,
+                        "{}",
+                        rail.name
+                    );
+                }
+            }
+        }
+    }
+
+    #[test]
     fn a_shaker_rail_shows_only_between_its_stiles() {
         let mut cab = Cabinet::new("B01", CabinetKind::Base);
         cab.standard.door_style = DoorStyle::Shaker;

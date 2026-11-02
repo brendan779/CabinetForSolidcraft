@@ -196,6 +196,53 @@ fn cabinets_built_into_a_design_read_back_as_they_were_specified() {
     assert_eq!(read, cabs);
 }
 
+/// A shaker rail's tenons are real: they fill the stiles' grooves, which run out through the stile
+/// ends, so no square hole shows at a joint.
+#[test]
+fn a_shaker_rail_keeps_its_tenons_in_the_stile_grooves() {
+    let Some(cli) = cli() else {
+        eprintln!("SOLIDCRAFT_CLI not set: skipped");
+        return;
+    };
+    use cabinet_core::part::Operation;
+    let mut cab = Cabinet::new("B01", CabinetKind::Base);
+    cab.standard.door_style = cabinet_core::model::DoorStyle::Shaker;
+    let mut list = build_cabinet(&cab).unwrap();
+    // Only the grooves, so the volumes are exact.
+    list.operations
+        .retain(|o| matches!(o, Operation::Groove { .. }));
+    let r = run(
+        &cli,
+        "tenons",
+        &emit_cabinet(&list, Detail::Manufacturing, None),
+        &["eval"],
+    );
+    for name in ["B01.Door1Rail1", "B01.Door1Rail2"] {
+        let rail = list.part(name).unwrap();
+        let groove = list
+            .operations
+            .iter()
+            .find_map(|o| match o {
+                Operation::Groove { part, bounds } if part == name => Some(bounds.volume()),
+                _ => None,
+            })
+            .unwrap();
+        let tenons: f64 = list.rail_tenons(rail).iter().map(|t| t.volume()).sum();
+        let expected = list.visible_bounds(rail).volume() + tenons - groove;
+        let body = r["bodies"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|b| b["name"] == name)
+            .unwrap();
+        let got = body["volume_mm3"].as_f64().unwrap();
+        assert!(
+            (got - expected).abs() < 1e-6 * expected,
+            "{name}: {got} vs {expected}"
+        );
+    }
+}
+
 #[test]
 fn an_integrated_toe_kick_notch_is_cut_out_of_both_sides() {
     let Some(cli) = cli() else {
@@ -456,9 +503,7 @@ fn the_new_cabinets_build_every_part_where_the_core_puts_it() {
         );
         let um = |v: f64| (v * 1000.0).round() as i64;
         for p in &list.parts {
-            // A shaker rail is drawn between its stiles: its tenons are inside them.
-            let shown = list.visible_bounds(p);
-            let (lo, hi) = (shown.min, shown.max());
+            let (lo, hi) = (p.bounds.min, p.bounds.max());
             let want = vec![um(lo.x), um(lo.y), um(lo.z), um(hi.x), um(hi.y), um(hi.z)];
             let got = &built
                 .iter()
