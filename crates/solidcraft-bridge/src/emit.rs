@@ -414,8 +414,18 @@ pub fn hardware_inserts(cabinet: &str, models: &[crate::vendor::VendorInstance])
     }
     let mut cmds =
         vec![json!({ "command": "component.activate", "params": { "component": cabinet } })];
+    let mut seen = std::collections::BTreeMap::<&str, usize>::new();
     for m in models {
         let matrix: Vec<f64> = m.transform.iter().map(|v| round(*v)).collect();
+        // A model of several files shares one placement's name, but each mesh needs its own to be
+        // moved by: the second would otherwise stay at the origin.
+        let n = seen.entry(&m.name).or_default();
+        *n += 1;
+        let name = if *n == 1 {
+            m.name.clone()
+        } else {
+            format!("{} {n}", m.name)
+        };
         let is_mesh = m
             .step
             .extension()
@@ -426,13 +436,13 @@ pub fn hardware_inserts(cabinet: &str, models: &[crate::vendor::VendorInstance])
             // takes no matrix and ignores one: it lands at the origin until it is moved.
             cmds.push(json!({
                 "command": "file.insert_mesh",
-                "params": { "path": m.step, "name": m.name }
+                "params": { "path": m.step, "name": name }
             }));
             cmds.push(json!({
                 "command": "occurrence.move",
-                "params": { "occurrence": format!("{}:1", m.name), "matrix": matrix }
+                "params": { "occurrence": format!("{name}:1"), "matrix": matrix }
             }));
-            cmds.extend(finish_colour(m));
+            cmds.extend(finish_colour(m, &name));
         } else {
             cmds.push(json!({
                 "command": "file.insert_step",
@@ -445,7 +455,7 @@ pub fn hardware_inserts(cabinet: &str, models: &[crate::vendor::VendorInstance])
 }
 
 /// A catalog finish on a model whose file carries no colour: the look the app's view draws.
-fn finish_colour(m: &crate::vendor::VendorInstance) -> Option<Value> {
+fn finish_colour(m: &crate::vendor::VendorInstance, name: &str) -> Option<Value> {
     let item = cabinet_core::hardware::item(&m.item).ok()?;
     let rgb = *item.parameters.get("finish_colour_rgb")? as u32;
     let metallic = if item.parameters.contains_key("matte") {
@@ -456,7 +466,7 @@ fn finish_colour(m: &crate::vendor::VendorInstance) -> Option<Value> {
     Some(json!({
         "command": "appearance.assign",
         "params": {
-            "components": [m.name],
+            "components": [name],
             "color": format!("#{rgb:06x}"),
             "pbr": { "metallic": metallic, "roughness": 0.45, "dielectric_ior": 1.5 },
         }
@@ -1477,5 +1487,24 @@ mod tests {
                 .any(|c| c["command"] == "solid.extrude" && c["params"]["operation"] == "cut")
         );
         assert!(cmds.iter().any(|c| c["command"] == "sketch.circle.center"));
+    }
+
+    #[test]
+    fn a_mirrored_model_of_two_files_moves_each_mesh_by_its_own_name() {
+        let inst = |file: &str| crate::vendor::VendorInstance {
+            name: "W01.LiftArm1".into(),
+            item: "blum.aventos.hf-top.lever-arm.22f3500".into(),
+            article: "22F3500".into(),
+            step: file.into(),
+            stl: file.into(),
+            transform: [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0],
+        };
+        let cmds = hardware_inserts("W01", &[inst("a__mirror.stl"), inst("b__mirror.stl")]);
+        let moved: Vec<_> = cmds
+            .iter()
+            .filter(|c| c["command"] == "occurrence.move")
+            .map(|c| c["params"]["occurrence"].as_str().unwrap())
+            .collect();
+        assert_eq!(moved, ["W01.LiftArm1:1", "W01.LiftArm1 2:1"]);
     }
 }

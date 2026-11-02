@@ -75,6 +75,25 @@ pub struct CadPlacement {
     pub frame: Frame,
 }
 
+/// The part Blum models a lift set by, for the sets it only models as parts: a look at the
+/// mechanism, whichever strength was chosen, as they share one shape.
+fn lift_model_article<'a>(item: &'a str, article: &'a str) -> &'a str {
+    if item.starts_with("blum.aventos.hs-top.mechanism.") {
+        "20S2A00.05"
+    } else if item.starts_with("blum.aventos.hl-top.mechanism.") {
+        "20L2700.05"
+    } else {
+        match article {
+            "22S3500" => "20S3500.06",
+            "22L3200" => "20L3200.06",
+            "22L3500" => "20L3500.06",
+            "22L3800" => "20L3800.06",
+            "22L3900" => "20L3900.06",
+            other => other,
+        }
+    }
+}
+
 /// The lift system whose holes a mechanism or lever arm model is placed by, if we place it.
 fn lift_family(item: &str) -> Option<&'static str> {
     if item.starts_with("blum.aventos.hk-top.mechanism.") {
@@ -87,6 +106,14 @@ fn lift_family(item: &str) -> Option<&'static str> {
         || item.starts_with("blum.aventos.hf-top.lever-arm.")
     {
         Some("blum.aventos.hf-top")
+    } else if item.starts_with("blum.aventos.hs-top.mechanism.")
+        || item == "blum.aventos.hs-top.lever-arm"
+    {
+        Some("blum.aventos.hs-top")
+    } else if item.starts_with("blum.aventos.hl-top.mechanism.")
+        || item.starts_with("blum.aventos.hl-top.lever-arm.")
+    {
+        Some("blum.aventos.hl-top")
     } else {
         None
     }
@@ -320,9 +347,16 @@ pub fn cad_placements(list: &PartList) -> Vec<CadPlacement> {
             let Ok(sys) = crate::hardware::item(family) else {
                 continue;
             };
-            let (Ok(hole_y), Ok(hole_z)) = (sys.param("model_hole_y"), sys.param("model_hole_z"))
-            else {
-                continue;
+            let measured = match (sys.param("model_hole_y"), sys.param("model_hole_z")) {
+                (Ok(y), Ok(z)) => Some((y, z)),
+                _ => None,
+            };
+            let read = match (
+                sys.param("model_origin_below_top"),
+                sys.param("model_origin_from_front"),
+            ) {
+                (Ok(below), Ok(from)) => Some((below, from)),
+                _ => None,
             };
             let hole_of = |part: &str| {
                 list.operations
@@ -351,21 +385,25 @@ pub fn cad_placements(list: &PartList) -> Vec<CadPlacement> {
                 "LiftMechanism"
             };
             for (side, panel) in [(Side::Left, left), (Side::Right, right)] {
-                let Some(hole) = hole_of(&panel.name) else {
+                // A hole we know the model's place on, or where its drawing puts it.
+                let at = if let Some((hole_y, hole_z)) = measured {
+                    let Some(hole) = hole_of(&panel.name) else {
+                        continue;
+                    };
+                    (hole.y + hole_z, hole.z - hole_y)
+                } else if let Some((below, from)) = read {
+                    (from, panel.bounds.max().z - below)
+                } else {
                     continue;
                 };
                 let n = next(kind);
                 out.push(CadPlacement {
                     name: format!("{}.{kind}{n}", list.cabinet),
                     item: h.item.clone(),
-                    article: item.article.clone(),
+                    article: lift_model_article(&h.item, &item.article).to_string(),
                     side,
                     // transform() adds the front plane; undo it, as this frame is the hole's.
-                    origin: Vec3::new(
-                        inner(side),
-                        hole.y + hole_z - BLUM_FRONT_PLANE,
-                        hole.z - hole_y,
-                    ),
+                    origin: Vec3::new(inner(side), at.0 - BLUM_FRONT_PLANE, at.1),
                     frame: Frame::Blum,
                 });
             }
@@ -518,7 +556,9 @@ pub fn cad_placements(list: &PartList) -> Vec<CadPlacement> {
                 "Runner"
             };
             let n = next(kind);
-            let x = list.part(&h.part).map_or(h.at.x, |p| p.bounds.center().x);
+            let x = list
+                .front_box(&h.part)
+                .map_or(h.at.x, |p| p.bounds.center().x);
             for (suffix, side) in [("L", Side::Left), ("R", Side::Right)] {
                 out.push(place(
                     format!("{}.{kind}{n}{suffix}", list.cabinet),
@@ -536,11 +576,7 @@ pub fn cad_placements(list: &PartList) -> Vec<CadPlacement> {
             let Some(unit) = crate::hardware::item(&h.item).ok() else {
                 continue;
             };
-            let Some(num) = h
-                .part
-                .rsplit_once(PartRole::DrawerFront.code())
-                .map(|t| t.1)
-            else {
+            let Some(num) = crate::part::drawer_number(&h.part) else {
                 continue;
             };
             let bottom = format!("{}.{}{num}", list.cabinet, PartRole::DrawerBottom.code());
@@ -615,7 +651,7 @@ pub fn cad_placements(list: &PartList) -> Vec<CadPlacement> {
                 continue;
             };
             let inset = bumper.param("inset_from_front_edge").unwrap_or(8.0);
-            let Some(f) = list.part(&h.part) else {
+            let Some(f) = list.front_box(&h.part) else {
                 continue;
             };
             // As the builder counted them for this front: 2 in one row, 4 in two.
@@ -681,7 +717,7 @@ pub(crate) fn is_runner(item: &str) -> bool {
 /// The underside of the base of the drawer behind `front` (`B01.DrawerFront2` →
 /// `B01.DrawerBottom2`).
 fn drawer_base(list: &PartList, front: &str) -> Option<f64> {
-    let n = front.rsplit_once(PartRole::DrawerFront.code())?.1;
+    let n = crate::part::drawer_number(front)?;
     let cab = &list.cabinet;
     list.part(&format!("{cab}.{}{n}", PartRole::DrawerBottom.code()))
         .map(|p| p.bounds.min.z)
@@ -929,6 +965,70 @@ mod tests {
                     "{family}: {at:?} not in {holes:?}"
                 );
             }
+        }
+    }
+
+    /// The owner's report: SERVO-DRIVE and TIP-ON vanished when fronts were shaker.
+    #[test]
+    fn framed_fronts_keep_the_same_hardware_as_slabs() {
+        use crate::model::{DoorStyle, Opening};
+        for (kind, opening) in [
+            (CabinetKind::DrawerBank, Opening::ServoDrive),
+            (CabinetKind::DrawerBank, Opening::TipOn),
+            (CabinetKind::Base, Opening::TipOn),
+        ] {
+            let names = |style| {
+                let mut cab = Cabinet::new("C1", kind);
+                cab.standard.opening = opening;
+                cab.standard.door_style = style;
+                let list = build_cabinet(&cab).unwrap();
+                let mut a: Vec<String> = cad_placements(&list)
+                    .into_iter()
+                    .filter(|c| !c.name.contains("Handle"))
+                    .map(|c| c.name)
+                    .chain(
+                        crate::standins::stand_ins(&list)
+                            .into_iter()
+                            .map(|s| s.name),
+                    )
+                    .collect();
+                a.sort();
+                a
+            };
+            let slab = names(DoorStyle::Slab);
+            assert!(!slab.is_empty());
+            assert_eq!(slab, names(DoorStyle::Shaker), "{kind:?} {opening:?}");
+        }
+    }
+
+    #[test]
+    fn up_and_over_and_lift_up_mechanisms_are_placed_with_their_arms_and_holes() {
+        use crate::model::LiftKind;
+        for (kind, height, mech, arm) in [
+            (LiftKind::UpAndOver, 720.0, "20S2A00.05", "20S3500.06"),
+            (LiftKind::LiftUp, 450.0, "20L2700.05", "20L3"),
+        ] {
+            let mut cab = Cabinet::new("W01", CabinetKind::Wall);
+            cab.height = height;
+            cab.fronts = FrontLayout::Lift {
+                kind,
+                handle_weight: 0.4,
+            };
+            let list = build_cabinet(&cab).unwrap();
+            let placed = cad_placements(&list);
+            let count = |a: &str| placed.iter().filter(|c| c.article.starts_with(a)).count();
+            assert_eq!(
+                (count(mech), count(arm)),
+                (2, 2),
+                "{kind:?} {:?}",
+                list.warnings
+            );
+            let holes = list
+                .operations
+                .iter()
+                .filter(|o| matches!(o, Operation::Bore { part, purpose: BorePurpose::LiftMechanism, .. } if part == "W01.LeftSide"))
+                .count();
+            assert_eq!(holes, 4);
         }
     }
 

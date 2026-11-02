@@ -225,6 +225,7 @@ pub fn build_cabinet(cab: &Cabinet) -> Result<PartList> {
         // Last: hinges, handles and drawer fixings are placed on the slab, then move to the
         // frame member they fall in.
         b.shaker_fronts();
+        b.lift_arm_warnings();
         b.list
     };
     let o = cab.origin + Vec3::new(0.0, frame, 0.0);
@@ -1736,6 +1737,15 @@ impl<'a> Builder<'a> {
     /// opening side.
     fn shelf_setback(&self) -> f64 {
         let s = &self.cab.standard;
+        // A bi-fold's lever arms run down the sides just behind the front, past any shelf.
+        let arms = crate::hardware::item("blum.aventos.hf-top")
+            .ok()
+            .filter(|_| self.cab.has_bi_fold())
+            .and_then(|hf| hf.param("arm_clear_from_front").ok())
+            .unwrap_or(0.0);
+        if arms > 0.0 {
+            return s.shelf_front_setback.max(arms);
+        }
         if s.is_sharknose() && s.sharknose_door_edge == SharknoseEdge::Opening {
             let inset = if s.overlay == DoorOverlay::Inset {
                 s.front_thickness
@@ -3295,6 +3305,8 @@ impl<'a> Builder<'a> {
             LiftKind::StayLift => "blum.aventos.hk-top",
             LiftKind::SmallStayLift => "blum.aventos.hk-s",
             LiftKind::HingedStayLift => "blum.aventos.hk-xs",
+            LiftKind::UpAndOver => "blum.aventos.hs-top",
+            LiftKind::LiftUp => "blum.aventos.hl-top",
             _ => return,
         };
         let Ok(sys) = crate::hardware::item(id) else {
@@ -3303,7 +3315,9 @@ impl<'a> Builder<'a> {
         let t = self.cab.standard.carcass_thickness;
         let param = |k: &str| sys.parameters.get(k).copied();
         // From the opening's top, or the cabinet's plus the top panel's thickness.
-        let top = if param("side_hole_adds_top_thickness").is_some() {
+        let top = if param("side_hole_from_cabinet_top").is_some() {
+            self.cab.height
+        } else if param("side_hole_adds_top_thickness").is_some() {
             self.cab.height - t
         } else {
             self.opening_z.1
@@ -3315,8 +3329,20 @@ impl<'a> Builder<'a> {
             .map(|h| (h.x, top - h.y, h.diameter, h.depth))
             .collect();
         self.side_holes(&bay, &holes);
+        // HL's front brackets sit by its lever arm's size.
+        let arm_below = self
+            .list
+            .hardware
+            .iter()
+            .filter(|h| h.item.contains(".lever-arm."))
+            .find_map(|h| {
+                crate::hardware::item(&h.item)
+                    .ok()?
+                    .param("front_hole_below_top")
+                    .ok()
+            });
         let (Some(below), Some(pitch), Some(count), Some(inset)) = (
-            param("front_hole_below_top"),
+            param("front_hole_below_top").or(arm_below),
             param("front_hole_pitch"),
             param("front_hole_count"),
             param("front_hole_inset"),
@@ -4981,6 +5007,43 @@ impl<'a> Builder<'a> {
                     }
                 }
             }
+        }
+    }
+
+    /// HS and HL arms swing through the top of the cabinet: a shelf up there is in their way.
+    fn lift_arm_warnings(&mut self) {
+        let reach = self
+            .list
+            .hardware
+            .iter()
+            .filter_map(|h| {
+                let id = if h.item.starts_with("blum.aventos.hs-top") {
+                    "blum.aventos.hs-top"
+                } else if h.item.starts_with("blum.aventos.hl-top.lever-arm.") {
+                    h.item.as_str()
+                } else {
+                    return None;
+                };
+                crate::hardware::item(id)
+                    .ok()?
+                    .param("arm_reach_below_top")
+                    .ok()
+            })
+            .fold(0.0, f64::max);
+        if reach <= 0.0 {
+            return;
+        }
+        let limit = self.cab.origin.z + self.cab.height - reach;
+        let high: Vec<String> = self
+            .list
+            .by_role(PartRole::Shelf)
+            .filter(|p| p.bounds.max().z > limit)
+            .map(|p| p.name.clone())
+            .collect();
+        for name in high {
+            self.list.warnings.push(format!(
+                "{name} is within {reach:.0} of the cabinet's top, in the lift's arms' way: lower it or leave it out"
+            ));
         }
     }
 

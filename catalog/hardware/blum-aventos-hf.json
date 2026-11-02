@@ -37,7 +37,8 @@
         "mechanism_hole_below_top": 116,
         "mechanism_short_below_height": 520,
         "model_hole_y": 16.5,
-        "model_hole_z": -59
+        "model_hole_z": -59,
+        "arm_clear_from_front": 45
       },
       "tables": {
         "mechanism_hole_below_top": {

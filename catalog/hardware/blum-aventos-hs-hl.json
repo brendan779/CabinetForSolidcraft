@@ -15,14 +15,53 @@
         "cabinet_height_max": 800,
         "cabinet_width_max": 1800,
         "inside_depth_min": 264,
-        "handle_weight_factor": 2
+        "handle_weight_factor": 2,
+        "side_hole_from_cabinet_top": 1,
+        "front_hole_pitch": 32,
+        "front_hole_count": 4,
+        "front_hole_inset": 12.5,
+        "front_hole_adds_overlay": 1,
+        "front_hole_below_top": 195,
+        "model_origin_below_top": 85,
+        "model_origin_from_front": 27,
+        "arm_reach_below_top": 232
       },
       "source": {
-        "url": "Blum Catalogue and technical manual 2024/2025, p.34, web code DQDZPC",
+        "url": "Blum Catalogue and technical manual 2024/2025, p.34, web code DQDZPC; drilling and front assembly from the drawings on catalogue p.36. model_origin_* is our reading of its space requirement drawing (the mechanism's top below the cabinet's, its back at the 264 minimum depth), not a measured hole",
         "document_date": "2024/2025",
         "retrieved": "2026-10-26",
         "verified": false
-      }
+      },
+      "drilling": [
+        {
+          "x": 101,
+          "y": 63,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "x from the cabinet front, y below the cabinet's top"
+        },
+        {
+          "x": 229,
+          "y": 63,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "x from the cabinet front, y below the cabinet's top"
+        },
+        {
+          "x": 101,
+          "y": 127,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "x from the cabinet front, y below the cabinet's top"
+        },
+        {
+          "x": 229,
+          "y": 127,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "x from the cabinet front, y below the cabinet's top"
+        }
+      ]
     },
     {
       "id": "blum.aventos.hs-top.mechanism.22s2210.a",
@@ -132,14 +171,51 @@
         "cabinet_width_max": 1800,
         "inside_depth_min": 264,
         "handle_weight_factor": 1,
-        "stabiliser_cut_deduction": 113
+        "stabiliser_cut_deduction": 113,
+        "side_hole_from_cabinet_top": 1,
+        "front_hole_pitch": 32,
+        "front_hole_count": 4,
+        "front_hole_inset": 12.5,
+        "front_hole_adds_overlay": 1,
+        "model_origin_below_top": 87,
+        "model_origin_from_front": 25
       },
       "source": {
-        "url": "Blum Catalogue and technical manual 2024/2025, p.40, web code DQE0EP",
+        "url": "Blum Catalogue and technical manual 2024/2025, p.40, web code DQE0EP; drilling and front assembly from the drawings on catalogue p.42. model_origin_* is our reading of its space requirement drawing (the mechanism's top below the cabinet's, its back at the 264 minimum depth), not a measured hole",
         "document_date": "2024/2025",
         "retrieved": "2026-10-26",
         "verified": false
-      }
+      },
+      "drilling": [
+        {
+          "x": 101,
+          "y": 63,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "x from the cabinet front, y below the cabinet's top"
+        },
+        {
+          "x": 229,
+          "y": 63,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "x from the cabinet front, y below the cabinet's top"
+        },
+        {
+          "x": 101,
+          "y": 127,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "x from the cabinet front, y below the cabinet's top"
+        },
+        {
+          "x": 229,
+          "y": 127,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "x from the cabinet front, y below the cabinet's top"
+        }
+      ]
     },
     {
       "id": "blum.aventos.hl-top.mechanism.22l2210",
@@ -188,7 +264,9 @@
         "cabinet_height_min": 300,
         "cabinet_height_max": 339,
         "front_weight_min_kg": 1.5,
-        "front_weight_max_kg": 9.0
+        "front_weight_max_kg": 9.0,
+        "front_hole_below_top": 113,
+        "arm_reach_below_top": 255
       },
       "source": {
         "url": "Blum Catalogue and technical manual 2024/2025, p.40, web code DQE0EP",
@@ -208,7 +286,9 @@
         "cabinet_height_min": 340,
         "cabinet_height_max": 389,
         "front_weight_min_kg": 1.75,
-        "front_weight_max_kg": 10.0
+        "front_weight_max_kg": 10.0,
+        "front_hole_below_top": 153,
+        "arm_reach_below_top": 295
       },
       "source": {
         "url": "Blum Catalogue and technical manual 2024/2025, p.40, web code DQE0EP",
@@ -228,7 +308,9 @@
         "cabinet_height_min": 390,
         "cabinet_height_max": 540,
         "front_weight_min_kg": 2.0,
-        "front_weight_max_kg": 12.25
+        "front_weight_max_kg": 12.25,
+        "front_hole_below_top": 203,
+        "arm_reach_below_top": 345
       },
       "source": {
         "url": "Blum Catalogue and technical manual 2024/2025, p.40, web code DQE0EP",
@@ -248,7 +330,9 @@
         "cabinet_height_min": 480,
         "cabinet_height_max": 580,
         "front_weight_min_kg": 2.5,
-        "front_weight_max_kg": 14.0
+        "front_weight_max_kg": 14.0,
+        "front_hole_below_top": 256,
+        "arm_reach_below_top": 399
       },
       "source": {
         "url": "Blum Catalogue and technical manual 2024/2025, p.40, web code DQE0EP",

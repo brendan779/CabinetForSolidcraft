@@ -210,6 +210,18 @@ impl Cladding {
 }
 
 impl Cabinet {
+    /// Whether any of its fronts is a bi-fold lift.
+    pub fn has_bi_fold(&self) -> bool {
+        match &self.fronts {
+            FrontLayout::BiFoldLift { .. } => true,
+            FrontLayout::Sections { columns } => columns
+                .iter()
+                .flat_map(|c| &c.rows)
+                .any(|r| matches!(r.front, SectionFront::BiFold { .. })),
+            _ => false,
+        }
+    }
+
     /// Whether a side is seen from the room. Jobs saved when cladding was a separate choice set
     /// it there; both mean the same now.
     pub fn seen_left(&self) -> bool {

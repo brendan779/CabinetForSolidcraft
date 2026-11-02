@@ -417,6 +417,39 @@ pub struct PartList {
     pub tile_fields: Vec<crate::tiling::TileField>,
 }
 
+/// A whole front's extent, see [`PartList::front_box`].
+pub struct FrontBox {
+    pub bounds: Aabb,
+}
+
+/// `B01.DrawerFront2FrameStile1` → `B01.DrawerFront2`: a framed front's name, from a member's.
+fn front_base(name: &str) -> &str {
+    for code in [
+        PartRole::FrameStile,
+        PartRole::FrameRail,
+        PartRole::FramePanel,
+    ]
+    .map(PartRole::code)
+    {
+        if let Some(at) = name.rfind(code) {
+            let rest = &name[at + code.len()..];
+            if at > 0 && rest.chars().all(|c| c.is_ascii_digit()) {
+                return &name[..at];
+            }
+        }
+    }
+    name
+}
+
+/// The drawer number in a front's or its member's name: `B01.DrawerFront2Stile1` → `2`.
+pub fn drawer_number(name: &str) -> Option<&str> {
+    let rest = name.rsplit_once(PartRole::DrawerFront.code())?.1;
+    let end = rest
+        .find(|c: char| !c.is_ascii_digit())
+        .unwrap_or(rest.len());
+    Some(&rest[..end])
+}
+
 /// A turn about a line across the cabinet (along X): the back of the board rises by `degrees`.
 #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Tilt {
@@ -459,6 +492,35 @@ impl Tilt {
 impl PartList {
     pub fn part(&self, name: &str) -> Option<&Part> {
         self.parts.iter().find(|p| p.name == name)
+    }
+
+    /// The whole front a hardware row belongs to, whichever part names it: a framed front is
+    /// made of members, and its hardware names the member it fixes to.
+    pub fn front_box(&self, name: &str) -> Option<FrontBox> {
+        let base = front_base(name);
+        self.parts
+            .iter()
+            .filter(|p| {
+                p.name == base
+                    || p.name
+                        .strip_prefix(base)
+                        .is_some_and(|rest| !rest.starts_with(|c: char| c.is_ascii_digit()))
+            })
+            .map(|p| p.bounds)
+            .reduce(|a, b| {
+                let lo = Vec3::new(
+                    a.min.x.min(b.min.x),
+                    a.min.y.min(b.min.y),
+                    a.min.z.min(b.min.z),
+                );
+                let hi = Vec3::new(
+                    a.max().x.max(b.max().x),
+                    a.max().y.max(b.max().y),
+                    a.max().z.max(b.max().z),
+                );
+                Aabb::new(lo, Vec3::new(hi.x - lo.x, hi.y - lo.y, hi.z - lo.z))
+            })
+            .map(|bounds| FrontBox { bounds })
     }
 
     pub fn by_role(&self, role: PartRole) -> impl Iterator<Item = &Part> {

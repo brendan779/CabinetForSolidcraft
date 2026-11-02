@@ -273,7 +273,7 @@ fn interior(list: &PartList) -> Option<(f64, f64, f64)> {
 /// A TIP-ON door unit: on the side opposite the door's hinges (the door's middle without any),
 /// pushing at the carcass front near the door's top.
 fn tip_on_door(list: &PartList, h: &HardwarePlacement) -> Option<Vec<Shape>> {
-    let door = list.part(&h.part)?;
+    let door = list.front_box(&h.part)?;
     let mid = door.bounds.center().x;
     let (l, r) = list.bay_around(mid)?;
     let (left, right) = (l.bounds.max().x, r.bounds.min.x);
@@ -320,9 +320,9 @@ pub(crate) fn behind_drawer(list: &PartList, n: &str) -> Option<(f64, f64, f64)>
 
 /// A TIP-ON BLUMOTION unit at the back of each of the drawer's runners, behind its box.
 fn tip_on_blumotion(list: &PartList, h: &HardwarePlacement) -> Option<Vec<Shape>> {
-    let n = h.part.rsplit_once(PartRole::DrawerFront.code())?.1;
+    let n = crate::part::drawer_number(&h.part)?;
     let (y0, y1, z0) = behind_drawer(list, n)?;
-    let (l, r) = list.bay_around(list.part(&h.part)?.bounds.center().x)?;
+    let (l, r) = list.bay_around(list.front_box(&h.part)?.bounds.center().x)?;
     let (left, right) = (l.bounds.max().x, r.bounds.min.x);
     let (w, ht) = TOB_UNIT;
     let unit = |inner: f64, sign: f64| {
@@ -394,7 +394,7 @@ pub(crate) fn servo_compartments(list: &PartList) -> Vec<ServoCompartment> {
 
 /// The base of the drawer behind `front`.
 fn servo_base<'a>(list: &'a PartList, front: &str) -> Option<&'a Part> {
-    let n = front.rsplit_once(PartRole::DrawerFront.code())?.1;
+    let n = crate::part::drawer_number(front)?;
     list.part(&format!(
         "{}.{}{n}",
         list.cabinet,
@@ -416,7 +416,7 @@ fn servo_x(list: &PartList, x: f64) -> Option<f64> {
 
 /// A driven drawer's drive unit, between its box and the room Blum asks for behind it (NL + 33).
 fn servo_unit(list: &PartList, front: &str) -> Option<Vec<Shape>> {
-    let n = front.rsplit_once(PartRole::DrawerFront.code())?.1;
+    let n = crate::part::drawer_number(front)?;
     let nl = nominal_length(list, front)?;
     let (box_back, _, z0) = behind_drawer(list, n)?;
     let x = servo_x(list, servo_base(list, front)?.bounds.center().x)?;
@@ -550,7 +550,7 @@ fn side(list: &PartList, role: PartRole) -> Option<&Part> {
 
 /// Cup in its bore, an arm across to the side, and the mounting plate on its two holes.
 fn hinge(list: &PartList, h: &HardwarePlacement) -> Option<Vec<Shape>> {
-    let door = list.part(&h.part)?;
+    let door = list.front_box(&h.part)?;
     let near = |a: &Vec3, b: &Vec3| {
         (a.x - b.x).abs() < 1e-6 && (a.y - b.y).abs() < 1e-6 && (a.z - b.z).abs() < 1e-6
     };
@@ -625,7 +625,7 @@ fn hinge(list: &PartList, h: &HardwarePlacement) -> Option<Vec<Shape>> {
 /// A runner along the inside of each side under the drawer's front, and the steel box side
 /// standing on it (a wooden box's sides are panels); left then right.
 fn runners(list: &PartList, h: &HardwarePlacement) -> Option<[(Vec<Shape>, Option<Shape>); 2]> {
-    let front = list.part(&h.part)?;
+    let front = list.front_box(&h.part)?;
     if let Some([l, r]) = wood_runners(list, &h.part) {
         return Some([(l, None), (r, None)]);
     }
@@ -674,7 +674,7 @@ fn runners(list: &PartList, h: &HardwarePlacement) -> Option<[(Vec<Shape>, Optio
 
 /// Under a wooden box the runners sit in the recess below its base, along each side's inner face.
 fn wood_runners(list: &PartList, front: &str) -> Option<[Vec<Shape>; 2]> {
-    let n = front.rsplit_once(PartRole::DrawerFront.code())?.1;
+    let n = crate::part::drawer_number(front)?;
     let cab = &list.cabinet;
     let left = list.part(&format!("{cab}.{}{n}", PartRole::DrawerLeftSide.code()))?;
     let right = list.part(&format!("{cab}.{}{n}", PartRole::DrawerRightSide.code()))?;
