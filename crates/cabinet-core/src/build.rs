@@ -5024,12 +5024,29 @@ impl<'a> Builder<'a> {
     fn cladding(&mut self) {
         let cab = self.cab;
         let c = &cab.cladding;
-        if c.is_none() {
-            return;
-        }
         let (w, d, h) = (cab.width, cab.depth, cab.height);
         let ct = c.thickness;
         let ft = cab.standard.front_thickness;
+        // A seen end's finished board, from the front's face to the back. Lining takes its place.
+        for (seen, lined, side, x0) in [
+            (cab.exposed.left, c.left, "Left", -ft),
+            (cab.exposed.right, c.right, "Right", w),
+        ] {
+            if seen && !lined {
+                self.list.parts.push(Part {
+                    name: format!("{}.SeenEnd{side}", cab.id),
+                    role: PartRole::Cladding,
+                    bounds: aabb(x0, -ft, 0.0, x0 + ft, d, h),
+                    thickness_axis: Axis::X,
+                    grain_axis: Some(Axis::Z),
+                    board: cab.standard.front_board.clone(),
+                    edges: EdgeBanding::default(),
+                });
+            }
+        }
+        if c.is_none() {
+            return;
+        }
         let back_t = if c.back { ct } else { 0.0 };
         let mut pieces = Vec::new();
         if c.left {
@@ -7414,6 +7431,21 @@ mod tests {
                 ..
             }
         )));
+    }
+
+    #[test]
+    fn a_seen_end_gets_a_finished_board_flush_with_the_fronts_face() {
+        let mut cab = Cabinet::new("D01", CabinetKind::DrawerBank);
+        cab.exposed.left = true;
+        let list = build_cabinet(&cab).unwrap();
+        let board = list.part("D01.SeenEndLeft").unwrap();
+        let front = list.part("D01.DrawerFront1").unwrap().bounds;
+        assert_eq!(board.bounds.min.y, front.min.y);
+        assert_eq!(board.bounds.max().x, 0.0);
+        assert_eq!(board.bounds.size.x, cab.standard.front_thickness);
+        assert_eq!(board.bounds.max().y, cab.depth);
+        assert_eq!(board.board, cab.standard.front_board);
+        assert!(list.part("D01.SeenEndRight").is_none());
     }
 
     #[test]

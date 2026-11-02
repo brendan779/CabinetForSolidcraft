@@ -838,7 +838,13 @@ fn lefts<'a>(run: &Run, neighbour: &dyn Fn(usize) -> &'a Cabinet) -> Vec<Vec3> {
         .iter()
         .enumerate()
         .map(|(i, item)| {
-            let at = Vec3::new(x, run.origin.y, run.origin.z);
+            let (left, right) = match item {
+                RunItem::Cabinet(c) => seen_boards(c, run, i),
+                _ => (0.0, 0.0),
+            };
+            // A cabinet stands inside its seen end boards.
+            let at = Vec3::new(x + left, run.origin.y, run.origin.z);
+            x += left + right;
             x += match item {
                 RunItem::Cabinet(c) => c.width,
                 RunItem::Filler(f) => f.width,
@@ -880,13 +886,27 @@ fn run_length<'a>(run: &Run, neighbour: &dyn Fn(usize) -> &'a Cabinet) -> f64 {
         .iter()
         .enumerate()
         .map(|(i, item)| match item {
-            RunItem::Cabinet(c) => c.width,
+            RunItem::Cabinet(c) => {
+                let (left, right) = seen_boards(c, run, i);
+                c.width + left + right
+            }
             RunItem::Filler(f) => f.width,
             RunItem::EndPanel(_) => neighbour(i).standard.front_thickness,
             RunItem::FloatingShelf(f) => f.width,
             RunItem::Benchtop(_) | RunItem::Moulding(_) | RunItem::Walls(_) => 0.0,
         })
         .sum()
+}
+
+/// The thickness of the seen end boards beside a cabinet, as the run will build it.
+fn seen_boards(c: &Cabinet, run: &Run, i: usize) -> (f64, f64) {
+    let c = walled(c.clone(), run, i);
+    let t = c.standard.front_thickness;
+    let board = |seen: bool, lined: bool| if seen && !lined { t } else { 0.0 };
+    (
+        board(c.exposed.left, c.cladding.left),
+        board(c.exposed.right, c.cladding.right),
+    )
 }
 
 /// A side against a return wall is not seen, whatever the cabinet was set to.
@@ -2670,5 +2690,38 @@ mod tests {
         assert_eq!(serde_json::from_str::<RunItem>(&text).unwrap(), item);
         let bare: RunItem = serde_json::from_str(r#"{"type":"walls","id":"WL01"}"#).unwrap();
         assert!(matches!(bare, RunItem::Walls(w) if !w.left && w.height == 2400.0));
+    }
+
+    #[test]
+    fn the_next_cabinet_clears_a_seen_end_board_and_a_wall_needs_none() {
+        let mut first = Cabinet::new("B1", CabinetKind::Base);
+        first.exposed.left = true;
+        first.exposed.right = true;
+        let (t, w) = (first.standard.front_thickness, first.width);
+        let items = vec![
+            RunItem::Cabinet(Box::new(first)),
+            cab("B2", CabinetKind::Base),
+        ];
+        let run = Run {
+            origin: Vec3::default(),
+            items: items.clone(),
+        };
+        let RunItem::Cabinet(a) = &laid_out(&run).items[0] else {
+            panic!()
+        };
+        let RunItem::Cabinet(b) = &laid_out(&run).items[1] else {
+            panic!()
+        };
+        assert_eq!(a.origin.x, t);
+        assert_eq!(b.origin.x, t + w + t);
+        // Against a wall the left side is hidden, so no board and no room for one.
+        let walled = walled_run(true, false, 0.0, items);
+        let RunItem::Cabinet(a) = &laid_out(&walled).items[0] else {
+            panic!()
+        };
+        assert_eq!(a.origin.x, 0.0);
+        let lists = build_run(&walled).unwrap();
+        assert!(!lists[0].parts.iter().any(|p| p.name == "B1.SeenEndLeft"));
+        assert!(lists[0].parts.iter().any(|p| p.name == "B1.SeenEndRight"));
     }
 }
