@@ -393,11 +393,16 @@
       "variant": "screw-on, black",
       "kind": "other",
       "parameters": {
-        "model_top": 25.6,
-        "screw_on": 1
+        "model_top": 25.0,
+        "screw_on": 1,
+        "fix_x_a": 38,
+        "fix_x_b": -26,
+        "fix_y": 24,
+        "fix_diameter": 3,
+        "fix_depth": 5
       },
       "source": {
-        "url": "Häfele CAD data for the AXILO 78 sets on hafele.com.au (set contents); model_top is the plate's top face in Häfele's CAD frame, measured from the model",
+        "url": "Häfele CAD data for the AXILO 78 sets on hafele.com.au (set contents). model_top is the plate's flat face, and fix_x_a, fix_x_b and fix_y are its four fixings, measured from the model. fix_diameter and fix_depth are our reading of the model: the knock-in tips are ribbed to 10.4 mm and 11 mm long, the screw-on's pilots are our choice. Check against a real plate.",
         "document_date": "2026",
         "retrieved": "2026-10-27",
         "verified": false
@@ -411,11 +416,16 @@
       "variant": "knock-in, black",
       "kind": "other",
       "parameters": {
-        "model_top": 36.0,
-        "screw_on": 0
+        "model_top": 25.0,
+        "screw_on": 0,
+        "fix_x_a": 45,
+        "fix_x_b": -19,
+        "fix_y": 32,
+        "fix_diameter": 10,
+        "fix_depth": 12
       },
       "source": {
-        "url": "Häfele CAD data for the AXILO 78 sets on hafele.com.au (set contents); model_top is the plate's top face in Häfele's CAD frame, measured from the model",
+        "url": "Häfele CAD data for the AXILO 78 sets on hafele.com.au (set contents). model_top is the plate's flat face, and fix_x_a, fix_x_b and fix_y are its four fixings, measured from the model. fix_diameter and fix_depth are our reading of the model: the knock-in tips are ribbed to 10.4 mm and 11 mm long, the screw-on's pilots are our choice. Check against a real plate.",
         "document_date": "2026",
         "retrieved": "2026-10-27",
         "verified": false

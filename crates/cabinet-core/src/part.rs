@@ -320,6 +320,8 @@ pub enum BorePurpose {
     /// sheets and CNC; not cut in SolidCraft (a cone there is cosmetic).
     Countersink,
     ScrewPilot,
+    /// For an AXILO leg plate's knock-in tips or screws, up into the bottom panel.
+    LegPlate,
     ShelfPin,
     HingeCup,
     /// An EXPANDO or INSERTA hinge's boss dowel, beside its cup.

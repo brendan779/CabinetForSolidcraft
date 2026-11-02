@@ -138,6 +138,11 @@ const SHAKER_PLAY: f64 = 1.0;
 /// Glass frames: the glass, and the rebate at the frame's back that takes it and its bead.
 const GLASS_THICKNESS: f64 = 4.0;
 const GLASS_REBATE_DEPTH: f64 = 12.0;
+/// Our choice: legs stand this far in from the cabinet's sides, so an AXILO plate's fixings clear
+/// the joints in the ends of the bottom panel, the widest being a cam housing 47.5 in.
+const LEG_INSET: f64 = 80.0;
+/// Our choice: and this far in from the back, so a knock-in plate's tips clear the back's groove.
+const LEG_BACK_INSET: f64 = 70.0;
 /// Our choice: a light's profile runs this far back from the panel's front edge, to light the
 /// bench rather than the wall.
 const LIGHT_PROFILE_SETBACK: f64 = 50.0;
@@ -5398,9 +5403,9 @@ impl<'a> Builder<'a> {
                 }
             };
             let xs: Vec<f64> = if w > 900.0 {
-                vec![50.0, w / 2.0, w - 50.0]
+                vec![LEG_INSET, w / 2.0, w - LEG_INSET]
             } else {
-                vec![50.0, w - 50.0]
+                vec![LEG_INSET, w - LEG_INSET]
             };
             let bottom = self.name(PartRole::Bottom, None);
             let plinth = self.name(PartRole::Plinth, None);
@@ -5414,7 +5419,7 @@ impl<'a> Builder<'a> {
             }
             for x in xs {
                 let front_leg = sb - forward + ft + 50.0;
-                for y in [front_leg, cab.depth - 50.0] {
+                for y in [front_leg, cab.depth - LEG_BACK_INSET] {
                     self.list.hardware.push(HardwarePlacement {
                         item: item.clone(),
                         description: description.clone(),
@@ -5422,6 +5427,7 @@ impl<'a> Builder<'a> {
                         part: bottom.clone(),
                         quantity: 1,
                     });
+                    self.leg_plate_holes(&item, &bottom, x, y);
                 }
                 // The plinth clips to the front legs, screwed to its back where nothing shows, and
                 // pulls off for access to them.
@@ -5440,6 +5446,52 @@ impl<'a> Builder<'a> {
 }
 
 impl Builder<'_> {
+    /// The holes an AXILO plate's knock-in tips or screws go into, up into the bottom panel.
+    fn leg_plate_holes(&mut self, set: &str, bottom: &str, x: f64, y: f64) {
+        let fixing = if set.ends_with("knock-in") {
+            "knock-in"
+        } else {
+            "screw-on"
+        };
+        let (Some(panel), Ok(plate)) = (
+            self.list.part(bottom).map(|p| p.bounds),
+            crate::hardware::item(&format!("hafele.axilo.glide.{fixing}")),
+        ) else {
+            return;
+        };
+        if !set.starts_with("hafele.axilo.set.") {
+            return;
+        }
+        let (Ok(diameter), Ok(depth)) = (plate.param("fix_diameter"), plate.param("fix_depth"))
+        else {
+            return;
+        };
+        let mut missed = 0;
+        for (hx, hy) in crate::cad::leg_plate_fixings(plate, x, y, panel.center().x) {
+            let inside = hx - diameter / 2.0 >= panel.min.x
+                && hx + diameter / 2.0 <= panel.max().x
+                && hy - diameter / 2.0 >= panel.min.y
+                && hy + diameter / 2.0 <= panel.max().y;
+            if !inside {
+                missed += 1;
+                continue;
+            }
+            self.list.operations.push(Operation::Bore {
+                part: bottom.to_string(),
+                at: Vec3::new(hx, hy, panel.min.z),
+                direction: Dir::new(Axis::Z, true),
+                diameter,
+                depth: depth.min(panel.size.z - 3.0),
+                purpose: BorePurpose::LegPlate,
+            });
+        }
+        if missed > 0 {
+            self.list.warnings.push(format!(
+                "a leg at {x:.0}, {y:.0} has {missed} plate fixings off the bottom panel: fix it on site"
+            ));
+        }
+    }
+
     /// Between notched sides there are no legs to clip a kick board to, so it screws to a batten
     /// on edge behind it, under the bottom panel: up through the batten into the bottom, and
     /// through the batten into the board's back. Nothing shows in the room or inside the cabinet,
@@ -10991,5 +11043,46 @@ mod tests {
                 .iter()
                 .any(|h| h.item == "hafele.loox5.profile.2190")
         );
+    }
+
+    /// The owner's report: a knock-in plate's tips sat on the bottom panel with no holes, holding
+    /// the plate 11 mm below it. The tips go into holes and the plate's face meets the panel.
+    #[test]
+    fn leg_plates_fix_into_holes_on_the_panel_for_every_width_and_fixing() {
+        for fixing in [LegFixing::KnockIn, LegFixing::ScrewOn] {
+            for width in [300.0, 450.0, 600.0, 900.0, 1200.0] {
+                let mut cab = Cabinet::new("B01", CabinetKind::Base);
+                cab.width = width;
+                cab.standard.toe_kick = ToeKick::LegsAndPlinth;
+                cab.standard.leg_fixing = fixing;
+                let list = build_cabinet(&cab).unwrap();
+                let legs = list
+                    .hardware
+                    .iter()
+                    .filter(|h| h.item.starts_with("hafele.axilo.set."))
+                    .count();
+                assert!(legs >= 4);
+                let bottom = list.part("B01.Bottom").unwrap().bounds;
+                let holes = list
+                    .operations
+                    .iter()
+                    .filter(|o| {
+                        matches!(o, Operation::Bore { part, at, purpose: BorePurpose::LegPlate, .. }
+                        if part == "B01.Bottom" && at.z == bottom.min.z)
+                    })
+                    .count();
+                assert_eq!(
+                    holes,
+                    legs * 4,
+                    "{fixing:?} at {width}: {:?}",
+                    list.warnings
+                );
+                assert!(
+                    !list.warnings.iter().any(|w| w.contains("plate fixings")),
+                    "{:?}",
+                    list.warnings
+                );
+            }
+        }
     }
 }

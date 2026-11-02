@@ -1904,6 +1904,262 @@ expression: list
       "purpose": "shelf_pin"
     },
     {
+      "type": "bore",
+      "part": "C01.Bottom",
+      "at": {
+        "x": 118.0,
+        "y": 94.0,
+        "z": 150.0
+      },
+      "direction": {
+        "axis": "Z",
+        "positive": true
+      },
+      "diameter": 3.0,
+      "depth": 5.0,
+      "purpose": "leg_plate"
+    },
+    {
+      "type": "bore",
+      "part": "C01.Bottom",
+      "at": {
+        "x": 118.0,
+        "y": 142.0,
+        "z": 150.0
+      },
+      "direction": {
+        "axis": "Z",
+        "positive": true
+      },
+      "diameter": 3.0,
+      "depth": 5.0,
+      "purpose": "leg_plate"
+    },
+    {
+      "type": "bore",
+      "part": "C01.Bottom",
+      "at": {
+        "x": 54.0,
+        "y": 94.0,
+        "z": 150.0
+      },
+      "direction": {
+        "axis": "Z",
+        "positive": true
+      },
+      "diameter": 3.0,
+      "depth": 5.0,
+      "purpose": "leg_plate"
+    },
+    {
+      "type": "bore",
+      "part": "C01.Bottom",
+      "at": {
+        "x": 54.0,
+        "y": 142.0,
+        "z": 150.0
+      },
+      "direction": {
+        "axis": "Z",
+        "positive": true
+      },
+      "diameter": 3.0,
+      "depth": 5.0,
+      "purpose": "leg_plate"
+    },
+    {
+      "type": "bore",
+      "part": "C01.Bottom",
+      "at": {
+        "x": 118.0,
+        "y": 486.0,
+        "z": 150.0
+      },
+      "direction": {
+        "axis": "Z",
+        "positive": true
+      },
+      "diameter": 3.0,
+      "depth": 5.0,
+      "purpose": "leg_plate"
+    },
+    {
+      "type": "bore",
+      "part": "C01.Bottom",
+      "at": {
+        "x": 118.0,
+        "y": 534.0,
+        "z": 150.0
+      },
+      "direction": {
+        "axis": "Z",
+        "positive": true
+      },
+      "diameter": 3.0,
+      "depth": 5.0,
+      "purpose": "leg_plate"
+    },
+    {
+      "type": "bore",
+      "part": "C01.Bottom",
+      "at": {
+        "x": 54.0,
+        "y": 486.0,
+        "z": 150.0
+      },
+      "direction": {
+        "axis": "Z",
+        "positive": true
+      },
+      "diameter": 3.0,
+      "depth": 5.0,
+      "purpose": "leg_plate"
+    },
+    {
+      "type": "bore",
+      "part": "C01.Bottom",
+      "at": {
+        "x": 54.0,
+        "y": 534.0,
+        "z": 150.0
+      },
+      "direction": {
+        "axis": "Z",
+        "positive": true
+      },
+      "diameter": 3.0,
+      "depth": 5.0,
+      "purpose": "leg_plate"
+    },
+    {
+      "type": "bore",
+      "part": "C01.Bottom",
+      "at": {
+        "x": 782.0,
+        "y": 94.0,
+        "z": 150.0
+      },
+      "direction": {
+        "axis": "Z",
+        "positive": true
+      },
+      "diameter": 3.0,
+      "depth": 5.0,
+      "purpose": "leg_plate"
+    },
+    {
+      "type": "bore",
+      "part": "C01.Bottom",
+      "at": {
+        "x": 782.0,
+        "y": 142.0,
+        "z": 150.0
+      },
+      "direction": {
+        "axis": "Z",
+        "positive": true
+      },
+      "diameter": 3.0,
+      "depth": 5.0,
+      "purpose": "leg_plate"
+    },
+    {
+      "type": "bore",
+      "part": "C01.Bottom",
+      "at": {
+        "x": 846.0,
+        "y": 94.0,
+        "z": 150.0
+      },
+      "direction": {
+        "axis": "Z",
+        "positive": true
+      },
+      "diameter": 3.0,
+      "depth": 5.0,
+      "purpose": "leg_plate"
+    },
+    {
+      "type": "bore",
+      "part": "C01.Bottom",
+      "at": {
+        "x": 846.0,
+        "y": 142.0,
+        "z": 150.0
+      },
+      "direction": {
+        "axis": "Z",
+        "positive": true
+      },
+      "diameter": 3.0,
+      "depth": 5.0,
+      "purpose": "leg_plate"
+    },
+    {
+      "type": "bore",
+      "part": "C01.Bottom",
+      "at": {
+        "x": 782.0,
+        "y": 486.0,
+        "z": 150.0
+      },
+      "direction": {
+        "axis": "Z",
+        "positive": true
+      },
+      "diameter": 3.0,
+      "depth": 5.0,
+      "purpose": "leg_plate"
+    },
+    {
+      "type": "bore",
+      "part": "C01.Bottom",
+      "at": {
+        "x": 782.0,
+        "y": 534.0,
+        "z": 150.0
+      },
+      "direction": {
+        "axis": "Z",
+        "positive": true
+      },
+      "diameter": 3.0,
+      "depth": 5.0,
+      "purpose": "leg_plate"
+    },
+    {
+      "type": "bore",
+      "part": "C01.Bottom",
+      "at": {
+        "x": 846.0,
+        "y": 486.0,
+        "z": 150.0
+      },
+      "direction": {
+        "axis": "Z",
+        "positive": true
+      },
+      "diameter": 3.0,
+      "depth": 5.0,
+      "purpose": "leg_plate"
+    },
+    {
+      "type": "bore",
+      "part": "C01.Bottom",
+      "at": {
+        "x": 846.0,
+        "y": 534.0,
+        "z": 150.0
+      },
+      "direction": {
+        "axis": "Z",
+        "positive": true
+      },
+      "diameter": 3.0,
+      "depth": 5.0,
+      "purpose": "leg_plate"
+    },
+    {
       "type": "groove",
       "part": "C01.LeftSide2",
       "bounds": {
@@ -2357,6 +2613,262 @@ expression: list
     },
     {
       "type": "bore",
+      "part": "C01.Bottom2",
+      "at": {
+        "x": 486.0,
+        "y": -202.0,
+        "z": 150.0
+      },
+      "direction": {
+        "axis": "Z",
+        "positive": true
+      },
+      "diameter": 3.0,
+      "depth": 5.0,
+      "purpose": "leg_plate"
+    },
+    {
+      "type": "bore",
+      "part": "C01.Bottom2",
+      "at": {
+        "x": 438.0,
+        "y": -202.0,
+        "z": 150.0
+      },
+      "direction": {
+        "axis": "Z",
+        "positive": true
+      },
+      "diameter": 3.0,
+      "depth": 5.0,
+      "purpose": "leg_plate"
+    },
+    {
+      "type": "bore",
+      "part": "C01.Bottom2",
+      "at": {
+        "x": 486.0,
+        "y": -266.0,
+        "z": 150.0
+      },
+      "direction": {
+        "axis": "Z",
+        "positive": true
+      },
+      "diameter": 3.0,
+      "depth": 5.0,
+      "purpose": "leg_plate"
+    },
+    {
+      "type": "bore",
+      "part": "C01.Bottom2",
+      "at": {
+        "x": 438.0,
+        "y": -266.0,
+        "z": 150.0
+      },
+      "direction": {
+        "axis": "Z",
+        "positive": true
+      },
+      "diameter": 3.0,
+      "depth": 5.0,
+      "purpose": "leg_plate"
+    },
+    {
+      "type": "bore",
+      "part": "C01.Bottom2",
+      "at": {
+        "x": 94.0,
+        "y": -202.0,
+        "z": 150.0
+      },
+      "direction": {
+        "axis": "Z",
+        "positive": true
+      },
+      "diameter": 3.0,
+      "depth": 5.0,
+      "purpose": "leg_plate"
+    },
+    {
+      "type": "bore",
+      "part": "C01.Bottom2",
+      "at": {
+        "x": 46.0,
+        "y": -202.0,
+        "z": 150.0
+      },
+      "direction": {
+        "axis": "Z",
+        "positive": true
+      },
+      "diameter": 3.0,
+      "depth": 5.0,
+      "purpose": "leg_plate"
+    },
+    {
+      "type": "bore",
+      "part": "C01.Bottom2",
+      "at": {
+        "x": 94.0,
+        "y": -266.0,
+        "z": 150.0
+      },
+      "direction": {
+        "axis": "Z",
+        "positive": true
+      },
+      "diameter": 3.0,
+      "depth": 5.0,
+      "purpose": "leg_plate"
+    },
+    {
+      "type": "bore",
+      "part": "C01.Bottom2",
+      "at": {
+        "x": 46.0,
+        "y": -266.0,
+        "z": 150.0
+      },
+      "direction": {
+        "axis": "Z",
+        "positive": true
+      },
+      "diameter": 3.0,
+      "depth": 5.0,
+      "purpose": "leg_plate"
+    },
+    {
+      "type": "bore",
+      "part": "C01.Bottom2",
+      "at": {
+        "x": 486.0,
+        "y": -118.0,
+        "z": 150.0
+      },
+      "direction": {
+        "axis": "Z",
+        "positive": true
+      },
+      "diameter": 3.0,
+      "depth": 5.0,
+      "purpose": "leg_plate"
+    },
+    {
+      "type": "bore",
+      "part": "C01.Bottom2",
+      "at": {
+        "x": 438.0,
+        "y": -118.0,
+        "z": 150.0
+      },
+      "direction": {
+        "axis": "Z",
+        "positive": true
+      },
+      "diameter": 3.0,
+      "depth": 5.0,
+      "purpose": "leg_plate"
+    },
+    {
+      "type": "bore",
+      "part": "C01.Bottom2",
+      "at": {
+        "x": 486.0,
+        "y": -54.0,
+        "z": 150.0
+      },
+      "direction": {
+        "axis": "Z",
+        "positive": true
+      },
+      "diameter": 3.0,
+      "depth": 5.0,
+      "purpose": "leg_plate"
+    },
+    {
+      "type": "bore",
+      "part": "C01.Bottom2",
+      "at": {
+        "x": 438.0,
+        "y": -54.0,
+        "z": 150.0
+      },
+      "direction": {
+        "axis": "Z",
+        "positive": true
+      },
+      "diameter": 3.0,
+      "depth": 5.0,
+      "purpose": "leg_plate"
+    },
+    {
+      "type": "bore",
+      "part": "C01.Bottom2",
+      "at": {
+        "x": 94.0,
+        "y": -118.0,
+        "z": 150.0
+      },
+      "direction": {
+        "axis": "Z",
+        "positive": true
+      },
+      "diameter": 3.0,
+      "depth": 5.0,
+      "purpose": "leg_plate"
+    },
+    {
+      "type": "bore",
+      "part": "C01.Bottom2",
+      "at": {
+        "x": 46.0,
+        "y": -118.0,
+        "z": 150.0
+      },
+      "direction": {
+        "axis": "Z",
+        "positive": true
+      },
+      "diameter": 3.0,
+      "depth": 5.0,
+      "purpose": "leg_plate"
+    },
+    {
+      "type": "bore",
+      "part": "C01.Bottom2",
+      "at": {
+        "x": 94.0,
+        "y": -54.0,
+        "z": 150.0
+      },
+      "direction": {
+        "axis": "Z",
+        "positive": true
+      },
+      "diameter": 3.0,
+      "depth": 5.0,
+      "purpose": "leg_plate"
+    },
+    {
+      "type": "bore",
+      "part": "C01.Bottom2",
+      "at": {
+        "x": 46.0,
+        "y": -54.0,
+        "z": 150.0
+      },
+      "direction": {
+        "axis": "Z",
+        "positive": true
+      },
+      "diameter": 3.0,
+      "depth": 5.0,
+      "purpose": "leg_plate"
+    },
+    {
+      "type": "bore",
       "part": "C01.Door2",
       "at": {
         "x": 580.0,
@@ -2492,7 +3004,7 @@ expression: list
       "item": "hafele.axilo.set.150.screw-on",
       "description": "Häfele AXILO 78 leg, 150 mm, screw-on (637.76.408)",
       "at": {
-        "x": 50.0,
+        "x": 80.0,
         "y": 118.0,
         "z": 0.0
       },
@@ -2503,8 +3015,8 @@ expression: list
       "item": "hafele.axilo.set.150.screw-on",
       "description": "Häfele AXILO 78 leg, 150 mm, screw-on (637.76.408)",
       "at": {
-        "x": 50.0,
-        "y": 530.0,
+        "x": 80.0,
+        "y": 510.0,
         "z": 0.0
       },
       "part": "C01.Bottom",
@@ -2514,7 +3026,7 @@ expression: list
       "item": "hafele.axilo.plinth-clip.screw",
       "description": "AXILO plinth clip 637.38.054, for screw fixing to the back of the plinth, white plastic",
       "at": {
-        "x": 50.0,
+        "x": 80.0,
         "y": 68.0,
         "z": 75.0
       },
@@ -2525,7 +3037,7 @@ expression: list
       "item": "hafele.axilo.set.150.screw-on",
       "description": "Häfele AXILO 78 leg, 150 mm, screw-on (637.76.408)",
       "at": {
-        "x": 850.0,
+        "x": 820.0,
         "y": 118.0,
         "z": 0.0
       },
@@ -2536,8 +3048,8 @@ expression: list
       "item": "hafele.axilo.set.150.screw-on",
       "description": "Häfele AXILO 78 leg, 150 mm, screw-on (637.76.408)",
       "at": {
-        "x": 850.0,
-        "y": 530.0,
+        "x": 820.0,
+        "y": 510.0,
         "z": 0.0
       },
       "part": "C01.Bottom",
@@ -2547,7 +3059,7 @@ expression: list
       "item": "hafele.axilo.plinth-clip.screw",
       "description": "AXILO plinth clip 637.38.054, for screw fixing to the back of the plinth, white plastic",
       "at": {
-        "x": 850.0,
+        "x": 820.0,
         "y": 68.0,
         "z": 75.0
       },
@@ -2559,7 +3071,7 @@ expression: list
       "description": "Häfele AXILO 78 leg, 150 mm, screw-on (637.76.408)",
       "at": {
         "x": 462.0,
-        "y": -270.0,
+        "y": -240.0,
         "z": 0.0
       },
       "part": "C01.Bottom2",
@@ -2569,8 +3081,8 @@ expression: list
       "item": "hafele.axilo.set.150.screw-on",
       "description": "Häfele AXILO 78 leg, 150 mm, screw-on (637.76.408)",
       "at": {
-        "x": 50.0,
-        "y": -270.0,
+        "x": 70.0,
+        "y": -240.0,
         "z": 0.0
       },
       "part": "C01.Bottom2",
@@ -2581,7 +3093,7 @@ expression: list
       "description": "AXILO plinth clip 637.38.054, for screw fixing to the back of the plinth, white plastic",
       "at": {
         "x": 512.0,
-        "y": -270.0,
+        "y": -240.0,
         "z": 75.0
       },
       "part": "C01.Plinth2",
@@ -2592,7 +3104,7 @@ expression: list
       "description": "Häfele AXILO 78 leg, 150 mm, screw-on (637.76.408)",
       "at": {
         "x": 462.0,
-        "y": -50.0,
+        "y": -80.0,
         "z": 0.0
       },
       "part": "C01.Bottom2",
@@ -2602,8 +3114,8 @@ expression: list
       "item": "hafele.axilo.set.150.screw-on",
       "description": "Häfele AXILO 78 leg, 150 mm, screw-on (637.76.408)",
       "at": {
-        "x": 50.0,
-        "y": -50.0,
+        "x": 70.0,
+        "y": -80.0,
         "z": 0.0
       },
       "part": "C01.Bottom2",
@@ -2614,7 +3126,7 @@ expression: list
       "description": "AXILO plinth clip 637.38.054, for screw fixing to the back of the plinth, white plastic",
       "at": {
         "x": 512.0,
-        "y": -50.0,
+        "y": -80.0,
         "z": 75.0
       },
       "part": "C01.Plinth2",

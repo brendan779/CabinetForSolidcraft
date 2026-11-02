@@ -75,6 +75,38 @@ pub struct CadPlacement {
     pub frame: Frame,
 }
 
+/// An AXILO plate is longer on its +X side, so it turns to keep that towards the cabinet's middle:
+/// otherwise a leg by the right side would have its fixings off the end of the bottom panel.
+pub(crate) fn leg_plate_turned(x: f64, panel_centre: f64) -> bool {
+    x > panel_centre + 1.0
+}
+
+/// Where an AXILO plate under a leg at (`x`, `y`) fixes to the bottom panel: its four tips or
+/// screws, as (x, y).
+pub(crate) fn leg_plate_fixings(
+    plate: &cabinet_catalog::HardwareItem,
+    x: f64,
+    y: f64,
+    panel_centre: f64,
+) -> Vec<(f64, f64)> {
+    let (Ok(a), Ok(b), Ok(across)) = (
+        plate.param("fix_x_a"),
+        plate.param("fix_x_b"),
+        plate.param("fix_y"),
+    ) else {
+        return Vec::new();
+    };
+    let sign = if leg_plate_turned(x, panel_centre) {
+        -1.0
+    } else {
+        1.0
+    };
+    [a, b]
+        .iter()
+        .flat_map(|fx| [(x + sign * fx, y - across), (x + sign * fx, y + across)])
+        .collect()
+}
+
 /// A plinth leg, generic or a Häfele AXILO 78 set.
 pub fn is_leg(item: &str) -> bool {
     item.starts_with("hafele.leg") || item.starts_with("hafele.axilo.set.")
@@ -369,14 +401,22 @@ pub fn cad_placements(list: &PartList) -> Vec<CadPlacement> {
                 origin: Vec3::new(h.at.x, h.at.y, z),
                 frame: Frame::Upright,
             };
-            // The tube's foot on the floor; the plate's top against the carcass bottom.
+            // The tube's foot on the floor; the plate's face against the carcass bottom, its tips
+            // up in their holes.
             if let Ok(t) = tube {
                 out.push(upright(t, height));
             }
             if let Ok(g) = glide
                 && let Ok(top) = g.param("model_top")
             {
-                out.push(upright(g, bottom.bounds.min.z - top));
+                let mut plate = upright(g, bottom.bounds.min.z - top);
+                if leg_plate_turned(h.at.x, bottom.bounds.center().x) {
+                    plate.frame = Frame::Oriented {
+                        x: Vec3::new(-1.0, 0.0, 0.0),
+                        y: Vec3::new(0.0, -1.0, 0.0),
+                    };
+                }
+                out.push(plate);
             }
         } else if h.item.starts_with("blum.clip-top") {
             let n = next("Hinge");
@@ -728,9 +768,28 @@ mod tests {
         assert_eq!(plate.article, "637.38.287");
         // The 150 mm tube hangs from its origin, so its foot is on the floor.
         assert_eq!(tube.origin.z, 150.0);
-        assert_eq!(plate.origin.z, bottom - 25.6);
+        assert_eq!(plate.origin.z, bottom - 25.0);
         let m = transform(tube, true, BLUM_FRONT_PLANE);
         assert_eq!(apply(&m, Vec3::new(0.0, 0.0, -150.0)).z, 0.0);
+    }
+
+    #[test]
+    fn a_turned_leg_plate_still_stands_with_its_face_on_the_panel() {
+        let mut cab = Cabinet::new("B01", CabinetKind::Base);
+        cab.standard.toe_kick = crate::model::ToeKick::LegsAndPlinth;
+        let list = build_cabinet(&cab).unwrap();
+        let bottom = list.part("B01.Bottom").unwrap().bounds;
+        let plates: Vec<_> = cad_placements(&list)
+            .into_iter()
+            .filter(|c| c.item.contains(".glide."))
+            .collect();
+        assert!(plates.iter().any(|c| c.frame == Frame::Upright));
+        for c in plates.iter().filter(|c| c.frame != Frame::Upright) {
+            let m = transform(c, true, BLUM_FRONT_PLANE);
+            assert_eq!(apply(&m, Vec3::new(0.0, 0.0, 25.0)).z, bottom.min.z);
+            // The plate's long side points back to the middle.
+            assert!(apply(&m, Vec3::new(52.7, 0.0, 0.0)).x < c.origin.x);
+        }
     }
 
     #[test]

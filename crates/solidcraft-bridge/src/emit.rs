@@ -151,6 +151,23 @@ pub fn emit_cabinet_with(
             cmds.extend(slot_batches(&list.cabinet, &list.operations));
         }
         cmds.extend(bore_batches(&list.operations));
+    } else {
+        // A leg's plate is drawn at every detail level, so its tips need their holes at every one.
+        let plates: Vec<Operation> = list
+            .operations
+            .iter()
+            .filter(|o| {
+                matches!(
+                    o,
+                    Operation::Bore {
+                        purpose: cabinet_core::part::BorePurpose::LegPlate,
+                        ..
+                    }
+                )
+            })
+            .cloned()
+            .collect();
+        cmds.extend(bore_batches(&plates));
     }
     // Legs at every detail level, so a cabinet never floats; hinge and runner stand-ins only with
     // machining. A stand-in is left out where the supplier's own model is put in (`real`).
@@ -1446,5 +1463,18 @@ mod tests {
             .map(|c| c["params"]["color"].as_str().unwrap())
             .collect();
         assert_eq!(colours, ["#888888", "#FFFFFF"]);
+    }
+
+    #[test]
+    fn design_detail_still_cuts_the_holes_a_legs_plate_fixes_into() {
+        let mut cab = cabinet_core::Cabinet::new("B01", cabinet_core::CabinetKind::Base);
+        cab.standard.toe_kick = cabinet_core::model::ToeKick::LegsAndPlinth;
+        let list = cabinet_core::build_cabinet(&cab).unwrap();
+        let cmds = emit_cabinet(&list, Detail::Design, None);
+        assert!(
+            cmds.iter()
+                .any(|c| c["command"] == "solid.extrude" && c["params"]["operation"] == "cut")
+        );
+        assert!(cmds.iter().any(|c| c["command"] == "sketch.circle.center"));
     }
 }
