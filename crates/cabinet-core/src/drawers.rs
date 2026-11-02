@@ -4,6 +4,7 @@
 use cabinet_catalog::HardwareItem;
 
 use crate::hardware;
+use crate::model::BoxHeight;
 
 /// Which boxes a drawer may be: each range lists (planning row, side set) keys tallest first,
 /// and the box chosen is the tallest whose space requirement fits. A system without a row
@@ -100,6 +101,35 @@ pub fn steel_box(
     space: f64,
     servo_drive: bool,
 ) -> Result<SteelBox, String> {
+    let pick = BoxPick::default();
+    picked_box(
+        kind,
+        range,
+        inner_width,
+        inner_depth,
+        space,
+        servo_drive,
+        pick,
+    )
+}
+
+/// A box height or nominal length the maker asked for, where it isn't left to what fits.
+#[derive(Clone, Copy, Debug, Default, PartialEq)]
+pub struct BoxPick {
+    pub height: Option<BoxHeight>,
+    pub nominal_length: Option<f64>,
+}
+
+/// [`steel_box`] held to `pick`: an error if what it asks for doesn't fit.
+pub fn picked_box(
+    kind: BoxSystem,
+    range: BoxRange,
+    inner_width: f64,
+    inner_depth: f64,
+    space: f64,
+    servo_drive: bool,
+    pick: BoxPick,
+) -> Result<SteelBox, String> {
     let key = kind.key();
     let what = if range == BoxRange::Inner {
         "inner drawer"
@@ -107,7 +137,13 @@ pub fn steel_box(
         "drawer"
     };
     let mut last_err = format!("no {} {what} fits in {space:.0} mm of height", kind.name());
-    for &(h, sides_key) in range.heights() {
+    // A height asked for is tried on its own, whatever the range: the maker chose it.
+    let asked = pick.height.map(|b| [(b.key(), b.key())]);
+    let heights: &[(&str, &str)] = match &asked {
+        Some(one) => one,
+        None => range.heights(),
+    };
+    for &(h, sides_key) in heights {
         let Ok(system) = hardware::item(&format!("blum.{key}.{h}")) else {
             continue;
         };
@@ -125,6 +161,7 @@ pub fn steel_box(
             .filter(|i| i.id.starts_with(&side_prefix))
             .filter_map(|i| Some((i.param("nominal_length").ok()?, i)))
             .filter(|(nl, _)| nl + allowance <= inner_depth + 1e-9)
+            .filter(|(nl, _)| pick.nominal_length.is_none_or(|want| want == *nl))
             .collect();
         lengths.sort_by(|a, b| a.0.total_cmp(&b.0));
         let Some(&(nl, sides)) = lengths.last() else {

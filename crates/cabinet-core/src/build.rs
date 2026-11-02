@@ -17,6 +17,8 @@ use crate::part::{
 };
 use crate::{Error, Result};
 
+/// Our choice: the least wood in front of a runner's screw.
+const MIN_SCREW_FROM_EDGE: f64 = 8.0;
 /// Depth of the grooves an inset back sits in.
 const BACK_GROOVE_DEPTH: f64 = 8.0;
 /// Distance from the carcass rear to the rear face of an inset back (the wall-hanging void).
@@ -389,6 +391,8 @@ struct Builder<'a> {
     /// While a section's fronts are built: its own opening and drawer system, if it has them.
     opening_now: Option<Opening>,
     system_now: Option<DrawerSystem>,
+    /// That section's box height and length, where the maker picked them.
+    box_pick_now: drawers::BoxPick,
     /// Fronts whose section opens differently from the job, by name.
     front_openings: std::collections::BTreeMap<String, Opening>,
     /// The drawer frame's openings, collected as the fronts are built.
@@ -475,6 +479,7 @@ impl<'a> Builder<'a> {
             inner_hinge: false,
             opening_now: None,
             system_now: None,
+            box_pick_now: drawers::BoxPick::default(),
             front_openings: Default::default(),
             frame_openings: Vec::new(),
             pending_pins: Vec::new(),
@@ -1890,7 +1895,7 @@ impl<'a> Builder<'a> {
             } else if row.shelf_above {
                 next_floor - t
             } else {
-                next_floor
+                fz1 + g
             };
             let behind_drawers = matches!(row.front, SectionFront::Drawers { .. });
             if fronts {
@@ -1901,6 +1906,17 @@ impl<'a> Builder<'a> {
                 self.system_now = match row.front {
                     SectionFront::Drawers { system, .. } => system,
                     _ => None,
+                };
+                self.box_pick_now = match row.front {
+                    SectionFront::Drawers {
+                        box_height,
+                        nominal_length,
+                        ..
+                    } => drawers::BoxPick {
+                        height: box_height,
+                        nominal_length,
+                    },
+                    _ => drawers::BoxPick::default(),
                 };
                 let before = self.list.parts.len();
                 self.row_fronts(row, (x0, x1, y0, y1), (fz0, fz1), (floor, ceiling), counts);
@@ -1915,8 +1931,9 @@ impl<'a> Builder<'a> {
                 self.inner_hinge = false;
                 self.opening_now = None;
                 self.system_now = None;
+                self.box_pick_now = drawers::BoxPick::default();
                 if !last {
-                    floor = next_floor;
+                    floor = if row.shelf_above { next_floor } else { fz1 + g };
                 }
                 fz0 = fz1 + g;
                 continue;
@@ -2007,7 +2024,7 @@ impl<'a> Builder<'a> {
                         panel(self, &bay.right_panel),
                     );
                 }
-                floor = next_floor;
+                floor = if row.shelf_above { next_floor } else { fz1 + g };
             }
             fz0 = fz1 + g;
         }
@@ -2157,8 +2174,20 @@ impl<'a> Builder<'a> {
             fronts.push(b);
             top -= hgt + g;
         }
+        // Blum's session: the lowest drawer stands on the floor, and one above another on the level
+        // of its own front's bottom edge (its front holes 51 up, against the lowest's 67).
         let lift = floor - z0;
-        let datums: Vec<f64> = fronts.iter().map(|b| b.min.z + lift).collect();
+        let datums: Vec<f64> = fronts
+            .iter()
+            .enumerate()
+            .map(|(i, b)| {
+                if i + 1 == fronts.len() {
+                    b.min.z + lift
+                } else {
+                    b.min.z
+                }
+            })
+            .collect();
         for (i, b) in fronts.iter().enumerate() {
             let above = if i == 0 { ceiling } else { datums[i - 1] };
             // A frame's rail comes down behind the front, past any bevel, and the box stays under
@@ -2416,14 +2445,19 @@ impl<'a> Builder<'a> {
             DrawerSides::HighFronted => BoxRange::HighFronted,
         };
         let servo = self.opening_now() == Opening::ServoDrive;
-        let lb = match drawers::steel_box(
-            kind,
-            range,
-            inner_width,
-            self.interior_back - fy,
-            space,
-            servo,
-        ) {
+        let depth = self.interior_back - fy;
+        let pick = self.box_pick_now;
+        let found = match drawers::picked_box(kind, range, inner_width, depth, space, servo, pick) {
+            Ok(lb) => Ok(lb),
+            Err(e) if pick != drawers::BoxPick::default() => {
+                self.list
+                    .warnings
+                    .push(format!("{front_name}: {e}; the box that fits is used"));
+                drawers::steel_box(kind, range, inner_width, depth, space, servo)
+            }
+            Err(e) => Err(e),
+        };
+        let lb = match found {
             Ok(lb) => lb,
             Err(e) => {
                 self.list
@@ -2453,6 +2487,7 @@ impl<'a> Builder<'a> {
             front_top: front.max().z,
         });
         self.steel_box_parts(n, &lb, fy, datum + base_lift);
+        self.profile_screws(&lb, &bay, fy, datum);
         // Front fixing brackets: their bores in the back of the front, in from each side.
         for x in [bay.left + hole_inset, bay.right - hole_inset] {
             for hole in &lb.system.drilling {
@@ -2467,6 +2502,39 @@ impl<'a> Builder<'a> {
             }
         }
         self.steel_box_hardware(&lb, front.center(), &front_name);
+    }
+
+    /// The cabinet profile's screw holes in the panels either side of the bay, each from the
+    /// front's back face and above the drawer's datum. A hole the moved-back side no longer
+    /// reaches is left out: Blum lists the first one as optional.
+    fn profile_screws(&mut self, lb: &SteelBox, bay: &Bay, fy: f64, datum: f64) {
+        let t = self.cab.standard.carcass_thickness;
+        // A divider is drilled from both sides: each hole stops short of the middle.
+        let sides = [
+            (bay.left_panel.clone(), bay.left, false, bay.left_divider),
+            (bay.right_panel.clone(), bay.right, true, bay.right_divider),
+        ];
+        for (part, x, positive, divider) in sides {
+            for hole in &lb.profile.drilling {
+                let y = fy + hole.x;
+                if y < MIN_SCREW_FROM_EDGE {
+                    continue;
+                }
+                let depth = if divider {
+                    hole.depth.min(t / 2.0 - 0.5)
+                } else {
+                    hole.depth
+                };
+                self.list.operations.push(Operation::Bore {
+                    part: part.clone(),
+                    at: Vec3::new(x, y, datum + hole.y),
+                    direction: Dir::new(Axis::X, positive),
+                    diameter: hole.diameter,
+                    depth,
+                    purpose: BorePurpose::RunnerScrew,
+                });
+            }
+        }
     }
 
     /// A steel box's base and back, placed for the 3D view and the cut list (the sizes are
@@ -6084,6 +6152,96 @@ mod tests {
         }
     }
 
+    /// Blum's session (check 2): a third hole 37 from the front and 38 above each datum, which
+    /// is 54 and 328.33 up the sides; the top one follows the fixed shelf, 7.5 higher in ours.
+    #[test]
+    fn a_legrabox_drills_its_profile_screws_at_blums_positions() {
+        let cab: Cabinet = serde_json::from_value(serde_json::json!({
+            "id": "B01", "kind": "base", "width": 600, "depth": 580, "height": 870,
+            "adjustable_shelves": 0,
+            "fronts": {"type": "sections", "columns": [{"width": 0, "rows": [
+                {"front": {"type": "drawers", "count": 1}, "shelf_above": false,
+                 "opening": "servo_drive"},
+                {"front": {"type": "drawers", "count": 1}, "shelf_above": true,
+                 "opening": "servo_drive"},
+                {"front": {"type": "drawers", "count": 1}, "opening": "servo_drive"}
+            ]}]},
+            "standard": {"toe_kick": "none", "top_joint": "rails", "bottom_joint": "under_sides",
+                "back": "applied", "back_thickness": 16, "front_thickness": 16,
+                "carcass_thickness": 16, "front_gap": 3, "top_gap": 2, "bottom_gap": 0,
+                "rail_width": 80, "fixings": "dowel", "overlay": "full",
+                "hinge_boss": "expando", "drawer_system": "legrabox"}
+        }))
+        .unwrap();
+        let list = build_cabinet(&cab).unwrap();
+        let mut third: Vec<f64> = list
+            .operations
+            .iter()
+            .filter_map(|o| match o {
+                Operation::Bore {
+                    part,
+                    at,
+                    purpose: BorePurpose::RunnerScrew,
+                    ..
+                } if part == "B01.LeftSide" && at.y == 37.0 => Some(at.z),
+                _ => None,
+            })
+            .collect();
+        third.sort_by(f64::total_cmp);
+        assert_eq!(third.len(), 3);
+        assert!((third[0] - 54.0).abs() < 0.01, "{third:?}");
+        assert!((third[1] - 328.33).abs() < 0.01, "{third:?}");
+        let shelf = list.by_role(PartRole::Shelf).next().unwrap().bounds.max().z;
+        assert!((third[2] - (shelf + 38.0)).abs() < 0.01, "{third:?}");
+        assert!(
+            list.warnings.iter().all(|w| !w.contains("clash")),
+            "{:?}",
+            list.warnings
+        );
+    }
+
+    #[test]
+    fn a_section_can_pick_its_box_height_and_length() {
+        let mut cab = Cabinet::new("D01", CabinetKind::DrawerBank).sectioned();
+        let FrontLayout::Sections { columns } = &mut cab.fronts else {
+            panic!("sections");
+        };
+        columns[0].rows[0].front = SectionFront::Drawers {
+            count: 1,
+            ratios: Vec::new(),
+            system: None,
+            box_height: Some(crate::model::BoxHeight::C),
+            nominal_length: Some(500.0),
+        };
+        let list = build_cabinet(&cab).unwrap();
+        let has = |id: &str| list.hardware.iter().any(|h| h.item == id);
+        assert!(has("blum.legrabox.cabinet-profile.750.500"));
+        assert!(
+            list.hardware
+                .iter()
+                .any(|h| h.item.contains(".drawer-side.c."))
+        );
+        assert!(list.warnings.iter().all(|w| !w.contains("box that fits")));
+    }
+
+    #[test]
+    fn a_box_too_tall_for_its_drawer_says_so_and_fits_one_that_does() {
+        let mut cab = Cabinet::new("D01", CabinetKind::DrawerBank).sectioned();
+        let FrontLayout::Sections { columns } = &mut cab.fronts else {
+            panic!("sections");
+        };
+        columns[0].rows[0].front = SectionFront::Drawers {
+            count: 4,
+            ratios: Vec::new(),
+            system: None,
+            box_height: Some(crate::model::BoxHeight::F),
+            nominal_length: None,
+        };
+        let list = build_cabinet(&cab).unwrap();
+        assert!(list.warnings.iter().any(|w| w.contains("box that fits")));
+        assert!(list.part("D01.DrawerBottom1").is_some());
+    }
+
     fn framed_bank() -> Cabinet {
         let mut cab = Cabinet::new("D01", CabinetKind::DrawerBank).sectioned();
         cab.standard.drawer_frame = DrawerFrame::Board;
@@ -7135,6 +7293,8 @@ mod tests {
                         count: 2,
                         ratios: Vec::new(),
                         system: Some(DrawerSystem::Merivobox),
+                        box_height: None,
+                        nominal_length: None,
                     },
                     SectionInside::Empty,
                 )],

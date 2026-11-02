@@ -316,6 +316,8 @@ pub enum BorePurpose {
     Dowel,
     /// A drawer system's front fixing (LEGRABOX EXPANDO bracket), in the back of a drawer front.
     FrontFixing,
+    /// A cabinet profile's screw, in the side or divider beside a drawer.
+    RunnerScrew,
     /// A light's cable, through a panel.
     CableHole,
     /// A handle's or knob's screw hole, through the front from the back.

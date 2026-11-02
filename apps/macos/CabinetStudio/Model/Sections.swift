@@ -11,6 +11,9 @@ struct SectionCell: Equatable {
     var ratios: [Double] = []
     /// The drawer system, where it differs from the job's.
     var system: String?
+    /// A steel box's height (n, m, k, c, f) and nominal length, where they aren't left to what fits.
+    var boxHeight: String?
+    var nominalLength: Double?
     /// A lifting front's movement, and its handle's weight (kg).
     var liftKind = "stay_lift"
     var handleWeight = SectionCell.defaultHandleWeight
@@ -43,6 +46,8 @@ struct SectionCell: Equatable {
             drawers = (f["count"] as? NSNumber)?.intValue ?? 2
             ratios = (f["ratios"] as? [NSNumber])?.map(\.doubleValue) ?? []
             system = f["system"] as? String
+            boxHeight = f["box_height"] as? String
+            nominalLength = (f["nominal_length"] as? NSNumber)?.doubleValue
         case "lift":
             front = "lift"
             liftKind = f["kind"] as? String ?? "stay_lift"
@@ -72,6 +77,8 @@ struct SectionCell: Equatable {
             f = ["type": "drawers", "count": drawers]
             if !ratios.isEmpty { f["ratios"] = ratios }
             if let system { f["system"] = system }
+            if let boxHeight { f["box_height"] = boxHeight }
+            if let nominalLength { f["nominal_length"] = nominalLength }
         case "lift": f = ["type": "lift", "kind": liftKind, "handle_weight": handleWeight]
         case "bi_fold": f = ["type": "bi_fold", "handle_weight": handleWeight]
         case "niche": f = ["type": "niche"]

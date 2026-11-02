@@ -385,6 +385,8 @@ impl Cabinet {
                         count: ratios.len() as u32,
                         ratios: if equal { Vec::new() } else { ratios.clone() },
                         system: None,
+                        box_height: None,
+                        nominal_length: None,
                     },
                     if wardrobe {
                         inside
@@ -634,6 +636,12 @@ pub enum SectionFront {
         /// The drawer system, where it differs from the job's.
         #[serde(default, skip_serializing_if = "Option::is_none")]
         system: Option<DrawerSystem>,
+        /// A steel box's height, where it isn't the tallest that fits.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        box_height: Option<BoxHeight>,
+        /// A steel box's nominal length, where it isn't the longest that fits.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        nominal_length: Option<f64>,
     },
     /// One lifting front. Only one to a cabinet: AVENTOS is sized from the cabinet.
     Lift {
@@ -655,6 +663,8 @@ impl SectionFront {
             count,
             ratios: Vec::new(),
             system: None,
+            box_height: None,
+            nominal_length: None,
         }
     }
 }
@@ -1144,6 +1154,30 @@ pub enum SharknoseEdge {
     Bottom,
     /// The side opposite the hinges.
     Opening,
+}
+
+/// A steel drawer box's height, as Blum names them.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum BoxHeight {
+    N,
+    M,
+    K,
+    C,
+    F,
+}
+
+impl BoxHeight {
+    /// The planning row's and side set's key in the catalog.
+    pub fn key(self) -> &'static str {
+        match self {
+            Self::N => "n",
+            Self::M => "m",
+            Self::K => "k",
+            Self::C => "c",
+            Self::F => "f",
+        }
+    }
 }
 
 /// What stands behind drawer fronts.

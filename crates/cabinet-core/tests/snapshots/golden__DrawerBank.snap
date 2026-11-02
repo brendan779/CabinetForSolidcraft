@@ -255,7 +255,7 @@ expression: list
         "min": {
           "x": 33.5,
           "y": 0.0,
-          "z": 669.4
+          "z": 653.4
         },
         "size": {
           "x": 533.0,
@@ -282,7 +282,7 @@ expression: list
         "min": {
           "x": 35.0,
           "y": 524.0,
-          "z": 685.4
+          "z": 669.4
         },
         "size": {
           "x": 530.0,
@@ -309,7 +309,7 @@ expression: list
         "min": {
           "x": 33.5,
           "y": 0.0,
-          "z": 429.4
+          "z": 413.4
         },
         "size": {
           "x": 533.0,
@@ -336,7 +336,7 @@ expression: list
         "min": {
           "x": 35.0,
           "y": 524.0,
-          "z": 445.4
+          "z": 429.4
         },
         "size": {
           "x": 530.0,
@@ -1329,11 +1329,235 @@ expression: list
     },
     {
       "type": "bore",
+      "part": "C01.LeftSide",
+      "at": {
+        "x": 16.0,
+        "y": 19.0,
+        "z": 668.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 5.0,
+      "depth": 11.5,
+      "purpose": "runner_screw"
+    },
+    {
+      "type": "bore",
+      "part": "C01.LeftSide",
+      "at": {
+        "x": 16.0,
+        "y": 37.0,
+        "z": 668.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 5.0,
+      "depth": 11.5,
+      "purpose": "runner_screw"
+    },
+    {
+      "type": "bore",
+      "part": "C01.LeftSide",
+      "at": {
+        "x": 16.0,
+        "y": 69.0,
+        "z": 668.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 5.0,
+      "depth": 11.5,
+      "purpose": "runner_screw"
+    },
+    {
+      "type": "bore",
+      "part": "C01.LeftSide",
+      "at": {
+        "x": 16.0,
+        "y": 243.0,
+        "z": 668.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 2.5,
+      "depth": 10.0,
+      "purpose": "runner_screw"
+    },
+    {
+      "type": "bore",
+      "part": "C01.LeftSide",
+      "at": {
+        "x": 16.0,
+        "y": 261.0,
+        "z": 668.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 5.0,
+      "depth": 11.5,
+      "purpose": "runner_screw"
+    },
+    {
+      "type": "bore",
+      "part": "C01.LeftSide",
+      "at": {
+        "x": 16.0,
+        "y": 293.0,
+        "z": 668.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 5.0,
+      "depth": 11.5,
+      "purpose": "runner_screw"
+    },
+    {
+      "type": "bore",
+      "part": "C01.LeftSide",
+      "at": {
+        "x": 16.0,
+        "y": 357.0,
+        "z": 668.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 5.0,
+      "depth": 11.5,
+      "purpose": "runner_screw"
+    },
+    {
+      "type": "bore",
+      "part": "C01.RightSide",
+      "at": {
+        "x": 584.0,
+        "y": 19.0,
+        "z": 668.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 5.0,
+      "depth": 11.5,
+      "purpose": "runner_screw"
+    },
+    {
+      "type": "bore",
+      "part": "C01.RightSide",
+      "at": {
+        "x": 584.0,
+        "y": 37.0,
+        "z": 668.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 5.0,
+      "depth": 11.5,
+      "purpose": "runner_screw"
+    },
+    {
+      "type": "bore",
+      "part": "C01.RightSide",
+      "at": {
+        "x": 584.0,
+        "y": 69.0,
+        "z": 668.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 5.0,
+      "depth": 11.5,
+      "purpose": "runner_screw"
+    },
+    {
+      "type": "bore",
+      "part": "C01.RightSide",
+      "at": {
+        "x": 584.0,
+        "y": 243.0,
+        "z": 668.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 2.5,
+      "depth": 10.0,
+      "purpose": "runner_screw"
+    },
+    {
+      "type": "bore",
+      "part": "C01.RightSide",
+      "at": {
+        "x": 584.0,
+        "y": 261.0,
+        "z": 668.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 5.0,
+      "depth": 11.5,
+      "purpose": "runner_screw"
+    },
+    {
+      "type": "bore",
+      "part": "C01.RightSide",
+      "at": {
+        "x": 584.0,
+        "y": 293.0,
+        "z": 668.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 5.0,
+      "depth": 11.5,
+      "purpose": "runner_screw"
+    },
+    {
+      "type": "bore",
+      "part": "C01.RightSide",
+      "at": {
+        "x": 584.0,
+        "y": 357.0,
+        "z": 668.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 5.0,
+      "depth": 11.5,
+      "purpose": "runner_screw"
+    },
+    {
+      "type": "bore",
       "part": "C01.DrawerFront1",
       "at": {
         "x": 30.0,
         "y": 0.0,
-        "z": 697.0
+        "z": 681.0
       },
       "direction": {
         "axis": "Y",
@@ -1349,7 +1573,7 @@ expression: list
       "at": {
         "x": 30.0,
         "y": 0.0,
-        "z": 729.0
+        "z": 713.0
       },
       "direction": {
         "axis": "Y",
@@ -1365,7 +1589,7 @@ expression: list
       "at": {
         "x": 570.0,
         "y": 0.0,
-        "z": 697.0
+        "z": 681.0
       },
       "direction": {
         "axis": "Y",
@@ -1381,7 +1605,247 @@ expression: list
       "at": {
         "x": 570.0,
         "y": 0.0,
-        "z": 729.0
+        "z": 713.0
+      },
+      "direction": {
+        "axis": "Y",
+        "positive": false
+      },
+      "diameter": 10.0,
+      "depth": 12.0,
+      "purpose": "front_fixing"
+    },
+    {
+      "type": "bore",
+      "part": "C01.LeftSide",
+      "at": {
+        "x": 16.0,
+        "y": 19.0,
+        "z": 428.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 5.0,
+      "depth": 11.5,
+      "purpose": "runner_screw"
+    },
+    {
+      "type": "bore",
+      "part": "C01.LeftSide",
+      "at": {
+        "x": 16.0,
+        "y": 37.0,
+        "z": 428.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 5.0,
+      "depth": 11.5,
+      "purpose": "runner_screw"
+    },
+    {
+      "type": "bore",
+      "part": "C01.LeftSide",
+      "at": {
+        "x": 16.0,
+        "y": 69.0,
+        "z": 428.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 5.0,
+      "depth": 11.5,
+      "purpose": "runner_screw"
+    },
+    {
+      "type": "bore",
+      "part": "C01.LeftSide",
+      "at": {
+        "x": 16.0,
+        "y": 243.0,
+        "z": 428.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 2.5,
+      "depth": 10.0,
+      "purpose": "runner_screw"
+    },
+    {
+      "type": "bore",
+      "part": "C01.LeftSide",
+      "at": {
+        "x": 16.0,
+        "y": 261.0,
+        "z": 428.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 5.0,
+      "depth": 11.5,
+      "purpose": "runner_screw"
+    },
+    {
+      "type": "bore",
+      "part": "C01.LeftSide",
+      "at": {
+        "x": 16.0,
+        "y": 293.0,
+        "z": 428.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 5.0,
+      "depth": 11.5,
+      "purpose": "runner_screw"
+    },
+    {
+      "type": "bore",
+      "part": "C01.LeftSide",
+      "at": {
+        "x": 16.0,
+        "y": 357.0,
+        "z": 428.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 5.0,
+      "depth": 11.5,
+      "purpose": "runner_screw"
+    },
+    {
+      "type": "bore",
+      "part": "C01.RightSide",
+      "at": {
+        "x": 584.0,
+        "y": 19.0,
+        "z": 428.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 5.0,
+      "depth": 11.5,
+      "purpose": "runner_screw"
+    },
+    {
+      "type": "bore",
+      "part": "C01.RightSide",
+      "at": {
+        "x": 584.0,
+        "y": 37.0,
+        "z": 428.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 5.0,
+      "depth": 11.5,
+      "purpose": "runner_screw"
+    },
+    {
+      "type": "bore",
+      "part": "C01.RightSide",
+      "at": {
+        "x": 584.0,
+        "y": 69.0,
+        "z": 428.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 5.0,
+      "depth": 11.5,
+      "purpose": "runner_screw"
+    },
+    {
+      "type": "bore",
+      "part": "C01.RightSide",
+      "at": {
+        "x": 584.0,
+        "y": 243.0,
+        "z": 428.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 2.5,
+      "depth": 10.0,
+      "purpose": "runner_screw"
+    },
+    {
+      "type": "bore",
+      "part": "C01.RightSide",
+      "at": {
+        "x": 584.0,
+        "y": 261.0,
+        "z": 428.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 5.0,
+      "depth": 11.5,
+      "purpose": "runner_screw"
+    },
+    {
+      "type": "bore",
+      "part": "C01.RightSide",
+      "at": {
+        "x": 584.0,
+        "y": 293.0,
+        "z": 428.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 5.0,
+      "depth": 11.5,
+      "purpose": "runner_screw"
+    },
+    {
+      "type": "bore",
+      "part": "C01.RightSide",
+      "at": {
+        "x": 584.0,
+        "y": 357.0,
+        "z": 428.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 5.0,
+      "depth": 11.5,
+      "purpose": "runner_screw"
+    },
+    {
+      "type": "bore",
+      "part": "C01.DrawerFront2",
+      "at": {
+        "x": 30.0,
+        "y": 0.0,
+        "z": 441.0
       },
       "direction": {
         "axis": "Y",
@@ -1397,23 +1861,7 @@ expression: list
       "at": {
         "x": 30.0,
         "y": 0.0,
-        "z": 457.0
-      },
-      "direction": {
-        "axis": "Y",
-        "positive": false
-      },
-      "diameter": 10.0,
-      "depth": 12.0,
-      "purpose": "front_fixing"
-    },
-    {
-      "type": "bore",
-      "part": "C01.DrawerFront2",
-      "at": {
-        "x": 30.0,
-        "y": 0.0,
-        "z": 489.0
+        "z": 473.0
       },
       "direction": {
         "axis": "Y",
@@ -1429,7 +1877,7 @@ expression: list
       "at": {
         "x": 570.0,
         "y": 0.0,
-        "z": 457.0
+        "z": 441.0
       },
       "direction": {
         "axis": "Y",
@@ -1445,7 +1893,7 @@ expression: list
       "at": {
         "x": 570.0,
         "y": 0.0,
-        "z": 489.0
+        "z": 473.0
       },
       "direction": {
         "axis": "Y",
@@ -1454,6 +1902,230 @@ expression: list
       "diameter": 10.0,
       "depth": 12.0,
       "purpose": "front_fixing"
+    },
+    {
+      "type": "bore",
+      "part": "C01.LeftSide",
+      "at": {
+        "x": 16.0,
+        "y": 19.0,
+        "z": 204.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 5.0,
+      "depth": 11.5,
+      "purpose": "runner_screw"
+    },
+    {
+      "type": "bore",
+      "part": "C01.LeftSide",
+      "at": {
+        "x": 16.0,
+        "y": 37.0,
+        "z": 204.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 5.0,
+      "depth": 11.5,
+      "purpose": "runner_screw"
+    },
+    {
+      "type": "bore",
+      "part": "C01.LeftSide",
+      "at": {
+        "x": 16.0,
+        "y": 69.0,
+        "z": 204.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 5.0,
+      "depth": 11.5,
+      "purpose": "runner_screw"
+    },
+    {
+      "type": "bore",
+      "part": "C01.LeftSide",
+      "at": {
+        "x": 16.0,
+        "y": 243.0,
+        "z": 204.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 2.5,
+      "depth": 10.0,
+      "purpose": "runner_screw"
+    },
+    {
+      "type": "bore",
+      "part": "C01.LeftSide",
+      "at": {
+        "x": 16.0,
+        "y": 261.0,
+        "z": 204.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 5.0,
+      "depth": 11.5,
+      "purpose": "runner_screw"
+    },
+    {
+      "type": "bore",
+      "part": "C01.LeftSide",
+      "at": {
+        "x": 16.0,
+        "y": 293.0,
+        "z": 204.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 5.0,
+      "depth": 11.5,
+      "purpose": "runner_screw"
+    },
+    {
+      "type": "bore",
+      "part": "C01.LeftSide",
+      "at": {
+        "x": 16.0,
+        "y": 357.0,
+        "z": 204.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": false
+      },
+      "diameter": 5.0,
+      "depth": 11.5,
+      "purpose": "runner_screw"
+    },
+    {
+      "type": "bore",
+      "part": "C01.RightSide",
+      "at": {
+        "x": 584.0,
+        "y": 19.0,
+        "z": 204.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 5.0,
+      "depth": 11.5,
+      "purpose": "runner_screw"
+    },
+    {
+      "type": "bore",
+      "part": "C01.RightSide",
+      "at": {
+        "x": 584.0,
+        "y": 37.0,
+        "z": 204.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 5.0,
+      "depth": 11.5,
+      "purpose": "runner_screw"
+    },
+    {
+      "type": "bore",
+      "part": "C01.RightSide",
+      "at": {
+        "x": 584.0,
+        "y": 69.0,
+        "z": 204.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 5.0,
+      "depth": 11.5,
+      "purpose": "runner_screw"
+    },
+    {
+      "type": "bore",
+      "part": "C01.RightSide",
+      "at": {
+        "x": 584.0,
+        "y": 243.0,
+        "z": 204.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 2.5,
+      "depth": 10.0,
+      "purpose": "runner_screw"
+    },
+    {
+      "type": "bore",
+      "part": "C01.RightSide",
+      "at": {
+        "x": 584.0,
+        "y": 261.0,
+        "z": 204.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 5.0,
+      "depth": 11.5,
+      "purpose": "runner_screw"
+    },
+    {
+      "type": "bore",
+      "part": "C01.RightSide",
+      "at": {
+        "x": 584.0,
+        "y": 293.0,
+        "z": 204.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 5.0,
+      "depth": 11.5,
+      "purpose": "runner_screw"
+    },
+    {
+      "type": "bore",
+      "part": "C01.RightSide",
+      "at": {
+        "x": 584.0,
+        "y": 357.0,
+        "z": 204.0
+      },
+      "direction": {
+        "axis": "X",
+        "positive": true
+      },
+      "diameter": 5.0,
+      "depth": 11.5,
+      "purpose": "runner_screw"
     },
     {
       "type": "bore",

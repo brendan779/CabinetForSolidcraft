@@ -132,6 +132,10 @@ struct SectionsEditor: View {
                 optionTiles(systems, field: "drawer_system", selected: cell.system) { id in
                     editCell(c, r) { $0.system = id }
                 }
+                // Wooden boxes are sized by their runners and sides.
+                if !["movento", "tandem"].contains(cell.system ?? project.option("drawer_system", of: cab)) {
+                    boxChips(cell, c, r)
+                }
             }
             if cell.front == "lift" {
                 LiftKindPicker(selected: cell.liftKind) { id in editCell(c, r) { $0.liftKind = id } }
@@ -219,6 +223,30 @@ struct SectionsEditor: View {
     }
 
     /// A choice this section can make for itself, or leave to the job's.
+    /// A steel box's height and length, where the tallest and longest that fit won't do.
+    private func boxChips(_ cell: SectionCell, _ c: Int, _ r: Int) -> some View {
+        Group {
+            ChipRow("Box height") {
+                Button("Auto") { editCell(c, r) { $0.boxHeight = nil } }
+                    .buttonStyle(ChipStyle(selected: cell.boxHeight == nil))
+                ForEach(["n", "m", "k", "c", "f"], id: \.self) { h in
+                    Button(h.uppercased()) { editCell(c, r) { $0.boxHeight = h } }
+                        .buttonStyle(ChipStyle(selected: cell.boxHeight == h))
+                }
+            }
+            .help("Auto takes the tallest box that fits")
+            ChipRow("Length") {
+                Button("Auto") { editCell(c, r) { $0.nominalLength = nil } }
+                    .buttonStyle(ChipStyle(selected: cell.nominalLength == nil))
+                ForEach([300.0, 400, 450, 500, 550, 600], id: \.self) { nl in
+                    Button("\(Int(nl))") { editCell(c, r) { $0.nominalLength = nl } }
+                        .buttonStyle(ChipStyle(selected: cell.nominalLength == nl))
+                }
+            }
+            .help("Nominal length; Auto takes the longest that fits")
+        }
+    }
+
     private func optionTiles(
         _ items: [(id: String, title: String)],
         field: String,

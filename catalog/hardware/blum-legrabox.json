@@ -1,7 +1,7 @@
 {
   "brand": "Blum",
   "website": "https://www.blum.com",
-  "notes": "LEGRABOX drawers N, M and K, inner drawers M and K (pp. 204-205, 208-209) and high fronted pull-outs C and F for LEGRABOX pure (pp. 210-211, 216-217) from the Blum Catalogue and technical manual 2024/2025, printed pages 198-207 (order information and planning) and 248. Cut sizes are Blum's for 16 mm chipboard bases and backs. The catalogue lists N only for NL 400-550. Cabinet profile screw positions (p.248) are along the profile, but their height on the side is not printed on these pages, so the side drilling is not recorded yet. The drawer system rows (blum.legrabox.n/m/k) carry the planning numbers; their article is the system name, not an orderable part. Not verified by a person. C and F: base_above_datum 24.4 and the front hole chains (C 51/+32/+96, F 51/+32/+96/+32/+32) are read from the drawings; F's front takes an M bracket pair below a C pair. Inner drawers take the M or K side sets and have a steel front piece, no front holes; their base height above the datum is taken from the M/K drawer drawings (the inner drawer pages do not print it).",
+  "notes": "LEGRABOX drawers N, M and K, inner drawers M and K (pp. 204-205, 208-209) and high fronted pull-outs C and F for LEGRABOX pure (pp. 210-211, 216-217) from the Blum Catalogue and technical manual 2024/2025, printed pages 198-207 (order information and planning) and 248. Cut sizes are Blum's for 16 mm chipboard bases and backs. The catalogue lists N only for NL 400-550. Cabinet profile screw positions are from p.248, read from its drawing; their height on the side (38 above the datum) is from the owner's Blum session. The drawer system rows (blum.legrabox.n/m/k) carry the planning numbers; their article is the system name, not an orderable part. Not verified by a person. C and F: base_above_datum 24.4 and the front hole chains (C 51/+32/+96, F 51/+32/+96/+32/+32) are read from the drawings; F's front takes an M bracket pair below a C pair. Inner drawers take the M or K side sets and have a steel front piece, no front holes; their base height above the datum is taken from the M/K drawer drawings (the inner drawer pages do not print it).",
   "items": [
     {
       "id": "blum.legrabox.n",
@@ -624,11 +624,41 @@
         "max_load_kg": 40
       },
       "source": {
-        "url": "Blum Catalogue and technical manual 2024/2025, p.202, web code DQBN9A",
+        "url": "Blum Catalogue and technical manual 2024/2025, p.202, web code DQBN9A; screw positions p.248 (optional ** positions left out), height 38 above the datum and hole sizes from Blum session output 2026-10-27 (third hole at 54, 328.33 and 625.17; Ø5 x 11.5 as Blum's plate drilling)",
         "document_date": "2024/2025",
         "retrieved": "2026-10-26",
         "verified": false
-      }
+      },
+      "drilling": [
+        {
+          "x": 19.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 37.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 69.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 197.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        }
+      ]
     },
     {
       "id": "blum.legrabox.cabinet-profile.750.300",
@@ -642,11 +672,48 @@
         "max_load_kg": 40
       },
       "source": {
-        "url": "Blum Catalogue and technical manual 2024/2025, p.202, web code DQBN9A",
+        "url": "Blum Catalogue and technical manual 2024/2025, p.202, web code DQBN9A; screw positions p.248 (optional ** positions left out), height 38 above the datum and hole sizes from Blum session output 2026-10-27 (third hole at 54, 328.33 and 625.17; Ø5 x 11.5 as Blum's plate drilling)",
         "document_date": "2024/2025",
         "retrieved": "2026-10-26",
         "verified": false
-      }
+      },
+      "drilling": [
+        {
+          "x": 19.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 37.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 69.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 229.0,
+          "y": 38.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw 4 x 15; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 261.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        }
+      ]
     },
     {
       "id": "blum.legrabox.cabinet-profile.750.350",
@@ -660,11 +727,48 @@
         "max_load_kg": 40
       },
       "source": {
-        "url": "Blum Catalogue and technical manual 2024/2025, p.202, web code DQBN9A",
+        "url": "Blum Catalogue and technical manual 2024/2025, p.202, web code DQBN9A; screw positions p.248 (optional ** positions left out), height 38 above the datum and hole sizes from Blum session output 2026-10-27 (third hole at 54, 328.33 and 625.17; Ø5 x 11.5 as Blum's plate drilling)",
         "document_date": "2024/2025",
         "retrieved": "2026-10-26",
         "verified": false
-      }
+      },
+      "drilling": [
+        {
+          "x": 19.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 37.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 69.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 229.0,
+          "y": 38.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw 4 x 15; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 261.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        }
+      ]
     },
     {
       "id": "blum.legrabox.cabinet-profile.750.400",
@@ -678,11 +782,55 @@
         "max_load_kg": 40
       },
       "source": {
-        "url": "Blum Catalogue and technical manual 2024/2025, p.202, web code DQBN9A",
+        "url": "Blum Catalogue and technical manual 2024/2025, p.202, web code DQBN9A; screw positions p.248 (optional ** positions left out), height 38 above the datum and hole sizes from Blum session output 2026-10-27 (third hole at 54, 328.33 and 625.17; Ø5 x 11.5 as Blum's plate drilling)",
         "document_date": "2024/2025",
         "retrieved": "2026-10-26",
         "verified": false
-      }
+      },
+      "drilling": [
+        {
+          "x": 19.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 37.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 69.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 243.0,
+          "y": 38.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw 4 x 15; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 261.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 293.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        }
+      ]
     },
     {
       "id": "blum.legrabox.cabinet-profile.750.450",
@@ -696,11 +844,55 @@
         "max_load_kg": 40
       },
       "source": {
-        "url": "Blum Catalogue and technical manual 2024/2025, p.202, web code DQBN9A",
+        "url": "Blum Catalogue and technical manual 2024/2025, p.202, web code DQBN9A; screw positions p.248 (optional ** positions left out), height 38 above the datum and hole sizes from Blum session output 2026-10-27 (third hole at 54, 328.33 and 625.17; Ø5 x 11.5 as Blum's plate drilling)",
         "document_date": "2024/2025",
         "retrieved": "2026-10-26",
         "verified": false
-      }
+      },
+      "drilling": [
+        {
+          "x": 19.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 37.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 69.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 243.0,
+          "y": 38.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw 4 x 15; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 261.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 293.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        }
+      ]
     },
     {
       "id": "blum.legrabox.cabinet-profile.750.500",
@@ -714,11 +906,55 @@
         "max_load_kg": 40
       },
       "source": {
-        "url": "Blum Catalogue and technical manual 2024/2025, p.202, web code DQBN9A",
+        "url": "Blum Catalogue and technical manual 2024/2025, p.202, web code DQBN9A; screw positions p.248 (optional ** positions left out), height 38 above the datum and hole sizes from Blum session output 2026-10-27 (third hole at 54, 328.33 and 625.17; Ø5 x 11.5 as Blum's plate drilling)",
         "document_date": "2024/2025",
         "retrieved": "2026-10-26",
         "verified": false
-      }
+      },
+      "drilling": [
+        {
+          "x": 19.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 37.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 69.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 243.0,
+          "y": 38.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw 4 x 15; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 261.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 293.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        }
+      ]
     },
     {
       "id": "blum.legrabox.cabinet-profile.750.550",
@@ -732,11 +968,62 @@
         "max_load_kg": 40
       },
       "source": {
-        "url": "Blum Catalogue and technical manual 2024/2025, p.202, web code DQBN9A",
+        "url": "Blum Catalogue and technical manual 2024/2025, p.202, web code DQBN9A; screw positions p.248 (optional ** positions left out), height 38 above the datum and hole sizes from Blum session output 2026-10-27 (third hole at 54, 328.33 and 625.17; Ø5 x 11.5 as Blum's plate drilling)",
         "document_date": "2024/2025",
         "retrieved": "2026-10-26",
         "verified": false
-      }
+      },
+      "drilling": [
+        {
+          "x": 19.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 37.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 69.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 243.0,
+          "y": 38.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw 4 x 15; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 261.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 293.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 357.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        }
+      ]
     },
     {
       "id": "blum.legrabox.cabinet-profile.750.600",
@@ -750,11 +1037,62 @@
         "max_load_kg": 40
       },
       "source": {
-        "url": "Blum Catalogue and technical manual 2024/2025, p.202, web code DQBN9A",
+        "url": "Blum Catalogue and technical manual 2024/2025, p.202, web code DQBN9A; screw positions p.248 (optional ** positions left out), height 38 above the datum and hole sizes from Blum session output 2026-10-27 (third hole at 54, 328.33 and 625.17; Ø5 x 11.5 as Blum's plate drilling)",
         "document_date": "2024/2025",
         "retrieved": "2026-10-26",
         "verified": false
-      }
+      },
+      "drilling": [
+        {
+          "x": 19.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 37.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 69.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 243.0,
+          "y": 38.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw 4 x 15; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 261.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 293.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 357.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        }
+      ]
     },
     {
       "id": "blum.legrabox.cabinet-profile.753.450",
@@ -768,11 +1106,62 @@
         "max_load_kg": 70
       },
       "source": {
-        "url": "Blum Catalogue and technical manual 2024/2025, p.202, web code DQBN9A",
+        "url": "Blum Catalogue and technical manual 2024/2025, p.202, web code DQBN9A; screw positions p.248 (optional ** positions left out), height 38 above the datum and hole sizes from Blum session output 2026-10-27 (third hole at 54, 328.33 and 625.17; Ø5 x 11.5 as Blum's plate drilling)",
         "document_date": "2024/2025",
         "retrieved": "2026-10-26",
         "verified": false
-      }
+      },
+      "drilling": [
+        {
+          "x": 19.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 28.0,
+          "y": 38.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw 4 x 15; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 37.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 69.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 243.0,
+          "y": 38.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw 4 x 15; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 261.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 293.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        }
+      ]
     },
     {
       "id": "blum.legrabox.cabinet-profile.753.500",
@@ -786,11 +1175,69 @@
         "max_load_kg": 70
       },
       "source": {
-        "url": "Blum Catalogue and technical manual 2024/2025, p.202, web code DQBN9A",
+        "url": "Blum Catalogue and technical manual 2024/2025, p.202, web code DQBN9A; screw positions p.248 (optional ** positions left out), height 38 above the datum and hole sizes from Blum session output 2026-10-27 (third hole at 54, 328.33 and 625.17; Ø5 x 11.5 as Blum's plate drilling)",
         "document_date": "2024/2025",
         "retrieved": "2026-10-26",
         "verified": false
-      }
+      },
+      "drilling": [
+        {
+          "x": 19.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 28.0,
+          "y": 38.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw 4 x 15; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 37.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 69.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 243.0,
+          "y": 38.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw 4 x 15; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 261.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 293.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 357.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        }
+      ]
     },
     {
       "id": "blum.legrabox.cabinet-profile.753.550",
@@ -804,11 +1251,69 @@
         "max_load_kg": 70
       },
       "source": {
-        "url": "Blum Catalogue and technical manual 2024/2025, p.202, web code DQBN9A",
+        "url": "Blum Catalogue and technical manual 2024/2025, p.202, web code DQBN9A; screw positions p.248 (optional ** positions left out), height 38 above the datum and hole sizes from Blum session output 2026-10-27 (third hole at 54, 328.33 and 625.17; Ø5 x 11.5 as Blum's plate drilling)",
         "document_date": "2024/2025",
         "retrieved": "2026-10-26",
         "verified": false
-      }
+      },
+      "drilling": [
+        {
+          "x": 19.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 28.0,
+          "y": 38.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw 4 x 15; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 37.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 69.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 243.0,
+          "y": 38.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw 4 x 15; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 261.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 293.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 357.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        }
+      ]
     },
     {
       "id": "blum.legrabox.cabinet-profile.753.600",
@@ -822,11 +1327,69 @@
         "max_load_kg": 70
       },
       "source": {
-        "url": "Blum Catalogue and technical manual 2024/2025, p.202, web code DQBN9A",
+        "url": "Blum Catalogue and technical manual 2024/2025, p.202, web code DQBN9A; screw positions p.248 (optional ** positions left out), height 38 above the datum and hole sizes from Blum session output 2026-10-27 (third hole at 54, 328.33 and 625.17; Ø5 x 11.5 as Blum's plate drilling)",
         "document_date": "2024/2025",
         "retrieved": "2026-10-26",
         "verified": false
-      }
+      },
+      "drilling": [
+        {
+          "x": 19.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 28.0,
+          "y": 38.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw 4 x 15; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 37.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 69.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 243.0,
+          "y": 38.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw 4 x 15; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 261.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 293.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 357.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        }
+      ]
     },
     {
       "id": "blum.legrabox.cabinet-profile.753.650",
@@ -840,11 +1403,76 @@
         "max_load_kg": 70
       },
       "source": {
-        "url": "Blum Catalogue and technical manual 2024/2025, p.202, web code DQBN9A",
+        "url": "Blum Catalogue and technical manual 2024/2025, p.202, web code DQBN9A; screw positions p.248 (optional ** positions left out), height 38 above the datum and hole sizes from Blum session output 2026-10-27 (third hole at 54, 328.33 and 625.17; Ø5 x 11.5 as Blum's plate drilling)",
         "document_date": "2024/2025",
         "retrieved": "2026-10-26",
         "verified": false
-      }
+      },
+      "drilling": [
+        {
+          "x": 19.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 28.0,
+          "y": 38.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw 4 x 15; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 37.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 69.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 243.0,
+          "y": 38.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw 4 x 15; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 261.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 293.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 357.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 453.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        }
+      ]
     },
     {
       "id": "blum.legrabox.c",

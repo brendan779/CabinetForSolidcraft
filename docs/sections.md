@@ -47,6 +47,14 @@ Section
   per compartment holding driven drawers, where a compartment runs between fixed shelves; one power
   supply per cabinet. An adjustable shelf in the way of a bracket gets a warning.
 
+## Drawer boxes
+
+A section of drawers can pick `box_height` (n, m, k, c or f) and `nominal_length`; left out, it takes
+the tallest and longest that fit. A pick that doesn't fit warns and uses what does. The lowest drawer
+in a compartment stands on the floor; one above another stands on the level of its own front's bottom
+edge, as in Blum's session. LEGRABOX's profile screws are drilled in the panels either side, from
+`drilling` on the cabinet profile row.
+
 ## Drawer frame
 
 `drawer_frame: board` puts one board (`<id>.DrawerFrame`, 16 or 18, of the front board) over the
