@@ -5084,7 +5084,10 @@ impl<'a> Builder<'a> {
             .filter(|p| {
                 matches!(
                     p.role,
-                    PartRole::Door | PartRole::DrawerFront | PartRole::LiftFront
+                    PartRole::Door
+                        | PartRole::DrawerFront
+                        | PartRole::LiftFront
+                        | PartRole::CanopyFront
                 )
             })
             .map(|p| p.bounds.min.y)

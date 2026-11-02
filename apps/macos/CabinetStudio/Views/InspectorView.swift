@@ -752,7 +752,7 @@ struct SplashbackSection: View {
                     }
                 }
                 ChipRow("Grout") {
-                    ForEach([1.5, 2, 3, 5], id: \.self) { g in
+                    ForEach([0.5, 1, 1.5, 2, 3, 5], id: \.self) { g in
                         Button(String(format: "%g", g)) { set { $0.grout = g } }
                             .buttonStyle(ChipStyle(selected: cab.grout == g))
                             .accessibilityLabel("Grout \(g) millimetres")
@@ -1881,7 +1881,7 @@ struct FrontsSection: View {
             SectionsEditor(cab: cab)
             if cab.hasFront("door") {
                 HStack(spacing: 6) {
-                    Text("Arch").foregroundStyle(.secondary)
+                    Text("Arched top").foregroundStyle(.secondary)
                     Spacer()
                     ForEach([0.0, 40, 60, 80], id: \.self) { rise in
                         Button(rise == 0 ? "Square" : "\(Int(rise))") {

@@ -627,9 +627,12 @@ pub fn build_run(run: &Run) -> Result<Vec<PartList>> {
     for (i, (item, &at)) in run.items.iter().zip(&places).enumerate() {
         match item {
             RunItem::Cabinet(c) => {
-                out.push(build_cabinet(&walled(placed(c, at), run, i))?);
+                out.push(build_cabinet(&placed(c, at))?);
             }
-            RunItem::Filler(f) => out.push(filler(f, neighbour(i), at)?),
+            RunItem::Filler(f) => {
+                let ends = line_ends(run, i);
+                out.push(filler(f, neighbour(i), at, ends)?);
+            }
             RunItem::EndPanel(e) => out.push(end_panel(e, neighbour(i), at)),
             // Built from the rest, below.
             RunItem::Benchtop(b) => out.push(PartList {
@@ -726,6 +729,7 @@ pub fn build_run(run: &Run) -> Result<Vec<PartList>> {
             out[i] = moulding(m, &out, &line, &solid, &neighbour, wall_ends(run));
         }
     }
+    one_kick_per_stretch(run, &mut out);
     Ok(out)
 }
 
@@ -889,11 +893,6 @@ pub fn laid_out(run: &Run) -> Run {
                 RunItem::Cabinet(c) => RunItem::Cabinet(Box::new(placed(c, at))),
                 other => other.clone(),
             })
-            .enumerate()
-            .map(|(i, item)| match item {
-                RunItem::Cabinet(c) => RunItem::Cabinet(Box::new(walled(*c, run, i))),
-                other => other,
-            })
             .collect()
     };
     Run {
@@ -1055,8 +1054,8 @@ fn lay(run: &Run, start: f64, stop: usize) -> Vec<Laid> {
             RunItem::Cabinet(c) => {
                 let t = c.seen_board_thickness();
                 let takes = !matches!(c.kind, CabinetKind::CornerBase | CabinetKind::CornerWall);
-                let left = takes && c.seen_left() && !against_left(run, i);
-                let right = takes && i != stop && c.seen_right() && !against_right(run, i);
+                let left = takes && c.seen_left();
+                let right = takes && i != stop && c.seen_right();
                 (if left { t } else { 0.0 }, if right { t } else { 0.0 })
             }
             _ => (0.0, 0.0),
@@ -1311,19 +1310,6 @@ fn run_length(run: &Run) -> f64 {
     run_length_from_zero(run)
 }
 
-/// A side against a return wall is not seen, whatever the cabinet was set to.
-fn walled(mut c: Cabinet, run: &Run, i: usize) -> Cabinet {
-    if against_left(run, i) {
-        c.exposed.left = false;
-        c.cladding.left = false;
-    }
-    if against_right(run, i) {
-        c.exposed.right = false;
-        c.cladding.right = false;
-    }
-    c
-}
-
 /// The X of the walls the run's ends can stand against.
 fn wall_ends(run: &Run) -> (Option<f64>, Option<f64>) {
     let Some(w) = walls(run) else {
@@ -1412,25 +1398,221 @@ fn front_stands_out(c: &Cabinet) -> f64 {
     }
 }
 
-fn filler(f: &Filler, c: &Cabinet, at: Vec3) -> Result<PartList> {
+/// Whether nothing stands before, and after, item `i` in its line.
+fn line_ends(run: &Run, i: usize) -> (bool, bool) {
+    let line = line_of(run, i);
+    let same = |j: &usize| line_of(run, *j) == line;
+    (
+        !(0..i).any(|j| same(&j)),
+        !(i + 1..run.items.len()).any(|j| same(&j)),
+    )
+}
+
+/// How deep a filler's blocking runs back. Our choice: enough to screw through a neighbour's side.
+const FILLER_BLOCK_DEPTH: f64 = 50.0;
+
+fn filler(f: &Filler, c: &Cabinet, at: Vec3, (first, last): (bool, bool)) -> Result<PartList> {
     if !(f.width > 0.0 && f.scribe >= 0.0) {
         return Err(Error::Invalid(format!("filler {} needs a width", f.id)));
     }
     let ft = c.standard.front_thickness;
     let (z0, z1) = front_z(c);
-    // In the plane of the doors; the scribe allowance is cut off on site.
+    let y = at.y - front_stands_out(c);
+    // In the plane of the doors. The scribe allowance is cut off on site, against a wall: only an
+    // end of the line has one, as anywhere else it would stand in its neighbour.
+    let (before, after) = match (first, last) {
+        (true, _) => (f.scribe, 0.0),
+        (_, true) => (0.0, f.scribe),
+        _ => (0.0, 0.0),
+    };
     let bounds = Aabb::new(
-        Vec3::new(at.x, at.y - front_stands_out(c), at.z + z0),
-        Vec3::new(f.width + f.scribe, ft, z1 - z0),
+        Vec3::new(at.x - before, y, at.z + z0),
+        Vec3::new(f.width + before + after, ft, z1 - z0),
     );
-    Ok(single(
+    let mut list = single(
         &f.id,
         PartRole::Filler,
         bounds,
         Axis::Y,
         Axis::Z,
         &c.standard.front_board,
-    ))
+    );
+    // Upright strips behind it, one at each edge, for its neighbours to screw through into.
+    let t = c.standard.carcass_thickness;
+    let xs = if f.width >= 2.0 * t {
+        vec![at.x, at.x + f.width - t]
+    } else if f.width >= t {
+        vec![at.x]
+    } else {
+        list.warnings.push(format!(
+            "{} is too narrow for blocking: fix it to its neighbour's edge",
+            f.id
+        ));
+        Vec::new()
+    };
+    for (n, x) in xs.into_iter().enumerate() {
+        let suffix = if n == 0 {
+            String::new()
+        } else {
+            (n + 1).to_string()
+        };
+        list.parts.push(Part {
+            name: format!("{}.{}{suffix}", f.id, PartRole::FillerBlock.code()),
+            role: PartRole::FillerBlock,
+            bounds: Aabb::new(
+                Vec3::new(x, y + ft, at.z + z0),
+                Vec3::new(t, FILLER_BLOCK_DEPTH, z1 - z0),
+            ),
+            thickness_axis: Axis::X,
+            grain_axis: Some(Axis::Z),
+            board: c.standard.carcass_board.clone(),
+            edges: EdgeBanding::default(),
+        });
+    }
+    Ok(list)
+}
+
+/// The longest toe kick board. Our choice, the long sheet most decors come in: past it, a join.
+const LONGEST_KICK: f64 = 3600.0;
+
+/// One toe kick board along each stretch of legged base cabinets, as a kitchen is really fitted,
+/// not one per cabinet: it passes fillers, and stops at anything that reaches the floor in its way.
+/// The first cabinet carries it. Past [`LONGEST_KICK`] it joins over a leg, where it can be fixed.
+fn one_kick_per_stretch(run: &Run, out: &mut [PartList]) {
+    struct Stretch {
+        first: usize,
+        cabinets: Vec<usize>,
+        x: (f64, f64),
+    }
+    let places = lefts(run);
+    let mut stretches: Vec<Stretch> = Vec::new();
+    let mut open: Option<Stretch> = None;
+    let mut lead: Option<(f64, f64)> = None;
+    for (j, item) in run.items.iter().enumerate() {
+        if !matches!(line_of(run, j), Line::Floor | Line::Both) {
+            continue;
+        }
+        let plinth = out[j].by_role(PartRole::Plinth).next().map(|p| p.bounds);
+        let span = (places[j].x, places[j].x + item_width(run, j));
+        let joins = match item {
+            RunItem::Cabinet(c) => {
+                c.standard.toe_kick == crate::model::ToeKick::LegsAndPlinth && plinth.is_some()
+            }
+            RunItem::Filler(_) => true,
+            RunItem::EndPanel(e) => !e.to_floor,
+            _ => false,
+        };
+        let cabinet = matches!(item, RunItem::Cabinet(_)) && joins;
+        // A seen end's board reaches the floor, so the kick stops at it.
+        let board = |name: &str| out[j].parts.iter().any(|p| p.name.ends_with(name));
+        let same = |a: &Stretch| {
+            let first = out[a.first]
+                .by_role(PartRole::Plinth)
+                .next()
+                .map(|p| p.bounds);
+            matches!((first, plinth), (Some(f), Some(p))
+                if (f.min.y - p.min.y).abs() < 1e-6
+                    && (f.size.z - p.size.z).abs() < 1e-6
+                    && (f.size.y - p.size.y).abs() < 1e-6)
+        };
+        if !joins || (cabinet && (board(".SeenEndLeft") || !open.as_ref().is_none_or(same))) {
+            if let Some(s) = open.take() {
+                stretches.push(s);
+            }
+            lead = None;
+        }
+        if !joins {
+            continue;
+        }
+        if cabinet {
+            let p = plinth.unwrap();
+            let s = open.get_or_insert_with(|| Stretch {
+                first: j,
+                cabinets: Vec::new(),
+                x: lead
+                    .take()
+                    .map_or((p.min.x, p.max().x), |l| (l.0, p.max().x)),
+            });
+            s.cabinets.push(j);
+            s.x.1 = s.x.1.max(p.max().x);
+            if board(".SeenEndRight") {
+                stretches.extend(open.take());
+            }
+        } else if let Some(s) = open.as_mut() {
+            s.x.1 = s.x.1.max(span.1);
+        } else {
+            lead = Some(lead.map_or(span, |l| (l.0, span.1)));
+        }
+    }
+    stretches.extend(open);
+    for s in stretches {
+        let lone = s.cabinets.len() == 1 && {
+            let p = out[s.first]
+                .by_role(PartRole::Plinth)
+                .next()
+                .unwrap()
+                .bounds;
+            (p.min.x - s.x.0).abs() < 1e-6 && (p.max().x - s.x.1).abs() < 1e-6
+        };
+        if lone {
+            continue;
+        }
+        let legs: Vec<f64> = s
+            .cabinets
+            .iter()
+            .flat_map(|&j| out[j].hardware.iter())
+            .filter(|h| crate::cad::is_leg(&h.item))
+            .map(|h| h.at.x)
+            .collect();
+        let template = out[s.first]
+            .by_role(PartRole::Plinth)
+            .next()
+            .unwrap()
+            .clone();
+        for &j in &s.cabinets {
+            let old: Vec<String> = out[j]
+                .parts
+                .iter()
+                .filter(|p| p.role == PartRole::Plinth)
+                .map(|p| p.name.clone())
+                .collect();
+            out[j].parts.retain(|p| p.role != PartRole::Plinth);
+            // Clips stay with their own cabinet, whichever board they hold.
+            let bottom = format!("{}.{}", out[j].cabinet, PartRole::Bottom.code());
+            for h in &mut out[j].hardware {
+                if old.contains(&h.part) {
+                    h.part = bottom.clone();
+                }
+            }
+        }
+        let mut from = s.x.0;
+        let mut n = 0;
+        while from < s.x.1 - 1e-6 {
+            n += 1;
+            let to = if s.x.1 - from <= LONGEST_KICK {
+                s.x.1
+            } else {
+                let last_leg = legs
+                    .iter()
+                    .copied()
+                    .filter(|&x| x > from + 100.0 && x <= from + LONGEST_KICK)
+                    .fold(f64::MIN, f64::max);
+                if last_leg > f64::MIN {
+                    last_leg
+                } else {
+                    from + LONGEST_KICK
+                }
+            };
+            let mut part = template.clone();
+            part.bounds.min.x = from;
+            part.bounds.size.x = to - from;
+            if n > 1 {
+                part.name = format!("{}{n}", template.name);
+            }
+            out[s.first].parts.push(part);
+            from = to;
+        }
+    }
 }
 
 fn end_panel(e: &EndPanel, c: &Cabinet, at: Vec3) -> PartList {
@@ -2212,13 +2394,15 @@ mod tests {
 
     #[test]
     fn laying_out_a_run_gives_each_cabinet_the_origin_it_is_built_at() {
+        // Notched, as legged cabinets give up their toe kicks to the run's one board.
+        let notched = |id: &str| {
+            let mut c = Cabinet::new(id, CabinetKind::Base);
+            c.standard.toe_kick = crate::model::ToeKick::IntegratedNotch;
+            RunItem::Cabinet(Box::new(c))
+        };
         let run = Run {
             origin: Vec3::default(),
-            items: vec![
-                end("E01"),
-                RunItem::Cabinet(Box::new(Cabinet::new("B01", CabinetKind::Base))),
-                RunItem::Cabinet(Box::new(Cabinet::new("B02", CabinetKind::Base))),
-            ],
+            items: vec![end("E01"), notched("B01"), notched("B02")],
         };
         let lists = build_run(&run).unwrap();
         for (item, list) in laid_out(&run).items.iter().zip(&lists).skip(1) {
@@ -2961,7 +3145,7 @@ mod tests {
     }
 
     #[test]
-    fn a_cabinet_against_a_return_wall_has_no_seen_end_on_that_side_only() {
+    fn a_cabinet_against_a_return_wall_keeps_the_seen_ends_it_was_given() {
         let mut c = Cabinet::new("B1", CabinetKind::Base);
         c.exposed.left = true;
         c.exposed.right = true;
@@ -2969,7 +3153,7 @@ mod tests {
         let RunItem::Cabinet(placed) = &laid_out(&run).items[0] else {
             panic!()
         };
-        assert!(!placed.exposed.left);
+        assert!(placed.exposed.left);
         assert!(placed.exposed.right);
     }
 
@@ -3110,7 +3294,7 @@ mod tests {
     }
 
     #[test]
-    fn the_next_cabinet_clears_a_seen_end_board_and_a_wall_needs_none() {
+    fn the_next_cabinet_clears_a_seen_end_board_and_a_chosen_board_stays_against_a_wall() {
         let mut first = Cabinet::new("B1", CabinetKind::Base);
         first.exposed.left = true;
         first.exposed.right = true;
@@ -3131,14 +3315,15 @@ mod tests {
         };
         assert_eq!(a.origin.x, t);
         assert_eq!(b.origin.x, t + w + t);
-        // Against a wall the left side is hidden, so no board and no room for one.
+        // Against a wall it's still built when chosen: it's the spacer the cabinet needs there.
         let walled = walled_run(true, false, 0.0, items);
         let RunItem::Cabinet(a) = &laid_out(&walled).items[0] else {
             panic!()
         };
-        assert_eq!(a.origin.x, 0.0);
+        assert_eq!(a.origin.x, t);
         let lists = build_run(&walled).unwrap();
-        assert!(!lists[0].parts.iter().any(|p| p.name == "B1.SeenEndLeft"));
+        let board = lists[0].part("B1.SeenEndLeft").unwrap().bounds;
+        assert_eq!(board.min.x, 0.0, "from the wall's face");
         assert!(lists[0].parts.iter().any(|p| p.name == "B1.SeenEndRight"));
     }
 
@@ -3534,12 +3719,12 @@ mod tests {
     }
 
     #[test]
-    fn a_seen_side_against_a_return_wall_takes_no_board_whichever_way_it_was_set() {
+    fn a_seen_side_against_a_return_wall_takes_its_board_whichever_way_it_was_set() {
         let mut c = Cabinet::new("B1", CabinetKind::Base);
         c.cladding.left = true;
         let run = walled_run(true, false, 0.0, vec![RunItem::Cabinet(Box::new(c))]);
         let lists = build_run(&run).unwrap();
-        assert!(lists[0].part("B1.SeenEndLeft").is_none());
+        assert!(lists[0].part("B1.SeenEndLeft").is_some());
     }
 
     /// The problems cladding had were each fixed once: with a drawer frame, the board reached only
@@ -3655,5 +3840,122 @@ mod tests {
         assert_eq!(row.quantity, (laid * 1.1).ceil() as u32);
         let list = crate::cutlist::cut_list(&lists, "board", 1.0);
         assert!(!list.rows.iter().any(|r| r.cabinet == "S1"));
+    }
+
+    fn legged(id: &str, width: f64) -> RunItem {
+        let mut c = Cabinet::new(id, CabinetKind::Base);
+        c.width = width;
+        c.standard.toe_kick = crate::model::ToeKick::LegsAndPlinth;
+        RunItem::Cabinet(Box::new(c))
+    }
+
+    fn kicks(lists: &[PartList]) -> Vec<(String, f64, f64)> {
+        lists
+            .iter()
+            .flat_map(|l| l.by_role(PartRole::Plinth))
+            .map(|p| (p.name.clone(), p.bounds.min.x, p.bounds.max().x))
+            .collect()
+    }
+
+    #[test]
+    fn a_run_of_base_cabinets_shares_one_toe_kick_board() {
+        let lists = build_run(&line_up(vec![
+            legged("B1", 600.0),
+            legged("B2", 900.0),
+            legged("B3", 600.0),
+        ]))
+        .unwrap();
+        assert_eq!(kicks(&lists), [("B1.Plinth".to_string(), 0.0, 2100.0)]);
+        assert!(
+            !lists[1]
+                .hardware
+                .iter()
+                .any(|h| h.part.ends_with(".Plinth"))
+        );
+        let list = crate::cutlist::cut_list(&lists, "board", 1.0);
+        assert_eq!(
+            list.rows
+                .iter()
+                .filter(|r| r.part.contains("Plinth"))
+                .count(),
+            1
+        );
+    }
+
+    #[test]
+    fn a_long_run_joins_its_toe_kick_over_a_leg_within_a_sheet() {
+        let lists = build_run(&line_up(
+            (1..=7).map(|n| legged(&format!("B{n}"), 900.0)).collect(),
+        ))
+        .unwrap();
+        let k = kicks(&lists);
+        assert_eq!(k.len(), 2, "{k:?}");
+        assert_eq!(k[0].1, 0.0);
+        assert_eq!(k[1].2, 6300.0);
+        assert_eq!(k[0].2, k[1].1, "they meet");
+        assert!(k[0].2 - k[0].1 <= LONGEST_KICK);
+        let legs: Vec<f64> = lists
+            .iter()
+            .flat_map(|l| &l.hardware)
+            .filter(|h| crate::cad::is_leg(&h.item))
+            .map(|h| h.at.x)
+            .collect();
+        assert!(legs.contains(&k[0].2), "the join sits on a leg: {k:?}");
+    }
+
+    #[test]
+    fn the_toe_kick_runs_past_a_filler_and_stops_at_a_tall_cabinet_or_a_seen_end() {
+        let lists = build_run(&line_up(vec![
+            legged("B1", 600.0),
+            RunItem::Filler(Filler {
+                id: "F1".into(),
+                width: 50.0,
+                scribe: 0.0,
+            }),
+            legged("B2", 600.0),
+        ]))
+        .unwrap();
+        assert_eq!(kicks(&lists), [("B1.Plinth".to_string(), 0.0, 1250.0)]);
+
+        let mut seen = Cabinet::new("B2", CabinetKind::Base);
+        seen.standard.toe_kick = crate::model::ToeKick::LegsAndPlinth;
+        seen.exposed.right = true;
+        let lists = build_run(&line_up(vec![
+            legged("B1", 600.0),
+            RunItem::Cabinet(Box::new(seen)),
+            legged("B3", 600.0),
+        ]))
+        .unwrap();
+        let names: Vec<String> = kicks(&lists).into_iter().map(|k| k.0).collect();
+        assert_eq!(names, ["B1.Plinth", "B3.Plinth"]);
+    }
+
+    #[test]
+    fn a_filler_keeps_out_of_its_neighbour_and_has_blocking_to_fix_it_by() {
+        let run = line_up(vec![
+            legged("B1", 600.0),
+            RunItem::Filler(Filler {
+                id: "F1".into(),
+                width: 50.0,
+                scribe: 20.0,
+            }),
+            RunItem::EndPanel(EndPanel {
+                id: "E1".into(),
+                scribe: 20.0,
+                to_floor: true,
+            }),
+        ]);
+        let lists = build_run(&run).unwrap();
+        let filler = lists[1].by_role(PartRole::Filler).next().unwrap().bounds;
+        let end = lists[2].parts[0].bounds;
+        assert_eq!(
+            filler.size.x, 50.0,
+            "the scribe belongs at a wall, not here"
+        );
+        assert!(!filler.overlaps(&end));
+        let blocks: Vec<_> = lists[1].by_role(PartRole::FillerBlock).collect();
+        assert_eq!(blocks.len(), 2, "one for each neighbour");
+        assert_eq!(blocks[1].bounds.max().x, filler.max().x);
+        assert!(blocks.iter().all(|b| !b.bounds.overlaps(&filler)));
     }
 }

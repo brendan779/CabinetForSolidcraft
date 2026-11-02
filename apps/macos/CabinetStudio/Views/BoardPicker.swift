@@ -55,10 +55,11 @@ struct BoardPicker<Accessory: View>: View {
         Array(Set(boards.filter { ($0.kind == "lining") == linings }.map(\.brand))).sorted()
     }
     private var ranges: [String] {
-        Array(Set(boards.filter { brand.isEmpty || $0.brand == brand }.map(\.range))).sorted()
+        // Only this kind's: a lining range offered among boards would find nothing when picked.
+        Array(Set(boards.filter { ($0.kind == "lining") == linings && (brand.isEmpty || $0.brand == brand) }.map(\.range))).sorted()
     }
     private var finishList: [String] {
-        let pool = boards.filter { (brand.isEmpty || $0.brand == brand) && (range.isEmpty || $0.range == range) }
+        let pool = boards.filter { ($0.kind == "lining") == linings && (brand.isEmpty || $0.brand == brand) && (range.isEmpty || $0.range == range) }
         let counts = Dictionary(grouping: pool, by: \.finish).mapValues(\.count)
         return counts.keys.sorted { counts[$0]! > counts[$1]! }
     }
@@ -143,6 +144,7 @@ struct BoardPicker<Accessory: View>: View {
             }
             .labelsHidden()
             .onChange(of: brand) { range = "" }
+            .onChange(of: linings) { brand = ""; range = ""; finishes = [] }
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 6) {
                     ForEach(finishList, id: \.self) { f in

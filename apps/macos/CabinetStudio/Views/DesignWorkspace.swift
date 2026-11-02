@@ -17,6 +17,7 @@ struct DesignWorkspace: View {
                     VStack(alignment: .leading, spacing: 8) {
                         ViewportControls(look: $look)
                         ViewPresets(scene: scene)
+                        ViewHint()
                     }
                 }
                 if let cab = project.selected, let b = project.build(cab) {
@@ -143,6 +144,19 @@ struct ViewPresets: View {
         .padding(4)
         .floatingPanel()
         .fixedSize()
+    }
+}
+
+/// How to move the view, in sight: nobody should have to find Shift-drag by trial and error.
+struct ViewHint: View {
+    var body: some View {
+        Text("Shift-drag or middle-drag pans · scroll zooms · F fits")
+            .font(.caption2)
+            .foregroundStyle(Theme.textDim)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 4)
+            .floatingPanel()
+            .fixedSize()
     }
 }
 

@@ -23,6 +23,8 @@ pub enum PartRole {
     Plinth,
     /// The hidden batten under the bottom panel that a kick board between notched sides screws to.
     PlinthBlock,
+    /// An upright strip behind a filler, for its neighbours to screw through into.
+    FillerBlock,
     /// The fixed front over the blind part of a blind corner cabinet.
     BlindPanel,
     /// A strip in the plane of the fronts: beside a blind panel, between cabinets or to a wall.
@@ -84,6 +86,7 @@ impl PartRole {
             PartRole::DrawerFront => "Drawer front",
             PartRole::Plinth => "Plinth",
             PartRole::PlinthBlock => "Plinth block",
+            PartRole::FillerBlock => "Filler block",
             PartRole::BlindPanel => "Blind panel",
             PartRole::Filler => "Filler",
             PartRole::EndPanel => "End panel",
@@ -124,6 +127,7 @@ impl PartRole {
             PartRole::DrawerFront => "DrawerFront",
             PartRole::Plinth => "Plinth",
             PartRole::PlinthBlock => "PlinthBlock",
+            PartRole::FillerBlock => "FillerBlock",
             PartRole::BlindPanel => "BlindPanel",
             PartRole::Filler => "Filler",
             PartRole::EndPanel => "EndPanel",
