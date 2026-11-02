@@ -4,7 +4,7 @@
 use serde::{Deserialize, Serialize};
 
 use crate::geom::{Aabb, Axis, Vec3};
-use crate::model::{Cabinet, FrontLayout};
+use crate::model::{Cabinet, CabinetKind, DoorOverlay, FrontLayout};
 use crate::part::{EdgeBanding, Part, PartList, PartRole};
 use crate::{Error, Result, build_cabinet};
 
@@ -900,6 +900,10 @@ fn run_length<'a>(run: &Run, neighbour: &dyn Fn(usize) -> &'a Cabinet) -> f64 {
 
 /// The thickness of the seen end boards beside a cabinet, as the run will build it.
 fn seen_boards(c: &Cabinet, run: &Run, i: usize) -> (f64, f64) {
+    // An L-corner builds from two legs and takes no board.
+    if matches!(c.kind, CabinetKind::CornerBase | CabinetKind::CornerWall) {
+        return (0.0, 0.0);
+    }
     let c = walled(c.clone(), run, i);
     let t = c.standard.front_thickness;
     let board = |seen: bool, lined: bool| if seen && !lined { t } else { 0.0 };
@@ -1001,6 +1005,16 @@ fn front_z(c: &Cabinet) -> (f64, f64) {
     (c.origin.z + kick, c.origin.z + c.height)
 }
 
+/// How far in front of the run's line the cabinet's fronts stand: an inset front is flush with
+/// the carcass, anything else stands on it.
+fn front_stands_out(c: &Cabinet) -> f64 {
+    if c.standard.overlay == DoorOverlay::Inset {
+        0.0
+    } else {
+        c.standard.front_thickness
+    }
+}
+
 fn filler(f: &Filler, c: &Cabinet, at: Vec3) -> Result<PartList> {
     if !(f.width > 0.0 && f.scribe >= 0.0) {
         return Err(Error::Invalid(format!("filler {} needs a width", f.id)));
@@ -1009,7 +1023,7 @@ fn filler(f: &Filler, c: &Cabinet, at: Vec3) -> Result<PartList> {
     let (z0, z1) = front_z(c);
     // In the plane of the doors; the scribe allowance is cut off on site.
     let bounds = Aabb::new(
-        Vec3::new(at.x, at.y - ft, at.z + z0),
+        Vec3::new(at.x, at.y - front_stands_out(c), at.z + z0),
         Vec3::new(f.width + f.scribe, ft, z1 - z0),
     );
     Ok(single(
@@ -1028,8 +1042,8 @@ fn end_panel(e: &EndPanel, c: &Cabinet, at: Vec3) -> PartList {
     let z0 = if e.to_floor { c.origin.z } else { z0 };
     // From the face of the doors back to the wall, plus the scribe.
     let bounds = Aabb::new(
-        Vec3::new(at.x, at.y - ft, at.z + z0),
-        Vec3::new(ft, c.depth + ft + e.scribe, z1 - z0),
+        Vec3::new(at.x, at.y - front_stands_out(c), at.z + z0),
+        Vec3::new(ft, c.depth + front_stands_out(c) + e.scribe, z1 - z0),
     );
     single(
         &e.id,
@@ -2723,5 +2737,72 @@ mod tests {
         let lists = build_run(&walled).unwrap();
         assert!(!lists[0].parts.iter().any(|p| p.name == "B1.SeenEndLeft"));
         assert!(lists[0].parts.iter().any(|p| p.name == "B1.SeenEndRight"));
+    }
+
+    /// Fillers and end panels stand in the plane of the doors, whatever the door mounting.
+    #[test]
+    fn fillers_and_end_panels_are_flush_with_the_fronts_in_every_door_mounting() {
+        use crate::model::{DoorOverlay, DrawerFrame};
+        let mut failures = Vec::new();
+        for overlay in [DoorOverlay::Full, DoorOverlay::Half, DoorOverlay::Inset] {
+            for frame in [DrawerFrame::None, DrawerFrame::Board] {
+                let mut c = Cabinet::new("D1", CabinetKind::DrawerBank);
+                c.standard.overlay = overlay;
+                c.standard.drawer_frame = frame;
+                let run = Run {
+                    origin: Vec3::default(),
+                    items: vec![
+                        RunItem::EndPanel(EndPanel {
+                            id: "E1".into(),
+                            scribe: 20.0,
+                            to_floor: true,
+                        }),
+                        RunItem::Cabinet(Box::new(c)),
+                        RunItem::Filler(Filler {
+                            id: "F1".into(),
+                            width: 50.0,
+                            scribe: 10.0,
+                        }),
+                    ],
+                };
+                let lists = build_run(&run).unwrap();
+                let parts: Vec<&Part> = lists.iter().flat_map(|l| &l.parts).collect();
+                let face = parts
+                    .iter()
+                    .filter(|p| p.role == PartRole::DrawerFront)
+                    .map(|p| p.bounds.min.y)
+                    .fold(f64::MAX, f64::min);
+                for p in parts
+                    .iter()
+                    .filter(|p| matches!(p.role, PartRole::EndPanel | PartRole::Filler))
+                {
+                    if (p.bounds.min.y - face).abs() > 1e-6 {
+                        failures.push(format!(
+                            "{overlay:?} {frame:?}: {} at {} but fronts at {face}",
+                            p.name, p.bounds.min.y
+                        ));
+                    }
+                }
+            }
+        }
+        assert!(failures.is_empty(), "{failures:#?}");
+    }
+
+    #[test]
+    fn a_corner_cabinet_leaves_no_gap_for_a_seen_end_board_it_does_not_build() {
+        let mut corner = Cabinet::new("C1", CabinetKind::CornerBase);
+        corner.exposed.right = true;
+        let w = corner.width;
+        let run = Run {
+            origin: Vec3::default(),
+            items: vec![
+                RunItem::Cabinet(Box::new(corner)),
+                cab("B2", CabinetKind::Base),
+            ],
+        };
+        let RunItem::Cabinet(b) = &laid_out(&run).items[1] else {
+            panic!()
+        };
+        assert_eq!(b.origin.x, w);
     }
 }

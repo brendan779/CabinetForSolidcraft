@@ -5027,6 +5027,21 @@ impl<'a> Builder<'a> {
         let (w, d, h) = (cab.width, cab.depth, cab.height);
         let ct = c.thickness;
         let ft = cab.standard.front_thickness;
+        // Where the fronts really stand: an inset one is back in the carcass, and a drawer frame
+        // moves the whole build back by its thickness afterwards. No fronts: the carcass's edge.
+        let face = self
+            .list
+            .parts
+            .iter()
+            .filter(|p| {
+                matches!(
+                    p.role,
+                    PartRole::Door | PartRole::DrawerFront | PartRole::LiftFront
+                )
+            })
+            .map(|p| p.bounds.min.y)
+            .fold(f64::MAX, f64::min);
+        let face = if face == f64::MAX { 0.0 } else { face };
         // A seen end's finished board, from the front's face to the back. Lining takes its place.
         for (seen, lined, side, x0) in [
             (cab.exposed.left, c.left, "Left", -ft),
@@ -5036,7 +5051,7 @@ impl<'a> Builder<'a> {
                 self.list.parts.push(Part {
                     name: format!("{}.SeenEnd{side}", cab.id),
                     role: PartRole::Cladding,
-                    bounds: aabb(x0, -ft, 0.0, x0 + ft, d, h),
+                    bounds: aabb(x0, face, 0.0, x0 + ft, d, h),
                     thickness_axis: Axis::X,
                     grain_axis: Some(Axis::Z),
                     board: cab.standard.front_board.clone(),
@@ -5050,10 +5065,10 @@ impl<'a> Builder<'a> {
         let back_t = if c.back { ct } else { 0.0 };
         let mut pieces = Vec::new();
         if c.left {
-            pieces.push(("Left", aabb(-ct, -ft, 0.0, 0.0, d + back_t, h), Axis::X));
+            pieces.push(("Left", aabb(-ct, face, 0.0, 0.0, d + back_t, h), Axis::X));
         }
         if c.right {
-            pieces.push(("Right", aabb(w, -ft, 0.0, w + ct, d + back_t, h), Axis::X));
+            pieces.push(("Right", aabb(w, face, 0.0, w + ct, d + back_t, h), Axis::X));
         }
         if c.back {
             pieces.push(("Back", aabb(0.0, d, 0.0, w, d + ct, h), Axis::Y));
@@ -7431,6 +7446,98 @@ mod tests {
                 ..
             }
         )));
+    }
+
+    #[test]
+    fn seen_end_boards_and_cladding_stay_flush_with_the_fronts_in_every_combination() {
+        use crate::model::{DoorOverlay, DrawerFrame};
+        let mut failures = Vec::new();
+        for kind in [
+            CabinetKind::Base,
+            CabinetKind::DrawerBank,
+            CabinetKind::Wall,
+            CabinetKind::Tall,
+            CabinetKind::Sink,
+        ] {
+            for overlay in [DoorOverlay::Full, DoorOverlay::Half, DoorOverlay::Inset] {
+                for frame in [DrawerFrame::None, DrawerFrame::Board] {
+                    for clad in [false, true] {
+                        let mut cab = Cabinet::new("C1", kind);
+                        cab.standard.overlay = overlay;
+                        cab.standard.drawer_frame = frame;
+                        cab.exposed.left = !clad;
+                        cab.cladding.left = clad;
+                        cab.cladding.thickness = 18.0;
+                        let list = build_cabinet(&cab).unwrap();
+                        let face = list
+                            .parts
+                            .iter()
+                            .filter(|p| {
+                                matches!(
+                                    p.role,
+                                    PartRole::Door | PartRole::DrawerFront | PartRole::LiftFront
+                                )
+                            })
+                            .map(|p| p.bounds.min.y)
+                            .fold(f64::MAX, f64::min);
+                        let board = list.parts.iter().find(|p| p.role == PartRole::Cladding);
+                        let board = board.unwrap();
+                        if (board.bounds.min.y - face).abs() > 1e-6 {
+                            failures.push(format!(
+                                "{kind:?} {overlay:?} {frame:?} clad {clad}: {} at {} but fronts at {face}",
+                                board.name, board.bounds.min.y
+                            ));
+                        }
+                    }
+                }
+            }
+        }
+        assert!(failures.is_empty(), "{failures:#?}");
+    }
+
+    #[test]
+    fn nothing_stands_proud_of_the_fronts_in_any_combination() {
+        use crate::model::{DoorOverlay, DrawerFrame};
+        let mut failures = Vec::new();
+        for kind in [
+            CabinetKind::Base,
+            CabinetKind::DrawerBank,
+            CabinetKind::Wall,
+            CabinetKind::Tall,
+            CabinetKind::Sink,
+        ] {
+            for overlay in [DoorOverlay::Full, DoorOverlay::Half, DoorOverlay::Inset] {
+                for frame in [DrawerFrame::None, DrawerFrame::Board] {
+                    let mut cab = Cabinet::new("C1", kind);
+                    cab.standard.overlay = overlay;
+                    cab.standard.drawer_frame = frame;
+                    let list = build_cabinet(&cab).unwrap();
+                    let face = list
+                        .parts
+                        .iter()
+                        .filter(|p| {
+                            matches!(
+                                p.role,
+                                PartRole::Door | PartRole::DrawerFront | PartRole::LiftFront
+                            )
+                        })
+                        .map(|p| p.bounds.min.y)
+                        .fold(f64::MAX, f64::min);
+                    for p in &list.parts {
+                        if p.bounds.min.y < face - 1e-6 {
+                            failures.push(format!(
+                                "{kind:?} {overlay:?} {frame:?}: {} at {} proud of {face}",
+                                p.name, p.bounds.min.y
+                            ));
+                        }
+                    }
+                    for w in list.warnings.iter().filter(|w| w.starts_with("clash")) {
+                        failures.push(format!("{kind:?} {overlay:?} {frame:?}: {w}"));
+                    }
+                }
+            }
+        }
+        assert!(failures.is_empty(), "{failures:#?}");
     }
 
     #[test]

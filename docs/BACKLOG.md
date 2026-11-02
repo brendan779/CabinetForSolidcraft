@@ -516,3 +516,4 @@ Agents append one line per session: date, items touched, outcome.
 - 2026-11-02 — Owner's benchtop answers logged (docs/benchtop-plan.md): BENCH-10 to BENCH-16. Tiled splashbacks with simulated grout are SPLASH-1, after wall cabinets work. All on hold except as BENCH-HOLD says.
 - 2026-11-02 — Owner asked for a design and UI pass with tabs at the top of the inspector (UI-18).
 - 2026-11-02 — UI-18, UI-19 built: Clay Dark theme, tabbed inspector, CAD-style camera.
+- 2026-11-02 — Owner's test of the redesign: seen end boards and cladding stopped short of the fronts behind a drawer frame. They now take the real front face. The sweep that checks it also found fillers and end panels proud of inset fronts, and a gap left for a board corner cabinets do not build: both fixed.
