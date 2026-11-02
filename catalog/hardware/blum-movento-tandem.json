@@ -1,7 +1,7 @@
 {
   "brand": "Blum",
   "website": "https://www.blum.com",
-  "notes": "MOVENTO 760H/766H and TANDEM 560H runners for wooden drawers, from the Blum Catalogue and technical manual 2024/2025, printed pages 412-413 and 434-435 (order information and planning). Inside drawer width SKW = LW - 42 (+0/-1.5), drawer length SKL = NL - 10, inside depth at least NL + 3. base_above_datum_min is the 'min 27.5' / 'min 28.5' from the surface the runner stands on to the underside of the drawer base; base_recess is the 12-15 mm the sides reach below the base. The runner attachment positions (pp. 428, 460) are not recorded yet: which hole takes the system screw is hard to read reliably. The 766H rows are '60 | 70 kg' on p.412 without a clear split, so they carry no load. Not verified by a person.",
+  "notes": "MOVENTO 760H/766H and TANDEM 560H runners for wooden drawers, from the Blum Catalogue and technical manual 2024/2025, printed pages 412-413 and 434-435 (order information and planning). Inside drawer width SKW = LW - 42 (+0/-1.5), drawer length SKL = NL - 10, inside depth at least NL + 3. base_above_datum_min is the 'min 27.5' / 'min 28.5' from the surface the runner stands on to the underside of the drawer base; base_recess is the 12-15 mm the sides reach below the base. The runner attachment positions (pp. 428, 460) are not recorded yet: which hole takes the system screw is hard to read reliably. The 766H rows are '60 | 70 kg' on p.412 without a clear split, so they carry no load. TANDEM's rear hook: Ø6 × 10, 11 above the sides' bottom edge, p.435; p.435 does not say which edge its 7 runs from, so 7 from the side's inside face is read from Blum's 560H5500B model, whose hook sits at 27.6 from the cabinet side with the box side's inside face at 21. That model's runner rises to 9.9 under the base, so back_above_side_bottom (our figure) stops the back clear of it with a 12 recess, instead of p.435's notches. Not verified by a person.",
   "items": [
     {
       "id": "blum.tandem.560h",
@@ -23,6 +23,11 @@
         "min_space_above": 7,
         "runner_screw_height": 37,
         "runner_screw_setback": 37,
+        "hook_hole_diameter": 6,
+        "hook_hole_depth": 10,
+        "hook_hole_above_side_bottom": 11,
+        "hook_hole_from_side_inside": 7,
+        "back_above_side_bottom": 4,
         "max_load_kg": 30
       },
       "source": {

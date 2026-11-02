@@ -2677,10 +2677,25 @@ impl<'a> Builder<'a> {
             aabb(x1, y0, z0, x1 + st, y1, top),
             Axis::X,
         );
+        // TANDEM's rear hooks need wood below the base: its back runs down behind the base.
+        let hook = (|| {
+            let p = |k: &str| b.system.param(k);
+            Some((
+                p("hook_hole_diameter").ok()?,
+                p("hook_hole_depth").ok()?,
+                p("hook_hole_above_side_bottom").ok()?,
+                p("hook_hole_from_side_inside").ok()?,
+                p("back_above_side_bottom").ok()?,
+            ))
+        })();
+        let (base_back, back_bottom) = match hook {
+            Some((.., above)) => (y1 - st, z0 + above),
+            None => (y1, base_z + st),
+        };
         self.add_drawer_part(
             PartRole::DrawerBottom,
             n,
-            aabb(x0, y0, base_z, x1, y1, base_z + st),
+            aabb(x0, y0, base_z, x1, base_back, base_z + st),
             Axis::Z,
         );
         self.add_drawer_part(
@@ -2692,9 +2707,22 @@ impl<'a> Builder<'a> {
         self.add_drawer_part(
             PartRole::DrawerBack,
             n,
-            aabb(x0, y1 - st, base_z + st, x1, y1, top),
+            aabb(x0, y1 - st, back_bottom, x1, y1, top),
             Axis::Y,
         );
+        if let Some((diameter, depth, above, inset, _)) = hook {
+            let back = self.name(PartRole::DrawerBack, Some(n));
+            for x in [x0 + inset, x1 - inset] {
+                self.list.operations.push(Operation::Bore {
+                    part: back.clone(),
+                    at: Vec3::new(x, y1, z0 + above),
+                    direction: Dir::new(Axis::Y, false),
+                    diameter,
+                    depth,
+                    purpose: BorePurpose::RunnerHook,
+                });
+            }
+        }
         let at = front.center();
         for (item, quantity) in [(b.runner, 1), (b.locking_device, 2)] {
             self.list.hardware.push(HardwarePlacement {
@@ -6131,9 +6159,12 @@ mod tests {
             // The base clears the runners: 27.5 above the runners' datum.
             let datum = l.bounds.min.z - 15.5;
             assert!((base.bounds.min.z - datum - 27.5).abs() < 1e-9);
-            for role in ["DrawerInnerFront", "DrawerBack"] {
-                let p = part(role);
-                assert!((p.bounds.min.z - base.bounds.max().z).abs() < 1e-9);
+            let front = part("DrawerInnerFront");
+            assert!((front.bounds.min.z - base.bounds.max().z).abs() < 1e-9);
+            // The back comes down behind the base for TANDEM's rear hooks.
+            let back = part("DrawerBack");
+            assert!((back.bounds.min.z - (l.bounds.min.z + 4.0)).abs() < 1e-9);
+            for p in [front, back] {
                 assert!((p.bounds.max().z - l.bounds.max().z).abs() < 1e-9);
             }
         }
@@ -7327,6 +7358,64 @@ mod tests {
     }
 
     /// The owner: up to 8, for a 2400 high cabinet.
+    #[test]
+    fn a_tandem_back_runs_down_behind_the_base_and_takes_the_rear_hooks() {
+        let mut cab = Cabinet::new("D01", CabinetKind::DrawerBank);
+        cab.standard.drawer_system = DrawerSystem::Tandem;
+        let list = build_cabinet(&cab).unwrap();
+        let side = list.part("D01.DrawerLeftSide1").unwrap().bounds;
+        let base = list.part("D01.DrawerBottom1").unwrap().bounds;
+        let back = list.part("D01.DrawerBack1").unwrap().bounds;
+        // Below the base, but clear of the runner under it.
+        assert_eq!(back.min.z, side.min.z + 4.0);
+        assert!(back.min.z < base.min.z);
+        assert_eq!(base.max().y, back.min.y);
+        assert_eq!(back.max().y, side.max().y);
+        let holes: Vec<(Vec3, f64, f64)> = list
+            .operations
+            .iter()
+            .filter_map(|o| match o {
+                Operation::Bore {
+                    part,
+                    at,
+                    diameter,
+                    depth,
+                    purpose: BorePurpose::RunnerHook,
+                    ..
+                } if part == "D01.DrawerBack1" => Some((*at, *diameter, *depth)),
+                _ => None,
+            })
+            .collect();
+        assert_eq!(holes.len(), 2);
+        for (at, d, depth) in &holes {
+            assert_eq!((*d, *depth), (6.0, 10.0));
+            assert_eq!(at.z, side.min.z + 11.0);
+            assert_eq!(at.y, back.max().y);
+        }
+        assert_eq!(holes[0].0.x, side.max().x + 7.0);
+        assert_eq!(
+            holes[1].0.x,
+            list.part("D01.DrawerRightSide1").unwrap().bounds.min.x - 7.0
+        );
+    }
+
+    #[test]
+    fn a_movento_back_still_stands_on_the_base() {
+        let mut cab = Cabinet::new("D01", CabinetKind::DrawerBank);
+        cab.standard.drawer_system = DrawerSystem::Movento;
+        let list = build_cabinet(&cab).unwrap();
+        let base = list.part("D01.DrawerBottom1").unwrap().bounds;
+        let back = list.part("D01.DrawerBack1").unwrap().bounds;
+        assert_eq!(back.min.z, base.max().z);
+        assert!(!list.operations.iter().any(|o| matches!(
+            o,
+            Operation::Bore {
+                purpose: BorePurpose::RunnerHook,
+                ..
+            }
+        )));
+    }
+
     #[test]
     fn cam_locks_are_bored_from_hafeles_table_with_bolt_housing_and_cap_counted() {
         let mut cab = base();

@@ -332,6 +332,8 @@ pub enum BorePurpose {
     FrontFixing,
     /// A cabinet profile's screw, in the side or divider beside a drawer.
     RunnerScrew,
+    /// A TANDEM runner's rear hook, in the back of the drawer box.
+    RunnerHook,
     /// A pull on the front's edge: its screw, in the back of the front or down into its edge.
     EdgePullScrew,
     /// A lift mechanism's fixing or peg, in the side.

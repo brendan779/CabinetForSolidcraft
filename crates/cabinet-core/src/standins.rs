@@ -679,7 +679,10 @@ fn wood_runners(list: &PartList, front: &str) -> Option<[Vec<Shape>; 2]> {
     let left = list.part(&format!("{cab}.{}{n}", PartRole::DrawerLeftSide.code()))?;
     let right = list.part(&format!("{cab}.{}{n}", PartRole::DrawerRightSide.code()))?;
     let base = list.part(&format!("{cab}.{}{n}", PartRole::DrawerBottom.code()))?;
-    let (z0, z1) = (left.bounds.min.z, base.bounds.min.z);
+    let back = list.part(&format!("{cab}.{}{n}", PartRole::DrawerBack.code()))?;
+    // Under a TANDEM back that comes down behind the base, as the real runner is.
+    let z1 = base.bounds.min.z.min(back.bounds.min.z);
+    let z0 = z1 - (base.bounds.min.z - left.bounds.min.z);
     let (y0, y1) = (left.bounds.min.y, left.bounds.max().y);
     let one = |inner: f64, sign: f64| {
         vec![Shape::Box(boxed(
