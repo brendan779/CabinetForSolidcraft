@@ -30,3 +30,7 @@ unsafe_code = "deny"
 
 [profile.release]
 lto = "thin"
+
+# Test builds pile up in target/: full debug info is most of it, and line numbers are enough here.
+[profile.dev]
+debug = "line-tables-only"
