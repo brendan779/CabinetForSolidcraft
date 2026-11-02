@@ -59,8 +59,8 @@ sizes of our choosing. They stand further forward than hinged fronts by a door a
 A section of drawers can pick `box_height` (n, m, k, c or f) and `nominal_length`; left out, it takes
 the tallest and longest that fit. A pick that doesn't fit warns and uses what does. The lowest drawer
 in a compartment stands on the floor; one above another stands on the level of its own front's bottom
-edge, as in Blum's session. LEGRABOX's profile screws are drilled in the panels either side, from
-`drilling` on the cabinet profile row.
+edge, as in Blum's session. Every system's runner screws are drilled in the panels either side, from
+`drilling` on the runner's catalog row.
 
 ## Drawer frame
 
@@ -107,5 +107,3 @@ a cell to select it, and under the drawing:
 - A divider is always full height. A divider inside one row only (a split within a drawer
   section) would be a tree, not columns of rows.
 - Sloped shoe shelves: today they're flat fixed shelves.
-- From Blum's check 2 (docs/blum-checks.md): cabinet profile holes, and choosing a drawer's box
-  height and length per section.

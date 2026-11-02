@@ -100,7 +100,7 @@ How Blum's configurator works, and what SEC-3 took from it:
 | Front to carcass | fronts' back 2.5 off the carcass (582.5, carcass front at 580) | 0 | **differs**: the bumper's 2.6 head needs that gap; all our fronts sit on the carcass |
 | Power supply | not listed | 1 per cabinet | ours stays: a cabinet can't run without one, and Blum's session may leave it to the room |
 | Fixed shelf height | 282.83 to 298.83, cuts 256.83 and 545.16 | 290.33 to 306.33, cuts 264.3 and 537.7 | **differs**: Blum's sits 7.5 lower; ours keeps every drawer's base the same height above its front |
-| Cabinet profile holes | drilled on the sides: 37 from the front, the third hole at 54, 328.33 and 625.17 | 54, 328.33 and 38 over the shelf, 632.67 (the shelf sits 7.5 higher in ours) | **fixed** (SEC-4), LEGRABOX only. 38 above the datum |
+| Cabinet profile holes | drilled on the sides: 37 from the front, the third hole at 54, 328.33 and 625.17 | 54, 328.33 and 38 over the shelf, 632.67 (the shelf sits 7.5 higher in ours) | **fixed** (SEC-4). 38 above the datum, confirmed by p.592; the other systems followed in SEC-4b |
 | Datum of a drawer above another | its own front's bottom edge: front holes 51 and 147 up, against 67 and 163 on the lowest | was 16 higher, copying the lowest | **fixed** (SEC-4) |
 | Box height, length | the user picked C (back height 148) and NL 500 on all drawers | auto takes the tallest and longest that fit; each section can pick its own | **fixed** (SEC-4) |
 | Carcass | sides 870, base and cross members between them | a construction choice in `bottom_joint` | ours to choose |

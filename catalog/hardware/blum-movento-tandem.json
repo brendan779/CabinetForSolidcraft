@@ -44,11 +44,41 @@
         "max_load_kg": 30
       },
       "source": {
-        "url": "Blum Catalogue and technical manual 2024/2025, p.434, web code DQD1XA",
+        "url": "Blum Catalogue and technical manual 2024/2025, p.434, web code DQD1XA; screw positions p.460 (optional ** positions left out), height p.592, hole sizes as Blum's plate drilling in the owner's session",
         "document_date": "2024/2025",
         "retrieved": "2026-10-26",
         "verified": false
-      }
+      },
+      "drilling": [
+        {
+          "x": 19.0,
+          "y": 37.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 37.0,
+          "y": 37.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 69.0,
+          "y": 37.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 133.0,
+          "y": 37.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        }
+      ]
     },
     {
       "id": "blum.tandem.560h.270",
@@ -62,11 +92,41 @@
         "max_load_kg": 30
       },
       "source": {
-        "url": "Blum Catalogue and technical manual 2024/2025, p.434, web code DQD1XA",
+        "url": "Blum Catalogue and technical manual 2024/2025, p.434, web code DQD1XA; screw positions p.460 (optional ** positions left out), height p.592, hole sizes as Blum's plate drilling in the owner's session",
         "document_date": "2024/2025",
         "retrieved": "2026-10-26",
         "verified": false
-      }
+      },
+      "drilling": [
+        {
+          "x": 19.0,
+          "y": 37.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 37.0,
+          "y": 37.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 69.0,
+          "y": 37.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 133.0,
+          "y": 37.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        }
+      ]
     },
     {
       "id": "blum.tandem.560h.300",
@@ -80,11 +140,48 @@
         "max_load_kg": 30
       },
       "source": {
-        "url": "Blum Catalogue and technical manual 2024/2025, p.434, web code DQD1XA",
+        "url": "Blum Catalogue and technical manual 2024/2025, p.434, web code DQD1XA; screw positions p.460 (optional ** positions left out), height p.592, hole sizes as Blum's plate drilling in the owner's session",
         "document_date": "2024/2025",
         "retrieved": "2026-10-26",
         "verified": false
-      }
+      },
+      "drilling": [
+        {
+          "x": 19.0,
+          "y": 37.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 37.0,
+          "y": 37.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 69.0,
+          "y": 37.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 165.0,
+          "y": 37.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 261.0,
+          "y": 37.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        }
+      ]
     },
     {
       "id": "blum.tandem.560h.320",
@@ -98,11 +195,48 @@
         "max_load_kg": 30
       },
       "source": {
-        "url": "Blum Catalogue and technical manual 2024/2025, p.434, web code DQD1XA",
+        "url": "Blum Catalogue and technical manual 2024/2025, p.434, web code DQD1XA; screw positions p.460 (optional ** positions left out), height p.592, hole sizes as Blum's plate drilling in the owner's session",
         "document_date": "2024/2025",
         "retrieved": "2026-10-26",
         "verified": false
-      }
+      },
+      "drilling": [
+        {
+          "x": 19.0,
+          "y": 37.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 37.0,
+          "y": 37.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 69.0,
+          "y": 37.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 165.0,
+          "y": 37.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 261.0,
+          "y": 37.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        }
+      ]
     },
     {
       "id": "blum.tandem.560h.350",
@@ -116,11 +250,48 @@
         "max_load_kg": 30
       },
       "source": {
-        "url": "Blum Catalogue and technical manual 2024/2025, p.434, web code DQD1XA",
+        "url": "Blum Catalogue and technical manual 2024/2025, p.434, web code DQD1XA; screw positions p.460 (optional ** positions left out), height p.592, hole sizes as Blum's plate drilling in the owner's session",
         "document_date": "2024/2025",
         "retrieved": "2026-10-26",
         "verified": false
-      }
+      },
+      "drilling": [
+        {
+          "x": 19.0,
+          "y": 37.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 37.0,
+          "y": 37.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 69.0,
+          "y": 37.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 165.0,
+          "y": 37.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 261.0,
+          "y": 37.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        }
+      ]
     },
     {
       "id": "blum.tandem.560h.380",
@@ -134,11 +305,48 @@
         "max_load_kg": 30
       },
       "source": {
-        "url": "Blum Catalogue and technical manual 2024/2025, p.434, web code DQD1XA",
+        "url": "Blum Catalogue and technical manual 2024/2025, p.434, web code DQD1XA; screw positions p.460 (optional ** positions left out), height p.592, hole sizes as Blum's plate drilling in the owner's session",
         "document_date": "2024/2025",
         "retrieved": "2026-10-26",
         "verified": false
-      }
+      },
+      "drilling": [
+        {
+          "x": 19.0,
+          "y": 37.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 37.0,
+          "y": 37.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 69.0,
+          "y": 37.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 165.0,
+          "y": 37.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 261.0,
+          "y": 37.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        }
+      ]
     },
     {
       "id": "blum.tandem.560h.400",
@@ -152,11 +360,48 @@
         "max_load_kg": 30
       },
       "source": {
-        "url": "Blum Catalogue and technical manual 2024/2025, p.434, web code DQD1XA",
+        "url": "Blum Catalogue and technical manual 2024/2025, p.434, web code DQD1XA; screw positions p.460 (optional ** positions left out), height p.592, hole sizes as Blum's plate drilling in the owner's session",
         "document_date": "2024/2025",
         "retrieved": "2026-10-26",
         "verified": false
-      }
+      },
+      "drilling": [
+        {
+          "x": 19.0,
+          "y": 37.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 37.0,
+          "y": 37.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 69.0,
+          "y": 37.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 165.0,
+          "y": 37.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 229.0,
+          "y": 37.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        }
+      ]
     },
     {
       "id": "blum.tandem.560h.420",
@@ -170,11 +415,48 @@
         "max_load_kg": 30
       },
       "source": {
-        "url": "Blum Catalogue and technical manual 2024/2025, p.434, web code DQD1XA",
+        "url": "Blum Catalogue and technical manual 2024/2025, p.434, web code DQD1XA; screw positions p.460 (optional ** positions left out), height p.592, hole sizes as Blum's plate drilling in the owner's session",
         "document_date": "2024/2025",
         "retrieved": "2026-10-26",
         "verified": false
-      }
+      },
+      "drilling": [
+        {
+          "x": 19.0,
+          "y": 37.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 37.0,
+          "y": 37.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 69.0,
+          "y": 37.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 165.0,
+          "y": 37.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 229.0,
+          "y": 37.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        }
+      ]
     },
     {
       "id": "blum.tandem.560h.450",
@@ -188,11 +470,48 @@
         "max_load_kg": 30
       },
       "source": {
-        "url": "Blum Catalogue and technical manual 2024/2025, p.434, web code DQD1XA",
+        "url": "Blum Catalogue and technical manual 2024/2025, p.434, web code DQD1XA; screw positions p.460 (optional ** positions left out), height p.592, hole sizes as Blum's plate drilling in the owner's session",
         "document_date": "2024/2025",
         "retrieved": "2026-10-26",
         "verified": false
-      }
+      },
+      "drilling": [
+        {
+          "x": 19.0,
+          "y": 37.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 37.0,
+          "y": 37.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 69.0,
+          "y": 37.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 165.0,
+          "y": 37.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 261.0,
+          "y": 37.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        }
+      ]
     },
     {
       "id": "blum.tandem.560h.480",
@@ -206,11 +525,48 @@
         "max_load_kg": 30
       },
       "source": {
-        "url": "Blum Catalogue and technical manual 2024/2025, p.434, web code DQD1XA",
+        "url": "Blum Catalogue and technical manual 2024/2025, p.434, web code DQD1XA; screw positions p.460 (optional ** positions left out), height p.592, hole sizes as Blum's plate drilling in the owner's session",
         "document_date": "2024/2025",
         "retrieved": "2026-10-26",
         "verified": false
-      }
+      },
+      "drilling": [
+        {
+          "x": 19.0,
+          "y": 37.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 37.0,
+          "y": 37.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 69.0,
+          "y": 37.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 165.0,
+          "y": 37.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 261.0,
+          "y": 37.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        }
+      ]
     },
     {
       "id": "blum.tandem.560h.500",
@@ -224,11 +580,55 @@
         "max_load_kg": 30
       },
       "source": {
-        "url": "Blum Catalogue and technical manual 2024/2025, p.434, web code DQD1XA",
+        "url": "Blum Catalogue and technical manual 2024/2025, p.434, web code DQD1XA; screw positions p.460 (optional ** positions left out), height p.592, hole sizes as Blum's plate drilling in the owner's session",
         "document_date": "2024/2025",
         "retrieved": "2026-10-26",
         "verified": false
-      }
+      },
+      "drilling": [
+        {
+          "x": 19.0,
+          "y": 37.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 37.0,
+          "y": 37.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 69.0,
+          "y": 37.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 243.0,
+          "y": 37.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 261.0,
+          "y": 37.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 284.0,
+          "y": 37.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        }
+      ]
     },
     {
       "id": "blum.tandem.560h.520",
@@ -242,11 +642,55 @@
         "max_load_kg": 30
       },
       "source": {
-        "url": "Blum Catalogue and technical manual 2024/2025, p.434, web code DQD1XA",
+        "url": "Blum Catalogue and technical manual 2024/2025, p.434, web code DQD1XA; screw positions p.460 (optional ** positions left out), height p.592, hole sizes as Blum's plate drilling in the owner's session",
         "document_date": "2024/2025",
         "retrieved": "2026-10-26",
         "verified": false
-      }
+      },
+      "drilling": [
+        {
+          "x": 19.0,
+          "y": 37.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 37.0,
+          "y": 37.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 69.0,
+          "y": 37.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 243.0,
+          "y": 37.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 261.0,
+          "y": 37.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 284.0,
+          "y": 37.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        }
+      ]
     },
     {
       "id": "blum.tandem.560h.550",
@@ -260,11 +704,55 @@
         "max_load_kg": 30
       },
       "source": {
-        "url": "Blum Catalogue and technical manual 2024/2025, p.434, web code DQD1XA",
+        "url": "Blum Catalogue and technical manual 2024/2025, p.434, web code DQD1XA; screw positions p.460 (optional ** positions left out), height p.592, hole sizes as Blum's plate drilling in the owner's session",
         "document_date": "2024/2025",
         "retrieved": "2026-10-26",
         "verified": false
-      }
+      },
+      "drilling": [
+        {
+          "x": 19.0,
+          "y": 37.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 37.0,
+          "y": 37.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 69.0,
+          "y": 37.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 243.0,
+          "y": 37.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 261.0,
+          "y": 37.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 284.0,
+          "y": 37.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        }
+      ]
     },
     {
       "id": "blum.tandem.560h.600",
@@ -278,11 +766,55 @@
         "max_load_kg": 30
       },
       "source": {
-        "url": "Blum Catalogue and technical manual 2024/2025, p.434, web code DQD1XA",
+        "url": "Blum Catalogue and technical manual 2024/2025, p.434, web code DQD1XA; screw positions p.460 (optional ** positions left out), height p.592, hole sizes as Blum's plate drilling in the owner's session",
         "document_date": "2024/2025",
         "retrieved": "2026-10-26",
         "verified": false
-      }
+      },
+      "drilling": [
+        {
+          "x": 19.0,
+          "y": 37.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 37.0,
+          "y": 37.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 69.0,
+          "y": 37.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 243.0,
+          "y": 37.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 261.0,
+          "y": 37.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 325.0,
+          "y": 37.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        }
+      ]
     },
     {
       "id": "blum.tandem.locking-device",
@@ -338,11 +870,41 @@
         "max_load_kg": 40
       },
       "source": {
-        "url": "Blum Catalogue and technical manual 2024/2025, p.412, web code DQCZ3Y",
+        "url": "Blum Catalogue and technical manual 2024/2025, p.412, web code DQCZ3Y; screw positions p.428 (optional ** positions left out), height p.592, hole sizes as Blum's plate drilling in the owner's session",
         "document_date": "2024/2025",
         "retrieved": "2026-10-26",
         "verified": false
-      }
+      },
+      "drilling": [
+        {
+          "x": 19.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 37.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 69.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 197.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        }
+      ]
     },
     {
       "id": "blum.movento.760h.270",
@@ -356,11 +918,41 @@
         "max_load_kg": 40
       },
       "source": {
-        "url": "Blum Catalogue and technical manual 2024/2025, p.412, web code DQCZ3Y",
+        "url": "Blum Catalogue and technical manual 2024/2025, p.412, web code DQCZ3Y; screw positions p.428 (optional ** positions left out), height p.592, hole sizes as Blum's plate drilling in the owner's session",
         "document_date": "2024/2025",
         "retrieved": "2026-10-26",
         "verified": false
-      }
+      },
+      "drilling": [
+        {
+          "x": 19.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 37.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 69.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 197.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        }
+      ]
     },
     {
       "id": "blum.movento.760h.300",
@@ -374,11 +966,41 @@
         "max_load_kg": 40
       },
       "source": {
-        "url": "Blum Catalogue and technical manual 2024/2025, p.412, web code DQCZ3Y",
+        "url": "Blum Catalogue and technical manual 2024/2025, p.412, web code DQCZ3Y; screw positions p.428 (optional ** positions left out), height p.592, hole sizes as Blum's plate drilling in the owner's session",
         "document_date": "2024/2025",
         "retrieved": "2026-10-26",
         "verified": false
-      }
+      },
+      "drilling": [
+        {
+          "x": 19.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 37.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 69.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 261.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        }
+      ]
     },
     {
       "id": "blum.movento.760h.320",
@@ -392,11 +1014,41 @@
         "max_load_kg": 40
       },
       "source": {
-        "url": "Blum Catalogue and technical manual 2024/2025, p.412, web code DQCZ3Y",
+        "url": "Blum Catalogue and technical manual 2024/2025, p.412, web code DQCZ3Y; screw positions p.428 (optional ** positions left out), height p.592, hole sizes as Blum's plate drilling in the owner's session",
         "document_date": "2024/2025",
         "retrieved": "2026-10-26",
         "verified": false
-      }
+      },
+      "drilling": [
+        {
+          "x": 19.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 37.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 69.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 261.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        }
+      ]
     },
     {
       "id": "blum.movento.760h.350",
@@ -410,11 +1062,41 @@
         "max_load_kg": 40
       },
       "source": {
-        "url": "Blum Catalogue and technical manual 2024/2025, p.412, web code DQCZ3Y",
+        "url": "Blum Catalogue and technical manual 2024/2025, p.412, web code DQCZ3Y; screw positions p.428 (optional ** positions left out), height p.592, hole sizes as Blum's plate drilling in the owner's session",
         "document_date": "2024/2025",
         "retrieved": "2026-10-26",
         "verified": false
-      }
+      },
+      "drilling": [
+        {
+          "x": 19.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 37.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 69.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 261.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        }
+      ]
     },
     {
       "id": "blum.movento.760h.380",
@@ -428,11 +1110,55 @@
         "max_load_kg": 40
       },
       "source": {
-        "url": "Blum Catalogue and technical manual 2024/2025, p.412, web code DQCZ3Y",
+        "url": "Blum Catalogue and technical manual 2024/2025, p.412, web code DQCZ3Y; screw positions p.428 (optional ** positions left out), height p.592, hole sizes as Blum's plate drilling in the owner's session",
         "document_date": "2024/2025",
         "retrieved": "2026-10-26",
         "verified": false
-      }
+      },
+      "drilling": [
+        {
+          "x": 19.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 37.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 69.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 243.0,
+          "y": 38.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 261.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 293.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        }
+      ]
     },
     {
       "id": "blum.movento.760h.400",
@@ -446,11 +1172,55 @@
         "max_load_kg": 40
       },
       "source": {
-        "url": "Blum Catalogue and technical manual 2024/2025, p.412, web code DQCZ3Y",
+        "url": "Blum Catalogue and technical manual 2024/2025, p.412, web code DQCZ3Y; screw positions p.428 (optional ** positions left out), height p.592, hole sizes as Blum's plate drilling in the owner's session",
         "document_date": "2024/2025",
         "retrieved": "2026-10-26",
         "verified": false
-      }
+      },
+      "drilling": [
+        {
+          "x": 19.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 37.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 69.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 243.0,
+          "y": 38.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 261.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 293.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        }
+      ]
     },
     {
       "id": "blum.movento.760h.420",
@@ -464,11 +1234,55 @@
         "max_load_kg": 40
       },
       "source": {
-        "url": "Blum Catalogue and technical manual 2024/2025, p.412, web code DQCZ3Y",
+        "url": "Blum Catalogue and technical manual 2024/2025, p.412, web code DQCZ3Y; screw positions p.428 (optional ** positions left out), height p.592, hole sizes as Blum's plate drilling in the owner's session",
         "document_date": "2024/2025",
         "retrieved": "2026-10-26",
         "verified": false
-      }
+      },
+      "drilling": [
+        {
+          "x": 19.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 37.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 69.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 243.0,
+          "y": 38.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 261.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 293.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        }
+      ]
     },
     {
       "id": "blum.movento.760h.450",
@@ -482,11 +1296,55 @@
         "max_load_kg": 40
       },
       "source": {
-        "url": "Blum Catalogue and technical manual 2024/2025, p.412, web code DQCZ3Y",
+        "url": "Blum Catalogue and technical manual 2024/2025, p.412, web code DQCZ3Y; screw positions p.428 (optional ** positions left out), height p.592, hole sizes as Blum's plate drilling in the owner's session",
         "document_date": "2024/2025",
         "retrieved": "2026-10-26",
         "verified": false
-      }
+      },
+      "drilling": [
+        {
+          "x": 19.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 37.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 69.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 243.0,
+          "y": 38.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 261.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 293.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        }
+      ]
     },
     {
       "id": "blum.movento.760h.480",
@@ -500,11 +1358,55 @@
         "max_load_kg": 40
       },
       "source": {
-        "url": "Blum Catalogue and technical manual 2024/2025, p.412, web code DQCZ3Y",
+        "url": "Blum Catalogue and technical manual 2024/2025, p.412, web code DQCZ3Y; screw positions p.428 (optional ** positions left out), height p.592, hole sizes as Blum's plate drilling in the owner's session",
         "document_date": "2024/2025",
         "retrieved": "2026-10-26",
         "verified": false
-      }
+      },
+      "drilling": [
+        {
+          "x": 19.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 37.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 69.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 243.0,
+          "y": 38.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 261.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 293.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        }
+      ]
     },
     {
       "id": "blum.movento.760h.500",
@@ -518,11 +1420,55 @@
         "max_load_kg": 40
       },
       "source": {
-        "url": "Blum Catalogue and technical manual 2024/2025, p.412, web code DQCZ3Y",
+        "url": "Blum Catalogue and technical manual 2024/2025, p.412, web code DQCZ3Y; screw positions p.428 (optional ** positions left out), height p.592, hole sizes as Blum's plate drilling in the owner's session",
         "document_date": "2024/2025",
         "retrieved": "2026-10-26",
         "verified": false
-      }
+      },
+      "drilling": [
+        {
+          "x": 19.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 37.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 69.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 243.0,
+          "y": 38.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 261.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 293.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        }
+      ]
     },
     {
       "id": "blum.movento.760h.520",
@@ -536,11 +1482,55 @@
         "max_load_kg": 40
       },
       "source": {
-        "url": "Blum Catalogue and technical manual 2024/2025, p.412, web code DQCZ3Y",
+        "url": "Blum Catalogue and technical manual 2024/2025, p.412, web code DQCZ3Y; screw positions p.428 (optional ** positions left out), height p.592, hole sizes as Blum's plate drilling in the owner's session",
         "document_date": "2024/2025",
         "retrieved": "2026-10-26",
         "verified": false
-      }
+      },
+      "drilling": [
+        {
+          "x": 19.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 37.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 69.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 243.0,
+          "y": 38.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 261.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 293.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        }
+      ]
     },
     {
       "id": "blum.movento.760h.550",
@@ -554,11 +1544,55 @@
         "max_load_kg": 40
       },
       "source": {
-        "url": "Blum Catalogue and technical manual 2024/2025, p.412, web code DQCZ3Y",
+        "url": "Blum Catalogue and technical manual 2024/2025, p.412, web code DQCZ3Y; screw positions p.428 (optional ** positions left out), height p.592, hole sizes as Blum's plate drilling in the owner's session",
         "document_date": "2024/2025",
         "retrieved": "2026-10-26",
         "verified": false
-      }
+      },
+      "drilling": [
+        {
+          "x": 19.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 37.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 69.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 243.0,
+          "y": 38.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 261.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 293.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        }
+      ]
     },
     {
       "id": "blum.movento.760h.600",
@@ -572,11 +1606,55 @@
         "max_load_kg": 40
       },
       "source": {
-        "url": "Blum Catalogue and technical manual 2024/2025, p.412, web code DQCZ3Y",
+        "url": "Blum Catalogue and technical manual 2024/2025, p.412, web code DQCZ3Y; screw positions p.428 (optional ** positions left out), height p.592, hole sizes as Blum's plate drilling in the owner's session",
         "document_date": "2024/2025",
         "retrieved": "2026-10-26",
         "verified": false
-      }
+      },
+      "drilling": [
+        {
+          "x": 19.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 37.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 69.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 243.0,
+          "y": 38.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 261.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 293.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        }
+      ]
     },
     {
       "id": "blum.movento.766h.450",
@@ -589,11 +1667,62 @@
         "nominal_length": 450
       },
       "source": {
-        "url": "Blum Catalogue and technical manual 2024/2025, p.412, web code DQCZ3Y",
+        "url": "Blum Catalogue and technical manual 2024/2025, p.412, web code DQCZ3Y; screw positions p.428 (optional ** positions left out), height p.592, hole sizes as Blum's plate drilling in the owner's session",
         "document_date": "2024/2025",
         "retrieved": "2026-10-26",
         "verified": false
-      }
+      },
+      "drilling": [
+        {
+          "x": 19.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 28.0,
+          "y": 38.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 37.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 69.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 243.0,
+          "y": 38.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 261.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 293.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        }
+      ]
     },
     {
       "id": "blum.movento.766h.500",
@@ -606,11 +1735,69 @@
         "nominal_length": 500
       },
       "source": {
-        "url": "Blum Catalogue and technical manual 2024/2025, p.412, web code DQCZ3Y",
+        "url": "Blum Catalogue and technical manual 2024/2025, p.412, web code DQCZ3Y; screw positions p.428 (optional ** positions left out), height p.592, hole sizes as Blum's plate drilling in the owner's session",
         "document_date": "2024/2025",
         "retrieved": "2026-10-26",
         "verified": false
-      }
+      },
+      "drilling": [
+        {
+          "x": 19.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 28.0,
+          "y": 38.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 37.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 69.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 243.0,
+          "y": 38.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 261.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 293.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 357.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        }
+      ]
     },
     {
       "id": "blum.movento.766h.520",
@@ -623,11 +1810,69 @@
         "nominal_length": 520
       },
       "source": {
-        "url": "Blum Catalogue and technical manual 2024/2025, p.412, web code DQCZ3Y",
+        "url": "Blum Catalogue and technical manual 2024/2025, p.412, web code DQCZ3Y; screw positions p.428 (optional ** positions left out), height p.592, hole sizes as Blum's plate drilling in the owner's session",
         "document_date": "2024/2025",
         "retrieved": "2026-10-26",
         "verified": false
-      }
+      },
+      "drilling": [
+        {
+          "x": 19.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 28.0,
+          "y": 38.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 37.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 69.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 243.0,
+          "y": 38.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 261.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 293.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 357.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        }
+      ]
     },
     {
       "id": "blum.movento.766h.550",
@@ -640,11 +1885,69 @@
         "nominal_length": 550
       },
       "source": {
-        "url": "Blum Catalogue and technical manual 2024/2025, p.412, web code DQCZ3Y",
+        "url": "Blum Catalogue and technical manual 2024/2025, p.412, web code DQCZ3Y; screw positions p.428 (optional ** positions left out), height p.592, hole sizes as Blum's plate drilling in the owner's session",
         "document_date": "2024/2025",
         "retrieved": "2026-10-26",
         "verified": false
-      }
+      },
+      "drilling": [
+        {
+          "x": 19.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 28.0,
+          "y": 38.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 37.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 69.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 243.0,
+          "y": 38.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 261.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 293.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 357.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        }
+      ]
     },
     {
       "id": "blum.movento.766h.580",
@@ -657,11 +1960,69 @@
         "nominal_length": 580
       },
       "source": {
-        "url": "Blum Catalogue and technical manual 2024/2025, p.412, web code DQCZ3Y",
+        "url": "Blum Catalogue and technical manual 2024/2025, p.412, web code DQCZ3Y; screw positions p.428 (optional ** positions left out), height p.592, hole sizes as Blum's plate drilling in the owner's session",
         "document_date": "2024/2025",
         "retrieved": "2026-10-26",
         "verified": false
-      }
+      },
+      "drilling": [
+        {
+          "x": 19.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 28.0,
+          "y": 38.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 37.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 69.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 243.0,
+          "y": 38.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 261.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 293.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 357.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        }
+      ]
     },
     {
       "id": "blum.movento.766h.600",
@@ -674,11 +2035,69 @@
         "nominal_length": 600
       },
       "source": {
-        "url": "Blum Catalogue and technical manual 2024/2025, p.412, web code DQCZ3Y",
+        "url": "Blum Catalogue and technical manual 2024/2025, p.412, web code DQCZ3Y; screw positions p.428 (optional ** positions left out), height p.592, hole sizes as Blum's plate drilling in the owner's session",
         "document_date": "2024/2025",
         "retrieved": "2026-10-26",
         "verified": false
-      }
+      },
+      "drilling": [
+        {
+          "x": 19.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 28.0,
+          "y": 38.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 37.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 69.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 243.0,
+          "y": 38.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 261.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 293.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 357.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        }
+      ]
     },
     {
       "id": "blum.movento.766h.650",
@@ -691,11 +2110,76 @@
         "nominal_length": 650
       },
       "source": {
-        "url": "Blum Catalogue and technical manual 2024/2025, p.412, web code DQCZ3Y",
+        "url": "Blum Catalogue and technical manual 2024/2025, p.412, web code DQCZ3Y; screw positions p.428 (optional ** positions left out), height p.592, hole sizes as Blum's plate drilling in the owner's session",
         "document_date": "2024/2025",
         "retrieved": "2026-10-26",
         "verified": false
-      }
+      },
+      "drilling": [
+        {
+          "x": 19.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 28.0,
+          "y": 38.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 37.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 69.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 243.0,
+          "y": 38.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 261.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 293.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 357.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 453.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        }
+      ]
     },
     {
       "id": "blum.movento.766h.700",
@@ -708,11 +2192,76 @@
         "nominal_length": 700
       },
       "source": {
-        "url": "Blum Catalogue and technical manual 2024/2025, p.412, web code DQCZ3Y",
+        "url": "Blum Catalogue and technical manual 2024/2025, p.412, web code DQCZ3Y; screw positions p.428 (optional ** positions left out), height p.592, hole sizes as Blum's plate drilling in the owner's session",
         "document_date": "2024/2025",
         "retrieved": "2026-10-26",
         "verified": false
-      }
+      },
+      "drilling": [
+        {
+          "x": 19.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 28.0,
+          "y": 38.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 37.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 69.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 243.0,
+          "y": 38.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 261.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 293.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 357.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 453.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        }
+      ]
     },
     {
       "id": "blum.movento.766h.750",
@@ -725,11 +2274,76 @@
         "nominal_length": 750
       },
       "source": {
-        "url": "Blum Catalogue and technical manual 2024/2025, p.412, web code DQCZ3Y",
+        "url": "Blum Catalogue and technical manual 2024/2025, p.412, web code DQCZ3Y; screw positions p.428 (optional ** positions left out), height p.592, hole sizes as Blum's plate drilling in the owner's session",
         "document_date": "2024/2025",
         "retrieved": "2026-10-26",
         "verified": false
-      }
+      },
+      "drilling": [
+        {
+          "x": 19.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 28.0,
+          "y": 38.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 37.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 69.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 243.0,
+          "y": 38.0,
+          "diameter": 2.5,
+          "depth": 10.0,
+          "note": "chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 261.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 293.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 357.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        },
+        {
+          "x": 453.0,
+          "y": 38.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "system screw 661.1450.HG, or chipboard screw; x from the cabinet front to the hole, y above the drawer's datum"
+        }
+      ]
     },
     {
       "id": "blum.movento.locking-device",

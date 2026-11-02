@@ -1,5 +1,7 @@
 //! Cabinet → parts, machining and hardware.
 
+use cabinet_catalog::HardwareItem;
+
 use crate::corner;
 use crate::drawers::{self, BoxRange, BoxSystem, SteelBox, WoodRunner};
 use crate::geom::{Aabb, Axis, Vec3};
@@ -2481,6 +2483,7 @@ impl<'a> Builder<'a> {
             height: String::new(),
             front_top: front.max().z,
         });
+        self.profile_screws(b.runner, &bay, fy, datum);
         let (st, mid) = (b.board, (bay.left + bay.right) / 2.0);
         let (x0, x1) = (mid - b.inside_width / 2.0, mid + b.inside_width / 2.0);
         let (y0, y1) = (fy, fy + b.length);
@@ -2584,7 +2587,7 @@ impl<'a> Builder<'a> {
             front_top: front.max().z,
         });
         self.steel_box_parts(n, &lb, fy, datum + base_lift);
-        self.profile_screws(&lb, &bay, fy, datum);
+        self.profile_screws(lb.profile, &bay, fy, datum);
         // Front fixing brackets: their bores in the back of the front, in from each side.
         for x in [bay.left + hole_inset, bay.right - hole_inset] {
             for hole in &lb.system.drilling {
@@ -2604,7 +2607,7 @@ impl<'a> Builder<'a> {
     /// The cabinet profile's screw holes in the panels either side of the bay, each from the
     /// front's back face and above the drawer's datum. A hole the moved-back side no longer
     /// reaches is left out: Blum lists the first one as optional.
-    fn profile_screws(&mut self, lb: &SteelBox, bay: &Bay, fy: f64, datum: f64) {
+    fn profile_screws(&mut self, runner: &HardwareItem, bay: &Bay, fy: f64, datum: f64) {
         let t = self.cab.standard.carcass_thickness;
         // A divider is drilled from both sides: each hole stops short of the middle.
         let sides = [
@@ -2612,7 +2615,7 @@ impl<'a> Builder<'a> {
             (bay.right_panel.clone(), bay.right, true, bay.right_divider),
         ];
         for (part, x, positive, divider) in sides {
-            for hole in &lb.profile.drilling {
+            for hole in &runner.drilling {
                 let y = fy + hole.x;
                 if y < MIN_SCREW_FROM_EDGE {
                     continue;
@@ -3929,6 +3932,38 @@ impl<'a> Builder<'a> {
                 .push("a CABLOXX lock needs drawers; this cabinet has none".into());
             return;
         }
+        // One bar to a column: a bar only reaches the drawers in its bay.
+        let mut columns: Vec<(f64, f64, Vec<String>)> = Vec::new();
+        for front in fronts {
+            let x = self
+                .list
+                .part(&front)
+                .map_or(cab.width / 2.0, |p| p.bounds.center().x);
+            let t = cab.standard.carcass_thickness;
+            let (left, right) = self
+                .list
+                .bay_around(x)
+                .map_or((t, cab.width - t), |(l, r)| {
+                    (l.bounds.max().x, r.bounds.min.x)
+                });
+            match columns.iter_mut().find(|c| c.0 == left) {
+                Some(c) => c.2.push(front),
+                None => columns.push((left, right, vec![front])),
+            }
+        }
+        for (left, right, fronts) in &columns {
+            self.lock_column(*left, *right, fronts);
+        }
+        self.list.notes.push(
+            "CABLOXX: fit a cylinder lock (Ø16.5–22, 28–48 long; not supplied by Blum); the \
+             locking bar's groove and drilling are not machined yet"
+                .into(),
+        );
+    }
+
+    /// A CABLOXX bar and what goes with it, for the drawers of one bay.
+    fn lock_column(&mut self, left: f64, right: f64, fronts: &[String]) {
+        let cab = self.cab;
         // Blum's limit: up to five pull-outs on one locking bar.
         if fronts.len() > 5 {
             self.list.warnings.push(format!(
@@ -3944,7 +3979,7 @@ impl<'a> Builder<'a> {
         };
         let kh = cab.height - kick;
         let lh = kh - 2.0 * cab.standard.carcass_thickness;
-        let lw = cab.width - 2.0 * cab.standard.carcass_thickness;
+        let lw = right - left;
         let Some(bar) = [600, 800, 1300]
             .into_iter()
             .find(|&h| kh <= h as f64 + 1e-6)
@@ -3955,8 +3990,9 @@ impl<'a> Builder<'a> {
             ));
             return;
         };
-        let synced = cab.width > 600.0;
-        let at = Vec3::new(cab.width / 2.0, 0.0, kick + kh / 2.0);
+        // Blum's width limit is the cabinet's: a bay stands as wide as its opening and panels.
+        let synced = lw + 2.0 * cab.standard.carcass_thickness > 600.0;
+        let at = Vec3::new((left + right) / 2.0, 0.0, kick + kh / 2.0);
         let mut rows = vec![(bar, if synced { 2 } else { 1 }, String::new())];
         let unit = |side: &str| crate::hardware::item(&format!("blum.cabloxx.locking-unit.{side}"));
         let n = fronts.len() as u32;
@@ -3998,11 +4034,6 @@ impl<'a> Builder<'a> {
                 quantity,
             });
         }
-        self.list.notes.push(
-            "CABLOXX: fit a cylinder lock (Ø16.5–22, 28–48 long; not supplied by Blum); the \
-             locking bar's groove and drilling are not machined yet"
-                .into(),
-        );
     }
 
     /// An arched top: the doors whose tops are the highest of the cabinet's fronts get one arch
@@ -6298,6 +6329,57 @@ mod tests {
         );
     }
 
+    /// Blum's p.592: the screw line's height above the datum, and the third hole 37 from the front.
+    #[test]
+    fn every_drawer_system_drills_its_runner_screws_at_its_own_height() {
+        for (system, height) in [
+            (DrawerSystem::Legrabox, 38.0),
+            (DrawerSystem::Merivobox, 54.0),
+            (DrawerSystem::Tandembox, 36.0),
+            (DrawerSystem::Movento, 38.0),
+            (DrawerSystem::Tandem, 37.0),
+        ] {
+            let mut cab = Cabinet::new("D01", CabinetKind::DrawerBank).sectioned();
+            cab.standard.drawer_system = system;
+            cab.standard.bottom_joint = BottomJoint::BetweenSides;
+            let list = build_cabinet(&cab).unwrap();
+            let floor = list.part("D01.Bottom").unwrap().bounds.max().z;
+            let lowest = list
+                .operations
+                .iter()
+                .filter_map(|o| match o {
+                    Operation::Bore {
+                        part,
+                        at,
+                        purpose: BorePurpose::RunnerScrew,
+                        ..
+                    } if part == "D01.LeftSide" && at.y == 37.0 => Some(at.z),
+                    _ => None,
+                })
+                .fold(f64::MAX, f64::min);
+            assert!(
+                (lowest - (floor + height)).abs() < 1e-6,
+                "{system:?}: {lowest} over {floor}"
+            );
+            assert!(
+                list.warnings.iter().all(|w| !w.contains("clash")),
+                "{system:?}: {:?}",
+                list.warnings
+            );
+        }
+    }
+
+    #[test]
+    fn every_runner_in_the_catalog_says_where_it_screws_on() {
+        for item in crate::hardware::items() {
+            let runner = crate::cad::is_runner(&item.id) && !item.id.contains(".drawer-side.");
+            if runner && item.param("nominal_length").is_ok() && !item.id.contains(".inner") {
+                assert!(!item.drilling.is_empty(), "{}", item.id);
+                assert!(item.drilling.iter().any(|h| h.x == 37.0), "{}", item.id);
+            }
+        }
+    }
+
     #[test]
     fn a_section_can_pick_its_box_height_and_length() {
         let mut cab = Cabinet::new("D01", CabinetKind::DrawerBank).sectioned();
@@ -8010,6 +8092,81 @@ mod tests {
 
     /// BLUM-16: CABLOXX: a 720 high drawer bank takes the 800 bar set, a unit and bracket per
     /// drawer; a 900 wide one a second bar and the synchronisation.
+    #[test]
+    fn each_drawer_column_gets_its_own_locking_bar() {
+        let mut cab = Cabinet::new("D01", CabinetKind::DrawerBank);
+        cab.width = 1000.0;
+        let row = || Section {
+            height: 0.0,
+            front: SectionFront::drawers(3),
+            inside: SectionInside::Empty,
+            shelf_above: false,
+            opening: None,
+        };
+        cab.fronts = FrontLayout::Sections {
+            columns: vec![
+                SectionColumn {
+                    width: 0.0,
+                    rows: vec![row()],
+                },
+                SectionColumn {
+                    width: 0.0,
+                    rows: vec![row()],
+                },
+            ],
+        };
+        cab.lock = true;
+        let list = build_cabinet(&cab).unwrap();
+        let bars: Vec<_> = list
+            .hardware
+            .iter()
+            .filter(|h| h.item.starts_with("blum.cabloxx.bar-set."))
+            .collect();
+        assert_eq!(bars.len(), 2, "one for each column");
+        assert_eq!(bars.iter().map(|b| b.quantity).sum::<u32>(), 2);
+        assert!(bars[0].at.x < 500.0 && bars[1].at.x > 500.0);
+        let units: u32 = list
+            .hardware
+            .iter()
+            .filter(|h| h.item.starts_with("blum.cabloxx.locking-unit."))
+            .map(|h| h.quantity)
+            .sum();
+        assert_eq!(units, 6);
+        assert_eq!(
+            list.notes.iter().filter(|n| n.contains("CABLOXX")).count(),
+            1
+        );
+    }
+
+    #[test]
+    fn five_drawers_in_each_of_two_columns_still_lock() {
+        let mut cab = Cabinet::new("D01", CabinetKind::DrawerBank);
+        cab.width = 1000.0;
+        cab.height = 1200.0;
+        let row = || Section {
+            height: 0.0,
+            front: SectionFront::drawers(5),
+            inside: SectionInside::Empty,
+            shelf_above: false,
+            opening: None,
+        };
+        cab.fronts = FrontLayout::Sections {
+            columns: vec![
+                SectionColumn {
+                    width: 0.0,
+                    rows: vec![row()],
+                },
+                SectionColumn {
+                    width: 0.0,
+                    rows: vec![row()],
+                },
+            ],
+        };
+        cab.lock = true;
+        let list = build_cabinet(&cab).unwrap();
+        assert!(list.warnings.iter().all(|w| !w.contains("up to five")));
+    }
+
     #[test]
     fn cabloxx_locks_every_drawer_on_one_bar() {
         let mut cab = Cabinet::new("D01", CabinetKind::DrawerBank);
