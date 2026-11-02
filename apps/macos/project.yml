@@ -55,7 +55,7 @@ targets:
         INFOPLIST_KEY_CFBundleDisplayName: Cabinet Studio
         INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.graphics-design
         INFOPLIST_KEY_NSHumanReadableCopyright: "MIT OR Apache-2.0"
-        MARKETING_VERSION: "0.8.0"
+        MARKETING_VERSION: "0.9.0"
         CURRENT_PROJECT_VERSION: "1"
         CODE_SIGN_IDENTITY: "-"
         CODE_SIGN_STYLE: Manual
