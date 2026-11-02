@@ -1,6 +1,6 @@
 # CAD still wanted
 
-What the catalog lists and `vendor-cad/` has no model for, from a check on 2026-11-02. Blum lines come as a package from E-SERVICES › CAD/CAM Data Service › CAD/CAM packages (STEP); `scripts/import_blum_package.py` takes out what the catalog lists. Then Settings › Folders › Prepare Now, or `cargo run -p solidcraft-bridge --example prepare_cad -- vendor-cad`. Nothing in that folder is committed. Anything missing still builds and draws, with a plain stand-in shape.
+What the catalog lists and `vendor-cad/` has no model for, from a check on 2026-11-02. Blum lines come as a package from E-SERVICES › CAD/CAM Data Service › CAD/CAM packages (STEP); `scripts/import_blum_package.py` takes out what the catalog lists. Then Settings › Folders › Prepare Now, or `cargo run -p solidcraft-bridge --example prepare_cad -- vendor-cad`. Anything missing still builds and draws, with a plain stand-in shape.
 
 ## blum-ambia-line.json (1)
 

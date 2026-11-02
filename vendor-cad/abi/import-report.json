@@ -1,0 +1,2898 @@
+[
+ {
+  "folder": "Beta Cabinetry Pull 115mm",
+  "article": "ABI-BETA-115",
+  "family": "Beta",
+  "kind": "Pull",
+  "knob": false,
+  "length": 115.0,
+  "centres": 64.0,
+  "holes": [
+   [
+    -32.0,
+    0.0
+   ],
+   [
+    32.0,
+    0.0
+   ]
+  ],
+  "adjustable": null,
+  "edge_mount": null,
+  "leg_height": 11.3,
+  "measured_length": 115.0,
+  "projection": 17.3,
+  "width": 11.3,
+  "across": [
+   -5.7,
+   5.7
+  ],
+  "colour_rgb": [
+   202,
+   154,
+   58
+  ],
+  "triangles": 52,
+  "geometry": "IFC",
+  "finishes": [
+   {
+    "name": "Brushed Brass",
+    "url": "https://www.abiinteriors.com.au/product/beta-cabinetry-pull-115mm-brushed-brass/",
+    "sku": "15047",
+    "price_aud": 44.9
+   },
+   {
+    "name": "Brushed Copper",
+    "url": "https://www.abiinteriors.com.au/product/beta-cabinetry-pull-115mm-brushed-copper/",
+    "sku": "15048",
+    "price_aud": 44.9
+   },
+   {
+    "name": "Brushed Gunmetal",
+    "url": "https://www.abiinteriors.com.au/product/beta-cabinetry-pull-115mm-brushed-gunmetal/",
+    "sku": "15049",
+    "price_aud": 44.9
+   },
+   {
+    "name": "Brushed Nickel",
+    "url": "https://www.abiinteriors.com.au/product/beta-cabinetry-pull-115mm-brushed-nickel/",
+    "sku": "15055",
+    "price_aud": 39.9
+   },
+   {
+    "name": "Matte Black",
+    "url": "https://www.abiinteriors.com.au/product/beta-cabinetry-pull-115mm-matte-black/",
+    "sku": "15050",
+    "price_aud": 29.9
+   }
+  ],
+  "spec_file": "BETA_Cabinetry_Pull_115mm_Gallery_Spec.jpg",
+  "url": "https://www.abiinteriors.com.au/product/beta-cabinetry-pull-115mm/"
+ },
+ {
+  "folder": "Beta Cabinetry Pull 400mm",
+  "article": "ABI-BETA-400",
+  "family": "Beta",
+  "kind": "Pull",
+  "knob": false,
+  "length": 400.0,
+  "centres": 355.0,
+  "holes": [
+   [
+    -177.5,
+    0.0
+   ],
+   [
+    177.5,
+    0.0
+   ]
+  ],
+  "adjustable": null,
+  "edge_mount": null,
+  "leg_height": 11.3,
+  "measured_length": 400.0,
+  "projection": 17.3,
+  "width": 11.3,
+  "across": [
+   -5.7,
+   5.7
+  ],
+  "colour_rgb": [
+   202,
+   154,
+   58
+  ],
+  "triangles": 52,
+  "geometry": "IFC",
+  "finishes": [
+   {
+    "name": "Brushed Brass",
+    "url": "https://www.abiinteriors.com.au/product/beta-cabinetry-pull-400mm-pvd-brushed-brass/",
+    "sku": "15051",
+    "price_aud": 114.9
+   },
+   {
+    "name": "Brushed Copper",
+    "url": "https://www.abiinteriors.com.au/product/beta-cabinetry-pull-400mm-brushed-copper-2/",
+    "sku": "15052",
+    "price_aud": 114.9
+   },
+   {
+    "name": "Brushed Gunmetal",
+    "url": "https://www.abiinteriors.com.au/product/beta-cabinetry-pull-400mm-brushed-gunmetal/",
+    "sku": "15053",
+    "price_aud": 114.9
+   },
+   {
+    "name": "Brushed Nickel",
+    "url": "https://www.abiinteriors.com.au/product/beta-cabinetry-pull-400mm-brushed-nickel/",
+    "sku": "15056",
+    "price_aud": 84.9
+   },
+   {
+    "name": "Matte Black",
+    "url": "https://www.abiinteriors.com.au/product/beta-cabinetry-pull-400mm-matte-black/",
+    "sku": "15054",
+    "price_aud": 74.9
+   }
+  ],
+  "spec_file": "BETA_Cabinetry_Pull_400_Spec-01.jpg",
+  "url": "https://www.abiinteriors.com.au/product/beta-cabinetry-pull-400mm/"
+ },
+ {
+  "folder": "Camille Farmhouse Cabinetry Pull",
+  "article": "ABI-CAMILLE-85",
+  "family": "Camille",
+  "kind": "Pull",
+  "knob": false,
+  "length": 85.1,
+  "centres": 64.0,
+  "holes": [
+   [
+    -32.0,
+    0.0
+   ],
+   [
+    32.0,
+    0.0
+   ]
+  ],
+  "adjustable": null,
+  "edge_mount": null,
+  "leg_height": 42.5,
+  "measured_length": 85.1,
+  "projection": 22.9,
+  "width": 42.5,
+  "across": [
+   -39.5,
+   3.0
+  ],
+  "colour_rgb": [
+   202,
+   154,
+   58
+  ],
+  "triangles": 1341,
+  "geometry": "IFC",
+  "finishes": [
+   {
+    "name": "Brushed Brass",
+    "url": "https://www.abiinteriors.com.au/product/camille-farmhouse-cabinetry-pull-brushed-brass/",
+    "sku": "16826",
+    "price_aud": 44.9
+   },
+   {
+    "name": "Brushed Copper",
+    "url": "https://www.abiinteriors.com.au/product/camille-farmhouse-cabinetry-pull-brushed-copper/",
+    "sku": "16827",
+    "price_aud": 44.9
+   },
+   {
+    "name": "Brushed Gunmetal",
+    "url": "https://www.abiinteriors.com.au/product/camille-farmhouse-cabinetry-pull-brushed-gunmetal/",
+    "sku": "16828",
+    "price_aud": 44.9
+   },
+   {
+    "name": "Brushed Nickel",
+    "url": "https://www.abiinteriors.com.au/product/camille-farmhouse-cabinetry-pull-brushed-nickel/",
+    "sku": "16829",
+    "price_aud": 39.9
+   },
+   {
+    "name": "Chrome",
+    "url": "https://www.abiinteriors.com.au/product/camille-farmhouse-cabinetry-pull-chrome/",
+    "sku": "16831",
+    "price_aud": 24.9
+   },
+   {
+    "name": "Matte Black",
+    "url": "https://www.abiinteriors.com.au/product/camille-farmhouse-cabinetry-pull-matte-black/",
+    "sku": "16830",
+    "price_aud": 39.9
+   }
+  ],
+  "spec_file": "Camille Farmhouse Cabinetry Pull_SPEC.jpg",
+  "url": "https://www.abiinteriors.com.au/product/camille-farmhouse-cabinetry-pull/"
+ },
+ {
+  "folder": "Elsa Cabinetry Knob",
+  "article": "ABI-ELSA-28",
+  "family": "Elsa",
+  "kind": "Knob",
+  "knob": true,
+  "length": 28.0,
+  "centres": 0.0,
+  "holes": [
+   [
+    0.0,
+    0.0
+   ]
+  ],
+  "adjustable": null,
+  "edge_mount": null,
+  "leg_height": 28.0,
+  "measured_length": 28.0,
+  "projection": 20.0,
+  "width": 28.0,
+  "across": [
+   -14.0,
+   14.0
+  ],
+  "colour_rgb": [
+   202,
+   154,
+   58
+  ],
+  "triangles": 184,
+  "geometry": "IFC",
+  "finishes": [
+   {
+    "name": "Brushed Brass",
+    "url": "https://www.abiinteriors.com.au/product/elsa-cabinetry-knob-brushed-brass/",
+    "sku": "14572",
+    "price_aud": 24.9
+   },
+   {
+    "name": "Brushed Copper",
+    "url": "https://www.abiinteriors.com.au/product/elsa-cabinetry-knob-copper/",
+    "sku": "14494",
+    "price_aud": 24.9
+   },
+   {
+    "name": "Brushed Gunmetal",
+    "url": "https://www.abiinteriors.com.au/product/elsa-cabinetry-knob-brushed-gunmetal/",
+    "sku": "14573",
+    "price_aud": 24.9
+   },
+   {
+    "name": "Brushed Nickel",
+    "url": "https://www.abiinteriors.com.au/product/elsa-cabinetry-knob-brushed-nickel/",
+    "sku": "14574",
+    "price_aud": 19.9
+   },
+   {
+    "name": "Matte Black",
+    "url": "https://www.abiinteriors.com.au/product/elsa-cabinetry-knob-matte-black-2/",
+    "sku": "14575",
+    "price_aud": 19.9
+   },
+   {
+    "name": "White",
+    "url": "https://www.abiinteriors.com.au/product/elsa-cabinetry-knob-white/",
+    "sku": "14576",
+    "price_aud": 19.9
+   },
+   {
+    "name": "Antique Aurum",
+    "url": "https://www.abiinteriors.com.au/product/elsa-cabinetry-knob-antique-aurum/",
+    "sku": "17719",
+    "price_aud": 29.9
+   },
+   {
+    "name": "Antique Bronze",
+    "url": "https://www.abiinteriors.com.au/product/elsa-cabinetry-knob-antique-bronze/",
+    "sku": "17720",
+    "price_aud": 29.9
+   },
+   {
+    "name": "Antique Slate",
+    "url": "https://www.abiinteriors.com.au/product/elsa-cabinetry-knob-antique-slate/",
+    "sku": "17721",
+    "price_aud": 29.9
+   },
+   {
+    "name": "Antique Steel",
+    "url": "https://www.abiinteriors.com.au/product/elsa-cabinetry-knob-antique-steel/",
+    "sku": "17717",
+    "price_aud": 29.9
+   }
+  ],
+  "spec_file": "ELSA_Cabinetry_Knob_Spec-01.jpg",
+  "url": "https://www.abiinteriors.com.au/product/elsa-cabinetry-knob/"
+ },
+ {
+  "folder": "Hegman Classic Pull 130mm",
+  "article": "ABI-HEGMANCLASSIC-130",
+  "family": "Hegman Classic",
+  "kind": "Pull",
+  "knob": false,
+  "length": 130.0,
+  "centres": 50.0,
+  "holes": [
+   [
+    -25.0,
+    0.0
+   ],
+   [
+    25.0,
+    0.0
+   ]
+  ],
+  "adjustable": null,
+  "edge_mount": null,
+  "leg_height": 20.0,
+  "measured_length": 130.0,
+  "projection": 20.0,
+  "width": 20.0,
+  "across": [
+   -10.0,
+   10.0
+  ],
+  "colour_rgb": [
+   244,
+   206,
+   157
+  ],
+  "triangles": 264,
+  "geometry": "FBX",
+  "finishes": [
+   {
+    "name": "Ash",
+    "url": "",
+    "sku": "13156",
+    "price_aud": 0.0
+   }
+  ],
+  "spec_file": "HEGMAN_130_Classic_Spec-01.jpg",
+  "url": "https://www.abiinteriors.com.au/product/hegman-classic-pull-130mm-ash/"
+ },
+ {
+  "folder": "Hegman Classic Pull 250mm",
+  "article": "ABI-HEGMANCLASSIC-250",
+  "family": "Hegman Classic",
+  "kind": "Pull",
+  "knob": false,
+  "length": 250.0,
+  "centres": 154.0,
+  "holes": [
+   [
+    -77.0,
+    0.0
+   ],
+   [
+    77.0,
+    0.0
+   ]
+  ],
+  "adjustable": null,
+  "edge_mount": null,
+  "leg_height": 20.0,
+  "measured_length": 250.0,
+  "projection": 20.0,
+  "width": 20.0,
+  "across": [
+   -10.0,
+   10.0
+  ],
+  "colour_rgb": [
+   244,
+   206,
+   157
+  ],
+  "triangles": 264,
+  "geometry": "FBX",
+  "finishes": [
+   {
+    "name": "Ash",
+    "url": "",
+    "sku": "13157",
+    "price_aud": 0.0
+   }
+  ],
+  "spec_file": "HEGMAN_250_Classic_SPEC-01.jpg",
+  "url": "https://www.abiinteriors.com.au/product/hegman-classic-pull-250mm-ash/"
+ },
+ {
+  "folder": "Hegman Half Moon Pull 200mm Pair",
+  "article": "ABI-HEGMANHALFMOON-200",
+  "family": "Hegman Half Moon",
+  "kind": "Pull",
+  "knob": false,
+  "length": 200.0,
+  "centres": 50.0,
+  "holes": [
+   [
+    -25.0,
+    0.0
+   ],
+   [
+    25.0,
+    0.0
+   ]
+  ],
+  "adjustable": null,
+  "edge_mount": null,
+  "leg_height": 98.5,
+  "measured_length": 200.0,
+  "projection": 52.0,
+  "width": 98.5,
+  "across": [
+   -83.5,
+   15.0
+  ],
+  "colour_rgb": [
+   244,
+   206,
+   157
+  ],
+  "triangles": 189,
+  "geometry": "IFC",
+  "finishes": [
+   {
+    "name": "Ash",
+    "url": "",
+    "sku": "13155",
+    "price_aud": 0.0
+   }
+  ],
+  "spec_file": "HEGMAN_Half_Moon_200_Galley_Spec-01.jpg",
+  "url": "https://www.abiinteriors.com.au/product/hegman-half-moon-pull-200mm-pair-ash/"
+ },
+ {
+  "folder": "Hegman Half Moon Pull 90mm Pair",
+  "article": "ABI-HEGMANHALFMOON-90",
+  "family": "Hegman Half Moon",
+  "kind": "Pull",
+  "knob": false,
+  "length": 90.0,
+  "centres": 22.0,
+  "holes": [
+   [
+    -11.0,
+    0.0
+   ],
+   [
+    11.0,
+    0.0
+   ]
+  ],
+  "adjustable": null,
+  "edge_mount": null,
+  "leg_height": 45.0,
+  "measured_length": 90.0,
+  "projection": 25.0,
+  "width": 45.0,
+  "across": [
+   -35.0,
+   10.0
+  ],
+  "colour_rgb": [
+   244,
+   206,
+   157
+  ],
+  "triangles": 990,
+  "geometry": "FBX",
+  "finishes": [
+   {
+    "name": "Ash",
+    "url": "",
+    "sku": "13154",
+    "price_aud": 0.0
+   }
+  ],
+  "spec_file": "Hegman_Half_Moon_Pull_90mm_Pair_Specifications.gif",
+  "url": "https://www.abiinteriors.com.au/product/hegman-half-moon-pull-90mm-pair-ash/"
+ },
+ {
+  "folder": "Hegman Kurve Pull 250mm Pair",
+  "article": "ABI-HEGMANKURVE-250",
+  "family": "Hegman Kurve",
+  "kind": "Pull",
+  "knob": false,
+  "length": 250.0,
+  "centres": 110.0,
+  "holes": [
+   [
+    -55.0,
+    0.0
+   ],
+   [
+    55.0,
+    0.0
+   ]
+  ],
+  "adjustable": null,
+  "edge_mount": null,
+  "leg_height": 35.0,
+  "measured_length": 250.0,
+  "projection": 26.0,
+  "width": 35.0,
+  "across": [
+   -27.5,
+   7.5
+  ],
+  "colour_rgb": [
+   244,
+   206,
+   157
+  ],
+  "triangles": 152,
+  "geometry": "IFC",
+  "finishes": [
+   {
+    "name": "Ash",
+    "url": "",
+    "sku": "13158",
+    "price_aud": 0.0
+   }
+  ],
+  "spec_file": "Hegman_Kurve_Pull_250mm_SPEC.jpg",
+  "url": "https://www.abiinteriors.com.au/product/hegman-kurve-pull-250mm-pair-ash/"
+ },
+ {
+  "folder": "Hegman Round Pull - 30mm",
+  "article": "ABI-HEGMANROUND-30",
+  "family": "Hegman Round",
+  "kind": "Pull",
+  "knob": true,
+  "length": 30.0,
+  "centres": 0.0,
+  "holes": [
+   [
+    0.0,
+    0.0
+   ]
+  ],
+  "adjustable": null,
+  "edge_mount": null,
+  "leg_height": 30.0,
+  "measured_length": 30.0,
+  "projection": 19.0,
+  "width": 30.0,
+  "across": [
+   -15.0,
+   15.0
+  ],
+  "colour_rgb": [
+   244,
+   206,
+   157
+  ],
+  "triangles": 158,
+  "geometry": "IFC",
+  "finishes": [
+   {
+    "name": "Ash",
+    "url": "",
+    "sku": "13150",
+    "price_aud": 0.0
+   }
+  ],
+  "spec_file": "HEGMAN_28_Round_Spec-01.jpg",
+  "url": "https://www.abiinteriors.com.au/product/hegman-round-pull-30mm-ash/"
+ },
+ {
+  "folder": "Hegman Round Pull 200mm",
+  "article": "ABI-HEGMANROUND-200",
+  "family": "Hegman Round",
+  "kind": "Pull",
+  "knob": false,
+  "length": 200.0,
+  "centres": 50.0,
+  "holes": [
+   [
+    -25.0,
+    0.0
+   ],
+   [
+    0.0,
+    -25.0
+   ],
+   [
+    0.0,
+    25.0
+   ],
+   [
+    25.0,
+    0.0
+   ]
+  ],
+  "adjustable": null,
+  "edge_mount": null,
+  "leg_height": 197.0,
+  "measured_length": 200.0,
+  "projection": 52.0,
+  "width": 197.0,
+  "across": [
+   -98.5,
+   98.5
+  ],
+  "colour_rgb": [
+   244,
+   206,
+   157
+  ],
+  "triangles": 360,
+  "geometry": "IFC",
+  "finishes": [
+   {
+    "name": "Ash",
+    "url": "",
+    "sku": "13153",
+    "price_aud": 0.0
+   }
+  ],
+  "spec_file": "Hegman_200_round_SPEC-01.jpg",
+  "url": "https://www.abiinteriors.com.au/product/hegman-round-pull-200mm-ash/"
+ },
+ {
+  "folder": "Hegman Round Pull 60mm",
+  "article": "ABI-HEGMANROUND-60",
+  "family": "Hegman Round",
+  "kind": "Pull",
+  "knob": true,
+  "length": 60.0,
+  "centres": 0.0,
+  "holes": [
+   [
+    0.0,
+    0.0
+   ]
+  ],
+  "adjustable": null,
+  "edge_mount": null,
+  "leg_height": 57.1,
+  "measured_length": 60.0,
+  "projection": 23.0,
+  "width": 57.1,
+  "across": [
+   -28.5,
+   28.5
+  ],
+  "colour_rgb": [
+   244,
+   206,
+   157
+  ],
+  "triangles": 450,
+  "geometry": "IFC",
+  "finishes": [
+   {
+    "name": "Ash",
+    "url": "",
+    "sku": "13151",
+    "price_aud": 0.0
+   }
+  ],
+  "spec_file": "HEGMAN_60_Round_SPEC-01.jpg",
+  "url": "https://www.abiinteriors.com.au/product/hegman-round-pull-60mm-ash/"
+ },
+ {
+  "folder": "Hegman Round Pull 90mm",
+  "article": "ABI-HEGMANROUND-90",
+  "family": "Hegman Round",
+  "kind": "Pull",
+  "knob": true,
+  "length": 90.0,
+  "centres": 0.0,
+  "holes": [
+   [
+    0.0,
+    0.0
+   ]
+  ],
+  "adjustable": null,
+  "edge_mount": null,
+  "leg_height": 90.0,
+  "measured_length": 90.0,
+  "projection": 25.0,
+  "width": 90.0,
+  "across": [
+   -45.0,
+   45.0
+  ],
+  "colour_rgb": [
+   244,
+   206,
+   157
+  ],
+  "triangles": 398,
+  "geometry": "IFC",
+  "finishes": [
+   {
+    "name": "Ash",
+    "url": "",
+    "sku": "13152",
+    "price_aud": 0.0
+   }
+  ],
+  "spec_file": "Hegman_Round_Pull_90mm_-_Specifications_1.gif",
+  "url": "https://www.abiinteriors.com.au/product/hegman-round-pull-90mm-ash/"
+ },
+ {
+  "folder": "Imes Cabinetry Pull",
+  "article": "ABI-IMES-98",
+  "family": "Imes",
+  "kind": "Pull",
+  "knob": false,
+  "length": 98.0,
+  "centres": 64.0,
+  "holes": [
+   [
+    -32.0,
+    0.0
+   ],
+   [
+    32.0,
+    0.0
+   ]
+  ],
+  "adjustable": null,
+  "edge_mount": null,
+  "leg_height": 50.0,
+  "measured_length": 98.0,
+  "projection": 17.7,
+  "width": 50.0,
+  "across": [
+   -35.0,
+   15.0
+  ],
+  "colour_rgb": [
+   202,
+   154,
+   58
+  ],
+  "triangles": 364,
+  "geometry": "IFC",
+  "finishes": [
+   {
+    "name": "Brushed Brass",
+    "url": "https://www.abiinteriors.com.au/product/imes-cabinetry-pull-brushed-brass-2/",
+    "sku": "14495",
+    "price_aud": 44.9
+   },
+   {
+    "name": "Brushed Copper",
+    "url": "https://www.abiinteriors.com.au/product/imes-cabinetry-pull-brushed-copper/",
+    "sku": "14496",
+    "price_aud": 44.9
+   },
+   {
+    "name": "Brushed Gunmetal",
+    "url": "https://www.abiinteriors.com.au/product/imes-cabinetry-pull-brushed-gunmetal/",
+    "sku": "14497",
+    "price_aud": 44.9
+   },
+   {
+    "name": "Brushed Nickel",
+    "url": "https://www.abiinteriors.com.au/product/imes-cabinetry-pull-brushed-nickel/",
+    "sku": "14498",
+    "price_aud": 39.9
+   },
+   {
+    "name": "Matte Black",
+    "url": "https://www.abiinteriors.com.au/product/imes-cabinetry-pull-matte-black/",
+    "sku": "14499",
+    "price_aud": 39.9
+   },
+   {
+    "name": "White",
+    "url": "https://www.abiinteriors.com.au/product/imes-cabinetry-pull-white/",
+    "sku": "14500",
+    "price_aud": 44.9
+   }
+  ],
+  "spec_file": "IMES_Cabinetry_Pull_Spec-01.jpg",
+  "url": "https://www.abiinteriors.com.au/product/imes-cabinetry-pull/"
+ },
+ {
+  "folder": "Kingsley Adjustable Cabinetry Pull 150mm",
+  "article": "ABI-KINGSLEYADJUSTABLE-150",
+  "family": "Kingsley Adjustable",
+  "kind": "Pull",
+  "knob": false,
+  "length": 150.0,
+  "centres": 98.0,
+  "holes": [
+   [
+    -49.0,
+    0.0
+   ],
+   [
+    49.0,
+    0.0
+   ]
+  ],
+  "adjustable": [
+   70,
+   120
+  ],
+  "edge_mount": null,
+  "leg_height": 17.5,
+  "measured_length": 150.0,
+  "projection": 39.0,
+  "width": 17.5,
+  "across": [
+   -8.7,
+   8.7
+  ],
+  "colour_rgb": [
+   202,
+   154,
+   58
+  ],
+  "triangles": 1044,
+  "geometry": "IFC",
+  "finishes": [
+   {
+    "name": "Brushed Brass",
+    "url": "https://www.abiinteriors.com.au/product/kingsley-adjustable-cabinetry-pull-150mm-brushed-brass/",
+    "sku": "16354",
+    "price_aud": 69.9
+   },
+   {
+    "name": "Brushed Copper",
+    "url": "https://www.abiinteriors.com.au/product/kingsley-adjustable-cabinetry-pull-150mm-brushed-copper/",
+    "sku": "16916",
+    "price_aud": 69.9
+   },
+   {
+    "name": "Brushed Nickel",
+    "url": "https://www.abiinteriors.com.au/product/kingsley-adjustable-cabinetry-pull-150mm-brushed-nickel/",
+    "sku": "16355",
+    "price_aud": 69.9
+   },
+   {
+    "name": "Chrome",
+    "url": "https://www.abiinteriors.com.au/product/kingsley-adjustable-cabinetry-pull-150mm-chrome/",
+    "sku": "16357",
+    "price_aud": 49.9
+   },
+   {
+    "name": "Matte Black",
+    "url": "https://www.abiinteriors.com.au/product/kingsley-adjustable-cabinetry-pull-150mm-matte-black/",
+    "sku": "16356",
+    "price_aud": 64.9
+   },
+   {
+    "name": "Tumbled Aged Brass",
+    "url": "https://www.abiinteriors.com.au/product/kingsley-adjustable-cabinetry-pull-150mm-tumbled-aged-brass/",
+    "sku": "20227",
+    "price_aud": 69.9
+   }
+  ],
+  "spec_file": "150_Kinglsey_Adjustable_Cabinetry_Pull_GALLERY_SPEC-01.jpg",
+  "url": "https://www.abiinteriors.com.au/product/kingsley-adjustable-cabinetry-pull-150mm/"
+ },
+ {
+  "folder": "Kingsley Adjustable Cabinetry Pull 250mm",
+  "article": "ABI-KINGSLEYADJUSTABLE-250",
+  "family": "Kingsley Adjustable",
+  "kind": "Pull",
+  "knob": false,
+  "length": 250.0,
+  "centres": 198.0,
+  "holes": [
+   [
+    -99.0,
+    0.0
+   ],
+   [
+    99.0,
+    0.0
+   ]
+  ],
+  "adjustable": [
+   100,
+   220
+  ],
+  "edge_mount": null,
+  "leg_height": 17.5,
+  "measured_length": 250.0,
+  "projection": 39.0,
+  "width": 17.5,
+  "across": [
+   -8.7,
+   8.7
+  ],
+  "colour_rgb": [
+   202,
+   154,
+   58
+  ],
+  "triangles": 1044,
+  "geometry": "IFC",
+  "finishes": [
+   {
+    "name": "Brushed Brass",
+    "url": "https://www.abiinteriors.com.au/product/kingsley-adjustable-cabinetry-pull-250mm-brushed-brass/",
+    "sku": "16358",
+    "price_aud": 79.9
+   },
+   {
+    "name": "Brushed Copper",
+    "url": "https://www.abiinteriors.com.au/product/kingsley-adjustable-cabinetry-pull-250mm-brushed-copper/",
+    "sku": "16917",
+    "price_aud": 79.9
+   },
+   {
+    "name": "Brushed Nickel",
+    "url": "https://www.abiinteriors.com.au/product/kingsley-adjustable-cabinetry-pull-250mm-brushed-nickel/",
+    "sku": "16359",
+    "price_aud": 79.9
+   },
+   {
+    "name": "Chrome",
+    "url": "https://www.abiinteriors.com.au/product/kingsley-adjustable-cabinetry-pull-250mm-chrome/",
+    "sku": "16361",
+    "price_aud": 59.9
+   },
+   {
+    "name": "Matte Black",
+    "url": "https://www.abiinteriors.com.au/product/kingsley-adjustable-cabinetry-pull-250mm-matte-black/",
+    "sku": "16360",
+    "price_aud": 74.9
+   },
+   {
+    "name": "Tumbled Aged Brass",
+    "url": "https://www.abiinteriors.com.au/product/kingsley-adjustable-cabinetry-pull-250mm-tumbled-aged-brass/",
+    "sku": "20228",
+    "price_aud": 79.9
+   }
+  ],
+  "spec_file": "250_Kingsley_Adjustable_Cabinetry_Pull_GALLERY_SPEC-01.jpg",
+  "url": "https://www.abiinteriors.com.au/product/kingsley-adjustable-cabinetry-pull-250mm/"
+ },
+ {
+  "folder": "Kingsley Adjustable Cabinetry Pull 350mm",
+  "article": "ABI-KINGSLEYADJUSTABLE-350",
+  "family": "Kingsley Adjustable",
+  "kind": "Pull",
+  "knob": false,
+  "length": 350.0,
+  "centres": 298.0,
+  "holes": [
+   [
+    -149.0,
+    0.0
+   ],
+   [
+    149.0,
+    0.0
+   ]
+  ],
+  "adjustable": [
+   140,
+   320
+  ],
+  "edge_mount": null,
+  "leg_height": 17.5,
+  "measured_length": 350.0,
+  "projection": 39.0,
+  "width": 17.5,
+  "across": [
+   -8.7,
+   8.7
+  ],
+  "colour_rgb": [
+   202,
+   154,
+   58
+  ],
+  "triangles": 1044,
+  "geometry": "IFC",
+  "finishes": [
+   {
+    "name": "Brushed Brass",
+    "url": "https://www.abiinteriors.com.au/product/kingsley-adjustable-cabinetry-pull-350mm-brushed-brass/",
+    "sku": "16362",
+    "price_aud": 99.9
+   },
+   {
+    "name": "Brushed Copper",
+    "url": "https://www.abiinteriors.com.au/product/kingsley-adjustable-cabinetry-pull-350mm-brushed-copper/",
+    "sku": "16918",
+    "price_aud": 99.9
+   },
+   {
+    "name": "Brushed Nickel",
+    "url": "https://www.abiinteriors.com.au/product/kingsley-adjustable-cabinetry-pull-350mm-brushed-nickel/",
+    "sku": "16363",
+    "price_aud": 99.9
+   },
+   {
+    "name": "Chrome",
+    "url": "https://www.abiinteriors.com.au/product/kingsley-adjustable-cabinetry-pull-350mm-chrome/",
+    "sku": "16365",
+    "price_aud": 74.9
+   },
+   {
+    "name": "Matte Black",
+    "url": "https://www.abiinteriors.com.au/product/kingsley-adjustable-cabinetry-pull-350mm-matte-black/",
+    "sku": "16364",
+    "price_aud": 94.9
+   },
+   {
+    "name": "Tumbled Aged Brass",
+    "url": "https://www.abiinteriors.com.au/product/kingsley-adjustable-cabinetry-pull-350mm-tumbled-aged-brass/",
+    "sku": "20229",
+    "price_aud": 99.9
+   }
+  ],
+  "spec_file": "350_Kinglsey_Adjustable_Cabinetry_Pull_GALLERY_SPEC-01.jpg",
+  "url": "https://www.abiinteriors.com.au/product/kingsley-adjustable-cabinetry-pull-350mm/"
+ },
+ {
+  "folder": "Modi Adjustable Cabinetry Pull 150mm",
+  "article": "ABI-MODIADJUSTABLE-150",
+  "family": "Modi Adjustable",
+  "kind": "Pull",
+  "knob": false,
+  "length": 150.0,
+  "centres": 96.0,
+  "holes": [
+   [
+    -48.0,
+    0.0
+   ],
+   [
+    48.0,
+    0.0
+   ]
+  ],
+  "adjustable": [
+   70,
+   120
+  ],
+  "edge_mount": null,
+  "leg_height": 14.0,
+  "measured_length": 150.0,
+  "projection": 37.0,
+  "width": 14.0,
+  "across": [
+   -7.0,
+   7.0
+  ],
+  "colour_rgb": [
+   202,
+   154,
+   58
+  ],
+  "triangles": 536,
+  "geometry": "IFC",
+  "finishes": [
+   {
+    "name": "Brushed Brass",
+    "url": "https://www.abiinteriors.com.au/product/modi-adjustable-cabinetry-pull-150mm-brushed-brass/",
+    "sku": "14713",
+    "price_aud": 69.9
+   },
+   {
+    "name": "Brushed Copper",
+    "url": "https://www.abiinteriors.com.au/product/modi-adjustable-cabinetry-pull-150mm-brushed-copper/",
+    "sku": "14714",
+    "price_aud": 69.9
+   },
+   {
+    "name": "Brushed Gunmetal",
+    "url": "https://www.abiinteriors.com.au/product/modi-adjustable-cabinetry-pull-150mm-brushed-gunmetal/",
+    "sku": "14715",
+    "price_aud": 69.9
+   },
+   {
+    "name": "Brushed Nickel",
+    "url": "https://www.abiinteriors.com.au/product/modi-adjustable-cabinetry-pull-150mm-brushed-nickel/",
+    "sku": "14716",
+    "price_aud": 54.9
+   },
+   {
+    "name": "Chrome",
+    "url": "https://www.abiinteriors.com.au/product/modi-adjustable-cabinetry-pull-150mm-chrome/",
+    "sku": "14717",
+    "price_aud": 34.9
+   },
+   {
+    "name": "Tumbled Aged Brass",
+    "url": "https://www.abiinteriors.com.au/product/modi-adjustable-cabinetry-pull-150mm-tumbled-aged-brass/",
+    "sku": "16681",
+    "price_aud": 69.9
+   }
+  ],
+  "spec_file": "Adjustable_Cab_Pull_150_GALLERY_SPEC-01.jpg",
+  "url": "https://www.abiinteriors.com.au/product/modi-adjustable-cabinetry-pull-150mm/"
+ },
+ {
+  "folder": "Modi Adjustable Cabinetry Pull 250mm",
+  "article": "ABI-MODIADJUSTABLE-250",
+  "family": "Modi Adjustable",
+  "kind": "Pull",
+  "knob": false,
+  "length": 250.0,
+  "centres": 192.0,
+  "holes": [
+   [
+    -96.0,
+    0.0
+   ],
+   [
+    96.0,
+    0.0
+   ]
+  ],
+  "adjustable": [
+   100,
+   220
+  ],
+  "edge_mount": null,
+  "leg_height": 14.0,
+  "measured_length": 250.0,
+  "projection": 37.0,
+  "width": 14.0,
+  "across": [
+   -7.0,
+   7.0
+  ],
+  "colour_rgb": [
+   202,
+   154,
+   58
+  ],
+  "triangles": 548,
+  "geometry": "IFC",
+  "finishes": [
+   {
+    "name": "Brushed Brass",
+    "url": "https://www.abiinteriors.com.au/product/modi-adjustable-cabinetry-pull-250mm-brushed-brass/",
+    "sku": "14718",
+    "price_aud": 79.9
+   },
+   {
+    "name": "Brushed Copper",
+    "url": "https://www.abiinteriors.com.au/product/modi-adjustable-cabinetry-pull-250mm-brushed-copper/",
+    "sku": "14719",
+    "price_aud": 79.9
+   },
+   {
+    "name": "Brushed Gunmetal",
+    "url": "https://www.abiinteriors.com.au/product/modi-adjustable-cabinetry-pull-250mm-brushed-gunmetal/",
+    "sku": "14720",
+    "price_aud": 79.9
+   },
+   {
+    "name": "Brushed Nickel",
+    "url": "https://www.abiinteriors.com.au/product/modi-adjustable-cabinetry-pull-250mm-brushed-nickel/",
+    "sku": "14721",
+    "price_aud": 64.9
+   },
+   {
+    "name": "Chrome",
+    "url": "https://www.abiinteriors.com.au/product/modi-adjustable-cabinetry-pull-250mm-chrome/",
+    "sku": "14722",
+    "price_aud": 44.9
+   },
+   {
+    "name": "Tumbled Aged Brass",
+    "url": "https://www.abiinteriors.com.au/product/modi-adjustable-cabinetry-pull-250mm-tumbled-aged-brass/",
+    "sku": "16682",
+    "price_aud": 79.9
+   }
+  ],
+  "spec_file": "MODI-Adj-Cabinetry-Pull-250_GALLERY-SPEC_V3.gif",
+  "url": "https://www.abiinteriors.com.au/product/modi-adjustable-cabinetry-pull-250mm/"
+ },
+ {
+  "folder": "Modi Adjustable Cabinetry Pull 350mm",
+  "article": "ABI-MODIADJUSTABLE-350",
+  "family": "Modi Adjustable",
+  "kind": "Pull",
+  "knob": false,
+  "length": 350.0,
+  "centres": 288.0,
+  "holes": [
+   [
+    -144.0,
+    0.0
+   ],
+   [
+    144.0,
+    0.0
+   ]
+  ],
+  "adjustable": [
+   140,
+   320
+  ],
+  "edge_mount": null,
+  "leg_height": 14.0,
+  "measured_length": 350.0,
+  "projection": 37.0,
+  "width": 14.0,
+  "across": [
+   -7.0,
+   7.0
+  ],
+  "colour_rgb": [
+   202,
+   154,
+   58
+  ],
+  "triangles": 560,
+  "geometry": "IFC",
+  "finishes": [
+   {
+    "name": "Brushed Brass",
+    "url": "https://www.abiinteriors.com.au/product/modi-adjustable-cabinetry-pull-350mm-brushed-brass/",
+    "sku": "14723",
+    "price_aud": 109.9
+   },
+   {
+    "name": "Brushed Copper",
+    "url": "https://www.abiinteriors.com.au/product/modi-adjustable-cabinetry-pull-350mm-brushed-copper/",
+    "sku": "14724",
+    "price_aud": 109.9
+   },
+   {
+    "name": "Brushed Gunmetal",
+    "url": "https://www.abiinteriors.com.au/product/modi-adjustable-cabinetry-pull-350mm-brushed-gunmetal/",
+    "sku": "14725",
+    "price_aud": 109.9
+   },
+   {
+    "name": "Brushed Nickel",
+    "url": "https://www.abiinteriors.com.au/product/modi-adjustable-cabinetry-pull-350mm-brushed-nickel/",
+    "sku": "14726",
+    "price_aud": 84.9
+   },
+   {
+    "name": "Chrome",
+    "url": "https://www.abiinteriors.com.au/product/modi-adjustable-cabinetry-pull-350mm-chrome/",
+    "sku": "14727",
+    "price_aud": 59.9
+   },
+   {
+    "name": "Tumbled Aged Brass",
+    "url": "https://www.abiinteriors.com.au/product/modi-adjustable-cabinetry-pull-350mm-tumbled-aged-brass/",
+    "sku": "16683",
+    "price_aud": 109.9
+   }
+  ],
+  "spec_file": "MODI-Adj-Cabinetry-Pull-350_GALLERY-SPEC_V3.gif",
+  "url": "https://www.abiinteriors.com.au/product/modi-adjustable-cabinetry-pull-350mm/"
+ },
+ {
+  "folder": "Myka Cabinetry Knob 60mm",
+  "article": "ABI-MYKA-60",
+  "family": "Myka",
+  "kind": "Knob",
+  "knob": true,
+  "length": 60.0,
+  "centres": 0.0,
+  "holes": [
+   [
+    0.0,
+    0.0
+   ]
+  ],
+  "adjustable": null,
+  "edge_mount": null,
+  "leg_height": 57.1,
+  "measured_length": 60.0,
+  "projection": 23.0,
+  "width": 57.1,
+  "across": [
+   -28.5,
+   28.5
+  ],
+  "colour_rgb": [
+   202,
+   154,
+   58
+  ],
+  "triangles": 210,
+  "geometry": "IFC",
+  "finishes": [
+   {
+    "name": "Brushed Brass",
+    "url": "https://www.abiinteriors.com.au/product/myka-cabinetry-knob-60mm-brushed-brass/",
+    "sku": "12491",
+    "price_aud": 64.9
+   },
+   {
+    "name": "Brushed Copper",
+    "url": "https://www.abiinteriors.com.au/product/myka-cabintery-knob-60mm-brushed-copper/",
+    "sku": "12492",
+    "price_aud": 64.9
+   },
+   {
+    "name": "Brushed Gunmetal",
+    "url": "https://www.abiinteriors.com.au/product/myka-cabintery-knob-60mm-brushed-gunmetal/",
+    "sku": "12493",
+    "price_aud": 64.9
+   },
+   {
+    "name": "Brushed Nickel",
+    "url": "https://www.abiinteriors.com.au/product/myka-cabintery-knob-60mm-brushed-nickel/",
+    "sku": "12494",
+    "price_aud": 54.9
+   },
+   {
+    "name": "Matte Black",
+    "url": "https://www.abiinteriors.com.au/product/myka-cabintery-knob-60mm-matte-black/",
+    "sku": "12495",
+    "price_aud": 54.9
+   },
+   {
+    "name": "White",
+    "url": "https://www.abiinteriors.com.au/product/myka-cabintery-knob-60mm-white/",
+    "sku": "12496",
+    "price_aud": 59.9
+   }
+  ],
+  "spec_file": "Myka_Cabinetry_Knob_60mm__Brushed_Brass_-_Specifications_1.gif",
+  "url": "https://www.abiinteriors.com.au/product/myka-cabinetry-knob-60mm-brushed-brass/"
+ },
+ {
+  "folder": "Pedra Cabinetry Pull 220mm",
+  "article": "ABI-PEDRA-220",
+  "family": "Pedra",
+  "kind": "Pull",
+  "knob": false,
+  "length": 220.0,
+  "centres": 174.0,
+  "holes": [
+   [
+    -87.0,
+    0.0
+   ],
+   [
+    0.0,
+    0.0
+   ],
+   [
+    87.0,
+    0.0
+   ]
+  ],
+  "adjustable": null,
+  "edge_mount": null,
+  "leg_height": 25.0,
+  "measured_length": 220.0,
+  "projection": 21.4,
+  "width": 25.0,
+  "across": [
+   -12.5,
+   12.5
+  ],
+  "colour_rgb": [
+   201,
+   180,
+   165
+  ],
+  "triangles": 128,
+  "geometry": "IFC",
+  "finishes": [
+   {
+    "name": "Beige Travertine",
+    "url": "https://www.abiinteriors.com.au/product/pedra-cabinetry-pull-220mm-beige-travertine/",
+    "sku": "17598",
+    "price_aud": 109.9
+   },
+   {
+    "name": "Carrara Marble",
+    "url": "https://www.abiinteriors.com.au/product/pedra-cabinetry-pull-220mm-carrara-marble/",
+    "sku": "17599",
+    "price_aud": 109.9
+   },
+   {
+    "name": "Red Travertine",
+    "url": "https://www.abiinteriors.com.au/product/pedra-cabinetry-pull-220mm-red-travertine/",
+    "sku": "17600",
+    "price_aud": 119.9
+   },
+   {
+    "name": "Verde Alpi Marble",
+    "url": "https://www.abiinteriors.com.au/product/pedra-cabinetry-pull-220mm-verde-alpi-marble/",
+    "sku": "17601",
+    "price_aud": 119.9
+   }
+  ],
+  "spec_file": "Pedra Cabinetry Pull 220mm_Gallery Spec.jpg",
+  "url": "https://www.abiinteriors.com.au/product/pedra-cabinetry-pull-220mm-beige-travertine/"
+ },
+ {
+  "folder": "Pedra Cabinetry Pull 400mm",
+  "article": "ABI-PEDRA-400",
+  "family": "Pedra",
+  "kind": "Pull",
+  "knob": false,
+  "length": 400.0,
+  "centres": 360.0,
+  "holes": [
+   [
+    -180.0,
+    0.0
+   ],
+   [
+    0.0,
+    0.0
+   ],
+   [
+    180.0,
+    0.0
+   ]
+  ],
+  "adjustable": null,
+  "edge_mount": null,
+  "leg_height": 25.0,
+  "measured_length": 400.0,
+  "projection": 21.4,
+  "width": 25.0,
+  "across": [
+   -12.5,
+   12.5
+  ],
+  "colour_rgb": [
+   201,
+   180,
+   165
+  ],
+  "triangles": 164,
+  "geometry": "IFC",
+  "finishes": [
+   {
+    "name": "Beige Travertine",
+    "url": "https://www.abiinteriors.com.au/product/pedra-curve-cabinetry-pull-400mm-beige-travertine/",
+    "sku": "17594",
+    "price_aud": 129.9
+   },
+   {
+    "name": "Carrara Marble",
+    "url": "https://www.abiinteriors.com.au/product/pedra-curve-cabinetry-pull-400mm-carrara-marble/",
+    "sku": "17595",
+    "price_aud": 129.9
+   },
+   {
+    "name": "Red Travertine",
+    "url": "https://www.abiinteriors.com.au/product/pedra-curve-cabinetry-pull-400mm-red-travertine/",
+    "sku": "17596",
+    "price_aud": 139.9
+   },
+   {
+    "name": "Verde Alpi Marble",
+    "url": "https://www.abiinteriors.com.au/product/pedra-curve-cabinetry-pull-400mm-verde-alpi-marble/",
+    "sku": "17597",
+    "price_aud": 139.9
+   }
+  ],
+  "spec_file": "Pedra Cabinetry Pull 400_Gallery Spec.jpg",
+  "url": "https://www.abiinteriors.com.au/product/pedra-curve-cabinetry-pull-400mm-beige-travertine/"
+ },
+ {
+  "folder": "Pedra Curve Cabinetry Pull 320mm (Pair)",
+  "article": "ABI-PEDRACURVE-320",
+  "family": "Pedra Curve",
+  "kind": "Pull",
+  "knob": false,
+  "length": 320.0,
+  "centres": 160.0,
+  "holes": [
+   [
+    -80.0,
+    0.0
+   ],
+   [
+    0.0,
+    0.0
+   ],
+   [
+    80.0,
+    0.0
+   ]
+  ],
+  "adjustable": null,
+  "edge_mount": null,
+  "leg_height": 40.0,
+  "measured_length": 317.5,
+  "projection": 22.0,
+  "width": 40.0,
+  "across": [
+   -25.0,
+   15.0
+  ],
+  "colour_rgb": [
+   201,
+   180,
+   165
+  ],
+  "triangles": 156,
+  "geometry": "IFC",
+  "finishes": [
+   {
+    "name": "Beige Travertine",
+    "url": "https://www.abiinteriors.com.au/product/pedra-curve-cabinetry-pull-320mm-pair-beige-travertine/",
+    "sku": "17590",
+    "price_aud": 174.9
+   },
+   {
+    "name": "Carrara Marble",
+    "url": "https://www.abiinteriors.com.au/product/pedra-curve-cabinetry-pull-320mm-pair-carrara-marble/",
+    "sku": "17591",
+    "price_aud": 174.9
+   },
+   {
+    "name": "Red Travertine",
+    "url": "https://www.abiinteriors.com.au/product/pedra-curve-cabinetry-pull-320mm-pair-red-travertine/",
+    "sku": "17592",
+    "price_aud": 194.9
+   },
+   {
+    "name": "Verde Alpi Marble",
+    "url": "https://www.abiinteriors.com.au/product/pedra-curve-cabinetry-pull-320mm-pair-verde-alpi-marble/",
+    "sku": "17593",
+    "price_aud": 194.9
+   }
+  ],
+  "spec_file": "Pedra Curve Cabinetry Pull 320mm_Gallery Spec.jpg",
+  "url": "https://www.abiinteriors.com.au/product/pedra-curve-cabinetry-pull-320mm-pair-beige-travertine/"
+ },
+ {
+  "folder": "Pedra Large Knob 35mm",
+  "article": "ABI-PEDRALARGE-35",
+  "family": "Pedra Large",
+  "kind": "Knob",
+  "knob": true,
+  "length": 35.0,
+  "centres": 0.0,
+  "holes": [
+   [
+    0.0,
+    0.0
+   ]
+  ],
+  "adjustable": null,
+  "edge_mount": null,
+  "leg_height": 35.0,
+  "measured_length": 35.0,
+  "projection": 21.5,
+  "width": 35.0,
+  "across": [
+   -17.5,
+   17.5
+  ],
+  "colour_rgb": [
+   205,
+   210,
+   215
+  ],
+  "triangles": 169,
+  "geometry": "IFC",
+  "finishes": [
+   {
+    "name": "Beige Travertine",
+    "url": "https://www.abiinteriors.com.au/product/pedra-insert-knob-35mm-beige-travertine/",
+    "sku": "17606",
+    "price_aud": 34.9
+   },
+   {
+    "name": "Carrara Marble",
+    "url": "https://www.abiinteriors.com.au/product/pedra-insert-knob-35mm-carrara-marble/",
+    "sku": "17607",
+    "price_aud": 34.9
+   },
+   {
+    "name": "Red Travertine",
+    "url": "https://www.abiinteriors.com.au/product/pedra-insert-knob-35mm-red-travertine/",
+    "sku": "17608",
+    "price_aud": 39.9
+   },
+   {
+    "name": "Verde Alpi Marble",
+    "url": "https://www.abiinteriors.com.au/product/pedra-insert-knob-35mm-verde-alpi-marble/",
+    "sku": "17609",
+    "price_aud": 39.9
+   }
+  ],
+  "spec_file": "Pedra Large Knob 35mm_Gallery Spec.jpg",
+  "url": "https://www.abiinteriors.com.au/product/pedra-insert-knob-35mm-beige-travertine/"
+ },
+ {
+  "folder": "Pedra Small Knob 20mm",
+  "article": "ABI-PEDRASMALL-20",
+  "family": "Pedra Small",
+  "kind": "Knob",
+  "knob": true,
+  "length": 20.0,
+  "centres": 0.0,
+  "holes": [
+   [
+    0.0,
+    0.0
+   ]
+  ],
+  "adjustable": null,
+  "edge_mount": null,
+  "leg_height": 20.0,
+  "measured_length": 20.0,
+  "projection": 25.0,
+  "width": 20.0,
+  "across": [
+   -10.0,
+   10.0
+  ],
+  "colour_rgb": [
+   205,
+   210,
+   215
+  ],
+  "triangles": 148,
+  "geometry": "IFC",
+  "finishes": [
+   {
+    "name": "Beige Travertine",
+    "url": "https://www.abiinteriors.com.au/product/pedra-insert-knob-20mm-beige-travertine/",
+    "sku": "17602",
+    "price_aud": 24.9
+   },
+   {
+    "name": "Carrara Marble",
+    "url": "https://www.abiinteriors.com.au/product/pedra-insert-knob-20mm-carrara-marble/",
+    "sku": "17603",
+    "price_aud": 24.9
+   },
+   {
+    "name": "Red Travertine",
+    "url": "https://www.abiinteriors.com.au/product/pedra-insert-knob-20mm-red-travertine/",
+    "sku": "17604",
+    "price_aud": 29.9
+   },
+   {
+    "name": "Verde Alpi Marble",
+    "url": "https://www.abiinteriors.com.au/product/pedra-insert-knob-20mm-verde-alpi-marble/",
+    "sku": "17605",
+    "price_aud": 29.9
+   }
+  ],
+  "spec_file": "Pedra Small Knob 20mm_Gallery Spec.jpg",
+  "url": "https://www.abiinteriors.com.au/product/pedra-insert-knob-20mm-beige-travertine/"
+ },
+ {
+  "folder": "Pika Cabinetry Knob",
+  "article": "ABI-PIKA-35",
+  "family": "Pika",
+  "kind": "Knob",
+  "knob": true,
+  "length": 35.0,
+  "centres": 0.0,
+  "holes": [
+   [
+    0.0,
+    0.0
+   ]
+  ],
+  "adjustable": null,
+  "edge_mount": null,
+  "leg_height": 34.8,
+  "measured_length": 35.0,
+  "projection": 24.5,
+  "width": 34.8,
+  "across": [
+   -17.4,
+   17.4
+  ],
+  "colour_rgb": [
+   202,
+   154,
+   58
+  ],
+  "triangles": 244,
+  "geometry": "IFC",
+  "finishes": [
+   {
+    "name": "Brushed Brass",
+    "url": "https://www.abiinteriors.com.au/product/pika-cabinetry-knob-brushed-brass/",
+    "sku": "14501",
+    "price_aud": 29.9
+   },
+   {
+    "name": "Brushed Nickel",
+    "url": "https://www.abiinteriors.com.au/product/pika-cabinetry-knob-brushed-nickel/",
+    "sku": "15424",
+    "price_aud": 21.9
+   },
+   {
+    "name": "Matte Black",
+    "url": "https://www.abiinteriors.com.au/product/pika-cabinetry-knob-matte-black/",
+    "sku": "15324",
+    "price_aud": 19.9
+   },
+   {
+    "name": "Tumbled Aged Brass",
+    "url": "https://www.abiinteriors.com.au/product/pika-cabinetry-knob-tumbled-aged-brass/",
+    "sku": "16675",
+    "price_aud": 29.9
+   }
+  ],
+  "spec_file": "Pika_Cabinetry_Knob_Spec-01.jpg",
+  "url": "https://www.abiinteriors.com.au/product/pika-cabinetry-knob/"
+ },
+ {
+  "folder": "Pika Cabinetry Pull 138mm",
+  "article": "ABI-PIKA-138",
+  "family": "Pika",
+  "kind": "Pull",
+  "knob": false,
+  "length": 138.0,
+  "centres": 128.0,
+  "holes": [
+   [
+    -64.0,
+    0.0
+   ],
+   [
+    64.0,
+    0.0
+   ]
+  ],
+  "adjustable": null,
+  "edge_mount": null,
+  "leg_height": 15.0,
+  "measured_length": 138.0,
+  "projection": 24.0,
+  "width": 15.0,
+  "across": [
+   -7.5,
+   7.5
+  ],
+  "colour_rgb": [
+   202,
+   154,
+   58
+  ],
+  "triangles": 202,
+  "geometry": "IFC",
+  "finishes": [
+   {
+    "name": "Brushed Brass",
+    "url": "https://www.abiinteriors.com.au/product/pika-cabinetry-pull-136mm-brushed-brass/",
+    "sku": "14502",
+    "price_aud": 44.9
+   },
+   {
+    "name": "Matte Black",
+    "url": "https://www.abiinteriors.com.au/product/pika-cabinetry-pull-136mm-matte-black/",
+    "sku": "14687",
+    "price_aud": 44.9
+   }
+  ],
+  "spec_file": "PIKA_Cabinetry_Pull_136mm_-_GALLERY_SPEC-01.jpg",
+  "url": "https://www.abiinteriors.com.au/product/pika-cabinetry-pull-136mm-brushed-brass/"
+ },
+ {
+  "folder": "Rappana Cabinetry Pull 50mm",
+  "article": "ABI-RAPPANA-50",
+  "family": "Rappana",
+  "kind": "Pull",
+  "knob": false,
+  "length": 50.0,
+  "centres": 25.0,
+  "holes": [
+   [
+    -12.5,
+    0.0
+   ],
+   [
+    12.5,
+    0.0
+   ]
+  ],
+  "adjustable": null,
+  "edge_mount": "back_leg",
+  "leg_height": 18.0,
+  "measured_length": 50.0,
+  "projection": 36.0,
+  "width": 18.0,
+  "across": [
+   -16.0,
+   2.0
+  ],
+  "colour_rgb": [
+   202,
+   154,
+   58
+  ],
+  "triangles": 226,
+  "geometry": "IFC",
+  "finishes": [
+   {
+    "name": "Brushed Brass",
+    "url": "https://www.abiinteriors.com.au/product/rappana-cabinetry-pull-50mm-brushed-brass/",
+    "sku": "10504",
+    "price_aud": 29.9
+   },
+   {
+    "name": "Brushed Copper",
+    "url": "https://www.abiinteriors.com.au/product/rappana-cabinetry-pull-50mm-brushed-copper/",
+    "sku": "10505",
+    "price_aud": 29.9
+   },
+   {
+    "name": "Brushed Gunmetal",
+    "url": "https://www.abiinteriors.com.au/product/rappana-cabinetry-pull-50mm-brushed-gunmetal/",
+    "sku": "10506",
+    "price_aud": 29.9
+   },
+   {
+    "name": "Stainless Steel",
+    "url": "https://www.abiinteriors.com.au/product/rappana-cabinetry-pull-50mm-stainless-steel/",
+    "sku": "10507",
+    "price_aud": 24.9
+   },
+   {
+    "name": "Antique Slate",
+    "url": "https://www.abiinteriors.com.au/product/rappana-cabinetry-pull-50mm-antique-slate/",
+    "sku": "17265",
+    "price_aud": 34.9
+   },
+   {
+    "name": "Antique Steel",
+    "url": "https://www.abiinteriors.com.au/product/rappana-cabinetry-pull-50mm-antique-steel/",
+    "sku": "17647",
+    "price_aud": 34.9
+   }
+  ],
+  "spec_file": "Rappana_50_Spec-01.jpg",
+  "url": "https://www.abiinteriors.com.au/product/rappana-cabinetry-pull-50mm/"
+ },
+ {
+  "folder": "Rappana Cabinetry Pull Extended 100mm",
+  "article": "ABI-RAPPANA-100",
+  "family": "Rappana",
+  "kind": "Pull",
+  "knob": false,
+  "length": 100.0,
+  "centres": 75.0,
+  "holes": [
+   [
+    -37.5,
+    0.0
+   ],
+   [
+    37.5,
+    0.0
+   ]
+  ],
+  "adjustable": null,
+  "edge_mount": "back_leg",
+  "leg_height": 18.0,
+  "measured_length": 100.0,
+  "projection": 36.0,
+  "width": 18.0,
+  "across": [
+   -16.0,
+   2.0
+  ],
+  "colour_rgb": [
+   202,
+   154,
+   58
+  ],
+  "triangles": 226,
+  "geometry": "IFC",
+  "finishes": [
+   {
+    "name": "Brushed Brass",
+    "url": "https://www.abiinteriors.com.au/product/rappana-cabinetry-pull-extended-100mm-brushed-brass/",
+    "sku": "10470",
+    "price_aud": 34.9
+   },
+   {
+    "name": "Brushed Copper",
+    "url": "https://www.abiinteriors.com.au/product/rappana-cabinetry-pull-extended-100mm-brushed-copper/",
+    "sku": "10469",
+    "price_aud": 34.9
+   },
+   {
+    "name": "Brushed Gunmetal",
+    "url": "https://www.abiinteriors.com.au/product/rappana-cabinetry-pull-extended-100mm-brushed-gunmetal/",
+    "sku": "10471",
+    "price_aud": 34.9
+   },
+   {
+    "name": "Stainless Steel",
+    "url": "https://www.abiinteriors.com.au/product/rappana-cabinetry-pull-extended-100mm-stainless-steel/",
+    "sku": "10472",
+    "price_aud": 29.9
+   },
+   {
+    "name": "Antique Aurum",
+    "url": "https://www.abiinteriors.com.au/product/rappana-cabinetry-pull-extended-100mm-antique-aurum/",
+    "sku": "17260",
+    "price_aud": 39.9
+   },
+   {
+    "name": "Antique Bronze",
+    "url": "https://www.abiinteriors.com.au/product/rappana-cabinetry-pull-extended-100mm-antique-bronze/",
+    "sku": "17261",
+    "price_aud": 39.9
+   },
+   {
+    "name": "Antique Slate",
+    "url": "https://www.abiinteriors.com.au/product/rappana-cabinetry-pull-extended-100mm-antique-slate/",
+    "sku": "17262",
+    "price_aud": 39.9
+   },
+   {
+    "name": "Antique Steel",
+    "url": "https://www.abiinteriors.com.au/product/rappana-cabinetry-pull-extended-100mm-antique-steel/",
+    "sku": "17646",
+    "price_aud": 39.9
+   }
+  ],
+  "spec_file": "Rappana_100_Spec-01.jpg",
+  "url": "https://www.abiinteriors.com.au/product/rappana-cabinetry-pull-extended-100mm/"
+ },
+ {
+  "folder": "Rappana Cabinetry Pull Extended 500mm",
+  "article": "ABI-RAPPANA-500",
+  "family": "Rappana",
+  "kind": "Pull",
+  "knob": false,
+  "length": 500.0,
+  "centres": 474.0,
+  "holes": [
+   [
+    -237.0,
+    0.0
+   ],
+   [
+    0.0,
+    0.0
+   ],
+   [
+    237.0,
+    0.0
+   ]
+  ],
+  "adjustable": null,
+  "edge_mount": "back_leg",
+  "leg_height": 18.0,
+  "measured_length": 500.0,
+  "projection": 36.0,
+  "width": 18.0,
+  "across": [
+   -16.0,
+   2.0
+  ],
+  "colour_rgb": [
+   189,
+   187,
+   185
+  ],
+  "triangles": 1530,
+  "geometry": "IFC",
+  "finishes": [
+   {
+    "name": "Brushed Brass",
+    "url": "https://www.abiinteriors.com.au/product/rappana-cabinetry-pull-extended-500mm-brushed-brass/",
+    "sku": "17049",
+    "price_aud": 114.9
+   },
+   {
+    "name": "Brushed Copper",
+    "url": "https://www.abiinteriors.com.au/product/rappana-cabinetry-pull-extended-500mm-brushed-copper/",
+    "sku": "17050",
+    "price_aud": 114.9
+   },
+   {
+    "name": "Brushed Gunmetal",
+    "url": "https://www.abiinteriors.com.au/product/rappana-cabinetry-pull-extended-500mm-brushed-gunmetal/",
+    "sku": "17051",
+    "price_aud": 114.9
+   },
+   {
+    "name": "Stainless Steel",
+    "url": "https://www.abiinteriors.com.au/product/rappana-cabinetry-pull-extended-500mm-stainless-steel/",
+    "sku": "17052",
+    "price_aud": 59.9
+   }
+  ],
+  "spec_file": "Rappana Cabinetry Pull Extended 500mm SPEC 2.jpg",
+  "url": "https://www.abiinteriors.com.au/product/rappana-cabinetry-pull-extended-500mm-brushed-brass/"
+ },
+ {
+  "folder": "Rappana Cabinetry Pull Extended 800mm",
+  "article": "ABI-RAPPANA-800",
+  "family": "Rappana",
+  "kind": "Pull",
+  "knob": false,
+  "length": 800.0,
+  "centres": 774.0,
+  "holes": [
+   [
+    -387.0,
+    0.0
+   ],
+   [
+    -129.0,
+    0.0
+   ],
+   [
+    129.0,
+    0.0
+   ],
+   [
+    387.0,
+    0.0
+   ]
+  ],
+  "adjustable": null,
+  "edge_mount": "back_leg",
+  "leg_height": 18.0,
+  "measured_length": 800.0,
+  "projection": 36.0,
+  "width": 18.0,
+  "across": [
+   -16.0,
+   2.0
+  ],
+  "colour_rgb": [
+   189,
+   187,
+   185
+  ],
+  "triangles": 2452,
+  "geometry": "IFC",
+  "finishes": [
+   {
+    "name": "Brushed Brass",
+    "url": "https://www.abiinteriors.com.au/product/rappana-cabinetry-pull-extended-800mm-brushed-brass/",
+    "sku": "17053",
+    "price_aud": 144.9
+   },
+   {
+    "name": "Brushed Copper",
+    "url": "https://www.abiinteriors.com.au/product/rappana-cabinetry-pull-extended-800mm-brushed-copper/",
+    "sku": "17054",
+    "price_aud": 144.9
+   },
+   {
+    "name": "Brushed Gunmetal",
+    "url": "https://www.abiinteriors.com.au/product/rappana-cabinetry-pull-extended-800mm-brushed-gunmetal/",
+    "sku": "17055",
+    "price_aud": 144.9
+   },
+   {
+    "name": "Stainless Steel",
+    "url": "https://www.abiinteriors.com.au/product/rappana-cabinetry-pull-extended-800mm-stainless-steel/",
+    "sku": "17056",
+    "price_aud": 79.9
+   }
+  ],
+  "spec_file": "Rappana Cabinetry Pull Extended 800mm SPEC 2.jpg",
+  "url": "https://www.abiinteriors.com.au/product/rappana-cabinetry-pull-extended-800mm-brushed-brass/"
+ },
+ {
+  "folder": "Scalo Cabinetry Pull",
+  "article": "ABI-SCALO-50",
+  "family": "Scalo",
+  "kind": "Pull",
+  "knob": false,
+  "length": 50.0,
+  "centres": 32.0,
+  "holes": [
+   [
+    -16.0,
+    0.0
+   ],
+   [
+    16.0,
+    0.0
+   ]
+  ],
+  "adjustable": null,
+  "edge_mount": "top_plate",
+  "leg_height": 30.0,
+  "measured_length": 50.0,
+  "projection": 35.0,
+  "width": 30.0,
+  "across": [
+   -28.0,
+   2.0
+  ],
+  "colour_rgb": [
+   202,
+   154,
+   58
+  ],
+  "triangles": 164,
+  "geometry": "IFC",
+  "finishes": [
+   {
+    "name": "Brushed Brass",
+    "url": "https://www.abiinteriors.com.au/product/scalo-cabinetry-pull-pvd-brushed-brass/",
+    "sku": "14503",
+    "price_aud": 29.9
+   },
+   {
+    "name": "Brushed Copper",
+    "url": "https://www.abiinteriors.com.au/product/scalo-cabinetry-pull-brushed-copper/",
+    "sku": "14504",
+    "price_aud": 34.9
+   },
+   {
+    "name": "Brushed Gunmetal",
+    "url": "https://www.abiinteriors.com.au/product/scalo-cabinetry-pull-brushed-gunmetal/",
+    "sku": "14505",
+    "price_aud": 34.9
+   },
+   {
+    "name": "Brushed Nickel",
+    "url": "https://www.abiinteriors.com.au/product/scalo-cabinetry-pull-brushed-nickel/",
+    "sku": "14506",
+    "price_aud": 32.9
+   },
+   {
+    "name": "Matte Black",
+    "url": "https://www.abiinteriors.com.au/product/scalo-cabinetry-pull-matte-black/",
+    "sku": "14507",
+    "price_aud": 29.9
+   }
+  ],
+  "spec_file": "SCALO_Cabinetry_Pull_Spec-01.jpg",
+  "url": "https://www.abiinteriors.com.au/product/scalo-cabinetry-pull/"
+ },
+ {
+  "folder": "Tezra Cabinetry Pull 220mm",
+  "article": "ABI-TEZRA-220",
+  "family": "Tezra",
+  "kind": "Pull",
+  "knob": false,
+  "length": 220.0,
+  "centres": 192.0,
+  "holes": [
+   [
+    -96.0,
+    0.0
+   ],
+   [
+    96.0,
+    0.0
+   ]
+  ],
+  "adjustable": null,
+  "edge_mount": null,
+  "leg_height": 12.0,
+  "measured_length": 220.0,
+  "projection": 32.0,
+  "width": 12.0,
+  "across": [
+   -6.0,
+   6.0
+  ],
+  "colour_rgb": [
+   202,
+   154,
+   58
+  ],
+  "triangles": 422,
+  "geometry": "IFC",
+  "finishes": [
+   {
+    "name": "Brushed Brass",
+    "url": "https://www.abiinteriors.com.au/product/tezra-cabinetry-pull-220mm-brushed-brass/",
+    "sku": "15021",
+    "price_aud": 64.9
+   },
+   {
+    "name": "Brushed Copper",
+    "url": "https://www.abiinteriors.com.au/product/tezra-cabinetry-pull-220mm-brushed-copper/",
+    "sku": "15022",
+    "price_aud": 64.9
+   },
+   {
+    "name": "Brushed Gunmetal",
+    "url": "https://www.abiinteriors.com.au/product/tezra-cabinetry-pull-220mm-brushed-gunmetal/",
+    "sku": "15023",
+    "price_aud": 64.9
+   },
+   {
+    "name": "Brushed Nickel",
+    "url": "https://www.abiinteriors.com.au/product/tezra-cabinetry-pull-220mm-brushed-nickel/",
+    "sku": "15024",
+    "price_aud": 39.9
+   },
+   {
+    "name": "Antique Aurum",
+    "url": "https://www.abiinteriors.com.au/product/tezra-cabinetry-pull-220mm-antique-aurum/",
+    "sku": "17983",
+    "price_aud": 69.9
+   },
+   {
+    "name": "Antique Bronze",
+    "url": "https://www.abiinteriors.com.au/product/tezra-cabinetry-pull-220mm-antique-bronze/",
+    "sku": "17984",
+    "price_aud": 69.9
+   },
+   {
+    "name": "Antique Slate",
+    "url": "https://www.abiinteriors.com.au/product/tezra-cabinetry-pull-220mm-antique-slate/",
+    "sku": "17985",
+    "price_aud": 69.9
+   },
+   {
+    "name": "Antique Steel",
+    "url": "https://www.abiinteriors.com.au/product/tezra-cabinetry-pull-220mm-antique-steel/",
+    "sku": "17986",
+    "price_aud": 69.9
+   }
+  ],
+  "spec_file": "TEZRA_Cabinetry_Pull_220mm_Gallery_Spec.jpg",
+  "url": "https://www.abiinteriors.com.au/product/tezra-cabinetry-pull-220mm/"
+ },
+ {
+  "folder": "Tezra Cabinetry Pull 500mm",
+  "article": "ABI-TEZRA-500",
+  "family": "Tezra",
+  "kind": "Pull",
+  "knob": false,
+  "length": 500.0,
+  "centres": 450.0,
+  "holes": [
+   [
+    -225.0,
+    0.0
+   ],
+   [
+    225.0,
+    0.0
+   ]
+  ],
+  "adjustable": null,
+  "edge_mount": null,
+  "leg_height": 12.0,
+  "measured_length": 500.0,
+  "projection": 42.0,
+  "width": 12.0,
+  "across": [
+   -6.0,
+   6.0
+  ],
+  "colour_rgb": [
+   202,
+   154,
+   58
+  ],
+  "triangles": 454,
+  "geometry": "IFC",
+  "finishes": [
+   {
+    "name": "Brushed Brass",
+    "url": "https://www.abiinteriors.com.au/product/tezra-cabinetry-pull-500mm-brushed-brass/",
+    "sku": "15026",
+    "price_aud": 124.9
+   },
+   {
+    "name": "Brushed Copper",
+    "url": "https://www.abiinteriors.com.au/product/tezra-cabinetry-pull-500mm-brushed-copper/",
+    "sku": "15027",
+    "price_aud": 124.9
+   },
+   {
+    "name": "Brushed Nickel",
+    "url": "https://www.abiinteriors.com.au/product/tezra-cabinetry-pull-500mm-brushed-nickel/",
+    "sku": "15029",
+    "price_aud": 89.9
+   },
+   {
+    "name": "Matte Black",
+    "url": "https://www.abiinteriors.com.au/product/tezra-cabinetry-pull-500mm-matte-black/",
+    "sku": "15030",
+    "price_aud": 79.9
+   },
+   {
+    "name": "Antique Aurum",
+    "url": "https://www.abiinteriors.com.au/product/tezra-cabinetry-pull-500mm-antique-aurum/",
+    "sku": "17997",
+    "price_aud": 129.9
+   },
+   {
+    "name": "Antique Bronze",
+    "url": "https://www.abiinteriors.com.au/product/tezra-cabinetry-pull-500mm-antique-bronze/",
+    "sku": "17998",
+    "price_aud": 129.9
+   },
+   {
+    "name": "Antique Slate",
+    "url": "https://www.abiinteriors.com.au/product/tezra-cabinetry-pull-500mm-antique-slate/",
+    "sku": "17999",
+    "price_aud": 129.9
+   },
+   {
+    "name": "Antique Steel",
+    "url": "https://www.abiinteriors.com.au/product/tezra-cabinetry-pull-500mm-antique-steel/",
+    "sku": "18000",
+    "price_aud": 129.9
+   }
+  ],
+  "spec_file": "TEZRA_Cabinetry_Pull_500_Spec-01.jpg",
+  "url": "https://www.abiinteriors.com.au/product/tezra-cabinetry-pull-500mm/"
+ },
+ {
+  "folder": "Tezra Cabinetry T Pull",
+  "article": "ABI-TEZRA-50",
+  "family": "Tezra",
+  "kind": "TPull",
+  "knob": false,
+  "length": 50.0,
+  "centres": 0.0,
+  "holes": [
+   [
+    0.0,
+    0.0
+   ]
+  ],
+  "adjustable": null,
+  "edge_mount": null,
+  "leg_height": 12.0,
+  "measured_length": 50.0,
+  "projection": 36.9,
+  "width": 12.0,
+  "across": [
+   -6.0,
+   6.0
+  ],
+  "colour_rgb": [
+   202,
+   154,
+   58
+  ],
+  "triangles": 352,
+  "geometry": "IFC",
+  "finishes": [
+   {
+    "name": "Brushed Brass",
+    "url": "https://www.abiinteriors.com.au/product/tezra-cabinetry-t-pull-pvd-brushed-brass-d/",
+    "sku": "14055",
+    "price_aud": 24.4
+   },
+   {
+    "name": "Brushed Copper",
+    "url": "https://www.abiinteriors.com.au/product/tezra-cabinetry-t-pull-brushed-copper-new1/",
+    "sku": "15017",
+    "price_aud": 34.9
+   },
+   {
+    "name": "Brushed Gunmetal",
+    "url": "https://www.abiinteriors.com.au/product/tezra-cabinetry-t-pull-brushed-gunmetal/",
+    "sku": "15018",
+    "price_aud": 34.9
+   },
+   {
+    "name": "Matte Black",
+    "url": "https://www.abiinteriors.com.au/product/tezra-cabinetry-knob-matte-black/",
+    "sku": "15020",
+    "price_aud": 24.9
+   },
+   {
+    "name": "Antique Aurum",
+    "url": "https://www.abiinteriors.com.au/product/tezra-cabinetry-t-pull-antique-aurum/",
+    "sku": "18002",
+    "price_aud": 39.9
+   },
+   {
+    "name": "Antique Bronze",
+    "url": "https://www.abiinteriors.com.au/product/tezra-cabinetry-t-pull-antique-bronze/",
+    "sku": "18003",
+    "price_aud": 39.9
+   },
+   {
+    "name": "Antique Slate",
+    "url": "https://www.abiinteriors.com.au/product/tezra-cabinetry-t-pull-antique-slate/",
+    "sku": "18004",
+    "price_aud": 39.9
+   },
+   {
+    "name": "Antique Steel",
+    "url": "https://www.abiinteriors.com.au/product/tezra-cabinetry-t-pull-antique-steel/",
+    "sku": "18005",
+    "price_aud": 39.9
+   }
+  ],
+  "spec_file": "TEZRA_Cabinetry_T_Pull_50_Spec-01.jpg",
+  "url": "https://www.abiinteriors.com.au/product/tezra-cabinetry-knob-matte-black/"
+ },
+ {
+  "folder": "Tezra Textured Cabinetry Knob",
+  "article": "ABI-TEZRATEXTURED-28",
+  "family": "Tezra Textured",
+  "kind": "Knob",
+  "knob": true,
+  "length": 28.0,
+  "centres": 0.0,
+  "holes": [
+   [
+    0.0,
+    0.0
+   ]
+  ],
+  "adjustable": null,
+  "edge_mount": null,
+  "leg_height": 28.0,
+  "measured_length": 28.0,
+  "projection": 35.0,
+  "width": 28.0,
+  "across": [
+   -14.0,
+   14.0
+  ],
+  "colour_rgb": [
+   202,
+   154,
+   58
+  ],
+  "triangles": 545,
+  "geometry": "IFC",
+  "finishes": [
+   {
+    "name": "Brushed Brass",
+    "url": "https://www.abiinteriors.com.au/product/tezra-textured-cabinetry-knob-brushed-brass/",
+    "sku": "15601",
+    "price_aud": 34.9
+   },
+   {
+    "name": "Brushed Copper",
+    "url": "https://www.abiinteriors.com.au/product/tezra-textured-cabinetry-knob-brushed-copper/",
+    "sku": "15602",
+    "price_aud": 34.9
+   },
+   {
+    "name": "Brushed Gunmetal",
+    "url": "https://www.abiinteriors.com.au/product/tezra-textured-cabinetry-knob-brushed-gunmetal/",
+    "sku": "15603",
+    "price_aud": 34.9
+   },
+   {
+    "name": "Brushed Nickel",
+    "url": "https://www.abiinteriors.com.au/product/tezra-textured-cabinetry-knob-brushed-nickel-2/",
+    "sku": "15604",
+    "price_aud": 29.9
+   },
+   {
+    "name": "Matte Black",
+    "url": "https://www.abiinteriors.com.au/product/tezra-textured-cabinetry-knob-matte-black/",
+    "sku": "15605",
+    "price_aud": 29.9
+   }
+  ],
+  "spec_file": "TEZRA_Textured_Cabinetry_Knob_Spec-01.jpg",
+  "url": "https://www.abiinteriors.com.au/product/tezra-textured-cabinetry-knob-brushed-brass/"
+ },
+ {
+  "folder": "Tezra Textured Cabinetry Pull 220mm",
+  "article": "ABI-TEZRATEXTURED-220",
+  "family": "Tezra Textured",
+  "kind": "Pull",
+  "knob": false,
+  "length": 220.0,
+  "centres": 192.0,
+  "holes": [
+   [
+    -96.0,
+    0.0
+   ],
+   [
+    96.0,
+    0.0
+   ]
+  ],
+  "adjustable": null,
+  "edge_mount": null,
+  "leg_height": 12.0,
+  "measured_length": 220.0,
+  "projection": 34.0,
+  "width": 12.0,
+  "across": [
+   -6.0,
+   6.0
+  ],
+  "colour_rgb": [
+   202,
+   154,
+   58
+  ],
+  "triangles": 419,
+  "geometry": "IFC",
+  "finishes": [
+   {
+    "name": "Brushed Brass",
+    "url": "https://www.abiinteriors.com.au/product/tezra-textured-cabinetry-pull-220mm-brushed-brass/",
+    "sku": "15036",
+    "price_aud": 79.9
+   },
+   {
+    "name": "Brushed Copper",
+    "url": "https://www.abiinteriors.com.au/product/tezra-textured-cabinetry-pull-220mm-brushed-copper/",
+    "sku": "15037",
+    "price_aud": 79.9
+   },
+   {
+    "name": "Brushed Gunmetal",
+    "url": "https://www.abiinteriors.com.au/product/tezra-textured-cabinetry-pull-220mm-brushed-gunmetal/",
+    "sku": "15038",
+    "price_aud": 79.9
+   },
+   {
+    "name": "Brushed Nickel",
+    "url": "https://www.abiinteriors.com.au/product/tezra-textured-cabinetry-pull-220mm-brushed-nickel-2/",
+    "sku": "15039",
+    "price_aud": 59.9
+   },
+   {
+    "name": "Matte Black",
+    "url": "https://www.abiinteriors.com.au/product/tezra-textured-cabinetry-pull-220mm-matte-black/",
+    "sku": "15040",
+    "price_aud": 49.9
+   }
+  ],
+  "spec_file": "TEZRA_Textured_22a0_Spec-01.jpg",
+  "url": "https://www.abiinteriors.com.au/product/tezra-textured-cabinetry-pull-220mm/"
+ },
+ {
+  "folder": "Tezra Textured Cabinetry Pull 500mm",
+  "article": "ABI-TEZRATEXTURED-500",
+  "family": "Tezra Textured",
+  "kind": "Pull",
+  "knob": false,
+  "length": 500.0,
+  "centres": 450.0,
+  "holes": [
+   [
+    -225.0,
+    0.0
+   ],
+   [
+    225.0,
+    0.0
+   ]
+  ],
+  "adjustable": null,
+  "edge_mount": null,
+  "leg_height": 12.0,
+  "measured_length": 500.0,
+  "projection": 34.0,
+  "width": 12.0,
+  "across": [
+   -6.0,
+   6.0
+  ],
+  "colour_rgb": [
+   202,
+   154,
+   58
+  ],
+  "triangles": 422,
+  "geometry": "IFC",
+  "finishes": [
+   {
+    "name": "Brushed Brass",
+    "url": "https://www.abiinteriors.com.au/product/tezra-textured-cabinetry-pull-500mm-brushed-brass/",
+    "sku": "15041",
+    "price_aud": 149.9
+   },
+   {
+    "name": "Brushed Copper",
+    "url": "https://www.abiinteriors.com.au/product/tezra-textured-cabinetry-pull-500mm-brushed-copper/",
+    "sku": "15042",
+    "price_aud": 149.9
+   },
+   {
+    "name": "Brushed Gunmetal",
+    "url": "https://www.abiinteriors.com.au/product/tezra-textured-cabinetry-pull-500mm-brushed-gunmetal/",
+    "sku": "15043",
+    "price_aud": 149.9
+   },
+   {
+    "name": "Brushed Nickel",
+    "url": "https://www.abiinteriors.com.au/product/tezra-textured-cabinetry-pull-500mm-brushed-nickel/",
+    "sku": "15044",
+    "price_aud": 99.0
+   },
+   {
+    "name": "Matte Black",
+    "url": "https://www.abiinteriors.com.au/product/tezra-textured-cabinetry-pull-500mm-matte-black/",
+    "sku": "15045",
+    "price_aud": 89.9
+   }
+  ],
+  "spec_file": "TEZRA_Textured_500_Spec-01.jpg",
+  "url": "https://www.abiinteriors.com.au/product/tezra-textured-cabinetry-pull-500mm/"
+ },
+ {
+  "folder": "Tezra Textured Cabinetry T Pull",
+  "article": "ABI-TEZRATEXTURED-57",
+  "family": "Tezra Textured",
+  "kind": "TPull",
+  "knob": false,
+  "length": 57.0,
+  "centres": 0.0,
+  "holes": [
+   [
+    0.0,
+    0.0
+   ]
+  ],
+  "adjustable": null,
+  "edge_mount": null,
+  "leg_height": 12.0,
+  "measured_length": 57.0,
+  "projection": 32.9,
+  "width": 12.0,
+  "across": [
+   -6.0,
+   6.0
+  ],
+  "colour_rgb": [
+   202,
+   154,
+   58
+  ],
+  "triangles": 352,
+  "geometry": "IFC",
+  "finishes": [
+   {
+    "name": "Brushed Brass",
+    "url": "https://www.abiinteriors.com.au/product/tezra-textured-cabinetry-t-pull-brushed-brass/",
+    "sku": "15031",
+    "price_aud": 29.9
+   },
+   {
+    "name": "Brushed Copper",
+    "url": "https://www.abiinteriors.com.au/product/tezra-textured-cabinetry-t-pull-brushed-copper/",
+    "sku": "15032",
+    "price_aud": 29.9
+   },
+   {
+    "name": "Brushed Gunmetal",
+    "url": "https://www.abiinteriors.com.au/product/tezra-textured-cabinetry-t-pull-brushed-gunmetal/",
+    "sku": "15033",
+    "price_aud": 29.9
+   },
+   {
+    "name": "Brushed Nickel",
+    "url": "https://www.abiinteriors.com.au/product/tezra-textured-cabinetry-t-pull-brushed-nickel/",
+    "sku": "15034",
+    "price_aud": 27.9
+   },
+   {
+    "name": "Matte Black",
+    "url": "https://www.abiinteriors.com.au/product/tezra-textured-cabinetry-t-pull-matte-black/",
+    "sku": "15035",
+    "price_aud": 24.9
+   }
+  ],
+  "spec_file": "TEZRA_Texured_T-Pull_Spec-01.jpg",
+  "url": "https://www.abiinteriors.com.au/product/tezra-textured-cabinetry-t-pull-brushed-brass/"
+ },
+ {
+  "folder": "Ziggy Adjustable Cabinetry Pull 150mm",
+  "article": "ABI-ZIGGYADJUSTABLE-150",
+  "family": "Ziggy Adjustable",
+  "kind": "Pull",
+  "knob": false,
+  "length": 150.0,
+  "centres": 100.0,
+  "holes": [
+   [
+    -50.0,
+    0.0
+   ],
+   [
+    50.0,
+    0.0
+   ]
+  ],
+  "adjustable": null,
+  "edge_mount": null,
+  "leg_height": 22.1,
+  "measured_length": 150.0,
+  "projection": 37.0,
+  "width": 22.1,
+  "across": [
+   -11.1,
+   11.1
+  ],
+  "colour_rgb": [
+   202,
+   154,
+   58
+  ],
+  "triangles": 800,
+  "geometry": "IFC",
+  "finishes": [
+   {
+    "name": "Brushed Brass",
+    "url": "https://www.abiinteriors.com.au/product/ziggy-adjustable-cabinetry-pull-150mm-brushed-brass/",
+    "sku": "17114",
+    "price_aud": 59.9
+   },
+   {
+    "name": "Brushed Copper",
+    "url": "https://www.abiinteriors.com.au/product/ziggy-adjustable-cabinetry-pull-150mm-brushed-copper/",
+    "sku": "17115",
+    "price_aud": 59.9
+   },
+   {
+    "name": "Brushed Gunmetal",
+    "url": "https://www.abiinteriors.com.au/product/ziggy-adjustable-cabinetry-pull-150mm-brushed-gunmetal/",
+    "sku": "17116",
+    "price_aud": 59.9
+   },
+   {
+    "name": "Brushed Nickel",
+    "url": "https://www.abiinteriors.com.au/product/ziggy-adjustable-cabinetry-pull-150mm-brushed-nickel/",
+    "sku": "17117",
+    "price_aud": 54.9
+   },
+   {
+    "name": "Matte Black",
+    "url": "https://www.abiinteriors.com.au/product/ziggy-adjustable-cabinetry-pull-150mm-matte-black/",
+    "sku": "17118",
+    "price_aud": 49.9
+   }
+  ],
+  "spec_file": "150mmZiggy_Gallery_Spec.jpg",
+  "url": "https://www.abiinteriors.com.au/product/ziggy-adjustable-cabinetry-pull-150mm-brushed-brass/"
+ },
+ {
+  "folder": "Ziggy Adjustable Cabinetry Pull 250mm",
+  "article": "ABI-ZIGGYADJUSTABLE-250",
+  "family": "Ziggy Adjustable",
+  "kind": "Pull",
+  "knob": false,
+  "length": 250.0,
+  "centres": 192.0,
+  "holes": [
+   [
+    -96.0,
+    0.0
+   ],
+   [
+    96.0,
+    0.0
+   ]
+  ],
+  "adjustable": null,
+  "edge_mount": null,
+  "leg_height": 26.4,
+  "measured_length": 250.0,
+  "projection": 37.0,
+  "width": 26.4,
+  "across": [
+   -13.2,
+   13.2
+  ],
+  "colour_rgb": [
+   202,
+   154,
+   58
+  ],
+  "triangles": 1142,
+  "geometry": "IFC",
+  "finishes": [
+   {
+    "name": "Brushed Brass",
+    "url": "https://www.abiinteriors.com.au/product/ziggy-adjustable-cabinetry-pull-250mm-brushed-brass/",
+    "sku": "17119",
+    "price_aud": 69.9
+   },
+   {
+    "name": "Brushed Copper",
+    "url": "https://www.abiinteriors.com.au/product/ziggy-adjustable-cabinetry-pull-250mm-brushed-copper/",
+    "sku": "17120",
+    "price_aud": 69.9
+   },
+   {
+    "name": "Brushed Gunmetal",
+    "url": "https://www.abiinteriors.com.au/product/ziggy-adjustable-cabinetry-pull-250mm-brushed-gunmetal/",
+    "sku": "17121",
+    "price_aud": 69.9
+   },
+   {
+    "name": "Brushed Nickel",
+    "url": "https://www.abiinteriors.com.au/product/ziggy-adjustable-cabinetry-pull-250mm-brushed-nickel/",
+    "sku": "17122",
+    "price_aud": 59.9
+   },
+   {
+    "name": "Matte Black",
+    "url": "https://www.abiinteriors.com.au/product/ziggy-adjustable-cabinetry-pull-250mm-matte-black/",
+    "sku": "17123",
+    "price_aud": 55.9
+   }
+  ],
+  "spec_file": "250mmZiggy_Gallery_Spec.jpg",
+  "url": "https://www.abiinteriors.com.au/product/ziggy-adjustable-cabinetry-pull-250mm-brushed-brass/"
+ },
+ {
+  "folder": "Ziggy Adjustable Cabinetry Pull 350mm",
+  "article": "ABI-ZIGGYADJUSTABLE-350",
+  "family": "Ziggy Adjustable",
+  "kind": "Pull",
+  "knob": false,
+  "length": 350.0,
+  "centres": 280.0,
+  "holes": [
+   [
+    -140.0,
+    0.0
+   ],
+   [
+    140.0,
+    0.0
+   ]
+  ],
+  "adjustable": null,
+  "edge_mount": null,
+  "leg_height": 38.8,
+  "measured_length": 350.0,
+  "projection": 37.0,
+  "width": 38.8,
+  "across": [
+   -19.4,
+   19.4
+  ],
+  "colour_rgb": [
+   202,
+   154,
+   58
+  ],
+  "triangles": 1342,
+  "geometry": "IFC",
+  "finishes": [
+   {
+    "name": "Brushed Brass",
+    "url": "https://www.abiinteriors.com.au/product/ziggy-adjustable-cabinetry-pull-350mm-brushed-brass/",
+    "sku": "17124",
+    "price_aud": 95.9
+   },
+   {
+    "name": "Brushed Copper",
+    "url": "https://www.abiinteriors.com.au/product/ziggy-adjustable-cabinetry-pull-350mm-brushed-copper/",
+    "sku": "17125",
+    "price_aud": 95.9
+   },
+   {
+    "name": "Brushed Gunmetal",
+    "url": "https://www.abiinteriors.com.au/product/ziggy-adjustable-cabinetry-pull-350mm-brushed-gunmetal/",
+    "sku": "17126",
+    "price_aud": 95.9
+   },
+   {
+    "name": "Brushed Nickel",
+    "url": "https://www.abiinteriors.com.au/product/ziggy-adjustable-cabinetry-pull-350mm-brushed-nickel/",
+    "sku": "17127",
+    "price_aud": 85.9
+   },
+   {
+    "name": "Matte Black",
+    "url": "https://www.abiinteriors.com.au/product/ziggy-adjustable-cabinetry-pull-350mm-matte-black/",
+    "sku": "17128",
+    "price_aud": 75.9
+   }
+  ],
+  "spec_file": "350mmZiggy_Gallery_Spec.jpg",
+  "url": "https://www.abiinteriors.com.au/product/ziggy-adjustable-cabinetry-pull-350mm-brushed-brass/"
+ }
+]

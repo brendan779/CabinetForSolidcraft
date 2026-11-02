@@ -6,8 +6,7 @@
 A package holds every article of a programme line, over a thousand files, so only exact matches
 go to vendor-cad/blum/<article>__<id>.step. One article's files can include its sub-parts, so only
 those near the largest's size are taken: the whole part, in each hand. An article already in the
-folder is left alone. The zip goes to vendor-cad/blum/catalogue/packages. Nothing in vendor-cad is
-committed.
+folder is left alone. The zip goes to vendor-cad/blum/catalogue/packages, which is not committed.
 """
 import glob
 import json

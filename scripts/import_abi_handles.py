@@ -21,7 +21,7 @@ For every cabinetry pull and knob this script:
   4. records the catalog row (length, projection, width, the screw pattern as `drilling`,
      and the finishes from product.txt) into catalog/hardware/abi-handles.json.
 
-The STLs stay local (vendor-cad is never committed); the catalog holds facts
+The STLs are committed under vendor-cad/abi; the catalog holds facts
 with their source. Run from the repository root:
 
     python3 scripts/import_abi_handles.py [--dry-run]
