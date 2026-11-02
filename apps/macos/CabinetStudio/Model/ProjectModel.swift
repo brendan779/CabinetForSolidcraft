@@ -1211,6 +1211,16 @@ final class ProjectModel {
         }
     }
 
+    /// A framed door's panel board, empty for the same look as the fronts.
+    func useShakerPanelBoard(_ id: String) {
+        guard let old = selected else { return }
+        var cab = old
+        var standard = cab.standard
+        standard["shaker_panel_board"] = id
+        cab.standard = standard
+        withAnimation(.snappy) { applyStandard(from: old, to: cab) }
+    }
+
     /// Where SolidCraft's installer puts the app.
     static let solidCraftApp = URL(fileURLWithPath: "/Applications/SolidCraft.app")
 

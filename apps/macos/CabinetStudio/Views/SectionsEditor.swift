@@ -49,10 +49,17 @@ struct SectionsEditor: View {
     @State private var column = 0
     @State private var row = 0
 
-    private let fronts: [(id: String, title: String)] = [
-        ("open", "Open"), ("door_left", "Door L"), ("door_right", "Door R"), ("door_pair", "Pair"),
-        ("drawers", "Drawers"), ("lift", "Lift"), ("bi_fold", "Bi-fold"), ("sliding", "Sliding"), ("niche", "Niche"),
-    ]
+    /// Lift and bi-fold fronts are on hold (LIFT-HOLD). A section already using one still shows it,
+    /// so an old job can be seen and changed.
+    private func fronts(showing current: String) -> [(id: String, title: String)] {
+        var list: [(id: String, title: String)] = [
+            ("open", "Open"), ("door_left", "Door L"), ("door_right", "Door R"), ("door_pair", "Pair"),
+            ("drawers", "Drawers"), ("sliding", "Sliding"), ("niche", "Niche"),
+        ]
+        if current == "lift" { list.append(("lift", "Lift")) }
+        if current == "bi_fold" { list.append(("bi_fold", "Bi-fold")) }
+        return list
+    }
 
     private let systems: [(id: String, title: String)] = [
         ("legrabox", "LEGRABOX"), ("merivobox", "MERIVOBOX"), ("tandembox", "TANDEMBOX"),
@@ -65,7 +72,7 @@ struct SectionsEditor: View {
 
     private var layouts: [(id: String, title: String)] {
         var l = [("door", "Door"), ("door_pair", "Pair"), ("drawers", "Drawers"),
-                 ("lift", "Lift"), ("bi_fold", "Bi-fold"), ("sliding", "Sliding"), ("open", "Open")]
+                 ("sliding", "Sliding"), ("open", "Open")]
         if cab.kind == "tall" { l += [("oven", "Oven"), ("fridge", "Fridge")] }
         return l
     }
@@ -112,7 +119,7 @@ struct SectionsEditor: View {
             }
 
             SectionTitle("Front")
-            tiles(fronts, columns: 4, selected: cell.front, label: "Front") { id in
+            tiles(fronts(showing: cell.front), columns: 4, selected: cell.front, label: "Front") { id in
                 SectionCellThumbnail(cell: SectionCell(front: id))
             } onPick: { id in
                 editCell(c, r) {

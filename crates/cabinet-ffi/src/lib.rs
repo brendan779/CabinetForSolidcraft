@@ -849,7 +849,14 @@ fn summary(list: PartList) -> BuildSummary {
                 hinged,
                 hinge_x,
                 hinge_y,
-                board: p.board.clone(),
+                // A framed door's panel with no board of its own looks like its frame.
+                board: if p.board.is_empty() && p.role == cabinet_core::part::PartRole::FramePanel {
+                    list.by_role(cabinet_core::part::PartRole::FrameStile)
+                        .next()
+                        .map_or_else(String::new, |stile| stile.board.clone())
+                } else {
+                    p.board.clone()
+                },
                 grain: p
                     .grain_axis
                     .map(|a| format!("{a:?}").to_lowercase())

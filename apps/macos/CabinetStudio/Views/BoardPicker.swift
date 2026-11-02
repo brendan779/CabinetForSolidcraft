@@ -258,6 +258,7 @@ struct BoardsSection: View {
     @Environment(ProjectModel.self) private var project
     let cab: CabinetDoc
     @State private var picking: BoardSlot?
+    @State private var pickingPanel = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -298,6 +299,55 @@ struct BoardsSection: View {
                         .frame(width: 640, height: 520)
                 }
             }
+            if project.option("door_style", of: cab) == "shaker" {
+                panelBoard
+            }
+        }
+    }
+}
+
+extension BoardsSection {
+    /// A shaker door's panel, in its own board if wanted: its frame is the Fronts board.
+    fileprivate var panelBoard: some View {
+        let id = cab.standard["shaker_panel_board"] as? String ?? ""
+        let board = project.boardsById[id]
+        return Button {
+            pickingPanel = true
+        } label: {
+            HStack(spacing: 10) {
+                RoundedRectangle(cornerRadius: 5)
+                    .fill(board.map { Color(nsColor: $0.displayColour) } ?? Color.primary.opacity(0.08))
+                    .overlay {
+                        if board?.grained == true { GrainPattern().clipShape(RoundedRectangle(cornerRadius: 5)) }
+                    }
+                    .overlay(RoundedRectangle(cornerRadius: 5).strokeBorder(.primary.opacity(0.2)))
+                    .frame(width: 34, height: 24)
+                VStack(alignment: .leading, spacing: 1) {
+                    Text("Shaker panels").font(.caption).foregroundStyle(.secondary)
+                    Text(board.map { "\($0.decor) \($0.finish)" } ?? "Same as the fronts").lineLimit(1)
+                }
+                Spacer()
+                Image(systemName: "chevron.right").foregroundStyle(.tertiary)
+            }
+            .padding(6)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(TileStyle(selected: pickingPanel))
+        .accessibilityLabel("Shaker panels board: \(board.map { "\($0.decor) \($0.finish)" } ?? "same as the fronts")")
+        .popover(isPresented: $pickingPanel, arrowEdge: .leading) {
+            VStack(alignment: .leading, spacing: 0) {
+                Button("Same as the fronts") {
+                    project.useShakerPanelBoard("")
+                    pickingPanel = false
+                }
+                .buttonStyle(ChipStyle(selected: id.isEmpty))
+                .padding(10)
+                BoardPicker(boards: project.boards, marked: [id], columns: 140, onPick: { b in
+                    project.useShakerPanelBoard(b.id)
+                    pickingPanel = false
+                }) { _ in EmptyView() }
+            }
+            .frame(width: 640, height: 560)
         }
     }
 }

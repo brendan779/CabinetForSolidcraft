@@ -248,6 +248,8 @@ Not ready for prime time yet: iterate through several design styles and make sur
 | HAF-9 | done (2026-11-02: recessed under-panel profile has a hole at its groove end; up the sides and under fixed shelves have a channel to the rear edge) | M | Loox5: route for the LED cable from the back; vertical at the rear of wardrobe sides; under a fixed shelf 50 from the rear (owner C7) | all three build |
 | SC-5 | done (2026-11-02: the light opens it when offline) | S | The red status button doesn't open SolidCraft (owner C28) | a click opens it with its control port |
 | UI-20 | done (2026-11-02) | S | Say how to pan: Shift-drag was trial and error (owner C11) | shown on screen |
+| LIFT-HOLD | on hold (owner 2026-11-02: too many errors, and not planned for use) | L | Lift and bi-fold fronts are hidden from the app until they can be gone through fully. The core keeps them and old jobs still open. On return: HK-XS and HKi drawn, HS and HL position against a real lift, whether a shelf should move for HS and HL | owner brings them back |
+| STYLE-7 | done (2026-11-02: a Shaker panels board under Boards; empty is drawn like the fronts and stays generic on the cut list) | S | A shaker panel's board could not be chosen (owner) | a panel takes any board |
 | THEME-1 | later (owner: post 1.0) | M | Copy SolidCraft's themes and offer a theme system (owner C10) | themes switch |
 
 Owner's answers: legs, splashbacks, shelf supports, Clay Dark, sections, sharknose drawers, saving, keys and handles work. Not to be tested for now: box to cabinet, read back, preferences folders, saved standards, accessibility. The machinist will check cut sheets. The owner wouldn't use light rails or cornices.

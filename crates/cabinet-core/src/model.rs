@@ -851,6 +851,9 @@ pub struct ConstructionStandard {
     /// (which is also the rails' stub tenon length).
     pub shaker_frame_width: f64,
     pub shaker_panel_thickness: f64,
+    /// A framed door's panel board. Empty: generic on the cut list, drawn like the fronts.
+    #[serde(default)]
+    pub shaker_panel_board: String,
     pub shaker_groove_depth: f64,
     /// A shaker-style front narrower or shorter than this stays a slab.
     pub shaker_slab_below: f64,
@@ -1035,6 +1038,7 @@ impl Default for ConstructionStandard {
             leg_fixing: LegFixing::ScrewOn,
             shaker_frame_width: 70.0,
             shaker_panel_thickness: 9.0,
+            shaker_panel_board: String::new(),
             shaker_groove_depth: 10.0,
             shaker_slab_below: 200.0,
             wardrobe_hat_shelf_drop: 300.0,

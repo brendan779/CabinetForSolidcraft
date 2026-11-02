@@ -4772,6 +4772,7 @@ impl<'a> Builder<'a> {
         }
         let glass_style = s.door_style == DoorStyle::GlassFrame;
         let front_board = s.front_board.clone();
+        let panel_board = s.shaker_panel_board.clone();
         let (f, p, g, play) = (
             s.shaker_frame_width,
             s.shaker_panel_thickness,
@@ -4884,7 +4885,7 @@ impl<'a> Builder<'a> {
                     thickness_axis: ta,
                     grain_axis: Some(grain),
                     board: if role == PartRole::FramePanel {
-                        String::new()
+                        panel_board.clone()
                     } else {
                         front_board.clone()
                     },
@@ -11426,5 +11427,24 @@ mod tests {
         };
         assert!(gap(&list) > gap(&plain));
         assert_eq!(gap(&list), 15.0);
+    }
+
+    #[test]
+    fn a_shaker_panel_takes_its_own_board_when_chosen() {
+        let mut cab = Cabinet::new("B01", CabinetKind::Base);
+        cab.standard.door_style = DoorStyle::Shaker;
+        cab.standard.front_board = "frame".into();
+        let panel = |c: &Cabinet| {
+            build_cabinet(c)
+                .unwrap()
+                .by_role(PartRole::FramePanel)
+                .next()
+                .unwrap()
+                .board
+                .clone()
+        };
+        assert_eq!(panel(&cab), "");
+        cab.standard.shaker_panel_board = "panel".into();
+        assert_eq!(panel(&cab), "panel");
     }
 }
