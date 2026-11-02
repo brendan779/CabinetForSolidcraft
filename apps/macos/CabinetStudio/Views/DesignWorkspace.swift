@@ -788,20 +788,36 @@ final class ViewportScene {
     /// `box` around rectangular openings right through it (min x, min z, max x, max z each): the
     /// strips across it, bottom to top, each broken where an opening passes.
     static func around(_ box: PanelBox, openings o: [Double]) -> [PanelBox] {
-        let holes = stride(from: 0, to: o.count - 3, by: 4).map { (x0: o[$0], z0: o[$0 + 1], x1: o[$0 + 2], z1: o[$0 + 3]) }
-        let (left, right) = (box.x, box.x + box.width)
-        let zs = Set(holes.flatMap { [$0.z0, $0.z1] } + [box.z, box.z + box.height]).sorted()
+        struct Hole { let x0, z0, x1, z1: Double }
+        var holes: [Hole] = []
+        for i in stride(from: 0, to: o.count - 3, by: 4) {
+            holes.append(Hole(x0: o[i], z0: o[i + 1], x1: o[i + 2], z1: o[i + 3]))
+        }
+        let (left, right): (Double, Double) = (box.x, box.x + box.width)
+        var levels: Set<Double> = [box.z, box.z + box.height]
+        for h in holes {
+            levels.insert(h.z0)
+            levels.insert(h.z1)
+        }
+        let zs: [Double] = levels.sorted()
         var pieces: [PanelBox] = []
-        for (z0, z1) in zip(zs, zs.dropFirst()) {
-            let crossing = holes.filter { $0.z0 < z1 && $0.z1 > z0 }.sorted { $0.x0 < $1.x0 }
-            var x = left
-            for edge in crossing.map({ ($0.x0, $0.x1) }) + [(right, right)] {
-                let end = min(edge.0, right)
+        for i in 0..<max(zs.count - 1, 0) {
+            let (z0, z1): (Double, Double) = (zs[i], zs[i + 1])
+            let crossing: [Hole] = holes
+                .filter { (h: Hole) -> Bool in h.z0 < z1 && h.z1 > z0 }
+                .sorted { (a: Hole, b: Hole) -> Bool in a.x0 < b.x0 }
+            var x: Double = left
+            var edges: [(Double, Double)] = crossing.map { (h: Hole) -> (Double, Double) in (h.x0, h.x1) }
+            edges.append((right, right))
+            for edge in edges {
+                let end: Double = min(edge.0, right)
                 if end > x + 1e-6 {
                     var b = box
                     b.name = pieces.isEmpty ? box.name : "\(box.name)~\(pieces.count)"
-                    b.x = x; b.width = end - x
-                    b.z = z0; b.height = z1 - z0
+                    b.x = x
+                    b.width = end - x
+                    b.z = z0
+                    b.height = z1 - z0
                     pieces.append(b)
                 }
                 x = max(x, min(edge.1, right))
