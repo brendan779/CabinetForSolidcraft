@@ -39,26 +39,34 @@ it may change everything below.
   measures from all of a stretch's parts, so a seen end board should be included: confirm it.
 - Warn when a top is too long for one slab, and place joins so they avoid cut-outs.
 
-**Stage 3, materials (M).** Add compact laminate and timber rows from real supplier documents, a
-proper material picker as pictures, and slab sizes per material. Needs the answers below.
+**Stage 3, materials (M).** Stone, Zenith, polytec and Laminex rows from real supplier documents, each
+with its slab sizes, allowed finishes and support rules, and a material picker as pictures.
 
-**Stage 4, how it looks (M).** Edge profiles drawn in the 3D view and the elevation. Benchtops drawn
-on the front elevation.
+**Stage 4, edges (L, split first).** All the front and end cuts, the shadow line with its edgeband, and
+mitred build-ups as real parts. Drawn in the 3D view and the elevation, and on the elevation drawing.
+
+**Stage 4b, appliances and power (M).** ABI sinks, Fisher & Paykel and Smeg cooktops, pop-ups, and power
+points in waterfall edges.
 
 **Stage 5, shapes (L, split first).** Mitred L-corners, a choice of joint position, and U shapes.
 L and U depend on the room planner, which is after 1.0, so this probably waits too.
 
-## Questions for the owner
+## The owner's answers (2026-11-02)
 
-1. **What do you specify most?** Stone, porcelain, laminate or timber decides what gets built first.
-2. **Who makes the tops?** If a stonemason templates on site, the app needs quote figures and a
-   layout. If you cut them yourself, it needs accurate cut files and DXF.
-3. **Which default overhangs do you use?** Front, ends, and how far back from the wall. Today's
-   figures are published conventions, not yours.
-4. **Are the support rules right?** 300 mm unsupported and 600 mm bracket spacing are our rules of
-   thumb for breakfast bars.
-5. **Which sink and cooktop do you fit most?** Real templates would replace the VERIFY sizes.
-6. **Are power pop-ups needed before 1.0?**
+1. **Materials:** stone, Zenith compact porcelain, and polytec and Laminex benchtops.
+2. **The owner cuts the tops.** So cut files and DXF must be workshop-accurate, and every piece of a
+   build-up has to be its own part on the cut list and nesting. Quote figures are secondary.
+3. **Edges:** all the major front and end cuts. Shadow line settings for how the top meets the
+   cabinet, with the visible shadow line face either in a contrasting custom edgeband or the same
+   band as the fronts. Each material allows different finishes, so options come from its catalog
+   row. Mitred edges that look 20, 40, 60, 80 or 100 mm thick (only to the eye: the top stays its real
+   thickness). Waterfall edges.
+4. **Support rules:** right, but they depend on the material, so they live on its catalog row.
+5. **Appliances:** ABI Interiors sinks for now, more from the owner after 1.0. Cooktops from the
+   Fisher & Paykel and Smeg BIM libraries, to be fetched.
+6. **Power:** pop-ups through the top, and an option for power points in waterfall edges.
+
+New work is in the backlog: BENCH-10 to BENCH-16 and SPLASH-1.
 
 ## Not planned
 
