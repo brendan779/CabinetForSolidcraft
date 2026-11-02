@@ -207,6 +207,12 @@ pub fn features(list: &PartList, part: &Part) -> Vec<Feature> {
                 };
                 out.push(rect(part, bounds.min, bounds.size, label));
             }
+            // A sharknose: the box its bevel cuts the corner off, the legs its sizes.
+            Operation::Chamfer {
+                part: name, bounds, ..
+            } if *name == part.name => {
+                out.push(rect(part, bounds.min, bounds.size, "bevel"));
+            }
             Operation::Cutout {
                 part: name,
                 bounds,
@@ -1006,6 +1012,45 @@ mod tests {
             let svg = part_sheet(&list, part, "Board", "Job");
             assert!(svg.contains("notch 150 × 50 ×1  @ 0, 0"), "{side}");
         }
+    }
+
+    /// WF-3 asked for this: the maker has to see the bevel, on the back face and with its legs.
+    #[test]
+    fn a_sharknose_front_shows_its_bevel_on_its_sheet() {
+        let mut cab = Cabinet::new("B01", CabinetKind::Base);
+        cab.standard.handle_place = cabinet_core::model::HandlePlace::Sharknose;
+        let list = build_cabinet(&cab).unwrap();
+        let door = list
+            .by_role(cabinet_core::part::PartRole::Door)
+            .next()
+            .unwrap();
+        let bevels: Vec<_> = features(&list, door)
+            .into_iter()
+            .filter(|f| matches!(f, Feature::Rect { label: "bevel", .. }))
+            .collect();
+        assert_eq!(bevels.len(), 1);
+        let Feature::Rect { face, .. } = &bevels[0] else {
+            unreachable!()
+        };
+        assert!(face.is_some(), "cut from one face, not through");
+        assert!(part_sheet(&list, door, "board", "job").contains("bevel"));
+    }
+
+    #[test]
+    fn a_door_bevelled_on_its_opening_side_shows_it_down_that_edge() {
+        let mut cab = Cabinet::new("B01", CabinetKind::Base);
+        cab.standard.handle_place = cabinet_core::model::HandlePlace::Sharknose;
+        cab.standard.sharknose_door_edge = cabinet_core::model::SharknoseEdge::Opening;
+        let list = build_cabinet(&cab).unwrap();
+        let door = list
+            .by_role(cabinet_core::part::PartRole::Door)
+            .next()
+            .unwrap();
+        let bevels = features(&list, door)
+            .into_iter()
+            .filter(|f| matches!(f, Feature::Rect { label: "bevel", .. }))
+            .count();
+        assert_eq!(bevels, 1);
     }
 
     #[test]

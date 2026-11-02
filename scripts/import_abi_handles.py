@@ -25,13 +25,18 @@ The STLs stay local (vendor-cad is never committed); the catalog holds facts
 with their source. Run from the repository root:
 
     python3 scripts/import_abi_handles.py [--dry-run]
+
+Three Hegman pulls have no mesh in their IFC; those read the product's FBX through assimp
+(brew install assimp).
 """
 import glob
 import json
 import os
 import re
 import struct
+import subprocess
 import sys
+import tempfile
 
 BIM = 'vendor-cad/abi-bim'
 OUT_DIR = 'vendor-cad/abi'
@@ -59,6 +64,7 @@ def pair(cc):
 # From each product's spec drawing (the "*Spec*" image in its BIM folder) and product.txt.
 #   holes: screw positions along the length from the pattern's centre; (x, z) off the line
 #   proj: projection off the door, printed
+#   axis: the mesh axis off the door, where the width equals the projection and size can't tell
 #   edge: a shape with one straight edge: its distance from the screw line, printed
 #   flip: the mesh's door face is the other extreme; set after looking at the render
 #   adjustable: ABI's recommended range for a pull whose collars slide
@@ -93,6 +99,9 @@ SPECS = {
     'Tezra Textured Cabinetry Pull 500mm': {'holes': pair(450), 'proj': 41},
     'Tezra Cabinetry T Pull': {'holes': [0], 'proj': 35},
     'Tezra Textured Cabinetry T Pull': {'holes': [0], 'proj': 35},
+    'Hegman Classic Pull 130mm': {'holes': pair(50), 'proj': 20, 'axis': 2},
+    'Hegman Classic Pull 250mm': {'holes': pair(154), 'proj': 20, 'axis': 2},
+    'Hegman Half Moon Pull 90mm Pair': {'holes': pair(22), 'proj': 25, 'edge': 10},
     'Hegman Half Moon Pull 200mm Pair': {'holes': pair(50), 'proj': 52, 'edge': 15},
     'Hegman Kurve Pull 250mm Pair': {'holes': pair(110), 'proj': 26, 'edge': 7.5},
     # Four M4 around a centre kept for an M10 through-bolt on glass, which we do not use.
@@ -170,6 +179,26 @@ def parse_ifc(path):
         holes = [loops[b] for b, is_outer in fb if not is_outer and loops[b] is not outer[0]]
         tris.extend(triangulate(outer[0], holes))
     return (tris, colours[0] if colours else None) if tris else None
+
+
+def parse_fbx(path):
+    """(triangles, first colour) from a binary FBX, by way of assimp's OBJ export."""
+    with tempfile.TemporaryDirectory() as tmp:
+        obj = os.path.join(tmp, 'mesh.obj')
+        subprocess.run(['assimp', 'export', path, obj], check=True, capture_output=True)
+        verts, tris = [], []
+        for line in open(obj):
+            if line.startswith('v '):
+                verts.append([float(v) for v in line.split()[1:4]])
+            elif line.startswith('f '):
+                f = [verts[int(c.split('/')[0]) - 1] for c in line.split()[1:]]
+                tris.extend([f[0], f[i], f[i + 1]] for i in range(1, len(f) - 1))
+        colour = None
+        for line in open(obj.replace('.obj', '.mtl')):
+            if line.startswith('Kd '):
+                colour = tuple(float(v) for v in line.split()[1:4])
+                break
+    return (tris, colour) if tris else None
 
 
 def newell(poly):
@@ -322,9 +351,13 @@ def components(loops):
         ra, rb = find(a), find(b)
         if ra != rb:
             parent[ra] = rb
+    # Each loop once, not once per edge.
     groups = {}
+    seen = set()
     for a, b, lp in edges:
-        groups.setdefault(find(a), []).append(lp)
+        if id(lp) not in seen:
+            seen.add(id(lp))
+            groups.setdefault(find(a), []).append(lp)
     if len(groups) <= 1:
         return loops
     sizes = []
@@ -352,7 +385,7 @@ def frame(tris, spec):
     lo = [min(p[i] for p in pts) for i in range(3)]
     hi = [max(p[i] for p in pts) for i in range(3)]
     size = [hi[i] - lo[i] for i in range(3)]
-    proj = min(range(3), key=lambda a: abs(size[a] - spec['proj']))
+    proj = spec.get('axis', min(range(3), key=lambda a: abs(size[a] - spec['proj'])))
     rest = [a for a in range(3) if a != proj]
     length = max(rest, key=lambda a: size[a])
     width = next(a for a in rest if a != length)
@@ -519,7 +552,8 @@ def write_catalog(rows, path):
                 f"ABI Interiors {r['family']} ({r['url']}); finish {f['name']}: {f['url']}, "
                 f"SKU {f['sku']}, ${f['price_aud']:.2f} AUD (product.txt of the BIMobject "
                 f"download, 2026-10-27); screw pattern from ABI's spec drawing {r['spec_file']}; "
-                f"geometry re-oriented from the product's IFC by scripts/import_abi_handles.py"
+                f"geometry re-oriented from the product's {r['geometry']} by "
+                f"scripts/import_abi_handles.py"
             )
             if colour and origin:
                 src += f"; finish colour from {origin}"
@@ -550,7 +584,8 @@ def write_catalog(rows, path):
             'SKU, finishes and price from each product\'s product.txt (BIMobject download of '
             '2026-10-27). length is ABI\'s named size; centres is the span of the screw pattern '
             'in drilling, both from ABI\'s spec drawings: a pull\'s name is not its fixing '
-            'distance. Geometry from the product IFC, re-oriented by '
+            'distance. Geometry from the product IFC (or its FBX, where the IFC has no mesh), '
+            're-oriented by '
             'scripts/import_abi_handles.py. Never commit ABI\'s BIM files or images '
             '(vendor-cad/abi-bim and vendor-cad/abi-web stay local).'
         ),
@@ -580,8 +615,13 @@ def main():
             print(f"{name:48s} edge-mounted: left out (ABI-5)")
             continue
         parsed = parse_ifc(ifc[0])
+        geometry = 'IFC'
+        fbx = glob.glob(folder + '/*.fbx')
+        if parsed is None and fbx:
+            parsed = parse_fbx(fbx[0])
+            geometry = 'FBX'
         if parsed is None:
-            print(f"{name:48s} NO IFC MESH: skipped (needs the FBX reader)")
+            print(f"{name:48s} NO MESH: skipped")
             continue
         tris, colour = parsed
         tris = components(tris)
@@ -623,6 +663,7 @@ def main():
             'across': (round(min(across), 1), round(max(across), 1)),
             'colour_rgb': rgb,
             'triangles': tri_count,
+            'geometry': geometry,
             'finishes': fins,
             'spec_file': drawing[0] if drawing else 'none',
             'url': (re.search(r'Source URL: (\S+)', txt) or [None, ''])[1],

@@ -3434,11 +3434,14 @@ impl<'a> Builder<'a> {
             HandlePlace::FingerPull | HandlePlace::Sharknose
         ) && s.door_style != DoorStyle::Slab
         {
-            self.list.warnings.push(
-                "finger pulls need slab fronts: a frame's grooves run where the grip would be; \
-                 none cut"
-                    .into(),
-            );
+            let grip = if s.handle_place == HandlePlace::Sharknose {
+                "sharknose bevels need"
+            } else {
+                "finger pulls need"
+            };
+            self.list.warnings.push(format!(
+                "{grip} slab fronts: a frame's grooves run where the grip would be; none cut"
+            ));
         }
         // An ABI style the catalog does not have falls back to the generic handle, and says so,
         // rather than boring a size we invented.
@@ -6542,6 +6545,21 @@ mod tests {
         assert!((gap - bank.standard.front_gap).abs() < 1e-6);
     }
 
+    #[test]
+    fn a_framed_sharknose_front_warns_about_sharknose_not_finger_pulls() {
+        let mut cab = Cabinet::new("B01", CabinetKind::Base);
+        cab.standard.handle_place = HandlePlace::Sharknose;
+        cab.standard.door_style = DoorStyle::Shaker;
+        let list = build_cabinet(&cab).unwrap();
+        assert!(
+            list.warnings
+                .iter()
+                .any(|w| w.starts_with("sharknose bevels need slab fronts")),
+            "{:?}",
+            list.warnings
+        );
+    }
+
     /// WF-3: a sharknose front is bevelled at the back of its top edge (a wall door's bottom),
     /// across its width, and gets no handle.
     #[test]
@@ -7767,6 +7785,28 @@ mod tests {
 
     /// ABI-2: the chosen catalog row sets the bore centres, the hardware id and the model article.
     /// ABI names a pull by its length: the 85 mm Camille's screws are 64 apart.
+    /// ABI-4: the three timber pulls whose IFC has no mesh, at the centres on ABI's drawings, not
+    /// their named lengths.
+    #[test]
+    fn hegman_pulls_read_from_fbx_are_bored_at_abis_centres() {
+        for (id, length, centres, projection) in [
+            ("handle.abi.hegmanclassic-130.ash", 130.0, 50.0, 20.0),
+            ("handle.abi.hegmanclassic-250.ash", 250.0, 154.0, 20.0),
+            ("handle.abi.hegmanhalfmoon-90.ash", 90.0, 22.0, 25.0),
+        ] {
+            let row = crate::hardware::item(id).unwrap();
+            assert_eq!(row.param("length"), Ok(length), "{id}");
+            assert_eq!(row.param("centres"), Ok(centres), "{id}");
+            assert_eq!(row.param("projection"), Ok(projection), "{id}");
+            let xs: Vec<f64> = row.drilling.iter().map(|h| h.x).collect();
+            assert_eq!(xs, vec![-centres / 2.0, centres / 2.0], "{id}");
+            assert!(!row.source.verified);
+        }
+        // The half moon's screw line is 10 from its straight edge.
+        let moon = crate::hardware::item("handle.abi.hegmanhalfmoon-90.ash").unwrap();
+        assert_eq!(moon.param("across_high"), Ok(10.0));
+    }
+
     #[test]
     fn an_abi_handle_bores_its_own_centres_and_places_that_finish() {
         use crate::model::HandleRange;

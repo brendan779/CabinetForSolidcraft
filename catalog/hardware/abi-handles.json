@@ -1,7 +1,7 @@
 {
  "brand": "ABI Interiors",
  "website": "https://www.abiinteriors.com.au",
- "notes": "SKU, finishes and price from each product's product.txt (BIMobject download of 2026-10-27). length is ABI's named size; centres is the span of the screw pattern in drilling, both from ABI's spec drawings: a pull's name is not its fixing distance. Geometry from the product IFC, re-oriented by scripts/import_abi_handles.py. Never commit ABI's BIM files or images (vendor-cad/abi-bim and vendor-cad/abi-web stay local).",
+ "notes": "SKU, finishes and price from each product's product.txt (BIMobject download of 2026-10-27). length is ABI's named size; centres is the span of the screw pattern in drilling, both from ABI's spec drawings: a pull's name is not its fixing distance. Geometry from the product IFC (or its FBX, where the IFC has no mesh), re-oriented by scripts/import_abi_handles.py. Never commit ABI's BIM files or images (vendor-cad/abi-bim and vendor-cad/abi-web stay local).",
  "items": [
   {
    "id": "handle.abi.beta-115.brushed-brass",
@@ -1015,6 +1015,90 @@
    }
   },
   {
+   "id": "handle.abi.hegmanclassic-130.ash",
+   "brand": "ABI Interiors",
+   "article": "ABI-HEGMANCLASSIC-130",
+   "family": "ABI Hegman Classic",
+   "variant": "Ash",
+   "kind": "handle",
+   "parameters": {
+    "length": 130.0,
+    "centres": 50.0,
+    "projection": 20.0,
+    "width": 20.0,
+    "sku": 13156,
+    "price_aud": 0.0,
+    "across_low": -10.0,
+    "across_high": 10.0,
+    "matte": 1,
+    "finish_colour_rgb": 16043677
+   },
+   "drilling": [
+    {
+     "x": -25.0,
+     "y": 0.0,
+     "diameter": 5,
+     "depth": 40,
+     "note": "screw through the front, whatever its thickness; x along the length, y across it"
+    },
+    {
+     "x": 25.0,
+     "y": 0.0,
+     "diameter": 5,
+     "depth": 40,
+     "note": "screw through the front, whatever its thickness; x along the length, y across it"
+    }
+   ],
+   "source": {
+    "url": "ABI Interiors Hegman Classic (https://www.abiinteriors.com.au/product/hegman-classic-pull-130mm-ash/); finish Ash: , SKU 13156, $0.00 AUD (product.txt of the BIMobject download, 2026-10-27); screw pattern from ABI's spec drawing HEGMAN_130_Classic_Spec-01.jpg; geometry re-oriented from the product's FBX by scripts/import_abi_handles.py; finish colour from Hegman BIM models",
+    "document_date": "2026-10-27",
+    "retrieved": "2026-11-01",
+    "verified": false
+   }
+  },
+  {
+   "id": "handle.abi.hegmanclassic-250.ash",
+   "brand": "ABI Interiors",
+   "article": "ABI-HEGMANCLASSIC-250",
+   "family": "ABI Hegman Classic",
+   "variant": "Ash",
+   "kind": "handle",
+   "parameters": {
+    "length": 250.0,
+    "centres": 154.0,
+    "projection": 20.0,
+    "width": 20.0,
+    "sku": 13157,
+    "price_aud": 0.0,
+    "across_low": -10.0,
+    "across_high": 10.0,
+    "matte": 1,
+    "finish_colour_rgb": 16043677
+   },
+   "drilling": [
+    {
+     "x": -77.0,
+     "y": 0.0,
+     "diameter": 5,
+     "depth": 40,
+     "note": "screw through the front, whatever its thickness; x along the length, y across it"
+    },
+    {
+     "x": 77.0,
+     "y": 0.0,
+     "diameter": 5,
+     "depth": 40,
+     "note": "screw through the front, whatever its thickness; x along the length, y across it"
+    }
+   ],
+   "source": {
+    "url": "ABI Interiors Hegman Classic (https://www.abiinteriors.com.au/product/hegman-classic-pull-250mm-ash/); finish Ash: , SKU 13157, $0.00 AUD (product.txt of the BIMobject download, 2026-10-27); screw pattern from ABI's spec drawing HEGMAN_250_Classic_SPEC-01.jpg; geometry re-oriented from the product's FBX by scripts/import_abi_handles.py; finish colour from Hegman BIM models",
+    "document_date": "2026-10-27",
+    "retrieved": "2026-11-01",
+    "verified": false
+   }
+  },
+  {
    "id": "handle.abi.hegmanhalfmoon-200.ash",
    "brand": "ABI Interiors",
    "article": "ABI-HEGMANHALFMOON-200",
@@ -1051,6 +1135,48 @@
    ],
    "source": {
     "url": "ABI Interiors Hegman Half Moon (https://www.abiinteriors.com.au/product/hegman-half-moon-pull-200mm-pair-ash/); finish Ash: , SKU 13155, $0.00 AUD (product.txt of the BIMobject download, 2026-10-27); screw pattern from ABI's spec drawing HEGMAN_Half_Moon_200_Galley_Spec-01.jpg; geometry re-oriented from the product's IFC by scripts/import_abi_handles.py; finish colour from Hegman BIM models",
+    "document_date": "2026-10-27",
+    "retrieved": "2026-11-01",
+    "verified": false
+   }
+  },
+  {
+   "id": "handle.abi.hegmanhalfmoon-90.ash",
+   "brand": "ABI Interiors",
+   "article": "ABI-HEGMANHALFMOON-90",
+   "family": "ABI Hegman Half Moon",
+   "variant": "Ash",
+   "kind": "handle",
+   "parameters": {
+    "length": 90.0,
+    "centres": 22.0,
+    "projection": 25.0,
+    "width": 45.0,
+    "sku": 13154,
+    "price_aud": 0.0,
+    "across_low": -35.0,
+    "across_high": 10.0,
+    "matte": 1,
+    "finish_colour_rgb": 16043677
+   },
+   "drilling": [
+    {
+     "x": -11.0,
+     "y": 0.0,
+     "diameter": 5,
+     "depth": 40,
+     "note": "screw through the front, whatever its thickness; x along the length, y across it"
+    },
+    {
+     "x": 11.0,
+     "y": 0.0,
+     "diameter": 5,
+     "depth": 40,
+     "note": "screw through the front, whatever its thickness; x along the length, y across it"
+    }
+   ],
+   "source": {
+    "url": "ABI Interiors Hegman Half Moon (https://www.abiinteriors.com.au/product/hegman-half-moon-pull-90mm-pair-ash/); finish Ash: , SKU 13154, $0.00 AUD (product.txt of the BIMobject download, 2026-10-27); screw pattern from ABI's spec drawing Hegman_Half_Moon_Pull_90mm_Pair_Specifications.gif; geometry re-oriented from the product's FBX by scripts/import_abi_handles.py; finish colour from Hegman BIM models",
     "document_date": "2026-10-27",
     "retrieved": "2026-11-01",
     "verified": false
