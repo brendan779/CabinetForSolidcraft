@@ -58,6 +58,16 @@ struct CabinetDoc: Identifiable, Hashable, Codable {
         return CabinetDoc(id: id, json: json)
     }
 
+    /// A floating shelf's board, and its light's profile.
+    var shelfBoard: String {
+        get { object["board"] as? String ?? "" }
+        set { update { $0["board"] = newValue } }
+    }
+    var shelfProfile: String {
+        get { object["light_profile"] as? String ?? "" }
+        set { update { $0["light_profile"] = newValue } }
+    }
+
     // A splashback's finish. A tile width of 0 is one sheet with no joints.
     var tileWidth: Double {
         get { number("tile_width") }

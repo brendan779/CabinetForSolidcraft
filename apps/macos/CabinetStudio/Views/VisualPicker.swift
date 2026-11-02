@@ -385,13 +385,15 @@ private struct Pen {
         let fronts: [(CGFloat, CGFloat)] = [(6, 40), (48, 12), (62, 12)]
         for (y, h) in fronts { board(30, y, 40, h) }
         let matched = choice == "matched"
+        let upright = matched || choice == "upright"
+        let across = choice == "across"
         for x in stride(from: CGFloat(36), through: 64, by: 7) {
-            for (i, (y, h)) in fronts.enumerated() where matched || i == 0 {
+            for (i, (y, h)) in fronts.enumerated() where (upright || i == 0) && !across {
                 line(p(x, y + 2), p(x, y + h - 2), colour: matched ? accent : nil, width: 1)
             }
         }
-        if !matched {
-            for (y, h) in fronts.dropFirst() {
+        if !upright {
+            for (y, h) in across ? fronts[...] : fronts.dropFirst() {
                 for dy in stride(from: CGFloat(3), to: h - 1, by: 3) {
                     line(p(34, y + dy), p(66, y + dy), width: 1)
                 }

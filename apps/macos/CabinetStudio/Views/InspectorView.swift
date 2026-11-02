@@ -346,6 +346,10 @@ struct StandardSizes: View {
                   ("Bottom gap", "bottom_gap", [0, 2])])
         case "handle_place" where project.option("handle_place", of: cab) == "edge_pull":
             rows([("Clearance over pull", "edge_pull_clearance", [2, 3, 5])])
+        case "handle_place" where project.option("handle_place", of: cab) == "finger_pull":
+            rows([("Notch height", "finger_pull_height", [15, 20, 25, 30, 40]),
+                  ("Notch depth", "finger_pull_depth", [6, 8, 10, 12]),
+                  ("Finger gap", "finger_pull_gap", [0, 5, 10, 15, 20])])
         case "sharknose_angle":
             rows([("Finger gap", "sharknose_gap", [10, 15, 20, 25, 30]),
                   ("Rail thickness", "drawer_frame_thickness", [16, 18]),
@@ -495,6 +499,18 @@ struct PieceSection: View {
                         .buttonStyle(ChipStyle(selected: abs(cab.shelfLight - w) < 0.05))
                     }
                 }
+                if cab.shelfLight > 0 {
+                    SectionTitle("LED profile")
+                    LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 6), count: 3), spacing: 6) {
+                        shelfProfileTile(id: "", title: "Bare strip", help: "No profile: the strip stuck under the shelf", surface: true, width: 0, depth: 0)
+                        ForEach(lightProfiles(), id: \.id) { p in
+                            shelfProfileTile(id: p.id, title: p.name.replacingOccurrences(of: "Loox5 profile ", with: ""),
+                                             help: "\(p.name), Häfele \(p.article). \(p.variant)",
+                                             surface: p.surface, width: p.width, depth: p.depth)
+                        }
+                    }
+                }
+                ShelfBoardButton(cab: cab)
                 Text("A shelf on concealed brackets in the run, against the wall; its LED strip is 24 V.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
@@ -659,6 +675,22 @@ struct PieceSection: View {
         }
     }
 
+    private func shelfProfileTile(id: String, title: String, help: String, surface: Bool, width: Double, depth: Double) -> some View {
+        Button {
+            withAnimation(.snappy) { var c = cab; c.shelfProfile = id; project.selected = c }
+        } label: {
+            VStack(spacing: 4) {
+                ProfileThumbnail(surface: surface, width: width, depth: depth).frame(height: 34)
+                Text(title).font(.caption2).lineLimit(1)
+            }
+            .padding(5)
+            .frame(maxWidth: .infinity)
+        }
+        .buttonStyle(TileStyle(selected: cab.shelfProfile == id))
+        .help(help)
+        .accessibilityLabel(id.isEmpty ? title : "Profile \(title)")
+    }
+
     private func wallField(_ title: String, _ value: Double,
                            set: @escaping (inout CabinetDoc, Double) -> Void) -> some View {
         NumberField(title: title, value: value) { v in
@@ -679,6 +711,46 @@ struct PieceSection: View {
                 .buttonStyle(ChipStyle(selected: abs(p - value) < 0.5))
                 .accessibilityLabel("\(title) \(unit.format(p))")
             }
+        }
+    }
+}
+
+/// A floating shelf's board, from the same picker as a cabinet's.
+struct ShelfBoardButton: View {
+    @Environment(ProjectModel.self) private var project
+    @State private var picking = false
+    let cab: CabinetDoc
+
+    var body: some View {
+        let board = project.boardsById[cab.shelfBoard]
+        Button { picking = true } label: {
+            HStack(spacing: 10) {
+                RoundedRectangle(cornerRadius: 5)
+                    .fill(board.map { Color(nsColor: $0.displayColour) } ?? Color.primary.opacity(0.08))
+                    .overlay {
+                        if board?.grained == true { GrainPattern().clipShape(RoundedRectangle(cornerRadius: 5)) }
+                    }
+                    .overlay(RoundedRectangle(cornerRadius: 5).strokeBorder(.primary.opacity(0.2)))
+                    .frame(width: 34, height: 24)
+                VStack(alignment: .leading, spacing: 1) {
+                    Text("Material").font(.caption).foregroundStyle(.secondary)
+                    Text(board.map { "\($0.decor) \($0.finish), \(Int($0.thickness)) mm" } ?? "Generic board").lineLimit(1)
+                }
+                Spacer()
+                Image(systemName: "chevron.right").foregroundStyle(.tertiary)
+            }
+            .padding(6)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(TileStyle(selected: picking))
+        .popover(isPresented: $picking, arrowEdge: .leading) {
+            BoardPicker(boards: project.boards, marked: [cab.shelfBoard], columns: 140, onPick: { b in
+                var c = cab
+                c.shelfBoard = b.id
+                withAnimation(.snappy) { project.selected = c }
+                picking = false
+            }) { _ in EmptyView() }
+                .frame(width: 640, height: 520)
         }
     }
 }
@@ -1582,6 +1654,10 @@ struct LightsSection: View {
             z.append(("under_cabinet", "Under", "A strip under the cabinet, lighting the bench"))
         }
         z.append(("in_cabinet", "Inside", "A strip under the top, inside the cabinet"))
+        z.append(("side_rear", "Up sides", "A strip up the rear of each side, lighting across to the other: for a wardrobe"))
+        if !cab.fixedShelves.isEmpty {
+            z.append(("under_fixed_shelf", "Under shelf", "A strip under each fixed shelf, 50 mm from the rear"))
+        }
         if ["base", "tall", "drawer_bank", "blind_corner", "corner_base", "sink", "wardrobe"].contains(cab.kind) {
             z.append(("plinth", "Plinth", "A strip in the plinth, lighting the floor"))
         }
@@ -1700,9 +1776,26 @@ struct LightZoneThumbnail: View {
             let w = size.width, h = size.height
             let body = CGRect(x: w * 0.15, y: h * 0.12, width: w * 0.7, height: h * 0.6)
             ctx.stroke(Path(body), with: .color(.primary.opacity(0.6)), lineWidth: 1)
+            if zone == "side_rear" {
+                // Upright at each side, lit across to the other.
+                for x in [body.minX + 5, body.maxX - 5] {
+                    var strip = Path()
+                    strip.move(to: CGPoint(x: x, y: body.minY + 4))
+                    strip.addLine(to: CGPoint(x: x, y: body.maxY - 4))
+                    if on { ctx.stroke(strip, with: .color(.yellow.opacity(0.35)), lineWidth: 6) }
+                    ctx.stroke(strip, with: .color(on ? .yellow : .primary.opacity(0.25)), lineWidth: 2)
+                }
+                return
+            }
             let y: CGFloat
             switch zone {
             case "under_cabinet": y = body.maxY + 3
+            case "under_fixed_shelf":
+                var shelf = Path()
+                shelf.move(to: CGPoint(x: body.minX, y: body.midY))
+                shelf.addLine(to: CGPoint(x: body.maxX, y: body.midY))
+                ctx.stroke(shelf, with: .color(.primary.opacity(0.6)), lineWidth: 1)
+                y = body.midY + 3
             case "plinth":
                 ctx.stroke(Path(CGRect(x: body.minX + 4, y: body.maxY, width: body.width - 8, height: h * 0.18)),
                            with: .color(.primary.opacity(0.4)), lineWidth: 1)

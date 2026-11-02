@@ -121,10 +121,6 @@ const TALL_HANDLE_HEIGHT: f64 = 1050.0;
 const DEEP_FRONT: f64 = 200.0;
 /// Our choice: a canopy bottom keeps at least this much board round the insert's cut-out.
 const CANOPY_CUTOUT_MARGIN: f64 = 20.0;
-/// Our choices for a routed finger pull: how far down the back of the front it reaches and how
-/// deep into the front it goes.
-const FINGER_PULL_HEIGHT: f64 = 25.0;
-const FINGER_PULL_DEPTH: f64 = 10.0;
 /// How far a sharknose bevel goes into the front, our choice, and the nose it must leave at the
 /// face so the edge doesn't chip.
 const SHARKNOSE_INTO: f64 = 12.0;
@@ -146,6 +142,14 @@ const LEG_BACK_INSET: f64 = 70.0;
 /// Our choice: a light's profile runs this far back from the panel's front edge, to light the
 /// bench rather than the wall.
 const LIGHT_PROFILE_SETBACK: f64 = 50.0;
+/// The owner's: a light at the rear stands this far from the rear.
+const LIGHT_PROFILE_REAR_SETBACK: f64 = 50.0;
+/// Our choice: how far from a strip's end its cable leaves through the panel.
+const LIGHT_CABLE_FROM_END: f64 = 15.0;
+/// Our choice: a channel for a light's cable, wide and deep.
+const LIGHT_CHANNEL: (f64, f64) = (8.0, 6.0);
+/// As `lighting`'s strips: short of each end of what they run along.
+const LIGHT_PROFILE_END_CLEARANCE: f64 = crate::lighting::STRIP_END_CLEARANCE;
 /// Our choice: the least board to leave behind a routed profile.
 const LIGHT_PROFILE_MIN_LEFT: f64 = 3.0;
 /// Generic until a supplier's shelf support is catalogued (HAF-3).
@@ -4330,14 +4334,14 @@ impl<'a> Builder<'a> {
                 }
                 // Along the back of the gripping edge, across the front's width.
                 let (zl, zh) = if wall_hung && f.role != PartRole::DrawerFront {
-                    (z0, z0 + FINGER_PULL_HEIGHT)
+                    (z0, z0 + s.finger_pull_height)
                 } else {
-                    (z1 - FINGER_PULL_HEIGHT, z1)
+                    (z1 - s.finger_pull_height, z1)
                 };
                 let (t_lo, t_hi) = if back_low {
-                    (back, back + FINGER_PULL_DEPTH)
+                    (back, back + s.finger_pull_depth)
                 } else {
-                    (back - FINGER_PULL_DEPTH, back)
+                    (back - s.finger_pull_depth, back)
                 };
                 let lo = Vec3::new(0.0, 0.0, zl).with(wa, w0).with(ta, t_lo);
                 let hi = Vec3::new(0.0, 0.0, zh).with(wa, w1).with(ta, t_hi);
@@ -4700,6 +4704,24 @@ impl<'a> Builder<'a> {
     /// runs its grain upright and is cut as one strip, top first.
     fn grain_match(&mut self) {
         let s = &self.cab.standard;
+        // A chosen direction, on every front that shows it.
+        if matches!(s.front_grain, FrontGrain::Upright | FrontGrain::Across) {
+            let upright = s.front_grain == FrontGrain::Upright;
+            for p in &mut self.list.parts {
+                if matches!(
+                    p.role,
+                    PartRole::Door | PartRole::DrawerFront | PartRole::LiftFront
+                ) {
+                    let across = if p.thickness_axis == Axis::X {
+                        Axis::Y
+                    } else {
+                        Axis::X
+                    };
+                    p.grain_axis = Some(if upright { Axis::Z } else { across });
+                }
+            }
+            return;
+        }
         if s.front_grain != FrontGrain::Matched {
             return;
         }
@@ -5277,6 +5299,10 @@ impl<'a> Builder<'a> {
             .iter()
             .filter(|l| crate::lighting::zone_fits(cab, l.zone));
         for (light, strip) in fitting.zip(crate::lighting::strips(cab)) {
+            if matches!(light.zone, LightZone::SideRear | LightZone::UnderFixedShelf) {
+                self.light_on_panels(light, &strip);
+                continue;
+            }
             let x = t + CABLE_HOLE_SIDE_INSET;
             let y = self.interior_back - CABLE_HOLE_BACK_INSET;
             let roles: &[PartRole] = match light.zone {
@@ -5329,6 +5355,94 @@ impl<'a> Builder<'a> {
         }
     }
 
+    /// A strip on each panel its zone names, set back from the rear: both sides, or each fixed shelf.
+    fn light_on_panels(&mut self, light: &crate::model::Light, strip: &crate::lighting::Strip) {
+        let panels: Vec<Part> = match light.zone {
+            LightZone::SideRear => self
+                .list
+                .parts
+                .iter()
+                .filter(|p| matches!(p.role, PartRole::LeftSide | PartRole::RightSide))
+                .cloned()
+                .collect(),
+            _ => self
+                .list
+                .parts
+                .iter()
+                .filter(|p| {
+                    p.role == PartRole::Shelf
+                        && !self
+                            .list
+                            .hardware
+                            .iter()
+                            .any(|h| h.item == SHELF_SUPPORT && h.part == p.name)
+                })
+                .cloned()
+                .collect(),
+        };
+        if panels.is_empty() {
+            self.list
+                .warnings
+                .push(format!("no panel to take the {:?} light", light.zone));
+            return;
+        }
+        let v = light.voltage.label();
+        let back = self.interior_back - LIGHT_PROFILE_REAR_SETBACK;
+        for panel in &panels {
+            let b = panel.bounds;
+            let side = light.zone == LightZone::SideRear;
+            let left = panel.role == PartRole::LeftSide;
+            // The strip's cable runs back to the void behind the back, in a channel in the same
+            // face, from near the strip's end to the panel's rear edge.
+            let (channel, at) = if side {
+                let z = self.opening_z.0 + LIGHT_CABLE_FROM_END;
+                let (x0, x1) = if left {
+                    (b.max().x - LIGHT_CHANNEL.1, b.max().x)
+                } else {
+                    (b.min.x, b.min.x + LIGHT_CHANNEL.1)
+                };
+                (
+                    aabb(x0, back, z, x1, b.max().y, z + LIGHT_CHANNEL.0),
+                    Vec3::new(if left { b.max().x } else { b.min.x }, back, z),
+                )
+            } else {
+                let x = b.min.x + LIGHT_CABLE_FROM_END;
+                (
+                    aabb(
+                        x,
+                        back,
+                        b.min.z,
+                        x + LIGHT_CHANNEL.0,
+                        b.max().y,
+                        b.min.z + LIGHT_CHANNEL.1,
+                    ),
+                    Vec3::new(x, back, b.min.z),
+                )
+            };
+            self.list.operations.push(Operation::Groove {
+                part: panel.name.clone(),
+                bounds: channel,
+            });
+            self.list.hardware.push(HardwarePlacement {
+                item: format!("lighting.strip.{}", v.replace(' ', "").to_lowercase()),
+                description: format!(
+                    "LED strip {v}, {:.0} mm, {:.1} W ({} W/m)",
+                    strip.length, strip.watts, light.watts_per_metre
+                ),
+                at,
+                part: panel.name.clone(),
+                quantity: 1,
+            });
+            let length = if side {
+                let (floor, top) = crate::cad::side_light_span(&self.list);
+                top - floor - 2.0 * LIGHT_PROFILE_END_CLEARANCE
+            } else {
+                strip.length
+            };
+            self.light_profile(light, length, panel);
+        }
+    }
+
     /// A strip's aluminium profile on the panel's underside, near its front edge. A recessed one
     /// has its groove routed to the catalogue's size, so it is on the cut sheet.
     fn light_profile(&mut self, light: &crate::model::Light, length: f64, panel: &Part) {
@@ -5343,36 +5457,71 @@ impl<'a> Builder<'a> {
             }
         };
         let b = panel.bounds;
-        let y = b.min.y + LIGHT_PROFILE_SETBACK;
+        let side = light.zone == LightZone::SideRear;
+        let rear = matches!(light.zone, LightZone::SideRear | LightZone::UnderFixedShelf);
+        let y = if rear {
+            self.interior_back - LIGHT_PROFILE_REAR_SETBACK
+        } else {
+            b.min.y + LIGHT_PROFILE_SETBACK
+        };
+        let left = panel.role == PartRole::LeftSide;
+        // The face it fixes to, and the board behind that face.
+        let thick = if side { b.size.x } else { b.size.z };
         if item.param("surface").unwrap_or(1.0) == 0.0 {
             let (Ok(width), Ok(depth)) = (item.param("routing_width"), item.param("routing_depth"))
             else {
                 return;
             };
-            if depth > b.size.z - LIGHT_PROFILE_MIN_LEFT {
+            if depth > thick - LIGHT_PROFILE_MIN_LEFT {
                 self.list.warnings.push(format!(
-                    "{} needs a {depth:.1} mm deep groove: {:.0} mm thick {} leaves too little. Use a surface mounted profile",
-                    item.family, b.size.z, panel.name
+                    "{} needs a {depth:.1} mm deep groove: {thick:.0} mm thick {} leaves too little. Use a surface mounted profile",
+                    item.family, panel.name
                 ));
                 return;
             }
-            let x0 = b.center().x - length / 2.0;
-            self.list.operations.push(Operation::Groove {
-                part: panel.name.clone(),
-                bounds: aabb(
+            let bounds = if side {
+                let (x0, x1) = if left {
+                    (b.max().x - depth, b.max().x)
+                } else {
+                    (b.min.x, b.min.x + depth)
+                };
+                let z0 = crate::cad::side_light_span(&self.list).0 + LIGHT_PROFILE_END_CLEARANCE;
+                aabb(x0, y - width / 2.0, z0, x1, y + width / 2.0, z0 + length)
+            } else {
+                let x0 = b.center().x - length / 2.0;
+                aabb(
                     x0,
                     y - width / 2.0,
                     b.min.z,
                     x0 + length,
                     y + width / 2.0,
                     b.min.z + depth,
-                ),
+                )
+            };
+            self.list.operations.push(Operation::Groove {
+                part: panel.name.clone(),
+                bounds,
             });
+            // The cable leaves from the groove's end, through the panel to the back void.
+            if !rear {
+                self.list.operations.push(Operation::Bore {
+                    part: panel.name.clone(),
+                    at: Vec3::new(bounds.min.x + LIGHT_CABLE_FROM_END, y, b.min.z),
+                    direction: Dir::new(Axis::Z, true),
+                    diameter: CABLE_HOLE_DIAMETER,
+                    depth: thick,
+                    purpose: BorePurpose::CableHole,
+                });
+            }
         }
         self.list.hardware.push(HardwarePlacement {
             item: item.id.clone(),
             description: format!("{}, cut to {length:.0} mm", item.family),
-            at: Vec3::new(b.center().x, y, b.min.z),
+            at: if side {
+                Vec3::new(if left { b.max().x } else { b.min.x }, y, b.center().z)
+            } else {
+                Vec3::new(b.center().x, y, b.min.z)
+            },
             part: panel.name.clone(),
             quantity: 1,
         });
@@ -9739,7 +9888,7 @@ mod tests {
         assert!(
             grooves_on(&list, "B01.Door1")
                 .iter()
-                .all(|(_, b)| b.size.z != FINGER_PULL_HEIGHT)
+                .all(|(_, b)| b.size.z != 25.0)
         );
     }
 
@@ -11150,5 +11299,132 @@ mod tests {
                 );
             }
         }
+    }
+
+    #[test]
+    fn a_recessed_profile_has_a_hole_for_its_cable_at_the_grooves_end() {
+        let list = lit("hafele.loox5.profile.1103");
+        let bottom = list.part("W01.Bottom").unwrap().bounds;
+        let y = bottom.min.y + LIGHT_PROFILE_SETBACK;
+        assert!(list.operations.iter().any(|o| matches!(o,
+            Operation::Bore { part, at, purpose: BorePurpose::CableHole, .. }
+                if part == "W01.Bottom" && (at.y - y).abs() < 1e-6)));
+    }
+
+    fn zoned(kind: CabinetKind, zone: crate::model::LightZone, profile: &str) -> PartList {
+        let mut cab = Cabinet::new("R01", kind);
+        if zone == crate::model::LightZone::UnderFixedShelf {
+            cab.adjustable_shelves = 2;
+            cab.fixed_shelves = vec![2];
+        }
+        cab.lights = vec![crate::model::Light {
+            zone,
+            voltage: crate::model::Voltage::V24,
+            watts_per_metre: 9.6,
+            profile: profile.into(),
+        }];
+        build_cabinet(&cab).unwrap()
+    }
+
+    #[test]
+    fn a_light_can_run_up_both_sides_at_the_rear_of_a_wardrobe_with_a_channel_for_its_cable() {
+        let list = zoned(
+            CabinetKind::Wardrobe,
+            crate::model::LightZone::SideRear,
+            "hafele.loox5.profile.1103",
+        );
+        let grooves: Vec<&String> = list
+            .operations
+            .iter()
+            .filter_map(|o| match o {
+                Operation::Groove { part, bounds } if (bounds.size.y - 13.9).abs() < 1e-6 => {
+                    Some(part)
+                }
+                _ => None,
+            })
+            .collect();
+        assert_eq!(grooves.len(), 2, "{:?}", list.warnings);
+        assert!(grooves.iter().any(|p| p.ends_with("LeftSide")));
+        assert!(grooves.iter().any(|p| p.ends_with("RightSide")));
+        assert_eq!(
+            list.hardware
+                .iter()
+                .filter(|h| h.item == "hafele.loox5.profile.1103")
+                .count(),
+            2
+        );
+        assert!(
+            !list.warnings.iter().any(|w| w.contains("clash")),
+            "{:?}",
+            list.warnings
+        );
+    }
+
+    #[test]
+    fn a_light_can_go_under_a_fixed_shelf_50_from_the_rear() {
+        let list = zoned(
+            CabinetKind::Tall,
+            crate::model::LightZone::UnderFixedShelf,
+            "hafele.loox5.profile.2190",
+        );
+        let row = list
+            .hardware
+            .iter()
+            .find(|h| h.item == "hafele.loox5.profile.2190")
+            .expect("a profile");
+        let shelf = list.part(&row.part).unwrap();
+        assert_eq!(shelf.role, PartRole::Shelf);
+        assert!(
+            (shelf.bounds.max().y - row.at.y - 50.0).abs() < 5.0,
+            "{}",
+            row.at.y
+        );
+    }
+
+    #[test]
+    fn grain_direction_turns_every_front() {
+        let axes = |g: FrontGrain, kind| {
+            let mut cab = Cabinet::new("C1", kind);
+            cab.standard.front_grain = g;
+            let list = build_cabinet(&cab).unwrap();
+            list.parts
+                .iter()
+                .filter(|p| matches!(p.role, PartRole::Door | PartRole::DrawerFront))
+                .map(|p| p.grain_axis)
+                .collect::<Vec<_>>()
+        };
+        for kind in [CabinetKind::Base, CabinetKind::DrawerBank] {
+            assert!(
+                axes(FrontGrain::Upright, kind)
+                    .iter()
+                    .all(|a| *a == Some(Axis::Z))
+            );
+            assert!(
+                axes(FrontGrain::Across, kind)
+                    .iter()
+                    .all(|a| *a == Some(Axis::X))
+            );
+        }
+    }
+
+    #[test]
+    fn a_finger_pulls_notch_and_gap_can_be_set() {
+        let mut cab = Cabinet::new("D1", CabinetKind::DrawerBank);
+        cab.standard.handle_place = crate::model::HandlePlace::FingerPull;
+        let plain = build_cabinet(&cab).unwrap();
+        cab.standard.finger_pull_height = 40.0;
+        cab.standard.finger_pull_depth = 12.0;
+        cab.standard.finger_pull_gap = 15.0;
+        let list = build_cabinet(&cab).unwrap();
+        assert!(list.operations.iter().any(|o| matches!(o,
+            Operation::Groove { bounds, .. }
+                if (bounds.size.z - 40.0).abs() < 1e-6 && (bounds.size.y - 12.0).abs() < 1e-6)));
+        let gap = |l: &PartList| {
+            let mut z: Vec<Aabb> = l.by_role(PartRole::DrawerFront).map(|p| p.bounds).collect();
+            z.sort_by(|a, b| a.min.z.total_cmp(&b.min.z));
+            z[1].min.z - z[0].max().z
+        };
+        assert!(gap(&list) > gap(&plain));
+        assert_eq!(gap(&list), 15.0);
     }
 }

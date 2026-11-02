@@ -53,7 +53,8 @@ pub fn zone_fits(cab: &Cabinet, zone: LightZone) -> bool {
             cab.kind,
             CabinetKind::Wall | CabinetKind::OpenShelf | CabinetKind::CornerWall
         ),
-        LightZone::InCabinet => true,
+        LightZone::InCabinet | LightZone::SideRear => true,
+        LightZone::UnderFixedShelf => !cab.fixed_shelves.is_empty(),
         LightZone::Plinth => cab.has_toe_kick(),
     }
 }
@@ -68,6 +69,7 @@ pub fn strips(cab: &Cabinet) -> Vec<Strip> {
         .map(|l: &Light| {
             let span = match l.zone {
                 LightZone::Plinth => cab.width,
+                LightZone::SideRear => cab.height - 2.0 * t,
                 _ => cab.width - 2.0 * t,
             };
             let length = (span - 2.0 * STRIP_END_CLEARANCE).max(0.0);

@@ -85,7 +85,11 @@ pub fn check(list: &PartList) -> Vec<Clash> {
         }
         for (i, a) in cuts.iter().enumerate() {
             for b in &cuts[i + 1..] {
-                if intersects(a, b) && !seat_and_hole(a, b) && !shank_and_housing(a, b) {
+                if intersects(a, b)
+                    && !seat_and_hole(a, b)
+                    && !shank_and_housing(a, b)
+                    && !grooves_crossing(a, b)
+                {
                     out.push(Clash {
                         part: part.name.clone(),
                         what: format!("{} runs into {}", a.label(), b.label()),
@@ -95,6 +99,12 @@ pub fn check(list: &PartList) -> Vec<Clash> {
         }
     }
     out
+}
+
+/// Two grooves may cross: a light's cable channel meets its profile's groove and runs through the
+/// back's on the way to the void behind it.
+fn grooves_crossing(a: &Cut, b: &Cut) -> bool {
+    a.label().starts_with("groove") && b.label().starts_with("groove")
 }
 
 fn cuts_in(list: &PartList, part: &Part) -> Vec<Cut> {

@@ -185,7 +185,7 @@ pub fn option_groups() -> Vec<OptionGroup> {
                 (
                     "edge_pull",
                     "Edge pull",
-                    "A pull on the top edge (wall doors: the bottom), screwed from behind",
+                    "A pull on the top edge (wall doors: the bottom), screwed from behind. For ABI's own edge pulls, choose ABI Interiors under Handle range",
                 ),
                 (
                     "finger_pull",
@@ -294,8 +294,18 @@ pub fn option_groups() -> Vec<OptionGroup> {
             &[
                 (
                     "free",
-                    "Each front",
-                    "Fronts are cut on their own; drawer fronts' grain runs across",
+                    "Usual",
+                    "Doors upright, drawer fronts across, each cut on its own",
+                ),
+                (
+                    "upright",
+                    "Upright",
+                    "Every front's grain runs upright, each cut on its own",
+                ),
+                (
+                    "across",
+                    "Across",
+                    "Every front's grain runs across, each cut on its own",
                 ),
                 (
                     "matched",

@@ -98,6 +98,10 @@ pub enum LightZone {
     UnderCabinet,
     /// Under the top, inside the cabinet.
     InCabinet,
+    /// Upright at the rear of both sides, each lighting across to the other: a wardrobe's.
+    SideRear,
+    /// Under each fixed shelf, near the rear: the top of a large open space.
+    UnderFixedShelf,
     /// In the plinth, lighting the floor.
     Plinth,
 }
@@ -873,6 +877,15 @@ pub struct ConstructionStandard {
     pub sharknose_door_edge: SharknoseEdge,
     /// The owner's 2 mm between an edge pull's plate and whatever is above it.
     pub edge_pull_clearance: f64,
+    /// A finger pull's notch along the back of a front's gripping edge: how far down the front.
+    #[serde(default = "ConstructionStandard::default_finger_pull_height")]
+    pub finger_pull_height: f64,
+    /// And how far into its thickness.
+    #[serde(default = "ConstructionStandard::default_finger_pull_depth")]
+    pub finger_pull_depth: f64,
+    /// The gap above a front gripped by a finger pull, in a stack. 0: the usual front gap.
+    #[serde(default)]
+    pub finger_pull_gap: f64,
     /// A board behind the drawer fronts, cut out for each drawer, so no carcass or dark gap shows
     /// between them. The carcass moves back by its thickness; the fronts stay.
     pub drawer_frame: DrawerFrame,
@@ -955,6 +968,14 @@ impl ConstructionStandard {
             .filter(|i| i.parameters.contains_key("edge_mount"))
     }
 
+    fn default_finger_pull_height() -> f64 {
+        25.0
+    }
+
+    fn default_finger_pull_depth() -> f64 {
+        10.0
+    }
+
     /// The gap an edge pull needs over a front: its sheet, and room to run under what is above.
     pub fn edge_pull_gap(&self) -> Option<f64> {
         if self.opening != Opening::Handles {
@@ -970,7 +991,14 @@ impl ConstructionStandard {
         if self.is_sharknose() {
             self.sharknose_gap
         } else {
-            self.front_gap.max(self.edge_pull_gap().unwrap_or(0.0))
+            let finger = if self.handle_place == HandlePlace::FingerPull {
+                self.finger_pull_gap
+            } else {
+                0.0
+            };
+            self.front_gap
+                .max(self.edge_pull_gap().unwrap_or(0.0))
+                .max(finger)
         }
     }
 
@@ -1020,6 +1048,9 @@ impl Default for ConstructionStandard {
             sharknose_gap: 15.0,
             sharknose_door_edge: SharknoseEdge::Auto,
             edge_pull_clearance: 2.0,
+            finger_pull_height: Self::default_finger_pull_height(),
+            finger_pull_depth: Self::default_finger_pull_depth(),
+            finger_pull_gap: 0.0,
             drawer_frame: DrawerFrame::None,
             drawer_frame_thickness: 16.0,
             drawer_frame_overlap: 25.0,
@@ -1347,6 +1378,10 @@ pub enum FrontGrain {
     /// grain upright and are cut one after the other from one strip of the sheet, so the grain
     /// runs on from front to front.
     Matched,
+    /// Every front's grain upright, each cut on its own.
+    Upright,
+    /// Every front's grain across, each cut on its own.
+    Across,
 }
 
 /// How tall a steel box's sides may be.

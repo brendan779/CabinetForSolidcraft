@@ -145,6 +145,13 @@ struct ConnectionDot: View {
             }
         }
         .frame(width: 18, height: 18)
+        .contentShape(Rectangle())
+        // Red means SolidCraft isn't there: the light is the obvious place to ask for it.
+        .onTapGesture {
+            if project.connection == .offline {
+                Task { await project.openSolidCraft() }
+            }
+        }
         .animation(.snappy, value: project.connection)
         .help(help)
         .accessibilityElement()

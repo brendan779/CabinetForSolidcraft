@@ -151,6 +151,9 @@ pub struct FloatingShelf {
     /// An LED strip under its front edge (24 V, at this power per metre; 0: none).
     #[serde(default)]
     pub light_watts_per_metre: f64,
+    /// The catalog's aluminium profile the strip sits in; empty for a bare strip.
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub light_profile: String,
     /// Catalog board id (a timber), or empty for generic.
     #[serde(default)]
     pub board: String,
@@ -2283,9 +2286,19 @@ fn floating_shelf(f: &FloatingShelf, at: Vec3, wall: f64) -> PartList {
                 f.light_watts_per_metre
             ),
             at: bounds.center(),
-            part: name,
+            part: name.clone(),
             quantity: 1,
         });
+        if let Ok(item) = crate::hardware::item(&f.light_profile) {
+            list.hardware.push(crate::part::HardwarePlacement {
+                item: item.id.clone(),
+                description: format!("{}, cut to {length:.0} mm", item.family),
+                // Near the front edge, lighting what's below.
+                at: Vec3::new(bounds.center().x, bounds.min.y + 40.0, bounds.min.z),
+                part: name,
+                quantity: 1,
+            });
+        }
     }
     list
 }
@@ -3056,6 +3069,7 @@ mod tests {
             thickness: 40.0,
             height: 1500.0,
             light_watts_per_metre: 9.6,
+            light_profile: String::new(),
             board: String::new(),
         });
         let run = Run {

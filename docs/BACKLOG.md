@@ -231,23 +231,23 @@ Not ready for prime time yet: iterate through several design styles and make sur
 
 | ID | Status | Size | Task | Done when |
 |---|---|---|---|---|
-| KICK-2 | todo | L | One toe kick board per run, not one per cabinet: a stretch of base cabinets shares one plinth, split only where it passes the longest sheet, with the join over a leg. Fillers and end panels no longer leave a gap | a 3 m run has one or two boards on the cut list, none per cabinet |
-| RUN-3 | todo | M | Fillers and end panels collide, and nothing joins them: fix the positions and add concealed blocking (owner C21) | they sit side by side and blocking is on the cut list |
-| CLAD-2 | todo | S | A seen end against a return wall still gets its board when chosen: it acts as the spacer (owner C3) | both sides chosen against a wall gives both boards |
-| CLAD-3 | todo | S | A rangehood's seen ends stop a panel short of its front (owner C38) | flush with the canopy front |
-| CLAD-4 | todo | S | Surround boards missing from the board picker (owner C39) | a Surround board can be chosen for a seen end |
-| SPLASH-2 | todo | S | Grout widths of 0.5 and 1 mm (owner C6) | both on the picker |
-| LIFT-2 | todo | M | Lift fronts draw no hardware, in the app or SolidCraft (owner C2): place every family | each lift family shows its mechanism |
-| LIFT-3 | todo | M | SolidCraft loses the left HF arm, and the arm runs through a shelf (owner C2) | both arms arrive; a shelf in an arm's way is handled |
-| SEC-11 | todo | S | SERVO-DRIVE and TIP-ON vanish with shaker fronts (owner C13) | same hardware as a slab |
-| SEC-12 | todo | M | Sharknose doors' usual and bottom edges are wrong (owner C18) | every edge has the right geometry |
-| PULL-1 | todo | M | Edge pull reversed with no ABI choice; finger pull has no gap or notch options (owner C18) | right way round, ABI choice, sizes editable |
-| GRAIN-1 | todo | S | The grain direction setting doesn't change the viewport (owner C20) | the setting visibly turns the grain |
-| STYLE-5 | todo | S | No way to choose an arched door (owner C34) | an arched option in the fronts |
-| STYLE-6 | todo | M | Floating shelf: no material choice, LED draws nothing (owner C35) | both work |
-| HAF-9 | todo | M | Loox5: route for the LED cable from the back; vertical at the rear of wardrobe sides; under a fixed shelf 50 from the rear (owner C7) | all three build |
-| SC-5 | todo | S | The red status button doesn't open SolidCraft (owner C28) | a click opens it with its control port |
-| UI-20 | todo | S | Say how to pan: Shift-drag was trial and error (owner C11) | shown on screen |
+| KICK-2 | done (2026-11-02, legged cabinets; notched sides still have a board per cabinet) | L | One toe kick board per run, not one per cabinet: a stretch of base cabinets shares one plinth, split only where it passes the longest sheet, with the join over a leg. Fillers and end panels no longer leave a gap | a 3 m run has one or two boards on the cut list, none per cabinet |
+| RUN-3 | done (2026-11-02: scribe only at a line's ends; two upright strips behind a filler) | M | Fillers and end panels collide, and nothing joins them: fix the positions and add concealed blocking (owner C21) | they sit side by side and blocking is on the cut list |
+| CLAD-2 | done (2026-11-02) | S | A seen end against a return wall still gets its board when chosen: it acts as the spacer (owner C3) | both sides chosen against a wall gives both boards |
+| CLAD-3 | done (2026-11-02) | S | A rangehood's seen ends stop a panel short of its front (owner C38) | flush with the canopy front |
+| CLAD-4 | done (2026-11-02: the picker offered lining ranges among boards) | S | Surround boards missing from the board picker (owner C39) | a Surround board can be chosen for a seen end |
+| SPLASH-2 | done (2026-11-02) | S | Grout widths of 0.5 and 1 mm (owner C6) | both on the picker |
+| LIFT-2 | part (2026-11-02: HS and HL drilled and drawn, placed from Blum's space drawing, not a measured hole; HK top is limited to KH 600, so a 720 wall cabinet shows a note; HK-XS and HKi still not drawn) | M | Lift fronts draw no hardware, in the app or SolidCraft (owner C2): place every family | each lift family shows its mechanism |
+| LIFT-3 | done (2026-11-02: bi-fold shelves stand 45 back from the front; HS and HL warn) | M | SolidCraft loses the left HF arm, and the arm runs through a shelf (owner C2) | both arms arrive; a shelf in an arm's way is handled |
+| SEC-11 | done (2026-11-02) | S | SERVO-DRIVE and TIP-ON vanish with shaker fronts (owner C13) | same hardware as a slab |
+| SEC-12 | 👤 needs the owner (2026-11-02: nothing wrong found in the code or on screen; a picture of a usual or bottom edge needed) | M | Sharknose doors' usual and bottom edges are wrong (owner C18) | every edge has the right geometry |
+| PULL-1 | part (2026-11-02: finger pull notch and gap settings done; edge pull reversal needs a picture; ABI edge pulls are under Handle range, and the tile now says so) | M | Edge pull reversed with no ABI choice; finger pull has no gap or notch options (owner C18) | right way round, ABI choice, sizes editable |
+| GRAIN-1 | done (2026-11-02: there was no direction setting: Front grain now has Usual, Upright, Across, Continuous) | S | The grain direction setting doesn't change the viewport (owner C20) | the setting visibly turns the grain |
+| STYLE-5 | done (2026-11-02: it existed, labelled Arch: now Arched top, in Fronts under the shelves) | S | No way to choose an arched door (owner C34) | an arched option in the fronts |
+| STYLE-6 | done (2026-11-02: board picker, LED profile; bare strips stay unmodelled) | M | Floating shelf: no material choice, LED draws nothing (owner C35) | both work |
+| HAF-9 | done (2026-11-02: recessed under-panel profile has a hole at its groove end; up the sides and under fixed shelves have a channel to the rear edge) | M | Loox5: route for the LED cable from the back; vertical at the rear of wardrobe sides; under a fixed shelf 50 from the rear (owner C7) | all three build |
+| SC-5 | done (2026-11-02: the light opens it when offline) | S | The red status button doesn't open SolidCraft (owner C28) | a click opens it with its control port |
+| UI-20 | done (2026-11-02) | S | Say how to pan: Shift-drag was trial and error (owner C11) | shown on screen |
 | THEME-1 | later (owner: post 1.0) | M | Copy SolidCraft's themes and offer a theme system (owner C10) | themes switch |
 
 Owner's answers: legs, splashbacks, shelf supports, Clay Dark, sections, sharknose drawers, saving, keys and handles work. Not to be tested for now: box to cabinet, read back, preferences folders, saved standards, accessibility. The machinist will check cut sheets. The owner wouldn't use light rails or cornices.
