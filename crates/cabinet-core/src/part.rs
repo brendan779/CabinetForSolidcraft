@@ -328,6 +328,8 @@ pub enum BorePurpose {
     RunnerScrew,
     /// A pull on the front's edge: its screw, in the back of the front or down into its edge.
     EdgePullScrew,
+    /// A lift mechanism's fixing or peg, in the side.
+    LiftMechanism,
     /// A light's cable, through a panel.
     CableHole,
     /// A handle's or knob's screw hole, through the front from the back.

@@ -14,14 +14,35 @@
         "cabinet_height_max": 600,
         "inside_height_min": 150,
         "inside_depth_min": 163,
-        "handle_weight_factor": 2
+        "handle_weight_factor": 2,
+        "front_hole_below_top": 78,
+        "front_hole_less_gap": 1,
+        "front_hole_pitch": 32,
+        "front_hole_count": 2,
+        "front_hole_inset": 12.5
       },
       "source": {
-        "url": "Blum Catalogue and technical manual 2024/2025, p.57, web code DQDD6M",
+        "url": "Blum Catalogue and technical manual 2024/2025, p.57, web code DQDD6M; peg positions and front assembly p.57, read from its drawings",
         "document_date": "2024/2025",
         "retrieved": "2026-10-26",
         "verified": false
-      }
+      },
+      "drilling": [
+        {
+          "x": 37.0,
+          "y": 74.0,
+          "diameter": 5.0,
+          "depth": 5.0,
+          "note": "x from the cabinet front, y below the top of the opening (its underside of the top panel)"
+        },
+        {
+          "x": 101.0,
+          "y": 74.0,
+          "diameter": 5.0,
+          "depth": 5.0,
+          "note": "x from the cabinet front, y below the top of the opening (its underside of the top panel)"
+        }
+      ]
     },
     {
       "id": "blum.aventos.hk-s.mechanism.20k2b00-06",
@@ -171,14 +192,35 @@
         "hinges_3_from_width": 900,
         "hinges_3_from_power_factor": 1800,
         "hinges_4_from_width": 1200,
-        "hinges_4_from_power_factor": 2700
+        "hinges_4_from_power_factor": 2700,
+        "side_hole_adds_top_thickness": 1,
+        "front_hole_below_top": 125.5,
+        "front_hole_pitch": 32,
+        "front_hole_count": 2,
+        "front_hole_inset": 15.5
       },
       "source": {
-        "url": "Blum Catalogue and technical manual 2024/2025, p.62, web code DQDDVY",
+        "url": "Blum Catalogue and technical manual 2024/2025, p.62, web code DQDDVY; mechanism plate and front assembly p.64, read from its drawings: hole size as Blum's plate drilling; a 100 deep cabinet's other positions are not entered",
         "document_date": "2024/2025",
         "retrieved": "2026-10-26",
         "verified": false
-      }
+      },
+      "drilling": [
+        {
+          "x": 37.0,
+          "y": 137.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "x from the cabinet front, y below the top of the cabinet, plus the top panel's thickness (H = 137 + MD + K + SOB, a 0 plate on a straight arm)"
+        },
+        {
+          "x": 37.0,
+          "y": 169.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "x from the cabinet front, y below the top of the cabinet, plus the top panel's thickness (H = 137 + MD + K + SOB, a 0 plate on a straight arm)"
+        }
+      ]
     },
     {
       "id": "blum.aventos.hk-xs.mechanism.20k1101",

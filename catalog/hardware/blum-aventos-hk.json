@@ -16,14 +16,49 @@
         "cabinet_width_max": 1800,
         "front_weight_max_kg": 18,
         "inside_height_min": 173,
-        "handle_weight_factor": 2
+        "handle_weight_factor": 2,
+        "front_hole_below_top": 62,
+        "front_hole_adds_overlay": 1,
+        "front_hole_pitch": 32,
+        "front_hole_count": 4,
+        "front_hole_inset": 12.5
       },
       "source": {
-        "url": "Blum Catalogue and technical manual 2024/2025, p.46, web code DQHFJY",
+        "url": "Blum Catalogue and technical manual 2024/2025, p.46, web code DQHFJY; mechanism side drilling and front assembly p.48, read from its drawings: the 36's top reference is our reading",
         "document_date": "2024/2025",
         "retrieved": "2026-10-26",
         "verified": false
-      }
+      },
+      "drilling": [
+        {
+          "x": 37.0,
+          "y": 36.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "x from the cabinet front, y below the top of the opening (its underside of the top panel)"
+        },
+        {
+          "x": 69.0,
+          "y": 36.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "x from the cabinet front, y below the top of the opening (its underside of the top panel)"
+        },
+        {
+          "x": 133.0,
+          "y": 36.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "x from the cabinet front, y below the top of the opening (its underside of the top panel)"
+        },
+        {
+          "x": 165.0,
+          "y": 36.0,
+          "diameter": 5.0,
+          "depth": 11.5,
+          "note": "x from the cabinet front, y below the top of the opening (its underside of the top panel)"
+        }
+      ]
     },
     {
       "id": "blum.aventos.hk-top.mechanism.22k2310",

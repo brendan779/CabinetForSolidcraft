@@ -32,7 +32,10 @@
         "hinges_4_from_weight_kg": 20,
         "centre_hinge_boss_overlay": 0,
         "hinge_120_boss_overlay": 11,
-        "hinge_120_special_boss_overlay": 13
+        "hinge_120_special_boss_overlay": 13,
+        "mechanism_hole_below_top_short": 93.5,
+        "mechanism_hole_below_top": 116,
+        "mechanism_short_below_height": 520
       },
       "tables": {
         "mechanism_hole_below_top": {

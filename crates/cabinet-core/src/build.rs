@@ -34,6 +34,9 @@ const MIN_SHOE_ROOM: f64 = 100.0;
 const SHOE_SHELF_SCREW_CLEARANCE: f64 = 4.5;
 const SHOE_SHELF_PILOT: f64 = 3.0;
 const SHOE_SHELF_PILOT_DEPTH: f64 = 25.0;
+/// Our choice: a pilot for the chipboard screws (609.1x00) in a lift bracket.
+const LIFT_BRACKET_PILOT: f64 = 2.5;
+const LIFT_BRACKET_PILOT_DEPTH: f64 = 10.0;
 /// Our choice: a sliding door narrower than this is no use as a door.
 const MIN_SLIDING_DOOR: f64 = 200.0;
 /// Our choice: the least wood in front of a runner's screw.
@@ -3092,6 +3095,122 @@ impl<'a> Builder<'a> {
         if kind == LiftKind::IntegratedStayLift {
             self.hki_recesses();
         }
+        self.lift_drilling(kind, front, &name);
+    }
+
+    /// A stay lift's mechanism: its holes in the sides, and its bracket's pilots in the back of
+    /// the front, from the system's catalog row.
+    fn lift_drilling(&mut self, kind: LiftKind, front: Aabb, name: &str) {
+        let id = match kind {
+            LiftKind::StayLift => "blum.aventos.hk-top",
+            LiftKind::SmallStayLift => "blum.aventos.hk-s",
+            LiftKind::HingedStayLift => "blum.aventos.hk-xs",
+            _ => return,
+        };
+        let Ok(sys) = crate::hardware::item(id) else {
+            return;
+        };
+        let t = self.cab.standard.carcass_thickness;
+        let param = |k: &str| sys.parameters.get(k).copied();
+        // From the opening's top, or the cabinet's plus the top panel's thickness.
+        let top = if param("side_hole_adds_top_thickness").is_some() {
+            self.cab.height - t
+        } else {
+            self.opening_z.1
+        };
+        let bay = self.bay();
+        let holes: Vec<_> = sys
+            .drilling
+            .iter()
+            .map(|h| (h.x, top - h.y, h.diameter, h.depth))
+            .collect();
+        self.side_holes(&bay, &holes);
+        let (Some(below), Some(pitch), Some(count), Some(inset)) = (
+            param("front_hole_below_top"),
+            param("front_hole_pitch"),
+            param("front_hole_count"),
+            param("front_hole_inset"),
+        ) else {
+            return;
+        };
+        let overlay = front.max().z - self.opening_z.1;
+        let gap = self.opening_z.1 + t - front.max().z;
+        let first = below
+            + if param("front_hole_adds_overlay").is_some() {
+                overlay
+            } else if param("front_hole_less_gap").is_some() {
+                -gap
+            } else {
+                0.0
+            };
+        for x in [bay.left + inset, bay.right - inset] {
+            for k in 0..count as usize {
+                self.list.operations.push(Operation::Bore {
+                    part: name.to_string(),
+                    at: Vec3::new(x, front.max().y, front.max().z - first - k as f64 * pitch),
+                    direction: Dir::new(Axis::Y, false),
+                    diameter: LIFT_BRACKET_PILOT,
+                    depth: LIFT_BRACKET_PILOT_DEPTH.min(front.size.y - 3.0),
+                    purpose: BorePurpose::FrontFixing,
+                });
+            }
+        }
+    }
+
+    /// Holes (from the front, height, diameter, depth) in the panels either side of a bay.
+    fn side_holes(&mut self, bay: &Bay, holes: &[(f64, f64, f64, f64)]) {
+        for (part, x, positive) in [
+            (bay.left_panel.clone(), bay.left, false),
+            (bay.right_panel.clone(), bay.right, true),
+        ] {
+            for &(from_front, z, diameter, depth) in holes {
+                self.list.operations.push(Operation::Bore {
+                    part: part.clone(),
+                    at: Vec3::new(x, from_front, z),
+                    direction: Dir::new(Axis::X, positive),
+                    diameter,
+                    depth,
+                    purpose: BorePurpose::LiftMechanism,
+                });
+            }
+        }
+    }
+
+    /// AVENTOS HF's mechanism: four holes in each side, at a height set by the cabinet's.
+    fn hf_drilling(&mut self) {
+        let Ok(sys) = crate::hardware::item("blum.aventos.hf-top") else {
+            return;
+        };
+        let numbers = (|| {
+            let p = |k: &str| sys.param(k);
+            let below = if self.cab.height < p("mechanism_short_below_height")? {
+                p("mechanism_hole_below_top_short")?
+            } else {
+                p("mechanism_hole_below_top")?
+            };
+            Ok::<_, String>((
+                below,
+                p("mechanism_hole_front_setback")?,
+                p("mechanism_hole_pitch_back")?,
+                p("mechanism_hole_pitch_down")?,
+                p("mechanism_hole_diameter")?,
+                p("mechanism_hole_depth_min")?,
+            ))
+        })();
+        let (below, setback, back, down, diameter, depth) = match numbers {
+            Ok(n) => n,
+            Err(e) => {
+                self.list.warnings.push(e);
+                return;
+            }
+        };
+        let z = self.cab.height - below;
+        let holes: Vec<_> = [z, z - down]
+            .into_iter()
+            .flat_map(|z| [setback, setback + back].map(|y| (y, z, diameter, depth)))
+            .collect();
+        let bay = self.bay();
+        self.side_holes(&bay, &holes);
     }
 
     /// AVENTOS HKi's pockets: one in each side's inside face, open at the front edge, below the
@@ -3262,6 +3381,7 @@ impl<'a> Builder<'a> {
                 quantity,
             });
         }
+        self.hf_drilling();
     }
 
     /// The blind panel and filler of a blind corner cabinet, from its blind side; returns the
@@ -6771,6 +6891,111 @@ mod tests {
                 .iter()
                 .any(|w| w.contains("needs a slab front"))
         );
+    }
+
+    fn lift_holes(list: &PartList, part: &str) -> Vec<Vec3> {
+        list.operations
+            .iter()
+            .filter_map(|o| match o {
+                Operation::Bore {
+                    part: p,
+                    at,
+                    purpose: BorePurpose::LiftMechanism,
+                    ..
+                } if p == part => Some(*at),
+                _ => None,
+            })
+            .collect()
+    }
+
+    fn wall_lift(kind: LiftKind) -> Cabinet {
+        let mut cab = Cabinet::new("W01", CabinetKind::Wall);
+        cab.height = 400.0;
+        cab.fronts = FrontLayout::Lift {
+            kind,
+            handle_weight: 0.4,
+        };
+        cab
+    }
+
+    /// Blum's p.48: 37, then 32, 64 and 32 along, 36 under the top panel.
+    #[test]
+    fn an_hk_top_drills_its_mechanism_and_front_brackets() {
+        let list = build_cabinet(&wall_lift(LiftKind::StayLift)).unwrap();
+        assert!(
+            list.warnings.iter().all(|w| !w.contains("no lift")),
+            "{:?}",
+            list.warnings
+        );
+        for side in ["W01.LeftSide", "W01.RightSide"] {
+            let holes = lift_holes(&list, side);
+            let ys: Vec<f64> = holes.iter().map(|h| h.y).collect();
+            assert_eq!(ys, [37.0, 69.0, 133.0, 165.0], "{side}");
+        }
+        let top = list
+            .parts
+            .iter()
+            .filter(|p| matches!(p.role, PartRole::FrontRail | PartRole::Top))
+            .map(|p| p.bounds.min.z)
+            .fold(f64::MAX, f64::min);
+        assert!((lift_holes(&list, "W01.LeftSide")[0].z - (top - 36.0)).abs() < 1e-6);
+        let brackets = list
+            .operations
+            .iter()
+            .filter(|o| {
+                matches!(o, Operation::Bore { part, purpose: BorePurpose::FrontFixing, .. } if part == "W01.LiftFront1")
+            })
+            .count();
+        assert_eq!(brackets, 8, "four each side");
+        assert!(
+            list.warnings.iter().all(|w| !w.contains("clash")),
+            "{:?}",
+            list.warnings
+        );
+    }
+
+    #[test]
+    fn hk_s_and_hk_xs_drill_their_own_patterns() {
+        let s = build_cabinet(&wall_lift(LiftKind::SmallStayLift)).unwrap();
+        let ys: Vec<f64> = lift_holes(&s, "W01.LeftSide").iter().map(|h| h.y).collect();
+        assert_eq!(ys, [37.0, 101.0]);
+        assert!(
+            s.warnings.iter().all(|w| !w.contains("clash")),
+            "{:?}",
+            s.warnings
+        );
+        let xs = build_cabinet(&wall_lift(LiftKind::HingedStayLift)).unwrap();
+        let holes = lift_holes(&xs, "W01.LeftSide");
+        assert_eq!(holes.len(), 2);
+        assert_eq!(holes[0].z - holes[1].z, 32.0, "the plate's holes");
+        assert!(
+            xs.warnings.iter().all(|w| !w.contains("clash")),
+            "{:?}",
+            xs.warnings
+        );
+    }
+
+    /// p.24: a rectangle 128 × 64, 101 from the front, H below the cabinet's top by its height.
+    #[test]
+    fn an_hf_drills_four_holes_each_side_at_the_height_for_its_cabinet() {
+        let mut cab = Cabinet::new("W01", CabinetKind::Wall);
+        cab.fronts = FrontLayout::BiFoldLift { handle_weight: 0.4 };
+        cab.height = 720.0;
+        let list = build_cabinet(&cab).unwrap();
+        let holes = lift_holes(&list, "W01.RightSide");
+        assert_eq!(holes.len(), 4);
+        assert_eq!(holes[0].y, 101.0);
+        assert_eq!(holes[1].y, 229.0);
+        assert_eq!(holes[0].z, 720.0 - 116.0);
+        assert_eq!(holes[2].z, 720.0 - 116.0 - 64.0);
+        assert!(
+            list.warnings.iter().all(|w| !w.contains("clash")),
+            "{:?}",
+            list.warnings
+        );
+        cab.height = 500.0;
+        let short = build_cabinet(&cab).unwrap();
+        assert_eq!(lift_holes(&short, "W01.RightSide")[0].z, 500.0 - 93.5);
     }
 
     #[test]
