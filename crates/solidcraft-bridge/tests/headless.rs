@@ -651,6 +651,54 @@ fn a_drawer_frame_is_cut_out_for_each_drawer() {
     }
 }
 
+/// SolidCraft's own box round each tilted board against the maths that placed it.
+#[test]
+fn a_sloped_shoe_shelf_lands_where_the_maths_puts_it() {
+    let Some(cli) = cli() else {
+        eprintln!("SOLIDCRAFT_CLI not set: skipped");
+        return;
+    };
+    use cabinet_core::model::{FrontLayout, SectionInside};
+    for angle in [5.0, 15.0] {
+        let mut cab = Cabinet::new("R01", CabinetKind::Wardrobe).sectioned();
+        let FrontLayout::Sections { columns } = &mut cab.fronts else {
+            panic!("sections");
+        };
+        columns[0].rows[0].inside = SectionInside::ShoeShelves {
+            count: 3,
+            angle,
+            lip: 30.0,
+        };
+        let list = build_cabinet(&cab).unwrap();
+        assert!(!list.tilts.is_empty());
+        let r = run(
+            &cli,
+            "shoe-rack",
+            &emit_cabinet(&list, Detail::Design, None),
+            &["eval"],
+        );
+        let bodies = r["bodies"].as_array().unwrap();
+        for (name, tilt) in &list.tilts {
+            let part = list.part(name).unwrap();
+            let (lo, hi) = tilt.reach(part.bounds);
+            let body = bodies.iter().find(|b| b["name"] == *name).unwrap();
+            let at = |key: &str, i: usize| body["bbox"][key][i].as_f64().unwrap();
+            for (key, y, z) in [("min", lo.y, lo.z), ("max", hi.y, hi.z)] {
+                assert!(
+                    (at(key, 1) - y).abs() < 0.01,
+                    "{name} {key} y: {} vs {y}",
+                    at(key, 1)
+                );
+                assert!(
+                    (at(key, 2) - z).abs() < 0.01,
+                    "{name} {key} z: {} vs {z}",
+                    at(key, 2)
+                );
+            }
+        }
+    }
+}
+
 #[test]
 fn a_rappanas_rebate_is_cut_in_the_back_of_the_front() {
     let Some(cli) = cli() else {

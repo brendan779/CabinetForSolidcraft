@@ -666,6 +666,11 @@ pub enum SectionFront {
     Niche,
 }
 
+/// Our choice, for the maker to set.
+fn default_toe_lip() -> f64 {
+    30.0
+}
+
 /// Our choice, for the maker to set: no supplier's system is catalogued yet.
 fn default_sliding_overlap() -> f64 {
     30.0
@@ -701,7 +706,16 @@ pub enum SectionInside {
         fixed: Vec<u32>,
     },
     /// Fixed shoe shelves at an even pitch.
-    ShoeShelves { count: u32 },
+    ShoeShelves {
+        count: u32,
+        /// How far each slopes, back up, in degrees: 0 for flat fixed shelves. Shoe racks are
+        /// usually 5 or 15 (owner, 2026-11-02).
+        #[serde(default)]
+        angle: f64,
+        /// How far the toe lip stands above a sloped shelf.
+        #[serde(default = "default_toe_lip")]
+        lip: f64,
+    },
     /// A wardrobe rail under the section's top.
     Hanging,
     /// LEGRABOX inner drawers from the section's floor.

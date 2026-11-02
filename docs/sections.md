@@ -21,7 +21,7 @@ Section
   opening: handles | tip_on | servo_drive     where it differs from the job's
   front: open | door{hinge_side} | door_pair | drawers{count, ratios, system}
          | lift{kind, handle_weight} | bi_fold{handle_weight} | niche
-  inside: empty | shelves{count, fixed} | shoe_shelves{count} | hanging | inner_drawers{count}
+  inside: empty | shelves{count, fixed} | shoe_shelves{count, angle, lip} | hanging | inner_drawers{count}
           | wardrobe
 ```
 
@@ -39,7 +39,8 @@ Section
   to a cabinet; elsewhere it warns and says why.
 - **Inside:**
   - *shelves:* adjustable shelves on pins in the bay's panels, on the 32 mm grid.
-  - *shoe shelves:* fixed shelves at an even pitch.
+  - *shoe shelves:* at an even pitch, flat and fixed, or sloped 5 or 15 degrees in decorative board
+    with a toe lip (`angle`, `lip`). A sloped part is cut flat and turned into place by `PartList.tilts`.
   - *hanging:* a wardrobe rail under the row's top.
   - *inner drawers:* LEGRABOX inner drawers from the row's floor.
   - *wardrobe:* the wardrobe preset's interior.
@@ -106,5 +107,4 @@ a cell to select it, and under the drawing:
 
 - After 1.0: a divider is always full height. A divider inside one row only (a split within a drawer
   section) would be a tree, not columns of rows.
-- Shoe shelves are flat fixed shelves today. The owner wants two types: sloped decorative board with
-  a lip, or flat glass (SEC-2c).
+- After 1.0: glass shelves and racks in bought inserts, and shoe racks on runners.

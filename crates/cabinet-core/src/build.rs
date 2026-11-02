@@ -15,7 +15,7 @@ use crate::model::{
     SectionInside, SectionKind, SharknoseEdge, StackSection, ToeKick, TopJoint, WallHanging,
 };
 use crate::part::{
-    BorePurpose, Dir, EdgeBanding, HardwarePlacement, Operation, Part, PartList, PartRole,
+    BorePurpose, Dir, EdgeBanding, HardwarePlacement, Operation, Part, PartList, PartRole, Tilt,
 };
 use crate::{Error, Result};
 
@@ -26,6 +26,14 @@ const EDGE_PULL_SCREW: f64 = 16.0;
 /// Our choice: the wood left over a screw's tip, and round a screw in an edge.
 const EDGE_PULL_SCREW_COVER: f64 = 1.0;
 const EDGE_PULL_WOOD_BEHIND: f64 = 3.0;
+/// Our choices for a sloped shoe shelf: clear of the back and the floor, room left for a shoe over
+/// it, and its screws.
+const SHOE_SHELF_BACK_GAP: f64 = 2.0;
+const SHOE_SHELF_FLOOR_GAP: f64 = 2.0;
+const MIN_SHOE_ROOM: f64 = 100.0;
+const SHOE_SHELF_SCREW_CLEARANCE: f64 = 4.5;
+const SHOE_SHELF_PILOT: f64 = 3.0;
+const SHOE_SHELF_PILOT_DEPTH: f64 = 25.0;
 /// Our choice: a sliding door narrower than this is no use as a door.
 const MIN_SLIDING_DOOR: f64 = 200.0;
 /// Our choice: the least wood in front of a runner's screw.
@@ -199,6 +207,10 @@ pub fn build_cabinet(cab: &Cabinet) -> Result<PartList> {
     let o = cab.origin + Vec3::new(0.0, frame, 0.0);
     for p in &mut list.parts {
         p.bounds.min = p.bounds.min + o;
+    }
+    for tilt in list.tilts.values_mut() {
+        tilt.pivot_y += o.y;
+        tilt.pivot_z += o.z;
     }
     offset_operations(&mut list, o);
     // Whatever the rules above missed shows to the user rather than at the machine.
@@ -535,6 +547,7 @@ impl<'a> Builder<'a> {
         let s = &self.cab.standard;
         let board = match role {
             _ if role.is_front() => s.front_board.clone(),
+            PartRole::ShoeShelf | PartRole::ShoeLip => s.front_board.clone(),
             PartRole::Back if s.back != BackStyle::Structural => s.back_board.clone(),
             _ => s.carcass_board.clone(),
         };
@@ -1964,7 +1977,15 @@ impl<'a> Builder<'a> {
                 }
                 // Built with the cabinet's shelves: it is the whole cabinet's interior.
                 SectionInside::Wardrobe => {}
-                SectionInside::ShoeShelves { count } => {
+                SectionInside::ShoeShelves { count, angle, lip } if *angle > 0.0 => {
+                    self.sloped_shoe_shelves(
+                        (*count, *angle, *lip),
+                        &bay,
+                        (floor, ceiling),
+                        counts,
+                    );
+                }
+                SectionInside::ShoeShelves { count, .. } => {
                     let n = *count as usize;
                     for k in 1..=n {
                         let z = floor + (ceiling - floor) * (k - 1) as f64 / n as f64;
@@ -2129,6 +2150,112 @@ impl<'a> Builder<'a> {
                     (floor, ceiling),
                 );
             }
+        }
+    }
+
+    /// Sloped shoe shelves of decorative board at an even pitch, each with a toe lip along its low
+    /// front edge, screwed through the panels either side. Each is the flat board as it's cut,
+    /// turned up about the bottom of its front edge.
+    fn sloped_shoe_shelves(
+        &mut self,
+        (count, angle, lip): (u32, f64, f64),
+        bay: &Bay,
+        (floor, ceiling): (f64, f64),
+        counts: &mut SectionCounts,
+    ) {
+        let s = &self.cab.standard;
+        let t = s.front_thickness;
+        let (sin, cos) = angle.to_radians().sin_cos();
+        let y0 = self.shelf_setback() + t;
+        // The back's lower corner reaches furthest: the board's length comes from that.
+        let depth = self.interior_back - SHOE_SHELF_BACK_GAP - y0;
+        let length = depth / cos;
+        let n = count.max(1) as usize;
+        let pitch = (ceiling - floor) / n as f64;
+        // The lip's front corner dips below the pivot as it turns.
+        let dip = t * sin + SHOE_SHELF_FLOOR_GAP;
+        let rise = length * sin + t * cos;
+        if pitch < rise + dip + lip + MIN_SHOE_ROOM {
+            self.list.warnings.push(format!(
+                "{n} shoe shelves at {angle:.0}° leave too little room for shoes: try fewer or a \
+                 shallower slope"
+            ));
+        }
+        let (left, right) = (bay.left_panel.clone(), bay.right_panel.clone());
+        for k in 0..n {
+            let z = floor + k as f64 * pitch + dip;
+            counts.shelves += 1;
+            let tilt = Tilt {
+                degrees: angle,
+                pivot_y: y0,
+                pivot_z: z,
+            };
+            let (bx0, bx1) = (bay.left, bay.right);
+            self.add(
+                PartRole::ShoeShelf,
+                Some(counts.shelves),
+                aabb(bx0, y0, z, bx1, y0 + length, z + t),
+                Axis::Z,
+                Axis::X,
+                EdgeBanding::default(),
+            );
+            let shelf = self.name(PartRole::ShoeShelf, Some(counts.shelves));
+            self.list.tilts.insert(shelf.clone(), tilt);
+            self.add(
+                PartRole::ShoeLip,
+                Some(counts.shelves),
+                aabb(bx0, y0 - t, z, bx1, y0, z + t + lip),
+                Axis::Y,
+                Axis::X,
+                EdgeBanding {
+                    top: true,
+                    ..EdgeBanding::default()
+                },
+            );
+            let toe = self.name(PartRole::ShoeLip, Some(counts.shelves));
+            self.list.tilts.insert(toe, tilt);
+            // Two screws each end, through the panel into the shelf's end grain, where the flat
+            // board's centre line lands once turned.
+            for along in [0.25, 0.75] {
+                let flat_y = y0 + length * along;
+                let flat_z = z + t / 2.0;
+                let world = tilt.apply(Vec3::new(bx0, flat_y, flat_z));
+                let sides = [
+                    (&left, bx0, true, bay.left_divider),
+                    (&right, bx1, false, bay.right_divider),
+                ];
+                for (panel, face, positive, divider) in sides {
+                    let wall = if divider {
+                        self.cab.standard.carcass_thickness
+                    } else {
+                        self.list
+                            .part(panel)
+                            .map_or(self.cab.standard.carcass_thickness, |p| p.thickness())
+                    };
+                    let sign = if positive { -1.0 } else { 1.0 };
+                    self.list.operations.push(Operation::Bore {
+                        part: panel.clone(),
+                        at: Vec3::new(face + sign * wall, world.y, world.z),
+                        direction: Dir::new(Axis::X, positive),
+                        diameter: SHOE_SHELF_SCREW_CLEARANCE,
+                        depth: wall,
+                        purpose: BorePurpose::Screw,
+                    });
+                    self.list.operations.push(Operation::Bore {
+                        part: shelf.clone(),
+                        at: Vec3::new(face, flat_y, flat_z),
+                        direction: Dir::new(Axis::X, positive),
+                        diameter: SHOE_SHELF_PILOT,
+                        depth: SHOE_SHELF_PILOT_DEPTH,
+                        purpose: BorePurpose::ScrewPilot,
+                    });
+                }
+            }
+        }
+        if !self.list.notes.iter().any(|n| n.contains("toe lip")) {
+            self.list
+                .notes
+                .push("Shoe shelves: glue and pin each toe lip to its shelf's front edge".into());
         }
     }
 
@@ -6686,6 +6813,152 @@ mod tests {
         let list = build_cabinet(&cab).unwrap();
         assert!(list.warnings.iter().any(|w| w.contains("box that fits")));
         assert!(list.part("D01.DrawerBottom1").is_some());
+    }
+
+    fn shoe_rack(count: u32, angle: f64, lip: f64) -> Cabinet {
+        let mut cab = Cabinet::new("R01", CabinetKind::Wardrobe).sectioned();
+        let FrontLayout::Sections { columns } = &mut cab.fronts else {
+            panic!("sections");
+        };
+        columns[0].rows[0].inside = SectionInside::ShoeShelves { count, angle, lip };
+        columns[0].rows[0].shelf_above = false;
+        cab
+    }
+
+    #[test]
+    fn a_sloped_shoe_shelf_rises_to_the_back_at_its_angle_and_stays_inside() {
+        for angle in [5.0, 15.0] {
+            let cab = shoe_rack(3, angle, 30.0);
+            let list = build_cabinet(&cab).unwrap();
+            let shelves: Vec<_> = list.by_role(PartRole::ShoeShelf).collect();
+            assert_eq!(shelves.len(), 3);
+            let back = list
+                .by_role(PartRole::Back)
+                .map(|b| b.bounds.min.y)
+                .fold(f64::MAX, f64::min);
+            let bottom = list.part("R01.Bottom").unwrap().bounds.max().z;
+            for shelf in &shelves {
+                let tilt = list.tilts[&shelf.name];
+                assert_eq!(tilt.degrees, angle);
+                let b = shelf.bounds;
+                let low = tilt.apply(b.min);
+                let high = tilt.apply(Vec3::new(b.min.x, b.max().y, b.min.z));
+                let slope = ((high.z - low.z) / (high.y - low.y)).atan().to_degrees();
+                assert!((slope - angle).abs() < 1e-9, "{slope}");
+                let (min, max) = tilt.reach(b);
+                assert!(max.y <= back + 1e-6, "{angle}: {} past {back}", max.y);
+                assert!(min.z >= bottom, "{angle}: {} under the floor", min.z);
+            }
+            assert!(
+                list.warnings.iter().all(|w| !w.contains("clash")),
+                "{:?}",
+                list.warnings
+            );
+        }
+    }
+
+    /// Cut as a flat board: its true length, longer than the depth it spans.
+    #[test]
+    fn a_sloped_shelfs_cut_size_is_its_length_along_the_slope() {
+        let cab = shoe_rack(2, 15.0, 30.0);
+        let list = build_cabinet(&cab).unwrap();
+        let shelf = list.by_role(PartRole::ShoeShelf).next().unwrap();
+        let tilt = list.tilts[&shelf.name];
+        let spans = tilt.apply(shelf.bounds.max()).y - tilt.apply(shelf.bounds.min).y;
+        assert!(shelf.bounds.size.y > spans);
+        assert_eq!(shelf.bounds.size.z, cab.standard.front_thickness);
+        assert_eq!(shelf.board, cab.standard.front_board, "decorative board");
+    }
+
+    #[test]
+    fn each_sloped_shelf_has_a_toe_lip_on_its_low_edge_turned_with_it() {
+        let cab = shoe_rack(3, 15.0, 40.0);
+        let list = build_cabinet(&cab).unwrap();
+        let shelves: Vec<_> = list.by_role(PartRole::ShoeShelf).collect();
+        let lips: Vec<_> = list.by_role(PartRole::ShoeLip).collect();
+        assert_eq!(lips.len(), shelves.len());
+        for (shelf, lip) in shelves.iter().zip(&lips) {
+            assert_eq!(list.tilts[&lip.name], list.tilts[&shelf.name]);
+            assert_eq!(lip.bounds.max().y, shelf.bounds.min.y, "on its front edge");
+            assert_eq!(
+                lip.bounds.max().z,
+                shelf.bounds.max().z + 40.0,
+                "standing 40 above it"
+            );
+            assert_eq!(lip.bounds.size.x, shelf.bounds.size.x);
+        }
+    }
+
+    #[test]
+    fn sloped_shelves_are_screwed_through_the_sides_where_the_slope_lands() {
+        let cab = shoe_rack(2, 15.0, 30.0);
+        let list = build_cabinet(&cab).unwrap();
+        let shelf = list.by_role(PartRole::ShoeShelf).next().unwrap();
+        let tilt = list.tilts[&shelf.name];
+        let pilots: Vec<Vec3> = list
+            .operations
+            .iter()
+            .filter_map(|o| match o {
+                Operation::Bore {
+                    part,
+                    at,
+                    purpose: BorePurpose::ScrewPilot,
+                    ..
+                } if *part == shelf.name => Some(*at),
+                _ => None,
+            })
+            .collect();
+        assert_eq!(pilots.len(), 4);
+        let side: Vec<Vec3> = list
+            .operations
+            .iter()
+            .filter_map(|o| match o {
+                Operation::Bore {
+                    part,
+                    at,
+                    purpose: BorePurpose::Screw,
+                    ..
+                } if part == "R01.LeftSide" => Some(*at),
+                _ => None,
+            })
+            .collect();
+        for pilot in pilots.iter().filter(|p| p.x < 100.0) {
+            let w = tilt.apply(*pilot);
+            assert!(
+                side.iter()
+                    .any(|s| (s.y - w.y).abs() < 1e-6 && (s.z - w.z).abs() < 1e-6),
+                "a hole in the side for the pilot at {w:?}"
+            );
+        }
+    }
+
+    #[test]
+    fn too_many_steep_shelves_warn_about_the_room_for_shoes() {
+        let cab = shoe_rack(12, 15.0, 30.0);
+        let list = build_cabinet(&cab).unwrap();
+        assert!(list.warnings.iter().any(|w| w.contains("room for shoes")));
+    }
+
+    #[test]
+    fn a_flat_shoe_shelf_stays_a_fixed_shelf() {
+        let cab = shoe_rack(3, 0.0, 30.0);
+        let list = build_cabinet(&cab).unwrap();
+        assert_eq!(list.by_role(PartRole::ShoeShelf).count(), 0);
+        assert!(list.tilts.is_empty());
+    }
+
+    #[test]
+    fn a_saved_job_with_flat_shoe_shelves_still_loads() {
+        let inside: SectionInside =
+            serde_json::from_str(r#"{"type":"shoe_shelves","count":2}"#).unwrap();
+        assert_eq!(
+            inside,
+            SectionInside::ShoeShelves {
+                count: 2,
+                angle: 0.0,
+                lip: 30.0
+            }
+        );
     }
 
     fn sliding_wardrobe(count: u32, overlap: f64) -> Cabinet {

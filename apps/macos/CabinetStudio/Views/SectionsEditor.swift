@@ -177,6 +177,24 @@ struct SectionsEditor: View {
                 }
             }
 
+            if cell.inside == "shoe_shelves" {
+                ChipRow("Slope") {
+                    ForEach([0.0, 5, 15], id: \.self) { a in
+                        Button(a == 0 ? "Flat" : "\(Int(a))°") { editCell(c, r) { $0.shoeAngle = a } }
+                            .buttonStyle(ChipStyle(selected: cell.shoeAngle == a))
+                    }
+                }
+                if cell.shoeAngle > 0 {
+                    ChipRow("Toe lip") {
+                        ForEach([20.0, 30, 40, 50], id: \.self) { l in
+                            Button("\(Int(l))") { editCell(c, r) { $0.shoeLip = l } }
+                                .buttonStyle(ChipStyle(selected: cell.shoeLip == l))
+                        }
+                    }
+                    .help("How far the lip stands above the shelf, to stop the toes sliding off")
+                }
+            }
+
             ChipRow(cell.front == "niche" ? "Clear height" : "Height") {
                 ForEach([0.0, 150, 300, 450, 600, 900], id: \.self) { h in
                     Button(h == 0 ? "Auto" : "\(Int(h))") { editCell(c, r) { $0.height = h } }

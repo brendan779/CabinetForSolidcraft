@@ -32,6 +32,7 @@ fn round(v: f64) -> f64 {
 fn colour(role: PartRole) -> &'static str {
     match role {
         _ if role.is_front() => "#c9a77c",
+        PartRole::ShoeShelf | PartRole::ShoeLip => "#c9a77c",
         PartRole::Back => "#b9b4aa",
         _ => "#ece9e2",
     }
@@ -169,6 +170,24 @@ pub fn emit_cabinet_with(
         cmds.extend(hardware.iter().flat_map(stand_in));
         (biscuits, hardware)
     };
+    // A board at an angle is cut flat, so it turns last. `solid.move` turns about a line through
+    // the origin: over there, round, and back.
+    for (name, tilt) in &list.tilts {
+        let to_origin = [0.0, -tilt.pivot_y, -tilt.pivot_z];
+        let back = [0.0, tilt.pivot_y, tilt.pivot_z];
+        cmds.push(json!({
+            "command": "solid.move",
+            "params": { "bodies": [name], "translate": to_origin }
+        }));
+        cmds.push(json!({
+            "command": "solid.move",
+            "params": { "bodies": [name], "axis": [1.0, 0.0, 0.0], "angle": format!("{} deg", tilt.degrees) }
+        }));
+        cmds.push(json!({
+            "command": "solid.move",
+            "params": { "bodies": [name], "translate": back }
+        }));
+    }
     // One appearance command per colour keeps the batch short.
     let mut by_colour: Vec<(&str, Vec<&str>)> = Vec::new();
     for p in &list.parts {

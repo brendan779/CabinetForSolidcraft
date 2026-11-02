@@ -739,10 +739,11 @@ final class ViewportScene {
         point(p.x + p.width / 2, p.y + p.depth / 2, p.z + p.height / 2)
     }
 
-    /// A door (and each piece of a shaker door) turns about the door's hinge line; everything else
-    /// about its middle.
+    /// A door (and each piece of a shaker door) turns about the door's hinge line, a sloped board
+    /// about the line it's tilted on; everything else about its middle.
     private static func pivot(_ p: PanelBox) -> SIMD3<Float> {
-        p.hinged.isEmpty ? mid(p) : point(p.hingeX, p.hingeY, p.z + p.height / 2)
+        if p.tilt.count == 3 { return point(p.x + p.width / 2, p.tilt[1], p.tilt[2]) }
+        return p.hinged.isEmpty ? mid(p) : point(p.hingeX, p.hingeY, p.z + p.height / 2)
     }
 
     private static func centre(of panels: [PanelBox]) -> SIMD3<Float> {
@@ -831,6 +832,7 @@ final class ViewportScene {
 
     private static func transform(_ p: PanelBox, centre: SIMD3<Float>, look: ViewportLook) -> Transform {
         var t = Transform(translation: pivot(p))
+        if p.tilt.count == 3 { t.rotation = simd_quatf(angle: Float(p.tilt[0]) * .pi / 180, axis: [1, 0, 0]) }
         // Exploded: away from the cabinet's centre, as far as 250 mm.
         let away = mid(p) - centre
         let len = simd_length(away)

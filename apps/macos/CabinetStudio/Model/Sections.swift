@@ -20,6 +20,9 @@ struct SectionCell: Equatable {
     /// empty, shelves, shoe_shelves, hanging, inner_drawers, wardrobe.
     var inside = "empty"
     var insideCount = 2
+    /// Shoe shelves: how far they slope (0 flat, 5 or 15 degrees), and the toe lip's height.
+    var shoeAngle = 15.0
+    var shoeLip = 30.0
     /// Which adjustable shelves are fixed instead (from 1), kept from older jobs.
     var fixed: [Int] = []
     /// A fixed shelf between this section and the one above.
@@ -72,6 +75,9 @@ struct SectionCell: Equatable {
         let i = json["inside"] as? [String: Any] ?? [:]
         inside = i["type"] as? String ?? "empty"
         insideCount = (i["count"] as? NSNumber)?.intValue ?? 2
+        // A job saved before slopes existed has flat ones.
+        shoeAngle = (i["angle"] as? NSNumber)?.doubleValue ?? (inside == "shoe_shelves" ? 0 : 15)
+        shoeLip = (i["lip"] as? NSNumber)?.doubleValue ?? 30
         fixed = (i["fixed"] as? [NSNumber])?.map(\.intValue) ?? []
         // The core's rule for jobs saved before the choice existed.
         shelfAbove = (json["shelf_above"] as? Bool) ?? true
@@ -99,6 +105,10 @@ struct SectionCell: Equatable {
         var i: [String: Any] = ["type": inside]
         if ["shelves", "shoe_shelves", "inner_drawers"].contains(inside) { i["count"] = insideCount }
         if inside == "shelves", !fixed.isEmpty { i["fixed"] = fixed }
+        if inside == "shoe_shelves" {
+            i["angle"] = shoeAngle
+            i["lip"] = shoeLip
+        }
         var out: [String: Any] = ["height": height, "front": f, "inside": i, "shelf_above": shelfAbove]
         if let opening { out["opening"] = opening }
         return out
@@ -113,7 +123,7 @@ struct SectionCell: Equatable {
     /// is the whole cabinet's.
     func insideOptions(wardrobe: Bool) -> [(id: String, title: String)] {
         if front == "drawers" || front == "niche" { return [("empty", "Empty")] }
-        var all = [("empty", "Empty"), ("shelves", "Adjustable"), ("shoe_shelves", "Fixed"),
+        var all = [("empty", "Empty"), ("shelves", "Adjustable"), ("shoe_shelves", "Shoes"),
                    ("hanging", "Hanging"), ("inner_drawers", "Inner drawers")]
         if wardrobe { all.append(("wardrobe", "Wardrobe")) }
         return all

@@ -66,6 +66,8 @@ pub struct PanelBox {
     pub bevel: Vec<f64>,
     /// Openings right through it, four numbers each: min x, min z, max x, max z (a drawer frame's).
     pub openings: Vec<f64>,
+    /// Standing at an angle: degrees, and the Y and Z of the line across it that it turns about.
+    pub tilt: Vec<f64>,
     /// A supplier handle model to draw in place of this panel's box (ABI-3): the article naming
     /// `vendor-cad/abi/<article>.stl`. Empty for every other panel; the box draws then.
     pub mesh: String,
@@ -790,6 +792,11 @@ fn summary(list: PartList) -> BuildSummary {
                 } else {
                     Vec::new()
                 },
+                tilt: list
+                    .tilts
+                    .get(&p.name)
+                    .map(|t| vec![t.degrees, t.pivot_y, t.pivot_z])
+                    .unwrap_or_default(),
                 mesh: String::new(),
                 mesh_transform: Vec::new(),
             }
@@ -942,6 +949,7 @@ fn summary(list: PartList) -> BuildSummary {
             rebate: Vec::new(),
             bevel: Vec::new(),
             openings: Vec::new(),
+            tilt: Vec::new(),
             mesh,
             mesh_transform,
         });
@@ -992,6 +1000,7 @@ fn summary(list: PartList) -> BuildSummary {
             rebate: Vec::new(),
             bevel: Vec::new(),
             openings: Vec::new(),
+            tilt: Vec::new(),
             mesh: c.article.clone(),
             mesh_transform: cabinet_core::cad::transform(c, false, 0.0).to_vec(),
         });
@@ -1047,6 +1056,7 @@ fn summary(list: PartList) -> BuildSummary {
             rebate: Vec::new(),
             bevel: Vec::new(),
             openings: Vec::new(),
+            tilt: Vec::new(),
             mesh: String::new(),
             mesh_transform: Vec::new(),
         });

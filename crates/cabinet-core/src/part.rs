@@ -54,6 +54,10 @@ pub enum PartRole {
     DrawerFrame,
     /// A strip behind a sharknose door's bevelled edge, closing the view inside.
     GripRail,
+    /// A sloped shoe shelf, of decorative board.
+    ShoeShelf,
+    /// The strip along a sloped shoe shelf's low edge that stops the toes sliding off.
+    ShoeLip,
     /// A rangehood canopy's fixed front.
     CanopyFront,
     /// A cornice board over wall-height cabinets, and its returns.
@@ -93,6 +97,8 @@ impl PartRole {
             PartRole::Cladding => "Cladding",
             PartRole::DrawerFrame => "Drawer frame",
             PartRole::GripRail => "Sharknose rail",
+            PartRole::ShoeShelf => "Shoe shelf",
+            PartRole::ShoeLip => "Toe lip",
             PartRole::CanopyFront => "Canopy front",
             PartRole::Cornice => "Cornice",
             PartRole::LightRail => "Light rail",
@@ -131,6 +137,8 @@ impl PartRole {
             PartRole::Cladding => "Clad",
             PartRole::DrawerFrame => "DrawerFrame",
             PartRole::GripRail => "GripRail",
+            PartRole::ShoeShelf => "ShoeShelf",
+            PartRole::ShoeLip => "ToeLip",
             PartRole::CanopyFront => "CanopyFront",
             PartRole::Cornice => "Cornice",
             PartRole::LightRail => "LightRail",
@@ -380,6 +388,49 @@ pub struct PartList {
     /// A sectioned cabinet's fronts' zone (width, height), for moving its splits. Not a result.
     #[serde(skip)]
     pub section_zone: Option<(f64, f64)>,
+    /// Parts standing at an angle, by name. Their `bounds` and operations stay the flat board, as
+    /// it is cut; this turns it into place.
+    #[serde(default, skip_serializing_if = "std::collections::BTreeMap::is_empty")]
+    pub tilts: std::collections::BTreeMap<String, Tilt>,
+}
+
+/// A turn about a line across the cabinet (along X): the back of the board rises by `degrees`.
+#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
+pub struct Tilt {
+    pub degrees: f64,
+    pub pivot_y: f64,
+    pub pivot_z: f64,
+}
+
+impl Tilt {
+    /// Where a point of the flat board ends up.
+    pub fn apply(&self, p: Vec3) -> Vec3 {
+        let (sin, cos) = self.degrees.to_radians().sin_cos();
+        let (y, z) = (p.y - self.pivot_y, p.z - self.pivot_z);
+        Vec3::new(
+            p.x,
+            self.pivot_y + y * cos - z * sin,
+            self.pivot_z + y * sin + z * cos,
+        )
+    }
+
+    /// The box round a flat board once turned: (lowest and furthest forward, highest and
+    /// furthest back).
+    pub fn reach(&self, b: Aabb) -> (Vec3, Vec3) {
+        let (lo, hi) = (b.min, b.max());
+        let mut min = Vec3::new(lo.x, f64::MAX, f64::MAX);
+        let mut max = Vec3::new(hi.x, f64::MIN, f64::MIN);
+        for y in [lo.y, hi.y] {
+            for z in [lo.z, hi.z] {
+                let q = self.apply(Vec3::new(lo.x, y, z));
+                min.y = min.y.min(q.y);
+                min.z = min.z.min(q.z);
+                max.y = max.y.max(q.y);
+                max.z = max.z.max(q.z);
+            }
+        }
+        (min, max)
+    }
 }
 
 impl PartList {
