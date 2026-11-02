@@ -174,14 +174,15 @@ impl Default for Insert {
     }
 }
 
-/// Which faces are clad, and in what.
+/// The back board, and the board chosen for seen faces. `left` and `right` are how older jobs
+/// marked a seen side (see `Cabinet::seen_left`).
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(default)]
 pub struct Cladding {
     pub left: bool,
     pub right: bool,
     pub back: bool,
-    /// Catalog lining board id, or empty for generic.
+    /// Catalog board id, or empty for the fronts' board.
     pub board: String,
     pub thickness: f64,
 }
@@ -201,7 +202,29 @@ impl Default for Cladding {
 
 impl Cladding {
     pub fn is_none(&self) -> bool {
-        !(self.left || self.right || self.back)
+        !(self.left || self.right || self.back) && self.board.is_empty()
+    }
+}
+
+impl Cabinet {
+    /// Whether a side is seen from the room. Jobs saved when cladding was a separate choice set
+    /// it there; both mean the same now.
+    pub fn seen_left(&self) -> bool {
+        self.exposed.left || self.cladding.left
+    }
+
+    pub fn seen_right(&self) -> bool {
+        self.exposed.right || self.cladding.right
+    }
+
+    /// The finished board on a seen side: the fronts' thickness, unless another board was chosen
+    /// for it (or an old job clad that side at its own thickness).
+    pub fn seen_board_thickness(&self) -> f64 {
+        if self.cladding.board.is_empty() && !self.cladding.left && !self.cladding.right {
+            self.standard.front_thickness
+        } else {
+            self.cladding.thickness
+        }
     }
 }
 

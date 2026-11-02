@@ -622,8 +622,8 @@ impl<'a> Builder<'a> {
         let limit = (along == Axis::Y).then_some((f64::NEG_INFINITY, self.interior_back));
         // Through an exposed side, screws would show from the room.
         let hidden = match face.role {
-            PartRole::LeftSide => self.cab.exposed.left,
-            PartRole::RightSide => self.cab.exposed.right,
+            PartRole::LeftSide => self.cab.seen_left(),
+            PartRole::RightSide => self.cab.seen_right(),
             _ => false,
         };
         let joint = ButtJoint {
@@ -5057,15 +5057,14 @@ impl<'a> Builder<'a> {
         ));
     }
 
-    /// Lining boards on the clad faces, standing proud of the carcass: the ends from the door
-    /// faces to the back (and over the back's cladding), the back across the width; floor to top
-    /// with the grain (the flutes) upright. Glued and pinned on site: no machining.
+    /// Finished boards on the faces seen from the room, standing proud of the carcass: the ends
+    /// from the front's face to the back (and over a back board), the back across the width; floor
+    /// to top with the grain (any flutes) upright. Glued and pinned on site: no machining.
     fn cladding(&mut self) {
         let cab = self.cab;
         let c = &cab.cladding;
         let (w, d, h) = (cab.width, cab.depth, cab.height);
         let ct = c.thickness;
-        let ft = cab.standard.front_thickness;
         // Where the fronts really stand: an inset one is back in the carcass, and a drawer frame
         // moves the whole build back by its thickness afterwards. No fronts: the carcass's edge.
         let face = self
@@ -5081,45 +5080,40 @@ impl<'a> Builder<'a> {
             .map(|p| p.bounds.min.y)
             .fold(f64::MAX, f64::min);
         let face = if face == f64::MAX { 0.0 } else { face };
-        // A seen end's finished board, from the front's face to the back. Lining takes its place.
-        for (seen, lined, side, x0) in [
-            (cab.exposed.left, c.left, "Left", -ft),
-            (cab.exposed.right, c.right, "Right", w),
-        ] {
-            if seen && !lined {
-                self.list.parts.push(Part {
-                    name: format!("{}.SeenEnd{side}", cab.id),
-                    role: PartRole::Cladding,
-                    bounds: aabb(x0, face, 0.0, x0 + ft, d, h),
-                    thickness_axis: Axis::X,
-                    grain_axis: Some(Axis::Z),
-                    board: cab.standard.front_board.clone(),
-                    edges: EdgeBanding::default(),
-                });
-            }
-        }
-        if c.is_none() {
-            return;
-        }
+        // A seen side's finished board, from the front's face to the back (and over a back board).
         let back_t = if c.back { ct } else { 0.0 };
+        let st = cab.seen_board_thickness();
+        let board = if c.board.is_empty() {
+            cab.standard.front_board.clone()
+        } else {
+            c.board.clone()
+        };
         let mut pieces = Vec::new();
-        if c.left {
-            pieces.push(("Left", aabb(-ct, face, 0.0, 0.0, d + back_t, h), Axis::X));
+        if cab.seen_left() {
+            pieces.push((
+                "SeenEndLeft",
+                aabb(-st, face, 0.0, 0.0, d + back_t, h),
+                Axis::X,
+            ));
         }
-        if c.right {
-            pieces.push(("Right", aabb(w, face, 0.0, w + ct, d + back_t, h), Axis::X));
+        if cab.seen_right() {
+            pieces.push((
+                "SeenEndRight",
+                aabb(w, face, 0.0, w + st, d + back_t, h),
+                Axis::X,
+            ));
         }
         if c.back {
-            pieces.push(("Back", aabb(0.0, d, 0.0, w, d + ct, h), Axis::Y));
+            pieces.push(("SeenBack", aabb(0.0, d, 0.0, w, d + ct, h), Axis::Y));
         }
-        for (side, bounds, axis) in pieces {
+        for (name, bounds, axis) in pieces {
             self.list.parts.push(Part {
-                name: format!("{}.{}{side}", cab.id, PartRole::Cladding.code()),
+                name: format!("{}.{name}", cab.id),
                 role: PartRole::Cladding,
                 bounds,
                 thickness_axis: axis,
                 grain_axis: Some(Axis::Z),
-                board: c.board.clone(),
+                board: board.clone(),
                 edges: EdgeBanding::default(),
             });
         }
@@ -9576,6 +9570,49 @@ mod tests {
         );
     }
 
+    /// A job saved when cladding was its own choice opens as seen ends, with its board and
+    /// thickness, so neither the fronts' alignment nor the screws depend on how the side was set.
+    #[test]
+    fn a_side_clad_in_an_old_job_behaves_as_a_seen_end() {
+        let mut old = Cabinet::new("B01", CabinetKind::Base);
+        old.cladding.left = true;
+        old.cladding.thickness = 12.0;
+        old.cladding.board = "lining".into();
+        let list = build_cabinet(&old).unwrap();
+        let board = list.part("B01.SeenEndLeft").unwrap();
+        assert_eq!((board.bounds.min.x, board.bounds.max().x), (-12.0, 0.0));
+        assert_eq!(board.board, "lining");
+        assert!(!list.operations.iter().any(|o| matches!(
+            o,
+            Operation::Bore { part, purpose: BorePurpose::Screw, .. } if part == "B01.LeftSide"
+        )));
+
+        let mut new = Cabinet::new("B01", CabinetKind::Base);
+        new.exposed.left = true;
+        let list = build_cabinet(&new).unwrap();
+        let board = list.part("B01.SeenEndLeft").unwrap();
+        assert_eq!(
+            (board.bounds.min.x, board.board.as_str()),
+            (
+                -new.standard.front_thickness,
+                new.standard.front_board.as_str()
+            )
+        );
+    }
+
+    #[test]
+    fn a_back_board_does_not_change_the_thickness_of_the_seen_ends() {
+        let mut cab = Cabinet::new("B01", CabinetKind::Base);
+        cab.exposed.left = true;
+        cab.cladding.back = true;
+        let list = build_cabinet(&cab).unwrap();
+        let end = list.part("B01.SeenEndLeft").unwrap().bounds;
+        let back = list.part("B01.SeenBack").unwrap().bounds;
+        assert_eq!(end.min.x, -cab.standard.front_thickness);
+        assert_eq!(back.max().y - back.min.y, cab.cladding.thickness);
+        assert_eq!(end.max().y, back.max().y, "the end covers the back's edge");
+    }
+
     /// SURR-2: an island cabinet clad on its back and ends: the ends run from the door faces
     /// over the back cladding's edges, floor to top, flutes upright; nothing overlaps the carcass.
     #[test]
@@ -9590,9 +9627,9 @@ mod tests {
         let list = build_cabinet(&cab).unwrap();
         let get = |n: &str| list.part(n).unwrap_or_else(|| panic!("{n}")).bounds;
         let (l, r, b) = (
-            get("B01.CladLeft"),
-            get("B01.CladRight"),
-            get("B01.CladBack"),
+            get("B01.SeenEndLeft"),
+            get("B01.SeenEndRight"),
+            get("B01.SeenBack"),
         );
         assert_eq!((l.max().x, r.min.x, b.min.y), (0.0, 600.0, 580.0));
         assert_eq!(
@@ -9643,7 +9680,7 @@ mod tests {
             "H01.Top",
             "H01.Bottom",
             "H01.CanopyFront",
-            "H01.CladLeft",
+            "H01.SeenEndLeft",
         ] {
             assert!(list.part(n).is_some(), "{n}");
         }

@@ -19,7 +19,7 @@
 use serde::{Deserialize, Serialize};
 
 use crate::geom::Vec3;
-use crate::part::{PartList, PartRole};
+use crate::part::{BorePurpose, Operation, PartList, PartRole};
 
 /// The cabinet front edge in Blum's CAD frame (Z), measured from CLIP top 110° 71B3550: its cup
 /// mouth (the door's back face, which a full overlay door closes onto the front edge) is at
@@ -263,6 +263,43 @@ pub fn cad_placements(list: &PartList) -> Vec<CadPlacement> {
                         Frame::Oriented { x: along, y: into },
                     ));
                 }
+            }
+        } else if h.item == crate::build::SHELF_SUPPORT {
+            // One row of the hardware list stands for all the shelf's supports: the holes it
+            // rests on say where they are. 282.12.405's pin runs down -X from the origin, on the
+            // hole's centre, and its seat is a pin's radius above (as the build's shelf is).
+            let Some(shelf) = list.part(&h.part).map(|p| p.bounds) else {
+                continue;
+            };
+            let hole_z = shelf.min.z - 2.5;
+            for op in &list.operations {
+                let Operation::Bore {
+                    at,
+                    purpose: BorePurpose::ShelfPin,
+                    ..
+                } = op
+                else {
+                    continue;
+                };
+                if (at.z - hole_z).abs() > 1e-6 {
+                    continue;
+                }
+                let (x, y) = if (at.x - shelf.min.x).abs() < 2.0 {
+                    (Vec3::new(1.0, 0.0, 0.0), Vec3::new(0.0, 1.0, 0.0))
+                } else if (at.x - shelf.max().x).abs() < 2.0 {
+                    (Vec3::new(-1.0, 0.0, 0.0), Vec3::new(0.0, -1.0, 0.0))
+                } else {
+                    continue;
+                };
+                let n = next("ShelfSupport");
+                out.push(CadPlacement {
+                    name: format!("{}.ShelfSupport{n}", list.cabinet),
+                    item: h.item.clone(),
+                    article: item.article.clone(),
+                    side: side_of(at.x),
+                    origin: *at,
+                    frame: Frame::Oriented { x, y },
+                });
             }
         } else if h.item.starts_with("hafele.axilo.set.") {
             // Both pieces under the leg's name, so they replace its stand-in together.
@@ -648,6 +685,43 @@ mod tests {
         assert_eq!(plate.origin.z, bottom - 25.6);
         let m = transform(tube, true, BLUM_FRONT_PLANE);
         assert_eq!(apply(&m, Vec3::new(0.0, 0.0, -150.0)).z, 0.0);
+    }
+
+    #[test]
+    fn shelf_supports_stand_on_the_shelfs_own_holes_with_their_pins_in_the_side() {
+        let mut cab = Cabinet::new("B01", CabinetKind::Base);
+        cab.adjustable_shelves = 2;
+        let list = build_cabinet(&cab).unwrap();
+        let supports: Vec<_> = cad_placements(&list)
+            .into_iter()
+            .filter(|c| c.name.contains("ShelfSupport"))
+            .collect();
+        assert_eq!(supports.len(), 8, "four under each of the two shelves");
+        for c in &supports {
+            assert_eq!(c.article, "282.12.405");
+            let m = transform(c, true, BLUM_FRONT_PLANE);
+            let tip = apply(&m, Vec3::new(-7.4, 0.0, 0.0));
+            let seat = apply(&m, Vec3::new(5.0, 0.0, 2.5));
+            assert_eq!(seat.z - tip.z, 2.5, "upright on both sides");
+            let inner = list
+                .by_role(if tip.x < cab.width / 2.0 {
+                    PartRole::LeftSide
+                } else {
+                    PartRole::RightSide
+                })
+                .next()
+                .unwrap()
+                .bounds;
+            assert!(
+                tip.x > inner.min.x && tip.x < inner.max().x,
+                "pin in the side"
+            );
+            assert!(
+                list.by_role(PartRole::Shelf)
+                    .any(|s| (s.bounds.min.z - seat.z).abs() < 1e-6),
+                "a shelf rests on the seat"
+            );
+        }
     }
 
     /// WF-7: a handle model sits between its screw holes on the front's face: a door's bar

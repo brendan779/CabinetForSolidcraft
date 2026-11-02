@@ -50,7 +50,7 @@ pub enum PartRole {
     Benchtop,
     /// A slab splashback standing on a benchtop piece.
     Splashback,
-    /// A lining board on a face seen from the room: `CladLeft`, `CladRight`, `CladBack`.
+    /// A finished board on a face seen from the room: `SeenEndLeft`, `SeenEndRight`, `SeenBack`.
     Cladding,
     /// One board on the carcass's front, behind the drawer fronts, with an opening for each.
     DrawerFrame,

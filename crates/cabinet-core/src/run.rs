@@ -1022,14 +1022,10 @@ fn lay(run: &Run, start: f64, stop: usize) -> Vec<Laid> {
         };
         let (board_left, board_right) = match &run.items[i] {
             RunItem::Cabinet(c) => {
-                let t = c.standard.front_thickness;
+                let t = c.seen_board_thickness();
                 let takes = !matches!(c.kind, CabinetKind::CornerBase | CabinetKind::CornerWall);
-                let left = takes && c.exposed.left && !c.cladding.left && !against_left(run, i);
-                let right = takes
-                    && i != stop
-                    && c.exposed.right
-                    && !c.cladding.right
-                    && !against_right(run, i);
+                let left = takes && c.seen_left() && !against_left(run, i);
+                let right = takes && i != stop && c.seen_right() && !against_right(run, i);
                 (if left { t } else { 0.0 }, if right { t } else { 0.0 })
             }
             _ => (0.0, 0.0),
@@ -1140,9 +1136,11 @@ fn run_length(run: &Run) -> f64 {
 fn walled(mut c: Cabinet, run: &Run, i: usize) -> Cabinet {
     if against_left(run, i) {
         c.exposed.left = false;
+        c.cladding.left = false;
     }
     if against_right(run, i) {
         c.exposed.right = false;
+        c.cladding.right = false;
     }
     c
 }
@@ -3336,5 +3334,69 @@ mod tests {
         let lists = build_run(&run).unwrap();
         assert_eq!(lists.len(), 1);
         assert!(lists[0].parts.is_empty());
+    }
+
+    /// Cladding used to leave no room in the run, so the next cabinet stood inside it.
+    #[test]
+    fn a_side_clad_in_an_old_job_gets_room_in_the_run_like_any_seen_end() {
+        let mut c = Cabinet::new("B1", CabinetKind::Base);
+        c.cladding.right = true;
+        c.cladding.thickness = 12.0;
+        let width = c.width;
+        let run = line_up(vec![
+            RunItem::Cabinet(Box::new(c)),
+            cab("B2", CabinetKind::Base),
+        ]);
+        assert_eq!(origin_of(&run, 1).x, width + 12.0);
+        let lists = build_run(&run).unwrap();
+        let board = lists[0].part("B1.SeenEndRight").unwrap();
+        assert_eq!(board.bounds.min.x, width);
+        assert!(board.bounds.max().x <= origin_of(&run, 1).x);
+    }
+
+    #[test]
+    fn a_seen_side_against_a_return_wall_takes_no_board_whichever_way_it_was_set() {
+        let mut c = Cabinet::new("B1", CabinetKind::Base);
+        c.cladding.left = true;
+        let run = walled_run(true, false, 0.0, vec![RunItem::Cabinet(Box::new(c))]);
+        let lists = build_run(&run).unwrap();
+        assert!(lists[0].part("B1.SeenEndLeft").is_none());
+    }
+
+    /// The problems cladding had were each fixed once: with a drawer frame, the board reached only
+    /// the carcass; a corner kept a gap for a board it never built. Seen ends must hold on both.
+    #[test]
+    fn a_seen_end_in_a_run_meets_a_framed_front_and_a_corner_keeps_no_gap() {
+        let mut framed = Cabinet::new("B1", CabinetKind::DrawerBank);
+        framed.standard.drawer_frame = crate::model::DrawerFrame::Board;
+        framed.exposed.right = true;
+        let width = framed.width;
+        let mut corner = Cabinet::new("C1", CabinetKind::CornerBase);
+        corner.exposed.right = true;
+        let corner_width = corner.width;
+        let run = line_up(vec![
+            RunItem::Cabinet(Box::new(framed)),
+            RunItem::Cabinet(Box::new(corner)),
+            cab("B2", CabinetKind::Base),
+        ]);
+        let lists = build_run(&run).unwrap();
+        let board = lists[0].part("B1.SeenEndRight").unwrap().bounds;
+        let face = lists[0]
+            .parts
+            .iter()
+            .filter(|p| p.role == crate::part::PartRole::DrawerFront)
+            .map(|p| p.bounds.min.y)
+            .fold(f64::MAX, f64::min);
+        assert_eq!(board.min.y, face);
+        let t = board.max().x - board.min.x;
+        assert_eq!(origin_of(&run, 1).x, width + t);
+        assert_eq!(origin_of(&run, 2).x, width + t + corner_width);
+
+        let list = crate::cutlist::cut_list(&lists, "board", 1.0);
+        assert!(
+            list.rows
+                .iter()
+                .any(|r| r.cabinet == "B1" && r.part.contains("SeenEndRight"))
+        );
     }
 }

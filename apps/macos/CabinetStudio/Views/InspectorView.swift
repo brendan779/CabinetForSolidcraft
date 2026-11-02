@@ -916,22 +916,6 @@ struct SizeSection: View {
                     .accessibilityValue("\(cab.innerDrawers)")
                 }
             }
-            HStack(spacing: 6) {
-                Text("Seen ends").foregroundStyle(.secondary)
-                Spacer()
-                ForEach(["left", "right"], id: \.self) { side in
-                    let on = cab.exposed(side)
-                    Button {
-                        withAnimation(.snappy) { var c = cab; c.setExposed(side, !on); project.selected = c }
-                    } label: {
-                        Image(systemName: side == "left" ? "rectangle.lefthalf.inset.filled" : "rectangle.righthalf.inset.filled")
-                    }
-                    .buttonStyle(ChipStyle(selected: on))
-                    .help(on ? "The \(side) side is seen from the room: no screws through it (biscuits, dowels and glue)."
-                             : "The \(side) side is hidden: screws through it are fine. Click if it will be seen.")
-                    .accessibilityLabel("\(side.capitalized) side \(on ? "seen" : "hidden")")
-                }
-            }
             if cab.shelves > 0 {
                 HStack(spacing: 6) {
                     Text("Fixed").foregroundStyle(.secondary)
@@ -1327,12 +1311,12 @@ struct CladdingSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            SectionTitle("Cladding")
+            SectionTitle("Seen ends")
             HStack(spacing: 8) {
                 ForEach([("left", "Left"), ("back", "Back"), ("right", "Right")], id: \.0) { face, title in
-                    let on = cab.clad(face)
+                    let on = cab.seenFace(face)
                     Button {
-                        withAnimation(.snappy) { var c = cab; c.setClad(face, !on); project.selected = c }
+                        withAnimation(.snappy) { var c = cab; c.setSeenFace(face, !on); project.selected = c }
                     } label: {
                         VStack(spacing: 6) {
                             CladThumbnail(face: face, on: on).frame(width: 48, height: 40)
@@ -1342,12 +1326,12 @@ struct CladdingSection: View {
                         .padding(.vertical, 8)
                     }
                     .buttonStyle(TileStyle(selected: on))
-                    .help("Clad the \(title.lowercased()) face in a lining board, flutes upright")
-                    .accessibilityLabel("Clad \(title.lowercased())")
+                    .help("The \(title.lowercased()) face is seen from the room: no screws through it, and a finished board over it from the front's face to the back")
+                    .accessibilityLabel("Seen \(title.lowercased())")
                     .accessibilityValue(on ? "on" : "off")
                 }
             }
-            if ["left", "back", "right"].contains(where: cab.clad) {
+            if ["left", "back", "right"].contains(where: cab.seenFace) {
                 // Any board: a Surround profiled lining, a plain lining, or a decor board.
                 let board = project.boardsById[cab.cladBoard]
                 Button { picking = true } label: {
@@ -1360,9 +1344,9 @@ struct CladdingSection: View {
                             .overlay(RoundedRectangle(cornerRadius: 5).strokeBorder(.primary.opacity(0.2)))
                             .frame(width: 34, height: 24)
                         VStack(alignment: .leading, spacing: 1) {
-                            Text(board?.profileModule ?? 0 > 0 ? "Lining, \(board!.range)" : "Cladding board")
+                            Text(board?.profileModule ?? 0 > 0 ? "Lining, \(board!.range)" : "Finished board")
                                 .font(.caption).foregroundStyle(.secondary).lineLimit(1)
-                            Text(board.map { "\($0.decor) \($0.finish), \(Int($0.thickness)) mm" } ?? "Generic board")
+                            Text(board.map { "\($0.decor) \($0.finish), \(Int($0.thickness)) mm" } ?? "Same as the fronts")
                                 .lineLimit(1)
                         }
                         Spacer()
@@ -1372,7 +1356,7 @@ struct CladdingSection: View {
                     .contentShape(Rectangle())
                 }
                 .buttonStyle(TileStyle(selected: picking))
-                .help("The board the clad faces are covered in: a Surround profiled lining, a plain lining or any decor board")
+                .help("The board over the seen faces, the same as the fronts unless you choose one: a Surround profiled lining, a plain lining or any decor board")
                 .popover(isPresented: $picking, arrowEdge: .leading) {
                     // Linings first: they are what cladding is usually in.
                     let boards = project.boards.filter { $0.kind == "lining" } + project.boards.filter { $0.kind != "lining" }
@@ -1385,9 +1369,17 @@ struct CladdingSection: View {
                     }) { _ in EmptyView() }
                         .frame(width: 640, height: 520)
                 }
-                if board == nil {
+                if board != nil {
+                    Button("Same as the fronts") {
+                        var c = cab
+                        c.cladBoard = ""
+                        withAnimation(.snappy) { project.selected = c }
+                    }
+                    .buttonStyle(ChipStyle(selected: false))
+                }
+                if board == nil, cab.clad("back") {
                 HStack(spacing: 6) {
-                    Text("Thickness").foregroundStyle(.secondary)
+                    Text("Back board thickness").foregroundStyle(.secondary)
                     Spacer()
                     ForEach([9.0, 12.0, 16.0], id: \.self) { t in
                         Button(unit.format(t, suffix: false)) {
