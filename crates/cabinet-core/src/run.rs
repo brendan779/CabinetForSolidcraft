@@ -34,8 +34,9 @@ pub enum RunItem {
     Walls(Walls),
 }
 
-/// The run stands along a back wall; a return wall closes either end of it, so the cabinet there
-/// abuts a wall on its back and its side. `length` is measured between the two return walls.
+/// The room around a straight run: the walls as measured, which stay put whatever the cabinets
+/// do. The back wall runs from x = 0, a return wall stands at either of its ends and comes forward
+/// from it, and every cabinet's back stands on the back wall.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Walls {
     pub id: String,
@@ -43,17 +44,29 @@ pub struct Walls {
     pub left: bool,
     #[serde(default)]
     pub right: bool,
-    /// Between the return walls (0: not measured yet).
+    /// The back wall's run: between the return walls where there are two (0: not measured, and
+    /// it follows the cabinets).
     #[serde(default)]
     pub length: f64,
-    /// Only for drawing them.
     #[serde(default = "Walls::default_height")]
     pub height: f64,
+    /// How far each return wall comes forward from the back wall.
+    #[serde(default = "Walls::default_return")]
+    pub left_run: f64,
+    #[serde(default = "Walls::default_return")]
+    pub right_run: f64,
+    /// Where the run starts along the back wall, with no return wall to stand against.
+    #[serde(default)]
+    pub offset: f64,
 }
 
 impl Walls {
     fn default_height() -> f64 {
         2400.0
+    }
+
+    fn default_return() -> f64 {
+        600.0
     }
 }
 
@@ -554,12 +567,24 @@ fn yes() -> bool {
 /// board from the nearest cabinet, so a run needs at least one.
 pub fn build_run(run: &Run) -> Result<Vec<PartList>> {
     let cabinets = cabinets(run);
+    // Walls with nothing against them yet are a fine start to a job.
+    if cabinets.is_empty() && run.items.iter().all(|i| matches!(i, RunItem::Walls(_))) {
+        return Ok(run
+            .items
+            .iter()
+            .map(|i| PartList {
+                cabinet: item_id(i).to_string(),
+                ..PartList::default()
+            })
+            .collect());
+    }
     if cabinets.is_empty() {
         return Err(Error::Invalid("a run needs at least one cabinet".into()));
     }
     let neighbour = |i: usize| nearest(&cabinets, i);
     let mut out = Vec::new();
-    for (i, (item, at)) in run.items.iter().zip(lefts(run, &neighbour)).enumerate() {
+    let places = lefts(run);
+    for (i, (item, &at)) in run.items.iter().zip(&places).enumerate() {
         match item {
             RunItem::Cabinet(c) => {
                 out.push(build_cabinet(&walled(placed(c, at), run, i))?);
@@ -578,7 +603,7 @@ pub fn build_run(run: &Run) -> Result<Vec<PartList>> {
             }),
             RunItem::Walls(w) => out.push(PartList {
                 cabinet: w.id.clone(),
-                warnings: wall_warnings(w, run, &neighbour),
+                warnings: wall_warnings(w, run),
                 ..PartList::default()
             }),
         }
@@ -598,7 +623,15 @@ pub fn build_run(run: &Run) -> Result<Vec<PartList>> {
                     | RunItem::Walls(_) => false,
                 })
                 .collect();
-            let mut top = benchtop(b, &out, &under, wall_ends(run, &neighbour));
+            // Only what stands on the floor joins or breaks a stretch: a wall cabinet hangs over it.
+            let (floor, floor_under): (Vec<PartList>, Vec<bool>) = out
+                .iter()
+                .zip(&under)
+                .enumerate()
+                .filter(|(j, _)| matches!(line_of(run, *j), Line::Floor | Line::Both))
+                .map(|(_, (l, u))| (l.clone(), *u))
+                .unzip();
+            let mut top = benchtop(b, &floor, &floor_under, wall_ends(run));
             cutouts(b, &mut top, &out);
             splashback_openings(b, &mut top, &out);
             round_ends(b, &mut top);
@@ -619,7 +652,7 @@ pub fn build_run(run: &Run) -> Result<Vec<PartList>> {
                         RunItem::Filler(_) | RunItem::EndPanel(_) => neighbour(j),
                         _ => return None,
                     };
-                    let z = run.origin.z + c.origin.z;
+                    let z = places[j].z + c.origin.z;
                     match m.kind {
                         MouldingKind::Cornice if takes_cornice(c) => Some(z + c.height),
                         MouldingKind::LightRail if takes_light_rail(c) => Some(z),
@@ -631,16 +664,10 @@ pub fn build_run(run: &Run) -> Result<Vec<PartList>> {
             let solid: Vec<bool> = run
                 .items
                 .iter()
-                .map(|it| !matches!(it, RunItem::Benchtop(_) | RunItem::Moulding(_)))
+                .enumerate()
+                .map(|(j, _)| matches!(line_of(run, j), Line::Upper | Line::Both))
                 .collect();
-            out[i] = moulding(
-                m,
-                &out,
-                &line,
-                &solid,
-                &neighbour,
-                wall_ends(run, &neighbour),
-            );
+            out[i] = moulding(m, &out, &line, &solid, &neighbour, wall_ends(run));
         }
     }
     Ok(out)
@@ -679,12 +706,21 @@ fn moulding<'a>(
         MouldingKind::LightRail => (PartRole::LightRail, true),
     };
     let mut stretches: Vec<(usize, usize, f64)> = Vec::new();
+    // Only the upper line joins or breaks a stretch: floor cabinets pass beneath it.
+    let mut joined = false;
     for (j, z) in line.iter().enumerate() {
-        let Some(z) = *z else { continue };
+        if !solid[j] {
+            continue;
+        }
+        let Some(z) = *z else {
+            joined = false;
+            continue;
+        };
         match stretches.last_mut() {
-            Some((_, end, at)) if *end + 1 == j && (*at - z).abs() < 0.5 => *end = j,
+            Some((_, end, at)) if joined && (*at - z).abs() < 0.5 => *end = j,
             _ => stretches.push((j, j, z)),
         }
+        joined = true;
     }
     if stretches.is_empty() {
         out.warnings.push(format!(
@@ -702,7 +738,7 @@ fn moulding<'a>(
             .collect::<Vec<_>>()
     };
     for (n, &(a, b, z)) in stretches.iter().enumerate() {
-        let parts: Vec<&Part> = (a..=b).flat_map(in_line).collect();
+        let parts: Vec<&Part> = (a..=b).filter(|&j| solid[j]).flat_map(in_line).collect();
         let lo = |f: fn(&Part) -> f64| parts.iter().map(|p| f(p)).fold(f64::MAX, f64::min);
         let hi = |f: fn(&Part) -> f64| parts.iter().map(|p| f(p)).fold(f64::MIN, f64::max);
         let (x0, x1) = (lo(|p| p.bounds.min.x), hi(|p| p.bounds.max().x));
@@ -790,10 +826,9 @@ pub fn laid_out(run: &Run) -> Run {
     let items = if cabinets.is_empty() {
         run.items.clone()
     } else {
-        let neighbour = |i: usize| nearest(&cabinets, i);
         run.items
             .iter()
-            .zip(lefts(run, &neighbour))
+            .zip(lefts(run))
             .map(|(item, at)| match item {
                 RunItem::Cabinet(c) => RunItem::Cabinet(Box::new(placed(c, at))),
                 other => other.clone(),
@@ -832,27 +867,226 @@ fn nearest<'a>(cabinets: &[(usize, &'a Cabinet)], i: usize) -> &'a Cabinet {
 }
 
 /// Where each item's left end sits, side by side from the run's origin.
-fn lefts<'a>(run: &Run, neighbour: &dyn Fn(usize) -> &'a Cabinet) -> Vec<Vec3> {
-    let mut x = run.origin.x;
-    run.items
+fn item_id(i: &RunItem) -> &str {
+    match i {
+        RunItem::Cabinet(c) => &c.id,
+        RunItem::Filler(f) => &f.id,
+        RunItem::EndPanel(e) => &e.id,
+        RunItem::Benchtop(b) => &b.id,
+        RunItem::FloatingShelf(f) => &f.id,
+        RunItem::Moulding(m) => &m.id,
+        RunItem::Walls(w) => &w.id,
+    }
+}
+
+/// A run's two lines along the wall: what stands on the floor, and what hangs above it. A tall
+/// cabinet is in both, so whatever follows it clears it in either line.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum Line {
+    Floor,
+    Upper,
+    Both,
+    /// Takes no length: a benchtop, a moulding, the walls.
+    Neither,
+}
+
+impl Line {
+    fn of_cabinet(c: &Cabinet) -> Self {
+        use CabinetKind as K;
+        match c.kind {
+            K::Wall | K::CornerWall | K::Rangehood => Line::Upper,
+            K::Tall | K::Wardrobe => Line::Both,
+            _ => Line::Floor,
+        }
+    }
+
+    fn shares(self, other: Line) -> bool {
+        match (self, other) {
+            (Line::Neither, _) | (_, Line::Neither) => false,
+            (Line::Both, _) | (_, Line::Both) => true,
+            (a, b) => a == b,
+        }
+    }
+}
+
+fn line_of(run: &Run, i: usize) -> Line {
+    match &run.items[i] {
+        RunItem::Cabinet(c) => Line::of_cabinet(c),
+        RunItem::Filler(_) | RunItem::EndPanel(_) => {
+            let cabs = cabinets(run);
+            if cabs.is_empty() {
+                Line::Floor
+            } else {
+                Line::of_cabinet(nearest(&cabs, i))
+            }
+        }
+        RunItem::FloatingShelf(_) => Line::Upper,
+        RunItem::Benchtop(_) | RunItem::Moulding(_) | RunItem::Walls(_) => Line::Neither,
+    }
+}
+
+/// Nothing before this item in its line, and no gap asked for.
+fn against_left(run: &Run, i: usize) -> bool {
+    let line = line_of(run, i);
+    walls(run).is_some_and(|w| w.left)
+        && line != Line::Neither
+        && !matches!(&run.items[i], RunItem::Cabinet(c) if c.gap_before > 0.0)
+        && (0..i).all(|j| !line_of(run, j).shares(line))
+}
+
+/// Last in its line, and reaching the right return wall.
+fn against_right(run: &Run, i: usize) -> bool {
+    let Some(w) = walls(run).filter(|w| w.right) else {
+        return false;
+    };
+    let line = line_of(run, i);
+    if line == Line::Neither || (i + 1..run.items.len()).any(|j| line_of(run, j).shares(line)) {
+        return false;
+    }
+    if w.length <= 0.0 {
+        return true;
+    }
+    // With no left wall the floor line is slid along to meet it.
+    if !w.left {
+        return line != Line::Upper;
+    }
+    let reach = lay(run, 0.0, i).pop().map_or(0.0, |p| p.end);
+    (reach - w.length).abs() < 1.0
+}
+
+/// The width an item takes in its line.
+fn item_width(run: &Run, i: usize) -> f64 {
+    match &run.items[i] {
+        RunItem::Cabinet(c) => c.width,
+        RunItem::Filler(f) => f.width,
+        RunItem::EndPanel(_) => nearest(&cabinets(run), i).standard.front_thickness,
+        RunItem::FloatingShelf(f) => f.width,
+        RunItem::Benchtop(_) | RunItem::Moulding(_) | RunItem::Walls(_) => 0.0,
+    }
+}
+
+struct Laid {
+    left: f64,
+    /// Where it ends, seen end boards included.
+    end: f64,
+}
+
+/// Each item's left along the wall from `start`, up to and including `stop`. `stop`'s own right
+/// board is left out, which is how `against_right` asks where it would end without one.
+fn lay(run: &Run, start: f64, stop: usize) -> Vec<Laid> {
+    let (mut floor, mut upper) = (start, start);
+    let mut out = Vec::new();
+    for i in 0..run.items.len().min(stop.saturating_add(1)) {
+        let line = line_of(run, i);
+        let from = match line {
+            Line::Floor | Line::Neither => floor,
+            Line::Upper => upper,
+            Line::Both => floor.max(upper),
+        };
+        let (gap, board_left, board_right) = match &run.items[i] {
+            RunItem::Cabinet(c) => {
+                let t = c.standard.front_thickness;
+                let takes = !matches!(c.kind, CabinetKind::CornerBase | CabinetKind::CornerWall);
+                let left = takes && c.exposed.left && !c.cladding.left && !against_left(run, i);
+                let right = takes
+                    && i != stop
+                    && c.exposed.right
+                    && !c.cladding.right
+                    && !against_right(run, i);
+                (
+                    c.gap_before,
+                    if left { t } else { 0.0 },
+                    if right { t } else { 0.0 },
+                )
+            }
+            _ => (0.0, 0.0, 0.0),
+        };
+        let left = from + gap + board_left;
+        let end = left + item_width(run, i) + board_right;
+        match line {
+            Line::Floor => floor = end,
+            Line::Upper => upper = end,
+            Line::Both => {
+                floor = end;
+                upper = end;
+            }
+            Line::Neither => {}
+        }
+        out.push(Laid { left, end });
+    }
+    out
+}
+
+/// Where the run starts along the back wall.
+fn run_start(run: &Run) -> f64 {
+    let Some(w) = walls(run) else {
+        return 0.0;
+    };
+    if w.left {
+        0.0
+    } else if w.right && w.length > 0.0 {
+        w.length - run_length_from_zero(run)
+    } else {
+        w.offset
+    }
+}
+
+fn run_length_from_zero(run: &Run) -> f64 {
+    lay(run, 0.0, usize::MAX)
+        .iter()
+        .map(|p| p.end)
+        .fold(0.0, f64::max)
+}
+
+/// How high a wall cabinet hangs by default: our rule of thumb, the tallest floor cabinet, a 30 mm
+/// top and a 600 mm splashback.
+fn wall_cabinet_bottom(run: &Run) -> f64 {
+    let floor = cabinets(run)
+        .iter()
+        .filter(|(_, c)| Line::of_cabinet(c) == Line::Floor)
+        .map(|(_, c)| c.height)
+        .fold(0.0, f64::max);
+    (if floor > 0.0 { floor } else { 870.0 }) + 630.0
+}
+
+/// How deep the run stands from its front line to the back wall: everything's back is on the wall.
+fn run_depth(run: &Run) -> f64 {
+    let cabs = cabinets(run);
+    let on_floor = cabs
+        .iter()
+        .filter(|(_, c)| Line::of_cabinet(c) != Line::Upper)
+        .map(|(_, c)| c.depth)
+        .fold(0.0, f64::max);
+    if on_floor > 0.0 {
+        on_floor
+    } else {
+        cabs.iter().map(|(_, c)| c.depth).fold(0.0, f64::max)
+    }
+}
+
+/// Each item's place: along the wall by its line, back on the wall, an unset wall cabinet at its
+/// usual height.
+fn lefts(run: &Run) -> Vec<Vec3> {
+    let start = run_start(run);
+    let depth = run_depth(run);
+    let bottom = wall_cabinet_bottom(run);
+    let cabs = cabinets(run);
+    lay(run, start, usize::MAX)
         .iter()
         .enumerate()
-        .map(|(i, item)| {
-            let (left, right) = match item {
-                RunItem::Cabinet(c) => seen_boards(c, run, i),
-                _ => (0.0, 0.0),
+        .map(|(i, p)| {
+            let at = run.origin;
+            let own = (!cabs.is_empty()).then(|| nearest(&cabs, i));
+            let back = own.map_or(0.0, |c| depth - c.depth);
+            let hangs = match &run.items[i] {
+                RunItem::FloatingShelf(_) => false,
+                _ => line_of(run, i) == Line::Upper && own.is_some_and(|c| c.origin.z == 0.0),
             };
-            // A cabinet stands inside its seen end boards.
-            let at = Vec3::new(x + left, run.origin.y, run.origin.z);
-            x += left + right;
-            x += match item {
-                RunItem::Cabinet(c) => c.width,
-                RunItem::Filler(f) => f.width,
-                RunItem::EndPanel(_) => neighbour(i).standard.front_thickness,
-                RunItem::Benchtop(_) | RunItem::Moulding(_) | RunItem::Walls(_) => 0.0,
-                RunItem::FloatingShelf(f) => f.width,
-            };
-            at
+            Vec3::new(
+                at.x + p.left,
+                at.y + back,
+                at.z + if hangs { bottom } else { 0.0 },
+            )
         })
         .collect()
 }
@@ -864,94 +1098,43 @@ fn walls(run: &Run) -> Option<&Walls> {
     })
 }
 
-/// The first and last items that take run length.
-fn run_ends(run: &Run) -> Option<(usize, usize)> {
-    let solid = |i: &RunItem| {
-        matches!(
-            i,
-            RunItem::Cabinet(_)
-                | RunItem::Filler(_)
-                | RunItem::EndPanel(_)
-                | RunItem::FloatingShelf(_)
-        )
-    };
-    let first = run.items.iter().position(solid)?;
-    let last = run.items.iter().rposition(solid)?;
-    Some((first, last))
-}
-
-/// From the run's left end to its right end.
-fn run_length<'a>(run: &Run, neighbour: &dyn Fn(usize) -> &'a Cabinet) -> f64 {
-    run.items
-        .iter()
-        .enumerate()
-        .map(|(i, item)| match item {
-            RunItem::Cabinet(c) => {
-                let (left, right) = seen_boards(c, run, i);
-                c.width + left + right
-            }
-            RunItem::Filler(f) => f.width,
-            RunItem::EndPanel(_) => neighbour(i).standard.front_thickness,
-            RunItem::FloatingShelf(f) => f.width,
-            RunItem::Benchtop(_) | RunItem::Moulding(_) | RunItem::Walls(_) => 0.0,
-        })
-        .sum()
-}
-
-/// The thickness of the seen end boards beside a cabinet, as the run will build it.
-fn seen_boards(c: &Cabinet, run: &Run, i: usize) -> (f64, f64) {
-    // An L-corner builds from two legs and takes no board.
-    if matches!(c.kind, CabinetKind::CornerBase | CabinetKind::CornerWall) {
-        return (0.0, 0.0);
-    }
-    let c = walled(c.clone(), run, i);
-    let t = c.standard.front_thickness;
-    let board = |seen: bool, lined: bool| if seen && !lined { t } else { 0.0 };
-    (
-        board(c.exposed.left, c.cladding.left),
-        board(c.exposed.right, c.cladding.right),
-    )
+/// From the run's start to the far end of its longer line.
+fn run_length(run: &Run) -> f64 {
+    run_length_from_zero(run)
 }
 
 /// A side against a return wall is not seen, whatever the cabinet was set to.
 fn walled(mut c: Cabinet, run: &Run, i: usize) -> Cabinet {
-    if let (Some(w), Some((first, last))) = (walls(run), run_ends(run)) {
-        if w.left && i == first {
-            c.exposed.left = false;
-        }
-        if w.right && i == last {
-            c.exposed.right = false;
-        }
+    if against_left(run, i) {
+        c.exposed.left = false;
+    }
+    if against_right(run, i) {
+        c.exposed.right = false;
     }
     c
 }
 
-/// The X of the run's ends that stand against a return wall.
-fn wall_ends<'a>(
-    run: &Run,
-    neighbour: &dyn Fn(usize) -> &'a Cabinet,
-) -> (Option<f64>, Option<f64>) {
+/// The X of the walls the run's ends can stand against.
+fn wall_ends(run: &Run) -> (Option<f64>, Option<f64>) {
     let Some(w) = walls(run) else {
         return (None, None);
     };
+    let far = if w.length > 0.0 {
+        w.length
+    } else {
+        run_start(run) + run_length(run)
+    };
     (
         w.left.then_some(run.origin.x),
-        w.right.then(|| run.origin.x + run_length(run, neighbour)),
+        w.right.then_some(run.origin.x + far),
     )
 }
 
-/// What a return wall asks of the run: a front needs room to open, a wall is rarely straight, and
-/// the cabinets have to fit between the walls.
-fn wall_warnings<'a>(
-    w: &Walls,
-    run: &Run,
-    neighbour: &dyn Fn(usize) -> &'a Cabinet,
-) -> Vec<String> {
+/// What the walls ask of the run: a front needs room to open, a wall is rarely straight, and the
+/// cabinets have to fit along the wall.
+fn wall_warnings(w: &Walls, run: &Run) -> Vec<String> {
     let mut out = Vec::new();
-    let Some((first, last)) = run_ends(run) else {
-        return out;
-    };
-    let check = |i: usize, side: &str, out: &mut Vec<String>| match &run.items[i] {
+    let mut check = |i: usize, side: &str| match &run.items[i] {
         RunItem::Cabinet(c) if c.fronts != FrontLayout::Open => out.push(format!(
             "{} is hard against the {side} wall: its fronts and handles need room to open, so \
              add a filler there",
@@ -967,20 +1150,24 @@ fn wall_warnings<'a>(
         )),
         _ => {}
     };
-    if w.left {
-        check(first, "left", &mut out);
+    for i in 0..run.items.len() {
+        if against_left(run, i) {
+            check(i, "left");
+        }
+        if against_right(run, i) {
+            check(i, "right");
+        }
     }
-    if w.right {
-        check(last, "right", &mut out);
-    }
-    if w.left && w.right && w.length > 0.0 {
-        let spare = w.length - run_length(run, neighbour);
-        if spare < -0.5 {
+    if w.length > 0.0 && !cabinets(run).is_empty() {
+        let start = run_start(run);
+        let spare = w.length - start - run_length(run);
+        if spare < -0.5 || start < -0.5 {
+            let over = (-spare).max(-start);
             out.push(format!(
-                "the run is {:.0} mm too long for {:.0} mm between the walls",
-                -spare, w.length
+                "the run is {over:.0} mm too long for the {:.0} mm wall",
+                w.length
             ));
-        } else if spare > 0.5 {
+        } else if spare > 0.5 && w.left && w.right {
             out.push(format!(
                 "{spare:.0} mm is left between the walls: take it up with a filler"
             ));
@@ -2523,6 +2710,9 @@ mod tests {
             right,
             length,
             height: 2400.0,
+            left_run: 600.0,
+            right_run: 600.0,
+            offset: 0.0,
         }));
         Run {
             origin: Vec3::default(),
@@ -2699,6 +2889,9 @@ mod tests {
             right: true,
             length: 3210.0,
             height: 2700.0,
+            left_run: 600.0,
+            right_run: 600.0,
+            offset: 0.0,
         });
         let text = serde_json::to_string(&item).unwrap();
         assert_eq!(serde_json::from_str::<RunItem>(&text).unwrap(), item);
@@ -2804,5 +2997,191 @@ mod tests {
             panic!()
         };
         assert_eq!(b.origin.x, w);
+    }
+
+    fn origin_of(run: &Run, i: usize) -> Vec3 {
+        match &laid_out(run).items[i] {
+            RunItem::Cabinet(c) => c.origin,
+            _ => panic!("not a cabinet"),
+        }
+    }
+
+    fn line_up(items: Vec<RunItem>) -> Run {
+        Run {
+            origin: Vec3::default(),
+            items,
+        }
+    }
+
+    #[test]
+    fn wall_cabinets_hang_above_the_base_line_not_beside_it() {
+        let run = line_up(vec![
+            cab("B1", CabinetKind::Base),
+            cab("B2", CabinetKind::Base),
+            cab("W1", CabinetKind::Wall),
+            cab("W2", CabinetKind::Wall),
+        ]);
+        let w = Cabinet::new("B1", CabinetKind::Base);
+        let upper = Cabinet::new("W1", CabinetKind::Wall);
+        assert_eq!(origin_of(&run, 1).x, w.width);
+        assert_eq!(origin_of(&run, 2).x, 0.0);
+        assert_eq!(origin_of(&run, 3).x, upper.width);
+        // Above the tallest floor cabinet, a top and a 600 splashback.
+        assert_eq!(origin_of(&run, 2).z, w.height + 630.0);
+        // Backs on the same wall, so the shallower cabinet's front stands further back.
+        let wall = origin_of(&run, 0).y + w.depth;
+        assert_eq!(origin_of(&run, 2).y + upper.depth, wall);
+    }
+
+    #[test]
+    fn a_wall_cabinet_keeps_a_height_set_on_it() {
+        let mut upper = Cabinet::new("W1", CabinetKind::Wall);
+        upper.origin.z = 1400.0;
+        let run = line_up(vec![
+            cab("B1", CabinetKind::Base),
+            RunItem::Cabinet(Box::new(upper)),
+        ]);
+        assert_eq!(origin_of(&run, 1).z, 1400.0);
+    }
+
+    #[test]
+    fn a_tall_cabinet_stands_in_both_lines_and_what_follows_clears_it() {
+        let base = Cabinet::new("B1", CabinetKind::Base).width;
+        let tall = Cabinet::new("T1", CabinetKind::Tall).width;
+        let run = line_up(vec![
+            cab("B1", CabinetKind::Base),
+            cab("T1", CabinetKind::Tall),
+            cab("W1", CabinetKind::Wall),
+            cab("B2", CabinetKind::Base),
+        ]);
+        assert_eq!(origin_of(&run, 1).x, base);
+        assert_eq!(origin_of(&run, 1).z, 0.0);
+        assert_eq!(origin_of(&run, 2).x, base + tall);
+        assert_eq!(origin_of(&run, 3).x, base + tall);
+    }
+
+    #[test]
+    fn a_gap_before_a_wall_cabinet_moves_it_along_its_line_only() {
+        let mut upper = Cabinet::new("W1", CabinetKind::Wall);
+        upper.gap_before = 900.0;
+        let run = line_up(vec![
+            RunItem::Cabinet(Box::new(upper)),
+            cab("B1", CabinetKind::Base),
+        ]);
+        assert_eq!(origin_of(&run, 0).x, 900.0);
+        assert_eq!(origin_of(&run, 1).x, 0.0);
+    }
+
+    #[test]
+    fn a_benchtop_runs_on_under_wall_cabinets_listed_between_the_base_cabinets() {
+        let top: Benchtop = serde_json::from_str(r#"{"id":"T1"}"#).unwrap();
+        let run = line_up(vec![
+            cab("B1", CabinetKind::Base),
+            cab("W1", CabinetKind::Wall),
+            cab("B2", CabinetKind::Base),
+            RunItem::Benchtop(top),
+        ]);
+        let lists = build_run(&run).unwrap();
+        let tops = lists
+            .iter()
+            .flat_map(|l| &l.parts)
+            .filter(|p| p.role == PartRole::Benchtop)
+            .count();
+        assert_eq!(tops, 1);
+    }
+
+    #[test]
+    fn a_cornice_runs_on_over_base_cabinets_listed_between_the_wall_cabinets() {
+        let cornice = RunItem::Moulding(Moulding {
+            id: "C1".into(),
+            kind: MouldingKind::Cornice,
+            height: 60.0,
+            board: String::new(),
+            returns: true,
+        });
+        let run = line_up(vec![
+            cab("W1", CabinetKind::Wall),
+            cab("B1", CabinetKind::Base),
+            cab("W2", CabinetKind::Wall),
+            cornice,
+        ]);
+        let lists = build_run(&run).unwrap();
+        let faces = lists
+            .iter()
+            .flat_map(|l| &l.parts)
+            .filter(|p| p.role == PartRole::Cornice && !p.name.contains("Return"))
+            .collect::<Vec<_>>();
+        assert_eq!(faces.len(), 1);
+        let upper = Cabinet::new("W1", CabinetKind::Wall);
+        assert_eq!(faces[0].bounds.min.z, 870.0 + 630.0 + upper.height);
+    }
+
+    fn with_walls(length: f64, left: bool, right: bool, offset: f64, items: Vec<RunItem>) -> Run {
+        let mut run = walled_run(left, right, length, items);
+        if let Some(RunItem::Walls(w)) = run.items.last_mut() {
+            w.offset = offset;
+        }
+        run
+    }
+
+    #[test]
+    fn walls_stay_put_when_the_cabinets_change() {
+        let narrow = |width: f64| {
+            let mut c = Cabinet::new("B1", CabinetKind::Base);
+            c.width = width;
+            RunItem::Cabinet(Box::new(c))
+        };
+        let a = with_walls(3000.0, true, true, 0.0, vec![narrow(600.0)]);
+        let b = with_walls(3000.0, true, true, 0.0, vec![narrow(900.0)]);
+        assert_eq!(wall_ends(&a), (Some(0.0), Some(3000.0)));
+        assert_eq!(wall_ends(&a), wall_ends(&b));
+    }
+
+    #[test]
+    fn with_only_a_right_wall_the_run_stands_against_it() {
+        let width = Cabinet::new("B1", CabinetKind::Base).width;
+        let run = with_walls(3000.0, false, true, 0.0, vec![cab("B1", CabinetKind::Base)]);
+        assert_eq!(origin_of(&run, 0).x, 3000.0 - width);
+    }
+
+    #[test]
+    fn with_no_return_walls_the_run_starts_where_it_is_set_along_the_back_wall() {
+        let run = with_walls(
+            3000.0,
+            false,
+            false,
+            450.0,
+            vec![cab("B1", CabinetKind::Base)],
+        );
+        assert_eq!(origin_of(&run, 0).x, 450.0);
+    }
+
+    #[test]
+    fn a_run_too_long_for_its_back_wall_is_flagged() {
+        let notes = wall_notes(&with_walls(
+            500.0,
+            false,
+            false,
+            0.0,
+            vec![cab("B1", CabinetKind::Base)],
+        ));
+        assert!(notes.iter().any(|n| n.contains("too long")), "{notes:?}");
+    }
+
+    #[test]
+    fn a_cabinet_short_of_the_right_wall_keeps_its_seen_end() {
+        let mut c = Cabinet::new("B1", CabinetKind::Base);
+        c.exposed.right = true;
+        let run = with_walls(3000.0, true, true, 0.0, vec![RunItem::Cabinet(Box::new(c))]);
+        let lists = build_run(&run).unwrap();
+        assert!(lists[0].parts.iter().any(|p| p.name == "B1.SeenEndRight"));
+    }
+
+    #[test]
+    fn walls_alone_build_nothing_and_do_not_fail() {
+        let run = walled_run(true, true, 3000.0, Vec::new());
+        let lists = build_run(&run).unwrap();
+        assert_eq!(lists.len(), 1);
+        assert!(lists[0].parts.is_empty());
     }
 }

@@ -90,6 +90,37 @@ struct ScopeSwitch: View {
     }
 }
 
+/// Where a wall cabinet hangs: how high, and any empty wall before it in the upper line.
+struct HangSection: View {
+    @Environment(ProjectModel.self) private var project
+    @AppStorage(LengthUnit.key) private var unit: LengthUnit = .millimetres
+    let cab: CabinetDoc
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            SectionTitle("On the wall")
+            ChipRow("Height off the floor") {
+                Button("Usual") { update { $0.hangHeight = 0 } }
+                    .buttonStyle(ChipStyle(selected: cab.hangHeight == 0))
+                    .help("Above the tallest floor cabinet, a 30 mm top and a 600 mm splashback")
+                ForEach([1350.0, 1400.0, 1450.0, 1500.0, 1600.0], id: \.self) { z in
+                    Button(unit.format(z, suffix: false)) { update { $0.hangHeight = z } }
+                        .buttonStyle(ChipStyle(selected: abs(cab.hangHeight - z) < 0.5))
+                }
+            }
+            NumberField(title: "Gap before it", value: cab.gapBefore) { v in
+                update { $0.gapBefore = v }
+            }
+        }
+    }
+
+    private func update(_ change: (inout CabinetDoc) -> Void) {
+        var c = cab
+        change(&c)
+        withAnimation(.snappy) { project.selected = c }
+    }
+}
+
 /// The job's benchtop, wherever the selection is: there is one for the job, not one per cabinet.
 struct BenchtopTab: View {
     @Environment(ProjectModel.self) private var project
@@ -154,6 +185,7 @@ struct InspectorView: View {
 
     @ViewBuilder private func cabinetTab(_ cab: CabinetDoc) -> some View {
         SizeSection(cab: cab)
+        if cab.isUpper { HangSection(cab: cab) }
         if cab.kind == "blind_corner" { BlindSection(cab: cab) }
         if cab.kind == "sink" { SinkSection(cab: cab) }
         if cab.kind == "wardrobe" { WardrobeSection(cab: cab) }
@@ -392,14 +424,14 @@ struct PieceSection: View {
                         .help(choice.help)
                     }
                 }
-                if cab.wallLeft && cab.wallRight {
-                    NumberField(title: "Between the walls", value: cab.wallLength) { v in
-                        var c = cab
-                        c.wallLength = v
-                        project.selected = c
-                    }
+                wallField(cab.wallLeft && cab.wallRight ? "Between the walls" : "Back wall run", cab.wallLength) { $0.wallLength = $1 }
+                wallField("Wall height", cab.wallHeight) { $0.wallHeight = $1 }
+                if cab.wallLeft { wallField("Left wall comes out", cab.wallLeftRun) { $0.wallLeftRun = $1 } }
+                if cab.wallRight { wallField("Right wall comes out", cab.wallRightRun) { $0.wallRightRun = $1 } }
+                if !cab.wallLeft && !cab.wallRight {
+                    wallField("Run starts along the wall", cab.wallOffset) { $0.wallOffset = $1 }
                 }
-                Text("The cabinets stand on the back wall. A return wall hides that cabinet's side, stops the benchtop and any cornice at it, and needs a filler so fronts can open.")
+                Text("Walls stay as measured, and the cabinets stand on the back wall. A return wall hides the side of a cabinet that reaches it, stops the benchtop and any cornice there, and needs a filler so fronts can open.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
@@ -608,6 +640,16 @@ struct PieceSection: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
         }
+    }
+
+    private func wallField(_ title: String, _ value: Double,
+                           set: @escaping (inout CabinetDoc, Double) -> Void) -> some View {
+        NumberField(title: title, value: value) { v in
+            var c = cab
+            set(&c, v)
+            project.selected = c
+        }
+        .id(title)
     }
 
     private func chips(_ title: String, value: Double, presets: [Double],

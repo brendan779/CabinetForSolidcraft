@@ -77,6 +77,10 @@ pub struct Cabinet {
     /// Sides seen from the room (the end of a run without an end panel): no screws through them.
     #[serde(default, skip_serializing_if = "Exposed::is_none")]
     pub exposed: Exposed,
+    /// Empty wall before this cabinet in its line of the run: a wall cabinet lined up past a window
+    /// or a rangehood's clearance.
+    #[serde(default, skip_serializing_if = "is_zero_f64")]
+    pub gap_before: f64,
 }
 
 /// An LED strip light on a cabinet (see `lighting`).
@@ -286,6 +290,7 @@ impl Cabinet {
             depth: d,
             height: h,
             origin: Vec3::default(),
+            gap_before: 0.0,
             standard: ConstructionStandard::default(),
             fronts: kind.default_fronts_for(w),
             adjustable_shelves: kind.default_shelves(),

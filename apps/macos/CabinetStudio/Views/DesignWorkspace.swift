@@ -222,28 +222,49 @@ struct RunStrip: View {
         }
     }
 
+    /// The floor line and the line hung above it, as they stand along the wall.
+    private var floorLine: [CabinetDoc] { items.filter { !$0.isUpper } }
+    private var upperLine: [CabinetDoc] { items.filter(\.isUpper) }
+
     private func width(_ c: CabinetDoc) -> Double {
         resizing?.id == c.id ? resizing!.width : c.width
     }
 
+    private func length(_ line: [CabinetDoc]) -> Double {
+        line.reduce(0) { $0 + width($1) + $1.gapBefore }
+    }
+
     var body: some View {
+        let upper = upperLine, floor = floorLine
         GeometryReader { geo in
-            let total = max(items.reduce(0) { $0 + width($1) }, 1)
-            let scale = (geo.size.width - CGFloat(max(items.count - 1, 0)) * 2) / total
-            HStack(spacing: 2) {
-                ForEach(items) { c in
-                    block(c, width: CGFloat(width(c)) * scale, scale: scale)
-                }
+            let total = max(length(upper), length(floor), 1)
+            let scale = (geo.size.width - CGFloat(max(max(upper.count, floor.count) - 1, 0)) * 2) / total
+            VStack(spacing: 2) {
+                if !upper.isEmpty { row(upper, scale: scale) }
+                if !floor.isEmpty { row(floor, scale: scale) }
             }
         }
-        .frame(height: 34)
+        .frame(height: upper.isEmpty || floor.isEmpty ? 34 : 70)
         .padding(6)
         .floatingPanel()
         .accessibilityElement(children: .contain)
         .accessibilityLabel("Run")
     }
 
-    private func block(_ c: CabinetDoc, width: CGFloat, scale: CGFloat) -> some View {
+    private func row(_ line: [CabinetDoc], scale: CGFloat) -> some View {
+        HStack(spacing: 2) {
+            ForEach(line) { c in
+                if c.gapBefore > 0 {
+                    Color.clear.frame(width: CGFloat(c.gapBefore) * scale)
+                }
+                block(c, width: CGFloat(width(c)) * scale, scale: scale, line: line)
+            }
+            Spacer(minLength: 0)
+        }
+        .frame(height: 34)
+    }
+
+    private func block(_ c: CabinetDoc, width: CGFloat, scale: CGFloat, line: [CabinetDoc]) -> some View {
         let selected = c.id == project.selection
         return ZStack(alignment: .trailing) {
             RoundedRectangle(cornerRadius: 5)
@@ -302,7 +323,7 @@ struct RunStrip: View {
             DragGesture(minimumDistance: 4)
                 .onChanged { v in moving = (c.id, v.translation.width) }
                 .onEnded { v in
-                    reorder(c, by: Double(v.translation.width / scale))
+                    reorder(c, by: Double(v.translation.width / scale), in: line)
                     moving = nil
                 }
         )
@@ -316,8 +337,7 @@ struct RunStrip: View {
     }
 
     /// Moves `c` to where its middle lands after a drag of `dx` mm along the run.
-    private func reorder(_ c: CabinetDoc, by dx: Double) {
-        let run = items
+    private func reorder(_ c: CabinetDoc, by dx: Double, in run: [CabinetDoc]) {
         guard let from = run.firstIndex(where: { $0.id == c.id }) else { return }
         var x = 0.0
         var centres: [Double] = []
@@ -562,6 +582,8 @@ final class ViewportScene {
     var viewSize = CGSize(width: 800, height: 600)
     /// The run as last built, in metres: its width, height and depth.
     private var extent: SIMD3<Float> = [1.8, 0.9, 0.6]
+    /// The user has orbited, panned or zoomed.
+    private var cameraMoved = false
     /// What the walls were last made for.
     private var wallsKey = ""
     /// The panels shown, by part name, as last built.
@@ -632,10 +654,18 @@ final class ViewportScene {
         }
         // Keep the run centred on the origin the camera orbits.
         if minX < maxX {
-            root.position.x = -(minX + maxX) / 2
+            // Measured walls hold still, so the view centres on them rather than the run.
+            let wallRun = project.cabinets.first { $0.kind == "walls" }.map { Float($0.wallLength) / 1000 } ?? 0
+            let (x0, x1) = wallRun > 0 ? (Float(0), wallRun) : (minX, maxX)
+            root.position.x = -(x0 + x1) / 2
             let height = panels.values.map { Float($0.z + $0.height) }.max() ?? extent.y
             let depth = panels.values.map { Float($0.y + $0.depth) }.max() ?? extent.z
-            extent = [maxX - minX, height / 1000, depth / 1000]
+            let grown: SIMD3<Float> = [x1 - x0, height / 1000, depth / 1000]
+            // Until the user takes the camera, keep the whole job in view as it grows.
+            if grown != extent {
+                extent = grown
+                if !cameraMoved { frameJob() }
+            }
         }
     }
 
@@ -651,12 +681,20 @@ final class ViewportScene {
     /// The back wall and any return walls, behind and beside the run. Glassy, because the camera
     /// often looks through one; not selectable.
     private func updateWalls(project: ProjectModel, minX: Float, maxX: Float, seen: inout Set<String>) {
-        guard let w = project.cabinets.first(where: { $0.kind == "walls" }), minX <= maxX else { return }
+        guard let w = project.cabinets.first(where: { $0.kind == "walls" }) else { return }
+        let run = Float(w.wallLength) / 1000
+        // Measured walls stand as measured; unmeasured ones still follow the run.
+        let (x0, x1) = run > 0 ? (Float(0), run) : (minX, maxX)
+        guard x0 < x1 else { return }
+        // The back wall's plane: the deepest cabinet's back. End panels and fillers run past it
+        // by their scribes, which are cut off on site.
         let panels = project.cabinets.filter { $0.placed != true }.compactMap { project.build($0) }.flatMap(\.panels)
-        let back = Float(panels.map { $0.y + $0.depth }.max() ?? 0) / 1000
+            .filter { $0.role != "End panel" && $0.role != "Filler" }
+        let back = Float(panels.map { $0.y + $0.depth }.max() ?? 600) / 1000
         let height = Float(w.wallHeight) / 1000
-        let t: Float = 0.1, reach: Float = 0.3
-        let key = "\(w.wallLeft) \(w.wallRight) \(minX) \(maxX) \(back) \(height)"
+        let (left, right) = (Float(w.wallLeftRun) / 1000, Float(w.wallRightRun) / 1000)
+        let t: Float = 0.1
+        let key = "\(w.wallLeft) \(w.wallRight) \(x0) \(x1) \(back) \(height) \(left) \(right)"
         seen.insert("walls")
         guard key != wallsKey else { return }
         wallsKey = key
@@ -664,14 +702,14 @@ final class ViewportScene {
         let group = Entity()
         group.name = "walls"
         let paint = SimpleMaterial(color: Theme.wall, roughness: 0.9, isMetallic: false)
-        func wall(_ x0: Float, _ x1: Float, _ front: Float, _ rear: Float) {
-            let e = ModelEntity(mesh: .generateBox(size: [x1 - x0, height, rear - front]), materials: [paint])
-            e.position = [(x0 + x1) / 2, height / 2, -(front + rear) / 2]
+        func wall(_ xa: Float, _ xb: Float, _ front: Float, _ rear: Float) {
+            let e = ModelEntity(mesh: .generateBox(size: [xb - xa, height, rear - front]), materials: [paint])
+            e.position = [(xa + xb) / 2, height / 2, -(front + rear) / 2]
             group.addChild(e)
         }
-        wall(minX - (w.wallLeft ? t : 0), maxX + (w.wallRight ? t : 0), back, back + t)
-        if w.wallLeft { wall(minX - t, minX, -reach, back) }
-        if w.wallRight { wall(maxX, maxX + t, -reach, back) }
+        wall(x0 - (w.wallLeft ? t : 0), x1 + (w.wallRight ? t : 0), back, back + t)
+        if w.wallLeft { wall(x0 - t, x0, back - left, back) }
+        if w.wallRight { wall(x1, x1 + t, back - right, back) }
         root.addChild(group)
     }
 
@@ -1275,6 +1313,7 @@ final class ViewportScene {
     }
 
     func orbit(dx: CGFloat, dy: CGFloat) {
+        cameraMoved = true
         yaw -= Float(dx) * 0.008
         pitch = min(Self.maxPitch, max(-0.2, pitch + Float(dy) * 0.008))
         applyCamera()
@@ -1282,6 +1321,7 @@ final class ViewportScene {
 
     /// Moves what the camera looks at so the view follows the pointer.
     func pan(dx: CGFloat, dy: CGFloat) {
+        cameraMoved = true
         let fov = camera.camera.fieldOfViewInDegrees * .pi / 180
         let perPoint = 2 * distance * tan(fov / 2) / Float(max(viewSize.height, 1))
         let m = camera.transformMatrix(relativeTo: nil)
@@ -1292,12 +1332,19 @@ final class ViewportScene {
     }
 
     func zoom(by factor: Float) {
+        cameraMoved = true
         distance = min(30, max(0.15, distance * factor))
         applyCamera()
     }
 
-    /// Frames the whole run, keeping the angle.
+    /// Back to the whole job, and following it again as it grows.
     func fit() {
+        cameraMoved = false
+        frameJob()
+    }
+
+    /// Frames the whole run, keeping the angle.
+    private func frameJob() {
         let fov = camera.camera.fieldOfViewInDegrees * .pi / 180
         let aspect = Float(max(viewSize.width, 1) / max(viewSize.height, 1))
         let span = max(extent.x / max(aspect, 0.1), extent.y)

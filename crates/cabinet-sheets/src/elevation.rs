@@ -20,12 +20,16 @@ const RIGHT: f64 = 24.0;
 const WALL: f64 = 100.0;
 /// How far a wall is drawn above the cabinets: its whole height would shrink a base run.
 const WALL_ABOVE: f64 = 200.0;
+/// An item that starts this far off the floor is hung, not standing.
+const UPPER_FROM: f64 = 1000.0;
 
 /// One item of the run, for its width dimension.
 struct Item<'a> {
     id: &'a str,
     x0: f64,
     x1: f64,
+    /// Hung above the floor line: its dimension goes above the drawing.
+    upper: bool,
 }
 
 /// What the page draws, in room millimetres: x along the run, z up.
@@ -77,6 +81,7 @@ fn drawing<'a>(lists: &'a [PartList], walls: Option<&Walls>) -> Option<Drawing<'
                 id: &l.cabinet,
                 x0: ps().map(|p| p.bounds.min.x).fold(f64::MAX, f64::min),
                 x1: ps().map(|p| p.bounds.max().x).fold(f64::MIN, f64::max),
+                upper: ps().map(|p| p.bounds.min.z).fold(f64::MAX, f64::min) >= UPPER_FROM,
             }
         })
         .collect();
@@ -174,14 +179,20 @@ pub fn elevation_svg(lists: &[PartList], walls: Option<&Walls>, job: &str) -> Op
         );
     };
     let y_items = floor + 8.0;
+    let top_line = py(d.wall_top) - 4.0;
     for i in &d.items {
         let width = (i.x1 - i.x0).round();
-        dim(&mut svg, px(i.x0), px(i.x1), y_items, format!("{width:.0}"));
+        // Wall cabinets are measured above the drawing, the floor line below it.
+        let (y, label_y) = if i.upper {
+            (top_line, top_line - 3.4)
+        } else {
+            (y_items, y_items + 4.0)
+        };
+        dim(&mut svg, px(i.x0), px(i.x1), y, format!("{width:.0}"));
         let _ = writeln!(
             svg,
-            r##"<text x="{:.2}" y="{:.2}" font-size="2.6" fill="#333" text-anchor="middle">{}</text>"##,
+            r##"<text x="{:.2}" y="{label_y:.2}" font-size="2.6" fill="#333" text-anchor="middle">{}</text>"##,
             px((i.x0 + i.x1) / 2.0),
-            y_items + 4.0,
             esc(i.id)
         );
     }
@@ -281,6 +292,9 @@ mod tests {
             right: true,
             length: 1300.0,
             height: 2400.0,
+            left_run: 600.0,
+            right_run: 600.0,
+            offset: 0.0,
         }
     }
 

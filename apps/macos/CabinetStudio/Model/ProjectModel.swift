@@ -50,7 +50,7 @@ struct CabinetDoc: Identifiable, Hashable, Codable {
         case "benchtop": #"{"id":"\#(id)","type":"benchtop","thickness":33,"front_overhang":20,"side_overhang":0}"#
         case "floating_shelf": #"{"id":"\#(id)","type":"floating_shelf","width":900,"depth":250,"thickness":40,"height":1500}"#
         case "cornice", "light_rail": #"{"id":"\#(id)","type":"moulding","kind":"\#(type)","height":60,"returns":true}"#
-        case "walls": #"{"id":"\#(id)","type":"walls","left":true,"right":false,"length":0,"height":2400}"#
+        case "walls": #"{"id":"\#(id)","type":"walls","left":true,"right":false,"length":3600,"height":2400,"left_run":600,"right_run":600,"offset":0}"#
         default: #"{"id":"\#(id)","scribe":20,"to_floor":true,"type":"end_panel"}"#
         }
         return CabinetDoc(id: id, json: json)
@@ -69,7 +69,43 @@ struct CabinetDoc: Identifiable, Hashable, Codable {
         get { number("length") }
         set { setNumber("length", newValue) }
     }
-    var wallHeight: Double { (object["height"] as? NSNumber)?.doubleValue ?? 2400 }
+    var wallHeight: Double {
+        get { (object["height"] as? NSNumber)?.doubleValue ?? 2400 }
+        set { setNumber("height", newValue) }
+    }
+    var wallLeftRun: Double {
+        get { (object["left_run"] as? NSNumber)?.doubleValue ?? 600 }
+        set { setNumber("left_run", newValue) }
+    }
+    var wallRightRun: Double {
+        get { (object["right_run"] as? NSNumber)?.doubleValue ?? 600 }
+        set { setNumber("right_run", newValue) }
+    }
+    var wallOffset: Double {
+        get { number("offset") }
+        set { setNumber("offset", newValue) }
+    }
+
+    /// Hung above the floor line, not standing on it.
+    var isUpper: Bool { ["wall", "corner_wall", "rangehood"].contains(kind) }
+
+    /// A wall cabinet's height off the floor, 0 for the job's usual one.
+    var hangHeight: Double {
+        get { ((object["origin"] as? [String: Any])?["z"] as? NSNumber)?.doubleValue ?? 0 }
+        set {
+            update {
+                var o = ($0["origin"] as? [String: Any]) ?? ["x": 0, "y": 0, "z": 0]
+                o["z"] = newValue
+                $0["origin"] = o
+            }
+        }
+    }
+
+    /// Empty wall before this cabinet in its line of the run.
+    var gapBefore: Double {
+        get { number("gap_before") }
+        set { setNumber("gap_before", newValue) }
+    }
 
     /// Benchtop: thickness and overhangs.
     var topThickness: Double {
