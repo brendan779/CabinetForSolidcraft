@@ -318,6 +318,8 @@ pub enum BorePurpose {
     FrontFixing,
     /// A cabinet profile's screw, in the side or divider beside a drawer.
     RunnerScrew,
+    /// A pull on the front's edge: its screw, in the back of the front or down into its edge.
+    EdgePullScrew,
     /// A light's cable, through a panel.
     CableHole,
     /// A handle's or knob's screw hole, through the front from the back.

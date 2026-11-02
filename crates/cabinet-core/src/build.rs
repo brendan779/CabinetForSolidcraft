@@ -19,6 +19,13 @@ use crate::part::{
 };
 use crate::{Error, Result};
 
+/// `edge_mount` in the catalog: a Rappana's back leg, rather than a Scalo's plate on the edge.
+const EDGE_MOUNT_BACK_LEG: f64 = 1.0;
+/// The screws in a Rappana's box (ABI's specification).
+const EDGE_PULL_SCREW: f64 = 16.0;
+/// Our choice: the wood left over a screw's tip, and round a screw in an edge.
+const EDGE_PULL_SCREW_COVER: f64 = 1.0;
+const EDGE_PULL_WOOD_BEHIND: f64 = 3.0;
 /// Our choice: a sliding door narrower than this is no use as a door.
 const MIN_SLIDING_DOOR: f64 = 200.0;
 /// Our choice: the least wood in front of a runner's screw.
@@ -1687,7 +1694,7 @@ impl<'a> Builder<'a> {
         let top_gap = if under_bench && self.finger_gap_on_top() {
             s.top_gap.max(s.sharknose_gap)
         } else if under_bench {
-            s.top_gap
+            s.top_gap.max(s.edge_pull_gap().unwrap_or(0.0))
         } else {
             0.0
         };
@@ -1706,7 +1713,7 @@ impl<'a> Builder<'a> {
                 let over = if self.finger_gap_on_top() {
                     s.sharknose_gap.max(g)
                 } else {
-                    g
+                    g.max(s.edge_pull_gap().unwrap_or(0.0))
                 };
                 (t + g, w - t - g, z0 + g, z1 - over, 0.0, ft)
             }
@@ -3621,6 +3628,7 @@ impl<'a> Builder<'a> {
                 crate::hardware::generic_handle(s)
             }
         };
+        let edge_pull = s.edge_mounted_pull();
         let mut unfit = false;
         let span = chosen.centres.unwrap_or(0.0);
         // One screw (a knob, a T pull): the body lies across the front, level, whatever the front.
@@ -3629,6 +3637,10 @@ impl<'a> Builder<'a> {
         // How far the body runs past the outer screws along the screw line.
         let overhang = ((chosen.length - span) / 2.0).max(0.0);
         for f in &fronts {
+            if let Some(pull) = edge_pull {
+                self.fit_edge_pull(f, pull, &chosen.description, wall_hung);
+                continue;
+            }
             let b = f.bounds;
             let ta = f.thickness_axis;
             let wa = if ta == Axis::X { Axis::Y } else { Axis::X };
@@ -3910,6 +3922,114 @@ impl<'a> Builder<'a> {
                 quantity: 1,
             });
         }
+    }
+
+    /// A pull over the front's gripping edge, centred on it: the top, or a wall door's bottom. A
+    /// Rappana's leg sits in a rebate in the back of the front and screws into it; a Scalo's plate
+    /// sits on the edge, flush with the back, and screws down into it (owner, 2026-11-02).
+    fn fit_edge_pull(
+        &mut self,
+        f: &Part,
+        pull: &'static HardwareItem,
+        description: &str,
+        wall_hung: bool,
+    ) {
+        let s = &self.cab.standard;
+        let b = f.bounds;
+        let numbers = (|| {
+            Ok::<_, String>((
+                pull.param("length")?,
+                pull.param("edge_mount")?,
+                pull.param("sheet_thickness")?,
+                pull.param("hole_offset")?,
+                pull.param("leg_height")?,
+            ))
+        })();
+        let (length, mount, sheet, offset, leg) = match numbers {
+            Ok(n) => n,
+            Err(e) => {
+                self.list.warnings.push(e);
+                return;
+            }
+        };
+        if s.door_style != DoorStyle::Slab || f.thickness_axis != Axis::Y {
+            self.list.warnings.push(format!(
+                "{description} needs a slab front in line with the cabinet: left off {}",
+                f.name
+            ));
+            return;
+        }
+        if length > b.size.x {
+            self.list
+                .warnings
+                .push(format!("{description} does not fit {}: left off", f.name));
+            return;
+        }
+        let top = !(wall_hung && f.role != PartRole::DrawerFront);
+        let edge = if top { b.max().z } else { b.min.z };
+        // From the edge into the front.
+        let inward = if top { -1.0 } else { 1.0 };
+        let (mid, back) = (b.center().x, b.max().y);
+        let thickness = f.thickness();
+        if mount == EDGE_MOUNT_BACK_LEG {
+            let (reach, x0, x1) = (
+                leg - sheet + 1.0,
+                mid - length / 2.0 - 1.0,
+                mid + length / 2.0 + 1.0,
+            );
+            let (z0, z1) = if top {
+                (edge - reach, edge)
+            } else {
+                (edge, edge + reach)
+            };
+            self.list.operations.push(Operation::Groove {
+                part: f.name.clone(),
+                bounds: aabb(x0, back - sheet, z0, x1, back, z1),
+            });
+            let screw_into_wood = EDGE_PULL_SCREW - sheet;
+            if screw_into_wood > thickness - sheet - EDGE_PULL_SCREW_COVER {
+                self.list.warnings.push(format!(
+                    "{}: the 16 mm screws in the box would come too close to its {thickness:.0} mm \
+                     face behind the rebate: use shorter ones",
+                    f.name
+                ));
+            }
+            for hole in &pull.drilling {
+                self.list.operations.push(Operation::Bore {
+                    part: f.name.clone(),
+                    at: Vec3::new(mid + hole.x, back - sheet, edge + inward * (offset - sheet)),
+                    direction: Dir::new(Axis::Y, false),
+                    diameter: hole.diameter,
+                    depth: hole.depth.min(thickness - sheet - EDGE_PULL_SCREW_COVER),
+                    purpose: BorePurpose::EdgePullScrew,
+                });
+            }
+        } else {
+            if thickness < offset + EDGE_PULL_WOOD_BEHIND {
+                self.list.warnings.push(format!(
+                    "{}: its {thickness:.0} mm edge leaves too little wood round the screws of \
+                     {description}",
+                    f.name
+                ));
+            }
+            for hole in &pull.drilling {
+                self.list.operations.push(Operation::Bore {
+                    part: f.name.clone(),
+                    at: Vec3::new(mid + hole.x, back - offset, edge),
+                    direction: Dir::new(Axis::Z, !top),
+                    diameter: hole.diameter,
+                    depth: hole.depth,
+                    purpose: BorePurpose::EdgePullScrew,
+                });
+            }
+        }
+        self.list.hardware.push(HardwarePlacement {
+            item: pull.id.clone(),
+            description: description.to_string(),
+            at: Vec3::new(mid, back, edge),
+            part: f.name.clone(),
+            quantity: 1,
+        });
     }
 
     /// Shaker fronts: every door, lift front and drawer front big enough becomes two stiles
@@ -6380,6 +6500,152 @@ mod tests {
         }
     }
 
+    fn with_abi_pull(kind: CabinetKind, family: &str) -> Cabinet {
+        let id = match kind {
+            CabinetKind::Wall => "W01",
+            _ => "D01",
+        };
+        let mut cab = Cabinet::new(id, kind).sectioned();
+        cab.standard.handle_range = crate::model::HandleRange::Abi;
+        cab.standard.handle_style = crate::hardware::items()
+            .iter()
+            .find(|i| i.id.starts_with(family))
+            .expect("the pull")
+            .id
+            .clone();
+        cab
+    }
+
+    fn pull_bores(list: &PartList, part: &str) -> Vec<(Vec3, Dir, f64)> {
+        list.operations
+            .iter()
+            .filter_map(|o| match o {
+                Operation::Bore {
+                    part: p,
+                    at,
+                    direction,
+                    depth,
+                    purpose: BorePurpose::EdgePullScrew,
+                    ..
+                } if p == part => Some((*at, *direction, *depth)),
+                _ => None,
+            })
+            .collect()
+    }
+
+    /// ABI's Rappana 100: holes 75 apart, 10 below the plate's top (2 thick), leg 2 thick in a
+    /// rebate in the back of the front.
+    #[test]
+    fn a_rappana_screws_its_leg_into_a_rebate_in_the_back_of_the_front() {
+        let cab = with_abi_pull(CabinetKind::DrawerBank, "handle.abi.rappana-100.");
+        let list = build_cabinet(&cab).unwrap();
+        let front = list.part("D01.DrawerFront1").unwrap().bounds;
+        let bores = pull_bores(&list, "D01.DrawerFront1");
+        assert_eq!(bores.len(), 2);
+        assert!((bores[1].0.x - bores[0].0.x - 75.0).abs() < 1e-9);
+        assert_eq!(
+            bores[0].0.z,
+            front.max().z - 8.0,
+            "10 below the plate's top"
+        );
+        assert_eq!(bores[0].0.y, front.max().y - 2.0, "from the rebate's floor");
+        assert!(!bores[0].1.positive, "towards the face");
+        assert!(bores[0].2 < front.size.y - 2.0, "not through the face");
+        let rebate = list
+            .operations
+            .iter()
+            .find_map(|o| match o {
+                Operation::Groove { part, bounds } if part == "D01.DrawerFront1" => Some(*bounds),
+                _ => None,
+            })
+            .expect("the rebate");
+        assert_eq!(rebate.size.y, 2.0);
+        assert_eq!(rebate.max().z, front.max().z);
+        assert!(rebate.size.x > 100.0 && rebate.size.x < 110.0);
+        assert!(
+            list.warnings.iter().all(|w| !w.contains("clash")),
+            "{:?}",
+            list.warnings
+        );
+        assert!(list.hardware.iter().any(|h| h.item.contains("rappana-100")));
+    }
+
+    #[test]
+    fn a_scalo_sits_on_the_edge_and_screws_down_into_it() {
+        let cab = with_abi_pull(CabinetKind::DrawerBank, "handle.abi.scalo-50.");
+        let list = build_cabinet(&cab).unwrap();
+        let front = list.part("D01.DrawerFront1").unwrap().bounds;
+        let bores = pull_bores(&list, "D01.DrawerFront1");
+        assert_eq!(bores.len(), 2);
+        assert!((bores[1].0.x - bores[0].0.x - 32.0).abs() < 1e-9);
+        assert_eq!(bores[0].0.z, front.max().z);
+        assert_eq!(
+            bores[0].0.y,
+            front.max().y - 10.0,
+            "10 from the plate's back"
+        );
+        assert!(!bores[0].1.positive && bores[0].1.axis == Axis::Z, "down");
+        assert!(
+            list.warnings.iter().all(|w| !w.contains("clash")),
+            "{:?}",
+            list.warnings
+        );
+    }
+
+    /// The owner: 2 mm between the plate and whatever is above it, raised automatically.
+    #[test]
+    fn an_edge_pull_gets_clearance_over_it_at_the_top_and_between_fronts() {
+        let cab = with_abi_pull(CabinetKind::DrawerBank, "handle.abi.rappana-100.");
+        let list = build_cabinet(&cab).unwrap();
+        let fronts: Vec<_> = list
+            .by_role(PartRole::DrawerFront)
+            .map(|p| p.bounds)
+            .collect();
+        assert_eq!(cab.height - fronts[0].max().z, 4.0, "plate 2 + clearance 2");
+        assert_eq!(fronts[0].min.z - fronts[1].max().z, 4.0);
+        let mut plain = cab.clone();
+        plain.standard.handle_range = crate::model::HandleRange::Generic;
+        let list = build_cabinet(&plain).unwrap();
+        let fronts: Vec<_> = list
+            .by_role(PartRole::DrawerFront)
+            .map(|p| p.bounds)
+            .collect();
+        assert_eq!(
+            fronts[0].min.z - fronts[1].max().z,
+            plain.standard.front_gap
+        );
+    }
+
+    #[test]
+    fn a_pull_longer_than_its_front_is_left_off_and_says_so() {
+        let mut cab = with_abi_pull(CabinetKind::DrawerBank, "handle.abi.rappana-800.");
+        cab.width = 600.0;
+        let list = build_cabinet(&cab).unwrap();
+        assert!(list.warnings.iter().any(|w| w.contains("does not fit")));
+        assert!(pull_bores(&list, "D01.DrawerFront1").is_empty());
+    }
+
+    #[test]
+    fn a_wall_doors_edge_pull_goes_on_its_bottom_edge() {
+        let cab = with_abi_pull(CabinetKind::Wall, "handle.abi.rappana-100.");
+        let list = build_cabinet(&cab).unwrap();
+        let door = list.part("W01.Door1").unwrap().bounds;
+        let bores = pull_bores(&list, "W01.Door1");
+        assert_eq!(bores[0].0.z, door.min.z + 8.0);
+    }
+
+    #[test]
+    fn a_shaker_front_leaves_an_edge_pull_off_and_says_so() {
+        let mut cab = with_abi_pull(CabinetKind::DrawerBank, "handle.abi.rappana-100.");
+        cab.standard.door_style = DoorStyle::Shaker;
+        let list = build_cabinet(&cab).unwrap();
+        assert!(
+            list.warnings
+                .iter()
+                .any(|w| w.contains("needs a slab front"))
+        );
+    }
+
     #[test]
     fn a_section_can_pick_its_box_height_and_length() {
         let mut cab = Cabinet::new("D01", CabinetKind::DrawerBank).sectioned();
@@ -8415,6 +8681,8 @@ mod tests {
         let styles: Vec<_> = crate::hardware::items()
             .iter()
             .filter(|h| h.id.starts_with("handle.abi."))
+            // Those over the edge are held to their own rules below.
+            .filter(|h| !h.parameters.contains_key("edge_mount"))
             .filter(|h| seen.insert(h.article.clone()))
             .collect();
         assert!(styles.len() >= 30);

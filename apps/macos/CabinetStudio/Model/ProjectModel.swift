@@ -800,6 +800,12 @@ final class ProjectModel {
         var standard = cab.standard
         standard["handle_range"] = "abi"
         standard["handle_style"] = record.id
+        // A pull over the edge has one place; a pull on the face can't stay there.
+        if record.edgeMounted {
+            standard["handle_place"] = "edge_pull"
+        } else if standard["handle_place"] as? String == "edge_pull" {
+            standard["handle_place"] = "corner"
+        }
         cab.standard = standard
         withAnimation(.snappy) { applyStandard(from: old, to: cab) }
         lastError = nil

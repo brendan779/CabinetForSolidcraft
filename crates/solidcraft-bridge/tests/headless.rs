@@ -652,6 +652,65 @@ fn a_drawer_frame_is_cut_out_for_each_drawer() {
 }
 
 #[test]
+fn a_rappanas_rebate_is_cut_in_the_back_of_the_front() {
+    let Some(cli) = cli() else {
+        eprintln!("SOLIDCRAFT_CLI not set: skipped");
+        return;
+    };
+    let mut cab = Cabinet::new("D01", CabinetKind::DrawerBank).sectioned();
+    cab.standard.handle_range = cabinet_core::model::HandleRange::Abi;
+    cab.standard.handle_style = cabinet_core::hardware::items()
+        .iter()
+        .find(|i| i.id.starts_with("handle.abi.rappana-100."))
+        .unwrap()
+        .id
+        .clone();
+    let list = build_cabinet(&cab).unwrap();
+    let r = run(
+        &cli,
+        "rappana",
+        &emit_cabinet(&list, Detail::Exact, None),
+        &["eval"],
+    );
+    let p = list.part("D01.DrawerFront1").unwrap();
+    let body = r["bodies"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|b| b["name"] == p.name)
+        .unwrap();
+    let rebate = list
+        .operations
+        .iter()
+        .find_map(|o| match o {
+            cabinet_core::part::Operation::Groove { part, bounds } if *part == p.name => {
+                Some(bounds.size.x * bounds.size.y * bounds.size.z)
+            }
+            _ => None,
+        })
+        .unwrap();
+    let full = p.bounds.size.x * p.bounds.size.y * p.bounds.size.z;
+    let volume = body["volume_mm3"].as_f64().unwrap();
+    let bored: f64 = list
+        .operations
+        .iter()
+        .filter_map(|o| match o {
+            cabinet_core::part::Operation::Bore {
+                part,
+                diameter,
+                depth,
+                ..
+            } if *part == p.name => Some(std::f64::consts::PI * diameter * diameter / 4.0 * depth),
+            _ => None,
+        })
+        .sum();
+    assert!(
+        (full - rebate - bored - volume).abs() < 100.0,
+        "{volume} of {full} less {rebate} and {bored}"
+    );
+}
+
+#[test]
 fn a_sliding_wardrobe_builds_with_its_doors_overlapping() {
     let Some(cli) = cli() else {
         eprintln!("SOLIDCRAFT_CLI not set: skipped");

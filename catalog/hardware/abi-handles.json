@@ -4500,6 +4500,1306 @@
    }
   },
   {
+   "id": "handle.abi.rappana-50.brushed-brass",
+   "brand": "ABI Interiors",
+   "article": "ABI-RAPPANA-50",
+   "family": "ABI Rappana",
+   "variant": "Brushed Brass",
+   "kind": "handle",
+   "parameters": {
+    "length": 50.0,
+    "centres": 25.0,
+    "projection": 36.0,
+    "width": 18.0,
+    "sku": 10504,
+    "price_aud": 29.9,
+    "across_low": -16.0,
+    "across_high": 2.0,
+    "edge_mount": 1,
+    "sheet_thickness": 2.0,
+    "hole_offset": 10.0,
+    "leg_height": 18.0,
+    "finish_colour_rgb": 13277754
+   },
+   "drilling": [
+    {
+     "x": -12.5,
+     "y": 0.0,
+     "diameter": 2.5,
+     "depth": 12.0,
+     "note": "pilot for the screw in the box: x along the length, hole_offset from the leg top or plate back"
+    },
+    {
+     "x": 12.5,
+     "y": 0.0,
+     "diameter": 2.5,
+     "depth": 12.0,
+     "note": "pilot for the screw in the box: x along the length, hole_offset from the leg top or plate back"
+    }
+   ],
+   "source": {
+    "url": "ABI Interiors Rappana (https://www.abiinteriors.com.au/product/rappana-cabinetry-pull-50mm/); finish Brushed Brass: https://www.abiinteriors.com.au/product/rappana-cabinetry-pull-50mm-brushed-brass/, SKU 10504, $29.90 AUD (product.txt of the BIMobject download, 2026-10-27); screw pattern from ABI's spec drawing Rappana_50_Spec-01.jpg; geometry re-oriented from the product's IFC by scripts/import_abi_handles.py; finish colour from Beta/Tezra BIM models",
+    "document_date": "2026-10-27",
+    "retrieved": "2026-11-01",
+    "verified": false
+   }
+  },
+  {
+   "id": "handle.abi.rappana-50.brushed-copper",
+   "brand": "ABI Interiors",
+   "article": "ABI-RAPPANA-50",
+   "family": "ABI Rappana",
+   "variant": "Brushed Copper",
+   "kind": "handle",
+   "parameters": {
+    "length": 50.0,
+    "centres": 25.0,
+    "projection": 36.0,
+    "width": 18.0,
+    "sku": 10505,
+    "price_aud": 29.9,
+    "across_low": -16.0,
+    "across_high": 2.0,
+    "edge_mount": 1,
+    "sheet_thickness": 2.0,
+    "hole_offset": 10.0,
+    "leg_height": 18.0,
+    "finish_colour_rgb": 13012586
+   },
+   "drilling": [
+    {
+     "x": -12.5,
+     "y": 0.0,
+     "diameter": 2.5,
+     "depth": 12.0,
+     "note": "pilot for the screw in the box: x along the length, hole_offset from the leg top or plate back"
+    },
+    {
+     "x": 12.5,
+     "y": 0.0,
+     "diameter": 2.5,
+     "depth": 12.0,
+     "note": "pilot for the screw in the box: x along the length, hole_offset from the leg top or plate back"
+    }
+   ],
+   "source": {
+    "url": "ABI Interiors Rappana (https://www.abiinteriors.com.au/product/rappana-cabinetry-pull-50mm/); finish Brushed Copper: https://www.abiinteriors.com.au/product/rappana-cabinetry-pull-50mm-brushed-copper/, SKU 10505, $29.90 AUD (product.txt of the BIMobject download, 2026-10-27); screw pattern from ABI's spec drawing Rappana_50_Spec-01.jpg; geometry re-oriented from the product's IFC by scripts/import_abi_handles.py; finish colour from ABI's finish swatch",
+    "document_date": "2026-10-27",
+    "retrieved": "2026-11-01",
+    "verified": false
+   }
+  },
+  {
+   "id": "handle.abi.rappana-50.brushed-gunmetal",
+   "brand": "ABI Interiors",
+   "article": "ABI-RAPPANA-50",
+   "family": "ABI Rappana",
+   "variant": "Brushed Gunmetal",
+   "kind": "handle",
+   "parameters": {
+    "length": 50.0,
+    "centres": 25.0,
+    "projection": 36.0,
+    "width": 18.0,
+    "sku": 10506,
+    "price_aud": 29.9,
+    "across_low": -16.0,
+    "across_high": 2.0,
+    "edge_mount": 1,
+    "sheet_thickness": 2.0,
+    "hole_offset": 10.0,
+    "leg_height": 18.0,
+    "finish_colour_rgb": 4144959
+   },
+   "drilling": [
+    {
+     "x": -12.5,
+     "y": 0.0,
+     "diameter": 2.5,
+     "depth": 12.0,
+     "note": "pilot for the screw in the box: x along the length, hole_offset from the leg top or plate back"
+    },
+    {
+     "x": 12.5,
+     "y": 0.0,
+     "diameter": 2.5,
+     "depth": 12.0,
+     "note": "pilot for the screw in the box: x along the length, hole_offset from the leg top or plate back"
+    }
+   ],
+   "source": {
+    "url": "ABI Interiors Rappana (https://www.abiinteriors.com.au/product/rappana-cabinetry-pull-50mm/); finish Brushed Gunmetal: https://www.abiinteriors.com.au/product/rappana-cabinetry-pull-50mm-brushed-gunmetal/, SKU 10506, $29.90 AUD (product.txt of the BIMobject download, 2026-10-27); screw pattern from ABI's spec drawing Rappana_50_Spec-01.jpg; geometry re-oriented from the product's IFC by scripts/import_abi_handles.py; finish colour from Kingsley Shower Head Round model",
+    "document_date": "2026-10-27",
+    "retrieved": "2026-11-01",
+    "verified": false
+   }
+  },
+  {
+   "id": "handle.abi.rappana-50.stainless-steel",
+   "brand": "ABI Interiors",
+   "article": "ABI-RAPPANA-50",
+   "family": "ABI Rappana",
+   "variant": "Stainless Steel",
+   "kind": "handle",
+   "parameters": {
+    "length": 50.0,
+    "centres": 25.0,
+    "projection": 36.0,
+    "width": 18.0,
+    "sku": 10507,
+    "price_aud": 24.9,
+    "across_low": -16.0,
+    "across_high": 2.0,
+    "edge_mount": 1,
+    "sheet_thickness": 2.0,
+    "hole_offset": 10.0,
+    "leg_height": 18.0,
+    "finish_colour_rgb": 12434361
+   },
+   "drilling": [
+    {
+     "x": -12.5,
+     "y": 0.0,
+     "diameter": 2.5,
+     "depth": 12.0,
+     "note": "pilot for the screw in the box: x along the length, hole_offset from the leg top or plate back"
+    },
+    {
+     "x": 12.5,
+     "y": 0.0,
+     "diameter": 2.5,
+     "depth": 12.0,
+     "note": "pilot for the screw in the box: x along the length, hole_offset from the leg top or plate back"
+    }
+   ],
+   "source": {
+    "url": "ABI Interiors Rappana (https://www.abiinteriors.com.au/product/rappana-cabinetry-pull-50mm/); finish Stainless Steel: https://www.abiinteriors.com.au/product/rappana-cabinetry-pull-50mm-stainless-steel/, SKU 10507, $24.90 AUD (product.txt of the BIMobject download, 2026-10-27); screw pattern from ABI's spec drawing Rappana_50_Spec-01.jpg; geometry re-oriented from the product's IFC by scripts/import_abi_handles.py; finish colour from Rappana Extended 500/800 models",
+    "document_date": "2026-10-27",
+    "retrieved": "2026-11-01",
+    "verified": false
+   }
+  },
+  {
+   "id": "handle.abi.rappana-50.antique-slate",
+   "brand": "ABI Interiors",
+   "article": "ABI-RAPPANA-50",
+   "family": "ABI Rappana",
+   "variant": "Antique Slate",
+   "kind": "handle",
+   "parameters": {
+    "length": 50.0,
+    "centres": 25.0,
+    "projection": 36.0,
+    "width": 18.0,
+    "sku": 17265,
+    "price_aud": 34.9,
+    "across_low": -16.0,
+    "across_high": 2.0,
+    "edge_mount": 1,
+    "sheet_thickness": 2.0,
+    "hole_offset": 10.0,
+    "leg_height": 18.0,
+    "finish_colour_rgb": 4539717
+   },
+   "drilling": [
+    {
+     "x": -12.5,
+     "y": 0.0,
+     "diameter": 2.5,
+     "depth": 12.0,
+     "note": "pilot for the screw in the box: x along the length, hole_offset from the leg top or plate back"
+    },
+    {
+     "x": 12.5,
+     "y": 0.0,
+     "diameter": 2.5,
+     "depth": 12.0,
+     "note": "pilot for the screw in the box: x along the length, hole_offset from the leg top or plate back"
+    }
+   ],
+   "source": {
+    "url": "ABI Interiors Rappana (https://www.abiinteriors.com.au/product/rappana-cabinetry-pull-50mm/); finish Antique Slate: https://www.abiinteriors.com.au/product/rappana-cabinetry-pull-50mm-antique-slate/, SKU 17265, $34.90 AUD (product.txt of the BIMobject download, 2026-10-27); screw pattern from ABI's spec drawing Rappana_50_Spec-01.jpg; geometry re-oriented from the product's IFC by scripts/import_abi_handles.py; finish colour from ABI's finish swatch",
+    "document_date": "2026-10-27",
+    "retrieved": "2026-11-01",
+    "verified": false
+   }
+  },
+  {
+   "id": "handle.abi.rappana-50.antique-steel",
+   "brand": "ABI Interiors",
+   "article": "ABI-RAPPANA-50",
+   "family": "ABI Rappana",
+   "variant": "Antique Steel",
+   "kind": "handle",
+   "parameters": {
+    "length": 50.0,
+    "centres": 25.0,
+    "projection": 36.0,
+    "width": 18.0,
+    "sku": 17647,
+    "price_aud": 34.9,
+    "across_low": -16.0,
+    "across_high": 2.0,
+    "edge_mount": 1,
+    "sheet_thickness": 2.0,
+    "hole_offset": 10.0,
+    "leg_height": 18.0,
+    "finish_colour_rgb": 9803157
+   },
+   "drilling": [
+    {
+     "x": -12.5,
+     "y": 0.0,
+     "diameter": 2.5,
+     "depth": 12.0,
+     "note": "pilot for the screw in the box: x along the length, hole_offset from the leg top or plate back"
+    },
+    {
+     "x": 12.5,
+     "y": 0.0,
+     "diameter": 2.5,
+     "depth": 12.0,
+     "note": "pilot for the screw in the box: x along the length, hole_offset from the leg top or plate back"
+    }
+   ],
+   "source": {
+    "url": "ABI Interiors Rappana (https://www.abiinteriors.com.au/product/rappana-cabinetry-pull-50mm/); finish Antique Steel: https://www.abiinteriors.com.au/product/rappana-cabinetry-pull-50mm-antique-steel/, SKU 17647, $34.90 AUD (product.txt of the BIMobject download, 2026-10-27); screw pattern from ABI's spec drawing Rappana_50_Spec-01.jpg; geometry re-oriented from the product's IFC by scripts/import_abi_handles.py; finish colour from ABI's finish swatch",
+    "document_date": "2026-10-27",
+    "retrieved": "2026-11-01",
+    "verified": false
+   }
+  },
+  {
+   "id": "handle.abi.rappana-100.brushed-brass",
+   "brand": "ABI Interiors",
+   "article": "ABI-RAPPANA-100",
+   "family": "ABI Rappana",
+   "variant": "Brushed Brass",
+   "kind": "handle",
+   "parameters": {
+    "length": 100.0,
+    "centres": 75.0,
+    "projection": 36.0,
+    "width": 18.0,
+    "sku": 10470,
+    "price_aud": 34.9,
+    "across_low": -16.0,
+    "across_high": 2.0,
+    "edge_mount": 1,
+    "sheet_thickness": 2.0,
+    "hole_offset": 10.0,
+    "leg_height": 18.0,
+    "finish_colour_rgb": 13277754
+   },
+   "drilling": [
+    {
+     "x": -37.5,
+     "y": 0.0,
+     "diameter": 2.5,
+     "depth": 12.0,
+     "note": "pilot for the screw in the box: x along the length, hole_offset from the leg top or plate back"
+    },
+    {
+     "x": 37.5,
+     "y": 0.0,
+     "diameter": 2.5,
+     "depth": 12.0,
+     "note": "pilot for the screw in the box: x along the length, hole_offset from the leg top or plate back"
+    }
+   ],
+   "source": {
+    "url": "ABI Interiors Rappana (https://www.abiinteriors.com.au/product/rappana-cabinetry-pull-extended-100mm/); finish Brushed Brass: https://www.abiinteriors.com.au/product/rappana-cabinetry-pull-extended-100mm-brushed-brass/, SKU 10470, $34.90 AUD (product.txt of the BIMobject download, 2026-10-27); screw pattern from ABI's spec drawing Rappana_100_Spec-01.jpg; geometry re-oriented from the product's IFC by scripts/import_abi_handles.py; finish colour from Beta/Tezra BIM models",
+    "document_date": "2026-10-27",
+    "retrieved": "2026-11-01",
+    "verified": false
+   }
+  },
+  {
+   "id": "handle.abi.rappana-100.brushed-copper",
+   "brand": "ABI Interiors",
+   "article": "ABI-RAPPANA-100",
+   "family": "ABI Rappana",
+   "variant": "Brushed Copper",
+   "kind": "handle",
+   "parameters": {
+    "length": 100.0,
+    "centres": 75.0,
+    "projection": 36.0,
+    "width": 18.0,
+    "sku": 10469,
+    "price_aud": 34.9,
+    "across_low": -16.0,
+    "across_high": 2.0,
+    "edge_mount": 1,
+    "sheet_thickness": 2.0,
+    "hole_offset": 10.0,
+    "leg_height": 18.0,
+    "finish_colour_rgb": 13012586
+   },
+   "drilling": [
+    {
+     "x": -37.5,
+     "y": 0.0,
+     "diameter": 2.5,
+     "depth": 12.0,
+     "note": "pilot for the screw in the box: x along the length, hole_offset from the leg top or plate back"
+    },
+    {
+     "x": 37.5,
+     "y": 0.0,
+     "diameter": 2.5,
+     "depth": 12.0,
+     "note": "pilot for the screw in the box: x along the length, hole_offset from the leg top or plate back"
+    }
+   ],
+   "source": {
+    "url": "ABI Interiors Rappana (https://www.abiinteriors.com.au/product/rappana-cabinetry-pull-extended-100mm/); finish Brushed Copper: https://www.abiinteriors.com.au/product/rappana-cabinetry-pull-extended-100mm-brushed-copper/, SKU 10469, $34.90 AUD (product.txt of the BIMobject download, 2026-10-27); screw pattern from ABI's spec drawing Rappana_100_Spec-01.jpg; geometry re-oriented from the product's IFC by scripts/import_abi_handles.py; finish colour from ABI's finish swatch",
+    "document_date": "2026-10-27",
+    "retrieved": "2026-11-01",
+    "verified": false
+   }
+  },
+  {
+   "id": "handle.abi.rappana-100.brushed-gunmetal",
+   "brand": "ABI Interiors",
+   "article": "ABI-RAPPANA-100",
+   "family": "ABI Rappana",
+   "variant": "Brushed Gunmetal",
+   "kind": "handle",
+   "parameters": {
+    "length": 100.0,
+    "centres": 75.0,
+    "projection": 36.0,
+    "width": 18.0,
+    "sku": 10471,
+    "price_aud": 34.9,
+    "across_low": -16.0,
+    "across_high": 2.0,
+    "edge_mount": 1,
+    "sheet_thickness": 2.0,
+    "hole_offset": 10.0,
+    "leg_height": 18.0,
+    "finish_colour_rgb": 4144959
+   },
+   "drilling": [
+    {
+     "x": -37.5,
+     "y": 0.0,
+     "diameter": 2.5,
+     "depth": 12.0,
+     "note": "pilot for the screw in the box: x along the length, hole_offset from the leg top or plate back"
+    },
+    {
+     "x": 37.5,
+     "y": 0.0,
+     "diameter": 2.5,
+     "depth": 12.0,
+     "note": "pilot for the screw in the box: x along the length, hole_offset from the leg top or plate back"
+    }
+   ],
+   "source": {
+    "url": "ABI Interiors Rappana (https://www.abiinteriors.com.au/product/rappana-cabinetry-pull-extended-100mm/); finish Brushed Gunmetal: https://www.abiinteriors.com.au/product/rappana-cabinetry-pull-extended-100mm-brushed-gunmetal/, SKU 10471, $34.90 AUD (product.txt of the BIMobject download, 2026-10-27); screw pattern from ABI's spec drawing Rappana_100_Spec-01.jpg; geometry re-oriented from the product's IFC by scripts/import_abi_handles.py; finish colour from Kingsley Shower Head Round model",
+    "document_date": "2026-10-27",
+    "retrieved": "2026-11-01",
+    "verified": false
+   }
+  },
+  {
+   "id": "handle.abi.rappana-100.stainless-steel",
+   "brand": "ABI Interiors",
+   "article": "ABI-RAPPANA-100",
+   "family": "ABI Rappana",
+   "variant": "Stainless Steel",
+   "kind": "handle",
+   "parameters": {
+    "length": 100.0,
+    "centres": 75.0,
+    "projection": 36.0,
+    "width": 18.0,
+    "sku": 10472,
+    "price_aud": 29.9,
+    "across_low": -16.0,
+    "across_high": 2.0,
+    "edge_mount": 1,
+    "sheet_thickness": 2.0,
+    "hole_offset": 10.0,
+    "leg_height": 18.0,
+    "finish_colour_rgb": 12434361
+   },
+   "drilling": [
+    {
+     "x": -37.5,
+     "y": 0.0,
+     "diameter": 2.5,
+     "depth": 12.0,
+     "note": "pilot for the screw in the box: x along the length, hole_offset from the leg top or plate back"
+    },
+    {
+     "x": 37.5,
+     "y": 0.0,
+     "diameter": 2.5,
+     "depth": 12.0,
+     "note": "pilot for the screw in the box: x along the length, hole_offset from the leg top or plate back"
+    }
+   ],
+   "source": {
+    "url": "ABI Interiors Rappana (https://www.abiinteriors.com.au/product/rappana-cabinetry-pull-extended-100mm/); finish Stainless Steel: https://www.abiinteriors.com.au/product/rappana-cabinetry-pull-extended-100mm-stainless-steel/, SKU 10472, $29.90 AUD (product.txt of the BIMobject download, 2026-10-27); screw pattern from ABI's spec drawing Rappana_100_Spec-01.jpg; geometry re-oriented from the product's IFC by scripts/import_abi_handles.py; finish colour from Rappana Extended 500/800 models",
+    "document_date": "2026-10-27",
+    "retrieved": "2026-11-01",
+    "verified": false
+   }
+  },
+  {
+   "id": "handle.abi.rappana-100.antique-aurum",
+   "brand": "ABI Interiors",
+   "article": "ABI-RAPPANA-100",
+   "family": "ABI Rappana",
+   "variant": "Antique Aurum",
+   "kind": "handle",
+   "parameters": {
+    "length": 100.0,
+    "centres": 75.0,
+    "projection": 36.0,
+    "width": 18.0,
+    "sku": 17260,
+    "price_aud": 39.9,
+    "across_low": -16.0,
+    "across_high": 2.0,
+    "edge_mount": 1,
+    "sheet_thickness": 2.0,
+    "hole_offset": 10.0,
+    "leg_height": 18.0,
+    "finish_colour_rgb": 10452308
+   },
+   "drilling": [
+    {
+     "x": -37.5,
+     "y": 0.0,
+     "diameter": 2.5,
+     "depth": 12.0,
+     "note": "pilot for the screw in the box: x along the length, hole_offset from the leg top or plate back"
+    },
+    {
+     "x": 37.5,
+     "y": 0.0,
+     "diameter": 2.5,
+     "depth": 12.0,
+     "note": "pilot for the screw in the box: x along the length, hole_offset from the leg top or plate back"
+    }
+   ],
+   "source": {
+    "url": "ABI Interiors Rappana (https://www.abiinteriors.com.au/product/rappana-cabinetry-pull-extended-100mm/); finish Antique Aurum: https://www.abiinteriors.com.au/product/rappana-cabinetry-pull-extended-100mm-antique-aurum/, SKU 17260, $39.90 AUD (product.txt of the BIMobject download, 2026-10-27); screw pattern from ABI's spec drawing Rappana_100_Spec-01.jpg; geometry re-oriented from the product's IFC by scripts/import_abi_handles.py; finish colour from ABI's finish swatch",
+    "document_date": "2026-10-27",
+    "retrieved": "2026-11-01",
+    "verified": false
+   }
+  },
+  {
+   "id": "handle.abi.rappana-100.antique-bronze",
+   "brand": "ABI Interiors",
+   "article": "ABI-RAPPANA-100",
+   "family": "ABI Rappana",
+   "variant": "Antique Bronze",
+   "kind": "handle",
+   "parameters": {
+    "length": 100.0,
+    "centres": 75.0,
+    "projection": 36.0,
+    "width": 18.0,
+    "sku": 17261,
+    "price_aud": 39.9,
+    "across_low": -16.0,
+    "across_high": 2.0,
+    "edge_mount": 1,
+    "sheet_thickness": 2.0,
+    "hole_offset": 10.0,
+    "leg_height": 18.0,
+    "finish_colour_rgb": 7162940
+   },
+   "drilling": [
+    {
+     "x": -37.5,
+     "y": 0.0,
+     "diameter": 2.5,
+     "depth": 12.0,
+     "note": "pilot for the screw in the box: x along the length, hole_offset from the leg top or plate back"
+    },
+    {
+     "x": 37.5,
+     "y": 0.0,
+     "diameter": 2.5,
+     "depth": 12.0,
+     "note": "pilot for the screw in the box: x along the length, hole_offset from the leg top or plate back"
+    }
+   ],
+   "source": {
+    "url": "ABI Interiors Rappana (https://www.abiinteriors.com.au/product/rappana-cabinetry-pull-extended-100mm/); finish Antique Bronze: https://www.abiinteriors.com.au/product/rappana-cabinetry-pull-extended-100mm-antique-bronze/, SKU 17261, $39.90 AUD (product.txt of the BIMobject download, 2026-10-27); screw pattern from ABI's spec drawing Rappana_100_Spec-01.jpg; geometry re-oriented from the product's IFC by scripts/import_abi_handles.py; finish colour from ABI's finish swatch",
+    "document_date": "2026-10-27",
+    "retrieved": "2026-11-01",
+    "verified": false
+   }
+  },
+  {
+   "id": "handle.abi.rappana-100.antique-slate",
+   "brand": "ABI Interiors",
+   "article": "ABI-RAPPANA-100",
+   "family": "ABI Rappana",
+   "variant": "Antique Slate",
+   "kind": "handle",
+   "parameters": {
+    "length": 100.0,
+    "centres": 75.0,
+    "projection": 36.0,
+    "width": 18.0,
+    "sku": 17262,
+    "price_aud": 39.9,
+    "across_low": -16.0,
+    "across_high": 2.0,
+    "edge_mount": 1,
+    "sheet_thickness": 2.0,
+    "hole_offset": 10.0,
+    "leg_height": 18.0,
+    "finish_colour_rgb": 4539717
+   },
+   "drilling": [
+    {
+     "x": -37.5,
+     "y": 0.0,
+     "diameter": 2.5,
+     "depth": 12.0,
+     "note": "pilot for the screw in the box: x along the length, hole_offset from the leg top or plate back"
+    },
+    {
+     "x": 37.5,
+     "y": 0.0,
+     "diameter": 2.5,
+     "depth": 12.0,
+     "note": "pilot for the screw in the box: x along the length, hole_offset from the leg top or plate back"
+    }
+   ],
+   "source": {
+    "url": "ABI Interiors Rappana (https://www.abiinteriors.com.au/product/rappana-cabinetry-pull-extended-100mm/); finish Antique Slate: https://www.abiinteriors.com.au/product/rappana-cabinetry-pull-extended-100mm-antique-slate/, SKU 17262, $39.90 AUD (product.txt of the BIMobject download, 2026-10-27); screw pattern from ABI's spec drawing Rappana_100_Spec-01.jpg; geometry re-oriented from the product's IFC by scripts/import_abi_handles.py; finish colour from ABI's finish swatch",
+    "document_date": "2026-10-27",
+    "retrieved": "2026-11-01",
+    "verified": false
+   }
+  },
+  {
+   "id": "handle.abi.rappana-100.antique-steel",
+   "brand": "ABI Interiors",
+   "article": "ABI-RAPPANA-100",
+   "family": "ABI Rappana",
+   "variant": "Antique Steel",
+   "kind": "handle",
+   "parameters": {
+    "length": 100.0,
+    "centres": 75.0,
+    "projection": 36.0,
+    "width": 18.0,
+    "sku": 17646,
+    "price_aud": 39.9,
+    "across_low": -16.0,
+    "across_high": 2.0,
+    "edge_mount": 1,
+    "sheet_thickness": 2.0,
+    "hole_offset": 10.0,
+    "leg_height": 18.0,
+    "finish_colour_rgb": 9803157
+   },
+   "drilling": [
+    {
+     "x": -37.5,
+     "y": 0.0,
+     "diameter": 2.5,
+     "depth": 12.0,
+     "note": "pilot for the screw in the box: x along the length, hole_offset from the leg top or plate back"
+    },
+    {
+     "x": 37.5,
+     "y": 0.0,
+     "diameter": 2.5,
+     "depth": 12.0,
+     "note": "pilot for the screw in the box: x along the length, hole_offset from the leg top or plate back"
+    }
+   ],
+   "source": {
+    "url": "ABI Interiors Rappana (https://www.abiinteriors.com.au/product/rappana-cabinetry-pull-extended-100mm/); finish Antique Steel: https://www.abiinteriors.com.au/product/rappana-cabinetry-pull-extended-100mm-antique-steel/, SKU 17646, $39.90 AUD (product.txt of the BIMobject download, 2026-10-27); screw pattern from ABI's spec drawing Rappana_100_Spec-01.jpg; geometry re-oriented from the product's IFC by scripts/import_abi_handles.py; finish colour from ABI's finish swatch",
+    "document_date": "2026-10-27",
+    "retrieved": "2026-11-01",
+    "verified": false
+   }
+  },
+  {
+   "id": "handle.abi.rappana-500.brushed-brass",
+   "brand": "ABI Interiors",
+   "article": "ABI-RAPPANA-500",
+   "family": "ABI Rappana",
+   "variant": "Brushed Brass",
+   "kind": "handle",
+   "parameters": {
+    "length": 500.0,
+    "centres": 474.0,
+    "projection": 36.0,
+    "width": 18.0,
+    "sku": 17049,
+    "price_aud": 114.9,
+    "across_low": -16.0,
+    "across_high": 2.0,
+    "edge_mount": 1,
+    "sheet_thickness": 2.0,
+    "hole_offset": 10.0,
+    "leg_height": 18.0,
+    "finish_colour_rgb": 13277754
+   },
+   "drilling": [
+    {
+     "x": -237.0,
+     "y": 0.0,
+     "diameter": 2.5,
+     "depth": 12.0,
+     "note": "pilot for the screw in the box: x along the length, hole_offset from the leg top or plate back"
+    },
+    {
+     "x": 0.0,
+     "y": 0.0,
+     "diameter": 2.5,
+     "depth": 12.0,
+     "note": "pilot for the screw in the box: x along the length, hole_offset from the leg top or plate back"
+    },
+    {
+     "x": 237.0,
+     "y": 0.0,
+     "diameter": 2.5,
+     "depth": 12.0,
+     "note": "pilot for the screw in the box: x along the length, hole_offset from the leg top or plate back"
+    }
+   ],
+   "source": {
+    "url": "ABI Interiors Rappana (https://www.abiinteriors.com.au/product/rappana-cabinetry-pull-extended-500mm-brushed-brass/); finish Brushed Brass: https://www.abiinteriors.com.au/product/rappana-cabinetry-pull-extended-500mm-brushed-brass/, SKU 17049, $114.90 AUD (product.txt of the BIMobject download, 2026-10-27); screw pattern from ABI's spec drawing Rappana Cabinetry Pull Extended 500mm SPEC 2.jpg; geometry re-oriented from the product's IFC by scripts/import_abi_handles.py; finish colour from Beta/Tezra BIM models",
+    "document_date": "2026-10-27",
+    "retrieved": "2026-11-01",
+    "verified": false
+   }
+  },
+  {
+   "id": "handle.abi.rappana-500.brushed-copper",
+   "brand": "ABI Interiors",
+   "article": "ABI-RAPPANA-500",
+   "family": "ABI Rappana",
+   "variant": "Brushed Copper",
+   "kind": "handle",
+   "parameters": {
+    "length": 500.0,
+    "centres": 474.0,
+    "projection": 36.0,
+    "width": 18.0,
+    "sku": 17050,
+    "price_aud": 114.9,
+    "across_low": -16.0,
+    "across_high": 2.0,
+    "edge_mount": 1,
+    "sheet_thickness": 2.0,
+    "hole_offset": 10.0,
+    "leg_height": 18.0,
+    "finish_colour_rgb": 13012586
+   },
+   "drilling": [
+    {
+     "x": -237.0,
+     "y": 0.0,
+     "diameter": 2.5,
+     "depth": 12.0,
+     "note": "pilot for the screw in the box: x along the length, hole_offset from the leg top or plate back"
+    },
+    {
+     "x": 0.0,
+     "y": 0.0,
+     "diameter": 2.5,
+     "depth": 12.0,
+     "note": "pilot for the screw in the box: x along the length, hole_offset from the leg top or plate back"
+    },
+    {
+     "x": 237.0,
+     "y": 0.0,
+     "diameter": 2.5,
+     "depth": 12.0,
+     "note": "pilot for the screw in the box: x along the length, hole_offset from the leg top or plate back"
+    }
+   ],
+   "source": {
+    "url": "ABI Interiors Rappana (https://www.abiinteriors.com.au/product/rappana-cabinetry-pull-extended-500mm-brushed-brass/); finish Brushed Copper: https://www.abiinteriors.com.au/product/rappana-cabinetry-pull-extended-500mm-brushed-copper/, SKU 17050, $114.90 AUD (product.txt of the BIMobject download, 2026-10-27); screw pattern from ABI's spec drawing Rappana Cabinetry Pull Extended 500mm SPEC 2.jpg; geometry re-oriented from the product's IFC by scripts/import_abi_handles.py; finish colour from ABI's finish swatch",
+    "document_date": "2026-10-27",
+    "retrieved": "2026-11-01",
+    "verified": false
+   }
+  },
+  {
+   "id": "handle.abi.rappana-500.brushed-gunmetal",
+   "brand": "ABI Interiors",
+   "article": "ABI-RAPPANA-500",
+   "family": "ABI Rappana",
+   "variant": "Brushed Gunmetal",
+   "kind": "handle",
+   "parameters": {
+    "length": 500.0,
+    "centres": 474.0,
+    "projection": 36.0,
+    "width": 18.0,
+    "sku": 17051,
+    "price_aud": 114.9,
+    "across_low": -16.0,
+    "across_high": 2.0,
+    "edge_mount": 1,
+    "sheet_thickness": 2.0,
+    "hole_offset": 10.0,
+    "leg_height": 18.0,
+    "finish_colour_rgb": 4144959
+   },
+   "drilling": [
+    {
+     "x": -237.0,
+     "y": 0.0,
+     "diameter": 2.5,
+     "depth": 12.0,
+     "note": "pilot for the screw in the box: x along the length, hole_offset from the leg top or plate back"
+    },
+    {
+     "x": 0.0,
+     "y": 0.0,
+     "diameter": 2.5,
+     "depth": 12.0,
+     "note": "pilot for the screw in the box: x along the length, hole_offset from the leg top or plate back"
+    },
+    {
+     "x": 237.0,
+     "y": 0.0,
+     "diameter": 2.5,
+     "depth": 12.0,
+     "note": "pilot for the screw in the box: x along the length, hole_offset from the leg top or plate back"
+    }
+   ],
+   "source": {
+    "url": "ABI Interiors Rappana (https://www.abiinteriors.com.au/product/rappana-cabinetry-pull-extended-500mm-brushed-brass/); finish Brushed Gunmetal: https://www.abiinteriors.com.au/product/rappana-cabinetry-pull-extended-500mm-brushed-gunmetal/, SKU 17051, $114.90 AUD (product.txt of the BIMobject download, 2026-10-27); screw pattern from ABI's spec drawing Rappana Cabinetry Pull Extended 500mm SPEC 2.jpg; geometry re-oriented from the product's IFC by scripts/import_abi_handles.py; finish colour from Kingsley Shower Head Round model",
+    "document_date": "2026-10-27",
+    "retrieved": "2026-11-01",
+    "verified": false
+   }
+  },
+  {
+   "id": "handle.abi.rappana-500.stainless-steel",
+   "brand": "ABI Interiors",
+   "article": "ABI-RAPPANA-500",
+   "family": "ABI Rappana",
+   "variant": "Stainless Steel",
+   "kind": "handle",
+   "parameters": {
+    "length": 500.0,
+    "centres": 474.0,
+    "projection": 36.0,
+    "width": 18.0,
+    "sku": 17052,
+    "price_aud": 59.9,
+    "across_low": -16.0,
+    "across_high": 2.0,
+    "edge_mount": 1,
+    "sheet_thickness": 2.0,
+    "hole_offset": 10.0,
+    "leg_height": 18.0,
+    "finish_colour_rgb": 12434361
+   },
+   "drilling": [
+    {
+     "x": -237.0,
+     "y": 0.0,
+     "diameter": 2.5,
+     "depth": 12.0,
+     "note": "pilot for the screw in the box: x along the length, hole_offset from the leg top or plate back"
+    },
+    {
+     "x": 0.0,
+     "y": 0.0,
+     "diameter": 2.5,
+     "depth": 12.0,
+     "note": "pilot for the screw in the box: x along the length, hole_offset from the leg top or plate back"
+    },
+    {
+     "x": 237.0,
+     "y": 0.0,
+     "diameter": 2.5,
+     "depth": 12.0,
+     "note": "pilot for the screw in the box: x along the length, hole_offset from the leg top or plate back"
+    }
+   ],
+   "source": {
+    "url": "ABI Interiors Rappana (https://www.abiinteriors.com.au/product/rappana-cabinetry-pull-extended-500mm-brushed-brass/); finish Stainless Steel: https://www.abiinteriors.com.au/product/rappana-cabinetry-pull-extended-500mm-stainless-steel/, SKU 17052, $59.90 AUD (product.txt of the BIMobject download, 2026-10-27); screw pattern from ABI's spec drawing Rappana Cabinetry Pull Extended 500mm SPEC 2.jpg; geometry re-oriented from the product's IFC by scripts/import_abi_handles.py; finish colour from Rappana Extended 500/800 models",
+    "document_date": "2026-10-27",
+    "retrieved": "2026-11-01",
+    "verified": false
+   }
+  },
+  {
+   "id": "handle.abi.rappana-800.brushed-brass",
+   "brand": "ABI Interiors",
+   "article": "ABI-RAPPANA-800",
+   "family": "ABI Rappana",
+   "variant": "Brushed Brass",
+   "kind": "handle",
+   "parameters": {
+    "length": 800.0,
+    "centres": 774.0,
+    "projection": 36.0,
+    "width": 18.0,
+    "sku": 17053,
+    "price_aud": 144.9,
+    "across_low": -16.0,
+    "across_high": 2.0,
+    "edge_mount": 1,
+    "sheet_thickness": 2.0,
+    "hole_offset": 10.0,
+    "leg_height": 18.0,
+    "finish_colour_rgb": 13277754
+   },
+   "drilling": [
+    {
+     "x": -387.0,
+     "y": 0.0,
+     "diameter": 2.5,
+     "depth": 12.0,
+     "note": "pilot for the screw in the box: x along the length, hole_offset from the leg top or plate back"
+    },
+    {
+     "x": -129.0,
+     "y": 0.0,
+     "diameter": 2.5,
+     "depth": 12.0,
+     "note": "pilot for the screw in the box: x along the length, hole_offset from the leg top or plate back"
+    },
+    {
+     "x": 129.0,
+     "y": 0.0,
+     "diameter": 2.5,
+     "depth": 12.0,
+     "note": "pilot for the screw in the box: x along the length, hole_offset from the leg top or plate back"
+    },
+    {
+     "x": 387.0,
+     "y": 0.0,
+     "diameter": 2.5,
+     "depth": 12.0,
+     "note": "pilot for the screw in the box: x along the length, hole_offset from the leg top or plate back"
+    }
+   ],
+   "source": {
+    "url": "ABI Interiors Rappana (https://www.abiinteriors.com.au/product/rappana-cabinetry-pull-extended-800mm-brushed-brass/); finish Brushed Brass: https://www.abiinteriors.com.au/product/rappana-cabinetry-pull-extended-800mm-brushed-brass/, SKU 17053, $144.90 AUD (product.txt of the BIMobject download, 2026-10-27); screw pattern from ABI's spec drawing Rappana Cabinetry Pull Extended 800mm SPEC 2.jpg; geometry re-oriented from the product's IFC by scripts/import_abi_handles.py; finish colour from Beta/Tezra BIM models",
+    "document_date": "2026-10-27",
+    "retrieved": "2026-11-01",
+    "verified": false
+   }
+  },
+  {
+   "id": "handle.abi.rappana-800.brushed-copper",
+   "brand": "ABI Interiors",
+   "article": "ABI-RAPPANA-800",
+   "family": "ABI Rappana",
+   "variant": "Brushed Copper",
+   "kind": "handle",
+   "parameters": {
+    "length": 800.0,
+    "centres": 774.0,
+    "projection": 36.0,
+    "width": 18.0,
+    "sku": 17054,
+    "price_aud": 144.9,
+    "across_low": -16.0,
+    "across_high": 2.0,
+    "edge_mount": 1,
+    "sheet_thickness": 2.0,
+    "hole_offset": 10.0,
+    "leg_height": 18.0,
+    "finish_colour_rgb": 13012586
+   },
+   "drilling": [
+    {
+     "x": -387.0,
+     "y": 0.0,
+     "diameter": 2.5,
+     "depth": 12.0,
+     "note": "pilot for the screw in the box: x along the length, hole_offset from the leg top or plate back"
+    },
+    {
+     "x": -129.0,
+     "y": 0.0,
+     "diameter": 2.5,
+     "depth": 12.0,
+     "note": "pilot for the screw in the box: x along the length, hole_offset from the leg top or plate back"
+    },
+    {
+     "x": 129.0,
+     "y": 0.0,
+     "diameter": 2.5,
+     "depth": 12.0,
+     "note": "pilot for the screw in the box: x along the length, hole_offset from the leg top or plate back"
+    },
+    {
+     "x": 387.0,
+     "y": 0.0,
+     "diameter": 2.5,
+     "depth": 12.0,
+     "note": "pilot for the screw in the box: x along the length, hole_offset from the leg top or plate back"
+    }
+   ],
+   "source": {
+    "url": "ABI Interiors Rappana (https://www.abiinteriors.com.au/product/rappana-cabinetry-pull-extended-800mm-brushed-brass/); finish Brushed Copper: https://www.abiinteriors.com.au/product/rappana-cabinetry-pull-extended-800mm-brushed-copper/, SKU 17054, $144.90 AUD (product.txt of the BIMobject download, 2026-10-27); screw pattern from ABI's spec drawing Rappana Cabinetry Pull Extended 800mm SPEC 2.jpg; geometry re-oriented from the product's IFC by scripts/import_abi_handles.py; finish colour from ABI's finish swatch",
+    "document_date": "2026-10-27",
+    "retrieved": "2026-11-01",
+    "verified": false
+   }
+  },
+  {
+   "id": "handle.abi.rappana-800.brushed-gunmetal",
+   "brand": "ABI Interiors",
+   "article": "ABI-RAPPANA-800",
+   "family": "ABI Rappana",
+   "variant": "Brushed Gunmetal",
+   "kind": "handle",
+   "parameters": {
+    "length": 800.0,
+    "centres": 774.0,
+    "projection": 36.0,
+    "width": 18.0,
+    "sku": 17055,
+    "price_aud": 144.9,
+    "across_low": -16.0,
+    "across_high": 2.0,
+    "edge_mount": 1,
+    "sheet_thickness": 2.0,
+    "hole_offset": 10.0,
+    "leg_height": 18.0,
+    "finish_colour_rgb": 4144959
+   },
+   "drilling": [
+    {
+     "x": -387.0,
+     "y": 0.0,
+     "diameter": 2.5,
+     "depth": 12.0,
+     "note": "pilot for the screw in the box: x along the length, hole_offset from the leg top or plate back"
+    },
+    {
+     "x": -129.0,
+     "y": 0.0,
+     "diameter": 2.5,
+     "depth": 12.0,
+     "note": "pilot for the screw in the box: x along the length, hole_offset from the leg top or plate back"
+    },
+    {
+     "x": 129.0,
+     "y": 0.0,
+     "diameter": 2.5,
+     "depth": 12.0,
+     "note": "pilot for the screw in the box: x along the length, hole_offset from the leg top or plate back"
+    },
+    {
+     "x": 387.0,
+     "y": 0.0,
+     "diameter": 2.5,
+     "depth": 12.0,
+     "note": "pilot for the screw in the box: x along the length, hole_offset from the leg top or plate back"
+    }
+   ],
+   "source": {
+    "url": "ABI Interiors Rappana (https://www.abiinteriors.com.au/product/rappana-cabinetry-pull-extended-800mm-brushed-brass/); finish Brushed Gunmetal: https://www.abiinteriors.com.au/product/rappana-cabinetry-pull-extended-800mm-brushed-gunmetal/, SKU 17055, $144.90 AUD (product.txt of the BIMobject download, 2026-10-27); screw pattern from ABI's spec drawing Rappana Cabinetry Pull Extended 800mm SPEC 2.jpg; geometry re-oriented from the product's IFC by scripts/import_abi_handles.py; finish colour from Kingsley Shower Head Round model",
+    "document_date": "2026-10-27",
+    "retrieved": "2026-11-01",
+    "verified": false
+   }
+  },
+  {
+   "id": "handle.abi.rappana-800.stainless-steel",
+   "brand": "ABI Interiors",
+   "article": "ABI-RAPPANA-800",
+   "family": "ABI Rappana",
+   "variant": "Stainless Steel",
+   "kind": "handle",
+   "parameters": {
+    "length": 800.0,
+    "centres": 774.0,
+    "projection": 36.0,
+    "width": 18.0,
+    "sku": 17056,
+    "price_aud": 79.9,
+    "across_low": -16.0,
+    "across_high": 2.0,
+    "edge_mount": 1,
+    "sheet_thickness": 2.0,
+    "hole_offset": 10.0,
+    "leg_height": 18.0,
+    "finish_colour_rgb": 12434361
+   },
+   "drilling": [
+    {
+     "x": -387.0,
+     "y": 0.0,
+     "diameter": 2.5,
+     "depth": 12.0,
+     "note": "pilot for the screw in the box: x along the length, hole_offset from the leg top or plate back"
+    },
+    {
+     "x": -129.0,
+     "y": 0.0,
+     "diameter": 2.5,
+     "depth": 12.0,
+     "note": "pilot for the screw in the box: x along the length, hole_offset from the leg top or plate back"
+    },
+    {
+     "x": 129.0,
+     "y": 0.0,
+     "diameter": 2.5,
+     "depth": 12.0,
+     "note": "pilot for the screw in the box: x along the length, hole_offset from the leg top or plate back"
+    },
+    {
+     "x": 387.0,
+     "y": 0.0,
+     "diameter": 2.5,
+     "depth": 12.0,
+     "note": "pilot for the screw in the box: x along the length, hole_offset from the leg top or plate back"
+    }
+   ],
+   "source": {
+    "url": "ABI Interiors Rappana (https://www.abiinteriors.com.au/product/rappana-cabinetry-pull-extended-800mm-brushed-brass/); finish Stainless Steel: https://www.abiinteriors.com.au/product/rappana-cabinetry-pull-extended-800mm-stainless-steel/, SKU 17056, $79.90 AUD (product.txt of the BIMobject download, 2026-10-27); screw pattern from ABI's spec drawing Rappana Cabinetry Pull Extended 800mm SPEC 2.jpg; geometry re-oriented from the product's IFC by scripts/import_abi_handles.py; finish colour from Rappana Extended 500/800 models",
+    "document_date": "2026-10-27",
+    "retrieved": "2026-11-01",
+    "verified": false
+   }
+  },
+  {
+   "id": "handle.abi.scalo-50.brushed-brass",
+   "brand": "ABI Interiors",
+   "article": "ABI-SCALO-50",
+   "family": "ABI Scalo",
+   "variant": "Brushed Brass",
+   "kind": "handle",
+   "parameters": {
+    "length": 50.0,
+    "centres": 32.0,
+    "projection": 35.0,
+    "width": 30.0,
+    "sku": 14503,
+    "price_aud": 29.9,
+    "across_low": -28.0,
+    "across_high": 2.0,
+    "edge_mount": 2,
+    "sheet_thickness": 2.0,
+    "hole_offset": 10.0,
+    "leg_height": 30.0,
+    "finish_colour_rgb": 13277754
+   },
+   "drilling": [
+    {
+     "x": -16.0,
+     "y": 0.0,
+     "diameter": 2.5,
+     "depth": 12.0,
+     "note": "pilot for the screw in the box: x along the length, hole_offset from the leg top or plate back"
+    },
+    {
+     "x": 16.0,
+     "y": 0.0,
+     "diameter": 2.5,
+     "depth": 12.0,
+     "note": "pilot for the screw in the box: x along the length, hole_offset from the leg top or plate back"
+    }
+   ],
+   "source": {
+    "url": "ABI Interiors Scalo (https://www.abiinteriors.com.au/product/scalo-cabinetry-pull/); finish Brushed Brass: https://www.abiinteriors.com.au/product/scalo-cabinetry-pull-pvd-brushed-brass/, SKU 14503, $29.90 AUD (product.txt of the BIMobject download, 2026-10-27); screw pattern from ABI's spec drawing SCALO_Cabinetry_Pull_Spec-01.jpg; geometry re-oriented from the product's IFC by scripts/import_abi_handles.py; finish colour from Beta/Tezra BIM models",
+    "document_date": "2026-10-27",
+    "retrieved": "2026-11-01",
+    "verified": false
+   }
+  },
+  {
+   "id": "handle.abi.scalo-50.brushed-copper",
+   "brand": "ABI Interiors",
+   "article": "ABI-SCALO-50",
+   "family": "ABI Scalo",
+   "variant": "Brushed Copper",
+   "kind": "handle",
+   "parameters": {
+    "length": 50.0,
+    "centres": 32.0,
+    "projection": 35.0,
+    "width": 30.0,
+    "sku": 14504,
+    "price_aud": 34.9,
+    "across_low": -28.0,
+    "across_high": 2.0,
+    "edge_mount": 2,
+    "sheet_thickness": 2.0,
+    "hole_offset": 10.0,
+    "leg_height": 30.0,
+    "finish_colour_rgb": 13012586
+   },
+   "drilling": [
+    {
+     "x": -16.0,
+     "y": 0.0,
+     "diameter": 2.5,
+     "depth": 12.0,
+     "note": "pilot for the screw in the box: x along the length, hole_offset from the leg top or plate back"
+    },
+    {
+     "x": 16.0,
+     "y": 0.0,
+     "diameter": 2.5,
+     "depth": 12.0,
+     "note": "pilot for the screw in the box: x along the length, hole_offset from the leg top or plate back"
+    }
+   ],
+   "source": {
+    "url": "ABI Interiors Scalo (https://www.abiinteriors.com.au/product/scalo-cabinetry-pull/); finish Brushed Copper: https://www.abiinteriors.com.au/product/scalo-cabinetry-pull-brushed-copper/, SKU 14504, $34.90 AUD (product.txt of the BIMobject download, 2026-10-27); screw pattern from ABI's spec drawing SCALO_Cabinetry_Pull_Spec-01.jpg; geometry re-oriented from the product's IFC by scripts/import_abi_handles.py; finish colour from ABI's finish swatch",
+    "document_date": "2026-10-27",
+    "retrieved": "2026-11-01",
+    "verified": false
+   }
+  },
+  {
+   "id": "handle.abi.scalo-50.brushed-gunmetal",
+   "brand": "ABI Interiors",
+   "article": "ABI-SCALO-50",
+   "family": "ABI Scalo",
+   "variant": "Brushed Gunmetal",
+   "kind": "handle",
+   "parameters": {
+    "length": 50.0,
+    "centres": 32.0,
+    "projection": 35.0,
+    "width": 30.0,
+    "sku": 14505,
+    "price_aud": 34.9,
+    "across_low": -28.0,
+    "across_high": 2.0,
+    "edge_mount": 2,
+    "sheet_thickness": 2.0,
+    "hole_offset": 10.0,
+    "leg_height": 30.0,
+    "finish_colour_rgb": 4144959
+   },
+   "drilling": [
+    {
+     "x": -16.0,
+     "y": 0.0,
+     "diameter": 2.5,
+     "depth": 12.0,
+     "note": "pilot for the screw in the box: x along the length, hole_offset from the leg top or plate back"
+    },
+    {
+     "x": 16.0,
+     "y": 0.0,
+     "diameter": 2.5,
+     "depth": 12.0,
+     "note": "pilot for the screw in the box: x along the length, hole_offset from the leg top or plate back"
+    }
+   ],
+   "source": {
+    "url": "ABI Interiors Scalo (https://www.abiinteriors.com.au/product/scalo-cabinetry-pull/); finish Brushed Gunmetal: https://www.abiinteriors.com.au/product/scalo-cabinetry-pull-brushed-gunmetal/, SKU 14505, $34.90 AUD (product.txt of the BIMobject download, 2026-10-27); screw pattern from ABI's spec drawing SCALO_Cabinetry_Pull_Spec-01.jpg; geometry re-oriented from the product's IFC by scripts/import_abi_handles.py; finish colour from Kingsley Shower Head Round model",
+    "document_date": "2026-10-27",
+    "retrieved": "2026-11-01",
+    "verified": false
+   }
+  },
+  {
+   "id": "handle.abi.scalo-50.brushed-nickel",
+   "brand": "ABI Interiors",
+   "article": "ABI-SCALO-50",
+   "family": "ABI Scalo",
+   "variant": "Brushed Nickel",
+   "kind": "handle",
+   "parameters": {
+    "length": 50.0,
+    "centres": 32.0,
+    "projection": 35.0,
+    "width": 30.0,
+    "sku": 14506,
+    "price_aud": 32.9,
+    "across_low": -28.0,
+    "across_high": 2.0,
+    "edge_mount": 2,
+    "sheet_thickness": 2.0,
+    "hole_offset": 10.0,
+    "leg_height": 30.0,
+    "finish_colour_rgb": 13488855
+   },
+   "drilling": [
+    {
+     "x": -16.0,
+     "y": 0.0,
+     "diameter": 2.5,
+     "depth": 12.0,
+     "note": "pilot for the screw in the box: x along the length, hole_offset from the leg top or plate back"
+    },
+    {
+     "x": 16.0,
+     "y": 0.0,
+     "diameter": 2.5,
+     "depth": 12.0,
+     "note": "pilot for the screw in the box: x along the length, hole_offset from the leg top or plate back"
+    }
+   ],
+   "source": {
+    "url": "ABI Interiors Scalo (https://www.abiinteriors.com.au/product/scalo-cabinetry-pull/); finish Brushed Nickel: https://www.abiinteriors.com.au/product/scalo-cabinetry-pull-brushed-nickel/, SKU 14506, $32.90 AUD (product.txt of the BIMobject download, 2026-10-27); screw pattern from ABI's spec drawing SCALO_Cabinetry_Pull_Spec-01.jpg; geometry re-oriented from the product's IFC by scripts/import_abi_handles.py; finish colour from Pedra Large Knob 35mm model",
+    "document_date": "2026-10-27",
+    "retrieved": "2026-11-01",
+    "verified": false
+   }
+  },
+  {
+   "id": "handle.abi.scalo-50.matte-black",
+   "brand": "ABI Interiors",
+   "article": "ABI-SCALO-50",
+   "family": "ABI Scalo",
+   "variant": "Matte Black",
+   "kind": "handle",
+   "parameters": {
+    "length": 50.0,
+    "centres": 32.0,
+    "projection": 35.0,
+    "width": 30.0,
+    "sku": 14507,
+    "price_aud": 29.9,
+    "across_low": -28.0,
+    "across_high": 2.0,
+    "matte": 1,
+    "edge_mount": 2,
+    "sheet_thickness": 2.0,
+    "hole_offset": 10.0,
+    "leg_height": 30.0,
+    "finish_colour_rgb": 986895
+   },
+   "drilling": [
+    {
+     "x": -16.0,
+     "y": 0.0,
+     "diameter": 2.5,
+     "depth": 12.0,
+     "note": "pilot for the screw in the box: x along the length, hole_offset from the leg top or plate back"
+    },
+    {
+     "x": 16.0,
+     "y": 0.0,
+     "diameter": 2.5,
+     "depth": 12.0,
+     "note": "pilot for the screw in the box: x along the length, hole_offset from the leg top or plate back"
+    }
+   ],
+   "source": {
+    "url": "ABI Interiors Scalo (https://www.abiinteriors.com.au/product/scalo-cabinetry-pull/); finish Matte Black: https://www.abiinteriors.com.au/product/scalo-cabinetry-pull-matte-black/, SKU 14507, $29.90 AUD (product.txt of the BIMobject download, 2026-10-27); screw pattern from ABI's spec drawing SCALO_Cabinetry_Pull_Spec-01.jpg; geometry re-oriented from the product's IFC by scripts/import_abi_handles.py; finish colour from Barre Progressive Wall-Mounted Set model",
+    "document_date": "2026-10-27",
+    "retrieved": "2026-11-01",
+    "verified": false
+   }
+  },
+  {
    "id": "handle.abi.tezra-220.brushed-brass",
    "brand": "ABI Interiors",
    "article": "ABI-TEZRA-220",

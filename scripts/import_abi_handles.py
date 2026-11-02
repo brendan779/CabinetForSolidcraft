@@ -68,8 +68,8 @@ def pair(cc):
 #   edge: a shape with one straight edge: its distance from the screw line, printed
 #   flip: the mesh's door face is the other extreme; set after looking at the render
 #   adjustable: ABI's recommended range for a pull whose collars slide
-#   edge_mount: sits over the front's top edge, not screwed through its face. Left out of the
-#   catalog until the builder can place and bore that (backlog ABI-5).
+#   edge_mount: sits over the front's top edge, not screwed through its face: 'back_leg' screws to
+#   the back of the front, 'top_plate' down into its top edge.
 SPECS = {
     'Beta Cabinetry Pull 115mm': {'holes': pair(64), 'proj': 18},
     'Beta Cabinetry Pull 400mm': {'holes': pair(355), 'proj': 18},
@@ -88,11 +88,11 @@ SPECS = {
     'Pedra Cabinetry Pull 400mm': {'holes': [-180, 0, 180], 'proj': 21},
     'Pedra Curve Cabinetry Pull 320mm (Pair)': {'holes': [-80, 0, 80], 'proj': 20, 'edge': 15},
     'Pika Cabinetry Pull 138mm': {'holes': pair(128), 'proj': 24},
-    'Rappana Cabinetry Pull 50mm': {'holes': pair(25), 'proj': 36, 'edge_mount': True},
-    'Rappana Cabinetry Pull Extended 100mm': {'holes': pair(75), 'proj': 36, 'edge_mount': True},
-    'Rappana Cabinetry Pull Extended 500mm': {'holes': [-237, 0, 237], 'proj': 36, 'edge_mount': True},
-    'Rappana Cabinetry Pull Extended 800mm': {'holes': [-387, -129, 129, 387], 'proj': 36, 'edge_mount': True},
-    'Scalo Cabinetry Pull': {'holes': pair(32), 'proj': 35, 'edge': 10, 'edge_mount': True},
+    'Rappana Cabinetry Pull 50mm': {'holes': pair(25), 'proj': 36, 'edge_mount': 'back_leg'},
+    'Rappana Cabinetry Pull Extended 100mm': {'holes': pair(75), 'proj': 36, 'edge_mount': 'back_leg'},
+    'Rappana Cabinetry Pull Extended 500mm': {'holes': [-237, 0, 237], 'proj': 36, 'edge_mount': 'back_leg'},
+    'Rappana Cabinetry Pull Extended 800mm': {'holes': [-387, -129, 129, 387], 'proj': 36, 'edge_mount': 'back_leg'},
+    'Scalo Cabinetry Pull': {'holes': pair(32), 'proj': 35, 'edge_mount': 'top_plate'},
     'Tezra Cabinetry Pull 220mm': {'holes': pair(192), 'proj': 32},
     'Tezra Cabinetry Pull 500mm': {'holes': pair(450), 'proj': 42},
     'Tezra Textured Cabinetry Pull 220mm': {'holes': pair(192), 'proj': 31},
@@ -424,6 +424,60 @@ def frame(tris, spec):
     return x, into, z, origin
 
 
+# Our choice for the 16 mm screws in the box: a pilot, not through the front.
+EDGE_PILOT = 2.5
+EDGE_PILOT_DEPTH = 12.0
+# ABI's drawing of the Rappana 100: the sheet is 2 thick. Its back leg's screws are 10 below the top;
+# Scalo's are 10 in from the plate's back.
+EDGE_SHEET = 2.0
+EDGE_HOLE_OFFSET = 10.0
+
+
+def edge_frame(tris, mount):
+    """The frame of a pull that sits over a front's top edge: x along it, y towards the cabinet,
+    z up, the origin on the front's back and top faces at the middle of its length.
+
+    The plate is the end of the shortest axis with the most flat area. A Rappana's back is the
+    taller end of the depth axis, its leg against its lip. A Scalo's half disc hangs at the front,
+    proud of the face, so its back is the plain end of the plate.
+    """
+    pts = [p for t in tris for p in t]
+    lo = [min(p[i] for p in pts) for i in range(3)]
+    hi = [max(p[i] for p in pts) for i in range(3)]
+    size = [hi[i] - lo[i] for i in range(3)]
+    up = min(range(3), key=lambda a: size[a])
+    rest = sorted((a for a in range(3) if a != up), key=lambda a: size[a])
+    # The depth is the plate's short side, except that a Rappana 50 is barely longer than deep.
+    depth, length = rest
+    flat = {lo[up]: 0.0, hi[up]: 0.0}
+    for t in tris:
+        n = cross(sub(t[1], t[0]), sub(t[2], t[0]))
+        area = dot(n, n) ** 0.5 / 2
+        for end in flat:
+            if all(abs(p[up] - end) < 0.3 for p in t):
+                flat[end] += area
+    top = max(flat, key=flat.get)
+    z = [0.0, 0.0, 0.0]
+    z[up] = 1.0 if top == hi[up] else -1.0
+
+    def score(end):
+        near = [p for p in pts if abs(p[depth] - end) < 0.5]
+        tall = max(p[up] for p in near) - min(p[up] for p in near)
+        long = max(p[length] for p in near) - min(p[length] for p in near)
+        return tall + long
+    taller = lo[depth] if score(lo[depth]) > score(hi[depth]) else hi[depth]
+    plain = hi[depth] if taller == lo[depth] else lo[depth]
+    back = taller if mount == 'back_leg' else plain
+    y = [0.0, 0.0, 0.0]
+    y[depth] = 1.0 if back == hi[depth] else -1.0
+    x = cross(y, z)
+    origin = [0.0, 0.0, 0.0]
+    origin[length] = (lo[length] + hi[length]) / 2.0
+    origin[depth] = back
+    origin[up] = top - z[up] * EDGE_SHEET
+    return x, y, z, origin
+
+
 def write_stl(path, tris_in, x, y, z, origin):
     tris = 0
     with open(path, 'wb') as fh:
@@ -543,6 +597,11 @@ def write_catalog(rows, path):
                 params['matte'] = 1
             if r['adjustable']:
                 params['adjustable_min'], params['adjustable_max'] = r['adjustable']
+            if r['edge_mount']:
+                params['edge_mount'] = 1 if r['edge_mount'] == 'back_leg' else 2
+                params['sheet_thickness'] = EDGE_SHEET
+                params['hole_offset'] = EDGE_HOLE_OFFSET
+                params['leg_height'] = r['leg_height']
             if colour:
                 params['finish_colour_rgb'] = colour[0] * 65536 + colour[1] * 256 + colour[2]
             variant = f"{f['name']}"
@@ -568,6 +627,10 @@ def write_catalog(rows, path):
                 'drilling': [
                     {'x': hx, 'y': hz, 'diameter': SCREW_HOLE, 'depth': SCREW_REACH,
                      'note': 'screw through the front, whatever its thickness; x along the length, y across it'}
+                    for hx, hz in r['holes']
+                ] if not r['edge_mount'] else [
+                    {'x': hx, 'y': 0.0, 'diameter': EDGE_PILOT, 'depth': EDGE_PILOT_DEPTH,
+                     'note': 'pilot for the screw in the box: x along the length, hole_offset from the leg top or plate back'}
                     for hx, hz in r['holes']
                 ],
                 'source': {
@@ -611,9 +674,6 @@ def main():
         if spec is None:
             print(f"{name:48s} NOT IN SPECS: read its spec drawing first")
             continue
-        if spec.get('edge_mount'):
-            print(f"{name:48s} edge-mounted: left out (ABI-5)")
-            continue
         parsed = parse_ifc(ifc[0])
         geometry = 'IFC'
         fbx = glob.glob(folder + '/*.fbx')
@@ -625,7 +685,10 @@ def main():
             continue
         tris, colour = parsed
         tris = components(tris)
-        x, y, z, origin = frame(tris, spec)
+        if spec.get('edge_mount'):
+            x, y, z, origin = edge_frame(tris, spec['edge_mount'])
+        else:
+            x, y, z, origin = frame(tris, spec)
         allp = [p for t in tris for p in t]
         along = [dot(sub(p, origin), x) for p in allp]
         off = [dot(sub(p, origin), y) for p in allp]
@@ -657,6 +720,9 @@ def main():
             'centres': centres,
             'holes': holes,
             'adjustable': spec.get('adjustable'),
+            'edge_mount': spec.get('edge_mount'),
+            'leg_height': round(max(dot(sub(p, origin), z) for p in allp)
+                                - min(dot(sub(p, origin), z) for p in allp), 1),
             'measured_length': round(length_mm, 1),
             'projection': round(proj_mm, 1),
             'width': round(width_mm, 1),

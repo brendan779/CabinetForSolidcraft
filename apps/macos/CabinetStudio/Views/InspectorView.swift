@@ -167,6 +167,8 @@ struct StandardSizes: View {
             rows([("Front gap", "front_gap", [2, 3, 4]),
                   ("Top gap", "top_gap", [0, 2, 3]),
                   ("Bottom gap", "bottom_gap", [0, 2])])
+        case "handle_place" where project.option("handle_place", of: cab) == "edge_pull":
+            rows([("Clearance over pull", "edge_pull_clearance", [2, 3, 5])])
         case "sharknose_angle":
             rows([("Finger gap", "sharknose_gap", [10, 15, 20, 25, 30]),
                   ("Rail thickness", "drawer_frame_thickness", [16, 18]),

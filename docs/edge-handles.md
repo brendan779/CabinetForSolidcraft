@@ -1,7 +1,7 @@
 # Plan: over-the-edge pulls, sharknose and bevelled fronts
 
 Written 2026-11-02 at the owner's request. The sharknose rows are since built (SEC-8 to SEC-10, see
-docs/sections.md), apart from SHARK-4; the edge pull rows are not. Decisions for the owner are at
+docs/sections.md), apart from SHARK-4; the edge pull rows are built for the ABI pulls (ABI-5), apart from side mounting (EDGE-6). Decisions for the owner are at
 the end.
 
 Two different things share the top edge of a front:
@@ -77,21 +77,17 @@ These touch the same part of `build.rs` as sections and sharknose.
 Later: all of this as a per-section choice, as `opening` is now. A cabinet could have a
 Scalo on its drawers and sharknose doors.
 
-## Decisions for the owner
+## Decisions from the owner (2026-11-02)
 
-1. **Scalo's position.** Is the plate's back flush with the front's back, overhanging forward? It's
-   my reading of the drawing. A photo of a real one or ABI's fitting note would settle it.
-2. **Rappana's leg behind a top drawer or door.** The leg and screw heads need room in front of the
-   rail. Recommended: rout a shallow rebate in the back of the front so the leg sits flush, cut as
-   an ordinary groove and shown on the sheet. Alternatives: a gap behind the front, or a warning
-   only.
-3. **What "bevelled edge" means to you.** Either the board's own edge cut at an angle, which is
-   sharknose with other angles and on the face side; or an applied aluminium bevel profile fixed to
-   the edge, which would be catalogue hardware on the EDGE rows and needs a supplier. Recommended:
-   do the board's own edge first.
-4. **Finger room for sharknose.** Answered by building it: a Finger gap setting, 10 to 30, default 15
-   (our choice), with rails behind the bevel.
-5. **Top gap with an edge pull.** Raise it automatically to clear the plate, or leave it and warn?
-   Recommended: warn, since the gap is yours to set.
-6. **Wide fronts.** ABI's photos show one Scalo centred on each 600-odd drawer. Should wider fronts
-   get two?
+The owner's Rappana 100 specification: plate 36 deep, lip 10 down at the face, back leg 18 long and
+2 thick, holes 10 below the top, 75 apart, 13 in from the ends; mounts from top and side; 2 × 16 mm
+screws, driven from behind through the leg into the back of the front.
+
+1. **Scalo's position.** The plate's back is flush with the front's back, overhanging forward.
+2. **Rappana's leg behind a front.** Rebate the back of the front so the leg sits flush.
+3. **Bevelled edge.** Sharknose, built (SEC-8 to SEC-10).
+4. **Finger room for sharknose.** A Finger gap setting, 10 to 30, default 15 (our choice), with rails
+   behind the bevel.
+5. **Clearance over an edge pull.** 2 mm between the plate and whatever is above it, raised
+   automatically: the pull sits on the top of the front and needs that room.
+6. **Wide fronts.** One pull, centred. Longer fronts take a longer Rappana.

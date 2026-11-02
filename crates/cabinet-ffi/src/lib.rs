@@ -115,6 +115,8 @@ pub struct HandleRecord {
     /// How many screws it takes.
     pub screws: u32,
     pub knob: bool,
+    /// It sits over the front's edge, not on its face.
+    pub edge_mounted: bool,
     pub sku: u32,
     /// ABI's list price in AUD; 0 where the product page printed none.
     pub price_aud: f64,
@@ -137,6 +139,7 @@ pub fn abi_handles() -> Vec<HandleRecord> {
             centres: h.parameters.get("centres").copied().unwrap_or(0.0),
             screws: h.drilling.len() as u32,
             knob: h.parameters.contains_key("knob"),
+            edge_mounted: h.parameters.contains_key("edge_mount"),
             sku: h.parameters.get("sku").copied().unwrap_or(0.0) as u32,
             price_aud: h.parameters.get("price_aud").copied().unwrap_or(0.0),
             colour: h
@@ -945,6 +948,54 @@ fn summary(list: PartList) -> BuildSummary {
     }
     // Edge pulls have no screw holes: a lip centred on the gripping edge the core places them
     // on, the top or a wall door's bottom.
+    // An ABI pull over the edge, its own model; its box only answers the pointer.
+    for h in list.hardware.iter() {
+        let Ok(item) = cabinet_core::hardware::item(&h.item) else {
+            continue;
+        };
+        if !item.parameters.contains_key("edge_mount") {
+            continue;
+        }
+        let Some(p) = list.part(&h.part) else {
+            continue;
+        };
+        let Some(c) = placements.iter().find(|c| {
+            c.item == h.item
+                && (c.origin.x - h.at.x).abs() < 1.0
+                && (c.origin.z - h.at.z).abs() < 1.0
+        }) else {
+            continue;
+        };
+        let front = panels.iter().find(|b| b.name == p.name);
+        let (hinged, hinge_x, hinge_y) = front
+            .map(|b| (b.hinged.clone(), b.hinge_x, b.hinge_y))
+            .unwrap_or_default();
+        let length = item.parameters.get("length").copied().unwrap_or(100.0);
+        let depth = item.parameters.get("projection").copied().unwrap_or(36.0);
+        let high = item.parameters.get("leg_height").copied().unwrap_or(18.0);
+        let on_drawer = p.role == cabinet_core::part::PartRole::DrawerFront;
+        panels.push(PanelBox {
+            name: format!("{}.Handle", p.name),
+            role: if on_drawer { "Drawer handle" } else { "Handle" }.into(),
+            x: h.at.x - length / 2.0,
+            y: h.at.y - depth,
+            z: h.at.z - high / 2.0,
+            width: length,
+            depth,
+            height: high,
+            is_front: false,
+            hinged,
+            hinge_x,
+            hinge_y,
+            board: format!("handle:{finish}"),
+            grain: String::new(),
+            rebate: Vec::new(),
+            bevel: Vec::new(),
+            openings: Vec::new(),
+            mesh: c.article.clone(),
+            mesh_transform: cabinet_core::cad::transform(c, false, 0.0).to_vec(),
+        });
+    }
     for h in list
         .hardware
         .iter()

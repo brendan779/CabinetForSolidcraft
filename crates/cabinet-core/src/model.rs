@@ -819,6 +819,8 @@ pub struct ConstructionStandard {
     pub sharknose_gap: f64,
     /// Which edge of a door a sharknose bevels. Drawers always take their top edge.
     pub sharknose_door_edge: SharknoseEdge,
+    /// The owner's 2 mm between an edge pull's plate and whatever is above it.
+    pub edge_pull_clearance: f64,
     /// A board behind the drawer fronts, cut out for each drawer, so no carcass or dark gap shows
     /// between them. The carcass moves back by its thickness; the fronts stay.
     pub drawer_frame: DrawerFrame,
@@ -891,12 +893,32 @@ impl ConstructionStandard {
             && self.door_style == DoorStyle::Slab
     }
 
-    /// The gap above a front in a stack: a sharknose needs room for fingers.
+    /// The ABI pull that sits over the front's edge, where one is chosen.
+    pub fn edge_mounted_pull(&self) -> Option<&'static cabinet_catalog::HardwareItem> {
+        if self.handle_range != HandleRange::Abi {
+            return None;
+        }
+        crate::hardware::item(&self.handle_style)
+            .ok()
+            .filter(|i| i.parameters.contains_key("edge_mount"))
+    }
+
+    /// The gap an edge pull needs over a front: its sheet, and room to run under what is above.
+    pub fn edge_pull_gap(&self) -> Option<f64> {
+        if self.opening != Opening::Handles {
+            return None;
+        }
+        self.edge_mounted_pull()
+            .map(|pull| pull.param("sheet_thickness").unwrap_or(2.0) + self.edge_pull_clearance)
+    }
+
+    /// The gap above a front in a stack: a sharknose needs room for fingers, an edge pull for
+    /// its plate.
     pub fn row_gap(&self) -> f64 {
         if self.is_sharknose() {
             self.sharknose_gap
         } else {
-            self.front_gap
+            self.front_gap.max(self.edge_pull_gap().unwrap_or(0.0))
         }
     }
 
@@ -945,6 +967,7 @@ impl Default for ConstructionStandard {
             sharknose_angle: SharknoseAngle::default(),
             sharknose_gap: 15.0,
             sharknose_door_edge: SharknoseEdge::Auto,
+            edge_pull_clearance: 2.0,
             drawer_frame: DrawerFrame::None,
             drawer_frame_thickness: 16.0,
             drawer_frame_overlap: 25.0,

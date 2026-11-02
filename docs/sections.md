@@ -104,6 +104,7 @@ a cell to select it, and under the drawing:
 
 ## Left for later
 
-- A divider is always full height. A divider inside one row only (a split within a drawer
+- After 1.0: a divider is always full height. A divider inside one row only (a split within a drawer
   section) would be a tree, not columns of rows.
-- Sloped shoe shelves: today they're flat fixed shelves.
+- Shoe shelves are flat fixed shelves today. The owner wants two types: sloped decorative board with
+  a lip, or flat glass (SEC-2c).

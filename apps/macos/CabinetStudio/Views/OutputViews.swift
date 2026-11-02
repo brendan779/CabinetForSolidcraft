@@ -511,7 +511,8 @@ struct CutSheetsView: View {
             List(selection: $part) {
                 ForEach(project.cabinets) { cab in
                     Section(cab.id) {
-                        ForEach(project.build(cab)?.panels ?? [], id: \.name) { p in
+                        // A handle is hardware: it has no sheet.
+                        ForEach((project.build(cab)?.panels ?? []).filter { !$0.board.hasPrefix("handle:") }, id: \.name) { p in
                             Label(p.role, systemImage: p.isFront ? "door.left.hand.closed" : "rectangle")
                                 .tag(p.name)
                         }

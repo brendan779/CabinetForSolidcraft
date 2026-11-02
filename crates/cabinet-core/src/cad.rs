@@ -140,7 +140,25 @@ pub fn cad_placements(list: &PartList) -> Vec<CadPlacement> {
                 Side::Right
             }
         };
-        if h.item.starts_with("handle.") && h.item != "handle.edge-pull" {
+        if item.parameters.contains_key("edge_mount") {
+            // Its frame: x along it, y to the cabinet, z up, the origin on the back and edge of
+            // the front. Under a wall door's bottom edge it hangs upside down.
+            let top = list
+                .part(&h.part)
+                .is_none_or(|p| (h.at.z - p.bounds.max().z).abs() < 1e-6);
+            let n = next("Handle");
+            out.push(CadPlacement {
+                name: format!("{}.Handle{n}", list.cabinet),
+                item: h.item.clone(),
+                article: item.article.clone(),
+                side: side_of(h.at.x),
+                origin: h.at,
+                frame: Frame::Oriented {
+                    x: Vec3::new(if top { 1.0 } else { -1.0 }, 0.0, 0.0),
+                    y: Vec3::new(0.0, 1.0, 0.0),
+                },
+            });
+        } else if h.item.starts_with("handle.") && h.item != "handle.edge-pull" {
             // Between its screw holes on the front's face, the bar along them, standing out of
             // the face the screws come through.
             let holes: Vec<(Vec3, crate::part::Dir, f64)> = list
