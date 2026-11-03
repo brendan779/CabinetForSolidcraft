@@ -14,11 +14,13 @@ import os
 import subprocess
 import sys
 
+import bmesh
 import bpy
 import numpy as np
 from mathutils import Vector
 
 MM = 0.001
+WELD = 1e-6  # metres: a micron, far under any real feature
 HEIGHT_VERSION = "h1"
 WARM = (1.0, 0.76, 0.54)  # about 3000 K: kitchen downlights
 DAYLIGHT = (0.86, 0.92, 1.0)
@@ -215,6 +217,28 @@ def add_uvs(obj, part, sheet, landscape, aspect, seed):
 
 
 # ---- The room ----------------------------------------------------------------------------------
+
+def smooth_routed(ob):
+    """Smooth shading for a routed face, the same at both ends of each groove.
+
+    The export joins a long thin pair of triangles per facet, each with its own
+    vertices per CAD face. Blender weighs a vertex normal by corner angle, so a
+    vertex at the top leans to one neighbouring facet and its twin at the bottom
+    to the other, and the shade drifts along the board as streaks. Welded quads
+    have square corners at both ends.
+    """
+    if "custom_normal" in ob.data.attributes:
+        ob.data.attributes.remove(ob.data.attributes["custom_normal"])
+    bm = bmesh.new()
+    bm.from_mesh(ob.data)
+    bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=WELD)
+    flat = [e for e in bm.edges if e.is_manifold and e.calc_face_angle() < math.radians(0.01)]
+    bmesh.ops.dissolve_edges(bm, edges=flat)
+    bm.to_mesh(ob.data)
+    bm.free()
+    ob.data.shade_smooth()
+    ob.data.set_sharp_from_angle(angle=math.radians(35))
+
 
 def collection(name):
     c = bpy.data.collections.new(name)
@@ -485,13 +509,12 @@ def build(job_path, obj_path, blend_path, cache, render):
         ob.data.materials.clear()
         ob.data.materials.append(material)
         board = job["boards"].get(part["board"]) or {}
-        add_uvs(ob, part, board.get("sheet", [2400, 1200]), landscape, aspect, i + 1)
         if part.get("routed"):
             # A routed face's curves are smooth, and its grooves crisp.
-            ob.data.shade_smooth()
-            ob.data.set_sharp_from_angle(angle=math.radians(35))
+            smooth_routed(ob)
         else:
             ob.data.shade_flat()
+        add_uvs(ob, part, board.get("sheet", [2400, 1200]), landscape, aspect, i + 1)
     pts = [o.matrix_world @ Vector(c) for o in bodies for c in o.bound_box]
     lo = Vector((min(p.x for p in pts), min(p.y for p in pts), min(p.z for p in pts)))
     hi = Vector((max(p.x for p in pts), max(p.y for p in pts), max(p.z for p in pts)))
@@ -547,4 +570,5 @@ def main():
     build(args[0], args[1], args[2], args[3], render)
 
 
-main()
+if __name__ == "__main__":
+    main()
