@@ -45,6 +45,7 @@ fn a_job_builds_in_solidcraft_and_renders_to_a_png() {
         port,
         String::new(),
         Default::default(),
+        String::new(),
     )
     .unwrap();
     assert_eq!(report.lines().count(), 3, "{report}");
@@ -118,6 +119,7 @@ fn boxes_selected_in_solidcraft_become_cabinets_that_load_back() {
         port,
         String::new(),
         Default::default(),
+        String::new(),
     )
     .unwrap();
     hide_bodies(

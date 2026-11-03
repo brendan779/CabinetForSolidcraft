@@ -1147,8 +1147,9 @@ final class ProjectModel {
         let level = detail.core
         let port = self.port
         let vendor = Preferences.vendorCADDir?.path ?? ""
+        let catalog = Preferences.catalogDir?.path ?? ""
         let result = await Task.detached { () -> Result<String, Error> in
-            Result { try sendToSolidcraft(job: job, detail: level, port: port, vendorDir: vendor, boardColours: colours) }
+            Result { try sendToSolidcraft(job: job, detail: level, port: port, vendorDir: vendor, boardColours: colours, catalogDir: catalog) }
         }.value
         isSending = false
         switch result {

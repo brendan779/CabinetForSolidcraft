@@ -205,7 +205,63 @@ pub struct LiningProfile {
     #[serde(default)]
     pub radius: Option<f64>,
     pub thickness: f64,
+    /// One repeat of the routed face as measured from the supplier's CAD: [across, depth below the
+    /// face], from 0 to `module`. Empty where none is to hand: `section` works it out from the rest.
+    #[serde(default)]
+    pub section: Vec<[f64; 2]>,
     pub source: Source,
+}
+
+impl LiningProfile {
+    /// One repeat of the routed face, as [across, depth below the face], from 0 to `module`.
+    pub fn section(&self) -> Vec<[f64; 2]> {
+        if !self.section.is_empty() {
+            return self.section.clone();
+        }
+        let m = self.module;
+        let groove = self
+            .groove
+            .unwrap_or_else(|| (m - self.face.unwrap_or(m * 0.8)).max(1.0));
+        let depth = self
+            .groove_depth
+            .unwrap_or(self.thickness * 0.4)
+            .min(self.thickness - 2.0);
+        // A curve across `width` from `from`, `depth` deep at its middle.
+        let curve = |from: f64, width: f64, deep: f64| {
+            (0..=16)
+                .map(|i| {
+                    let t = f64::from(i) / 16.0;
+                    [from + t * width, deep * (std::f64::consts::PI * t).sin()]
+                })
+                .collect::<Vec<_>>()
+        };
+        match self.shape {
+            ProfileShape::Batten | ProfileShape::Stripe => vec![
+                [0.0, 0.0],
+                [0.0, depth],
+                [groove, depth],
+                [groove, 0.0],
+                [m, 0.0],
+            ],
+            ProfileShape::Vj | ProfileShape::Heritage => {
+                vec![[0.0, 0.0], [groove / 2.0, depth], [groove, 0.0], [m, 0.0]]
+            }
+            // Concave across most of the module, a flat ridge between.
+            ProfileShape::Scallop => {
+                let mut points = curve(0.0, m - groove, depth);
+                points.push([m, 0.0]);
+                points
+            }
+            // Half rods: the valley is at the module's ends.
+            ProfileShape::Round => {
+                let mut points = curve(0.0, m, depth);
+                for p in &mut points {
+                    p[1] = depth - p[1];
+                }
+                points
+            }
+        }
+    }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]

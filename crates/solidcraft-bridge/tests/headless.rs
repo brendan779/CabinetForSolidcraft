@@ -196,6 +196,67 @@ fn cabinets_built_into_a_design_read_back_as_they_were_specified() {
     assert_eq!(read, cabs);
 }
 
+/// Every lining profile the catalog has is cut for real into a seen end, on its outer face, and takes
+/// the wood its section says: measured sections and those worked out from printed figures alike.
+#[test]
+fn every_lining_profile_is_routed_into_its_board() {
+    let Some(cli) = cli() else {
+        eprintln!("SOLIDCRAFT_CLI not set: skipped");
+        return;
+    };
+    let cat = cabinet_catalog::Catalog::load(Path::new(concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/../../catalog"
+    )))
+    .unwrap();
+    assert!(cat.profiles.len() > 20);
+    for profile in &cat.profiles {
+        let mut cab = Cabinet::new("B01", CabinetKind::Base);
+        cab.cladding.left = true;
+        // A board thick enough for any profile's depth.
+        cab.cladding.thickness = 18.0;
+        cab.cladding.board = "lining".into();
+        let list = build_cabinet(&cab).unwrap();
+        let end = list.part("B01.SeenEndLeft").unwrap().clone();
+        let section = solidcraft_bridge::LiningSection {
+            module: profile.module,
+            points: profile.section(),
+        };
+        let mut cmds = emit_cabinet(&list, Detail::Design, None);
+        cmds.extend(solidcraft_bridge::emit::lining_cut(&end, &section, 300.0));
+        let r = run(&cli, &format!("lining-{}", profile.id), &cmds, &["eval"]);
+        let body = r["bodies"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|b| b["name"] == "B01.SeenEndLeft")
+            .unwrap_or_else(|| panic!("{}: no body", profile.id));
+        let got = body["volume_mm3"].as_f64().unwrap();
+        // The section's area per repeat, over the board's width, along its height.
+        let area: f64 = section
+            .points
+            .windows(2)
+            .map(|w| (w[1][0] - w[0][0]) * (w[0][1] + w[1][1]) / 2.0)
+            .sum();
+        let width = end.bounds.size.y;
+        let repeats = (width / section.module).floor();
+        let least = area * repeats * end.bounds.size.z;
+        let most = area * (repeats + 1.0) * end.bounds.size.z;
+        let taken = end.bounds.volume() - got;
+        assert!(
+            taken >= least * 0.97 && taken <= most * 1.03,
+            "{}: took {taken:.0} mm3, its section says {least:.0} to {most:.0}",
+            profile.id
+        );
+        // The outer face is what was cut: the board's inner face is untouched, so the box holds.
+        assert!(
+            (body["bbox"]["max"][0].as_f64().unwrap() - end.bounds.max().x).abs() < 1e-6,
+            "{}",
+            profile.id
+        );
+    }
+}
+
 /// A shaker rail's tenons are real: they fill the stiles' grooves, which run out through the stile
 /// ends, so no square hole shows at a joint.
 #[test]

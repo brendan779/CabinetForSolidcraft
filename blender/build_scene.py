@@ -476,7 +476,12 @@ def build(job_path, obj_path, blend_path, cache, render):
         ob.data.materials.append(material)
         board = job["boards"].get(part["board"]) or {}
         add_uvs(ob, part, board.get("sheet", [2400, 1200]), landscape, aspect, i + 1)
-        ob.data.shade_flat()
+        if part.get("routed"):
+            # A routed face's curves are smooth, and its grooves crisp.
+            ob.data.shade_smooth()
+            ob.data.set_sharp_from_angle(angle=math.radians(35))
+        else:
+            ob.data.shade_flat()
     pts = [o.matrix_world @ Vector(c) for o in bodies for c in o.bound_box]
     lo = Vector((min(p.x for p in pts), min(p.y for p in pts), min(p.z for p in pts)))
     hi = Vector((max(p.x for p in pts), max(p.y for p in pts), max(p.z for p in pts)))

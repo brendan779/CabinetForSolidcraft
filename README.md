@@ -38,7 +38,8 @@ light beside the SolidCraft button.
   cam locks or DOMINO. Short joints such as rails are screwed. 32 mm shelf-pin rows and hinge holes,
   with shelf pins making way for hinge plates.
 - **Boards:** Polytec, Laminex, EGGER, Formica, Nikpol and Trade Essentials decors, shown with
-  woodgrain in the viewport, plus Polytec's linings.
+  woodgrain in the viewport. Lining boards are routed for real when built: Surround by Laminex from
+  its Revit sections, Polytec's from its printed figures.
 - **Build in SolidCraft:** each cabinet becomes a component of named panels in your board colours,
   with supplier hardware models. Manufacturing detail cuts every bore, groove and biscuit slot.
 - **Blender scenes:** the camera button beside SolidCraft builds the job with `solidcraft-cli` and makes
@@ -48,7 +49,7 @@ light beside the SolidCraft button.
   sheets per part as PDF or DXF, labels, assembly drawings and the job as STEP.
 
 **On hold:** benchtops, lift-up and bi-fold fronts, and lighting. Their code is kept, but they are not
-ready to use. Linings reach SolidCraft as flat boards for now: real flutes and textures are planned.
+ready to use.
 
 ![Built in SolidCraft](docs/images/first-run.png)
 

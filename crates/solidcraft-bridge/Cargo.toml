@@ -22,3 +22,6 @@ workspace = true
 
 [[example]]
 name = "cad_preview"
+
+[dev-dependencies]
+cabinet-catalog = { path = "../cabinet-catalog" }

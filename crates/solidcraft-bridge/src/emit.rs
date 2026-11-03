@@ -337,6 +337,154 @@ pub fn replace_cabinet(
     cmds
 }
 
+/// One repeat of a lining board's routed face.
+#[derive(Clone, Debug, PartialEq)]
+pub struct LiningSection {
+    pub module: f64,
+    /// [across, depth below the face], from 0 to `module`.
+    pub points: Vec<[f64; 2]>,
+}
+
+/// Which side of a lining board faces the room, as the sign along its thickness axis. Fronts look
+/// forward. A named side looks away from its cabinet; anything else, away from the run's middle.
+fn room_side(p: &Part, run_centre: f64) -> f64 {
+    if p.thickness_axis == Axis::Y {
+        return if p.name.contains("Back") { 1.0 } else { -1.0 };
+    }
+    if p.name.ends_with("Left") {
+        -1.0
+    } else if p.name.ends_with("Right") {
+        1.0
+    } else if p.bounds.center().get(p.thickness_axis) < run_centre {
+        -1.0
+    } else {
+        1.0
+    }
+}
+
+/// The grooves across a board `width` wide: each a closed outline in (across, depth), running above
+/// the face so the cut is clean there. The pattern repeats from one edge; the last is cut short.
+fn groove_outlines(section: &LiningSection, width: f64) -> Vec<Vec<[f64; 2]>> {
+    let mut outlines = Vec::new();
+    let mut run: Vec<[f64; 2]> = Vec::new();
+    let mut close = |run: &mut Vec<[f64; 2]>| {
+        if run.len() > 1 && run.iter().any(|p| p[1] > 0.01) {
+            let (first, last) = (run[0][0], run[run.len() - 1][0]);
+            if last - first > 0.01 {
+                let mut outline = run.clone();
+                outline.push([last, -1.0]);
+                outline.push([first, -1.0]);
+                outlines.push(outline);
+            }
+        }
+        run.clear();
+    };
+    let mut start = 0.0;
+    while start < width - 1e-6 {
+        for pair in section.points.windows(2) {
+            let (a, b) = (
+                [pair[0][0] + start, pair[0][1]],
+                [pair[1][0] + start, pair[1][1]],
+            );
+            if a[0] >= width {
+                break;
+            }
+            // Along the face itself: between grooves.
+            if a[1] <= 0.01 && b[1] <= 0.01 {
+                close(&mut run);
+                continue;
+            }
+            if run.is_empty() {
+                run.push(a);
+            }
+            if b[0] > width {
+                let t = (width - a[0]) / (b[0] - a[0]);
+                run.push([width, a[1] + (b[1] - a[1]) * t]);
+                break;
+            }
+            run.push(b);
+        }
+        start += section.module;
+    }
+    close(&mut run);
+    outlines
+}
+
+/// Cuts a lining board's routed profile into its room side, along its length. All its grooves in one
+/// sketch, as every cut costs more the more features a body has (docs/perf.md).
+pub fn lining_cut(p: &Part, section: &LiningSection, run_centre: f64) -> Vec<Value> {
+    let t = p.thickness_axis;
+    let across = if t == Axis::X { Axis::Y } else { Axis::X };
+    let b = p.bounds;
+    let side = room_side(p, run_centre);
+    let face = if side < 0.0 {
+        b.min.get(t)
+    } else {
+        b.max().get(t)
+    };
+    let to_sketch = |[a, depth]: [f64; 2]| {
+        let w = Vec3::default()
+            .with(across, b.min.get(across) + a)
+            .with(t, face - side * depth);
+        json!([round(w.x), round(w.y)])
+    };
+    let sketch = format!("{}.Profile", p.name);
+    let mut cmds = vec![json!({
+        "command": "sketch.create",
+        "params": {
+            "plane": {
+                "origin": arr(Vec3::new(0.0, 0.0, b.min.z)),
+                "x_dir": [1.0, 0.0, 0.0],
+                "y_dir": [0.0, 1.0, 0.0],
+            },
+            "name": sketch,
+        }
+    })];
+    let outlines = groove_outlines(section, b.size.get(across));
+    if outlines.is_empty() {
+        return Vec::new();
+    }
+    for outline in outlines {
+        // The engine refuses a zero-length line: a section's near-repeats can round to one.
+        let mut points: Vec<Value> = outline.into_iter().map(to_sketch).collect();
+        points.dedup();
+        if points.len() > 1 && points.first() == points.last() {
+            points.pop();
+        }
+        cmds.push(json!({
+            "command": "sketch.line",
+            "params": { "points": points, "closed": true }
+        }));
+    }
+    cmds.push(json!({ "command": "sketch.finish", "params": {} }));
+    cmds.push(json!({
+        "command": "solid.extrude",
+        "params": {
+            "sketch": sketch,
+            "profiles": "all",
+            "distance": round(b.size.z),
+            "direction": "positive",
+            "operation": "cut",
+            "targets": [p.name],
+            "name": format!("{}.Routing", p.name),
+        }
+    }));
+    cmds
+}
+
+/// Every lining board's routed profile in a cabinet, by board id.
+pub fn lining_cuts(
+    list: &PartList,
+    sections: &std::collections::BTreeMap<String, LiningSection>,
+    run_centre: f64,
+) -> Vec<Value> {
+    list.parts
+        .iter()
+        .filter_map(|p| sections.get(&p.board).map(|s| lining_cut(p, s, run_centre)))
+        .flatten()
+        .collect()
+}
+
 /// The boards' own colours on a built cabinet, where the catalog has them: `colours` maps a board
 /// id to `#RRGGBB`. A framed door's panel with no board of its own takes its frame's.
 pub fn board_colours(
@@ -1026,6 +1174,59 @@ fn cut_box(min: Vec3, size: Vec3, targets: &[String]) -> Value {
 mod tests {
     use super::*;
     use cabinet_core::{Cabinet, CabinetKind, build_cabinet};
+
+    fn batten() -> LiningSection {
+        LiningSection {
+            module: 25.0,
+            points: vec![[0.0, 0.0], [0.0, 5.1], [6.0, 5.1], [6.0, 0.0], [25.0, 0.0]],
+        }
+    }
+
+    #[test]
+    fn a_lining_has_a_groove_per_module_and_the_last_is_cut_at_the_edge() {
+        let outlines = groove_outlines(&batten(), 53.0);
+        assert_eq!(outlines.len(), 3);
+        assert!(outlines[2].iter().all(|p| p[0] <= 53.0));
+        assert!((outlines[2][0][0] - 50.0).abs() < 1e-9);
+        // Each runs above the face, so nothing is left standing on it.
+        assert!(outlines.iter().all(|o| o.iter().any(|p| p[1] < 0.0)));
+    }
+
+    #[test]
+    fn a_curved_section_is_one_groove_however_many_points_it_has() {
+        let scallop = LiningSection {
+            module: 42.0,
+            points: vec![
+                [0.0, 0.0],
+                [3.0, 0.0],
+                [10.0, 3.0],
+                [22.5, 5.0],
+                [35.0, 3.0],
+                [42.0, 0.0],
+            ],
+        };
+        assert_eq!(groove_outlines(&scallop, 84.0).len(), 2);
+    }
+
+    #[test]
+    fn a_seen_end_is_routed_on_the_side_away_from_its_cabinet() {
+        let mut cab = Cabinet::new("B01", CabinetKind::Base);
+        cab.cladding.left = true;
+        let list = build_cabinet(&cab).unwrap();
+        let end = list.part("B01.SeenEndLeft").unwrap();
+        let cut = lining_cut(end, &batten(), 300.0);
+        let first = &cut[1]["params"]["points"][0];
+        // The groove's floor is 5.1 in from the outer face.
+        assert!(
+            (first[0].as_f64().unwrap() - (end.bounds.min.x + 5.1)).abs() < 1e-6
+                || first[0].as_f64().unwrap() <= end.bounds.min.x + 5.1
+        );
+        assert_eq!(cut.last().unwrap()["params"]["operation"], "cut");
+        assert_eq!(
+            cut.last().unwrap()["params"]["targets"][0],
+            "B01.SeenEndLeft"
+        );
+    }
 
     #[test]
     fn design_detail_makes_one_box_per_part() {

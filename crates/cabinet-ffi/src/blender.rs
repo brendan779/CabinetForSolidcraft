@@ -48,6 +48,7 @@ fn manifest(
                 "role": p.role.label(),
                 "front": p.role.is_front(),
                 "board": board,
+                "routed": cat.board(board).is_some_and(|b| cat.profile_of(b).is_some()),
                 "grain": p.grain_axis.map(axis),
                 "thickness": axis(p.thickness_axis),
                 "min": [lo.x, lo.y, lo.z],
@@ -143,6 +144,8 @@ pub fn write_blender_job(
         _ => None,
     });
     let lists = job_lists(&job)?;
+    let sections = lining_sections(Path::new(&catalog_dir));
+    let centre = run_centre(&lists);
     let index = vendor::load_index(Path::new(&vendor_dir));
     let mut commands = Vec::new();
     for (list, _) in &lists {
@@ -158,6 +161,7 @@ pub fn write_blender_job(
             None,
             &real,
         ));
+        commands.extend(solidcraft_bridge::lining_cuts(list, &sections, centre));
         commands.extend(hardware_inserts(&list.cabinet, &models));
     }
     let write = |name: &str, v: &Value| {
@@ -248,6 +252,33 @@ mod tests {
         });
         assert_eq!(m["cabinets"][0]["max"][0], 600.0);
         assert_eq!(m["cabinets"][1]["min"][0], 600.0);
+    }
+
+    #[test]
+    fn a_lining_board_is_routed_in_the_build_and_marked_in_the_manifest() {
+        let cat = cabinet_catalog::Catalog::load(Path::new(&catalog())).unwrap();
+        let lining = cat
+            .boards
+            .iter()
+            .find(|b| cat.profile_of(b).is_some_and(|p| p.name == "Batten 100"))
+            .unwrap();
+        let mut base = Cabinet::new("B01", cabinet_core::CabinetKind::Base);
+        base.cladding.left = true;
+        base.cladding.board = lining.id.clone();
+        let (m, build) = written(JobItems {
+            items_json: vec![serde_json::to_string(&base).unwrap()],
+            placed: Vec::new(),
+        });
+        let end = m["parts"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|p| p["name"] == "B01.SeenEndLeft")
+            .unwrap();
+        assert_eq!(end["routed"], true);
+        assert!(build["commands"].as_array().unwrap().iter().any(|c| {
+            c["params"]["operation"] == "cut" && c["params"]["targets"][0] == "B01.SeenEndLeft"
+        }));
     }
 
     #[test]

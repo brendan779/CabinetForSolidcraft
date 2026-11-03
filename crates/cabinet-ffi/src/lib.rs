@@ -368,6 +368,38 @@ fn job_lists(job: &JobItems) -> Result<Vec<(PartList, Option<Cabinet>)>, CoreErr
         .collect()
 }
 
+/// Each lining board's routed section, by board id. None without a catalog: boards stay flat.
+pub(crate) fn lining_sections(
+    catalog_dir: &Path,
+) -> std::collections::BTreeMap<String, solidcraft_bridge::LiningSection> {
+    let Ok(cat) = cabinet_catalog::Catalog::load(catalog_dir) else {
+        return Default::default();
+    };
+    cat.boards
+        .iter()
+        .filter_map(|b| {
+            let p = cat.profile_of(b)?;
+            Some((
+                b.id.clone(),
+                solidcraft_bridge::LiningSection {
+                    module: p.module,
+                    points: p.section(),
+                },
+            ))
+        })
+        .collect()
+}
+
+/// The middle of the job across the room: an end panel's room side looks away from it.
+pub(crate) fn run_centre(lists: &[(PartList, Option<Cabinet>)]) -> f64 {
+    let xs = lists
+        .iter()
+        .flat_map(|(l, _)| &l.parts)
+        .flat_map(|p| [p.bounds.min.x, p.bounds.max().x]);
+    let (lo, hi) = xs.fold((f64::MAX, f64::MIN), |(lo, hi), x| (lo.min(x), hi.max(x)));
+    (lo + hi) / 2.0
+}
+
 /// One item's build, or why it does not build.
 #[derive(uniffi::Record)]
 pub struct ItemBuild {
@@ -2249,7 +2281,9 @@ pub fn send_to_solidcraft(
     port: u16,
     vendor_dir: String,
     board_colours: std::collections::HashMap<String, String>,
+    catalog_dir: String,
 ) -> Result<String, CoreError> {
+    let sections = lining_sections(Path::new(&catalog_dir));
     let colours: std::collections::BTreeMap<String, String> = board_colours.into_iter().collect();
     let sc = |e: solidcraft_bridge::Error| CoreError::SolidCraft {
         message: e.to_string(),
@@ -2264,7 +2298,9 @@ pub fn send_to_solidcraft(
     let vendor_path = Path::new(&vendor_dir);
     let index = vendor::load_index(vendor_path);
     let mut report = Vec::new();
-    for (list, cab) in job_lists(&job)? {
+    let lists = job_lists(&job)?;
+    let centre = run_centre(&lists);
+    for (list, cab) in lists {
         // One batch replaces an earlier build of this item and keeps it where the user moved it
         // in SolidCraft. Only cabinets carry a spec to load back (SC-3).
         let existing = find_existing(&client.components().map_err(sc)?, &list.cabinet);
@@ -2291,6 +2327,18 @@ pub fn send_to_solidcraft(
         let real: Vec<String> = models.iter().map(|m| m.name.clone()).collect();
         let cmds = replace_cabinet(&list, detail, spec.as_ref(), existing.as_ref(), &real);
         let r = client.batch(&cmds).map_err(sc)?;
+        // Linings' routed faces: the build isn't right without them, so a refusal is reported.
+        let routing = solidcraft_bridge::lining_cuts(&list, &sections, centre);
+        if !routing.is_empty() {
+            let mut cmds = vec![serde_json::json!({
+                "command": "component.activate", "params": { "component": list.cabinet }
+            })];
+            cmds.extend(routing);
+            cmds.push(serde_json::json!({
+                "command": "component.activate", "params": { "component": "root" }
+            }));
+            client.batch(&cmds).map_err(sc)?;
+        }
         // The boards' own colours. One the engine refuses should not lose the build.
         let painted = solidcraft_bridge::board_colours(&list, &colours);
         if !painted.is_empty() {
