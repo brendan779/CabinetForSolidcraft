@@ -1,0 +1,24 @@
+{
+ "source": "Colours sampled from Laminex's Surround Revit family previews, which name these Dulux paints. Shaded renders, so approximate: not Dulux's figures. Roughness per finish is our estimate.",
+ "verified": false,
+ "default_finish": "Satin",
+ "paints": [
+  { "name": "Natural White", "colour": "#f8f5ee" },
+  { "name": "Lexicon Quarter", "colour": "#fbfbfb" },
+  { "name": "Hog Bristle Half", "colour": "#ede5d2" },
+  { "name": "Silkwort", "colour": "#bdbcba" },
+  { "name": "Harmonious", "colour": "#afcec9" },
+  { "name": "New Penny", "colour": "#a77e6a" },
+  { "name": "Terra Rose", "colour": "#a46f6b" },
+  { "name": "Natural Flora", "colour": "#626049" },
+  { "name": "Winter Sea", "colour": "#324158" },
+  { "name": "Maximus", "colour": "#33383c" }
+ ],
+ "finishes": [
+  { "name": "Matt", "roughness": 0.85 },
+  { "name": "Low sheen", "roughness": 0.6 },
+  { "name": "Satin", "roughness": 0.42 },
+  { "name": "Semi-gloss", "roughness": 0.26 },
+  { "name": "Gloss", "roughness": 0.1 }
+ ]
+}

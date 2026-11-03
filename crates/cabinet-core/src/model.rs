@@ -183,6 +183,16 @@ impl Default for Insert {
 
 /// The back board, and the board chosen for seen faces. `left` and `right` are how older jobs
 /// marked a seen side (see `Cabinet::seen_left`).
+/// A primed board's paint: `catalog/paints/paints.json`'s, or a colour of the user's own.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct Paint {
+    pub name: String,
+    /// `#rrggbb`.
+    pub colour: String,
+    /// As the catalog names it: "Satin".
+    pub finish: String,
+}
+
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(default)]
 pub struct Cladding {
@@ -880,6 +890,9 @@ pub struct ConstructionStandard {
     /// A framed door's panel board. Empty: generic on the cut list, drawn like the fronts.
     #[serde(default)]
     pub shaker_panel_board: String,
+    /// What primed boards are painted, by board id: a board with none stays primed.
+    #[serde(default, skip_serializing_if = "std::collections::BTreeMap::is_empty")]
+    pub paints: std::collections::BTreeMap<String, Paint>,
     pub shaker_groove_depth: f64,
     /// A shaker-style front narrower or shorter than this stays a slab.
     pub shaker_slab_below: f64,
@@ -1065,6 +1078,7 @@ impl Default for ConstructionStandard {
             shaker_frame_width: 70.0,
             shaker_panel_thickness: 9.0,
             shaker_panel_board: String::new(),
+            paints: Default::default(),
             shaker_groove_depth: 10.0,
             shaker_slab_below: 200.0,
             wardrobe_hat_shelf_drop: 300.0,

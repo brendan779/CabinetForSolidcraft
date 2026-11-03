@@ -2,6 +2,9 @@ import AppKit
 import SwiftUI
 
 extension BoardRecord {
+    /// Sold ready to paint: "Primed Ready To Paint", "Pre-primed". Not "Prime Oak", a decor.
+    var needsPaint: Bool { decor.lowercased().contains("primed") }
+
     /// The board's colour on screen: its catalog `preview_colour`, or when the catalog has none, a
     /// rough guess from the decor's name (Oak, Walnut, Grey...). Either way an approximation: the
     /// brands' swatches are not ours to copy.

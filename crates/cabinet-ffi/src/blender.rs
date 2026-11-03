@@ -38,16 +38,27 @@ fn manifest(
     let mut parts = Vec::new();
     let mut boards = BTreeMap::new();
     let mut cabinets = Vec::new();
+    let job = job_paints(lists);
     for (list, cab) in lists {
+        let paints = cab_paints(&job, cab.as_ref().map(|c| &c.standard.paints));
         for p in &list.parts {
             let board = board_of(list, p);
             let (lo, hi) = (p.bounds.min, p.bounds.max());
+            let paint = paints.get(board).map(|paint| {
+                json!({
+                    "name": paint.name,
+                    "colour": paint.colour,
+                    "finish": paint.finish,
+                    "roughness": finish_roughness(catalog_dir, &paint.finish),
+                })
+            });
             parts.push(json!({
                 "name": p.name,
                 "cabinet": list.cabinet,
                 "role": p.role.label(),
                 "front": p.role.is_front(),
                 "board": board,
+                "paint": paint,
                 "routed": cat.board(board).is_some_and(|b| cat.profile_of(b).is_some()),
                 "grain": p.grain_axis.map(axis),
                 "thickness": axis(p.thickness_axis),
@@ -279,6 +290,33 @@ mod tests {
         assert!(build["commands"].as_array().unwrap().iter().any(|c| {
             c["params"]["operation"] == "cut" && c["params"]["targets"][0] == "B01.SeenEndLeft"
         }));
+    }
+
+    #[test]
+    fn a_painted_board_tells_the_scene_its_colour_and_finish() {
+        let mut base = Cabinet::new("B01", cabinet_core::CabinetKind::Base);
+        base.cladding.left = true;
+        base.cladding.board = "laminex.primed-panels.batten-100.12.mdf-mr-e0".into();
+        base.standard.paints.insert(
+            base.cladding.board.clone(),
+            cabinet_core::model::Paint {
+                name: "Winter Sea".into(),
+                colour: "#324158".into(),
+                finish: "Semi-gloss".into(),
+            },
+        );
+        let (m, _) = written(JobItems {
+            items_json: vec![serde_json::to_string(&base).unwrap()],
+            placed: Vec::new(),
+        });
+        let parts = m["parts"].as_array().unwrap();
+        let end = parts
+            .iter()
+            .find(|p| p["name"] == "B01.SeenEndLeft")
+            .unwrap();
+        assert_eq!(end["paint"]["colour"], "#324158");
+        assert_eq!(end["paint"]["roughness"], 0.26);
+        assert!(parts.iter().find(|p| p["name"] == "B01.Bottom").unwrap()["paint"].is_null());
     }
 
     #[test]

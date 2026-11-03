@@ -368,6 +368,41 @@ fn job_lists(job: &JobItems) -> Result<Vec<(PartList, Option<Cabinet>)>, CoreErr
         .collect()
 }
 
+/// A list's paints: its cabinet's, or the job's for an item with no standard of its own.
+pub(crate) fn cab_paints(
+    job: &std::collections::BTreeMap<String, cabinet_core::model::Paint>,
+    own: Option<&std::collections::BTreeMap<String, cabinet_core::model::Paint>>,
+) -> std::collections::BTreeMap<String, cabinet_core::model::Paint> {
+    own.unwrap_or(job).clone()
+}
+
+/// The paints for a job's cabinets, for items with no standard of their own (an end panel, say):
+/// the first cabinet's.
+pub(crate) fn job_paints(
+    lists: &[(PartList, Option<Cabinet>)],
+) -> std::collections::BTreeMap<String, cabinet_core::model::Paint> {
+    lists
+        .iter()
+        .find_map(|(_, c)| c.as_ref())
+        .map(|c| c.standard.paints.clone())
+        .unwrap_or_default()
+}
+
+/// A paint finish's roughness, from `catalog/paints/paints.json`. An unknown finish is mid sheen.
+pub(crate) fn finish_roughness(catalog_dir: &Path, finish: &str) -> f64 {
+    std::fs::read_to_string(catalog_dir.join("paints/paints.json"))
+        .ok()
+        .and_then(|t| serde_json::from_str::<serde_json::Value>(&t).ok())
+        .and_then(|v| {
+            v["finishes"]
+                .as_array()?
+                .iter()
+                .find(|f| f["name"] == finish)?["roughness"]
+                .as_f64()
+        })
+        .unwrap_or(0.45)
+}
+
 /// Each lining board's routed section, by board id. None without a catalog: boards stay flat.
 pub(crate) fn lining_sections(
     catalog_dir: &Path,
@@ -2300,7 +2335,9 @@ pub fn send_to_solidcraft(
     let mut report = Vec::new();
     let lists = job_lists(&job)?;
     let centre = run_centre(&lists);
+    let fallback_paints = job_paints(&lists);
     for (list, cab) in lists {
+        let cab_standard_paints = cab.as_ref().map(|c| c.standard.paints.clone());
         // One batch replaces an earlier build of this item and keeps it where the user moved it
         // in SolidCraft. Only cabinets carry a spec to load back (SC-3).
         let existing = find_existing(&client.components().map_err(sc)?, &list.cabinet);
@@ -2343,6 +2380,17 @@ pub fn send_to_solidcraft(
         let painted = solidcraft_bridge::board_colours(&list, &colours);
         if !painted.is_empty() {
             let _ = client.batch(&painted);
+        }
+        let painted = cab_paints(&fallback_paints, cab_standard_paints.as_ref())
+            .into_iter()
+            .map(|(board, p)| {
+                let roughness = finish_roughness(Path::new(&catalog_dir), &p.finish);
+                (board, (p.colour, roughness))
+            })
+            .collect();
+        let paint = solidcraft_bridge::board_paints(&list, &painted);
+        if !paint.is_empty() {
+            let _ = client.batch(&paint);
         }
         // Supplier models load files, which a batch refuses: one request each.
         for c in hardware_inserts(&list.cabinet, &models) {

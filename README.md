@@ -40,6 +40,7 @@ light beside the SolidCraft button.
 - **Boards:** Polytec, Laminex, EGGER, Formica, Nikpol and Trade Essentials decors, shown with
   woodgrain in the viewport. Lining boards are routed for real when built: Surround by Laminex from
   its Revit sections, Polytec's from its printed figures.
+- **Paint:** primed boards take a paint or your own colour, and a finish from matt to gloss.
 - **Build in SolidCraft:** each cabinet becomes a component of named panels in your board colours,
   with supplier hardware models. Manufacturing detail cuts every bore, groove and biscuit slot.
 - **Blender scenes:** the camera button beside SolidCraft builds the job with `solidcraft-cli` and makes

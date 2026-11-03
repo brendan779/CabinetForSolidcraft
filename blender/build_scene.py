@@ -462,9 +462,19 @@ def build(job_path, obj_path, blend_path, cache, render):
             ob.data.shade_smooth()
             ob.data.set_sharp_from_angle(angle=math.radians(35))
             continue
+        paint = part.get("paint")
         key = part["board"] or ("front" if part["front"] else "carcass")
+        if paint:
+            key = f'{key}|{paint["name"]}|{paint["colour"]}|{paint["finish"]}'
         if key not in materials:
-            if part["board"]:
+            if paint:
+                # Primed board under paint: its colour and sheen, and no decor.
+                m, b = principled(
+                    f'{paint["name"]} {paint["finish"]}', hex_colour(paint["colour"]), paint["roughness"]
+                )
+                soften_edges(m, b)
+                materials[key] = (m, False, 0.5)
+            elif part["board"]:
                 materials[key] = board_material(key, job["boards"][key], cache)
             else:
                 look = job["default_look"]

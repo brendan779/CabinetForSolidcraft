@@ -1587,6 +1587,9 @@ struct CladdingSection: View {
                     }) { _ in EmptyView() }
                         .frame(width: 640, height: 520)
                 }
+                if let board, board.needsPaint {
+                    PaintPicker(board: board.id, cab: cab)
+                }
                 if board != nil {
                     Button("Same as the fronts") {
                         var c = cab

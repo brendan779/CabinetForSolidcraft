@@ -303,6 +303,9 @@ struct BoardsSection: View {
                                 }) { _ in EmptyView() }
                         .frame(width: 640, height: 520)
                 }
+                if let board, board.needsPaint {
+                    PaintPicker(board: board.id, cab: cab)
+                }
             }
             if project.option("door_style", of: cab) == "shaker" {
                 panelBoard
@@ -390,5 +393,119 @@ struct ProfileSwatch: View {
             }
         }
         .accessibilityHidden(true)
+    }
+}
+
+/// What a primed board is painted: a paint or a colour of your own, and its finish.
+struct PaintPicker: View {
+    @Environment(ProjectModel.self) private var project
+    let board: String
+    let cab: CabinetDoc
+    @State private var picking = false
+
+    private var paint: PaintChoice? { project.paint(of: board, in: cab) }
+    private var range: PaintRange { project.paintRange }
+    private var finish: String { paint?.finish ?? range.defaultFinish }
+
+    private func swatch(_ colour: String?, roughness: Double) -> some View {
+        RoundedRectangle(cornerRadius: 5)
+            .fill(colour.flatMap { NSColor(hex: $0) }.map { Color(nsColor: $0) } ?? Color.primary.opacity(0.08))
+            // A shinier finish shows a tighter, brighter highlight.
+            .overlay {
+                RadialGradient(
+                    colors: [Color.white.opacity(0.75 * (1 - roughness)), .clear],
+                    center: UnitPoint(x: 0.3, y: 0.25), startRadius: 0, endRadius: 8 + 26 * roughness
+                )
+                .clipShape(RoundedRectangle(cornerRadius: 5))
+            }
+            .overlay(RoundedRectangle(cornerRadius: 5).strokeBorder(.primary.opacity(0.2)))
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Button {
+                picking = true
+            } label: {
+                HStack(spacing: 10) {
+                    swatch(paint?.colour, roughness: range.roughness(finish)).frame(width: 34, height: 24)
+                    VStack(alignment: .leading, spacing: 1) {
+                        Text("Paint").font(.caption).foregroundStyle(.secondary)
+                        Text(paint?.name ?? "Primer only, not painted").lineLimit(1)
+                    }
+                    Spacer()
+                    Image(systemName: "chevron.right").foregroundStyle(.tertiary)
+                }
+                .padding(6)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(TileStyle(selected: picking))
+            .accessibilityLabel("Paint: \(paint?.name ?? "primer only")")
+            .popover(isPresented: $picking, arrowEdge: .leading) { paints }
+            if paint != nil {
+                finishes
+            }
+        }
+    }
+
+    private var paints: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 5), spacing: 8) {
+                ForEach(range.paints, id: \.name) { p in
+                    Button {
+                        project.setPaint(PaintChoice(name: p.name, colour: p.colour, finish: finish), of: board)
+                        picking = false
+                    } label: {
+                        VStack(spacing: 4) {
+                            swatch(p.colour, roughness: range.roughness(finish)).frame(height: 44)
+                            Text(p.name).font(.caption).lineLimit(2).multilineTextAlignment(.center)
+                        }
+                        .padding(4)
+                    }
+                    .buttonStyle(TileStyle(selected: paint?.name == p.name))
+                }
+            }
+            HStack {
+                ColorPicker("Your own colour", selection: Binding(
+                    get: { paint.flatMap { NSColor(hex: $0.colour) }.map { Color(nsColor: $0) } ?? Color.white },
+                    set: { new in
+                        let hex = (NSColor(new).usingColorSpace(.sRGB) ?? .white).hexString
+                        project.setPaint(PaintChoice(name: "Custom \(hex)", colour: hex, finish: finish), of: board)
+                    }
+                ), supportsOpacity: false)
+                Spacer()
+                Button("Primer only") {
+                    project.setPaint(nil, of: board)
+                    picking = false
+                }
+                .buttonStyle(ChipStyle(selected: paint == nil))
+            }
+            Text("Colours are approximate: check them against the paint maker's chart.")
+                .font(.caption).foregroundStyle(.secondary)
+        }
+        .padding(12)
+        .frame(width: 420)
+    }
+
+    private var finishes: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text("Finish").font(.caption).foregroundStyle(.secondary)
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 6), count: 5), spacing: 6) {
+                ForEach(range.finishes, id: \.name) { f in
+                    Button {
+                        guard var p = paint else { return }
+                        p.finish = f.name
+                        project.setPaint(p, of: board)
+                    } label: {
+                        VStack(spacing: 4) {
+                            swatch(paint?.colour, roughness: f.roughness).frame(height: 28)
+                            Text(f.name).font(.caption2).lineLimit(1).minimumScaleFactor(0.8)
+                        }
+                        .padding(3)
+                    }
+                    .buttonStyle(TileStyle(selected: finish == f.name))
+                    .accessibilityLabel("\(f.name) finish")
+                }
+            }
+        }
     }
 }

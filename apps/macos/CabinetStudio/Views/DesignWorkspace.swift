@@ -662,7 +662,10 @@ final class ViewportScene {
                     seen.insert(piece.name)
                     panels[piece.name] = p
                     let e = entity(for: piece)
-                    e.model?.materials = [material(piece, board: board, selected: selected, hovered: p.name == hovered)]
+                    let paint = project.paint(of: p.board, in: cab).map {
+                        (colour: NSColor(hex: $0.colour), roughness: project.paintRange.roughness($0.finish))
+                    }
+                    e.model?.materials = [material(piece, board: board, paint: paint, selected: selected, hovered: p.name == hovered)]
                     let target = Self.transform(piece, centre: centre, look: look)
                     if animate && isFront {
                         e.move(to: target, relativeTo: root, duration: 0.45, timingFunction: .easeInOut)
@@ -1204,7 +1207,9 @@ final class ViewportScene {
 
     /// The board's preview colour (generic colours without a board), with a woodgrain texture for
     /// grained decors. Cabinets other than the selected one are greyed a little.
-    private func material(_ p: PanelBox, board: BoardRecord?, selected: Bool, hovered: Bool) -> PhysicallyBasedMaterial {
+    private func material(
+        _ p: PanelBox, board: BoardRecord?, paint: (colour: NSColor?, roughness: Double)?, selected: Bool, hovered: Bool
+    ) -> PhysicallyBasedMaterial {
         let generic: NSColor = p.isFront ? Theme.front : (p.role == "Back" ? Theme.carcassBack : Theme.carcass)
         if p.board.hasPrefix("handle:") {
             return Self.handleMaterial(p.board.dropFirst("handle:".count), selected: selected)
@@ -1212,7 +1217,7 @@ final class ViewportScene {
         if p.board.hasPrefix("tile:") {
             return tileMaterial(p, selected: selected, hovered: hovered)
         }
-        let colour = board?.displayColour ?? generic
+        let colour = paint?.colour ?? board?.displayColour ?? generic
         var m = PhysicallyBasedMaterial()
         let tint = selected ? NSColor.white : NSColor(calibratedWhite: 0.72, alpha: 1)
         let texture: TextureResource? = if let board, board.profileModule > 0 {
@@ -1233,7 +1238,7 @@ final class ViewportScene {
         } else {
             m.baseColor = .init(tint: selected ? colour : colour.blended(withFraction: 0.35, of: .gray) ?? colour)
         }
-        m.roughness = board?.finish.lowercased().contains("gloss") == true ? 0.2 : 0.65
+        m.roughness = .init(floatLiteral: Float(paint?.roughness ?? (board?.finish.lowercased().contains("gloss") == true ? 0.2 : 0.65)))
         // The selected cabinet glows faintly in the accent colour; the panel under the pointer more.
         if selected || hovered {
             m.emissiveColor = .init(color: NSColor(hex: 0xE8845E))
@@ -1346,7 +1351,8 @@ final class ViewportScene {
 
     /// A lining's routed profile as stripes along the grain, or nil while it loads.
     private func profileTexture(_ board: BoardRecord, _ colour: NSColor) -> TextureResource? {
-        let key = "profile:" + board.id
+        // The colour too: a painted lining changes with its paint.
+        let key = "profile:" + board.id + colour.hexString
         if let t = grainTextures[key] { return t }
         guard !loading.contains(key),
               let image = Self.flutes(colour, shape: board.profileShape, module: board.profileModule,

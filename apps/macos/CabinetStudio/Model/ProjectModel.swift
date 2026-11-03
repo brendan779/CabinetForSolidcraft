@@ -667,6 +667,40 @@ enum Workspace: String, CaseIterable, Identifiable {
     }
 }
 
+/// A primed board's paint.
+struct PaintChoice: Equatable {
+    var name: String
+    var colour: String
+    var finish: String
+}
+
+/// `catalog/paints/paints.json`.
+struct PaintRange {
+    var paints: [(name: String, colour: String)] = []
+    var finishes: [(name: String, roughness: Double)] = []
+    var defaultFinish = "Satin"
+
+    init() {}
+
+    init?(file: URL) {
+        guard let data = try? Data(contentsOf: file),
+              let o = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else { return nil }
+        paints = (o["paints"] as? [[String: Any]] ?? []).compactMap {
+            guard let n = $0["name"] as? String, let c = $0["colour"] as? String else { return nil }
+            return (n, c)
+        }
+        finishes = (o["finishes"] as? [[String: Any]] ?? []).compactMap {
+            guard let n = $0["name"] as? String, let r = ($0["roughness"] as? NSNumber)?.doubleValue else { return nil }
+            return (n, r)
+        }
+        defaultFinish = o["default_finish"] as? String ?? defaultFinish
+    }
+
+    func roughness(_ finish: String) -> Double {
+        finishes.first { $0.name == finish }?.roughness ?? 0.45
+    }
+}
+
 @MainActor
 @Observable
 final class ProjectModel {
@@ -1327,6 +1361,31 @@ final class ProjectModel {
         cab.standard = standard
         withAnimation(.snappy) { applyStandard(from: old, to: cab) }
     }
+
+    /// What a primed board is painted in this cabinet, if anything.
+    func paint(of board: String, in cab: CabinetDoc) -> PaintChoice? {
+        guard let all = cab.standard["paints"] as? [String: Any],
+              let p = all[board] as? [String: Any],
+              let colour = p["colour"] as? String else { return nil }
+        return PaintChoice(name: p["name"] as? String ?? "", colour: colour, finish: p["finish"] as? String ?? "")
+    }
+
+    /// Paints a primed board, for the whole job or this cabinet as the inspector says. Nil: primer.
+    func setPaint(_ paint: PaintChoice?, of board: String) {
+        guard let old = selected else { return }
+        var cab = old
+        var standard = cab.standard
+        var all = standard["paints"] as? [String: Any] ?? [:]
+        all[board] = paint.map { ["name": $0.name, "colour": $0.colour, "finish": $0.finish] }
+        standard["paints"] = all.isEmpty ? nil : all
+        cab.standard = standard
+        withAnimation(.snappy) { applyStandard(from: old, to: cab) }
+    }
+
+    /// The paints and finishes on offer.
+    @ObservationIgnored private(set) lazy var paintRange: PaintRange = {
+        Preferences.catalogDir.flatMap { PaintRange(file: $0.appending(path: "paints/paints.json")) } ?? PaintRange()
+    }()
 
     /// Where SolidCraft's installer puts the app.
     static let solidCraftApp = URL(fileURLWithPath: "/Applications/SolidCraft.app")

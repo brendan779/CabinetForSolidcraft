@@ -337,6 +337,37 @@ pub fn replace_cabinet(
     cmds
 }
 
+/// Painted boards' look in SolidCraft: its colour and how shiny the finish is. By board id, as
+/// (`#rrggbb`, roughness).
+pub fn board_paints(
+    list: &PartList,
+    paints: &std::collections::BTreeMap<String, (String, f64)>,
+) -> Vec<Value> {
+    let painted: Vec<Value> = list
+        .parts
+        .iter()
+        .filter_map(|p| {
+            let (colour, roughness) = paints.get(&p.board)?;
+            Some(json!({
+                "command": "appearance.assign",
+                "params": {
+                    "bodies": [p.name],
+                    "color": colour,
+                    "pbr": { "metallic": 0.0, "roughness": roughness, "dielectric_ior": 1.5 },
+                }
+            }))
+        })
+        .collect();
+    if painted.is_empty() {
+        return Vec::new();
+    }
+    let mut cmds =
+        vec![json!({ "command": "component.activate", "params": { "component": list.cabinet } })];
+    cmds.extend(painted);
+    cmds.push(json!({ "command": "component.activate", "params": { "component": "root" } }));
+    cmds
+}
+
 /// One repeat of a lining board's routed face.
 #[derive(Clone, Debug, PartialEq)]
 pub struct LiningSection {
@@ -1180,6 +1211,24 @@ mod tests {
             module: 25.0,
             points: vec![[0.0, 0.0], [0.0, 5.1], [6.0, 5.1], [6.0, 0.0], [25.0, 0.0]],
         }
+    }
+
+    #[test]
+    fn a_painted_board_takes_its_colour_and_finishes_shine_in_solidcraft() {
+        let mut cab = Cabinet::new("B01", CabinetKind::Base);
+        cab.cladding.left = true;
+        cab.cladding.board = "primed".into();
+        let list = build_cabinet(&cab).unwrap();
+        let paints = [("primed".to_string(), ("#324158".to_string(), 0.42))].into();
+        let cmds = board_paints(&list, &paints);
+        let assign = cmds
+            .iter()
+            .find(|c| c["command"] == "appearance.assign")
+            .unwrap();
+        assert_eq!(assign["params"]["bodies"][0], "B01.SeenEndLeft");
+        assert_eq!(assign["params"]["color"], "#324158");
+        assert_eq!(assign["params"]["pbr"]["roughness"], 0.42);
+        assert!(board_paints(&list, &Default::default()).is_empty());
     }
 
     #[test]
