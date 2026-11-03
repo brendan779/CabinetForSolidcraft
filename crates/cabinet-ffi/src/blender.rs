@@ -92,6 +92,7 @@ fn manifest(
                         "colour": colours.get(board),
                         "look": finishes["finishes"].get(finish).unwrap_or(&finishes["default"]),
                         "image": image["name"],
+                        "pixels": image["pixels"],
                         "normal": image["normal"],
                         "url": image["url"],
                         // What the image covers: a whole sheet, unless it says less.

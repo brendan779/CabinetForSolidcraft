@@ -1273,6 +1273,70 @@ final class ProjectModel {
         }
     }
 
+    /// A folder and zip Revit can take this job from: geometry from SolidCraft, every decor's image,
+    /// and the Dynamo graph that makes them Revit parts and materials. See `revit.rs`.
+    func exportForRevit() async {
+        let solidCraft = NSWorkspace.shared.urlForApplication(withBundleIdentifier: "io.tangencylabs.solidcraft")
+            ?? URL(fileURLWithPath: "/Applications/SolidCraft.app")
+        let cli = solidCraft.appending(path: "Contents/MacOS/solidcraft-cli")
+        guard FileManager.default.isExecutableFile(atPath: cli.path) else {
+            lastError = "SolidCraft is not in Applications: it builds the cabinets for Revit."
+            return
+        }
+        guard let catalog = Preferences.catalogDir else {
+            lastError = "This copy of Cabinet Studio is missing its catalog."
+            return
+        }
+        let support = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+        let cache = support.appending(path: "CabinetStudio/decors")
+        let documents = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        let parent = fileURL?.deletingLastPathComponent() ?? documents.appending(path: "Cabinet Studio Scenes")
+        let folder = parent.appending(path: "\(jobName) Revit")
+        let zip = parent.appending(path: "\(jobName) Revit.zip")
+        let colours = Dictionary(uniqueKeysWithValues: boards.map { ($0.id, $0.displayColour.hexString) })
+        let job = jobItems
+        let vendor = Preferences.vendorCADDir?.path ?? ""
+        isMakingScene = true
+        lastError = nil
+        status = "Building the cabinets for Revit…"
+        let made = await Task.detached { () -> Result<[String], Error> in
+            do {
+                try? FileManager.default.removeItem(at: folder)
+                try writeBlenderJob(
+                    job: job, catalogDir: catalog.path, vendorDir: vendor, colours: colours, folder: folder.path)
+                try Self.run(cli, ["run", folder.appending(path: "build.json").path,
+                                   "--out", folder.appending(path: "job.obj").path, "--quiet"])
+                try FileManager.default.createDirectory(at: cache, withIntermediateDirectories: true)
+                for image in try revitImages(folder: folder.path) {
+                    let file = cache.appending(path: "\(image.name).jpg")
+                    if !FileManager.default.fileExists(atPath: file.path), let url = image.url {
+                        try? Self.run(URL(fileURLWithPath: "/usr/bin/curl"),
+                                      ["-sSfL", "--max-time", "120", "-A", "CabinetStudio/1.0 (decor images for a cabinet tool)",
+                                       "-o", file.path, url])
+                    }
+                }
+                let missing = try writeRevitPackage(folder: folder.path, decorsDir: cache.path)
+                try? FileManager.default.removeItem(at: zip)
+                try Self.run(URL(fileURLWithPath: "/usr/bin/ditto"),
+                             ["-c", "-k", "--sequesterRsrc", "--keepParent", folder.path, zip.path])
+                return .success(missing)
+            } catch {
+                return .failure(error)
+            }
+        }.value
+        isMakingScene = false
+        switch made {
+        case .success(let missing):
+            status = missing.isEmpty
+                ? "Saved \(zip.lastPathComponent)"
+                : "Saved \(zip.lastPathComponent). No image for \(missing.count) decors: they arrive in plain colour"
+            NSWorkspace.shared.activateFileViewerSelecting([zip])
+        case .failure(let e):
+            lastError = "\(e)"
+            status = "The export for Revit failed"
+        }
+    }
+
     private struct ToolFailure: LocalizedError, CustomStringConvertible {
         let description: String
         var errorDescription: String? { description }

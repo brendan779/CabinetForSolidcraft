@@ -18,6 +18,8 @@ use std::path::Path;
 
 mod blender;
 pub use blender::write_blender_job;
+mod revit;
+pub use revit::{RevitImage, revit_images, write_revit_package};
 
 uniffi::setup_scaffolding!();
 
