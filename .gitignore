@@ -12,5 +12,6 @@ xcuserdata/
 /vendor-cad/abi-web/
 /vendor-cad/blum-sessions/
 /vendor-cad/blum/catalogue/
+/vendor-cad/tempimport/
 __pycache__/
 /apps/macos/build/

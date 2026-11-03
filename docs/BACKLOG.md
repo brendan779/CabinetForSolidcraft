@@ -253,7 +253,7 @@ Not ready for prime time yet: iterate through several design styles and make sur
 | LINING-TEX | superseded (owner 2026-11-03) | M | Textures go to Blender rather than SolidCraft, whose runtime maps stop at 1024 x 1024 and are not saved with the design. |
 | BLENDER-1 | done (2026-11-03) | L | Blender button: `solidcraft-cli` builds the job, `blender/build_scene.py` matches bodies to the manifest by name and makes a lit kitchen with Polytec decors. Images in `~/Library/Application Support/CabinetStudio/decors`, never committed. |
 | BLENDER-2 | todo | S | Decors with no image show plain colour: see `no_image` in `catalog/textures/*.json`. |
-| BLENDER-3 | 👤 todo | M | EGGER's own larger images look tied to a myEGGER account: the owner may download them. ForestOne's pictures stand in, at an estimated scale. |
+| BLENDER-3 | done (2026-11-03) | M | EGGER's decors and normal maps from ForestOne's Revit materials: `scripts/import_egger_materials.py`. |
 | BLENDER-4 | 👤 before any wider release | S | Ask the brands whether the app may fetch their images for other users: Laminex's terms prohibit copying site content beyond normal use. Images stay on this machine for now. |
 | LIFT-HOLD | on hold (owner 2026-11-02: too many errors, and not planned for use) | L | Lift and bi-fold fronts are hidden from the app until they can be gone through fully. The core keeps them and old jobs still open. On return: HK-XS and HKi drawn, HS and HL position against a real lift, whether a shelf should move for HS and HL | owner brings them back |
 | STYLE-7 | done (2026-11-02: a Shaker panels board under Boards; empty is drawn like the fronts and stays generic on the cut list) | S | A shaker panel's board could not be chosen (owner) | a panel takes any board |

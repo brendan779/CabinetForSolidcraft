@@ -79,13 +79,16 @@ def ensure_maps(cache, board):
         return None
     os.makedirs(cache, exist_ok=True)
     src = os.path.join(cache, name + ".jpg")
-    if not os.path.exists(src) and not fetch(board["url"], src):
+    if not os.path.exists(src) and not (board.get("url") and fetch(board["url"], src)):
         print(f"no image for {name}: plain colour")
         return None
     height = height_path(cache, name)
     if not os.path.exists(height):
         make_height(src, height)
-    return src, height
+    # The supplier's own relief, where it has one, is better than ours.
+    normal = board.get("normal")
+    normal = os.path.join(cache, normal + ".jpg") if normal else None
+    return src, height, normal if normal and os.path.exists(normal) else None
 
 
 # ---- Materials ---------------------------------------------------------------------------------
@@ -156,6 +159,14 @@ def board_material(board_id, board, cache):
         bump.inputs["Distance"].default_value = 0.0006
         n.links.new(height.outputs[0], bump.inputs["Height"])
         n.links.new(bump.outputs[0], b.inputs["Normal"])
+        if maps[2]:
+            real = n.nodes.new("ShaderNodeNormalMap")
+            real.uv_map = "panel"
+            # Laminate's relief is shallow: at full strength a board reads as rough bark.
+            real.inputs["Strength"].default_value = 0.25
+            n.links.new(texture(maps[2], True).outputs[0], real.inputs["Color"])
+            n.links.new(real.outputs[0], b.inputs["Normal"])
+            n.nodes.remove(bump)
         # Grain is duller than the surface around it.
         rough = n.nodes.new("ShaderNodeMapRange")
         rough.inputs["From Min"].default_value = 0.0
@@ -164,7 +175,8 @@ def board_material(board_id, board, cache):
         rough.inputs["To Max"].default_value = max(look["roughness"] - look["bump"] * 0.06, 0.05)
         n.links.new(height.outputs[0], rough.inputs["Value"])
         n.links.new(rough.outputs[0], b.inputs["Roughness"])
-        soften_edges(m, b, bump.inputs["Normal"])
+        if not maps[2]:
+            soften_edges(m, b, bump.inputs["Normal"])
         soft = False
     if soft:
         soften_edges(m, b)
@@ -182,7 +194,7 @@ def add_uvs(obj, part, sheet, landscape, aspect, seed):
     size = [hi[i] - lo[i] for i in range(3)]
     # The sheet's length is the picture's long side; its width follows the picture, so it never stretches.
     length, width = sheet[0], sheet[0] * aspect
-    offset = ((seed * 0.6180339) % 1, (seed * 0.7548776) % 1)
+    fraction = ((seed * 0.6180339) % 1, (seed * 0.7548776) % 1)
     world = obj.matrix_world
     for poly in me.polygons:
         normal = poly.normal
@@ -190,11 +202,16 @@ def add_uvs(obj, part, sheet, landscape, aspect, seed):
         plane = [k for k in range(3) if k != facing]
         along = grain if grain in plane else max(plane, key=lambda k: size[k])
         across = plane[0] if plane[1] == along else plane[1]
+        # Somewhere on the picture that holds the whole face: the picture's edge would be a seam.
+        # Only a part longer than the picture has to cross one.
+        start_u = fraction[0] * max(0.0, 1 - size[across] / width)
+        start_v = fraction[1] * max(0.0, 1 - size[along] / length)
         for li in poly.loop_indices:
             co = world @ me.vertices[me.loops[li].vertex_index].co
-            u = co[across] / MM / width + offset[0]
-            v = co[along] / MM / length + offset[1]
-            layer.data[li].uv = (v, u) if landscape else (u, v)
+            u = (co[across] / MM - lo[across]) / width + start_u
+            v = (co[along] / MM - lo[along]) / length + start_v
+            # A quarter turn, not a swap: a swap would mirror a normal map's relief inside out.
+            layer.data[li].uv = (v, -u) if landscape else (u, v)
 
 
 # ---- The room ----------------------------------------------------------------------------------
@@ -505,7 +522,7 @@ def main():
     if args[0] == "--prepare":
         cache = args[1]
         for f in sorted(os.listdir(cache)):
-            if f.endswith(".jpg"):
+            if f.endswith(".jpg") and not f.endswith("-normal.jpg"):
                 dst = height_path(cache, f[:-4])
                 if not os.path.exists(dst):
                     make_height(os.path.join(cache, f), dst)

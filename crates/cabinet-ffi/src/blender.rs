@@ -80,6 +80,7 @@ fn manifest(
                         "colour": colours.get(board),
                         "look": finishes["finishes"].get(finish).unwrap_or(&finishes["default"]),
                         "image": image["name"],
+                        "normal": image["normal"],
                         "url": image["url"],
                         // What the image covers: a whole sheet, unless it says less.
                         "sheet": image.get("covers").cloned().unwrap_or_else(|| {
