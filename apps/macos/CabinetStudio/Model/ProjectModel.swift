@@ -679,6 +679,7 @@ final class ProjectModel {
     var connection: ConnectionState = .unknown
     var status: String = ""
     var isSending = false
+    var isMakingScene = false
     var lastError: String?
     var jobName = "Untitled job"
     /// The job's construction standard (JSON): every cabinet follows it except in the fields it
@@ -1158,6 +1159,109 @@ final class ProjectModel {
             lastError = "\(e)"
             status = "SolidCraft did not build the cabinets"
             await checkConnection()
+        }
+    }
+
+    /// Makes the job's scene in Blender: solidcraft-cli builds the cabinets, Blender dresses them in
+    /// their boards in a lit kitchen, and the file opens. Beside the job file, once it has one.
+    func makeBlenderScene() async {
+        let workspace = NSWorkspace.shared
+        func app(_ id: String, _ fallback: String) -> URL {
+            workspace.urlForApplication(withBundleIdentifier: id) ?? URL(fileURLWithPath: fallback)
+        }
+        let solidCraft = app("io.tangencylabs.solidcraft", "/Applications/SolidCraft.app")
+        let blender = app("org.blenderfoundation.blender", "/Applications/Blender.app")
+        let cli = solidCraft.appending(path: "Contents/MacOS/solidcraft-cli")
+        let blenderTool = blender.appending(path: "Contents/MacOS/Blender")
+        guard FileManager.default.isExecutableFile(atPath: cli.path) else {
+            lastError = "SolidCraft is not in Applications: it builds the cabinets for Blender."
+            return
+        }
+        guard FileManager.default.isExecutableFile(atPath: blenderTool.path) else {
+            lastError = "Blender is not in Applications. Install it from blender.org, then try again."
+            return
+        }
+        guard let script = Bundle.main.url(forResource: "build_scene", withExtension: "py", subdirectory: "blender"),
+              let catalog = Preferences.catalogDir else {
+            lastError = "This copy of Cabinet Studio is missing its Blender script."
+            return
+        }
+        let support = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+        let cache = support.appending(path: "CabinetStudio/polytec")
+        let documents = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        let parent = fileURL?.deletingLastPathComponent() ?? documents.appending(path: "Cabinet Studio Scenes")
+        let folder = parent.appending(path: "\(jobName) scene")
+        let blend = folder.appending(path: "\(jobName).blend")
+        let colours = Dictionary(uniqueKeysWithValues: boards.map { ($0.id, $0.displayColour.hexString) })
+        let job = jobItems
+        let vendor = Preferences.vendorCADDir?.path ?? ""
+        isMakingScene = true
+        lastError = nil
+        status = "Building the cabinets for Blender…"
+        let built = await Task.detached { () -> Result<Void, Error> in
+            do {
+                try writeBlenderJob(
+                    job: job, catalogDir: catalog.path, vendorDir: vendor, colours: colours, folder: folder.path)
+                try Self.run(cli, ["run", folder.appending(path: "build.json").path,
+                                   "--out", folder.appending(path: "job.obj").path, "--quiet"])
+                return .success(())
+            } catch {
+                return .failure(error)
+            }
+        }.value
+        if case .failure(let e) = built {
+            isMakingScene = false
+            lastError = "\(e)"
+            status = "SolidCraft did not build the cabinets for Blender"
+            return
+        }
+        status = "Making the scene in Blender. The first use of a decor downloads it from Polytec…"
+        let made = await Task.detached { () -> Result<Void, Error> in
+            do {
+                try Self.run(blenderTool, ["-b", "-P", script.path, "--",
+                                           folder.appending(path: "job.json").path,
+                                           folder.appending(path: "job.obj").path,
+                                           blend.path, cache.path])
+                return .success(())
+            } catch {
+                return .failure(error)
+            }
+        }.value
+        isMakingScene = false
+        switch made {
+        case .success:
+            status = "Scene saved as \(blend.lastPathComponent)"
+            workspace.open([blend], withApplicationAt: blender, configuration: NSWorkspace.OpenConfiguration()) { _, _ in }
+        case .failure(let e):
+            lastError = "\(e)"
+            status = "Blender did not make the scene"
+        }
+    }
+
+    private struct ToolFailure: LocalizedError, CustomStringConvertible {
+        let description: String
+        var errorDescription: String? { description }
+    }
+
+    /// Runs a tool to the end. Its last lines say why, if it fails.
+    nonisolated private static func run(_ tool: URL, _ arguments: [String]) throws {
+        let process = Process()
+        process.executableURL = tool
+        process.arguments = arguments
+        let log = FileManager.default.temporaryDirectory.appending(path: "cabinet-studio-\(UUID().uuidString).log")
+        FileManager.default.createFile(atPath: log.path, contents: nil)
+        defer { try? FileManager.default.removeItem(at: log) }
+        let handle = try FileHandle(forWritingTo: log)
+        defer { try? handle.close() }
+        process.standardOutput = handle
+        process.standardError = handle
+        try process.run()
+        process.waitUntilExit()
+        let text = (try? String(contentsOf: log, encoding: .utf8)) ?? ""
+        // Blender goes on with a script's error and exits 0, so the script's own word is checked too.
+        if process.terminationStatus != 0 || text.contains("Traceback (most recent call last)") {
+            let tail = text.split(separator: "\n").suffix(4).joined(separator: "\n")
+            throw ToolFailure(description: "\(tool.lastPathComponent) failed: \(tail)")
         }
     }
 

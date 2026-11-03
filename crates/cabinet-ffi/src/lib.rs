@@ -16,6 +16,9 @@ use solidcraft_bridge::{
 };
 use std::path::Path;
 
+mod blender;
+pub use blender::write_blender_job;
+
 uniffi::setup_scaffolding!();
 
 #[derive(Debug, thiserror::Error, uniffi::Error)]

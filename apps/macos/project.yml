@@ -22,6 +22,9 @@ targets:
       - path: ../../catalog
         type: folder
         buildPhase: resources
+      - path: ../../blender
+        type: folder
+        buildPhase: resources
     dependencies:
       - framework: Core/CabinetCore.xcframework
         embed: false

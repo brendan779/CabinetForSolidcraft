@@ -1,5 +1,28 @@
 import SwiftUI
 
+/// A job window opens filling the screen, as the window's green button's Fill does. Once: after that
+/// its size is the user's.
+private struct FillScreenOnOpen: NSViewRepresentable {
+    final class Marker: NSView {
+        private var filled = false
+
+        override func viewDidMoveToWindow() {
+            super.viewDidMoveToWindow()
+            guard !filled, window != nil else { return }
+            filled = true
+            // After this layout pass: moving the window in the middle of one is a layout loop.
+            DispatchQueue.main.async { [weak self] in
+                guard let window = self?.window, !window.styleMask.contains(.fullScreen),
+                      let screen = window.screen ?? NSScreen.main else { return }
+                window.setFrame(screen.visibleFrame, display: true)
+            }
+        }
+    }
+
+    func makeNSView(context: Context) -> Marker { Marker() }
+    func updateNSView(_ view: Marker, context: Context) {}
+}
+
 struct ContentView: View {
     @Environment(ProjectModel.self) private var project
     @State private var showInspector = true
@@ -49,6 +72,15 @@ struct ContentView: View {
                 // A toolbar menu draws only its label's icon and title, so the dot stands beside it.
                 ConnectionDot()
                 SolidCraftButton()
+                Button {
+                    Task { await project.makeBlenderScene() }
+                } label: {
+                    // An icon: at the window's usual width a title pushes Inspector off the toolbar.
+                    Label("Blender", systemImage: project.isMakingScene ? "hourglass" : "camera")
+                        .labelStyle(.iconOnly)
+                }
+                .disabled(project.isMakingScene)
+                .help("Make this job's scene in Blender: its cabinets in their boards, in a lit kitchen")
 
                 Button {
                     showInspector.toggle()
@@ -58,6 +90,7 @@ struct ContentView: View {
                 .disabled(project.workspace != .design)
             }
         }
+        .background(FillScreenOnOpen())
         .toolbarBackground(Theme.appBar, for: .windowToolbar)
         .toolbarBackground(.visible, for: .windowToolbar)
         // Below the split view, not an inset on it: its columns ignore one and run under the bar.

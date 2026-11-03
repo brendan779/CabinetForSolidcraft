@@ -1,0 +1,20 @@
+{
+ "source": "Our own estimates of how each Polytec finish looks: not Polytec's figures. Check against samples.",
+ "verified": false,
+ "default": { "roughness": 0.5, "bump": 0.25, "coat": 0.0 },
+ "finishes": {
+  "Woodmatt": { "roughness": 0.48, "bump": 0.45, "coat": 0.0 },
+  "Matt": { "roughness": 0.55, "bump": 0.15, "coat": 0.0 },
+  "Ultramatt": { "roughness": 0.72, "bump": 0.1, "coat": 0.0 },
+  "Smooth": { "roughness": 0.42, "bump": 0.1, "coat": 0.0 },
+  "Sheen": { "roughness": 0.32, "bump": 0.15, "coat": 0.1 },
+  "Ravine": { "roughness": 0.46, "bump": 0.9, "coat": 0.0 },
+  "Venette": { "roughness": 0.5, "bump": 0.5, "coat": 0.0 },
+  "Legato": { "roughness": 0.5, "bump": 0.6, "coat": 0.0 },
+  "Texture": { "roughness": 0.6, "bump": 0.7, "coat": 0.0 },
+  "Ashgrain": { "roughness": 0.5, "bump": 0.7, "coat": 0.0 },
+  "Leaf Matt": { "roughness": 0.45, "bump": 0.3, "coat": 0.0 },
+  "Gloss Ultraglaze": { "roughness": 0.12, "bump": 0.03, "coat": 1.0 },
+  "Gloss Createc": { "roughness": 0.14, "bump": 0.03, "coat": 1.0 }
+ }
+}

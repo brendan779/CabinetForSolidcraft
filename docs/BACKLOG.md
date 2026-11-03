@@ -250,7 +250,10 @@ Not ready for prime time yet: iterate through several design styles and make sur
 | UI-20 | done (2026-11-02) | S | Say how to pan: Shift-drag was trial and error (owner C11) | shown on screen |
 | LIGHT-HOLD | on hold (owner 2026-11-03: undercooked; lights will be done by hand in SolidCraft for now) | L | Lighting options hidden from the app, code kept: bring them back once done properly. |
 | LINING-3D | todo (owner 2026-11-03: "will become important later") | L | Linings as real geometry in SolidCraft: flutes cut from `catalog/profiles`, not flat boards with a picture. |
-| LINING-TEX | todo (owner 2026-11-03) | M | Board and lining textures in SolidCraft, which only gets plain colours now. |
+| LINING-TEX | superseded (owner 2026-11-03) | M | Textures go to Blender rather than SolidCraft, whose runtime maps stop at 1024 x 1024 and are not saved with the design. |
+| BLENDER-1 | done (2026-11-03) | L | Blender button: `solidcraft-cli` builds the job, `blender/build_scene.py` matches bodies to the manifest by name and makes a lit kitchen with Polytec decors. Images in `~/Library/Application Support/CabinetStudio/polytec`, never committed. |
+| BLENDER-2 | todo | S | 17 Polytec decors have no image at the usual address and show plain colour: see `no_image` in `catalog/textures/polytec.json`. |
+| BLENDER-3 | todo | M | Other brands' images (Laminex, EGGER...): the same manifest takes them. |
 | LIFT-HOLD | on hold (owner 2026-11-02: too many errors, and not planned for use) | L | Lift and bi-fold fronts are hidden from the app until they can be gone through fully. The core keeps them and old jobs still open. On return: HK-XS and HKi drawn, HS and HL position against a real lift, whether a shelf should move for HS and HL | owner brings them back |
 | STYLE-7 | done (2026-11-02: a Shaker panels board under Boards; empty is drawn like the fronts and stays generic on the cut list) | S | A shaker panel's board could not be chosen (owner) | a panel takes any board |
 | STYLE-8 | done (2026-11-03: handles on framed fronts placed by the whole front; rails shown only between stiles) | M | Shaker fronts: no handles in SolidCraft, odd in the app, rails overlapping stiles (owner) | handles arrive; no overlap |
