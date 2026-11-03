@@ -1,0 +1,772 @@
+{
+ "source": "https://forest.one: EGGER's Australian distributor's picture of each decor",
+ "verified": false,
+ "images": {
+  "Acapulco F685": {
+   "name": "egger-acapulco-f685",
+   "url": "https://forest.one/media/catalog/product/a/c/aca.jpg",
+   "pixels": [
+    1000,
+    1000
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Agave Green U645": {
+   "name": "egger-agave-green-u645",
+   "url": "https://forest.one/media/catalog/product/a/g/agave_copy.jpg",
+   "pixels": [
+    1000,
+    1000
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Almond Beige U211": {
+   "name": "egger-almond-beige-u211",
+   "url": "https://forest.one/media/catalog/product/a/l/almond.jpg",
+   "pixels": [
+    1000,
+    1000
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Alpine White W1100": {
+   "name": "egger-alpine-white-w1100",
+   "url": "https://forest.one/media/catalog/product/2/0/202210-forestone_sample_w1100_st9_premium_white_0111.jpg",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Angora Grey U705": {
+   "name": "egger-angora-grey-u705",
+   "url": "https://forest.one/media/catalog/product/u/7/u705_a3_10de.jpg",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Anthracite Sherman Oak H1346": {
+   "name": "egger-anthracite-sherman-oak-h1346",
+   "url": "https://forest.one/media/catalog/product/h/1/h1346_1300x2800_10de.jpg",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Antique Rose U325": {
+   "name": "egger-antique-rose-u325",
+   "url": "https://forest.one/media/catalog/product/a/n/ant_rose_1.jpg",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Baltic Blue U545": {
+   "name": "egger-baltic-blue-u545",
+   "url": "https://forest.one/media/catalog/product/b/a/balticb.jpg",
+   "pixels": [
+    1000,
+    1000
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Beige Textile F416": {
+   "name": "egger-beige-textile-f416",
+   "url": "https://forest.one/media/catalog/product/2/0/202210-forestone_sample_f416_st10_beige_textile_0075.jpg",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Bleached Cuneo Oak H3311": {
+   "name": "egger-bleached-cuneo-oak-h3311",
+   "url": "https://forest.one/media/catalog/product/h/3/h3311_a3_10de_fur.jpg",
+   "pixels": [
+    1000,
+    1000
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Bronze Brushed Metal F528": {
+   "name": "egger-bronze-brushed-metal-f528",
+   "url": "https://forest.one/media/catalog/product/b/b/bbm.jpg",
+   "pixels": [
+    1000,
+    1000
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Brown Cuneo Oak H3317": {
+   "name": "egger-brown-cuneo-oak-h3317",
+   "url": "https://forest.one/media/catalog/product/h/3/h3317_a3_10de_fur.jpg",
+   "pixels": [
+    1000,
+    1000
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Brown Warmia Walnut H1307": {
+   "name": "egger-brown-warmia-walnut-h1307",
+   "url": "https://forest.one/media/catalog/product/h/1/h1307_a3_10de_fur.jpg",
+   "pixels": [
+    1000,
+    1000
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Caramel Nude U830": {
+   "name": "egger-caramel-nude-u830",
+   "url": "https://forest.one/media/catalog/product/u/8/u830_9_2000x2000.jpg",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Carat Beige U115": {
+   "name": "egger-carat-beige-u115",
+   "url": "https://forest.one/media/catalog/product/o/r/original_2_copy.jpg",
+   "pixels": [
+    1000,
+    1000
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Cashmere Grey U702": {
+   "name": "egger-cashmere-grey-u702",
+   "url": "https://forest.one/media/catalog/product/u/7/u702_89_2000x2000.jpg",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Chromix Silver F638": {
+   "name": "egger-chromix-silver-f638",
+   "url": "https://forest.one/media/catalog/product/c/h/chromixf638st10.jpg",
+   "pixels": [
+    1000,
+    1000
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Curry Yellow U163": {
+   "name": "egger-curry-yellow-u163",
+   "url": "https://forest.one/media/catalog/product/c/u/curryy.jpg",
+   "pixels": [
+    1000,
+    1000
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Dark Grey Chicago Concrete F187": {
+   "name": "egger-dark-grey-chicago-concrete-f187",
+   "url": "https://forest.one/media/catalog/product/f/1/f187_a3_10de.jpg",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Denim Blue U540": {
+   "name": "egger-denim-blue-u540",
+   "url": "https://forest.one/media/catalog/product/u/5/u540_a3_10de.jpg",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Diamond Grey U963": {
+   "name": "egger-diamond-grey-u963",
+   "url": "https://forest.one/media/catalog/product/u/9/u963_9_2000x2000.jpg",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Fjord Green U636": {
+   "name": "egger-fjord-green-u636",
+   "url": "https://forest.one/media/catalog/product/u/6/u636_9_2000x2000.jpg",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Garnet Red U399": {
+   "name": "egger-garnet-red-u399",
+   "url": "https://forest.one/media/catalog/product/g/a/garnetr.jpg",
+   "pixels": [
+    1000,
+    1000
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Grey Textile F417": {
+   "name": "egger-grey-textile-f417",
+   "url": "https://forest.one/media/catalog/product/2/0/202210-forestone_sample_f417_st10_grey_textile_0076.jpg",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Grey Vicenza Oak H3158": {
+   "name": "egger-grey-vicenza-oak-h3158",
+   "url": "https://forest.one/media/catalog/product/h/3/h3158_19_2000x2000.jpg",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Kiwi Green U626": {
+   "name": "egger-kiwi-green-u626",
+   "url": "https://forest.one/media/catalog/product/u/6/u626_9_2000x2000.jpg",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Light Grey Chicago Concrete F186": {
+   "name": "egger-light-grey-chicago-concrete-f186",
+   "url": "https://forest.one/media/catalog/product/f/1/f186_a3_10de.jpg",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Light Grey U708": {
+   "name": "egger-light-grey-u708",
+   "url": "https://forest.one/media/catalog/product/u/7/u708_a3_10de.jpg",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Light Lakeland Acacia H1277": {
+   "name": "egger-light-lakeland-acacia-h1277",
+   "url": "https://forest.one/media/catalog/product/h/1/h1277_a3_10de_fur.jpg",
+   "pixels": [
+    1000,
+    1000
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Light Vicenza Oak H3165": {
+   "name": "egger-light-vicenza-oak-h3165",
+   "url": "https://forest.one/media/catalog/product/h/3/h3165_a3_10de_fur.jpg",
+   "pixels": [
+    1000,
+    1000
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Mainau Birch H1733": {
+   "name": "egger-mainau-birch-h1733",
+   "url": "https://forest.one/media/catalog/product/h/1/h1733_9_raportwm_2000x2000.jpg",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Marone Casella Oak H1369": {
+   "name": "egger-marone-casella-oak-h1369",
+   "url": "https://forest.one/media/catalog/product/h/1/h1369_600x900_10de_fur.jpg",
+   "pixels": [
+    1000,
+    1000
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Misty Blue U502": {
+   "name": "egger-misty-blue-u502",
+   "url": "https://forest.one/media/catalog/product/m/i/mistyb.jpg",
+   "pixels": [
+    1000,
+    1000
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Natural Carini Walnut H3710": {
+   "name": "egger-natural-carini-walnut-h3710",
+   "url": "https://forest.one/media/catalog/product/h/3/h3710_9_2000x2000.jpg",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Natural Halifax Oak H1180": {
+   "name": "egger-natural-halifax-oak-h1180",
+   "url": "https://forest.one/media/catalog/product/h/1/h1180_1300x2800_10de.jpg",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Natural Hamilton Oak H3303": {
+   "name": "egger-natural-hamilton-oak-h3303",
+   "url": "https://forest.one/media/catalog/product/h/3/h3303_1300x2800_10de.jpg",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Natural Kendal Oak H3170": {
+   "name": "egger-natural-kendal-oak-h3170",
+   "url": "https://forest.one/media/catalog/product/h/3/h3170_12_raportwm_2000x2000.jpg",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Ocean Blue U565": {
+   "name": "egger-ocean-blue-u565",
+   "url": "https://forest.one/media/catalog/product/o/r/original_copy_1.jpg",
+   "pixels": [
+    1000,
+    1000
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Olive Green U640": {
+   "name": "egger-olive-green-u640",
+   "url": "https://forest.one/media/catalog/product/o/l/olivegreen.jpg",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Parona Walnut H1715": {
+   "name": "egger-parona-walnut-h1715",
+   "url": "https://forest.one/media/catalog/product/h/1/h1715_a3_10de_fur.jpg",
+   "pixels": [
+    1000,
+    1000
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Pistachio Green U608": {
+   "name": "egger-pistachio-green-u608",
+   "url": "https://forest.one/media/catalog/product/u/6/u608_a3_10de.jpg",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Premium White W1000": {
+   "name": "egger-premium-white-w1000",
+   "url": "https://forest.one/media/catalog/product/2/0/202210-forestone_sample_w1000_hg_premium_white_0108_2.jpg",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Purple U420": {
+   "name": "egger-purple-u420",
+   "url": "https://forest.one/media/catalog/product/o/r/original_8_copy.jpg",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Reed Green U604": {
+   "name": "egger-reed-green-u604",
+   "url": "https://forest.one/media/catalog/product/o/r/original_copy.jpg",
+   "pixels": [
+    1000,
+    1000
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Rusty Red U335": {
+   "name": "egger-rusty-red-u335",
+   "url": "https://forest.one/media/catalog/product/r/u/rustyred.jpg",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Sage Green U638": {
+   "name": "egger-sage-green-u638",
+   "url": "https://forest.one/media/catalog/product/u/6/u638_a3_copy.jpg",
+   "pixels": [
+    1000,
+    1000
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Sand Kentucky Chestnut H1710": {
+   "name": "egger-sand-kentucky-chestnut-h1710",
+   "url": "https://forest.one/media/catalog/product/h/1/h1710_1300x2800_10de.jpg",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Sand Orleans Oak H1377": {
+   "name": "egger-sand-orleans-oak-h1377",
+   "url": "https://forest.one/media/catalog/product/h/1/h1377_a3_10de_fur.jpg",
+   "pixels": [
+    1000,
+    1000
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Sand Yellow U125": {
+   "name": "egger-sand-yellow-u125",
+   "url": "https://forest.one/media/catalog/product/s/a/sandy.jpg",
+   "pixels": [
+    1000,
+    1000
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Soft Black U899": {
+   "name": "egger-soft-black-u899",
+   "url": "https://forest.one/media/catalog/product/u/8/u899_a3_10de.jpg",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Stone Green U665": {
+   "name": "egger-stone-green-u665",
+   "url": "https://forest.one/media/catalog/product/s/t/stonegreen_copy.jpg",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Stone Grey U727": {
+   "name": "egger-stone-grey-u727",
+   "url": "https://forest.one/media/catalog/product/s/t/stone_grey_u727.jpg",
+   "pixels": [
+    1000,
+    1000
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Taupe Grey U750": {
+   "name": "egger-taupe-grey-u750",
+   "url": "https://forest.one/media/catalog/product/t/a/taupeg.jpg",
+   "pixels": [
+    1000,
+    1000
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Tobacco Halifax Oak H1181": {
+   "name": "egger-tobacco-halifax-oak-h1181",
+   "url": "https://forest.one/media/catalog/product/h/1/h1181_1300x2800_10de.jpg",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Tobacco Pacific Walnut H3702": {
+   "name": "egger-tobacco-pacific-walnut-h3702",
+   "url": "https://forest.one/media/catalog/product/t/o/tobacco_pacific_walnut_copy.jpg",
+   "pixels": [
+    1000,
+    1000
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Truffle Brown Davos Oak H3133": {
+   "name": "egger-truffle-brown-davos-oak-h3133",
+   "url": "https://forest.one/media/catalog/product/h/3/h3133_a3_10de_fur.jpg",
+   "pixels": [
+    1000,
+    1000
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Truffle Brown U748": {
+   "name": "egger-truffle-brown-u748",
+   "url": "https://forest.one/media/catalog/product/t/r/trufflebrown.jpg",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Vicenza Oak H3157": {
+   "name": "egger-vicenza-oak-h3157",
+   "url": "https://forest.one/media/catalog/product/h/3/h3157_1300x2800_10de.jpg",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "White Casella Oak H1384": {
+   "name": "egger-white-casella-oak-h1384",
+   "url": "https://forest.one/media/catalog/product/h/1/h1384_a3_10de_fur.jpg",
+   "pixels": [
+    1000,
+    1000
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "White Chromix F637": {
+   "name": "egger-white-chromix-f637",
+   "url": "https://forest.one/media/catalog/product/f/6/f637_a3_10de_fur.jpg",
+   "pixels": [
+    1000,
+    1000
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "White Grey U775": {
+   "name": "egger-white-grey-u775",
+   "url": "https://forest.one/media/catalog/product/w/h/white_grey_1.jpg",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "White Halifax Oak H1176": {
+   "name": "egger-white-halifax-oak-h1176",
+   "url": "https://forest.one/media/catalog/product/h/1/h1176_1300x2800_10de.jpg",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "White Linen F422": {
+   "name": "egger-white-linen-f422",
+   "url": "https://forest.one/media/catalog/product/f/4/f422_a3_10de_fur.jpg",
+   "pixels": [
+    1000,
+    1000
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  }
+ },
+ "no_image": [
+  "Apricot Nude U232",
+  "Black PM U999",
+  "Black ST12 U999",
+  "Black ST19 U999",
+  "Black TM28 U999",
+  "Dust Grey U732",
+  "Graphite Grey U961",
+  "Indigo Blue U599"
+ ]
+}

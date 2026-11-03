@@ -1,0 +1,1297 @@
+{
+ "source": "https://www.laminex.com.au: the product page's Full Sheet Image or colour picture",
+ "verified": false,
+ "images": {
+  "Aged Ash": {
+   "name": "laminex-aged-ash",
+   "url": "https://www.laminex.com.au/medias/LX-ColourCollection-Aged-ash-Chalk-RGB-1200x1200-HR.jpg?context=bWFzdGVyfGltYWdlc3w2ODI3MzF8aW1hZ2UvanBlZ3xhVzFoWjJWekwyZ3lOaTlvTldJdmFEQXdMemc0TWpVMU9ESTJPREl4TkRJdWFuQm58NTgwNTUwYjdjZGYwN2RmNDRmOTYwMjZjNWVjNTg2ZWEyNzgyMWUwZDE4MDdiNjY1NDNkMWZkMWQ3OWY2OTI1Yg&attachment=true",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Aged Walnut": {
+   "name": "laminex-aged-walnut",
+   "url": "https://www.laminex.com.au/medias/LX-ColourCollection-Aged-walnut-Chalk-RGB-1200x1200-HR.jpg?context=bWFzdGVyfGltYWdlc3w3NTQ1NDN8aW1hZ2UvanBlZ3xhVzFoWjJWekwyaG1OQzlvTVdRdmFEQXdMemc0TWpVMU9ESTNPREEwTkRZdWFuQm58Y2UzMjZjN2NjMmIyMGFiMTJmOTA4MzhhZDQ4NTkxZmI2ODMxMWJhMmZiNmFjYTkwNzQ1MWNkNTA4NjcyNWZjNQ&attachment=true",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Alabaster": {
+   "name": "laminex-alabaster",
+   "url": "https://www.laminex.com.au/medias/LX-Alabaster-RGB-1200x1200-HR.jpg?context=bWFzdGVyfGltYWdlc3w0NzUxOTR8aW1hZ2UvanBlZ3xhVzFoWjJWekwyaGlNeTlvWVRZdmFEQXdMemc0TWpVMU9ETXdNRGs0TWpJdWFuQm58OTJjMWVmOTcwMzQyNWUxMWM5MzEwMGNjNTU2NDVlMDFjOTIwZmQ0MjY3MzA2YmYxZDg0NDdhODgwNzNmOWE5ZA&attachment=true",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Alaskan": {
+   "name": "laminex-alaskan",
+   "url": "https://www.laminex.com.au/medias/LX-ColourCollection-Alaskan-natural-RGB-FS-HR.jpg?context=bWFzdGVyfGltYWdlc3w1MTU0NjZ8aW1hZ2UvanBlZ3xhVzFoWjJWekwyZ3hNUzlvTUdRdmFEQXdMemc0TWpVMU9ETTBOamcxTnpRdWFuQm58MTk3MTQzYzU3NTNmYmMzZTJkYjc2MDE5MTlhMDE5OTBlYjBiMWI3OWI4N2VkMGU0NWY2YzJiMjdjOTBjNjVmNg&attachment=true",
+   "pixels": [
+    1200,
+    600
+   ]
+  },
+  "Alpaca": {
+   "name": "laminex-alpaca",
+   "url": "https://www.laminex.com.au/medias/LX-Alpaca-RGB-1200x1200-HR.jpg?context=bWFzdGVyfGltYWdlc3wyNjY1MjR8aW1hZ2UvanBlZ3xhVzFoWjJWekwyZ3laQzlvT0RZdmFEQXdMemc0TWpVMU9ETTFOalk0TnpndWFuQm58Y2IyYzBiZWMxNzFmYWE3ZDJhYmEzYWIxZjdlZjE0YjYxYzRhYjkwNzczYmM2YzY2MjNiNmUxNTVhNDgzYzNlYQ&attachment=true",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Alpine Mist": {
+   "name": "laminex-alpine-mist",
+   "url": "https://www.laminex.com.au/medias/LX-ColourCollection-Alpine-Mist-RGB-FS-HR.jpg?context=bWFzdGVyfGltYWdlc3w3NzA4MnxpbWFnZS9qcGVnfGFXMWhaMlZ6TDJnMU5TOW9Oakl2YURBd0x6ZzRNekEwTURZd05qWXlNRFl1YW5Cbnw2NWMwMjBiOGIzZTc5ZTU2Y2NkNzYwNzliYzkyZDg5Y2NhMzQ5OWUxN2EzMGRhZjIwYjRhMGNkNzIyY2YxZTg5&attachment=true",
+   "pixels": [
+    1200,
+    600
+   ]
+  },
+  "Aries": {
+   "name": "laminex-aries",
+   "url": "https://www.laminex.com.au/medias/LX-Aries-RGB-1200x1200-HR.jpg?context=bWFzdGVyfGltYWdlc3wzMjAwNTd8aW1hZ2UvanBlZ3xhVzFoWjJWekwyZzRZUzlvWkRndmFEQXdMemc0TWpVMU9ETTVNamN6TWpZdWFuQm58OGQyNWY2ZGQ0ZTQ4NTY3Mjg1NzBjZjc4ZTcyYjBkMzgwZDZjZjI1NTEzNzMyZWQ0NzhkYWY4MmY4MWFkN2U0MQ&attachment=true",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Ash White": {
+   "name": "laminex-ash-white",
+   "url": "https://www.laminex.com.au/medias/LX-Ash-White-RGB-1200x1200-HR.jpg?context=bWFzdGVyfGltYWdlc3w0MzU4ODV8aW1hZ2UvanBlZ3xhVzFoWjJWekwyaGlOaTlvWXpRdmFEQXdMemc0TWpVMU9EUXdNalUyTXpBdWFuQm58OTg5ZjMxN2RiMDljZjQ1ZDczYTQ5YzBkZWY3ZDU2YzQyNTYxZTIwMjViYWRkNzRlNzBhYzgyZjE3MmUxMzk5OA&attachment=true",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Austral Oak TrueScale": {
+   "name": "laminex-austral-oak-truescale",
+   "url": "https://www.laminex.com.au/medias/Austral-Oak-TrueScale-3600x1800-law.jpg?context=bWFzdGVyfHJvb3R8NzQ2NjE1OHxpbWFnZS9qcGVnfGFESm1MMmd5WVM4NU16VXlORE00TkRFMU16a3dMMEYxYzNSeVlXeGZUMkZyWDFSeWRXVlRZMkZzWlY4ek5qQXdlREU0TURBdGJHRjNMbXB3Wnd8YmU1NDNlYjQ3ZTVjMmUyOWYxMDlkYjgzNTQyNjk3YTg3YmJjOTg4OTVhZDcwODY5NTliNzJiMWYxNjJlYjg5Mg&attachment=true",
+   "pixels": [
+    7283,
+    3642
+   ]
+  },
+  "Avignon Walnut": {
+   "name": "laminex-avignon-walnut",
+   "url": "https://www.laminex.com.au/medias/LX-ColourCollection-Avignon-walnut-natural-RGB-FS-HR.jpg?context=bWFzdGVyfGltYWdlc3w1NDc4MTJ8aW1hZ2UvanBlZ3xhVzFoWjJWekwyaGtZeTlvWlRndmFEQXdMemc0TWpVMU9EUTFORGs1TVRndWFuQm58OTg4Y2UzMDA3OTgxMmI3MjM4ZGJlOGIwZWFiNTNiZWI3NGFjNDRmZGE2MTBjNzk1ZTdlOWE1Y2JlZGM4NDIyOQ&attachment=true",
+   "pixels": [
+    1200,
+    600
+   ]
+  },
+  "Basalt": {
+   "name": "laminex-basalt",
+   "url": "https://www.laminex.com.au/medias/LX-COlourCollection-Basalt-natural-RGB-1200x1200-HR.jpg?context=bWFzdGVyfGltYWdlc3wyNjMwMzR8aW1hZ2UvanBlZ3xhVzFoWjJWekwyZ3pNQzlvT1dJdmFEQXdMemc0TWpVMU9EUTBOVEUyTVRRdWFuQm58ODlkMDc4MjRmZjJhYjZmZTE2YjM0YjE0NGFhZDUxZTMzMjdkMWY5ODFjYzZhNzQwNDU5ZmU5NDIxY2EzNzQ1MQ&attachment=true",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Battalion": {
+   "name": "laminex-battalion",
+   "url": "https://www.laminex.com.au/medias/LX-Battalion-RGB-1200x1200-HR.jpg?context=bWFzdGVyfGltYWdlc3wyNjY1MzZ8aW1hZ2UvanBlZ3xhVzFoWjJWekwyZ3pOUzlvTldVdmFEQXdMemc0TWpVMU9EUTRORFE0TXpBdWFuQm58ZWIyMzVjMzI0MmE3ZmNhZmUzOTllNDBlNDhkMTRjMzk2NmEwNWMxYjhkMWQ1YmI5YjA5ZmIwODVkNTM5YjkxOQ&attachment=true",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Baye": {
+   "name": "laminex-baye",
+   "url": "https://www.laminex.com.au/medias/LX-Baye-RGB-1200x1200-HR.jpg?context=bWFzdGVyfGltYWdlc3wyNzI2MjR8aW1hZ2UvanBlZ3xhVzFoWjJWekwyaGxaQzlvWldZdmFEQXdMemc0TWpVMU9EUTVOelU1TURJdWFuQm58N2EzYjQwYjg0MTA5YWM5ZWVlZDgxYjUyMzQ3ZTVjYTg1ZDQxNmIwYzg5NjEyNWZjZTVkNWI2YjJlNDBlNjcxYg&attachment=true",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Bayleaf": {
+   "name": "laminex-bayleaf",
+   "url": "https://www.laminex.com.au/medias/LX-Bay-leaf-RGB-1200x1200-HR.jpg?context=bWFzdGVyfGltYWdlc3w1ODcwMjd8aW1hZ2UvanBlZ3xhVzFoWjJWekwyaGtPQzlvWXpFdmFEQXdMemc0TWpVMU9EVXhOekkxTVRBdWFuQm58NDAwZDMxMGVhZGVkNzc1MDA4ZThkZTg2NDRhMGNjYWE0MmFjZmUwZjM0YzVjZDFjZGJjNGQ1ZTkyNjlmMGU3MA&attachment=true",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Black": {
+   "name": "laminex-black",
+   "url": "https://www.laminex.com.au/medias/LX-Black-RGB-1200x1200-HR.jpg?context=bWFzdGVyfGltYWdlc3w1NjkyNDR8aW1hZ2UvanBlZ3xhVzFoWjJWekwyZ3dZaTlvTWpBdmFEQXdMemc0TWpnNE56TXlORFEzTURJdWFuQm58ZGRjZDVjODY3NDM4Mjg2ZWQ0YTU1NmEzN2RiM2VhMmE1ZWMxZjMxZTg3MTNlMDljMjhhMzRkODU0OTA1YzQ0Yw&attachment=true",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Black Birchply": {
+   "name": "laminex-black-birchply",
+   "url": "https://www.laminex.com.au/medias/Black-Birchply-3600x1200.jpg?context=bWFzdGVyfGltYWdlc3wyMjA4ODU1fGltYWdlL2pwZWd8YVcxaFoyVnpMMmc1TkM5b01UQXZhREF3THpnNE5ESTJORGswTXpZeE9UQXVhbkJufDNiMzI4MWYyMWY3YTg4NmY0ZGIyOTk3NmU5YWExYTM0OTIxODJiYjVhODdlNGZjODE4NGRlNDk4NTdjYzFhZmE&attachment=true",
+   "pixels": [
+    7087,
+    2362
+   ]
+  },
+  "Blackbutt TrueScale": {
+   "name": "laminex-blackbutt-truescale",
+   "url": "https://www.laminex.com.au/medias/Blackbutt-TrueScale-3600x1800.jpg?context=bWFzdGVyfGltYWdlc3w2MTMxMTV8aW1hZ2UvanBlZ3xhRFJsTDJneFpTODVNelU0TWpJNE1USTNOemMwTDBKc1lXTnJZblYwZEY5VWNuVmxVMk5oYkdWZk16WXdNSGd4T0RBd0xtcHdad3xkODEyZTgxMTE1YmM5MTVmYmFiNmY4M2Y3ZDE1NzZiNDllZjVkZGYwNDY1NmYxZDZhNGQwNjEzM2M4ZTg3ZDUw&attachment=true",
+   "pixels": [
+    3000,
+    1500
+   ]
+  },
+  "Blackened Elm": {
+   "name": "laminex-blackened-elm",
+   "url": "https://www.laminex.com.au/medias/LX-ColourCollection-Blackened-Elm-FS-HR.jpg?context=bWFzdGVyfGltYWdlc3w1ODQyNTV8aW1hZ2UvanBlZ3xhVzFoWjJWekwyaGxOQzlvWVRBdmFEQXdMemc0TWpVMU9EWTNOemd4TkRJdWFuQm58NjQwM2MyNTZkMmYzNzIxODA2MzgyMzFhMGNjMDI1MThiYmVlNTkzODliZjlmNmU3M2NjNWM2YWMzMDVjODVlYw&attachment=true",
+   "pixels": [
+    1200,
+    600
+   ]
+  },
+  "Blackened Legno": {
+   "name": "laminex-blackened-legno",
+   "url": "https://www.laminex.com.au/medias/LX-ColourCollection-Blackened-legno-natural-RGB-FS-HR.jpg?context=bWFzdGVyfGltYWdlc3w0MTIxNTN8aW1hZ2UvanBlZ3xhVzFoWjJWekwyZ3hOeTlvTm1FdmFEQXdMemc0TWpnNE56TXpOelUzTnpRdWFuQm58YTQ3ZWYwYTI3MDYzMGRiNWM4OTAwMmUzZjZiNGEzZGM2YjYwZTIwZTFkODI1ZTQ2MzQxMGQ0YjM4MDEzNGEzYw&attachment=true",
+   "pixels": [
+    1200,
+    600
+   ]
+  },
+  "Bluestone": {
+   "name": "laminex-bluestone",
+   "url": "https://www.laminex.com.au/medias/Bluestone-Detail-3000x1250.jpg?context=bWFzdGVyfGltYWdlc3wxNjQyNjM3fGltYWdlL2pwZWd8YUdGbUwyZzNZUzg1TWpVME16QXlORFE1TmprMEwwSnNkV1Z6ZEc5dVpWOUVaWFJoYVd4Zk16QXdNSGd4TWpVd0xtcHdad3w5MzFhMWU3NDZmNGI2YTNlNmU4MjljYTY2YjNlYWNkODNlYThmNmU0MzNhODZjNjZlYWMwZDFlOTYzZWU1MzM4&attachment=true",
+   "pixels": [
+    3000,
+    1250
+   ]
+  },
+  "Burnished Wood": {
+   "name": "laminex-burnished-wood",
+   "url": "https://www.laminex.com.au/medias/LX-Burnished-wood-natural-RGB-FS-HR.jpg?context=bWFzdGVyfGltYWdlc3wzNDk4MTR8aW1hZ2UvanBlZ3xhVzFoWjJWekwyZ3pNUzlvT0dNdmFEQXdMemc0TWpVMU9EZ3dNak16TWpZdWFuQm58YTQ3M2EzZmFlZjYxZTBkYWFkODg5NGE5NTYwN2I2ODAzZDUyODgzODQ0MDQ4OTg5ZTMzM2I3OGUyYTM1NmUzMQ&attachment=true",
+   "pixels": [
+    1200,
+    600
+   ]
+  },
+  "Burnt Ochre": {
+   "name": "laminex-burnt-ochre",
+   "url": "https://www.laminex.com.au/medias/Burnt-Ochre-1200x1200.jpg?context=bWFzdGVyfGltYWdlc3w3MjkxMHxpbWFnZS9qcGVnfGFERTNMMmhoWlM4NE9UTTNPRGc1TmpJNE1Ua3dMMEoxY201MFgwOWphSEpsWHpFeU1EQjRNVEl3TUM1cWNHY3xiZDAwZjNiNTgxODQxYjVjODMzMTk1MzdlYWFmMTFkNTMzZjlmZjY3ZjU3M2M0Zjg3ZjYzNmU5MzI2ZWM3Nzli&attachment=true",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Calacatta Majore TrueScale": {
+   "name": "laminex-calacatta-majore-truescale",
+   "url": "https://www.laminex.com.au/medias/Calacatta-mijore-FullSheet-3000x1250px.jpg?context=bWFzdGVyfGltYWdlc3w5MzcyMTd8aW1hZ2UvanBlZ3xhREJrTDJnMk1DODVNRGMyT0RnNE9UWXhNRFUwTDBOaGJHRmpZWFIwWVY5dGFXcHZjbVZmUm5Wc2JGTm9aV1YwWHpNd01EQjRNVEkxTUhCNExtcHdad3xhMjhiZTNiODZkMzk3NGExNTFhM2RhOTVhOTlhOTU1NjM2MmJiYmVmM2E3MmRhZDE3NTIwMDZmZDEyZWIwYTcz&attachment=true",
+   "pixels": [
+    3000,
+    1250
+   ]
+  },
+  "Calm Oak": {
+   "name": "laminex-calm-oak",
+   "url": "https://www.laminex.com.au/medias/Calm-Oak-FullSheet-3000x1250px.jpg?context=bWFzdGVyfGltYWdlc3wyMzk4MDk1fGltYWdlL2pwZWd8YURnekwyaGlNUzg1TURjM01ETTBPVGMxTWpZeUwwTmhiRzFmVDJGclgwWjFiR3hUYUdWbGRGOHpNREF3ZURFeU5UQndlQzVxY0djfDRlY2E1M2FiNDU5ZTk2YmE0MGE3NjY3OTY1YzBjYWVlMDViOWJjNzhmNmNiM2ZjODhmNjJhMjE5YjZkZDBmNGM&attachment=true",
+   "pixels": [
+    3000,
+    1250
+   ]
+  },
+  "Calm White": {
+   "name": "laminex-calm-white",
+   "url": "https://www.laminex.com.au/medias/LX-ColourCollection-Calm-White-RGB-FS-HR.jpg?context=bWFzdGVyfGltYWdlc3wyOTg0NnxpbWFnZS9qcGVnfGFXMWhaMlZ6TDJneFl5OW9NbVF2YURBd0x6ZzRNamc0TnpNM05qZzVPVEF1YW5Cbnw5ODkyNDU0MzBiNDBiNDFhMzdlODRjYTAwYzVlMDFlMWJlNWNhYzU2YmY3MTVhNDY1NmNjOWU1NWYwMDk0YzFi&attachment=true",
+   "pixels": [
+    1200,
+    600
+   ]
+  },
+  "Chalk White": {
+   "name": "laminex-chalk-white",
+   "url": "https://www.laminex.com.au/medias/LX-ColourCollection-Chalk-White-RGB-FS-HR.jpg?context=bWFzdGVyfGltYWdlc3wyOTgzNnxpbWFnZS9qcGVnfGFXMWhaMlZ6TDJoaVppOW9PVEF2YURBd0x6ZzRNamc0TnpRd09UWTJOekF1YW5CbnxkYzcwNmE2N2JkYzdkNWEzZmM0MWZmYTg3MjE2MGI5ZjlkMGY5ZjhkMDEyZTE5MDExY2I3NzE2NmJjNGRlYWNl&attachment=true",
+   "pixels": [
+    1200,
+    600
+   ]
+  },
+  "Chamois": {
+   "name": "laminex-chamois",
+   "url": "https://www.laminex.com.au/medias/LX-Chamois-RGB-1200x1200-HR.jpg?context=bWFzdGVyfGltYWdlc3w1NzEwNDd8aW1hZ2UvanBlZ3xhVzFoWjJWekwyZ3dOUzlvWkRVdmFEQXdMemc0TWpVMU9EZzJOemcyT0RZdWFuQm58YTc5MWNkN2Y3MWJmNDI3ODBhYTM5ZWJmNmM2NzRkOTVkY2U3YmE5MzRiZDZhOTIwODA2MWZjMTgyOTFhYTA3Zg&attachment=true",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Charcoal": {
+   "name": "laminex-charcoal",
+   "url": "https://www.laminex.com.au/medias/LX-Charcoal-RGB-1200x1200-HR.jpg?context=bWFzdGVyfGltYWdlc3w1NzI2MDR8aW1hZ2UvanBlZ3xhVzFoWjJWekwyaGxOUzlvTkRZdmFEQXdMemc0TWpVMU9EZzVNRGd3TmpJdWFuQm58Y2QwMzVmYjAzNWE1YzEyYjNlMjI5ZmZkNjU4ODQ5NDg3NWExMWM3ZmRmZjE5NGUyODk3OWY2MmUzMDhmMzAzNA&attachment=true",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Classic Oak": {
+   "name": "laminex-classic-oak",
+   "url": "https://www.laminex.com.au/medias/LX-ColourCollection-Classic-oak-RGB-FS-HR.jpg?context=bWFzdGVyfGltYWdlc3w2NTA1NDJ8aW1hZ2UvanBlZ3xhVzFoWjJWekwyZ3lPUzlvT0RZdmFEQXdMemc0TWpVMU9EazROVGd6TXpRdWFuQm58NGIwNTJkOTc0OGE4YTI3NzljZGYwM2E3MGMzZDYxYmI0NWYwNWQxNjU3YzI3OGI1YjYyM2IzYzZjMjk0ZjY0MA&attachment=true",
+   "pixels": [
+    1200,
+    600
+   ]
+  },
+  "Coastal Sunrise": {
+   "name": "laminex-coastal-sunrise",
+   "url": "https://www.laminex.com.au/medias/Coastal-Sunrise-FullSheet-3000x1250px.jpg?context=bWFzdGVyfGltYWdlc3wxODA4NDQwfGltYWdlL2pwZWd8YURFeEwyaGlaaTg1TURjM01ETTBOVGd5TURRMkwwTnZZWE4wWVd4ZlUzVnVjbWx6WlY5R2RXeHNVMmhsWlhSZk16QXdNSGd4TWpVd2NIZ3VhbkJufGMzNTNiNDYzMTMyY2IwYjFkODRjYmRkODRmZGZiZWI2ODJmNGIyMjA5OTNiNjAzM2Y4Y2U5YzdiNmY2YzA5NGE&attachment=true",
+   "pixels": [
+    3000,
+    1250
+   ]
+  },
+  "Coolum Sand": {
+   "name": "laminex-coolum-sand",
+   "url": "https://www.laminex.com.au/medias/Coolum-Sand-Detail-3000x1250.jpg?context=bWFzdGVyfGltYWdlc3wxMjY1NzM1fGltYWdlL2pwZWd8YURneUwyZzFNaTg1TWpVME16QTBNamcwTnpBeUwwTnZiMngxYlY5VFlXNWtYMFJsZEdGcGJGOHpNREF3ZURFeU5UQXVhbkJufGEyYWFkNDI1NGZmYmRjMGI2NTc5ZmQ4MmJlYzNjMGI1ZmNhYWNkYWY1ZDI1Zjk4ZWQ1ZmY2MDg4ZTBhYzYzM2M&attachment=true",
+   "pixels": [
+    3000,
+    1250
+   ]
+  },
+  "Curly Birch": {
+   "name": "laminex-curly-birch",
+   "url": "https://www.laminex.com.au/medias/LX-Curly-Birch-RGB-FS-HR.jpg?context=bWFzdGVyfGltYWdlc3w0MTc3MjV8aW1hZ2UvanBlZ3xhVzFoWjJWekwyaGtOQzlvWWpNdmFEQXdMemc0TWpnNE56UTJOVE0zTWpZdWFuQm58MWYwNjMyZGNkMTcwNGFjODcyYWE2MzhlNzIwOTkzNzNjMGY4ZDU5OWY1MzY4ZDgwNmI5NzdmMjVmZWEzZmFmNw&attachment=true",
+   "pixels": [
+    1200,
+    600
+   ]
+  },
+  "Daintree": {
+   "name": "laminex-daintree",
+   "url": "https://www.laminex.com.au/medias/Daintree-Detail-3000x1250.jpg?context=bWFzdGVyfGltYWdlc3wxNzQ1ODUyfGltYWdlL2pwZWd8YURrekwyZzFOUzg1TWpVME16QTBNelV3TWpNNEwwUmhhVzUwY21WbFgwUmxkR0ZwYkY4ek1EQXdlREV5TlRBdWFuQm58ZGE3NDYwMGZiMjQ1Yzk1OTE2ZDQ4NTljZTk3NDk0MGYzYTQ5NjdlMWEwNmNjM2Q4NGJiZWFmOWQ1Y2RiNTFjMw&attachment=true",
+   "pixels": [
+    3000,
+    1250
+   ]
+  },
+  "Danish Walnut": {
+   "name": "laminex-danish-walnut",
+   "url": "https://www.laminex.com.au/medias/Davish-Walnut-high-res.jpg?context=bWFzdGVyfGltYWdlc3wzMjIzNTQ4fGltYWdlL2pwZWd8YURBM0wyZ3hNQzg1TURnMk5UZzRPVFEwTkRFMEwwUmhkbWx6YUMxWFlXeHVkWFF0YUdsbmFDMXlaWE11YW5CbnxjM2JkYjllZTgxOTE2MTUxNTcwNDczZThhOTJiOTVkODIxYzIyMzMyODU2MmUzYzExNjdjZjkyMzAzZGNkNDUx&attachment=true",
+   "pixels": [
+    7087,
+    2362
+   ]
+  },
+  "Dansk Maple": {
+   "name": "laminex-dansk-maple",
+   "url": "https://www.laminex.com.au/medias/LX-ColourCollection-Dansk-maple-natural-RGB-FS-HR.jpg?context=bWFzdGVyfGltYWdlc3wzMzYyMzJ8aW1hZ2UvanBlZ3xhVzFoWjJWekwyZzVOQzlvT0dJdmFEQXdMemc0TWpVMU9UQTJNVEU1T1RndWFuQm58NjgzY2Y4YWQwMGQ3ZjI5MGIyMjY4ZmRjMDRmMjg2NzA0MTQ2M2E3OTE3NGZkMDM4ZjQ5MTlmMTc3NTliM2YxMA&attachment=true",
+   "pixels": [
+    1200,
+    600
+   ]
+  },
+  "Delana Oak": {
+   "name": "laminex-delana-oak",
+   "url": "https://www.laminex.com.au/medias/LX-ColourCollection-Delano-oak-Chalk-RGB-1200X1200-HR.jpg?context=bWFzdGVyfGltYWdlc3w4Mzk2NDB8aW1hZ2UvanBlZ3xhVzFoWjJWekwyZ3pZUzlvWVRFdmFEQXdMemc0TWpVMU9UQTJOemMxTXpRdWFuQm58MmQ0NzU0OTA2ZjA1NjZkMjUzNjUzZmIzOGQxY2ExYzQ3ZDUzMDM5ODFhNWNhYzY3ZTE5NTNhMzljYWZiYjVlYw&attachment=true",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Elegant Oak": {
+   "name": "laminex-elegant-oak",
+   "url": "https://www.laminex.com.au/medias/LX-ColourCollection-Elegant-Oak-RGB-FS-HR.jpg?context=bWFzdGVyfGltYWdlc3w0NzIyNDJ8aW1hZ2UvanBlZ3xhVzFoWjJWekwyaGlNQzlvTm1JdmFEQXdMemc0TWpVMU9USTJNVEE0TkRZdWFuQm58MGVkNGQzMDdiNmQ5NGE5ZGY0ZDkyMjY2NThlMTQ4ZDA4N2IxZDI1NjYxMWYxMmJiMzgwY2YyODQ5NjRlZGQ1Yg&attachment=true",
+   "pixels": [
+    1200,
+    600
+   ]
+  },
+  "Eucalypt": {
+   "name": "laminex-eucalypt",
+   "url": "https://www.laminex.com.au/medias/Eucalypt-Detail-3000x1250.jpg?context=bWFzdGVyfGltYWdlc3wxNjQ1NTcwfGltYWdlL2pwZWd8YURKaEwyaGlaaTg1TWpVME16QTFNek16TWpjNEwwVjFZMkZzZVhCMFgwUmxkR0ZwYkY4ek1EQXdlREV5TlRBdWFuQm58YzFlZjBlMzEyYmQyMDQ5MjMzYmVmYjdjZTVkMTk1YjI5Njg4ZjIxZGNlNjIyYTEzNDYwODk3NmUzMzBhMTY5Yw&attachment=true",
+   "pixels": [
+    3000,
+    1250
+   ]
+  },
+  "Fossil": {
+   "name": "laminex-fossil",
+   "url": "https://www.laminex.com.au/medias/LX-Fossil-RGB-1200x1200-HR.jpg?context=bWFzdGVyfGltYWdlc3w2Mjk3MjV8aW1hZ2UvanBlZ3xhVzFoWjJWekwyZzRZaTlvWkRBdmFEQXdMemc0TWpVMU9UTTRPRGczT1RndWFuQm58OWI1OGJjNzM3YTUwYTQ0OGM3NDY2ZDQ5YjIwNDljN2NmMjBlOTlmMzk5ZmZkMDFlMWE5NmUzNzcxNWE5MDQzNQ&attachment=true",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Fox": {
+   "name": "laminex-fox",
+   "url": "https://www.laminex.com.au/medias/Product-Image-Flatlays-3D-8.jpg?context=bWFzdGVyfGltYWdlc3w2MzQ1NnxpbWFnZS9qcGVnfGFXMWhaMlZ6TDJoalpTOW9abVl2YURBd0x6ZzRNamc0TnpnMk1UZzJOVFF1YW5Cbnw5NjFlYzE2NTkxYmU3NDAzMmE1OTc3M2Q0ZWYyZGU4ZWJiYTk5MWUzY2YwNWZmMzczM2UyNGZlMTNhNTU2MDJk&attachment=true",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Fox Teakwood": {
+   "name": "laminex-fox-teakwood",
+   "url": "https://www.laminex.com.au/medias/LX-ColourCollection-Fox-teakwood-natural-RGB-FS-HR.jpg?context=bWFzdGVyfGltYWdlc3w1NTEwOTl8aW1hZ2UvanBlZ3xhVzFoWjJWekwyaGxNaTlvTnpndmFEQXdMemc0TWpnNE56WXdNams1T0RJdWFuQm58OTY1NDdjMWNhNzU5M2ExMGEzNDFlNDExZDNlMjA0ZmYxZTU5MDllODhkMzU0MDQ4ZDM5MDM5YjA2ZjY3NzY1Nw&attachment=true",
+   "pixels": [
+    1200,
+    600
+   ]
+  },
+  "French Cream": {
+   "name": "laminex-french-cream",
+   "url": "https://www.laminex.com.au/medias/LX-ColourCollection-French-Cream-RGB-FS-HR.jpg?context=bWFzdGVyfGltYWdlc3wyOTg4NXxpbWFnZS9qcGVnfGFXMWhaMlZ6TDJnNFl5OW9ZV1F2YURBd0x6ZzRNamc0TnpZeE1qZ3lPRFl1YW5Cbnw4ZDM2MWI1ZjA0MmEzZWNhNjg5YmNhZTBkZjU5OTc4MzVjNTNhNzM5NjJkYWFiYWEyZjYzODdlNjg3ZDc0MGFj&attachment=true",
+   "pixels": [
+    1200,
+    600
+   ]
+  },
+  "French Navy": {
+   "name": "laminex-french-navy",
+   "url": "https://www.laminex.com.au/medias/LX-ColourCollection-French-Navy-RGB-FS-HR.jpg?context=bWFzdGVyfGltYWdlc3w5MjA5NXxpbWFnZS9qcGVnfGFXMWhaMlZ6TDJnMU5pOW9PRFl2YURBd0x6ZzRNamc0TnpZMU5UUXlOekF1YW5CbnxkOTExYjg1NzMxZWMxNWNjYjMzNjg0YTZiMjBlMTQwNGJjY2QwNzg4OWJiNTBlYWNhMDU2YzRlMDJhNGY4OGUx&attachment=true",
+   "pixels": [
+    1200,
+    600
+   ]
+  },
+  "Fresh Spring": {
+   "name": "laminex-fresh-spring",
+   "url": "https://www.laminex.com.au/medias/LX-Fresh-Spring-RGB-1200x1200-HR.jpg?context=bWFzdGVyfGltYWdlc3wyNzYwNDV8aW1hZ2UvanBlZ3xhVzFoWjJWekwyaGlPUzlvWW1FdmFEQXdMemc0TWpVMU9UUTBNVE13T0RZdWFuQm58YjA2MmVmZGM2YTFlZDFiMzZkZjgyMmVmYjA1NzhjNzUyN2UwMDlhYThkNTBkZDMwYjkxYjIzNDZiYzkxYzY2Ng&attachment=true",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Ghostgum": {
+   "name": "laminex-ghostgum",
+   "url": "https://www.laminex.com.au/medias/LX-Ghostgum-RGB-1200x1200-HR.jpg?context=bWFzdGVyfGltYWdlc3wyNjgxMjB8aW1hZ2UvanBlZ3xhVzFoWjJWekwyZ3dOUzlvTm1JdmFEQXdMemc0TWpVMU9UUTJOelV5TXpBdWFuQm58NTVkZDEzMDRjODhhZTM5NTBhMmEyZDNiNWJiYzk3NWYwZjczN2VkMWVmMzZiODIyZDQwMDY1ZjJmZGNlYTFmMA&attachment=true",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Golden Wattle": {
+   "name": "laminex-golden-wattle",
+   "url": "https://www.laminex.com.au/medias/Golden-Wattle-FullSheet-3000x1250px.jpg?context=bWFzdGVyfGltYWdlc3wxNDg4NDE2fGltYWdlL2pwZWd8YURkakwyZzNOeTg1TURjM01ETXlPRGM0TVRFd0wwZHZiR1JsYmw5WFlYUjBiR1ZmUm5Wc2JGTm9aV1YwWHpNd01EQjRNVEkxTUhCNExtcHdad3wxNGIzN2Q1NzBhYzM0M2Q3YzA2MDBkZmMwZGZiN2FkNzYyYmMxZWZkMTNlMDg5NTEwZWQzMTM3YjQ2YjRiYzQ5&attachment=true",
+   "pixels": [
+    3000,
+    1250
+   ]
+  },
+  "Green Slate": {
+   "name": "laminex-green-slate",
+   "url": "https://www.laminex.com.au/medias/LX-ColourCollection-Green-Slate-RGB-FS-HR.jpg?context=bWFzdGVyfGltYWdlc3w3NzIyMXxpbWFnZS9qcGVnfGFXMWhaMlZ6TDJobU1pOW9PV1V2YURBd0x6ZzRNamc0TnpZM09ETTJORFl1YW5CbnwyYzlkNGQ3OGU4MTM0ZTEzMjhjNGQ0MmE1MDM5OGRlYTEyZWE2NWY1MTNmYzJlMWMxYjNlZjBmMjExMzM5MDMz&attachment=true",
+   "pixels": [
+    1200,
+    600
+   ]
+  },
+  "Greystone": {
+   "name": "laminex-greystone",
+   "url": "https://www.laminex.com.au/medias/LX-ColourCollection-Greystone-RGB-FS-HR.jpg?context=bWFzdGVyfGltYWdlc3w0Njk5ODF8aW1hZ2UvanBlZ3xhVzFoWjJWekwyZ3dPQzlvWWpBdmFEQXdMemc0TWpVMU9UUTRNRFl6TURJdWFuQm58ZDkxNDRiYzc3ZTBiMDFjYTZlNzRjZmQ5OTMwOGFhOGNkOWNiMzE5YzcxYTkwMzFhNzk2NjFlODkwNmRhMWZhNw&attachment=true",
+   "pixels": [
+    1200,
+    600
+   ]
+  },
+  "Gumnut": {
+   "name": "laminex-gumnut",
+   "url": "https://www.laminex.com.au/medias/Gumnut-Detail-3000x1250.jpg?context=bWFzdGVyfGltYWdlc3wxNTc5NzAxfGltYWdlL2pwZWd8YURBeEwyZzFaQzg1TWpVMk56RTBOalkyTURFMEwwZDFiVzUxZEY5RVpYUmhhV3hmTXpBd01IZ3hNalV3TG1wd1p3fDU5MTVjODdiNDEwNTE1YmNiMWU2NzRkOTA1N2UzZTgzZDJiODZkNWM1MDA2ZGZmNGE2NzI2NDJjNzQ0NjQ5MDA&attachment=true",
+   "pixels": [
+    3000,
+    1250
+   ]
+  },
+  "Gunmetal": {
+   "name": "laminex-gunmetal",
+   "url": "https://www.laminex.com.au/medias/LX-Gunmetal-RGB-1200x1200-HR.jpg?context=bWFzdGVyfGltYWdlc3w2MTAzNDB8aW1hZ2UvanBlZ3xhVzFoWjJWekwyZ3dOQzlvTXpjdmFEQXdMemc0TWpVMU9UVXhOalkzTlRBdWFuQm58MDgxMmM0YmUxZWYzYWE3ZDVhOTkxMjQwZDMxMjhkNDMwYWExYTVhY2ExMDE5NWZjYTRmYjcxZjcwN2M2OWRkNw&attachment=true",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Honey Elm": {
+   "name": "laminex-honey-elm",
+   "url": "https://www.laminex.com.au/medias/Honey-Elm-3600x1200.jpg?context=bWFzdGVyfGltYWdlc3wxNTYwOTgyfGltYWdlL2pwZWd8YVcxaFoyVnpMMmd3WVM5b1lqTXZhREF3THpnNE5UQTJOamsxTXpVeU5qSXVhbkJufDcxZjEwNWE3YjZlOGJmMzNhYTliZWZiMDdlM2JjZTBlYjI2ODQyYTI2NDBmNmQ5YmQ3NmVjZmNlNzFkYzNmNDM&attachment=true",
+   "pixels": [
+    2362,
+    787
+   ]
+  },
+  "Hushed Pine": {
+   "name": "laminex-hushed-pine",
+   "url": "https://www.laminex.com.au/medias/Hushed-Pine-1200x1200.jpg?context=bWFzdGVyfGltYWdlc3w2ODAzNnxpbWFnZS9qcGVnfGFEVXdMMmcwWWk4NE9UTTNPRGc0T0RReE56VTRMMGgxYzJobFpGOVFhVzVsWHpFeU1EQjRNVEl3TUM1cWNHY3w0MTNiOTI4N2Q0NTY4NzliMDFlOGRmMzAzNjgxYTA0NDg3NTM2NTQyNmYyOTA3ZGI5Mjk4NTEwZmM0NzkxNDll&attachment=true",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Jarrah Legno": {
+   "name": "laminex-jarrah-legno",
+   "url": "https://www.laminex.com.au/medias/LX-ColourCollection-Jarrah-legno-natural-RGB-FS-HR.jpg?context=bWFzdGVyfGltYWdlc3w1MDUzNzd8aW1hZ2UvanBlZ3xhVzFoWjJWekwyZ3pNUzlvWVdFdmFEQXdMemc0TWpnNE56Y3hNVEV6TWpZdWFuQm58MjE0MjU1OTY0MTUyZjQyNDU2M2MyMmFmNjY0NmE3YTlkMTZiZjdjMTJlNjU2YmNjM2Y4MzIyM2Y3NWVlYmM5OQ&attachment=true",
+   "pixels": [
+    1200,
+    600
+   ]
+  },
+  "Jericho": {
+   "name": "laminex-jericho",
+   "url": "https://www.laminex.com.au/medias/LX-ColourCollection-Jericho-natural-RGB-FS-HR.jpg?context=bWFzdGVyfGltYWdlc3w2NDQwOTJ8aW1hZ2UvanBlZ3xhVzFoWjJWekwyZzFOeTlvTVRrdmFEQXdMemc0TWpVMU9UWXpNVE0yTXpBdWFuQm58YjE5ZDcwZDU0Yjc1MzI5NDY5ZGE4NzJmZWMxMTMzNmQ2NTNmNzA0OWFlZjdmNTdlOTMyOWE3MDViNGVhMDI3Yg&attachment=true",
+   "pixels": [
+    1200,
+    600
+   ]
+  },
+  "Just Blue": {
+   "name": "laminex-just-blue",
+   "url": "https://www.laminex.com.au/medias/LX-ColourCollection-Just-Blue-RGB-FS-HR.jpg?context=bWFzdGVyfGltYWdlc3w0MzcxNHxpbWFnZS9qcGVnfGFXMWhaMlZ6TDJoaFpTOW9ZV0V2YURBd0x6ZzRNamc0TnpjeU56VXhOall1YW5CbnxiNjU0ZjQ1ZWJmZjFlMDlhYzcxN2U0ZjJlNmIzMDYzNjMyMmI0YjIyMzAzNDQ3ZmFmYzExYjRjZTE4OTFiYjlj&attachment=true",
+   "pixels": [
+    1200,
+    600
+   ]
+  },
+  "Kalamata": {
+   "name": "laminex-kalamata",
+   "url": "https://www.laminex.com.au/medias/Kalamata-1200x1200-v2.jpg?context=bWFzdGVyfGltYWdlc3w3NjIyNXxpbWFnZS9qcGVnfGFEUTBMMmhtWmk4NE9UTTVNekUwT1RBMU1URTRMMHRoYkdGdFlYUmhYekV5TURCNE1USXdNQzEyTWk1cWNHY3wwOWU4NGVjNzEzZWJlM2Q1OWU3ZWNkMjc0ODdlMmE2ZDRjNTU5ZTQ4M2JhMWJjNTJhNTBmZDc4OTQ0NjAwZTdi&attachment=true",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Lava Grey": {
+   "name": "laminex-lava-grey",
+   "url": "https://www.laminex.com.au/medias/LX-ColourCollection-Lava-Grey-Natural-RGB-FS-HR.jpg?context=bWFzdGVyfGltYWdlc3w1NDQ5N3xpbWFnZS9qcGVnfGFXMWhaMlZ6TDJnd1lTOW9aV0V2YURBd0x6ZzRNamc0TnpnMk5URTBNakl1YW5CbnwxMGVlYmE1NWRlZTVmNjAwMmM5ZDQwMDJlNGNmNjYyZTBlYjE3YTRhOTFjOTM0OTNlMjc3MzVkOWQyYmQwYjAy&attachment=true",
+   "pixels": [
+    1200,
+    600
+   ]
+  },
+  "Light Jarrah TrueScale": {
+   "name": "laminex-light-jarrah-truescale",
+   "url": "https://www.laminex.com.au/medias/Light-Jarrah-TrueScale-3600x1800.jpg?context=bWFzdGVyfGltYWdlc3wzMzQzMzMwfGltYWdlL2pwZWd8YURFd0wyZ3haaTg1TXpVNE1qSTRNVGt6TXpFd0wweHBaMmgwWDBwaGNuSmhhRjlVY25WbFUyTmhiR1ZmTXpZd01IZ3hPREF3TG1wd1p3fDliMTI2MzY2MmVjNDc1NGE1YzRhOTk3NDY1ZmVjNWE2OTRlMjZkNjU1ZGQxZTA2NjA0NmI4YWM1OGYwY2Y0NWY&attachment=true",
+   "pixels": [
+    3000,
+    1500
+   ]
+  },
+  "Light Walnut": {
+   "name": "laminex-light-walnut",
+   "url": "https://www.laminex.com.au/medias/Light-Walnut-2400x1200.jpg?context=bWFzdGVyfGltYWdlc3wyMTY4MTM3fGltYWdlL2pwZWd8YURoa0wyZ3lZeTg1TXpVNE1ETXlORE0zTWpjNEwweHBaMmgwWDFkaGJHNTFkQ0F5TkRBd2VERXlNREF1YW5CbnxkOGJjNWZjYWUzMTkzNjliZThmMGY4ODJjNmIzNzQ5NTk3M2EzODRlOTEwZGM2NjdiYTRmMTE2ZmJlOWZlN2M2&attachment=true",
+   "pixels": [
+    7298,
+    3929
+   ]
+  },
+  "Lustrous Elm": {
+   "name": "laminex-lustrous-elm",
+   "url": "https://www.laminex.com.au/medias/LX-ColourCollection-Lustrous-elm-natural-RGB-FS-HR.jpg?context=bWFzdGVyfGltYWdlc3w2NzY0NDZ8aW1hZ2UvanBlZ3xhVzFoWjJWekwyaGtNUzlvTWpndmFEQXdMemc0TWpVMU9UYzROVE0zTWpZdWFuQm58NTU3OWQ3Mjg4YzRmMGQ4YmNjNmMwNmMyN2IzODAxNGM5OWI5ZTc2YmZjNzM0ZTU2ZDg1NTE0MTIwNTlmMmViNg&attachment=true",
+   "pixels": [
+    1200,
+    600
+   ]
+  },
+  "Luxe Elba TrueScale": {
+   "name": "laminex-luxe-elba-truescale",
+   "url": "https://www.laminex.com.au/medias/Luxe-Elba-FullSheet-3000x1250px.jpg?context=bWFzdGVyfGltYWdlc3wxMzAwNDQ4fGltYWdlL2pwZWd8YUdRd0wyZzJZeTg1TURjM01EUXdOamMyT0RrMEwweDFlR1ZmUld4aVlWOUdkV3hzVTJobFpYUmZNekF3TUhneE1qVXdjSGd1YW5CbnwxZWMyMWVjYmNlYjY2ZmRjODMzMjU0OGNmNjY4ZmRiYzM2YzI3MzIyZWJiOGNkOTg1OTQwODhmMDFhMTE3ZDdj&attachment=true",
+   "pixels": [
+    3000,
+    1250
+   ]
+  },
+  "Macedon Mist": {
+   "name": "laminex-macedon-mist",
+   "url": "https://www.laminex.com.au/medias/Macedon-Mist-Detail-3000x1250.jpg?context=bWFzdGVyfGltYWdlc3wxNzgxMjU1fGltYWdlL2pwZWd8YUdRNEwyaGlaaTg1TWpVME16QTFNems0T0RFMEwwMWhZMlZrYjI1ZlRXbHpkRjlFWlhSaGFXeGZNekF3TUhneE1qVXdMbXB3Wnd8OWY2ODYxZDZhZTZkZWNmYzRkZjk4ODNjM2JmMzhhOGQyNWFkNzVhNTJiYWFhYmY0ODI3NGZjM2NjYWZjMGRmZQ&attachment=true",
+   "pixels": [
+    3000,
+    1250
+   ]
+  },
+  "Manhattan Concrete": {
+   "name": "laminex-manhattan-concrete",
+   "url": "https://www.laminex.com.au/medias/Manhattan-Concrete-1200x1200.jpg?context=bWFzdGVyfGltYWdlc3wyOTQzMjZ8aW1hZ2UvanBlZ3xhREl6TDJnek1DODRPVE0zT0RnNE1EVTFNekkyTDAxaGJtaGhkSFJoYmw5RGIyNWpjbVYwWlY4eE1qQXdlREV5TURBdWFuQm58MjQ5MGEwZjlhODA2ZTFkZDdkNzgyN2QzNmZiYmY1MTQzYjc2ZjQ0ZTI4YTQyZDlmOGIxNjEyMGNmNjA1MGViMg&attachment=true",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Marmo Grigio TrueScale": {
+   "name": "laminex-marmo-grigio-truescale",
+   "url": "https://www.laminex.com.au/medias/MarmoGrigio-FullSheet-3000x1250px.jpg?context=bWFzdGVyfGltYWdlc3wyMDk4MTM1fGltYWdlL2pwZWd8YURZNUwyaGtNeTg1TURjM01EUXhOVGswTXprNEwwMWhjbTF2UjNKcFoybHZYMFoxYkd4VGFHVmxkRjh6TURBd2VERXlOVEJ3ZUM1cWNHY3w3OGNjYTEyMDRhZjQxMWFjODNkZmNmNjQzNjljZjU1NjhmMTY5ODY1YTZmM2JiNTAwOTNiNTBjZTZlZWM1NjUw&attachment=true",
+   "pixels": [
+    3000,
+    1250
+   ]
+  },
+  "Midnight Oak TrueScale": {
+   "name": "laminex-midnight-oak-truescale",
+   "url": "https://www.laminex.com.au/medias/Midnight-Oak-TrueScale-3600x1800.jpg?context=bWFzdGVyfGltYWdlc3wzMjU1ODMxfGltYWdlL2pwZWd8YURCbEwyZ3lNaTg1TXpVNE1qSTRNalU0T0RRMkwwMXBaRzVwWjJoMFgwOWhhMTlVY25WbFUyTmhiR1ZmTXpZd01IZ3hPREF3TG1wd1p3fDliYjg3MTBhOGQ3ZjgxMDA5ZjQxODA3YzI0MTRiMjY3NjFmMTA3OGFiNWMzNDM4OGU4YjZkZjU1NmQ4ODc1MDg&attachment=true",
+   "pixels": [
+    3000,
+    1500
+   ]
+  },
+  "Milano Walnut": {
+   "name": "laminex-milano-walnut",
+   "url": "https://www.laminex.com.au/medias/LX-Milano-Walnut-RGB-FS-HR.jpg?context=bWFzdGVyfGltYWdlc3w0NjQ2Njh8aW1hZ2UvanBlZ3xhVzFoWjJWekwyZ3dZeTlvTWpVdmFEQXdMemc0TWpVMU9UZ3hORGcyTXpndWFuQm58MDFjZDU0NmRiMWQ4ZThmYTVkYjM3OTc0NjI5MzQ2ZjU3ZTM1NDFmODRhYjQwMzFhZGE1YmQ0ZDAzN2JhNDY1Ng&attachment=true",
+   "pixels": [
+    1200,
+    600
+   ]
+  },
+  "Milkwood": {
+   "name": "laminex-milkwood",
+   "url": "https://www.laminex.com.au/medias/Milkwood-3600x1200.jpg?context=bWFzdGVyfGltYWdlc3wxMzY1OTI0fGltYWdlL2pwZWd8YUdNMEwyaGpOUzg1TWpJeU16ZzROemMyT1Rrd0wwMXBiR3QzYjI5a1h6TTJNREI0TVRJd01DNXFjR2N8OWRhMGZiYjQ2NWNiMzg0ZTJmOTVhOTRkNTljN2YwZDY3NTQ4YjdiZTlhMWRlZTEwYTVkNzRkNGFhMzQ4NGMwMw&attachment=true",
+   "pixels": [
+    2362,
+    787
+   ]
+  },
+  "Moleskin": {
+   "name": "laminex-moleskin",
+   "url": "https://www.laminex.com.au/medias/LX-Moleskin-RGB-1200x1200-HR.jpg?context=bWFzdGVyfGltYWdlc3w0NTYwMzJ8aW1hZ2UvanBlZ3xhVzFoWjJWekwyZzVNaTlvTURrdmFEQXdMemc0TWpVMU9Ua3dOall4TkRJdWFuQm58NjBmNjRiODRjZDUyYzkwMWU0MDQ0NzhkOTdiNTBjNGVjMmE2MDVjY2ViMTRmYmFjZWI0NDc4YjgyMWE3MTEwNQ&attachment=true",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Moose": {
+   "name": "laminex-moose",
+   "url": "https://www.laminex.com.au/medias/LX-Moose-RGB-1200x1200-HR.jpg?context=bWFzdGVyfGltYWdlc3w5OTc4NTF8aW1hZ2UvanBlZ3xhVzFoWjJWekwyZzJaaTlvWXpjdmFEQXdMemc0TWpVMU9Ua3pNamd5T0RZdWFuQm58YzdkN2QyYmY4MWE1ZjU4MmNhNWI4NmNjZTA0ZGJjOWE2NTdkMTkzOGVhOTgzOGFjNjY0NTcxNGEzNTkyYzY1Mg&attachment=true",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Moroccan Clay": {
+   "name": "laminex-moroccan-clay",
+   "url": "https://www.laminex.com.au/medias/Moroccan-Clay-1200x1200.jpg?context=bWFzdGVyfGltYWdlc3w3MzA5NXxpbWFnZS9qcGVnfGFERXlMMmd3Tnk4NE9UTTNPVEF4TlRVMU56UXlMMDF2Y205alkyRnVYME5zWVhsZk1USXdNSGd4TWpBd0xtcHdad3wwNTc3N2JhZTc0Mjg0OTIxN2UzYTU5M2Q2ZmQwZmVlYTFhNDE1NDNmY2NlNDBhOGRkMThhYzFlYTNhYzE3M2Ni&attachment=true",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Natural Ash": {
+   "name": "laminex-natural-ash",
+   "url": "https://www.laminex.com.au/medias/LX-ColourCollection-Natural-ash-natural-RGB-FS-HR.jpg?context=bWFzdGVyfGltYWdlc3w1NjkyMjd8aW1hZ2UvanBlZ3xhVzFoWjJWekwyZzVOUzlvWVRndmFEQXdMemc0TWpnNE56a3lOREV5TkRZdWFuQm58NjM1ZDgxNWE4MDRhZmM0NmRkYWZlMzcwZTAxODc2Nzc1YWQxOWE1ODlkYzFlMjdlYmMzMWZiOTZlM2Y1Njc5NQ&attachment=true",
+   "pixels": [
+    1200,
+    600
+   ]
+  },
+  "Natural Teak": {
+   "name": "laminex-natural-teak",
+   "url": "https://www.laminex.com.au/medias/LX-ColourCollection-Natural-teak-RGB-FS-HR.jpg?context=bWFzdGVyfGltYWdlc3w2MzM2NDl8aW1hZ2UvanBlZ3xhVzFoWjJWekwyZzRZaTlvWXpBdmFEQXdMemc0TWpnNE56azFOamc1TWpZdWFuQm58YmQ1OWFhOTgwMTQ0ZDExMzM2ZDJjNTA0N2UyZWJmZTE4NGYwMDA2NTdlMjhiOTcwZGY0ZTlkYmVjYzYyMTJkYg&attachment=true",
+   "pixels": [
+    1200,
+    600
+   ]
+  },
+  "Natural Walnut": {
+   "name": "laminex-natural-walnut",
+   "url": "https://www.laminex.com.au/medias/ES-Product-Image-Brochure-17.jpg?context=bWFzdGVyfGltYWdlc3w1MTY2NXxpbWFnZS9qcGVnfGFXMWhaMlZ6TDJnME1TOW9NVFl2YURBd0x6ZzRNalUyTURVMU9EWTVOelF1YW5CbnxlZDQxZDg5ZGUyZTIzMjI0YjM4Yjk0MmY3MTQwNjUwODYyMTgzZGQyZTI5NTIwMThhNWE0YjhiYTU0NzI1NTcz&attachment=true",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "New Antique White": {
+   "name": "laminex-new-antique-white",
+   "url": "https://www.laminex.com.au/medias/LX-New-Antique-White-RGB-1200x1200-HR.jpg?context=bWFzdGVyfGltYWdlc3w0NjM4OTR8aW1hZ2UvanBlZ3xhVzFoWjJWekwyZzNPUzlvTWprdmFEQXdMemc0TWpnNE56azRNekV3TnpBdWFuQm58ZmUxMTJhN2ExYTA1ZjJmMjE5NGFhYjVhODYzMGYxYjEyZTc1MDg3MGZjMGMxZGY5ZTZiNmI0NzY4Zjg3NGZjYg&attachment=true",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "New Graphite": {
+   "name": "laminex-new-graphite",
+   "url": "https://www.laminex.com.au/medias/LX-New-Graphite-RGB-1200x1200-HR.jpg?context=bWFzdGVyfGltYWdlc3w2MzgzNjZ8aW1hZ2UvanBlZ3xhVzFoWjJWekwyZzVNQzlvTm1ZdmFEQXdMemc0TWpVMk1EQTFOek0wTnpBdWFuQm58NDc4MGMzZDEwOGU1NTgxNWIzYjQ3NDlkMmFmZTU4ODUzYjc2N2Y5NjJhNzc2YzhmNTk4MzI0ZDBhZGY5MWU3Yg&attachment=true",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Oiled Legno": {
+   "name": "laminex-oiled-legno",
+   "url": "https://www.laminex.com.au/medias/LX-ColourCollection-Oiled-legno-Chalk-RGB-FS-HR.jpg?context=bWFzdGVyfGltYWdlc3w2MDI0Mzd8aW1hZ2UvanBlZ3xhVzFoWjJWekwyaGxOaTlvWXpRdmFEQXdMemc0TWpVMk1EQTVPVGswTlRRdWFuQm58NzJhMTMxMTU2ZTlhYWY1NWVhN2ZkMzlhMWE5N2ZjYjRmMmU0MWEwMjQ5YThkYjA1MjhlZWZlZjJlZTI0MWZjNg&attachment=true",
+   "pixels": [
+    1200,
+    600
+   ]
+  },
+  "Olivine": {
+   "name": "laminex-olivine",
+   "url": "https://www.laminex.com.au/medias/Olivine-1200x1200.jpg?context=bWFzdGVyfGltYWdlc3w3MzQzOXxpbWFnZS9qcGVnfGFEY3hMMmhrTUM4NE9UTTNPVEF6TWpVNU5qYzRMMDlzYVhacGJtVmZNVEl3TUhneE1qQXdMbXB3Wnd8NDM2NGFiNmE4YTQ2YTVmZGIyN2JhOTY1NjQ1NzkyYmFmNzExMGQ0MTcyZmY5MDYxYzk1MjExMTMyZjk0N2MzMw&attachment=true",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Otway": {
+   "name": "laminex-otway",
+   "url": "https://www.laminex.com.au/medias/Otway-FullSheet-3000x1250px.jpg?context=bWFzdGVyfGltYWdlc3wxMzA0Njk5fGltYWdlL2pwZWd8YURVMEwyaGlPQzg1TURjM01ETTBOemM0TmpVMEwwOTBkMkY1WDBaMWJHeFRhR1ZsZEY4ek1EQXdlREV5TlRCd2VDNXFjR2N8NTEyMGQzY2M3NGFhMWJmMzUxMTY2MGI3YjRiYzRkMWZlNjQ2OGRlMzJiYmQzZGNlZjMzNjEwNDM0N2MwYjgyOQ&attachment=true",
+   "pixels": [
+    3000,
+    1250
+   ]
+  },
+  "Outback Clay": {
+   "name": "laminex-outback-clay",
+   "url": "https://www.laminex.com.au/medias/Outback-Clay-Detail-3000x1250.jpg?context=bWFzdGVyfGltYWdlc3wyMDE3MTg1fGltYWdlL2pwZWd8YURsa0wyZzNOeTg1TWpVME16QXlOVEUxTWpNd0wwOTFkR0poWTJ0ZlEyeGhlVjlFWlhSaGFXeGZNekF3TUhneE1qVXdMbXB3Wnd8YmZhZDEzNjRjYjdjMjY1NjIwNTFmYWNmMzUzNDU2OTBhZTQ1OWY0Yzk4OGVlNjBhZDIxM2YxZTNhMmIwYzE4Mw&attachment=true",
+   "pixels": [
+    3000,
+    1250
+   ]
+  },
+  "Oyster Grey": {
+   "name": "laminex-oyster-grey",
+   "url": "https://www.laminex.com.au/medias/Fireguard-Product-Oyster-Grey.jpg?context=bWFzdGVyfGltYWdlc3w2MjY0NnxpbWFnZS9qcGVnfGFESXhMMmhtWmk4NE9UTTFNemN4T1RrM01qRTBMMFpwY21WbmRXRnlaQzFRY205a2RXTjBMVTk1YzNSbGNpMUhjbVY1TG1wd1p3fGYxYjdhODllODNiNzkwOGEyNzUzMGFhN2U1ZmY1YzQxYjVhNjlhNDgwMDY2ZTEwYTY5ZGNiY2MwYjIwYzU1ZTk&attachment=true",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Oyster Linea": {
+   "name": "laminex-oyster-linea",
+   "url": "https://www.laminex.com.au/medias/LX-Oyster-Linea-RGB-1200x1200-HR.jpg?context=bWFzdGVyfGltYWdlc3wxMDYyMDI5fGltYWdlL2pwZWd8YVcxaFoyVnpMMmczWlM5b05qQXZhREF3THpnNE1qVTJNREl4TkRZek16UXVhbkJufGRiYjVhMmE5NzljNzA0NjMzZDYxMGI0YmQzNjA0MThiMjM2NWUzMmI1NTQwYWQ3ZjI5YjBlMWJmMmZmMDQ4ZmE&attachment=true",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Pale Honey": {
+   "name": "laminex-pale-honey",
+   "url": "https://www.laminex.com.au/medias/Pale-Honey-1200x1200.jpg?context=bWFzdGVyfGltYWdlc3w1ODg0NXxpbWFnZS9qcGVnfGFHTTJMMmhoWkM4NE9UTTNPVEEwT1RZek5qRTBMMUJoYkdWZlNHOXVaWGxmTVRJd01IZ3hNakF3TG1wd1p3fGJkOTlhZGJjMzY2YTEyYmViNjI2MjQ4ZmY3MGEzNDYyM2I5OWJiMTEyZmVlYWE4YjZlOTZlNjdmMTQ3Y2FjY2Q&attachment=true",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Paper Bark": {
+   "name": "laminex-paper-bark",
+   "url": "https://www.laminex.com.au/medias/LX-Paper-Bark-RGB-1200x1200-HR.jpg?context=bWFzdGVyfGltYWdlc3w1NTg2NTB8aW1hZ2UvanBlZ3xhVzFoWjJWekwyZ3pPUzlvTXpFdmFEQXdMemc0TWpVMk1ESXlOemMwTURZdWFuQm58NWIyMWFkYmNiYzM3NGUwNTRjZDM1ZGJjYjU3OGU3NTM3NjViY2RiNzFjN2ZhMDI0N2UxNjc4OWEzZDlmYjA1Ng&attachment=true",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Parchment": {
+   "name": "laminex-parchment",
+   "url": "https://www.laminex.com.au/medias/LX-Parchment-RGB-1200x1200-HR.jpg?context=bWFzdGVyfGltYWdlc3wzMjQ0ODB8aW1hZ2UvanBlZ3xhVzFoWjJWekwyZzJZaTlvWlRrdmFEQXdMemc0TWpVMk1ESTJNemM0TlRRdWFuQm58NWU5NmRhYTJhMGRiNzVmNjU1Y2U1NTI3MDA0MWEwYjNjYWI4MDZiZDI0NTY2NGZkOTAzNDI1ZDJkYTlmOTJkNg&attachment=true",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Pearl Grey": {
+   "name": "laminex-pearl-grey",
+   "url": "https://www.laminex.com.au/medias/LX-Pearl-Grey-RGB-1200x1200-HR.jpg?context=bWFzdGVyfGltYWdlc3w1MTc0NzN8aW1hZ2UvanBlZ3xhVzFoWjJWekwyZzBPUzlvWVRjdmFEQXdMemc0TWpVMk1ESTRNelEwTmpJdWFuQm58YjhhOGI4YWJjZWQ4NzQzMDgzZTYxNjgzNWQ1NzlmZjdlNTk5YmU4NDViZjQxMTU5MWViZjc1M2I1Y2E1YmI1Mg&attachment=true",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Peruvian Clay": {
+   "name": "laminex-peruvian-clay",
+   "url": "https://www.laminex.com.au/medias/LX-Peruvian-Clay-RGB-1200x1200-HR.jpg?context=bWFzdGVyfGltYWdlc3w1NTIwMjB8aW1hZ2UvanBlZ3xhVzFoWjJWekwyaGtNUzlvTTJFdmFEQXdMemc0TWpVMk1ESTRPVGs1T1RndWFuQm58N2UwY2ViYjExYzkwODVlMjk0YzkzOTVmNmQxZTgzZTFhZDMzOGFlOGExYTVhMjVkZmQ4OWZmYjI2MzRmN2U0OQ&attachment=true",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Pewter": {
+   "name": "laminex-pewter",
+   "url": "https://www.laminex.com.au/medias/LX-Pewter-RGB-1200x1200-HR.jpg?context=bWFzdGVyfGltYWdlc3w1NjcxNTl8aW1hZ2UvanBlZ3xhVzFoWjJWekwyZ3lOeTlvWmpVdmFEQXdMemc0TWpVMk1ETXhNamt6TnpRdWFuQm58ODUxYWUyMDY5NjY5MmNhNmJlYWQ1Y2RlOWQyNTk0YjFhNzFlODAwNTJhY2RhY2NhZTJmN2JlZWVkMTEzNmMzNg&attachment=true",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Pillarbox": {
+   "name": "laminex-pillarbox",
+   "url": "https://www.laminex.com.au/medias/LX-Pillarbox-RGB-1200x1200-HR.jpg?context=bWFzdGVyfGltYWdlc3w1MjY3MDF8aW1hZ2UvanBlZ3xhVzFoWjJWekwyZ3hOQzlvWmpVdmFEQXdMemc0TWpVMk1ETXhOakl4TkRJdWFuQm58ZThkNDlkMDg5MGMyNjFmYzhkN2I5YTFkYjhjN2EzODBjYjU1NGMwMDUzOGY0Y2NiYWIxOTc4MGYxZWUwZTUxZQ&attachment=true",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Planked Urban Oak": {
+   "name": "laminex-planked-urban-oak",
+   "url": "https://www.laminex.com.au/medias/LX-ColourCollection-Planked-urban-oak-natural-RGB-FS-HR.jpg?context=bWFzdGVyfGltYWdlc3w1NTQwMTR8aW1hZ2UvanBlZ3xhVzFoWjJWekwyZzFaUzlvTW1NdmFEQXdMemc0TWpnNE9EQXlPRGs0TWpJdWFuQm58OGZmMGQ1ZmJmYTZhNTM2NmE4NmM0ZjI2ODFkZmJjZmIyNjIyYjllNmZlYjMxMjVhZWIxZDkwNDAxNzUwMzM1Mg&attachment=true",
+   "pixels": [
+    1200,
+    600
+   ]
+  },
+  "Platypus": {
+   "name": "laminex-platypus",
+   "url": "https://www.laminex.com.au/medias/Platypus-Detail-3000x1250.jpg?context=bWFzdGVyfGltYWdlc3wxNzIwNzQxfGltYWdlL2pwZWd8YUdZeEwyZzFPUzg1TWpVMk56RTBOek14TlRVd0wxQnNZWFI1Y0hWelgwUmxkR0ZwYkY4ek1EQXdlREV5TlRBdWFuQm58MTAxMzU3ZTdmMTEzNDIyNjQxZDNjM2ZhYzIyNzA5OWM5NTJiYjgwMmU4NTJhZWVlYzllN2EyZTlhMDc4ZTdhOQ&attachment=true",
+   "pixels": [
+    3000,
+    1250
+   ]
+  },
+  "Polar White": {
+   "name": "laminex-polar-white",
+   "url": "https://www.laminex.com.au/medias/LX-Polar-White-RGB-1200x1200-HR.jpg?context=bWFzdGVyfGltYWdlc3wzNDYyMDh8aW1hZ2UvanBlZ3xhVzFoWjJWekwyZzVNUzlvWVRVdmFEQXdMemc0TWpnNE9EQTFNVGt4T1RndWFuQm58YmQ5OTgzODRhMzJhMGE3MTgwZjIyZGEyN2I5N2E0MDM5Y2EzOTQ2Nzc1ZDRkMjhhYzdiYzhiZTA3NDllNGUyNQ&attachment=true",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Porcelain Blush": {
+   "name": "laminex-porcelain-blush",
+   "url": "https://www.laminex.com.au/medias/Porcelain-Blush-1200x1200.jpg?context=bWFzdGVyfGltYWdlc3w1ODkzOHxpbWFnZS9qcGVnfGFEVXdMMmd5TlM4NE9UTTNPRGt4TXpNeU1USTJMMUJ2Y21ObGJHRnBibDlDYkhWemFGOHhNakF3ZURFeU1EQXVhbkJufDhhZGU1YWM5NGUwNjFjNjFmZWE5NmRkMzRhNTNkZjIwZTk0NDg0MzM3NWFmZWMxMWE0MjFiZjg2NDg1OTkzNmU&attachment=true",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Portsea": {
+   "name": "laminex-portsea",
+   "url": "https://www.laminex.com.au/medias/Portsea-FullSheet-3000x1250px.jpg?context=bWFzdGVyfGltYWdlc3wxNzc3NDYwfGltYWdlL2pwZWd8YUdZMkwyZ3hNQzg1TURjM01ETXhPVFl3TmpBMkwxQnZjblJ6WldGZlJuVnNiRk5vWldWMFh6TXdNREI0TVRJMU1IQjRMbXB3Wnd8OWQwNGQ2OTkxMTUwNDI4MWNlYzc1MjljNzhlMDU2M2U5ZGQ3ZWY0ZGNkODM4Y2JjM2RjMjlmNzFkNzExYWQ1MQ&attachment=true",
+   "pixels": [
+    3000,
+    1250
+   ]
+  },
+  "Possum": {
+   "name": "laminex-possum",
+   "url": "https://www.laminex.com.au/medias/LX-ColourCollection-Possum-Natural-RGB-FS-HR.jpg?context=bWFzdGVyfGltYWdlc3w2ODcyNnxpbWFnZS9qcGVnfGFXMWhaMlZ6TDJobU1TOW9Zakl2YURBd0x6ZzRNamc0T0RBMk9ETXdNemd1YW5CbnwwYWE4NjVlZDY0ZjUwZDBlNmRjYzQ1Nzg5OTRjODc0MmRiNGM4ZmM5ZmJiM2NhYjgyNjgxZmYyNmExYTRlZjU2&attachment=true",
+   "pixels": [
+    1200,
+    600
+   ]
+  },
+  "Premier Oak TrueScale": {
+   "name": "laminex-premier-oak-truescale",
+   "url": "https://www.laminex.com.au/medias/Premiere-Oak-TrueScale-3600x1800.jpg?context=bWFzdGVyfGltYWdlc3w0ODA0MDk1fGltYWdlL2pwZWd8YURGbUwyZ3lOUzg1TXpVNE1qSTRNekkwTXpneUwxQnlaVzFwWlhKbFgwOWhhMTlVY25WbFUyTmhiR1ZmTXpZd01IZ3hPREF3TG1wd1p3fGNlMTA5Yzc2YWQxY2FiZTAwNzRjYjhhMDk4NjQzY2YwMjkwNmI4MTcxMWE0YmMxNjMwZDY0YTI5ZmI2NGRkYTU&attachment=true",
+   "pixels": [
+    3000,
+    1500
+   ]
+  },
+  "Premio Carrara TrueScale": {
+   "name": "laminex-premio-carrara-truescale",
+   "url": "https://www.laminex.com.au/medias/Premio-Carrara-FullSheet-3000x1250px.jpg?context=bWFzdGVyfGltYWdlc3wxMzE4MTkxfGltYWdlL2pwZWd8YURCaEwyaGlNaTg1TURjM01ETTVORE14TnpFd0wxQnlaVzFwYjE5RFlYSnlZWEpoWDBaMWJHeFRhR1ZsZEY4ek1EQXdlREV5TlRCd2VDNXFjR2N8NzQ2MWMxMmJkNDA2Y2E2NGJjNTdmMDQxOTA2MzI1NTQwZTQwZjMzZGRkN2RkMDUwZjlkY2Q0NGUwMWEzYzliNA&attachment=true",
+   "pixels": [
+    3000,
+    1250
+   ]
+  },
+  "Pumice": {
+   "name": "laminex-pumice",
+   "url": "https://www.laminex.com.au/medias/LX-Pumice-RGB-1200x1200-HR.jpg?context=bWFzdGVyfGltYWdlc3w1NTY0NzJ8aW1hZ2UvanBlZ3xhVzFoWjJWekwyZ3dZaTlvTXpjdmFEQXdMemc0TWpVMk1EUTFOekV4TmpZdWFuQm58ZGFmMjI4OTM5MTVjZTVmZTk0OTMxOTJmZmI2MjIyNmUxNjZmYjRjODNjNDEyNDQ0MTczOTI1NTc1YmQzMGQ5Mg&attachment=true",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Raw Birchply": {
+   "name": "laminex-raw-birchply",
+   "url": "https://www.laminex.com.au/medias/LX-ColourCollection-Raw-birchply-natural-RGB-FS-HR.jpg?context=bWFzdGVyfGltYWdlc3w1NjU2MjJ8aW1hZ2UvanBlZ3xhVzFoWjJWekwyZ3paaTlvT1RjdmFEQXdMemc0TWpnNE9ERTNNekUyTVRRdWFuQm58Y2M4NjI4NmJlMzMwZTQ2YWRmYzJlZjllYmEwNmE3NTdhNjM2MzYyYzMxZDUxNTIwYzdlYTc2MDBlNTMzMjhiNQ&attachment=true",
+   "pixels": [
+    1200,
+    600
+   ]
+  },
+  "Raw Cotton": {
+   "name": "laminex-raw-cotton",
+   "url": "https://www.laminex.com.au/medias/LX-Raw-Cotton-RGB-1200x1200-HR.jpg?context=bWFzdGVyfGltYWdlc3wyNzMwNzJ8aW1hZ2UvanBlZ3xhVzFoWjJWekwyZzBZeTlvTVdJdmFEQXdMemc0TWpnNE9ERTRNams1TVRndWFuQm58NmM1OTQzYzgzNjM1MTk3YzBhNTFjNmZlNmUxNmUyODFhNmJiZGZhY2ExODgxMjI0ZDA2ZmIyMDk2OTdkNTY5NQ&attachment=true",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Refined Walnut": {
+   "name": "laminex-refined-walnut",
+   "url": "https://www.laminex.com.au/medias/Refined-Walnut-2400x1200.jpg?context=bWFzdGVyfGltYWdlc3wzNTYyNzQ3fGltYWdlL2pwZWd8YUdOa0wyZ3lOUzg1TXpVNE1qSTRNemc1T1RFNEwxSmxabWx1WldSZlYyRnNiblYwWHpJME1EQjRNVEl3TUM1cWNHY3w2NTY4YTM1ZTQ3N2VkMGYzYTYwNTNlZDRjNDJkYmE1YzgxNGQzOWJiYjRiOWRhNDI2YTQxYzQxMmMwYTEzNjU5&attachment=true",
+   "pixels": [
+    3000,
+    1619
+   ]
+  },
+  "Rock Maple": {
+   "name": "laminex-rock-maple",
+   "url": "https://www.laminex.com.au/medias/LX-Rock-Maple-RGB-FS-HR.jpg?context=bWFzdGVyfGltYWdlc3w0OTkzMjl8aW1hZ2UvanBlZ3xhVzFoWjJWekwyZ3dOUzlvWmpJdmFEQXdMemc0TWpVMk1EVXpNalE0TXpBdWFuQm58MThmYTcwOGQ3OTE3MzU2NjU2YmU5NmE0YmVmNDhjNGU4YWQ1ODYwYTRkNDI3MTI1MDBhY2ViMWM1ZmExNjMzMQ&attachment=true",
+   "pixels": [
+    1200,
+    600
+   ]
+  },
+  "Rocky Bay": {
+   "name": "laminex-rocky-bay",
+   "url": "https://www.laminex.com.au/medias/Rocky-Bay-Detail-3000x1250.jpg?context=bWFzdGVyfGltYWdlc3wxMDE5MjE0fGltYWdlL2pwZWd8YURkbUwyZzNNaTg1TWpVMk56RTJOVEF4TURJeUwxSnZZMnQ1WDBKaGVWOUVaWFJoYVd4Zk16QXdNSGd4TWpVd0xtcHdad3wyNDdhMWFmYmFkNzUzYmFmMDBjZDYxNWIxMGExNTZiZGZmZDY0ZWQwYTI0NjQ5Nzc5ZTA0NjAyYTVjMGYyMmYy&attachment=true",
+   "pixels": [
+    3000,
+    1250
+   ]
+  },
+  "Rotary Hoop Pine TrueScale": {
+   "name": "laminex-rotary-hoop-pine-truescale",
+   "url": "https://www.laminex.com.au/medias/Rotary-Hoop-Pine-TrueScale-3600x1800.jpg?context=bWFzdGVyfGltYWdlc3wyOTc1ODY1fGltYWdlL2pwZWd8YUdSbEwyZ3lPQzg1TXpVNE1qSTRORFUxTkRVMEwxSnZkR0Z5ZVY5SWIyOXdYMUJwYm1WZlZISjFaVk5qWVd4bFh6TTJNREI0TVRnd01DNXFjR2N8ZjRiOTljMjNmZmUyMmQ0MjBmNThkNmRhMjBmMDJiZjVkYTljMzdiZDQ4NDBiNDljZjEzY2UyOTBlNGE3NTlhOQ&attachment=true",
+   "pixels": [
+    3000,
+    1500
+   ]
+  },
+  "Rural Oak": {
+   "name": "laminex-rural-oak",
+   "url": "https://www.laminex.com.au/medias/LX-ColourCollection-Rural-Oak-RGB-FS-HR.jpg?context=bWFzdGVyfGltYWdlc3w2NjUxNzF8aW1hZ2UvanBlZ3xhVzFoWjJWekwyZzRPUzlvWXprdmFEQXdMemc0TWpVMk1EVTFNakUwTXpndWFuQm58YWJhOTQ1ZWY0MjNkYzcxZTQzYjg4MzNmOTc2NmE0Y2E1NTI3Njg5NjQxMmI2NTVhZWNhZjE1ZmI0NTdmMWMxMQ&attachment=true",
+   "pixels": [
+    1200,
+    600
+   ]
+  },
+  "Sarsen Grey": {
+   "name": "laminex-sarsen-grey",
+   "url": "https://www.laminex.com.au/medias/LX-Sarsen-Grey-RGB-1200x1200-HR.jpg?context=bWFzdGVyfGltYWdlc3w1MTU3ODF8aW1hZ2UvanBlZ3xhVzFoWjJWekwyZ3pNQzlvWmpBdmFEQXdMemc0TWpVMk1EWXlOREl6TXpRdWFuQm58YjlhMzM5N2I2YWEyYzVhNjRiMDQ3YmQxN2JiMzM4NWE2ZTYzMTI2ODkxN2QyNjg4N2JlZjIxNzM5ZjllNmYzZQ&attachment=true",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Seasoned Oak": {
+   "name": "laminex-seasoned-oak",
+   "url": "https://www.laminex.com.au/medias/LX-ColourCollection-Seasoned-oak-natural-RGB-FS-HR.jpg?context=bWFzdGVyfGltYWdlc3w3NzM1NjB8aW1hZ2UvanBlZ3xhVzFoWjJWekwyaG1NeTlvTWpJdmFEQXdMemc0TWpVMk1EWTNNREV3T0RZdWFuQm58MWJlOWJiMWJmZGY3YzNhYWEwMmYwNWMwNDdlN2U0NzY0M2M5YzcxMmM2MzVkOGZkZmM2Njg0YWU0NjcxMjM4MA&attachment=true",
+   "pixels": [
+    1200,
+    600
+   ]
+  },
+  "Seed": {
+   "name": "laminex-seed",
+   "url": "https://www.laminex.com.au/medias/LX-ColourCollection-Seed-Natural-RGB-1200x1200-HR.jpg?context=bWFzdGVyfGltYWdlc3wyNjcxMjl8aW1hZ2UvanBlZ3xhVzFoWjJWekwyZzRZeTlvTWpZdmFEQXdMemc0TWpnNE9ESTFPRE0xT0RJdWFuQm58ODczYTQwNjk4NDM1MWI0NDdmNDBhZGU0MzFmZGI1YjhmMDY1ZGU3ZWFjODJhZTBiZWQ1ZjRkNTZlMjNkZDYzOA&attachment=true",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Select Beech": {
+   "name": "laminex-select-beech",
+   "url": "https://www.laminex.com.au/medias/LX-Select-Beech-RGB-FS-HR.jpg?context=bWFzdGVyfGltYWdlc3w0NDI2NTJ8aW1hZ2UvanBlZ3xhVzFoWjJWekwyZzRaQzlvWkRjdmFEQXdMemc0TWpVMk1EY3pOVFkwTkRZdWFuQm58NDBjYTBlMzQwMzE5MWVhNTY4M2RiNWRkZDYzZTZhNDEyMzliMWEyODNiZDU1ODkxNTY3Y2Q0YmM5ZTQxOTY5Yg&attachment=true",
+   "pixels": [
+    1200,
+    600
+   ]
+  },
+  "Sepia Walnut": {
+   "name": "laminex-sepia-walnut",
+   "url": "https://www.laminex.com.au/medias/Sepia-Walnut-2400x1200.jpg?context=bWFzdGVyfGltYWdlc3w0MjAzNjAyfGltYWdlL2pwZWd8YUdWbUwyZ3lZaTg1TXpVNE1qSTROVEl3T1Rrd0wxTmxjR2xoWDFkaGJHNTFkRjh5TkRBd2VERXlNREF1YW5CbnwyMjhmMTIzYjRjM2Y1MGY0MGNiMzIzMjBiYTFhZjdiOGVmYWM1MmU4NWIxMzZmMDJjNDQyMmQ5N2RmOWFjNDBl&attachment=true",
+   "pixels": [
+    3000,
+    1578
+   ]
+  },
+  "Silver Grey": {
+   "name": "laminex-silver-grey",
+   "url": "https://www.laminex.com.au/medias/LX-Silver-Grey-RGB-1200x1200-HR.jpg?context=bWFzdGVyfGltYWdlc3w1ODAzODZ8aW1hZ2UvanBlZ3xhVzFoWjJWekwyZ3hPUzlvT0RVdmFEQXdMemc0TWpVMk1EZ3hOelUyTkRZdWFuQm58ZGU4NmE1NTBmNzc0YmIzOGEwZGYwMmJlZWU4ZWQyMGUwNWE0Mjc2MjU5NDY0OWZjOTc5NmJkMjQ4MDlkZjgwMQ&attachment=true",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Smoked Birchply": {
+   "name": "laminex-smoked-birchply",
+   "url": "https://www.laminex.com.au/medias/LX-ColourCollection-Smoked-birchply-natural-RGB-FS-HR.jpg?context=bWFzdGVyfGltYWdlc3wzOTUxNzV8aW1hZ2UvanBlZ3xhVzFoWjJWekwyaGxZeTlvWVRndmFEQXdMemc0TWpnNE9ETXhOREEyTXpndWFuQm58ZGYzMzdhZmJhYWUzYmFkOGU2NTQ4Y2I1YWUzNDdlYmQyOGNiMzljM2RiMmMxZjJmYzMzNjg0MTA2OGYwMmE0MA&attachment=true",
+   "pixels": [
+    1200,
+    600
+   ]
+  },
+  "Smoky Sapelle": {
+   "name": "laminex-smoky-sapelle",
+   "url": "https://www.laminex.com.au/medias/LX-ColourCollection-Smoky-sapelle-natural-RGB-FS-HR.jpg?context=bWFzdGVyfGltYWdlc3wzMjc3MTJ8aW1hZ2UvanBlZ3xhVzFoWjJWekwyZ3pNeTlvTW1RdmFEQXdMemc0TWpVMk1EZ3pNemswT0RZdWFuQm58MGZkNTFlODJlMDhhZjU0MDIyZWJlNmZkYmYzOWRlNDllMjU0MzQwN2VhODY5Y2Q0MjM5YTEwZTg2NmFjZmUzNg&attachment=true",
+   "pixels": [
+    1200,
+    600
+   ]
+  },
+  "Spinifex": {
+   "name": "laminex-spinifex",
+   "url": "https://www.laminex.com.au/medias/LX-ColourCollection-Spinifex-Natural-RGB-FS-HR.jpg?context=bWFzdGVyfGltYWdlc3wxMDIwMjF8aW1hZ2UvanBlZ3xhVzFoWjJWekwyZ3daQzlvWlRVdmFEQXdMemc0TWpnNE9ETTBNelUxTlRBdWFuQm58ZWY3YzRhNDVkOWY1YjZhZDNiM2E3OTM3YmVkZDZmZTg0MGE1ZTkxMmE3NWViY2M2MmIzZTI0OTJiYmZiMWFjZA&attachment=true",
+   "pixels": [
+    1200,
+    600
+   ]
+  },
+  "Spotted Gum TrueScale": {
+   "name": "laminex-spotted-gum-truescale",
+   "url": "https://www.laminex.com.au/medias/Spotted-Gum-TrueScale-3600x1800.jpg?context=bWFzdGVyfGltYWdlc3w0NzgwODYzfGltYWdlL2pwZWd8YURsa0wyZ3lZeTg1TXpVNE1qSTROVGcyTlRJMkwxTndiM1IwWldSZlIzVnRYMVJ5ZFdWVFkyRnNaVjh6TmpBd2VERTRNREF1YW5CbnwwOGRmZDdlMmYyMGQzYjgzNDlkOWM5ZDUyOGNkZTBlZjRiOWIxN2ExZTVmNDA3NDkzNmFhNDAwMzRiMmMzNjVm&attachment=true",
+   "pixels": [
+    3000,
+    1500
+   ]
+  },
+  "Steel Blue": {
+   "name": "laminex-steel-blue",
+   "url": "https://www.laminex.com.au/medias/LX-Steel-Blue-RGB-1200x1200-HR.jpg?context=bWFzdGVyfGltYWdlc3w1MjAxMzJ8aW1hZ2UvanBlZ3xhVzFoWjJWekwyZzVPUzlvTVdVdmFEQXdMemc0TWpVMk1EZzVPVFE0TkRZdWFuQm58ZWQyOThhODE4ZTQxYmQ0NTY0NjUwNGI4MzBhNmE0MzY4MzAzYzMyNTlkY2JlNTRmZDc5ZTM4ZTNkYmQyNjFiOQ&attachment=true",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Stipple Seal": {
+   "name": "laminex-stipple-seal",
+   "url": "https://www.laminex.com.au/medias/LX-Stipple-Seal-RGB-1200x1200-HR.jpg?context=bWFzdGVyfGltYWdlc3w4MzQyODd8aW1hZ2UvanBlZ3xhVzFoWjJWekwyZzNaUzlvWlRBdmFEQXdMemc0TWpVMk1EazBOVE0xT1RndWFuQm58MmY3YTE4NjIxY2QyNmVmMThkZGQ5ZjkwNzE2OGQwZWE0MGZhY2M0ZDcyYTI2YjZmM2JjYzIyMmM2NmY1ZDE1Mw&attachment=true",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Stipple Smoke": {
+   "name": "laminex-stipple-smoke",
+   "url": "https://www.laminex.com.au/medias/LX-Stipple-Smoke-RGB-1200x1200-HR.jpg?context=bWFzdGVyfGltYWdlc3wxMDc0OTAwfGltYWdlL2pwZWd8YVcxaFoyVnpMMmc1WkM5b056Y3ZhREF3THpnNE1qVTJNRGsxTVRreE16UXVhbkJufGM3ZWI4MTUyYTRiNjk0NDRjMGMzZmM2NDZjMTc3MDNhNTc0ZWIxZGMyODNmN2M1ZGM0YTMyMzFlMDdmNTZlNDU&attachment=true",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Stormcloud": {
+   "name": "laminex-stormcloud",
+   "url": "https://www.laminex.com.au/medias/LX-ColourCollection-Stormcloud-Natural-RGB-1200x1200-HR.jpg?context=bWFzdGVyfGltYWdlc3w1NjM2MDZ8aW1hZ2UvanBlZ3xhVzFoWjJWekwyaGtNaTlvTldZdmFEQXdMemc0TWprNE1EWTVOamc0TmpJdWFuQm58MjY0ODk1YTk1MmYwNTU3MTM3MDVlZDMxYWVmYmI4ODRkZjc5NTZhMDc5MDIzMzI1YmM4ZGVhZTNkMDI2MjIzYQ&attachment=true",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Sublime Teak": {
+   "name": "laminex-sublime-teak",
+   "url": "https://www.laminex.com.au/medias/LX-ColourCollection-Sublime-teak-natural-RGB-FS-HR.jpg?context=bWFzdGVyfGltYWdlc3w2Mzk2MzV8aW1hZ2UvanBlZ3xhVzFoWjJWekwyZ3lOaTlvTjJRdmFEQXdMemc0TWpVMk1URXlNak13TnpBdWFuQm58ZTQ5YzY1OGQwZTgxNWQ5NWJhOGU4ZDAwY2Q4ZmJiYzgxMTA3ZGY4ZTVlN2M2ODQxNzQ3N2FiZjIwMzNmN2YxZA&attachment=true",
+   "pixels": [
+    1200,
+    600
+   ]
+  },
+  "Super White": {
+   "name": "laminex-super-white",
+   "url": "https://www.laminex.com.au/medias/ES-Product-Image-Brochure-20.jpg?context=bWFzdGVyfGltYWdlc3wzNzA0NXxpbWFnZS9qcGVnfGFXMWhaMlZ6TDJneU1pOW9aakV2YURBd0x6ZzRNalUyTVRFek5UUXhOREl1YW5CbnwwM2M4ZDNhYzBjNTJiMzQ0NTVjNjAwOTZlMTQyYjA2YWQ0ZDY3ZWZmNDdjODllNjU5NGRjNGNlYzc2ZGIzMWY3&attachment=true",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Surf": {
+   "name": "laminex-surf",
+   "url": "https://www.laminex.com.au/medias/LX-ColourCollection-Surf-Natural-RGB-FS-HR.jpg?context=bWFzdGVyfGltYWdlc3w3NzA5MXxpbWFnZS9qcGVnfGFXMWhaMlZ6TDJnek1TOW9NRGt2YURBd0x6ZzRNalUyTVRFMU1UYzVPREl1YW5Cbnw2YTYyZTA5MDNlYjk3M2E2YzFlMDg2OWZlYzBkMzNlYzU1OWIzNWY2YzM3YzFkZDNjYmNhOGVkNjQwZTFlZGRj&attachment=true",
+   "pixels": [
+    1200,
+    600
+   ]
+  },
+  "Tasmanian Oak TrueScale": {
+   "name": "laminex-tasmanian-oak-truescale",
+   "url": "https://www.laminex.com.au/medias/Tasmanian-Oak-TrueScale-3600x1800.jpg?context=bWFzdGVyfGltYWdlc3wzMzU0NjczfGltYWdlL2pwZWd8YUdFM0wyZzRPQzg1TXpVNE1qSTVNVGMyTXpVd0wxUmhjMjFoYm1saGJsOVBZV3RmVkhKMVpWTmpZV3hsWHpNMk1EQjRNVGd3TUM1cWNHY3w4NTk0YjgxZDZkNDllNWViNDJmZDc3YzE3YTUyN2VhNmYzNjZjOTUyNWIxNWY5MTFiZGI0NzIxMzJlMGNmYWU4&attachment=true",
+   "pixels": [
+    3000,
+    1500
+   ]
+  },
+  "Terril": {
+   "name": "laminex-terril",
+   "url": "https://www.laminex.com.au/medias/LX-ColourCollection-Terril-RGB-FS-HR.jpg?context=bWFzdGVyfGltYWdlc3wzNzM4MXxpbWFnZS9qcGVnfGFXMWhaMlZ6TDJoaVl5OW9aR012YURBd0x6ZzRNamc0T0RNNU1qY3dOekF1YW5CbnxmYTVhNzNlZDkxNzJkNmM1ZmU4OGZkYmIwYzI1YzRlM2Q1NDdkMTMyZWM4NGJlYWEzYjRhMGI0NmZlMDJjYTBh&attachment=true",
+   "pixels": [
+    1200,
+    600
+   ]
+  },
+  "Tornado": {
+   "name": "laminex-tornado",
+   "url": "https://www.laminex.com.au/medias/LX-Tornado-RGB-1200x1200-HR.jpg?context=bWFzdGVyfGltYWdlc3w0NDgwOTN8aW1hZ2UvanBlZ3xhVzFoWjJWekwyaGpNQzlvWkRjdmFEQXdMemc0TWpVMk1USTBNREkzTVRndWFuQm58MjdkZmFlNGNkNDUwNGE5NmYxYmM0MWQ5NzY2MjliNmRiNjU2NzYxYTNiNjRmODNjOWFhMmQ4Zjc2NjQ0Zjc5Mw&attachment=true",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Victorian Ash TrueScale": {
+   "name": "laminex-victorian-ash-truescale",
+   "url": "https://www.laminex.com.au/medias/Victorian-Ash-TrueScale-3600x1800.jpg?context=bWFzdGVyfGltYWdlc3wzMDAxMDYwfGltYWdlL2pwZWd8YUdGbUwyZ3laaTg1TXpVNE1qSTROalV5TURZeUwxWnBZM1J2Y21saGJsOUJjMmhmVkhKMVpWTmpZV3hsWHpNMk1EQjRNVGd3TUM1cWNHY3xmNWNmMTQwOWI3OGUzMjg3YWY1OGJiNjZlZDk3OWMzYzhlYzliYzNjM2RkMTA0MmM5ZjhmMDNmMzEwNDkwODky&attachment=true",
+   "pixels": [
+    3000,
+    1500
+   ]
+  },
+  "White": {
+   "name": "laminex-white",
+   "url": "https://www.laminex.com.au/medias/Product-Image-The-Barisan-3.jpg?context=bWFzdGVyfGltYWdlc3wyNzAxOTd8aW1hZ2UvanBlZ3xhVzFoWjJWekwyaGpOaTlvWVRNdmFEQXdMemc0TWpVMk1UTXlPRGMwTlRRdWFuQm58MDVkZmU0YmRkNjE4MzkwMmY0MTZmYjBhMDM3ZmNiOWJkZmFjODk1Y2E5ZTllNTM5YjUxY2M1MzRhZWY2MTRjOA&attachment=true",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "White Linen": {
+   "name": "laminex-white-linen",
+   "url": "https://www.laminex.com.au/medias/LX-ColourCollection-White-Linen-RGB-FS-HR.jpg?context=bWFzdGVyfGltYWdlc3w3OTE5OXxpbWFnZS9qcGVnfGFXMWhaMlZ6TDJobVlpOW9ZakV2YURBd0x6ZzRNamc0T0RRNE1URTRNRFl1YW5CbnwzODUzMTRmNDA2YzM2Zjg0NDYzODU3ZGE2ZTc2YjI0NmQ5ZGFhNDAwNTMwYjlhYzUyNzU2MGE3ZTY5Y2M3OWU4&attachment=true",
+   "pixels": [
+    1200,
+    600
+   ]
+  },
+  "White Painted Wood": {
+   "name": "laminex-white-painted-wood",
+   "url": "https://www.laminex.com.au/medias/White-Painted-Wood-3600x1200.jpg?context=bWFzdGVyfGltYWdlc3wyOTM2NTY2fGltYWdlL2pwZWd8YVcxaFoyVnpMMmhoWVM5b05qVXZhREF3THpnNE5ESTJORGN5TURjNU5qWXVhbkJufDM1Nzc2MWNhODEyYzA3NjNiN2Y0OTQ5MTZjODBkN2RlYTlhMWJhZDFiNGRiMjZkNzFlY2U0ZGRiMDhjMTFlOGU&attachment=true",
+   "pixels": [
+    7087,
+    2362
+   ]
+  },
+  "White Textile": {
+   "name": "laminex-white-textile",
+   "url": "https://www.laminex.com.au/medias/LX-ColourCollection-White-textile-natural-RGB-FS-HR.jpg?context=bWFzdGVyfGltYWdlc3w0MDcwMjN8aW1hZ2UvanBlZ3xhVzFoWjJWekwyZzNOaTlvTVRjdmFEQXdMemc0TWpVMk1UTTFPREl6TmpZdWFuQm58YTdjYTNkNmU4ZGQ1N2M4ZDEwYzU4ODM3NzFjNzg0MTY1NzNkMTEzYzU3NTJlNmM1ODI4ZmVjNDE1YmE3YzczOQ&attachment=true",
+   "pixels": [
+    1200,
+    600
+   ]
+  },
+  "Whitewashed Oak": {
+   "name": "laminex-whitewashed-oak",
+   "url": "https://www.laminex.com.au/medias/Fireguard-Product-Whitewashed-Oak.jpg?context=bWFzdGVyfGltYWdlc3wxNTM4Nzh8aW1hZ2UvanBlZ3xhRFJrTDJnek1TODRPVE0xTXpneU56UTFNVEU0TDBacGNtVm5kV0Z5WkMxUWNtOWtkV04wTFZkb2FYUmxkMkZ6YUdWa0xVOWhheTVxY0djfGMzNzI3NzA4ODAzMWRmMjBhOTYzMzQ1ZWJjMGUwNWNlNTMyZDE4N2I5OGMyMDQwZWI3MjkyMGQyMGNlOWYzNTQ&attachment=true",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Winter Sky": {
+   "name": "laminex-winter-sky",
+   "url": "https://www.laminex.com.au/medias/LX-ColourCollection-Winter-Sky-Natural-RGB-FS-HR.jpg?context=bWFzdGVyfGltYWdlc3w1MzM5OHxpbWFnZS9qcGVnfGFXMWhaMlZ6TDJnMU15OW9PR0l2YURBd0x6ZzRNamc0T0RVMU16STNNREl1YW5CbnxmZDgwNzNmZDVlMmU5NzQ1NzVjZTI0NGJmYTliYTBiYWZhNTFjYjdjODRjN2IyNGY1MzcyYTZhNjA1M2QyNmJj&attachment=true",
+   "pixels": [
+    1200,
+    600
+   ]
+  },
+  "Young Beech": {
+   "name": "laminex-young-beech",
+   "url": "https://www.laminex.com.au/medias/LX-ColourCollection-Young-beech-natural-FS-HR.jpg?context=bWFzdGVyfGltYWdlc3w1ODE5MjB8aW1hZ2UvanBlZ3xhVzFoWjJWekwyZzFPQzlvWWpjdmFEQXdMemc0TWpVMU5qZ3pNamszTlRndWFuQm58MmFmMTRiZjVhNjY5YTQ0M2UzZDRkYmE5NDY5MjQwNThiOWFkZGU2NDhmYjZkNTYzNzVlMGFhMjUwMzFkOTJkNg&attachment=true",
+   "pixels": [
+    1200,
+    600
+   ]
+  },
+  "Zincworks": {
+   "name": "laminex-zincworks",
+   "url": "https://www.laminex.com.au/medias/LX-Zincworks-RGB-1200x1200-HR.jpg?context=bWFzdGVyfGltYWdlc3w3Njc5OTl8aW1hZ2UvanBlZ3xhVzFoWjJWekwyZzFOeTlvWlRJdmFEQXdMemc0TWpVMk1UUXdNRGd6TlRBdWFuQm58ZWRjNTE1NWFjNzJhMjdkNjI1ZDFjOTUzZjRjODY3NzI0ZWVjOTJkNjcyNmVjOTc1OGRhZjljNDBmMTY2NzMxMw&attachment=true",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  }
+ },
+ "no_image": [
+  "Artisan Beamwood",
+  "Bleached Elm",
+  "Denim",
+  "Oxidised Beamwood",
+  "Primed Ready To Paint"
+ ]
+}

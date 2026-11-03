@@ -1,162 +1,1471 @@
 {
- "source": "https://www.polytec.com.au (each colour's page links its full sheet image)",
+ "source": "https://www.polytec.com.au: each colour's full sheet image",
  "verified": false,
- "image_url": "https://www.polytec.com.au/img/products/fullsheet/{name}.jpg",
  "images": {
-  "Adriatic": "adriatic",
-  "Agave": "agave",
-  "Alabaster": "alabaster",
-  "Aluminium": "aluminium",
-  "Amaro": "amaro",
-  "Angora Oak": "angora-oak",
-  "Anthracite Metallic": "anthracite-metallic",
-  "Antico Oak": "antico-oak",
-  "Antique": "antique",
-  "Arabica": "arabica",
-  "Arcadia Oak": "arcadia-oak",
-  "Arctic Ice": "arctic-ice",
-  "Artisan Oak": "artisan-oak",
-  "Aston White": "aston-white",
-  "Australian Native": "australian-native",
-  "Avion Grey": "avion-grey",
-  "Batten Oak": "batten-oak",
-  "Belgian Oak": "belgian-oak",
-  "Bespoke": "bespoke",
-  "Black": "black",
-  "Black Ply": "black-ply",
-  "Black Wenge": "black-wenge",
-  "Blackened Oak": "blackened-oak",
-  "Bleached Walnut": "bleached-walnut",
-  "Blonde Oak": "blonde-oak",
-  "Blossom White": "blossom-white",
-  "Bone White": "bone-white",
-  "Boston Oak": "boston-oak",
-  "Botany Oak": "botany-oak",
-  "Bottega Oak": "bottega-oak",
-  "Bronze Gold Leaf": "bronze-gold-leaf",
-  "Bronzed Oak": "bronzed-oak",
-  "Café Cream": "cafe-cream",
-  "Café Oak": "cafe-oak",
-  "Canterbury Grey": "canterbury-grey",
-  "Casentino Beech": "casentino-beech",
-  "Castel": "castel",
-  "Cavia Lini": "cavia-lini",
-  "Champagne Metallic": "champagne-metallic",
-  "Char Oak": "char-oak",
-  "Cinder": "cinder",
-  "Classic White": "classic-white",
-  "Cloudy Grey": "cloudy-grey",
-  "Coastal Oak": "coastal-oak",
-  "Combat Teak": "combat-teak",
-  "Copper Leaf": "copper-leaf",
-  "Cream": "cream",
-  "Crema Lini": "crema-lini",
-  "Crisp White": "crisp-white",
-  "Danish Rattan": "danish-rattan",
-  "Dark Batten Oak": "dark-batten-oak",
-  "Dawnshade": "dawnshade",
-  "Designer White": "designer-white",
-  "Distressed Wood": "distressed-wood",
-  "District Oak": "district-oak",
-  "Drifted Oak": "drifted-oak",
-  "Ecru Oak": "ecru-oak",
-  "Elemental Grey": "elemental-grey",
-  "Empire Oak": "empire-oak",
-  "Estella Oak": "estella-oak",
-  "European Walnut": "european-walnut",
-  "Ferro": "ferro",
-  "Florentine Walnut": "florentine-walnut",
-  "Gesso Lini": "gesso-lini",
-  "Gossamer White": "gossamer-white",
-  "Graphite": "graphite",
-  "Greige": "greige",
-  "Grey Cement": "grey-cement",
-  "Habitat": "habitat",
-  "Havana Oak": "havana-oak",
-  "Hazel Oak": "hazel-oak",
-  "Husk": "husk",
-  "Italian Cotton": "italian-cotton",
-  "Jamaican Walnut": "jamaican-walnut",
-  "Laurel Oak": "laurel-oak",
-  "Lava": "lava",
-  "Light Brass Leaf": "light-brass-leaf",
-  "Lightstone": "lightstone",
-  "Ligurian Walnut": "ligurian-walnut",
-  "Maison Oak": "maison-oak",
-  "Malt": "malt",
-  "Manor Oak": "manor-oak",
-  "Marina Grey": "marina-grey",
-  "Marni Lini": "marni-lini",
-  "Maroso Milan": "maroso-milan",
-  "Mercurio Grey": "mercurio-grey",
-  "Montage": "montage",
-  "Moss Grey": "moss-grey",
-  "Natural Cotton": "natural-cotton",
-  "Natural Oak": "natural-oak",
-  "Natural Ply": "natural-ply",
-  "Natural White": "natural-white",
-  "New Antique White": "new-antique-white",
-  "Nickel": "nickel",
-  "Nomad": "nomad",
-  "Nordic Oak": "nordic-oak",
-  "Notaio Walnut": "notaio-walnut",
-  "Nouveau Grey": "nouveau-grey",
-  "Oasis": "oasis",
-  "Ochre Figured-Wood": "ochre-figured-wood",
-  "Onyx Figured-Wood": "onyx-figured-wood",
-  "Oxford": "oxford",
-  "Oyster Grey": "oyster-grey",
-  "Palace Teak": "palace-teak",
-  "Pallido": "pallido",
-  "Palomera Oak": "palomera-oak",
-  "Papyrus": "papyrus",
-  "Parchment": "parchment",
-  "Pearl Metallic": "pearl-metallic",
-  "Perugian Walnut": "perugian-walnut",
-  "Phantom Black": "phantom-black",
-  "Plantation Ash": "plantation-ash",
-  "Platinum Leaf": "platinum-leaf",
-  "Polar White": "polar-white",
-  "Porcelain": "porcelain",
-  "Prime Oak": "prime-oak",
-  "Pure Gold Leaf": "pure-gold-leaf",
-  "Quartiera Maple": "quartiera-maple",
-  "Raven Metallic": "raven-metallic",
-  "Rocco Lini": "rocco-lini",
-  "Rojo Walnut": "rojo-walnut",
-  "Rose Gold Leaf": "rose-gold-leaf",
-  "Royal Oyster": "royal-oyster",
-  "Rubra Oak": "rubra-oak",
-  "SIlk": "silk",
-  "Satra Wood": "satra-wood",
-  "Sepia Oak": "sepia-oak",
-  "Serene": "serene",
-  "Shannon Oak": "shannon-oak",
-  "Sienna Figured-Wood": "sienna-figured-wood",
-  "Silk": "silk",
-  "Society Oak": "society-oak",
-  "Soft Walnut": "soft-walnut",
-  "Solara": "solara",
-  "Stone Grey": "stone-grey",
-  "Storm": "storm",
-  "Strata Grey": "strata-grey",
-  "Superior White": "superior-white",
-  "Swiss Rattan": "swiss-rattan",
-  "Tasmanian Oak": "tasmanian-oak",
-  "Taupe": "taupe",
-  "Tessuto Milan": "tessuto-milan",
-  "Titanium": "titanium",
-  "Topiary": "topiary",
-  "Truffle Lini": "truffle-lini",
-  "Tuross Oak": "tuross-oak",
-  "Ultra White": "ultra-white",
-  "Verdelho": "verdelho",
-  "White Cement": "white-cement",
-  "White Cotton": "white-cotton",
-  "White Mist": "white-mist",
-  "Whitewood": "whitewood",
-  "Wild Clay": "wild-clay",
-  "Wispwood": "wispwood"
+  "Adriatic": {
+   "name": "adriatic",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/adriatic.jpg",
+   "pixels": [
+    1280,
+    1280
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Agave": {
+   "name": "agave",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/agave.jpg",
+   "pixels": [
+    1280,
+    1280
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Alabaster": {
+   "name": "alabaster",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/alabaster.jpg",
+   "pixels": [
+    4000,
+    4000
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Aluminium": {
+   "name": "aluminium",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/aluminium.jpg",
+   "pixels": [
+    1500,
+    2500
+   ]
+  },
+  "Amaro": {
+   "name": "amaro",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/amaro.jpg",
+   "pixels": [
+    4000,
+    4000
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Angora Oak": {
+   "name": "angora-oak",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/angora-oak.jpg",
+   "pixels": [
+    2152,
+    4288
+   ]
+  },
+  "Anthracite Metallic": {
+   "name": "anthracite-metallic",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/anthracite-metallic.jpg",
+   "pixels": [
+    3000,
+    6000
+   ]
+  },
+  "Antico Oak": {
+   "name": "antico-oak",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/antico-oak.jpg",
+   "pixels": [
+    2116,
+    4240
+   ]
+  },
+  "Antique": {
+   "name": "antique",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/antique.jpg",
+   "pixels": [
+    4000,
+    4000
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Arabica": {
+   "name": "arabica",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/arabica.jpg",
+   "pixels": [
+    1280,
+    1280
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Arcadia Oak": {
+   "name": "arcadia-oak",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/arcadia-oak.jpg",
+   "pixels": [
+    1500,
+    2500
+   ]
+  },
+  "Arctic Ice": {
+   "name": "arctic-ice",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/arctic-ice.jpg",
+   "pixels": [
+    3000,
+    6000
+   ]
+  },
+  "Artisan Oak": {
+   "name": "artisan-oak",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/artisan-oak.jpg",
+   "pixels": [
+    720,
+    1296
+   ]
+  },
+  "Aston White": {
+   "name": "aston-white",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/aston-white.jpg",
+   "pixels": [
+    1280,
+    1280
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Australian Native": {
+   "name": "australian-native",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/australian-native.jpg",
+   "pixels": [
+    1256,
+    2500
+   ]
+  },
+  "Avion Grey": {
+   "name": "avion-grey",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/avion-grey.jpg",
+   "pixels": [
+    1600,
+    1600
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Batten Oak": {
+   "name": "batten-oak",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/batten-oak.jpg",
+   "pixels": [
+    1500,
+    2500
+   ]
+  },
+  "Belgian Oak": {
+   "name": "belgian-oak",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/belgian-oak.jpg",
+   "pixels": [
+    720,
+    1296
+   ]
+  },
+  "Bespoke": {
+   "name": "bespoke",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/bespoke.jpg",
+   "pixels": [
+    4000,
+    4000
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Black": {
+   "name": "black",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/black.jpg",
+   "pixels": [
+    4000,
+    4000
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Black Ply": {
+   "name": "black-ply",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/black-ply.jpg",
+   "pixels": [
+    1500,
+    2500
+   ]
+  },
+  "Black Wenge": {
+   "name": "black-wenge",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/black-wenge.jpg",
+   "pixels": [
+    720,
+    1296
+   ]
+  },
+  "Blackened Oak": {
+   "name": "blackened-oak",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/blackened-oak.jpg",
+   "pixels": [
+    1256,
+    2500
+   ]
+  },
+  "Bleached Walnut": {
+   "name": "bleached-walnut",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/bleached-walnut.jpg",
+   "pixels": [
+    720,
+    1296
+   ]
+  },
+  "Blonde Oak": {
+   "name": "blonde-oak",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/blonde-oak.jpg",
+   "pixels": [
+    1256,
+    2500
+   ]
+  },
+  "Blossom White": {
+   "name": "blossom-white",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/blossom-white.jpg",
+   "pixels": [
+    3000,
+    5401
+   ]
+  },
+  "Bone White": {
+   "name": "bone-white",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/bone-white.jpg",
+   "pixels": [
+    4000,
+    4000
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Boston Oak": {
+   "name": "boston-oak",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/boston-oak.jpg",
+   "pixels": [
+    1500,
+    2500
+   ]
+  },
+  "Botany Oak": {
+   "name": "botany-oak",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/botany-oak.jpg",
+   "pixels": [
+    1256,
+    2500
+   ]
+  },
+  "Bottega Oak": {
+   "name": "bottega-oak",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/bottega-oak.jpg",
+   "pixels": [
+    2148,
+    4288
+   ]
+  },
+  "Bronze Gold Leaf": {
+   "name": "bronze-gold-leaf",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/bronze-gold-leaf.jpg",
+   "pixels": [
+    1250,
+    2500
+   ]
+  },
+  "Bronzed Oak": {
+   "name": "bronzed-oak",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/bronzed-oak.jpg",
+   "pixels": [
+    1259,
+    2500
+   ]
+  },
+  "Café Cream": {
+   "name": "cafe-cream",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/cafe-cream.jpg",
+   "pixels": [
+    4000,
+    4000
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Café Oak": {
+   "name": "cafe-oak",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/cafe-oak.jpg",
+   "pixels": [
+    3000,
+    5401
+   ]
+  },
+  "Canterbury Grey": {
+   "name": "canterbury-grey",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/canterbury-grey.jpg",
+   "pixels": [
+    3000,
+    5401
+   ]
+  },
+  "Casentino Beech": {
+   "name": "casentino-beech",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/casentino-beech.jpg",
+   "pixels": [
+    1977,
+    4038
+   ]
+  },
+  "Castel": {
+   "name": "castel",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/castel.jpg",
+   "pixels": [
+    4000,
+    4000
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Cavia Lini": {
+   "name": "cavia-lini",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/cavia-lini.jpg",
+   "pixels": [
+    720,
+    1296
+   ]
+  },
+  "Champagne Metallic": {
+   "name": "champagne-metallic",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/champagne-metallic.jpg",
+   "pixels": [
+    3000,
+    6000
+   ]
+  },
+  "Char Oak": {
+   "name": "char-oak",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/char-oak.jpg",
+   "pixels": [
+    3000,
+    5401
+   ]
+  },
+  "Cinder": {
+   "name": "cinder",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/cinder.jpg",
+   "pixels": [
+    4000,
+    4000
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Classic White": {
+   "name": "classic-white",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/classic-white.jpg",
+   "pixels": [
+    4000,
+    4000
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Cloudy Grey": {
+   "name": "cloudy-grey",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/cloudy-grey.jpg",
+   "pixels": [
+    3000,
+    6000
+   ]
+  },
+  "Coastal Oak": {
+   "name": "coastal-oak",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/coastal-oak.jpg",
+   "pixels": [
+    2068,
+    4144
+   ]
+  },
+  "Combat Teak": {
+   "name": "combat-teak",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/combat-teak.jpg",
+   "pixels": [
+    720,
+    1296
+   ]
+  },
+  "Copper Leaf": {
+   "name": "copper-leaf",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/copper-leaf.jpg",
+   "pixels": [
+    1250,
+    2500
+   ]
+  },
+  "Cream": {
+   "name": "cream",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/cream.jpg",
+   "pixels": [
+    3000,
+    6000
+   ]
+  },
+  "Crema Lini": {
+   "name": "crema-lini",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/crema-lini.jpg",
+   "pixels": [
+    720,
+    1296
+   ]
+  },
+  "Crisp White": {
+   "name": "crisp-white",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/crisp-white.jpg",
+   "pixels": [
+    4000,
+    4000
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Danish Rattan": {
+   "name": "danish-rattan",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/danish-rattan.jpg",
+   "pixels": [
+    2729,
+    5401
+   ]
+  },
+  "Dark Batten Oak": {
+   "name": "dark-batten-oak",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/dark-batten-oak.jpg",
+   "pixels": [
+    2152,
+    4288
+   ]
+  },
+  "Dawnshade": {
+   "name": "dawnshade",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/dawnshade.jpg",
+   "pixels": [
+    1600,
+    1600
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Designer White": {
+   "name": "designer-white",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/designer-white.jpg",
+   "pixels": [
+    4000,
+    4000
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Distressed Wood": {
+   "name": "distressed-wood",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/distressed-wood.jpg",
+   "pixels": [
+    720,
+    1296
+   ]
+  },
+  "District Oak": {
+   "name": "district-oak",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/district-oak.jpg",
+   "pixels": [
+    1256,
+    2500
+   ]
+  },
+  "Drifted Oak": {
+   "name": "drifted-oak",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/drifted-oak.jpg",
+   "pixels": [
+    720,
+    1296
+   ]
+  },
+  "Ecru Oak": {
+   "name": "ecru-oak",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/ecru-oak.jpg",
+   "pixels": [
+    1256,
+    2500
+   ]
+  },
+  "Elemental Grey": {
+   "name": "elemental-grey",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/elemental-grey.jpg",
+   "pixels": [
+    1280,
+    1280
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Empire Oak": {
+   "name": "empire-oak",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/empire-oak.jpg",
+   "pixels": [
+    2085,
+    4179
+   ]
+  },
+  "Estella Oak": {
+   "name": "estella-oak",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/estella-oak.jpg",
+   "pixels": [
+    2100,
+    4256
+   ]
+  },
+  "European Walnut": {
+   "name": "european-walnut",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/european-walnut.jpg",
+   "pixels": [
+    720,
+    1296
+   ]
+  },
+  "Ferro": {
+   "name": "ferro",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/ferro.jpg",
+   "pixels": [
+    1600,
+    1600
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Florentine Walnut": {
+   "name": "florentine-walnut",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/florentine-walnut.jpg",
+   "pixels": [
+    2001,
+    4029
+   ]
+  },
+  "Gesso Lini": {
+   "name": "gesso-lini",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/gesso-lini.jpg",
+   "pixels": [
+    720,
+    1296
+   ]
+  },
+  "Gossamer White": {
+   "name": "gossamer-white",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/gossamer-white.jpg",
+   "pixels": [
+    1280,
+    1280
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Graphite": {
+   "name": "graphite",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/graphite.jpg",
+   "pixels": [
+    4000,
+    4000
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Greige": {
+   "name": "greige",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/greige.jpg",
+   "pixels": [
+    4000,
+    4000
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Grey Cement": {
+   "name": "grey-cement",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/grey-cement.jpg",
+   "pixels": [
+    1503,
+    4071
+   ]
+  },
+  "Habitat": {
+   "name": "habitat",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/habitat.jpg",
+   "pixels": [
+    1280,
+    1280
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Havana Oak": {
+   "name": "havana-oak",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/havana-oak.jpg",
+   "pixels": [
+    1500,
+    2500
+   ]
+  },
+  "Hazel Oak": {
+   "name": "hazel-oak",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/hazel-oak.jpg",
+   "pixels": [
+    1256,
+    2500
+   ]
+  },
+  "Husk": {
+   "name": "husk",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/husk.jpg",
+   "pixels": [
+    4000,
+    4000
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Italian Cotton": {
+   "name": "italian-cotton",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/italian-cotton.jpg",
+   "pixels": [
+    1500,
+    2500
+   ]
+  },
+  "Jamaican Walnut": {
+   "name": "jamaican-walnut",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/jamaican-walnut.jpg",
+   "pixels": [
+    720,
+    1296
+   ]
+  },
+  "Laurel Oak": {
+   "name": "laurel-oak",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/laurel-oak.jpg",
+   "pixels": [
+    1256,
+    2500
+   ]
+  },
+  "Lava": {
+   "name": "lava",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/lava.jpg",
+   "pixels": [
+    3000,
+    6000
+   ]
+  },
+  "Light Brass Leaf": {
+   "name": "light-brass-leaf",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/light-brass-leaf.jpg",
+   "pixels": [
+    1250,
+    2500
+   ]
+  },
+  "Lightstone": {
+   "name": "lightstone",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/lightstone.jpg",
+   "pixels": [
+    1600,
+    1600
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Ligurian Walnut": {
+   "name": "ligurian-walnut",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/ligurian-walnut.jpg",
+   "pixels": [
+    1500,
+    2500
+   ]
+  },
+  "Maison Oak": {
+   "name": "maison-oak",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/maison-oak.jpg",
+   "pixels": [
+    720,
+    1296
+   ]
+  },
+  "Malt": {
+   "name": "malt",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/malt.jpg",
+   "pixels": [
+    4000,
+    4000
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Manor Oak": {
+   "name": "manor-oak",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/manor-oak.jpg",
+   "pixels": [
+    1256,
+    2500
+   ]
+  },
+  "Marina Grey": {
+   "name": "marina-grey",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/marina-grey.jpg",
+   "pixels": [
+    4000,
+    4000
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Marni Lini": {
+   "name": "marni-lini",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/marni-lini.jpg",
+   "pixels": [
+    720,
+    1296
+   ]
+  },
+  "Maroso Milan": {
+   "name": "maroso-milan",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/maroso-milan.jpg",
+   "pixels": [
+    720,
+    1296
+   ]
+  },
+  "Mercurio Grey": {
+   "name": "mercurio-grey",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/mercurio-grey.jpg",
+   "pixels": [
+    1280,
+    1280
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Montage": {
+   "name": "montage",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/montage.jpg",
+   "pixels": [
+    4000,
+    4000
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Moss Grey": {
+   "name": "moss-grey",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/moss-grey.jpg",
+   "pixels": [
+    4000,
+    4000
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Natural Cotton": {
+   "name": "natural-cotton",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/natural-cotton.jpg",
+   "pixels": [
+    1500,
+    2500
+   ]
+  },
+  "Natural Oak": {
+   "name": "natural-oak",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/natural-oak.jpg",
+   "pixels": [
+    720,
+    1296
+   ]
+  },
+  "Natural Ply": {
+   "name": "natural-ply",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/natural-ply.jpg",
+   "pixels": [
+    1500,
+    2500
+   ]
+  },
+  "Natural White": {
+   "name": "natural-white",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/natural-white.jpg",
+   "pixels": [
+    4000,
+    4000
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "New Antique White": {
+   "name": "new-antique-white",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/new-antique-white.jpg",
+   "pixels": [
+    4000,
+    4000
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Nickel": {
+   "name": "nickel",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/nickel.jpg",
+   "pixels": [
+    3000,
+    6000
+   ]
+  },
+  "Nomad": {
+   "name": "nomad",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/nomad.jpg",
+   "pixels": [
+    1600,
+    1600
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Nordic Oak": {
+   "name": "nordic-oak",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/nordic-oak.jpg",
+   "pixels": [
+    2166,
+    4241
+   ]
+  },
+  "Notaio Walnut": {
+   "name": "notaio-walnut",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/notaio-walnut.jpg",
+   "pixels": [
+    708,
+    1392
+   ]
+  },
+  "Nouveau Grey": {
+   "name": "nouveau-grey",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/nouveau-grey.jpg",
+   "pixels": [
+    960,
+    960
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Oasis": {
+   "name": "oasis",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/oasis.jpg",
+   "pixels": [
+    1280,
+    1280
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Ochre Figured-Wood": {
+   "name": "ochre-figured-wood",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/ochre-figured-wood.jpg",
+   "pixels": [
+    1500,
+    2500
+   ]
+  },
+  "Onyx Figured-Wood": {
+   "name": "onyx-figured-wood",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/onyx-figured-wood.jpg",
+   "pixels": [
+    1500,
+    2500
+   ]
+  },
+  "Oxford": {
+   "name": "oxford",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/oxford.jpg",
+   "pixels": [
+    4000,
+    3999
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Oyster Grey": {
+   "name": "oyster-grey",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/oyster-grey.jpg",
+   "pixels": [
+    4000,
+    4000
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Palace Teak": {
+   "name": "palace-teak",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/palace-teak.jpg",
+   "pixels": [
+    720,
+    1296
+   ]
+  },
+  "Pallido": {
+   "name": "pallido",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/pallido.jpg",
+   "pixels": [
+    960,
+    960
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Palomera Oak": {
+   "name": "palomera-oak",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/palomera-oak.jpg",
+   "pixels": [
+    1500,
+    2500
+   ]
+  },
+  "Papyrus": {
+   "name": "papyrus",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/papyrus.jpg",
+   "pixels": [
+    4000,
+    4000
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Parchment": {
+   "name": "parchment",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/parchment.jpg",
+   "pixels": [
+    4000,
+    4000
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Pearl Metallic": {
+   "name": "pearl-metallic",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/pearl-metallic.jpg",
+   "pixels": [
+    3000,
+    6000
+   ]
+  },
+  "Perugian Walnut": {
+   "name": "perugian-walnut",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/perugian-walnut.jpg",
+   "pixels": [
+    1250,
+    2500
+   ]
+  },
+  "Phantom Black": {
+   "name": "phantom-black",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/phantom-black.jpg",
+   "pixels": [
+    3000,
+    6000
+   ]
+  },
+  "Plantation Ash": {
+   "name": "plantation-ash",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/plantation-ash.jpg",
+   "pixels": [
+    1500,
+    2500
+   ]
+  },
+  "Platinum Leaf": {
+   "name": "platinum-leaf",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/platinum-leaf.jpg",
+   "pixels": [
+    1250,
+    2500
+   ]
+  },
+  "Polar White": {
+   "name": "polar-white",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/polar-white.jpg",
+   "pixels": [
+    4000,
+    4000
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Porcelain": {
+   "name": "porcelain",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/porcelain.jpg",
+   "pixels": [
+    4000,
+    4000
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Prime Oak": {
+   "name": "prime-oak",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/prime-oak.jpg",
+   "pixels": [
+    2067,
+    4208
+   ]
+  },
+  "Pure Gold Leaf": {
+   "name": "pure-gold-leaf",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/pure-gold-leaf.jpg",
+   "pixels": [
+    1250,
+    2500
+   ]
+  },
+  "Quartiera Maple": {
+   "name": "quartiera-maple",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/quartiera-maple.jpg",
+   "pixels": [
+    1500,
+    2500
+   ]
+  },
+  "Raven Metallic": {
+   "name": "raven-metallic",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/raven-metallic.jpg",
+   "pixels": [
+    3000,
+    6000
+   ]
+  },
+  "Rocco Lini": {
+   "name": "rocco-lini",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/rocco-lini.jpg",
+   "pixels": [
+    720,
+    1296
+   ]
+  },
+  "Rojo Walnut": {
+   "name": "rojo-walnut",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/rojo-walnut.jpg",
+   "pixels": [
+    1981,
+    3876
+   ]
+  },
+  "Rose Gold Leaf": {
+   "name": "rose-gold-leaf",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/rose-gold-leaf.jpg",
+   "pixels": [
+    1250,
+    2500
+   ]
+  },
+  "Royal Oyster": {
+   "name": "royal-oyster",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/royal-oyster.jpg",
+   "pixels": [
+    3000,
+    6000
+   ]
+  },
+  "Rubra Oak": {
+   "name": "rubra-oak",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/rubra-oak.jpg",
+   "pixels": [
+    1256,
+    2500
+   ]
+  },
+  "SIlk": {
+   "name": "silk",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/silk.jpg",
+   "pixels": [
+    4000,
+    4000
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Satra Wood": {
+   "name": "satra-wood",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/satra-wood.jpg",
+   "pixels": [
+    720,
+    1296
+   ]
+  },
+  "Sepia Oak": {
+   "name": "sepia-oak",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/sepia-oak.jpg",
+   "pixels": [
+    720,
+    1296
+   ]
+  },
+  "Serene": {
+   "name": "serene",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/serene.jpg",
+   "pixels": [
+    4000,
+    4000
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Shannon Oak": {
+   "name": "shannon-oak",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/shannon-oak.jpg",
+   "pixels": [
+    3000,
+    5401
+   ]
+  },
+  "Sienna Figured-Wood": {
+   "name": "sienna-figured-wood",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/sienna-figured-wood.jpg",
+   "pixels": [
+    1500,
+    2500
+   ]
+  },
+  "Silk": {
+   "name": "silk",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/silk.jpg",
+   "pixels": [
+    4000,
+    4000
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Society Oak": {
+   "name": "society-oak",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/society-oak.jpg",
+   "pixels": [
+    1256,
+    2500
+   ]
+  },
+  "Soft Walnut": {
+   "name": "soft-walnut",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/soft-walnut.jpg",
+   "pixels": [
+    3000,
+    5401
+   ]
+  },
+  "Solara": {
+   "name": "solara",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/solara.jpg",
+   "pixels": [
+    1600,
+    1600
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Stone Grey": {
+   "name": "stone-grey",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/stone-grey.jpg",
+   "pixels": [
+    4000,
+    4000
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Storm": {
+   "name": "storm",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/storm.jpg",
+   "pixels": [
+    4000,
+    4000
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Strata Grey": {
+   "name": "strata-grey",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/strata-grey.jpg",
+   "pixels": [
+    4000,
+    4000
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Superior White": {
+   "name": "superior-white",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/superior-white.jpg",
+   "pixels": [
+    3000,
+    6000
+   ]
+  },
+  "Swiss Rattan": {
+   "name": "swiss-rattan",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/swiss-rattan.jpg",
+   "pixels": [
+    2729,
+    5401
+   ]
+  },
+  "Tasmanian Oak": {
+   "name": "tasmanian-oak",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/tasmanian-oak.jpg",
+   "pixels": [
+    2158,
+    4288
+   ]
+  },
+  "Taupe": {
+   "name": "taupe",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/taupe.jpg",
+   "pixels": [
+    4000,
+    4000
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Tessuto Milan": {
+   "name": "tessuto-milan",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/tessuto-milan.jpg",
+   "pixels": [
+    3000,
+    5401
+   ]
+  },
+  "Titanium": {
+   "name": "titanium",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/titanium.jpg",
+   "pixels": [
+    3000,
+    6000
+   ]
+  },
+  "Topiary": {
+   "name": "topiary",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/topiary.jpg",
+   "pixels": [
+    1280,
+    1280
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Truffle Lini": {
+   "name": "truffle-lini",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/truffle-lini.jpg",
+   "pixels": [
+    3000,
+    5401
+   ]
+  },
+  "Tuross Oak": {
+   "name": "tuross-oak",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/tuross-oak.jpg",
+   "pixels": [
+    3000,
+    5401
+   ]
+  },
+  "Ultra White": {
+   "name": "ultra-white",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/ultra-white.jpg",
+   "pixels": [
+    4000,
+    4000
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Verdelho": {
+   "name": "verdelho",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/verdelho.jpg",
+   "pixels": [
+    1280,
+    1280
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "White Cement": {
+   "name": "white-cement",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/white-cement.jpg",
+   "pixels": [
+    1503,
+    4071
+   ]
+  },
+  "White Cotton": {
+   "name": "white-cotton",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/white-cotton.jpg",
+   "pixels": [
+    4000,
+    4000
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "White Mist": {
+   "name": "white-mist",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/white-mist.jpg",
+   "pixels": [
+    4000,
+    4000
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Whitewood": {
+   "name": "whitewood",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/whitewood.jpg",
+   "pixels": [
+    3000,
+    5401
+   ]
+  },
+  "Wild Clay": {
+   "name": "wild-clay",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/wild-clay.jpg",
+   "pixels": [
+    1600,
+    1600
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Wispwood": {
+   "name": "wispwood",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/wispwood.jpg",
+   "pixels": [
+    1600,
+    1600
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  }
  },
  "no_image": [
   "Botanic",

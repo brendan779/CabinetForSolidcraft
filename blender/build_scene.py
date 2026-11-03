@@ -33,6 +33,7 @@ def fetch(url, path):
     done = subprocess.run(["/usr/bin/curl", "-sSfL", "--max-time", "60", "-A", agent, "-o", part, url])
     if done.returncode != 0:
         return False
+    # A PNG under this name is fine: Blender goes by what's in a file.
     os.replace(part, path)
     return True
 
@@ -129,6 +130,7 @@ def board_material(board_id, board, cache):
     soft = True
     maps = ensure_maps(cache, board)
     landscape = False
+    aspect = 0.5
     if maps:
         n = m.node_tree
         uv = n.nodes.new("ShaderNodeUVMap")
@@ -146,6 +148,7 @@ def board_material(board_id, board, cache):
 
         base = texture(maps[0], False)
         landscape = base.image.size[0] > base.image.size[1]
+        aspect = min(base.image.size) / max(base.image.size)
         n.links.new(base.outputs[0], b.inputs["Base Color"])
         height = texture(maps[1], True)
         bump = n.nodes.new("ShaderNodeBump")
@@ -165,10 +168,10 @@ def board_material(board_id, board, cache):
         soft = False
     if soft:
         soften_edges(m, b)
-    return m, landscape
+    return m, landscape, aspect
 
 
-def add_uvs(obj, part, sheet, landscape, seed):
+def add_uvs(obj, part, sheet, landscape, aspect, seed):
     """Each face mapped by its plane, the sheet's length along the part's grain, from its own place
     on the sheet, at the sheet's true size."""
     me = obj.data
@@ -177,7 +180,8 @@ def add_uvs(obj, part, sheet, landscape, seed):
     grain = axis_of.get(part.get("grain"))
     lo, hi = part["min"], part["max"]
     size = [hi[i] - lo[i] for i in range(3)]
-    length, width = sheet
+    # The sheet's length is the picture's long side; its width follows the picture, so it never stretches.
+    length, width = sheet[0], sheet[0] * aspect
     offset = ((seed * 0.6180339) % 1, (seed * 0.7548776) % 1)
     world = obj.matrix_world
     for poly in me.polygons:
@@ -449,12 +453,12 @@ def build(job_path, obj_path, blend_path, cache, render):
                 look = job["default_look"]
                 m, b = principled(f"Generic {key}", (0.8, 0.77, 0.7), look["roughness"])
                 soften_edges(m, b)
-                materials[key] = (m, False)
-        material, landscape = materials[key]
+                materials[key] = (m, False, 0.5)
+        material, landscape, aspect = materials[key]
         ob.data.materials.clear()
         ob.data.materials.append(material)
         board = job["boards"].get(part["board"]) or {}
-        add_uvs(ob, part, board.get("sheet", [2400, 1200]), landscape, i + 1)
+        add_uvs(ob, part, board.get("sheet", [2400, 1200]), landscape, aspect, i + 1)
         ob.data.shade_flat()
     pts = [o.matrix_world @ Vector(c) for o in bodies for c in o.bound_box]
     lo = Vector((min(p.x for p in pts), min(p.y for p in pts), min(p.z for p in pts)))
@@ -479,6 +483,13 @@ def build(job_path, obj_path, blend_path, cache, render):
     sc.view_settings.view_transform = "AgX"
     sc.view_settings.look = "AgX - Medium High Contrast"
     sc.render.image_settings.file_format = "PNG"
+    # It opens looking through the camera, on every workspace's 3D views.
+    for screen in bpy.data.screens:
+        for area in screen.areas:
+            if area.type == "VIEW_3D":
+                for space in area.spaces:
+                    if space.type == "VIEW_3D":
+                        space.region_3d.view_perspective = "CAMERA"
     # The file stands alone, so it can be moved or sent.
     bpy.ops.file.pack_all()
     os.makedirs(os.path.dirname(blend_path), exist_ok=True)

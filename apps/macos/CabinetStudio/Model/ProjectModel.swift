@@ -1187,7 +1187,7 @@ final class ProjectModel {
             return
         }
         let support = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
-        let cache = support.appending(path: "CabinetStudio/polytec")
+        let cache = support.appending(path: "CabinetStudio/decors")
         let documents = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
         let parent = fileURL?.deletingLastPathComponent() ?? documents.appending(path: "Cabinet Studio Scenes")
         let folder = parent.appending(path: "\(jobName) scene")
@@ -1215,7 +1215,7 @@ final class ProjectModel {
             status = "SolidCraft did not build the cabinets for Blender"
             return
         }
-        status = "Making the scene in Blender. The first use of a decor downloads it from Polytec…"
+        status = "Making the scene in Blender. The first use of a decor downloads its image…"
         let made = await Task.detached { () -> Result<Void, Error> in
             do {
                 try Self.run(blenderTool, ["-b", "-P", script.path, "--",

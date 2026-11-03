@@ -42,8 +42,8 @@ light beside the SolidCraft button.
 - **Build in SolidCraft:** each cabinet becomes a component of named panels in your board colours,
   with supplier hardware models. Manufacturing detail cuts every bore, groove and biscuit slot.
 - **Blender scenes:** the camera button beside SolidCraft builds the job with `solidcraft-cli` and makes
-  a Blender scene: Polytec decors with bump maps, on each part by its name and grain, in a lit kitchen.
-  It needs SolidCraft and Blender in Applications. Other brands show plain colours for now.
+  a Blender scene: board decors with bump maps, on each part by its name and grain, in a lit kitchen.
+  It needs SolidCraft and Blender in Applications. Images come from each brand's site when first used.
 - **Outputs:** cut list with edge tape and CSV, parts nested on sheets, hardware order, quote, cut
   sheets per part as PDF or DXF, labels, assembly drawings and the job as STEP.
 

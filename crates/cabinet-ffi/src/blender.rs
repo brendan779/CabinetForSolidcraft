@@ -34,8 +34,6 @@ fn manifest(
         let text = std::fs::read_to_string(catalog_dir.join("textures").join(file)).ok()?;
         serde_json::from_str(&text).ok()
     };
-    let images = read("polytec.json").unwrap_or(Value::Null);
-    let image_url = images["image_url"].as_str().unwrap_or_default();
     let finishes = read("finishes.json").unwrap_or(Value::Null);
     let mut parts = Vec::new();
     let mut boards = BTreeMap::new();
@@ -59,10 +57,20 @@ fn manifest(
                 let found = cat.board(board);
                 let decor = found.map_or("", |b| b.decor.as_str());
                 let finish = found.map_or("", |b| b.finish.as_str());
-                let image = found
-                    .filter(|b| b.brand == "Polytec")
-                    .and_then(|_| images["images"][decor].as_str());
-                let sheet = found.and_then(|b| b.sheets.first());
+                // Each brand's images, by decor, from `scripts/fetch_board_images.py`.
+                let brand =
+                    found.map_or(String::new(), |b| b.brand.to_lowercase().replace(' ', "-"));
+                let images = read(&format!("{brand}.json")).unwrap_or(Value::Null);
+                let image = &images["images"][decor];
+                // A picture is of a sheet at the longest size its decor comes in: a lining strip,
+                // or a shorter sheet of the same decor, is a piece of that.
+                let sheet = found.and_then(|f| {
+                    cat.boards
+                        .iter()
+                        .filter(|b| b.brand == f.brand && b.decor == f.decor)
+                        .flat_map(|b| &b.sheets)
+                        .max_by(|x, y| x.length.total_cmp(&y.length))
+                });
                 boards.insert(
                     board.to_string(),
                     json!({
@@ -71,9 +79,13 @@ fn manifest(
                         "grained": found.is_some_and(|b| b.grained),
                         "colour": colours.get(board),
                         "look": finishes["finishes"].get(finish).unwrap_or(&finishes["default"]),
-                        "image": image,
-                        "url": image.map(|i| image_url.replace("{name}", i)),
-                        "sheet": sheet.map_or([2400.0, 1200.0], |s| [s.length, s.width]),
+                        "image": image["name"],
+                        "url": image["url"],
+                        // What the image covers: a whole sheet, unless it says less.
+                        "sheet": image.get("covers").cloned().unwrap_or_else(|| {
+                            let s = sheet.map_or([2400.0, 1200.0], |s| [s.length, s.width]);
+                            json!(s)
+                        }),
                     }),
                 );
             }
@@ -243,6 +255,29 @@ mod tests {
         let board = &m["boards"]["polytec.commercial.angora-oak-woodmatt.18.mr-mdf"];
         assert_eq!(board["look"]["bump"], 0.45);
         assert_eq!(board["sheet"][0], 3600.0);
+    }
+
+    #[test]
+    fn a_board_takes_its_brands_image_and_says_what_it_covers() {
+        let (m, _) = written(job("polytec.commercial.angora-oak-woodmatt.18.mr-mdf"));
+        let board = &m["boards"]["polytec.commercial.angora-oak-woodmatt.18.mr-mdf"];
+        assert_eq!(board["image"], "angora-oak");
+        assert!(board["url"].as_str().unwrap().ends_with("/angora-oak.jpg"));
+    }
+
+    #[test]
+    fn a_lining_strip_takes_the_scale_of_its_decors_full_sheet() {
+        let (m, _) = written(job("polytec.commercial.angora-oak-woodmatt.18.mr-mdf"));
+        let cat = cabinet_catalog::Catalog::load(Path::new(&catalog())).unwrap();
+        let longest = cat
+            .boards
+            .iter()
+            .filter(|b| b.brand == "Polytec" && b.decor == "Angora Oak")
+            .flat_map(|b| &b.sheets)
+            .map(|s| s.length)
+            .fold(0.0, f64::max);
+        let board = &m["boards"]["polytec.commercial.angora-oak-woodmatt.18.mr-mdf"];
+        assert_eq!(board["sheet"][0].as_f64().unwrap(), longest);
     }
 
     #[test]

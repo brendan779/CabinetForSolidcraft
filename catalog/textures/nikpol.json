@@ -1,0 +1,795 @@
+{
+ "source": "https://www.nikpol.com.au: each colour's Sheet Design image",
+ "verified": false,
+ "images": {
+  "Acadia Linen 9203": {
+   "name": "nikpol-acadia-linen-9203",
+   "url": "https://www.nikpol.com.au/Uploads/FinishImage/SheetDesign/Finish_304324094336_AcadiaLinenSX.jpg",
+   "pixels": [
+    1080,
+    1920
+   ]
+  },
+  "Acero 9116": {
+   "name": "nikpol-acero-9116",
+   "url": "https://www.nikpol.com.au/Uploads/FinishImage/SheetDesign/Finish_231526101538_9116DVACERO.jpg",
+   "pixels": [
+    1200,
+    1800
+   ]
+  },
+  "Alby Blue 9025": {
+   "name": "nikpol-alby-blue-9025",
+   "url": "https://www.nikpol.com.au/Uploads/FinishImage/SheetDesign/Finish_160025060053_9025BayBlue.jpg",
+   "pixels": [
+    1000,
+    1000
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Alpaca 9026": {
+   "name": "nikpol-alpaca-9026",
+   "url": "https://www.nikpol.com.au/Uploads/FinishImage/SheetDesign/Finish_162226122256_AlpacaPDK682960x0fit478b24840a2.jpg",
+   "pixels": [
+    960,
+    960
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Alpine White W1100": {
+   "name": "nikpol-alpine-white-w1100",
+   "url": "https://www.nikpol.com.au/Uploads/FinishImage/SheetDesign/Finish_194820094838_alpinewhite.jpg",
+   "pixels": [
+    1080,
+    1920
+   ]
+  },
+  "Amber Urban Oak 9001": {
+   "name": "nikpol-amber-urban-oak-9001",
+   "url": "https://www.nikpol.com.au/Uploads/FinishImage/SheetDesign/Finish_041820101814_honeystirlingoak.png",
+   "pixels": [
+    1772,
+    2255
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "American Walnut Oak 4005": {
+   "name": "nikpol-american-walnut-oak-4005",
+   "url": "https://www.nikpol.com.au/Uploads/FinishImage/SheetDesign/Finish_105924105931_americanwalnutoak.jpg",
+   "pixels": [
+    1080,
+    1920
+   ]
+  },
+  "American White Oak 4004": {
+   "name": "nikpol-american-white-oak-4004",
+   "url": "https://www.nikpol.com.au/Uploads/FinishImage/SheetDesign/Finish_100024110009_americanwhiteoak.jpg",
+   "pixels": [
+    1080,
+    1920
+   ]
+  },
+  "Angora Grey U705": {
+   "name": "nikpol-angora-grey-u705",
+   "url": "https://www.nikpol.com.au/Uploads/FinishImage/SheetDesign/Finish_051324051355_U705AngoraGrey.jpg",
+   "pixels": [
+    1080,
+    1920
+   ]
+  },
+  "Aspen White 5009": {
+   "name": "nikpol-aspen-white-5009",
+   "url": "https://www.nikpol.com.au/Uploads/FinishImage/SheetDesign/Finish_142321112345_5009AspenWhite.jpg",
+   "pixels": [
+    1080,
+    1920
+   ]
+  },
+  "Black 9017": {
+   "name": "nikpol-black-9017",
+   "url": "https://www.nikpol.com.au/Uploads/FinishImage/SheetDesign/Finish_013021123052_BlackSUWeb.png",
+   "pixels": [
+    1080,
+    1920
+   ]
+  },
+  "Black U999": {
+   "name": "nikpol-black-u999",
+   "url": "https://www.nikpol.com.au/Uploads/FinishImage/SheetDesign/Finish_013021123052_BlackSUWeb.png",
+   "pixels": [
+    1080,
+    1920
+   ]
+  },
+  "Blonde Liberty Elm 9005": {
+   "name": "nikpol-blonde-liberty-elm-9005",
+   "url": "https://www.nikpol.com.au/Uploads/FinishImage/SheetDesign/Finish_042520092517_grampianelm.png",
+   "pixels": [
+    1772,
+    2255
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Blonde Liberty Elm 9107": {
+   "name": "nikpol-blonde-liberty-elm-9107",
+   "url": "https://www.nikpol.com.au/Uploads/FinishImage/SheetDesign/Finish_042520092517_grampianelm.png",
+   "pixels": [
+    1772,
+    2255
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Blonde Surfside Ash 9107": {
+   "name": "nikpol-blonde-surfside-ash-9107",
+   "url": "https://www.nikpol.com.au/Uploads/FinishImage/SheetDesign/Finish_235526095541_9107SNBLONDESURFSIDEASH.jpg",
+   "pixels": [
+    1800,
+    2291
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Brush Wood 8003": {
+   "name": "nikpol-brush-wood-8003",
+   "url": "https://www.nikpol.com.au/Uploads/FinishImage/SheetDesign/Finish_053224093255_MasterOakBrushWoodDetail.jpg",
+   "pixels": [
+    1080,
+    1920
+   ]
+  },
+  "Caramel Franklin Walnut 9111": {
+   "name": "nikpol-caramel-franklin-walnut-9111",
+   "url": "https://www.nikpol.com.au/Uploads/FinishImage/SheetDesign/Finish_231126101133_9111RWCARAMELFRANKLINWALNUT.jpg",
+   "pixels": [
+    1772,
+    2255
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Carbon Marine Wood 9004": {
+   "name": "nikpol-carbon-marine-wood-9004",
+   "url": "https://www.nikpol.com.au/Uploads/FinishImage/SheetDesign/Finish_043120103112_kiandraoak.png",
+   "pixels": [
+    1772,
+    2226
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Cashmere 9013": {
+   "name": "nikpol-cashmere-9013",
+   "url": "https://www.nikpol.com.au/Uploads/FinishImage/SheetDesign/Finish_270721010749_TaupeBeigeWeb.png",
+   "pixels": [
+    1080,
+    1920
+   ]
+  },
+  "Cenere 9207": {
+   "name": "nikpol-cenere-9207",
+   "url": "https://www.nikpol.com.au/Uploads/FinishImage/SheetDesign/Finish_102024112038_cenere.jpg",
+   "pixels": [
+    1080,
+    1920
+   ]
+  },
+  "Chiaro 9114": {
+   "name": "nikpol-chiaro-9114",
+   "url": "https://www.nikpol.com.au/Uploads/FinishImage/SheetDesign/Finish_231426101424_9114DVCHIARO.jpg",
+   "pixels": [
+    1200,
+    1800
+   ]
+  },
+  "Chinchilla Grey 9012": {
+   "name": "nikpol-chinchilla-grey-9012",
+   "url": "https://www.nikpol.com.au/Uploads/FinishImage/SheetDesign/Finish_270421010434_SeattleGreyWeb.png",
+   "pixels": [
+    1080,
+    1920
+   ]
+  },
+  "Cocoa Primavera Oak 9130": {
+   "name": "nikpol-cocoa-primavera-oak-9130",
+   "url": "https://www.nikpol.com.au/Uploads/FinishImage/SheetDesign/Finish_233826123810_9130PVCOCOAPRIMAVERAOAK.jpg",
+   "pixels": [
+    1112,
+    1415
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Coffee Urban Oak 9002": {
+   "name": "nikpol-coffee-urban-oak-9002",
+   "url": "https://www.nikpol.com.au/Uploads/FinishImage/SheetDesign/Finish_253320013357_BrownStirlingOak.png",
+   "pixels": [
+    1772,
+    2255
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Cotta Cremona Oak 9124": {
+   "name": "nikpol-cotta-cremona-oak-9124",
+   "url": "https://www.nikpol.com.au/Uploads/FinishImage/SheetDesign/Finish_233426123456_9124MWCOTTACREMONAOAK.jpg",
+   "pixels": [
+    1392,
+    1771
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Deep Sahara 9024": {
+   "name": "nikpol-deep-sahara-9024",
+   "url": "https://www.nikpol.com.au/Uploads/FinishImage/SheetDesign/Finish_161025061011_9024Terracotta.jpg",
+   "pixels": [
+    1000,
+    1000
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Dorian Grey 5008": {
+   "name": "nikpol-dorian-grey-5008",
+   "url": "https://www.nikpol.com.au/Uploads/FinishImage/SheetDesign/Finish_142221112231_5008DorianGrey.jpg",
+   "pixels": [
+    1080,
+    1920
+   ]
+  },
+  "Dusk Blue 5004": {
+   "name": "nikpol-dusk-blue-5004",
+   "url": "https://www.nikpol.com.au/Uploads/FinishImage/SheetDesign/Finish_141921111923_5004SpringGreen.jpg",
+   "pixels": [
+    2480,
+    3508
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Dust Grey U732": {
+   "name": "nikpol-dust-grey-u732",
+   "url": "https://www.nikpol.com.au/Uploads/FinishImage/SheetDesign/Finish_235826105821_DustGreyST9Swatch.jpg",
+   "pixels": [
+    1080,
+    1920
+   ]
+  },
+  "Ferro Nero 9208": {
+   "name": "nikpol-ferro-nero-9208",
+   "url": "https://www.nikpol.com.au/Uploads/FinishImage/SheetDesign/Finish_102724112700_ferronero.jpg",
+   "pixels": [
+    1080,
+    1920
+   ]
+  },
+  "Graphite Linen 9204": {
+   "name": "nikpol-graphite-linen-9204",
+   "url": "https://www.nikpol.com.au/Uploads/FinishImage/SheetDesign/Finish_172624072600_9204GRAPHITELINENSX.jpg",
+   "pixels": [
+    1080,
+    1920
+   ]
+  },
+  "Graphite U961": {
+   "name": "nikpol-graphite-u961",
+   "url": "https://www.nikpol.com.au/Uploads/FinishImage/SheetDesign/Finish_042720092750_Graphite.jpg",
+   "pixels": [
+    1080,
+    1920
+   ]
+  },
+  "Grey Fabric 9301": {
+   "name": "nikpol-grey-fabric-9301",
+   "url": "https://www.nikpol.com.au/Uploads/FinishImage/SheetDesign/Finish_053524093506_FikaLinenRangeGreyFabricDetail.jpg",
+   "pixels": [
+    1080,
+    1920
+   ]
+  },
+  "Grigio Chiaro 9206": {
+   "name": "nikpol-grigio-chiaro-9206",
+   "url": "https://www.nikpol.com.au/Uploads/FinishImage/SheetDesign/Finish_103324113328_grigiochiaro.jpg",
+   "pixels": [
+    1080,
+    1920
+   ]
+  },
+  "Indigo Blue U599": {
+   "name": "nikpol-indigo-blue-u599",
+   "url": "https://www.nikpol.com.au/Uploads/FinishImage/SheetDesign/Finish_042420102406_indigoblue.png",
+   "pixels": [
+    1080,
+    1920
+   ]
+  },
+  "Iron Surfside Ash 9108": {
+   "name": "nikpol-iron-surfside-ash-9108",
+   "url": "https://www.nikpol.com.au/Uploads/FinishImage/SheetDesign/Finish_235626095626_9108SNIRONSURFSIDEASH.jpg",
+   "pixels": [
+    1772,
+    2255
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Light Fabric 9300": {
+   "name": "nikpol-light-fabric-9300",
+   "url": "https://www.nikpol.com.au/Uploads/FinishImage/SheetDesign/Finish_053424093436_FikaLinenRangeLightFabricDetail.jpg",
+   "pixels": [
+    1080,
+    1920
+   ]
+  },
+  "Light Select Walnut 9003": {
+   "name": "nikpol-light-select-walnut-9003",
+   "url": "https://www.nikpol.com.au/Uploads/FinishImage/SheetDesign/Finish_040820020810_proserpinewalnut.png",
+   "pixels": [
+    1772,
+    2255
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Limed Oak 8004": {
+   "name": "nikpol-limed-oak-8004",
+   "url": "https://www.nikpol.com.au/Uploads/FinishImage/SheetDesign/Finish_053224093204_MasterOakLimedOakDetail.jpg",
+   "pixels": [
+    1080,
+    1920
+   ]
+  },
+  "Mouse Grey 9022": {
+   "name": "nikpol-mouse-grey-9022",
+   "url": "https://www.nikpol.com.au/Uploads/FinishImage/SheetDesign/Finish_053524093553_BuildersRangeElementalGreyDetail.jpg",
+   "pixels": [
+    1080,
+    1920
+   ]
+  },
+  "Natural Canella Oak 9126": {
+   "name": "nikpol-natural-canella-oak-9126",
+   "url": "https://www.nikpol.com.au/Uploads/FinishImage/SheetDesign/Finish_233526123558_9126MWNATURALCANELLAOAK.jpg",
+   "pixels": [
+    1082,
+    1378
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Natural Copper 8005": {
+   "name": "nikpol-natural-copper-8005",
+   "url": "https://www.nikpol.com.au/Uploads/FinishImage/SheetDesign/Finish_121625021613_8005MasterOakNaturalCopper.jpg",
+   "pixels": [
+    1000,
+    1000
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Natural Linen 9205": {
+   "name": "nikpol-natural-linen-9205",
+   "url": "https://www.nikpol.com.au/Uploads/FinishImage/SheetDesign/Finish_305124095114_NaturalLinenSX.jpg",
+   "pixels": [
+    1080,
+    1920
+   ]
+  },
+  "Naturale 9122": {
+   "name": "nikpol-naturale-9122",
+   "url": "https://www.nikpol.com.au/Uploads/FinishImage/SheetDesign/Finish_233326123338_9122DENATURALE.jpg",
+   "pixels": [
+    1200,
+    1800
+   ]
+  },
+  "Naval Blue 5002": {
+   "name": "nikpol-naval-blue-5002",
+   "url": "https://www.nikpol.com.au/Uploads/FinishImage/SheetDesign/Finish_141721111727_5002NavalBlue.jpg",
+   "pixels": [
+    2480,
+    3508
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Noce Pallido 9118": {
+   "name": "nikpol-noce-pallido-9118",
+   "url": "https://www.nikpol.com.au/Uploads/FinishImage/SheetDesign/Finish_232226102211_9118DVNOCEPALLIDO.jpg",
+   "pixels": [
+    1200,
+    1800
+   ]
+  },
+  "Onyx Grey U960": {
+   "name": "nikpol-onyx-grey-u960",
+   "url": "https://www.nikpol.com.au/Uploads/FinishImage/SheetDesign/Finish_045320125314_OnyxGrey.png",
+   "pixels": [
+    1080,
+    1920
+   ]
+  },
+  "Pallido 9117": {
+   "name": "nikpol-pallido-9117",
+   "url": "https://www.nikpol.com.au/Uploads/FinishImage/SheetDesign/Finish_232126102134_9117DVPALLIDO.jpg",
+   "pixels": [
+    1200,
+    1800
+   ]
+  },
+  "Passive Grey 5007": {
+   "name": "nikpol-passive-grey-5007",
+   "url": "https://www.nikpol.com.au/Uploads/FinishImage/SheetDesign/Finish_124424064459_PassiveGrey.jpg",
+   "pixels": [
+    1080,
+    1920
+   ]
+  },
+  "Pearl Grey U763": {
+   "name": "nikpol-pearl-grey-u763",
+   "url": "https://www.nikpol.com.au/Uploads/FinishImage/SheetDesign/Finish_044220014247_Pearlgrey.jpg",
+   "pixels": [
+    1080,
+    1920
+   ]
+  },
+  "Pino Daka 9120": {
+   "name": "nikpol-pino-daka-9120",
+   "url": "https://www.nikpol.com.au/Uploads/FinishImage/SheetDesign/Finish_232326102331_9120SNPINODAKA.jpg",
+   "pixels": [
+    1200,
+    1800
+   ]
+  },
+  "Porcelain 1200": {
+   "name": "nikpol-porcelain-1200",
+   "url": "https://www.nikpol.com.au/Uploads/FinishImage/SheetDesign/Finish_045620015645_Porcelain.jpg",
+   "pixels": [
+    1080,
+    1920
+   ]
+  },
+  "Premium White W1000": {
+   "name": "nikpol-premium-white-w1000",
+   "url": "https://www.nikpol.com.au/Uploads/FinishImage/SheetDesign/Finish_031924061921_PaintflowPremiumWhite.jpg",
+   "pixels": [
+    1080,
+    1920
+   ]
+  },
+  "Pure Surfside Ash 9106": {
+   "name": "nikpol-pure-surfside-ash-9106",
+   "url": "https://www.nikpol.com.au/Uploads/FinishImage/SheetDesign/Finish_235326095324_9106SNPURESURFSIDEASH.jpg",
+   "pixels": [
+    1772,
+    2255
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Reed Green U604": {
+   "name": "nikpol-reed-green-u604",
+   "url": "https://www.nikpol.com.au/Uploads/FinishImage/SheetDesign/Finish_103124123111_Finish305524095508PaintflowReedGreen.jpg",
+   "pixels": [
+    1080,
+    1920
+   ]
+  },
+  "Ristretto Baroque Oak 9109": {
+   "name": "nikpol-ristretto-baroque-oak-9109",
+   "url": "https://www.nikpol.com.au/Uploads/FinishImage/SheetDesign/Finish_235726095714_9109RWRISTRETTOBAROQUEOAK.jpg",
+   "pixels": [
+    1772,
+    2255
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Rovere 9121": {
+   "name": "nikpol-rovere-9121",
+   "url": "https://www.nikpol.com.au/Uploads/FinishImage/SheetDesign/Finish_232426102408_9121DVROVERE.jpg",
+   "pixels": [
+    1200,
+    1800
+   ]
+  },
+  "Sage Green U638": {
+   "name": "nikpol-sage-green-u638",
+   "url": "https://www.nikpol.com.au/Uploads/FinishImage/SheetDesign/Finish_305524095544_U638SAGEGREEN.jpg",
+   "pixels": [
+    1080,
+    1920
+   ]
+  },
+  "Sahara Blonde 5006": {
+   "name": "nikpol-sahara-blonde-5006",
+   "url": "https://www.nikpol.com.au/Uploads/FinishImage/SheetDesign/Finish_142121112130_5006SaharaBlonde.jpg",
+   "pixels": [
+    2480,
+    3508
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Sand Barbera Oak 9110": {
+   "name": "nikpol-sand-barbera-oak-9110",
+   "url": "https://www.nikpol.com.au/Uploads/FinishImage/SheetDesign/Finish_235726095747_9110SNSANDBARBERAOAK.jpg",
+   "pixels": [
+    1800,
+    2291
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Sandalo 9119": {
+   "name": "nikpol-sandalo-9119",
+   "url": "https://www.nikpol.com.au/Uploads/FinishImage/SheetDesign/Finish_232226102248_9119DVSANDALO.jpg",
+   "pixels": [
+    1200,
+    1800
+   ]
+  },
+  "Scuro Metallico 9209": {
+   "name": "nikpol-scuro-metallico-9209",
+   "url": "https://www.nikpol.com.au/Uploads/FinishImage/SheetDesign/Finish_103224123250_scurometallico.jpg",
+   "pixels": [
+    1080,
+    1920
+   ]
+  },
+  "Silk Primavera Oak 9127": {
+   "name": "nikpol-silk-primavera-oak-9127",
+   "url": "https://www.nikpol.com.au/Uploads/FinishImage/SheetDesign/Finish_233626123643_9127PVSILKPRIMAVERAOAK.jpg",
+   "pixels": [
+    1095,
+    1431
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Silverwood Black 9105": {
+   "name": "nikpol-silverwood-black-9105",
+   "url": "https://www.nikpol.com.au/Uploads/FinishImage/SheetDesign/Finish_054024094056_BuildersRangeSilverwoodBlackDetail.jpg",
+   "pixels": [
+    1080,
+    1920
+   ]
+  },
+  "Simply White 5003": {
+   "name": "nikpol-simply-white-5003",
+   "url": "https://www.nikpol.com.au/Uploads/FinishImage/SheetDesign/Finish_125624065604_SimplyWhite.jpg",
+   "pixels": [
+    1080,
+    1920
+   ]
+  },
+  "Slavonia Oak 9123": {
+   "name": "nikpol-slavonia-oak-9123",
+   "url": "https://www.nikpol.com.au/Uploads/FinishImage/SheetDesign/Finish_233426123417_9123SNSLAVONIAOAK.jpg",
+   "pixels": [
+    1772,
+    2255
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Smoke Green 9021": {
+   "name": "nikpol-smoke-green-9021",
+   "url": "https://www.nikpol.com.au/Uploads/FinishImage/SheetDesign/Finish_113925123907_SmokeGreenREN3D.jpg",
+   "pixels": [
+    1080,
+    1920
+   ]
+  },
+  "Smoked Black 8001": {
+   "name": "nikpol-smoked-black-8001",
+   "url": "https://www.nikpol.com.au/Uploads/FinishImage/SheetDesign/Finish_181124051126_SmokedBlackDetail.jpg",
+   "pixels": [
+    1080,
+    1920
+   ]
+  },
+  "Smoked Kala Ash 9113": {
+   "name": "nikpol-smoked-kala-ash-9113",
+   "url": "https://www.nikpol.com.au/Uploads/FinishImage/SheetDesign/Finish_231326101337_9113RWSMOKEDKALAASH.jpg",
+   "pixels": [
+    1772,
+    2255
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Snow White 9015": {
+   "name": "nikpol-snow-white-9015",
+   "url": "https://www.nikpol.com.au/Uploads/FinishImage/SheetDesign/Finish_040420030449_snowwhitethumb.png",
+   "pixels": [
+    1080,
+    1920
+   ]
+  },
+  "Spring Green 5004": {
+   "name": "nikpol-spring-green-5004",
+   "url": "https://www.nikpol.com.au/Uploads/FinishImage/SheetDesign/Finish_141921111923_5004SpringGreen.jpg",
+   "pixels": [
+    2480,
+    3508
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Stone Green 5010": {
+   "name": "nikpol-stone-green-5010",
+   "url": "https://www.nikpol.com.au/Uploads/FinishImage/SheetDesign/Finish_172424072426_5010STONEGREENST.jpg",
+   "pixels": [
+    1080,
+    1920
+   ]
+  },
+  "Stone Grey 9016": {
+   "name": "nikpol-stone-grey-9016",
+   "url": "https://www.nikpol.com.au/Uploads/FinishImage/SheetDesign/Finish_053624093626_BuildersRangeSilverGreyDetail.jpg",
+   "pixels": [
+    1080,
+    1920
+   ]
+  },
+  "Straw Primavera Oak 9128": {
+   "name": "nikpol-straw-primavera-oak-9128",
+   "url": "https://www.nikpol.com.au/Uploads/FinishImage/SheetDesign/Finish_233726123715_9128PVSTRAWPRIMAVERAOAK.jpg",
+   "pixels": [
+    1112,
+    1415
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Titanio 9210": {
+   "name": "nikpol-titanio-9210",
+   "url": "https://www.nikpol.com.au/Uploads/FinishImage/SheetDesign/Finish_103424123401_titanio.jpg",
+   "pixels": [
+    1080,
+    1920
+   ]
+  },
+  "Tobacco Franklin Walnut 9112": {
+   "name": "nikpol-tobacco-franklin-walnut-9112",
+   "url": "https://www.nikpol.com.au/Uploads/FinishImage/SheetDesign/Finish_231226101224_9112RWTOBACCOFRANKLINWALNUT.jpg",
+   "pixels": [
+    1772,
+    2255
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Torro Cremona Oak 9125": {
+   "name": "nikpol-torro-cremona-oak-9125",
+   "url": "https://www.nikpol.com.au/Uploads/FinishImage/SheetDesign/Finish_233526123525_9125MWTORROCREMONAOAK.jpg",
+   "pixels": [
+    1392,
+    1771
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Umber Brown 8002": {
+   "name": "nikpol-umber-brown-8002",
+   "url": "https://www.nikpol.com.au/Uploads/FinishImage/SheetDesign/Finish_053324093325_MasterOakUmberBrownDetail.jpg",
+   "pixels": [
+    1080,
+    1920
+   ]
+  },
+  "Umber Primavera Oak 9129": {
+   "name": "nikpol-umber-primavera-oak-9129",
+   "url": "https://www.nikpol.com.au/Uploads/FinishImage/SheetDesign/Finish_233726123739_9129PVUMBERPRIMAVERAOAK.jpg",
+   "pixels": [
+    1112,
+    1415
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Viandre 9115": {
+   "name": "nikpol-viandre-9115",
+   "url": "https://www.nikpol.com.au/Uploads/FinishImage/SheetDesign/Finish_231526101504_9115EZVIANDRE.jpg",
+   "pixels": [
+    1200,
+    1800
+   ]
+  },
+  "Volcanic Black 5001": {
+   "name": "nikpol-volcanic-black-5001",
+   "url": "https://www.nikpol.com.au/Uploads/FinishImage/SheetDesign/Finish_241920121940_VolcanicBlackWebPicProduct960x960.jpg",
+   "pixels": [
+    1080,
+    1920
+   ]
+  },
+  "White Coastland Oak 9008": {
+   "name": "nikpol-white-coastland-oak-9008",
+   "url": "https://www.nikpol.com.au/Uploads/FinishImage/SheetDesign/Finish_042220032244_torrensoakthumb.png",
+   "pixels": [
+    1772,
+    2255
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "White Grey U775": {
+   "name": "nikpol-white-grey-u775",
+   "url": "https://www.nikpol.com.au/Uploads/FinishImage/SheetDesign/Finish_044220034208_whitegreypm1.png",
+   "pixels": [
+    1080,
+    1920
+   ]
+  }
+ },
+ "no_image": []
+}

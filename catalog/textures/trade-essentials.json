@@ -1,0 +1,50 @@
+{
+ "source": "https://www.laminex.com.au: the product page's Full Sheet Image or colour picture",
+ "verified": false,
+ "images": {
+  "Black": {
+   "name": "trade-essentials-black",
+   "url": "https://www.laminex.com.au/medias/LX-Black-RGB-1200x1200-HR.jpg?context=bWFzdGVyfGltYWdlc3w1NjkyNDR8aW1hZ2UvanBlZ3xhVzFoWjJWekwyZ3dZaTlvTWpBdmFEQXdMemc0TWpnNE56TXlORFEzTURJdWFuQm58ZGRjZDVjODY3NDM4Mjg2ZWQ0YTU1NmEzN2RiM2VhMmE1ZWMxZjMxZTg3MTNlMDljMjhhMzRkODU0OTA1YzQ0Yw&attachment=true",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Polar White": {
+   "name": "trade-essentials-polar-white",
+   "url": "https://www.laminex.com.au/medias/LX-Polar-White-RGB-1200x1200-HR.jpg?context=bWFzdGVyfGltYWdlc3wzNDYyMDh8aW1hZ2UvanBlZ3xhVzFoWjJWekwyZzVNUzlvWVRVdmFEQXdMemc0TWpnNE9EQTFNVGt4T1RndWFuQm58YmQ5OTgzODRhMzJhMGE3MTgwZjIyZGEyN2I5N2E0MDM5Y2EzOTQ2Nzc1ZDRkMjhhYzdiYzhiZTA3NDllNGUyNQ&attachment=true",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "White": {
+   "name": "trade-essentials-white",
+   "url": "https://www.laminex.com.au/medias/Product-Image-The-Barisan-3.jpg?context=bWFzdGVyfGltYWdlc3wyNzAxOTd8aW1hZ2UvanBlZ3xhVzFoWjJWekwyaGpOaTlvWVRNdmFEQXdMemc0TWpVMk1UTXlPRGMwTlRRdWFuQm58MDVkZmU0YmRkNjE4MzkwMmY0MTZmYjBhMDM3ZmNiOWJkZmFjODk1Y2E5ZTllNTM5YjUxY2M1MzRhZWY2MTRjOA&attachment=true",
+   "pixels": [
+    1200,
+    1200
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  }
+ },
+ "no_image": [
+  "Black Mixed",
+  "Grey Embossed",
+  "Mirage Pearl",
+  "White Embossed",
+  "White Gloss",
+  "White Matte"
+ ]
+}
