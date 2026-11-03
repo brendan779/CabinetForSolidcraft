@@ -336,6 +336,35 @@ mod tests {
     }
 
     #[test]
+    fn a_polytec_colour_without_a_full_sheet_takes_its_swatch_as_part_of_a_board() {
+        let cat = cabinet_catalog::Catalog::load(Path::new(&catalog())).unwrap();
+        let mink = cat
+            .boards
+            .iter()
+            .find(|b| b.brand == "Polytec" && b.decor == "Mink")
+            .unwrap();
+        let (m, _) = written(job(&mink.id));
+        let board = &m["boards"][mink.id.as_str()];
+        assert_eq!(board["image"], "mink");
+        assert_eq!(board["sheet"][0], 1300.0);
+    }
+
+    #[test]
+    fn palace_teak_takes_its_woodmatt_sheet_over_the_smaller_plain_one() {
+        let cat = cabinet_catalog::Catalog::load(Path::new(&catalog())).unwrap();
+        let teak = cat
+            .boards
+            .iter()
+            .find(|b| b.brand == "Polytec" && b.decor == "Palace Teak")
+            .unwrap();
+        let (m, _) = written(job(&teak.id));
+        assert_eq!(
+            m["boards"][teak.id.as_str()]["image"],
+            "palace-teak-woodmatt"
+        );
+    }
+
+    #[test]
     fn a_lining_strip_takes_the_scale_of_its_decors_full_sheet() {
         let (m, _) = written(job("polytec.commercial.angora-oak-woodmatt.18.mr-mdf"));
         let cat = cabinet_catalog::Catalog::load(Path::new(&catalog())).unwrap();

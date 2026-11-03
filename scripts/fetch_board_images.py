@@ -90,17 +90,27 @@ def decors(brand):
     })
 
 
+# A finish's own sheet where the plain one is far smaller. Palace Teak only comes in Woodmatt; Notaio
+# Walnut's plain sheet is greyer than its Ravine and Woodmatt ones, which agree.
+POLYTEC_SHEETS = {"Palace Teak": "palace-teak-woodmatt", "Notaio Walnut": "notaio-walnut-ravine"}
+
+
 def polytec(names):
-    template = "https://www.polytec.com.au/img/products/fullsheet/{}.jpg"
+    site = "https://www.polytec.com.au"
+    template = site + "/img/products/fullsheet/{}.jpg"
     for decor in names:
-        name = slug(decor)
+        name = POLYTEC_SHEETS.get(decor, slug(decor))
         url = template.format(name)
-        if os.path.exists(os.path.join(CACHE, name + ".jpg")):
+        if os.path.exists(os.path.join(CACHE, name + ".jpg")) or decor in POLYTEC_SHEETS:
             yield decor, name, url, None
             continue
-        # The colour's own page says where its sheet is, where the name alone doesn't.
-        found = re.search(r"/img/products/fullsheet/[^'\"]+\.jpg", page(f"https://www.polytec.com.au/colour/{name}/"))
-        yield decor, name, ("https://www.polytec.com.au" + found.group(0)) if found else url, None
+        # The colour's own page says where its sheet is, where the name alone doesn't. A plain colour
+        # may only have a swatch: the sheet would look the same.
+        text = page(f"{site}/colour/{name}/")
+        found = re.search(r"/img/products/fullsheet/[^'\"]+\.jpg", text) or re.search(
+            rf"/img/products/960-960/{name}\.jpg", text
+        )
+        yield decor, name, (site + found.group(0)) if found else url, None
 
 
 def laminex_group(brand, names):
@@ -190,7 +200,7 @@ def egger(names):
 
 
 SOURCES = {
-    "polytec": ("https://www.polytec.com.au: each colour's full sheet image", polytec),
+    "polytec": ("https://www.polytec.com.au: each colour's full sheet image, or its swatch where it has none", polytec),
     "laminex": ("https://www.laminex.com.au: the product page's Full Sheet Image or colour picture", lambda n: laminex_group("laminex", n)),
     "formica": ("https://www.laminex.com.au: the product page's Full Sheet Image or colour picture", lambda n: laminex_group("formica", n)),
     "trade-essentials": ("https://www.laminex.com.au: the product page's Full Sheet Image or colour picture", lambda n: laminex_group("trade-essentials", n)),

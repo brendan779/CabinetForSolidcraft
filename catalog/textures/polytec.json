@@ -1,5 +1,5 @@
 {
- "source": "https://www.polytec.com.au: each colour's full sheet image",
+ "source": "https://www.polytec.com.au: each colour's full sheet image, or its swatch where it has none",
  "verified": false,
  "images": {
   "Adriatic": {
@@ -268,6 +268,18 @@
    "pixels": [
     1500,
     2500
+   ]
+  },
+  "Botanic": {
+   "name": "botanic",
+   "url": "https://www.polytec.com.au/img/products/960-960/botanic.jpg",
+   "pixels": [
+    960,
+    960
+   ],
+   "covers": [
+    1300.0,
+    1300.0
    ]
   },
   "Botany Oak": {
@@ -566,6 +578,30 @@
     1296
    ]
   },
+  "Evergreen": {
+   "name": "evergreen",
+   "url": "https://www.polytec.com.au/img/products/960-960/evergreen.jpg",
+   "pixels": [
+    960,
+    960
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Feldspar Shimmer": {
+   "name": "feldspar-shimmer",
+   "url": "https://www.polytec.com.au/img/products/960-960/feldspar-shimmer.jpg",
+   "pixels": [
+    960,
+    960
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
   "Ferro": {
    "name": "ferro",
    "url": "https://www.polytec.com.au/img/products/fullsheet/ferro.jpg",
@@ -584,6 +620,18 @@
    "pixels": [
     2001,
     4029
+   ]
+  },
+  "Forage": {
+   "name": "forage",
+   "url": "https://www.polytec.com.au/img/products/960-960/forage.jpg",
+   "pixels": [
+    960,
+    960
+   ],
+   "covers": [
+    1300.0,
+    1300.0
    ]
   },
   "Gesso Lini": {
@@ -692,6 +740,18 @@
    "pixels": [
     720,
     1296
+   ]
+  },
+  "Jasmine": {
+   "name": "jasmine",
+   "url": "https://www.polytec.com.au/img/products/960-960/jasmine.jpg",
+   "pixels": [
+    960,
+    960
+   ],
+   "covers": [
+    1300.0,
+    1300.0
    ]
   },
   "Laurel Oak": {
@@ -806,6 +866,30 @@
     1300.0
    ]
   },
+  "Mineral Metallic": {
+   "name": "mineral-metallic",
+   "url": "https://www.polytec.com.au/img/products/960-960/mineral-metallic.jpg",
+   "pixels": [
+    960,
+    960
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Mink": {
+   "name": "mink",
+   "url": "https://www.polytec.com.au/img/products/960-960/mink.jpg",
+   "pixels": [
+    960,
+    960
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
   "Montage": {
    "name": "montage",
    "url": "https://www.polytec.com.au/img/products/fullsheet/montage.jpg",
@@ -866,12 +950,36 @@
     1300.0
    ]
   },
+  "Navy": {
+   "name": "navy",
+   "url": "https://www.polytec.com.au/img/products/960-960/navy.jpg",
+   "pixels": [
+    960,
+    960
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
   "New Antique White": {
    "name": "new-antique-white",
    "url": "https://www.polytec.com.au/img/products/fullsheet/new-antique-white.jpg",
    "pixels": [
     4000,
     4000
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "New Ultra White": {
+   "name": "new-ultra-white",
+   "url": "https://www.polytec.com.au/img/products/960-960/new-ultra-white.jpg",
+   "pixels": [
+    960,
+    960
    ],
    "covers": [
     1300.0,
@@ -907,11 +1015,11 @@
    ]
   },
   "Notaio Walnut": {
-   "name": "notaio-walnut",
-   "url": "https://www.polytec.com.au/img/products/fullsheet/notaio-walnut.jpg",
+   "name": "notaio-walnut-ravine",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/notaio-walnut-ravine.jpg",
    "pixels": [
-    708,
-    1392
+    1500,
+    2500
    ]
   },
   "Nouveau Grey": {
@@ -932,6 +1040,18 @@
    "pixels": [
     1280,
     1280
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
+  "Obsidian Metallic": {
+   "name": "obsidian-metallic",
+   "url": "https://www.polytec.com.au/img/products/960-960/obsidian-metallic.jpg",
+   "pixels": [
+    960,
+    960
    ],
    "covers": [
     1300.0,
@@ -979,11 +1099,11 @@
    ]
   },
   "Palace Teak": {
-   "name": "palace-teak",
-   "url": "https://www.polytec.com.au/img/products/fullsheet/palace-teak.jpg",
+   "name": "palace-teak-woodmatt",
+   "url": "https://www.polytec.com.au/img/products/fullsheet/palace-teak-woodmatt.jpg",
    "pixels": [
-    720,
-    1296
+    1500,
+    2500
    ]
   },
   "Pallido": {
@@ -1044,6 +1164,18 @@
    "pixels": [
     1250,
     2500
+   ]
+  },
+  "Pewter Metallic": {
+   "name": "pewter-metallic",
+   "url": "https://www.polytec.com.au/img/products/960-960/pewter-metallic.jpg",
+   "pixels": [
+    960,
+    960
+   ],
+   "covers": [
+    1300.0,
+    1300.0
    ]
   },
   "Phantom Black": {
@@ -1262,6 +1394,18 @@
     1300.0
    ]
   },
+  "Sterling": {
+   "name": "sterling",
+   "url": "https://www.polytec.com.au/img/products/960-960/sterling.jpg",
+   "pixels": [
+    960,
+    960
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
   "Stone Grey": {
    "name": "stone-grey",
    "url": "https://www.polytec.com.au/img/products/fullsheet/stone-grey.jpg",
@@ -1402,6 +1546,18 @@
     1300.0
    ]
   },
+  "White": {
+   "name": "white",
+   "url": "https://www.polytec.com.au/img/products/960-960/white.jpg",
+   "pixels": [
+    960,
+    960
+   ],
+   "covers": [
+    1300.0,
+    1300.0
+   ]
+  },
   "White Cement": {
    "name": "white-cement",
    "url": "https://www.polytec.com.au/img/products/fullsheet/white-cement.jpg",
@@ -1468,22 +1624,9 @@
   }
  },
  "no_image": [
-  "Botanic",
   "Clear Pine",
   "Engineered American Oak",
-  "Evergreen",
-  "Feldspar Shimmer",
-  "Forage",
-  "Jasmine",
-  "Mineral Metallic",
-  "Mink",
-  "Navy",
-  "New Ultra White",
-  "Obsidian Metallic",
-  "Pewter Metallic",
   "Pre-primed",
-  "Primed FJ Pine",
-  "Sterling",
-  "White"
+  "Primed FJ Pine"
  ]
 }
