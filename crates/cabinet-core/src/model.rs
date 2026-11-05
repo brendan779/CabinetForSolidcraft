@@ -2,7 +2,7 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::geom::{Aabb, Vec3};
+use crate::geom::{Aabb, Axis, Vec3};
 
 /// A drawn box at least this tall (mm) is a tall cabinet: base cabinets stop near 900, pantries
 /// and oven towers start near 1800.
@@ -202,6 +202,10 @@ pub struct Cladding {
     /// Catalog board id, or empty for the fronts' board.
     pub board: String,
     pub thickness: f64,
+    /// Widest continuous seen-back blank; joints sit at cabinet boundaries where possible.
+    pub back_max_width: f64,
+    /// Grain direction for the continuous rear face, independently of the seen sides.
+    pub back_grain: Axis,
 }
 
 impl Default for Cladding {
@@ -213,6 +217,8 @@ impl Default for Cladding {
             back: false,
             board: String::new(),
             thickness: 12.0,
+            back_max_width: 2700.0,
+            back_grain: Axis::X,
         }
     }
 }

@@ -89,8 +89,10 @@ fn manifest(
                         "decor": decor,
                         "finish": finish,
                         "grained": found.is_some_and(|b| b.grained),
-                        "colour": colours.get(board),
-                        "look": finishes["finishes"].get(finish).unwrap_or(&finishes["default"]),
+                        "colour": colours.get(board).map(String::as_str).or_else(|| board.strip_prefix("edgeband:").and_then(|s| s.split(':').next())).or_else(||found.map(|b|b.preview_colour.as_str())),
+                        "look": image.get("look").unwrap_or_else(|| finishes["finishes"].get(finish).unwrap_or(&finishes["default"])),
+                        "stone": image["stone"],
+                        "file": image["file"],
                         "image": image["name"],
                         "pixels": image["pixels"],
                         "normal": image["normal"],
@@ -174,6 +176,10 @@ pub fn write_blender_job(
             &real,
         ));
         commands.extend(solidcraft_bridge::lining_cuts(list, &sections, centre));
+        commands.extend(solidcraft_bridge::board_paints(
+            list,
+            &crate::slab_looks(Path::new(&catalog_dir)),
+        ));
         commands.extend(hardware_inserts(&list.cabinet, &models));
     }
     let write = |name: &str, v: &Value| {
@@ -184,10 +190,21 @@ pub fn write_blender_job(
         .map_err(invalid)
     };
     write("build.json", &json!({ "commands": commands }))?;
-    write(
-        "job.json",
-        &manifest(&lists, walls.as_ref(), Path::new(&catalog_dir), &colours)?,
-    )
+    let mut job = manifest(&lists, walls.as_ref(), Path::new(&catalog_dir), &colours)?;
+    for board in job["boards"]
+        .as_object_mut()
+        .into_iter()
+        .flat_map(|b| b.values_mut())
+    {
+        if let Some(file) = board["file"].as_str().map(str::to_owned) {
+            let source = Path::new(&catalog_dir).join("textures").join(&file);
+            let name = format!("textures/{}.jpg", board["image"].as_str().unwrap_or("slab"));
+            std::fs::create_dir_all(folder.join("textures")).map_err(invalid)?;
+            std::fs::copy(source, folder.join(&name)).map_err(invalid)?;
+            board["file"] = json!(name);
+        }
+    }
+    write("job.json", &job)
 }
 
 #[cfg(test)]
@@ -223,6 +240,38 @@ mod tests {
         let got = (read("job.json"), read("build.json"));
         std::fs::remove_dir_all(dir).unwrap();
         got
+    }
+
+    #[test]
+    fn blender_benchtops_keep_the_sink_tap_hole_at_design_detail() {
+        let mut sink = Cabinet::new("S01", cabinet_core::CabinetKind::Sink);
+        sink.width = 900.0;
+        let (manifest, build) = written(JobItems {
+            items_json: vec![
+                serde_json::to_string(&sink).unwrap(),
+                serde_json::json!({ "type": "benchtop", "id": "BT1", "cutouts": [{
+                    "over": "S01", "kind": "sink", "width": 600, "depth": 400,
+                    "tap_hole": 35, "tap_hole_behind": 55,
+                }]})
+                .to_string(),
+            ],
+            placed: Vec::new(),
+        });
+        assert!(
+            manifest["parts"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .any(|p| p["name"] == "BT1.Benchtop1")
+        );
+        assert!(
+            build["commands"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .any(|c| c["command"] == "sketch.circle.center" && c["params"]["diameter"] == 35.0),
+            "Blender's Design build lost the visible tap hole"
+        );
     }
 
     #[test]

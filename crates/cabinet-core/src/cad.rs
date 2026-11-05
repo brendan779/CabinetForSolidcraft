@@ -4,7 +4,8 @@
 //! face of the cabinet side the part is fixed to (hinges and plates sit at negative X, inside the
 //! cabinet), Y is up, Z points to the front, and the cabinet's front edge is at Z =
 //! [`BLUM_FRONT_PLANE`]. A part's height reference is Y = 0: the hinge's centre line, or the
-//! underside of the drawer base for runners and box sides. Hinges and plates come as one model;
+//! mounting screw line for runners, or the underside of the drawer base for box sides.
+//! Hinges and plates come as one model;
 //! runners, profiles and drawer sides as a left and a right one.
 //!
 //! So a model is placed by mapping that frame onto ours: the side's inner face, the cabinet front
@@ -649,14 +650,21 @@ pub fn cad_placements(list: &PartList) -> Vec<CadPlacement> {
                 h.at.z,
             ));
         } else if is_runner(&h.item) {
-            // One placement per hand, at the underside of that drawer's base.
-            let Some(z) = drawer_base(list, &h.part) else {
+            let Some(base) = drawer_base(list, &h.part) else {
                 continue;
             };
             let kind = if h.item.contains("drawer-side") {
                 "BoxSide"
             } else {
                 "Runner"
+            };
+            let z = if kind == "Runner" {
+                let Some(z) = runner_height(list, h, item, base) else {
+                    continue;
+                };
+                z
+            } else {
+                base
             };
             let n = next(kind);
             let x = list
@@ -820,10 +828,46 @@ pub(crate) fn is_runner(item: &str) -> bool {
 /// The underside of the base of the drawer behind `front` (`B01.DrawerFront2` →
 /// `B01.DrawerBottom2`).
 fn drawer_base(list: &PartList, front: &str) -> Option<f64> {
+    // Inner drawers list their hardware against the base rather than a decorative front.
+    if let Some(base) = list
+        .part(front)
+        .filter(|p| p.role == PartRole::DrawerBottom)
+    {
+        return Some(base.bounds.min.z);
+    }
     let n = crate::part::drawer_number(front)?;
     let cab = &list.cabinet;
     list.part(&format!("{cab}.{}{n}", PartRole::DrawerBottom.code()))
         .map(|p| p.bounds.min.z)
+}
+
+/// Blum's runner STEP models have their main mounting holes at Y = 0. Recover the
+/// planning datum from the drawer base, then use the same screw line as `profile_screws`.
+fn runner_height(
+    list: &PartList,
+    placement: &crate::part::HardwarePlacement,
+    runner: &cabinet_catalog::HardwareItem,
+    base: f64,
+) -> Option<f64> {
+    let lift = if let Some((family, _)) = runner.id.split_once(".cabinet-profile.") {
+        let prefix = format!("{family}.drawer-side.");
+        let side = list
+            .hardware
+            .iter()
+            .find(|h| h.part == placement.part && h.item.starts_with(&prefix))?;
+        let height = side.item.strip_prefix(&prefix)?.split('.').next()?;
+        crate::hardware::item(&format!("{family}.{height}"))
+            .ok()?
+            .param("base_above_datum")
+            .ok()?
+    } else {
+        let (system, _) = runner.id.rsplit_once('.')?;
+        crate::hardware::item(system)
+            .ok()?
+            .param("base_above_datum_min")
+            .ok()?
+    };
+    Some(base - lift + runner.drilling.first()?.y)
 }
 
 /// The model-to-cabinet transform (mm) for a model whose parts sit on the +X side of its frame
@@ -916,9 +960,11 @@ mod tests {
     }
 
     #[test]
-    fn drawers_get_a_runner_each_side_at_the_underside_of_their_base() {
+    fn drawers_get_a_runner_each_side_on_the_catalogue_screw_line() {
         for system in [
             DrawerSystem::Legrabox,
+            DrawerSystem::Merivobox,
+            DrawerSystem::Tandembox,
             DrawerSystem::Movento,
             DrawerSystem::Tandem,
         ] {
@@ -928,8 +974,14 @@ mod tests {
             let p = cad_placements(&list);
             let runners: Vec<_> = p.iter().filter(|c| c.name.contains("Runner")).collect();
             assert_eq!(runners.len(), 6, "{system:?}");
-            let base = list.part("D01.DrawerBottom1").unwrap().bounds.min.z;
-            assert_eq!(runners[0].origin.z, base);
+            assert!(
+                list.operations.iter().any(|op| matches!(op,
+                    Operation::Bore { at, purpose: BorePurpose::RunnerScrew, .. }
+                    if (at.z - runners[0].origin.z).abs() < 1e-6
+                        && (at.x - runners[0].origin.x).abs() < 1e-6
+                )),
+                "{system:?}"
+            );
             assert_eq!(
                 (runners[0].side, runners[1].side),
                 (Side::Left, Side::Right)

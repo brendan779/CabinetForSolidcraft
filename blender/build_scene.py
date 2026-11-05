@@ -80,10 +80,12 @@ def ensure_maps(cache, board):
     if not name:
         return None
     os.makedirs(cache, exist_ok=True)
-    src = os.path.join(cache, name + ".jpg")
+    src = board.get("file") or os.path.join(cache, name + ".jpg")
     if not os.path.exists(src) and not (board.get("url") and fetch(board["url"], src)):
         print(f"no image for {name}: plain colour")
         return None
+    if board.get("stone"):
+        return src, None, None
     height = height_path(cache, name)
     if not os.path.exists(height):
         make_height(src, height)
@@ -155,6 +157,21 @@ def board_material(board_id, board, cache):
         landscape = base.image.size[0] > base.image.size[1]
         aspect = min(base.image.size) / max(base.image.size)
         n.links.new(base.outputs[0], b.inputs["Base Color"])
+        if board.get("stone"):
+            # Veins carry colour only. Suede has a restrained, sub-millimetre surface texture.
+            strength = look.get("micro_bump", 0)
+            if strength:
+                geometry = n.nodes.new("ShaderNodeNewGeometry")
+                noise = n.nodes.new("ShaderNodeTexNoise")
+                noise.inputs["Scale"].default_value = 10000
+                noise.inputs["Detail"].default_value = 2
+                n.links.new(geometry.outputs["Position"], noise.inputs["Vector"])
+                bump = n.nodes.new("ShaderNodeBump")
+                bump.inputs["Strength"].default_value = strength
+                bump.inputs["Distance"].default_value = 0.00001
+                n.links.new(noise.outputs["Fac"], bump.inputs["Height"])
+                n.links.new(bump.outputs["Normal"], b.inputs["Normal"])
+            return m, landscape, aspect
         height = texture(maps[1], True)
         bump = n.nodes.new("ShaderNodeBump")
         bump.inputs["Strength"].default_value = look["bump"]
@@ -185,7 +202,7 @@ def board_material(board_id, board, cache):
     return m, landscape, aspect
 
 
-def add_uvs(obj, part, sheet, landscape, aspect, seed):
+def add_uvs(obj, part, sheet, landscape, aspect, seed, stone=False):
     """Each face mapped by its plane, the sheet's length along the part's grain, from its own place
     on the sheet, at the sheet's true size."""
     me = obj.data
@@ -195,8 +212,8 @@ def add_uvs(obj, part, sheet, landscape, aspect, seed):
     lo, hi = part["min"], part["max"]
     size = [hi[i] - lo[i] for i in range(3)]
     # The sheet's length is the picture's long side; its width follows the picture, so it never stretches.
-    length, width = sheet[0], sheet[0] * aspect
-    fraction = ((seed * 0.6180339) % 1, (seed * 0.7548776) % 1)
+    length, width = sheet[0], sheet[1] if stone else sheet[0] * aspect
+    fraction = (0, 0) if stone else ((seed * 0.6180339) % 1, (seed * 0.7548776) % 1)
     world = obj.matrix_world
     for poly in me.polygons:
         normal = poly.normal
@@ -462,6 +479,9 @@ def build_room(job, lo, hi):
 
 def build(job_path, obj_path, blend_path, cache, render):
     job = json.load(open(job_path))
+    for board in job.get("boards", {}).values():
+        if board.get("file"):
+            board["file"] = os.path.join(os.path.dirname(os.path.abspath(job_path)), board["file"])
     bpy.ops.wm.read_factory_settings(use_empty=True)
     bpy.ops.wm.obj_import(filepath=obj_path, forward_axis="Y", up_axis="Z", global_scale=MM)
     bodies = [o for o in bpy.context.scene.objects if o.type == "MESH"]
@@ -514,7 +534,7 @@ def build(job_path, obj_path, blend_path, cache, render):
             smooth_routed(ob)
         else:
             ob.data.shade_flat()
-        add_uvs(ob, part, board.get("sheet", [2400, 1200]), landscape, aspect, i + 1)
+        add_uvs(ob, part, board.get("sheet", [2400, 1200]), landscape, aspect, i + 1, stone=bool(board.get("stone")))
     pts = [o.matrix_world @ Vector(c) for o in bodies for c in o.bound_box]
     lo = Vector((min(p.x for p in pts), min(p.y for p in pts), min(p.z for p in pts)))
     hi = Vector((max(p.x for p in pts), max(p.y for p in pts), max(p.z for p in pts)))
@@ -525,7 +545,6 @@ def build(job_path, obj_path, blend_path, cache, render):
     prefs = bpy.context.preferences.addons["cycles"].preferences
     if prefs.compute_device_type == "NONE":
         prefs.compute_device_type = "METAL"
-        bpy.ops.wm.save_userpref()
     prefs.get_devices()
     for d in prefs.devices:
         d.use = True

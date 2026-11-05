@@ -23,6 +23,7 @@ fi
 cargo deny --log-level error check
 
 if [[ "$(uname)" == "Darwin" && "${SKIP_APP:-0}" != "1" ]]; then
+  bash scripts/check-swift-tools.sh
   # The bindings and xcframework are generated, so a fresh checkout must build them before
   # xcodegen can find them.
   scripts/build-core.sh

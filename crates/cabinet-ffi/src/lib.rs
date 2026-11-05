@@ -44,6 +44,10 @@ fn parse(json: &str) -> Result<Cabinet, CoreError> {
 /// One panel as a box, for the app's 3D preview.
 #[derive(uniffi::Record)]
 pub struct PanelBox {
+    /// Finite mitre cuts: min, max and corner point, nine values per triangular prism.
+    pub mitres: Vec<f64>,
+    /// Rectangular clearances in supports: min/max, six values per cut.
+    pub voids: Vec<f64>,
     pub name: String,
     pub role: String,
     pub x: f64,
@@ -403,6 +407,26 @@ pub(crate) fn finish_roughness(catalog_dir: &Path, finish: &str) -> f64 {
                 .as_f64()
         })
         .unwrap_or(0.45)
+}
+
+/// Smooth stone colour/PBR fallback for the engine's texture-free appearance interface.
+pub(crate) fn slab_looks(catalog_dir: &Path) -> std::collections::BTreeMap<String, (String, f64)> {
+    let Ok(cat) = cabinet_catalog::Catalog::load(catalog_dir) else {
+        return Default::default();
+    };
+    cat.boards
+        .iter()
+        .filter(|b| b.kind == cabinet_catalog::BoardKind::SinteredStone)
+        .map(|b| {
+            (
+                b.id.clone(),
+                (
+                    b.preview_colour.clone(),
+                    if b.finish == "Suede" { 0.48 } else { 0.32 },
+                ),
+            )
+        })
+        .collect()
 }
 
 /// Each lining board's routed section, by board id. None without a catalog: boards stay flat.
@@ -919,6 +943,58 @@ fn summary(list: PartList) -> BuildSummary {
             let (hinged, hinge_x, hinge_y) = hinge(&door_of(p)).unwrap_or_default();
             let shown = list.visible_bounds(p);
             PanelBox {
+                voids: if matches!(
+                    p.role,
+                    cabinet_core::part::PartRole::BenchtopSupport
+                        | cabinet_core::part::PartRole::EdgeBand
+                ) {
+                    list.operations
+                        .iter()
+                        .filter_map(|op| match op {
+                            Operation::Groove { part, bounds }
+                            | Operation::Cutout { part, bounds, .. }
+                                if part == &p.name =>
+                            {
+                                Some(vec![
+                                    bounds.min.x,
+                                    bounds.min.y,
+                                    bounds.min.z,
+                                    bounds.max().x,
+                                    bounds.max().y,
+                                    bounds.max().z,
+                                ])
+                            }
+                            _ => None,
+                        })
+                        .flatten()
+                        .collect()
+                } else {
+                    Vec::new()
+                },
+                mitres: if p.role == cabinet_core::part::PartRole::Benchtop {
+                    list.operations
+                        .iter()
+                        .filter_map(|op| match op {
+                            Operation::Chamfer { part, at, bounds } if *part == p.name => {
+                                Some(vec![
+                                    bounds.min.x,
+                                    bounds.min.y,
+                                    bounds.min.z,
+                                    bounds.max().x,
+                                    bounds.max().y,
+                                    bounds.max().z,
+                                    at.x,
+                                    at.y,
+                                    at.z,
+                                ])
+                            }
+                            _ => None,
+                        })
+                        .flatten()
+                        .collect()
+                } else {
+                    Vec::new()
+                },
                 name: p.name.clone(),
                 role: p.role.label().to_string(),
                 x: shown.min.x,
@@ -1136,6 +1212,8 @@ fn summary(list: PartList) -> BuildSummary {
             .unwrap_or_default();
         let on_drawer = family.contains(cabinet_core::part::PartRole::DrawerFront.code());
         panels.push(PanelBox {
+            mitres: Vec::new(),
+            voids: Vec::new(),
             name: format!("{family}.Handle"),
             role: if on_drawer { "Drawer handle" } else { "Handle" }.into(),
             x: x.0,
@@ -1163,6 +1241,8 @@ fn summary(list: PartList) -> BuildSummary {
     // Tiled stretches of wall: the viewport draws their joints from the board's spec.
     for f in &list.tile_fields {
         panels.push(PanelBox {
+            mitres: Vec::new(),
+            voids: Vec::new(),
             name: f.name.clone(),
             role: if f.spec.is_sheet() {
                 "Splashback"
@@ -1221,6 +1301,8 @@ fn summary(list: PartList) -> BuildSummary {
         let high = item.parameters.get("leg_height").copied().unwrap_or(18.0);
         let on_drawer = p.role == cabinet_core::part::PartRole::DrawerFront;
         panels.push(PanelBox {
+            mitres: Vec::new(),
+            voids: Vec::new(),
             name: format!("{}.Handle", p.name),
             role: if on_drawer { "Drawer handle" } else { "Handle" }.into(),
             x: h.at.x - length / 2.0,
@@ -1279,6 +1361,8 @@ fn summary(list: PartList) -> BuildSummary {
         let (hinged, hinge_x, hinge_y) = (front.hinged.clone(), front.hinge_x, front.hinge_y);
         let on_drawer = p.role == cabinet_core::part::PartRole::DrawerFront;
         panels.push(PanelBox {
+            mitres: Vec::new(),
+            voids: Vec::new(),
             name: format!("{}.Handle", p.name),
             role: if on_drawer { "Drawer handle" } else { "Handle" }.into(),
             x: lo.x,
@@ -1419,7 +1503,7 @@ pub fn cut_list_rows(job: JobItems) -> Result<Vec<CutRowRecord>, CoreError> {
                 .collect::<Vec<_>>()
                 .join(" ");
             CutRowRecord {
-                edge_metres: r.edge_metres(),
+                edge_metres: if r.templated { 0.0 } else { r.edge_metres() },
                 cabinet: r.cabinet,
                 part: r.part,
                 description: r.description,
@@ -2321,6 +2405,7 @@ pub fn send_to_solidcraft(
     catalog_dir: String,
 ) -> Result<String, CoreError> {
     let sections = lining_sections(Path::new(&catalog_dir));
+    let slab_looks = slab_looks(Path::new(&catalog_dir));
     let colours: std::collections::BTreeMap<String, String> = board_colours.into_iter().collect();
     let sc = |e: solidcraft_bridge::Error| CoreError::SolidCraft {
         message: e.to_string(),
@@ -2382,6 +2467,10 @@ pub fn send_to_solidcraft(
         let painted = solidcraft_bridge::board_colours(&list, &colours);
         if !painted.is_empty() {
             let _ = client.batch(&painted);
+        }
+        let stone = solidcraft_bridge::board_paints(&list, &slab_looks);
+        if !stone.is_empty() {
+            let _ = client.batch(&stone);
         }
         let painted = cab_paints(&fallback_paints, cab_standard_paints.as_ref())
             .into_iter()
@@ -2564,6 +2653,48 @@ pub fn load_boards(catalog_dir: String) -> Result<Vec<BoardRecord>, CoreError> {
             thickness: b.thickness,
             preview_colour: b.preview_colour,
             grained: b.grained,
+        })
+        .collect())
+}
+
+#[derive(uniffi::Record)]
+pub struct ShadowTapeRecord {
+    pub id: String,
+    pub label: String,
+    pub colour: String,
+    pub thickness: f64,
+    pub width: f64,
+}
+
+#[uniffi::export]
+pub fn shadow_tapes(catalog_dir: String) -> Result<Vec<ShadowTapeRecord>, CoreError> {
+    let cat = cabinet_catalog::Catalog::load(Path::new(&catalog_dir)).map_err(invalid)?;
+    Ok(cat
+        .edge_tapes
+        .iter()
+        .map(|t| {
+            let colour = cat
+                .boards
+                .iter()
+                .find(|b| b.brand == t.brand && b.decor == t.decor && b.finish == t.finish)
+                .map(|b| b.preview_colour.clone())
+                .filter(|c| !c.is_empty())
+                .unwrap_or_default();
+            ShadowTapeRecord {
+                id: t.id.clone(),
+                label: format!(
+                    "{} — {} {} · {} mm{}",
+                    t.brand,
+                    t.decor,
+                    t.finish,
+                    t.thickness,
+                    t.width
+                        .map_or_else(String::new, |w| format!(" × {w} mm wide"))
+                ),
+                colour,
+                thickness: t.thickness,
+                width: t.width.unwrap_or(0.0),
+            }
         })
         .collect())
 }

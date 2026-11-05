@@ -72,7 +72,31 @@ pub fn cut_list(lists: &[PartList], default_board: &str, tape: f64) -> CutList {
         let mut mine: Vec<CutRow> = list
             .parts
             .iter()
-            .map(|p| row(&list.cabinet, p, default_board, tape))
+            .filter(|p| p.role != PartRole::EdgeBand)
+            .map(|p| {
+                let band = list.edge_tapes.get(&p.name);
+                let mut finished = p.clone();
+                if let Some(band) = band {
+                    for axis in p.thickness_axis.others() {
+                        let (low, high) = p.edges.on_axis(axis);
+                        let allowance = (u8::from(low) + u8::from(high)) as f64 * band.thickness;
+                        finished.bounds.size = finished
+                            .bounds
+                            .size
+                            .with(axis, finished.bounds.size.get(axis) + allowance);
+                    }
+                }
+                let mut r = row(
+                    &list.cabinet,
+                    &finished,
+                    default_board,
+                    band.map_or(tape, |b| b.thickness),
+                );
+                if let Some(band) = band {
+                    r.description.push_str(&format!("; edgeband {}", band.id));
+                }
+                r
+            })
             .collect();
         // A matched group's rows go together, top first, under the group's name.
         for (n, group) in list.grain_matched.iter().enumerate() {
@@ -108,6 +132,9 @@ pub fn cut_list(lists: &[PartList], default_board: &str, tape: f64) -> CutList {
 }
 
 fn row(cabinet: &str, p: &Part, default_board: &str, tape: f64) -> CutRow {
+    let templated = matches!(p.role, PartRole::Benchtop | PartRole::Splashback);
+    // These flags mean polished edges on maker-supplied stone, not added cabinet tape.
+    let tape = if templated { 0.0 } else { tape };
     let (length, width) = p.finished_size();
     let [a, b] = p.thickness_axis.others();
     let length_axis: Axis =
@@ -139,7 +166,7 @@ fn row(cabinet: &str, p: &Part, default_board: &str, tape: f64) -> CutRow {
         edges: [l1, l2, w1, w2],
         grain: p.grain_axis.is_some(),
         quantity: 1,
-        templated: matches!(p.role, PartRole::Benchtop | PartRole::Splashback),
+        templated,
         grain_match: String::new(),
     }
 }

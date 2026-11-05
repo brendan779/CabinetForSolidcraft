@@ -26,7 +26,7 @@ extension BoardRecord {
         ("cinder", 0x6f6e6a), ("cement", 0xa9a6a0), ("concrete", 0xa3a19b), ("stone", 0xb5aea3),
         ("greige", 0xb7afa3), ("taupe", 0x9b8f84), ("navy", 0x2c3a4f), ("blue", 0x5d7590),
         ("green", 0x6f7f63), ("sage", 0x9aa48c), ("olive", 0x75744f), ("pink", 0xd8b8b0),
-        ("terracotta", 0xb4674a), ("ochre", 0xc39a4e), ("gold", 0xb99a5b), ("bronze", 0x8a6a45),
+        ("terracotta", 0xb4674a), ("ochre", 0xc39a4e), ("brass", 0xb59a61), ("gold", 0xb99a5b), ("bronze", 0x8a6a45),
         ("copper", 0xa8673f), ("cream", 0xeee6d3), ("ecru", 0xe8e0cc), ("ivory", 0xefe9da),
         ("beige", 0xd9ccb5), ("linen", 0xe6dfd0), ("cotton", 0xefece4), ("white", 0xf1f0eb),
     ]

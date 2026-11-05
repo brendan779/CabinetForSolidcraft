@@ -28,19 +28,24 @@ fn line(list: &PartList, p: &Part) -> String {
     let [a, b] = p.thickness_axis.others();
     let along = |axis| p.bounds.size.get(axis) / 1000.0;
     let mut metres = 0.0;
-    for (on, axis) in [
-        (e.front || e.back, a),
-        (e.left || e.right, b),
-        (e.top || e.bottom, b),
-    ] {
-        if on {
-            metres += along(axis);
-        }
+    for (ends, along_axis) in [(a, b), (b, a)] {
+        let (low, high) = e.on_axis(ends);
+        metres += (u8::from(low) + u8::from(high)) as f64 * along(along_axis);
     }
     let cutouts: Vec<String> = list
         .operations
         .iter()
         .filter_map(|o| match o {
+            Operation::Chamfer { part, .. } if *part == p.name => {
+                Some("45 degree mitre; dimensions to long points".into())
+            }
+            Operation::EdgeFinish {
+                part, size, bevel, ..
+            } if *part == p.name => Some(if *bevel {
+                format!("upper edge bevel {size} mm at 45 degrees")
+            } else {
+                format!("upper and lower edges R{size}")
+            }),
             Operation::Cutout {
                 part,
                 bounds,
@@ -49,8 +54,8 @@ fn line(list: &PartList, p: &Part) -> String {
             } if *part == p.name => Some(format!(
                 "{} {:.0} × {:.0}{}",
                 if note.is_empty() { "cut-out" } else { note },
-                bounds.size.x,
-                bounds.size.y,
+                bounds.size.get(a),
+                bounds.size.get(b),
                 if *radius > 0.0 {
                     format!(" R{radius:.0}")
                 } else {
@@ -104,6 +109,11 @@ pub fn benchtops_pdf(lists: &[PartList], job: &str) -> Vec<u8> {
         .filter(|l| pieces.iter().any(|(pl, _)| pl.cabinet == l.cabinet))
     {
         lines.extend(l.notes.iter().map(|n| format!("{}: {n}", l.cabinet)));
+        lines.extend(
+            l.warnings
+                .iter()
+                .map(|n| format!("{} warning: {n}", l.cabinet)),
+        );
     }
     let total: f64 = pieces
         .iter()
@@ -176,6 +186,88 @@ mod tests {
     use cabinet_core::{Cabinet, CabinetKind};
 
     #[test]
+    fn a_thickness_profile_is_scheduled_without_rounding_the_dxf_outline() {
+        use cabinet_core::geom::{Aabb, Axis, Vec3};
+        let p = Part {
+            name: "BT1.Benchtop1".into(),
+            role: PartRole::Benchtop,
+            bounds: Aabb::new(Vec3::default(), Vec3::new(900.0, 600.0, 33.0)),
+            thickness_axis: Axis::Z,
+            grain_axis: Some(Axis::X),
+            board: String::new(),
+            edges: Default::default(),
+        };
+        let list = PartList {
+            cabinet: "BT1".into(),
+            parts: vec![p.clone()],
+            operations: vec![Operation::EdgeFinish {
+                part: p.name.clone(),
+                edges: vec![Vec3::new(450.0, 0.0, 33.0)],
+                size: 2.0,
+                bevel: false,
+            }],
+            ..PartList::default()
+        };
+        assert!(line(&list, &p).contains("upper and lower edges R2"));
+        assert!(
+            !crate::dxf::part_dxfs(&list, &p)[0]
+                .contents
+                .contains("0.414213562")
+        );
+    }
+
+    #[test]
+    fn the_schedule_counts_each_finished_edge_in_the_parts_own_plane() {
+        use cabinet_core::geom::{Aabb, Axis, Vec3};
+        use cabinet_core::part::EdgeBanding;
+        for (axis, size) in [
+            (Axis::Z, Vec3::new(1200.0, 600.0, 20.0)),
+            (Axis::Y, Vec3::new(1200.0, 20.0, 600.0)),
+            (Axis::X, Vec3::new(20.0, 600.0, 1200.0)),
+        ] {
+            let part = Part {
+                name: "BT1.Piece".into(),
+                role: PartRole::Benchtop,
+                bounds: Aabb::new(Vec3::default(), size),
+                thickness_axis: axis,
+                grain_axis: None,
+                board: String::new(),
+                edges: EdgeBanding::all(),
+            };
+            let summary = line(&PartList::default(), &part);
+            assert!(
+                summary.contains("3.60 m finished edge"),
+                "{axis:?}: {summary}"
+            );
+        }
+    }
+
+    #[test]
+    fn splashback_openings_are_scheduled_by_width_and_height_not_slab_thickness() {
+        use cabinet_core::geom::{Aabb, Axis, Vec3};
+        let part = Part {
+            name: "BT1.Splashback1".into(),
+            role: PartRole::Splashback,
+            bounds: Aabb::new(Vec3::default(), Vec3::new(1200.0, 20.0, 600.0)),
+            thickness_axis: Axis::Y,
+            grain_axis: None,
+            board: String::new(),
+            edges: Default::default(),
+        };
+        let list = PartList {
+            operations: vec![Operation::Cutout {
+                part: part.name.clone(),
+                bounds: Aabb::new(Vec3::default(), Vec3::new(500.0, 20.0, 300.0)),
+                radius: 0.0,
+                note: "niche".into(),
+            }],
+            ..PartList::default()
+        };
+        let summary = line(&list, &part);
+        assert!(summary.contains("niche 500 × 300"), "{summary}");
+    }
+
+    #[test]
     fn the_schedule_has_a_summary_and_a_sheet_per_piece() {
         let run = Run {
             origin: Default::default(),
@@ -183,6 +275,7 @@ mod tests {
                 RunItem::Cabinet(Box::new(Cabinet::new("B01", CabinetKind::Base))),
                 RunItem::Cabinet(Box::new(Cabinet::new("S01", CabinetKind::Sink))),
                 RunItem::Benchtop(Benchtop {
+                    build_up: Default::default(),
                     id: "BT1".into(),
                     thickness: 33.0,
                     front_overhang: 20.0,

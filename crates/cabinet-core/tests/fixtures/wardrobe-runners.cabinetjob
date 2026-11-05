@@ -1,0 +1,237 @@
+{
+  "name": "WIRMaster",
+  "standard": {
+    "name": "Frameless 16 mm, biscuit + screw",
+    "carcass": "frameless",
+    "carcass_thickness": 16.0,
+    "carcass_board": "polytec.decorative.florentine-walnut-woodmatt.16.mr-mdf",
+    "front_thickness": 9.0,
+    "front_board": "polytec.decorative.florentine-walnut-woodmatt.9.mdf",
+    "back_board": "polytec.decorative.florentine-walnut-woodmatt.9.mdf",
+    "top_joint": "over_sides",
+    "bottom_joint": "between_sides",
+    "back": "applied",
+    "back_thickness": 9.0,
+    "toe_kick": "legs_and_plinth",
+    "toe_kick_height": 125.0,
+    "toe_kick_setback": 50.0,
+    "leg_fixing": "knock_in",
+    "shaker_frame_width": 70.0,
+    "shaker_panel_thickness": 9.0,
+    "shaker_panel_board": "",
+    "shaker_groove_depth": 10.0,
+    "shaker_slab_below": 200.0,
+    "wardrobe_hat_shelf_drop": 300.0,
+    "wardrobe_rail_drop": 60.0,
+    "wardrobe_double_hang_shelf": 1050.0,
+    "wardrobe_drawer_pitch": 200.0,
+    "overlay": "inset",
+    "front_gap": 2.0,
+    "top_gap": 2.0,
+    "bottom_gap": 0.0,
+    "sharknose_angle": "bevel_45",
+    "sharknose_gap": 20.0,
+    "sharknose_door_edge": "auto",
+    "edge_pull_clearance": 2.0,
+    "finger_pull_height": 25.0,
+    "finger_pull_depth": 10.0,
+    "finger_pull_gap": 0.0,
+    "drawer_frame": "board",
+    "drawer_frame_thickness": 16.0,
+    "drawer_frame_overlap": 25.0,
+    "hinge_boss": "expando",
+    "fixings": "dowel",
+    "biscuit": "no20",
+    "domino": "d5x30",
+    "dowel": "d8x35",
+    "dowel_spacing": "system32",
+    "fixing_density": "normal",
+    "rail_width": 100.0,
+    "shelf_front_setback": 2.0,
+    "edge_band_thickness": 1.0,
+    "wall_hanging": "hangers",
+    "opening": "handles",
+    "handle_size": "cc128",
+    "handle_place": "sharknose",
+    "handle_finish": "stainless",
+    "handle_range": "generic",
+    "door_style": "slab",
+    "drawer_system": "tandembox",
+    "drawer_sides": "standard",
+    "front_grain": "free",
+    "insert_design": "steel",
+    "drawer_board_thickness": 16.0,
+    "front_core": "mdf"
+  },
+  "cabinets": [
+    {
+      "adjustable_shelves": 0,
+      "blind": {
+        "filler": 50.0,
+        "side": "left",
+        "width": 630.0
+      },
+      "corner": {
+        "side": "left",
+        "width": 900.0
+      },
+      "depth": 450.0,
+      "fronts": {
+        "columns": [
+          {
+            "rows": [
+              {
+                "front": {
+                  "count": 1,
+                  "system": "tandembox",
+                  "type": "drawers"
+                },
+                "height": 198.0,
+                "inside": {
+                  "type": "empty"
+                },
+                "opening": "handles",
+                "shelf_above": false
+              },
+              {
+                "front": {
+                  "count": 3,
+                  "type": "drawers"
+                },
+                "height": 748.0,
+                "inside": {
+                  "type": "empty"
+                },
+                "shelf_above": true
+              },
+              {
+                "front": {
+                  "type": "open"
+                },
+                "height": 0.0,
+                "inside": {
+                  "count": 2,
+                  "type": "shelves"
+                },
+                "shelf_above": true
+              },
+              {
+                "front": {
+                  "type": "open"
+                },
+                "height": 250.0,
+                "inside": {
+                  "type": "empty"
+                },
+                "shelf_above": false
+              }
+            ],
+            "width": 0.0
+          }
+        ],
+        "type": "sections"
+      },
+      "height": 2400.0,
+      "id": "W01",
+      "insert": {
+        "depth": 260.0,
+        "width": 520.0
+      },
+      "kind": "wardrobe",
+      "origin": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "sink": {
+        "back_cutout": true,
+        "liner": true
+      },
+      "wardrobe": "long",
+      "width": 900.0
+    },
+    {
+      "adjustable_shelves": 0,
+      "blind": {
+        "filler": 50.0,
+        "side": "left",
+        "width": 630.0
+      },
+      "corner": {
+        "side": "left",
+        "width": 900.0
+      },
+      "depth": 450.0,
+      "fronts": {
+        "columns": [
+          {
+            "rows": [
+              {
+                "front": {
+                  "count": 1,
+                  "type": "drawers"
+                },
+                "height": 198.0,
+                "inside": {
+                  "type": "empty"
+                },
+                "shelf_above": true
+              },
+              {
+                "front": {
+                  "count": 3,
+                  "type": "drawers"
+                },
+                "height": 748.0,
+                "inside": {
+                  "type": "empty"
+                },
+                "shelf_above": true
+              },
+              {
+                "front": {
+                  "type": "open"
+                },
+                "height": 0.0,
+                "inside": {
+                  "type": "empty"
+                },
+                "shelf_above": true
+              },
+              {
+                "front": {
+                  "type": "open"
+                },
+                "height": 250.0,
+                "inside": {
+                  "type": "empty"
+                },
+                "shelf_above": false
+              }
+            ],
+            "width": 0.0
+          }
+        ],
+        "type": "sections"
+      },
+      "height": 2400.0,
+      "id": "W05",
+      "insert": {
+        "depth": 260.0,
+        "width": 520.0
+      },
+      "kind": "wardrobe",
+      "origin": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "sink": {
+        "back_cutout": true,
+        "liner": true
+      },
+      "wardrobe": "long",
+      "width": 900.0
+    }
+  ]
+}

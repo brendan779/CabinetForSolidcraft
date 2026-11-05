@@ -50,6 +50,8 @@ pub enum PartRole {
     FramePanel,
     /// A benchtop piece over a stretch of base cabinets.
     Benchtop,
+    BenchtopSupport,
+    EdgeBand,
     /// A slab splashback standing on a benchtop piece.
     Splashback,
     /// A finished board on a face seen from the room: `SeenEndLeft`, `SeenEndRight`, `SeenBack`.
@@ -99,6 +101,8 @@ impl PartRole {
             PartRole::FrameRail => "Frame rail",
             PartRole::FramePanel => "Frame panel",
             PartRole::Benchtop => "Benchtop",
+            PartRole::BenchtopSupport => "Benchtop support",
+            PartRole::EdgeBand => "Edge band",
             PartRole::Splashback => "Splashback",
             PartRole::Cladding => "Cladding",
             PartRole::DrawerFrame => "Drawer frame",
@@ -141,6 +145,8 @@ impl PartRole {
             PartRole::FrameRail => "Rail",
             PartRole::FramePanel => "Panel",
             PartRole::Benchtop => "Benchtop",
+            PartRole::BenchtopSupport => "BenchtopSupport",
+            PartRole::EdgeBand => "EdgeBand",
             PartRole::Splashback => "Splashback",
             PartRole::Cladding => "Clad",
             PartRole::DrawerFrame => "DrawerFrame",
@@ -257,6 +263,13 @@ impl Part {
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case", tag = "type")]
 pub enum Operation {
+    /// Thickness-edge finishing, separate from rounding corners in the sheet's outline.
+    EdgeFinish {
+        part: String,
+        edges: Vec<Vec3>,
+        size: f64,
+        bevel: bool,
+    },
     /// A round hole. `at` is the centre of the hole's mouth, `direction` points into the material.
     Bore {
         part: String,
@@ -392,6 +405,8 @@ pub struct HardwarePlacement {
 /// Everything [`crate::build_cabinet`] produces for one cabinet.
 #[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
 pub struct PartList {
+    #[serde(default, skip_serializing_if = "std::collections::BTreeMap::is_empty")]
+    pub edge_tapes: std::collections::BTreeMap<String, crate::run::ShadowTape>,
     pub cabinet: String,
     pub parts: Vec<Part>,
     pub operations: Vec<Operation>,

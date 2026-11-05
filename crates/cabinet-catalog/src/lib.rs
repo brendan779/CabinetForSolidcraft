@@ -64,6 +64,8 @@ pub enum Substrate {
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum BoardKind {
+    /// A sintered stone slab for benchtops, kept out of cabinet board pickers.
+    SinteredStone,
     /// Low pressure melamine on a substrate.
     Melamine,
     /// High pressure laminate sheet (not a board).

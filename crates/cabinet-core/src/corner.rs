@@ -34,6 +34,11 @@ fn transform(
     }
     for op in &mut list.operations {
         match op {
+            Operation::EdgeFinish { edges, .. } => {
+                for at in edges {
+                    *at = point(*at);
+                }
+            }
             Operation::Bore { at, direction, .. } => {
                 *at = point(*at);
                 *direction = dir(*direction);
@@ -138,7 +143,8 @@ pub fn rename(list: &mut PartList, f: impl Fn(&str) -> String) {
     }
     for op in &mut list.operations {
         match op {
-            Operation::Bore { part, .. }
+            Operation::EdgeFinish { part, .. }
+            | Operation::Bore { part, .. }
             | Operation::Groove { part, .. }
             | Operation::Cutout { part, .. }
             | Operation::Chamfer { part, .. }
@@ -176,7 +182,8 @@ pub fn open_end(list: &mut PartList, side: &str, end: f64) {
     list.operations.retain(|op| match op {
         Operation::Bore { part, at, .. } => part != side && !at_point(at),
         Operation::BiscuitSlot { parts, .. } => !parts.iter().any(|p| p == side),
-        Operation::Groove { part, .. }
+        Operation::EdgeFinish { part, .. }
+        | Operation::Groove { part, .. }
         | Operation::Cutout { part, .. }
         | Operation::Chamfer { part, .. }
         | Operation::Round { part, .. }

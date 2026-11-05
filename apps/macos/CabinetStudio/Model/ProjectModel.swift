@@ -198,6 +198,46 @@ struct CabinetDoc: Identifiable, Hashable, Codable {
         }
     }
 
+    var apronDepth: Double {
+        get { (object["edge"] as? [String: Any])?["depth"] as? Double ?? 60 }
+        set { update { $0["edge"] = ["type": "mitred_apron", "depth": newValue] } }
+    }
+    private var buildUp: [String: Any] { object["build_up"] as? [String: Any] ?? [:] }
+    private mutating func setBuildUp(_ key: String, _ value: Any) {
+        update { o in var values = o["build_up"] as? [String: Any] ?? [:]; values[key] = value; o["build_up"] = values }
+    }
+    var shadowHeight: Double {
+        get { buildUp["shadow_height"] as? Double ?? 20 }
+        set { setBuildUp("shadow_height", newValue) }
+    }
+    var shadowSetback: Double {
+        get { buildUp["setback"] as? Double ?? 0 }
+        set { setBuildUp("setback", newValue) }
+    }
+    var supportWidth: Double {
+        get { buildUp["strip_width"] as? Double ?? 80 }
+        set { setBuildUp("strip_width", newValue) }
+    }
+    var supportBoard: String { buildUp["board"] as? String ?? "" }
+    var stoneProductID: String { object["board"] as? String ?? "" }
+    mutating func setStoneProduct(_ board: BoardRecord?) {
+        update { $0["board"] = board?.id ?? "" }
+        if let board {
+            setNumber("thickness", board.thickness)
+            material = "porcelain"
+            if edgeProfile == "mitred_apron" && apronDepth < board.thickness { apronDepth = board.thickness }
+        }
+    }
+    mutating func setSupportBoard(_ board: BoardRecord) {
+        setBuildUp("board", board.id); setBuildUp("board_thickness", board.thickness)
+    }
+    mutating func resetSupportBoard() { setBuildUp("board", ""); setBuildUp("board_thickness", 0.0) }
+    var shadowTape: String { (buildUp["edge_tape"] as? [String: Any])?["id"] as? String ?? "" }
+    mutating func setShadowTape(_ tape: ShadowTapeRecord) {
+        setBuildUp("edge_tape", ["id":tape.id,"colour":tape.displayColour.hexString,"thickness":tape.thickness])
+    }
+    mutating func clearShadowTape() { setBuildUp("edge_tape", NSNull()) }
+
     /// Benchtop: seating overhang past the cabinets' backs (0: to the wall).
     var backOverhang: Double {
         get { number("back_overhang") }
@@ -495,6 +535,15 @@ struct CabinetDoc: Identifiable, Hashable, Codable {
     var cladThickness: Double {
         get { (cladding["thickness"] as? NSNumber)?.doubleValue ?? 12 }
         set { update { o in var c = o["cladding"] as? [String: Any] ?? [:]; c["thickness"] = newValue; o["cladding"] = c } }
+    }
+
+    var backPanelMaximum: Double {
+        get { cladding["back_max_width"] as? Double ?? 2700 }
+        set { update { o in var c = o["cladding"] as? [String:Any] ?? [:]; c["back_max_width"] = newValue; o["cladding"] = c } }
+    }
+    var backPanelGrain: String {
+        get { (cladding["back_grain"] as? String ?? "X").lowercased() }
+        set { update { o in var c = o["cladding"] as? [String:Any] ?? [:]; c["back_grain"] = newValue.uppercased(); o["cladding"] = c } }
     }
 
     /// A rangehood canopy's insert cut-out.
@@ -1113,6 +1162,29 @@ final class ProjectModel {
         changed()
     }
 
+    /// Layout belongs to a matching rear face, rather than to the cabinet seams beneath it.
+    func setSeenBackLayout(maximum: Double? = nil, grain: String? = nil) {
+        guard let selected else { return }
+        for i in cabinets.indices where cabinets[i].seenFace("back") && cabinets[i].placed != true
+            && cabinets[i].cladBoard == selected.cladBoard && cabinets[i].cladThickness == selected.cladThickness {
+            if let maximum { cabinets[i].backPanelMaximum = max(100,maximum) }
+            if let grain { cabinets[i].backPanelGrain = grain }
+        }
+        changed()
+    }
+
+    /// An explicit finish match: the existing cladding slot covers all seen faces of a cabinet.
+    func matchSeenBoardsAcrossRun() {
+        guard let selected else { return }
+        for i in cabinets.indices where cabinets[i].seenFace("back") && cabinets[i].placed != true {
+            cabinets[i].cladBoard = selected.cladBoard
+            cabinets[i].cladThickness = selected.cladThickness
+            cabinets[i].backPanelMaximum = selected.backPanelMaximum
+            cabinets[i].backPanelGrain = selected.backPanelGrain
+        }
+        changed()
+    }
+
     /// Records an edit. The core lays the run out (`build_job`); cabinets drawn in SolidCraft stay
     /// where they were drawn.
     func changed() {
@@ -1253,7 +1325,8 @@ final class ProjectModel {
         status = "Making the scene in Blender. The first use of a decor downloads its image…"
         let made = await Task.detached { () -> Result<Void, Error> in
             do {
-                try Self.run(blenderTool, ["-b", "-P", script.path, "--",
+                try Self.run(blenderTool, ["-b", "--factory-startup", "--python-exit-code", "1",
+                                           "-P", script.path, "--",
                                            folder.appending(path: "job.json").path,
                                            folder.appending(path: "job.obj").path,
                                            blend.path, cache.path])
@@ -1265,8 +1338,15 @@ final class ProjectModel {
         isMakingScene = false
         switch made {
         case .success:
-            status = "Scene saved as \(blend.lastPathComponent)"
-            workspace.open([blend], withApplicationAt: blender, configuration: NSWorkspace.OpenConfiguration()) { _, _ in }
+            status = "Opening \(blend.lastPathComponent) in Blender…"
+            do {
+                _ = try await workspace.open([blend], withApplicationAt: blender,
+                                             configuration: NSWorkspace.OpenConfiguration())
+                status = "Opened \(blend.lastPathComponent) in Blender"
+            } catch {
+                lastError = "Scene saved as \(blend.lastPathComponent), but Blender could not open it: \(error.localizedDescription)"
+                status = "Scene saved; Blender could not open it"
+            }
         case .failure(let e):
             lastError = "\(e)"
             status = "Blender did not make the scene"
@@ -1337,31 +1417,8 @@ final class ProjectModel {
         }
     }
 
-    private struct ToolFailure: LocalizedError, CustomStringConvertible {
-        let description: String
-        var errorDescription: String? { description }
-    }
-
-    /// Runs a tool to the end. Its last lines say why, if it fails.
     nonisolated private static func run(_ tool: URL, _ arguments: [String]) throws {
-        let process = Process()
-        process.executableURL = tool
-        process.arguments = arguments
-        let log = FileManager.default.temporaryDirectory.appending(path: "cabinet-studio-\(UUID().uuidString).log")
-        FileManager.default.createFile(atPath: log.path, contents: nil)
-        defer { try? FileManager.default.removeItem(at: log) }
-        let handle = try FileHandle(forWritingTo: log)
-        defer { try? handle.close() }
-        process.standardOutput = handle
-        process.standardError = handle
-        try process.run()
-        process.waitUntilExit()
-        let text = (try? String(contentsOf: log, encoding: .utf8)) ?? ""
-        // Blender goes on with a script's error and exits 0, so the script's own word is checked too.
-        if process.terminationStatus != 0 || text.contains("Traceback (most recent call last)") {
-            let tail = text.split(separator: "\n").suffix(4).joined(separator: "\n")
-            throw ToolFailure(description: "\(tool.lastPathComponent) failed: \(tail)")
-        }
+        try ToolRunner.run(tool, arguments)
     }
 
     /// Renders the design in SolidCraft to a PNG next to the job file (or where the user picks

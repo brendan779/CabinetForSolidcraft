@@ -507,7 +507,10 @@ struct PieceSection: View {
                     .fixedSize(horizontal: false, vertical: true)
             } else if cab.kind == "benchtop" {
                 SectionTitle("Benchtop")
-                chips("Thickness", value: cab.topThickness, presets: [20, 33, 40, 60, 80]) { c, v in c.topThickness = v }
+                chips("Stone", value: cab.topThickness, presets: project.boardsById[cab.stoneProductID].map { [$0.thickness] } ?? [12, 20, 30, 40]) { c, v in
+                    c.topThickness = v
+                    if c.edgeProfile == "mitred_apron", c.apronDepth < v { c.apronDepth = v }
+                }
                 chips("Front", value: cab.frontOverhang, presets: [0, 10, 20, 30, 40]) { c, v in c.frontOverhang = v }
                 chips("Ends", value: cab.sideOverhang, presets: [0, 10, 20, 40]) { c, v in c.sideOverhang = v }
                 chips("Splashback", value: cab.splashback, presets: [0, 100, 300, 600, 650]) { c, v in c.splashback = v }
@@ -515,7 +518,7 @@ struct PieceSection: View {
                 chips("Corners", value: cab.endRadius, presets: [0, 25, 100, 300]) { c, v in c.endRadius = v }
                 LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 3), spacing: 8) {
                     ForEach([("square", "Square"), ("pencil_round", "Pencil"), ("bullnose", "Bullnose"),
-                             ("bevel", "Bevel"), ("mitred_apron", "Apron")], id: \.0) { id, title in
+                             ("bevel", "Bevel"), ("mitred_apron", "Built-up")], id: \.0) { id, title in
                         Button {
                             withAnimation(.snappy) { var c = cab; c.edgeProfile = id; project.selected = c }
                         } label: {
@@ -527,10 +530,13 @@ struct PieceSection: View {
                             .padding(.vertical, 6)
                         }
                         .buttonStyle(TileStyle(selected: cab.edgeProfile == id))
-                        .help(id == "mitred_apron" ? "A strip mitred under the front edge: the top looks 60 mm thick"
+                        .help(id == "mitred_apron" ? "Mitred stone returns over cabinet-board supports, with an adjustable shadow line"
                                                    : "The front edge's profile, for the benchtop maker")
                         .accessibilityLabel("Edge: \(title)")
                     }
+                }
+                if cab.edgeProfile == "mitred_apron" {
+                    BenchtopBuildUpControls(cab: cab)
                 }
                 HStack(spacing: 6) {
                     Text("Waterfall").foregroundStyle(.secondary)
@@ -1276,11 +1282,12 @@ struct MaterialSection: View {
         let materials = benchtopMaterials()
         let current = materials.first { $0.id == cab.material }
         VStack(alignment: .leading, spacing: 8) {
+            StoneProductControls(cab: cab)
             MenuRow("Material") {
                 Menu {
                     ForEach(materials, id: \.id) { m in
                         Button {
-                            withAnimation(.snappy) { var c = cab; c.material = m.id; project.selected = c }
+                            withAnimation(.snappy) { var c = cab; if m.id != "porcelain" { c.setStoneProduct(nil) }; c.material = m.id; project.selected = c }
                         } label: {
                             Text(m.label)
                             Text(m.description)
@@ -1529,7 +1536,7 @@ struct CladdingSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            SectionTitle("Seen ends")
+            SectionTitle("Seen faces")
             HStack(spacing: 8) {
                 ForEach([("left", "Left"), ("back", "Back"), ("right", "Right")], id: \.0) { face, title in
                     let on = cab.seenFace(face)
@@ -1590,6 +1597,29 @@ struct CladdingSection: View {
                 if let board, board.needsPaint {
                     PaintPicker(board: board.id, cab: cab)
                 }
+                if cab.seenFace("back") {
+                    HStack {
+                        Text("Maximum back panel").foregroundStyle(.secondary)
+                        Spacer()
+                        TextField("Maximum back panel", value: Binding(get: {cab.backPanelMaximum}, set: {project.setSeenBackLayout(maximum: $0)}), format: .number)
+                            .textFieldStyle(.roundedBorder).multilineTextAlignment(.trailing).frame(width: 70)
+                        Text("mm").font(.caption).foregroundStyle(.secondary)
+                    }
+                    HStack {
+                        Text("Back grain").foregroundStyle(.secondary)
+                        Spacer()
+                        ForEach([("x","Across run"),("z","Vertical")], id: \.0) { value, title in
+                            Button(title) { withAnimation(.snappy) { project.setSeenBackLayout(grain: value) } }
+                                .buttonStyle(ChipStyle(selected: cab.backPanelGrain == value))
+                        }
+                    }
+                    Button("Match seen boards across run") { project.matchSeenBoardsAcrossRun() }
+                        .buttonStyle(.borderless)
+                        .help("Use this cabinet's finished board, thickness, grain and maximum width on all cabinets with seen backs. Their seen sides use the same finished board.")
+                    Text("Different boards, thicknesses, grain or maximum widths create separate panels. Matching seen backs form continuous panels, with joins at cabinet boundaries up to this width. Layout changes apply to matching seen backs in the job; choose a maximum that fits your stock sheets.")
+                        .font(.caption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
+                }
+
                 if board != nil {
                     Button("Same as the fronts") {
                         var c = cab

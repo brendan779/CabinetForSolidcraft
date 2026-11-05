@@ -448,6 +448,11 @@ fn positive(v: f64) -> bool {
 fn offset_operations(list: &mut PartList, o: Vec3) {
     for op in &mut list.operations {
         match op {
+            Operation::EdgeFinish { edges, .. } => {
+                for at in edges {
+                    *at = *at + o;
+                }
+            }
             Operation::Bore { at, .. } | Operation::Round { at, .. } => *at = *at + o,
             Operation::Arch { centre, .. } => *centre = *centre + o,
             Operation::Chamfer { at, bounds, .. } => {
@@ -5285,7 +5290,11 @@ impl<'a> Builder<'a> {
                 role: PartRole::Cladding,
                 bounds,
                 thickness_axis: axis,
-                grain_axis: Some(Axis::Z),
+                grain_axis: Some(if name == "SeenBack" {
+                    c.back_grain
+                } else {
+                    Axis::Z
+                }),
                 board: board.clone(),
                 edges: EdgeBanding::default(),
             });
@@ -6148,7 +6157,8 @@ mod tests {
             | Operation::Chamfer { part, .. }
             | Operation::Mortise { part, .. }
             | Operation::Round { part, .. }
-            | Operation::Arch { part, .. } => *part == shelf.name,
+            | Operation::Arch { part, .. }
+            | Operation::EdgeFinish { part, .. } => *part == shelf.name,
         }));
         assert_eq!(shelf.bounds.min.x, 16.0 + SHELF_SIDE_CLEARANCE);
     }
@@ -10039,7 +10049,12 @@ mod tests {
             list.parts
                 .iter()
                 .filter(|p| p.role == PartRole::Cladding)
-                .all(|p| p.grain_axis == Some(Axis::Z))
+                .all(|p| p.grain_axis
+                    == Some(if p.name.ends_with(".SeenBack") {
+                        Axis::X
+                    } else {
+                        Axis::Z
+                    }))
         );
         let carcass: Vec<_> = list
             .parts

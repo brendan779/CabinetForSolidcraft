@@ -597,6 +597,102 @@ fn the_new_cabinets_build_every_part_where_the_core_puts_it() {
 /// BENCH-4: a benchtop's sink and cooktop cut-outs and tap hole cut through in SolidCraft: the
 /// piece keeps its outline.
 #[test]
+fn benchtop_edge_profiles_remove_the_expected_material_at_every_detail_level() {
+    let Some(cli) = cli() else { return };
+    use cabinet_core::run::{Benchtop, Run, RunItem, build_run};
+    for profile in ["pencil_round", "bullnose", "bevel"] {
+        for detail in [Detail::Design, Detail::Manufacturing] {
+            let top: Benchtop = serde_json::from_value(json!({
+                "id": "BT1", "edge": {"type": profile},
+                "side_overhang": if profile == "bullnose" { 20.0 } else { 0.0 },
+            }))
+            .unwrap();
+            let run = Run {
+                origin: Vec3::new(100.0, 200.0, 50.0),
+                items: vec![
+                    RunItem::Cabinet(Box::new(Cabinet::new("B01", CabinetKind::Base))),
+                    RunItem::Benchtop(top),
+                ],
+            };
+            let list = build_run(&run).unwrap().pop().unwrap();
+            let p = &list.parts[0];
+            let result = crate::run(
+                &cli,
+                &format!("edge-{profile}-{detail:?}"),
+                &emit_cabinet(&list, detail, None),
+                &["eval"],
+            );
+            let body = &result["bodies"][0];
+            assert_eq!(body["closed"], true);
+            let r: f64 = if profile == "bullnose" {
+                p.thickness() / 2.0
+            } else {
+                2.0
+            };
+            let section = if profile == "bevel" {
+                r * r / 2.0
+            } else {
+                2.0 * r * r * (1.0 - std::f64::consts::PI / 4.0)
+            };
+            let expected = p.bounds.volume() - p.bounds.size.x * section;
+            let actual = body["volume_mm3"].as_f64().unwrap();
+            // The CLI's volume estimate is coarse for small fillets; require the expected
+            // material loss within 12%, rather than a tolerance that could admit a square slab.
+            let removed = p.bounds.volume() - expected;
+            assert!(
+                (actual - expected).abs()
+                    < if profile == "bevel" {
+                        0.1
+                    } else {
+                        removed * 0.12
+                    },
+                "{profile} {detail:?}: {actual} vs {expected}"
+            );
+        }
+    }
+}
+
+#[test]
+fn translated_corner_benchtops_and_waterfalls_export_at_the_core_bounds() {
+    let Some(cli) = cli() else { return };
+    use cabinet_core::run::{Benchtop, Run, RunItem, build_run};
+    for side in [
+        cabinet_core::model::HingeSide::Left,
+        cabinet_core::model::HingeSide::Right,
+    ] {
+        let mut cab = Cabinet::new("C01", CabinetKind::CornerBase);
+        cab.corner.side = side;
+        let top: Benchtop = serde_json::from_value(json!({
+            "id": "BT1", "waterfall_left": true, "waterfall_right": true,
+        }))
+        .unwrap();
+        let run = Run {
+            origin: Vec3::new(1000.0, -2000.0, 250.0),
+            items: vec![RunItem::Cabinet(Box::new(cab)), RunItem::Benchtop(top)],
+        };
+        let list = build_run(&run).unwrap().pop().unwrap();
+        let built = bounds(
+            &cli,
+            &format!("bench-moved-{side:?}"),
+            &emit_cabinet(&list, Detail::Design, None),
+        );
+        assert_eq!(list.parts.len(), built.len());
+        for part in &list.parts {
+            let got = &built.iter().find(|(name, _)| *name == part.name).unwrap().1;
+            let lo = part.bounds.min;
+            let hi = part.bounds.max();
+            for (g, w) in got.iter().zip([lo.x, lo.y, lo.z, hi.x, hi.y, hi.z]) {
+                assert!(
+                    (*g - (w * 1000.0).round() as i64).abs() <= 5,
+                    "{} {side:?}: {got:?}",
+                    part.name
+                );
+            }
+        }
+    }
+}
+
+#[test]
 fn a_benchtop_with_cut_outs_builds() {
     let Some(cli) = cli() else {
         eprintln!("SOLIDCRAFT_CLI not set: skipped");
@@ -615,6 +711,7 @@ fn a_benchtop_with_cut_outs_builds() {
             RunItem::Cabinet(Box::new(Cabinet::new("B01", CabinetKind::Base))),
             RunItem::Cabinet(Box::new(Cabinet::new("S01", CabinetKind::Sink))),
             RunItem::Benchtop(Benchtop {
+                build_up: Default::default(),
                 id: "BT1".into(),
                 thickness: 33.0,
                 front_overhang: 20.0,
@@ -1224,4 +1321,143 @@ fn a_tiled_splashback_builds_with_a_body_for_each_tile() {
     let bodies = bounds(&cli, "tiled", &commands);
     let tiles = field.spec.layout(field.bounds.size.x, field.bounds.size.z);
     assert_eq!(bodies.len(), tiles.len() + 1, "one bed and every tile");
+}
+
+#[test]
+fn mitred_stone_build_up_and_waterfalls_are_closed_solids_with_stock_supports() {
+    let Some(cli) = cli() else { return };
+    use cabinet_core::run::{Benchtop, Run, RunItem, build_run};
+    for (falls, kind, side) in [
+        (
+            false,
+            CabinetKind::Base,
+            cabinet_core::model::HingeSide::Left,
+        ),
+        (
+            true,
+            CabinetKind::Base,
+            cabinet_core::model::HingeSide::Left,
+        ),
+        (
+            false,
+            CabinetKind::CornerBase,
+            cabinet_core::model::HingeSide::Left,
+        ),
+        (
+            false,
+            CabinetKind::CornerBase,
+            cabinet_core::model::HingeSide::Right,
+        ),
+    ] {
+        let b: Benchtop = serde_json::from_value(json!({"id":"BT1","thickness":20,"side_overhang":20,
+            "waterfall_left":falls,"waterfall_right":falls,"edge":{"type":"mitred_apron","depth":60},
+            "build_up":{"shadow_height":20,"edge_tape":{"id":"accent","colour":"#aa7722","thickness":1}}})).unwrap();
+        let mut cabinet = Cabinet::new("B01", kind);
+        cabinet.corner.side = side;
+        let list = build_run(&Run {
+            origin: Vec3::default(),
+            items: vec![RunItem::Cabinet(Box::new(cabinet)), RunItem::Benchtop(b)],
+        })
+        .unwrap()
+        .pop()
+        .unwrap();
+        for detail in [Detail::Design, Detail::Manufacturing] {
+            let result = run(
+                &cli,
+                &format!("mitred-build-up-{falls}-{kind:?}-{side:?}-{detail:?}"),
+                &emit_cabinet(&list, detail, None),
+                &["eval"],
+            );
+            let bodies = result["bodies"].as_array().unwrap();
+            assert_eq!(bodies.len(), list.parts.len());
+            for body in bodies {
+                let name = body["name"].as_str().unwrap();
+                let p = list.part(name).unwrap();
+                assert_eq!(body["closed"], true, "{name}");
+                let actual = body["volume_mm3"].as_f64().unwrap();
+                assert!(
+                    actual > 0.0 && actual <= p.bounds.volume() + 0.1,
+                    "{name}: {actual}"
+                );
+                if name.contains("Apron") || name.contains("Waterfall") || name.contains("Benchtop")
+                {
+                    assert!(actual < p.bounds.volume() - 1.0, "mitre absent: {name}");
+                }
+            }
+        }
+    }
+}
+
+#[test]
+fn rear_shadow_frames_and_continuous_seen_backs_export_with_and_without_waterfalls() {
+    let Some(cli) = cli() else { return };
+    use cabinet_core::run::{Benchtop, Run, RunItem, build_run};
+    for falls in [false, true] {
+        let mut a = Cabinet::new("B01", CabinetKind::Base);
+        a.width = 900.0;
+        a.cladding.back = true;
+        let mut b = a.clone();
+        b.id = "B02".into();
+        let top:Benchtop=serde_json::from_value(json!({"id":"BT1","thickness":20,"front_overhang":0,"side_overhang":0,"back_overhang":300,
+            "waterfall_left":falls,"waterfall_right":falls,"edge":{"type":"mitred_apron","depth":60},
+            "build_up":{"shadow_height":15,"setback":10,"strip_width":30,"board_thickness":18,
+            "edge_tape":{"id":"accent","colour":"#B59A61","thickness":1}}})).unwrap();
+        let lists = build_run(&Run {
+            origin: Vec3::new(100.0, 200.0, 50.0),
+            items: vec![
+                RunItem::Cabinet(Box::new(a)),
+                RunItem::Cabinet(Box::new(b)),
+                RunItem::Benchtop(top),
+            ],
+        })
+        .unwrap();
+        assert_eq!(lists[0].part("B01.SeenBack").unwrap().bounds.size.x, 1800.0);
+        for detail in [Detail::Design, Detail::Manufacturing] {
+            let list = &lists[2];
+            let result = run(
+                &cli,
+                &format!("rear-frame-{falls}-{detail:?}"),
+                &emit_cabinet(list, detail, None),
+                &["eval"],
+            );
+            assert_eq!(result["bodies"].as_array().unwrap().len(), list.parts.len());
+            for body in result["bodies"].as_array().unwrap() {
+                assert_eq!(body["closed"], true, "{}", body["name"]);
+                assert!(body["volume_mm3"].as_f64().unwrap() > 0.0);
+            }
+        }
+    }
+}
+
+#[test]
+fn three_matching_seen_backs_export_as_one_body_without_cabinet_seams() {
+    let Some(cli) = cli() else { return };
+    use cabinet_core::run::{Run, RunItem, build_run};
+    let items = [600.0, 600.0, 500.0]
+        .iter()
+        .enumerate()
+        .map(|(i, &width)| {
+            let mut c = Cabinet::new(format!("B0{}", i + 1), CabinetKind::Base);
+            c.width = width;
+            c.cladding.back = true;
+            c.cladding.thickness = 16.0;
+            RunItem::Cabinet(Box::new(c))
+        })
+        .collect();
+    let lists = build_run(&Run {
+        origin: Vec3::default(),
+        items,
+    })
+    .unwrap();
+    let commands: Vec<_> = lists
+        .iter()
+        .flat_map(|l| emit_cabinet(l, Detail::Design, None))
+        .collect();
+    let bodies = bounds(&cli, "three-continuous-backs", &commands);
+    let backs: Vec<_> = bodies
+        .iter()
+        .filter(|(name, _)| name.contains(".SeenBack"))
+        .collect();
+    assert_eq!(backs.len(), 1, "cabinet seams survived the export");
+    assert_eq!(backs[0].1[3] - backs[0].1[0], 1_700_000);
 }

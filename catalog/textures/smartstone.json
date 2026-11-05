@@ -1,0 +1,463 @@
+{
+  "source": "Owner supplied SmartstoneSinteredStone.zip, 2026-11-05; product metadata from the official pages linked in boards/smartstone.json.",
+  "notes": "Images map to the stated physical slab size, independently of pixel aspect. Originals with 16:9 filenames retained in full. JPEG originals copied unchanged; WebP decoded to JPEG for native and Blender compatibility. No relief inferred from veins. Local images; no runtime download.",
+  "verified": false,
+  "images": {
+    "Arabescato Chiaro": {
+      "name": "smartstone-arabescato-chiaro",
+      "file": "smartstone/arabescato-chiaro.jpg",
+      "pixels": [
+        2500,
+        1250
+      ],
+      "covers": [
+        3200,
+        1600
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.32,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0
+      },
+      "original_file": "smartstone_full-slab_arabescato-chiaro.jpg",
+      "original_sha256": "0ab5055af08210fb32151f6521533cd04e7d84f5b6f4d0df384bb87d5bba4d06",
+      "discontinued": false
+    },
+    "Austral Dream": {
+      "name": "smartstone-austral-dream",
+      "file": "smartstone/austral-dream.jpg",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "covers": [
+        3200,
+        1600
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.32,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0
+      },
+      "original_file": "austral-dream_16x9.webp",
+      "original_sha256": "a9b4fa242dd8f7c24eff70e5b94ee6d96fdfa975a7f5e75f0e612e19b8d81a96",
+      "discontinued": false
+    },
+    "Bellini Bianco": {
+      "name": "smartstone-bellini-bianco",
+      "file": "smartstone/bellini-bianco.jpg",
+      "pixels": [
+        2500,
+        1250
+      ],
+      "covers": [
+        3200,
+        1600
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.32,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0
+      },
+      "original_file": "smartstone_full-slab_bellini-bianco.jpg",
+      "original_sha256": "96260f5c0f47dfeee6cec672cfe28dd2aa366f2636a7cea389094965ed98bdbe",
+      "discontinued": false
+    },
+    "Bianco Angelico": {
+      "name": "smartstone-bianco-angelico",
+      "file": "smartstone/bianco-angelico.jpg",
+      "pixels": [
+        2500,
+        1250
+      ],
+      "covers": [
+        3200,
+        1600
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.32,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0
+      },
+      "original_file": "smartstone_full-slab_bianco-angelico.jpg",
+      "original_sha256": "01416cde8796e49cd4ac8fb3528dafa4256efae5d2dcea2fd21af65bcfea3709",
+      "discontinued": false
+    },
+    "Calacatta Bianco": {
+      "name": "smartstone-calacatta-bianco",
+      "file": "smartstone/calacatta-bianco.jpg",
+      "pixels": [
+        2500,
+        1250
+      ],
+      "covers": [
+        3200,
+        1600
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.32,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0
+      },
+      "original_file": "smartstone_full-slab_calacatta-bianco.jpg",
+      "original_sha256": "359f35536a177cfea8805e1f104a6cd6d98e106ce2c6a2f137d30cedb6c1cd9c",
+      "discontinued": false
+    },
+    "Calacatta Borghini": {
+      "name": "smartstone-calacatta-borghini",
+      "file": "smartstone/calacatta-borghini.jpg",
+      "pixels": [
+        2500,
+        1250
+      ],
+      "covers": [
+        3200,
+        1600
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.32,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0
+      },
+      "original_file": "calacatta-borghini-full-slab.jpg",
+      "original_sha256": "a6bf5eea7f62ea1b52433c3bae6d7dbcb21ed88c82248cd19c3e1807e83fd642",
+      "discontinued": false
+    },
+    "Calacatta Lusso": {
+      "name": "smartstone-calacatta-lusso",
+      "file": "smartstone/calacatta-lusso.jpg",
+      "pixels": [
+        2500,
+        1250
+      ],
+      "covers": [
+        3200,
+        1600
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.32,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0
+      },
+      "original_file": "smartstone_full-slab_calacatta-lusso.jpg",
+      "original_sha256": "70802fa08f555fc418f805ce675a1bea2542066bd06f76ee0e2ef47efbcfc512",
+      "discontinued": false
+    },
+    "Calacatta Oro": {
+      "name": "smartstone-calacatta-oro",
+      "file": "smartstone/calacatta-oro.jpg",
+      "pixels": [
+        2500,
+        1250
+      ],
+      "covers": [
+        3200,
+        1600
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.32,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0
+      },
+      "original_file": "smartstone_full-slab_calacatta-oro.jpg",
+      "original_sha256": "477e932f128926b0e7778f40d52250b7e39460b0352527982dde90cd1b92172c",
+      "discontinued": false
+    },
+    "Calacatta Verde": {
+      "name": "smartstone-calacatta-verde",
+      "file": "smartstone/calacatta-verde.jpg",
+      "pixels": [
+        2500,
+        1250
+      ],
+      "covers": [
+        3200,
+        1600
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.32,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0
+      },
+      "original_file": "smartstone_full-slab_calacatta-verde.jpg",
+      "original_sha256": "3d013f6d48c9a575f887d7f33009bceea57a6932f9b5d08801d396891ca93e6e",
+      "discontinued": false
+    },
+    "Calacatta Viola": {
+      "name": "smartstone-calacatta-viola",
+      "file": "smartstone/calacatta-viola.jpg",
+      "pixels": [
+        2500,
+        1250
+      ],
+      "covers": [
+        3200,
+        1600
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.32,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0
+      },
+      "original_file": "smartstone_full-slab_calacatta-viola.jpg",
+      "original_sha256": "f6b4ce7c935a8012ea8118d4bc99887e250d3b132a74883dde3df6b64a1744ef",
+      "discontinued": false
+    },
+    "Carrara": {
+      "name": "smartstone-carrara",
+      "file": "smartstone/carrara.jpg",
+      "pixels": [
+        2500,
+        1250
+      ],
+      "covers": [
+        3200,
+        1600
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.32,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0
+      },
+      "original_file": "smartstone_full-slab_carrara_1.jpg",
+      "original_sha256": "fecfa296908d1b37b00e354843b470ca7e18a28f3530b56982db9d879a6fdd6b",
+      "discontinued": false
+    },
+    "Grafite Titanio": {
+      "name": "smartstone-grafite-titanio",
+      "file": "smartstone/grafite-titanio.jpg",
+      "pixels": [
+        2500,
+        1250
+      ],
+      "covers": [
+        3200,
+        1600
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.48,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.08
+      },
+      "original_file": "smartstone_full-slab_grafite-titanio.jpg",
+      "original_sha256": "cffec30395a276c0cafe072ed2dc29bbf8aa22033f42bb7c41c07902e84715d7",
+      "discontinued": false
+    },
+    "Les Quatre Saisons": {
+      "name": "smartstone-les-quatre-saisons",
+      "file": "smartstone/les-quatre-saisons.jpg",
+      "pixels": [
+        2500,
+        1250
+      ],
+      "covers": [
+        3200,
+        1600
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.32,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0
+      },
+      "original_file": "les-quatre-saisons-slab-16x9.webp",
+      "original_sha256": "3bb6e8e4f871300ac98aaa867887c75260700400edbc8373be782572a78d253d",
+      "discontinued": false
+    },
+    "Pietra Luna": {
+      "name": "smartstone-pietra-luna",
+      "file": "smartstone/pietra-luna.jpg",
+      "pixels": [
+        2500,
+        1333
+      ],
+      "covers": [
+        3200,
+        1600
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.32,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0
+      },
+      "original_file": "smartstone_full-slab_pietra-luna.jpg",
+      "original_sha256": "ad1cd6c8a2f0a114e04a35d3488f1d642bf27e4bb9c10209a843ac3a8f6fd5c8",
+      "discontinued": false
+    },
+    "Pietra Scuro": {
+      "name": "smartstone-pietra-scuro",
+      "file": "smartstone/pietra-scuro.jpg",
+      "pixels": [
+        2500,
+        1250
+      ],
+      "covers": [
+        3200,
+        1600
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.48,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.08
+      },
+      "original_file": "smartstone_full-slab_pietra-scuro.jpg",
+      "original_sha256": "2934b7255c8ce39da8467e28d6c085436fe8941be62ef3185e55e9ec2277198c",
+      "discontinued": false
+    },
+    "Statuario Grigio": {
+      "name": "smartstone-statuario-grigio",
+      "file": "smartstone/statuario-grigio.jpg",
+      "pixels": [
+        2500,
+        1250
+      ],
+      "covers": [
+        3200,
+        1600
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.32,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0
+      },
+      "original_file": "smartstone_full-slab_statuario-grigio.jpg",
+      "original_sha256": "8b864b30db19a52e35200eab59778f0b8f2bc59ef122fc7a58441060d59ff07c",
+      "discontinued": false
+    },
+    "Super White": {
+      "name": "smartstone-super-white",
+      "file": "smartstone/super-white.jpg",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "covers": [
+        3200,
+        1600
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.32,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0
+      },
+      "original_file": "smartstone_super-white_slab_16x9.webp",
+      "original_sha256": "4ba44f77e31c5a43303e4440feb05cfa976dea8613d56df0d9587f1f02fc40bf",
+      "discontinued": true
+    },
+    "Taj Mahal": {
+      "name": "smartstone-taj-mahal",
+      "file": "smartstone/taj-mahal.jpg",
+      "pixels": [
+        2500,
+        1250
+      ],
+      "covers": [
+        3200,
+        1600
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.32,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0
+      },
+      "original_file": "smartstone_full-slab_taj-mahal.jpg",
+      "original_sha256": "4b7755fd9bac6442218e52cf116ce54a3e99a4fb92fd227903a812fc3115de3e",
+      "discontinued": false
+    },
+    "Volakas Gold": {
+      "name": "smartstone-volakas-gold",
+      "file": "smartstone/volakas-gold.jpg",
+      "pixels": [
+        2500,
+        1250
+      ],
+      "covers": [
+        3200,
+        1600
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.32,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0
+      },
+      "original_file": "smartstone_full-slab_volakas-gold.jpg",
+      "original_sha256": "4e98acef839318b8603c7e9e27d89ee95cc3d0390eb64e1b1f3a6b702b646b1f",
+      "discontinued": false
+    }
+  }
+}

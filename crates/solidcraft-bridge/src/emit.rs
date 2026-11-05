@@ -1,7 +1,7 @@
 //! Part lists → SolidCraft engine commands.
 
 use cabinet_core::PartList;
-use cabinet_core::geom::{Axis, Vec3};
+use cabinet_core::geom::{Aabb, Axis, Vec3};
 use cabinet_core::model::BiscuitSize;
 use cabinet_core::part::{BorePurpose, Dir, Operation, Part, PartRole};
 use cabinet_core::standins::{Shape, StandIn, stand_ins};
@@ -74,6 +74,13 @@ pub fn emit_cabinet_with(
     // any cut.
     for op in &list.operations {
         match op {
+            Operation::EdgeFinish { part, edges, size, bevel } => cmds.push(if *bevel {
+                json!({"command": "solid.chamfer", "params": {"body": part,
+                    "edges": edges.iter().copied().map(arr).collect::<Vec<_>>(), "distance": round(*size)}})
+            } else {
+                json!({"command": "solid.fillet", "params": {"body": part,
+                    "edges": edges.iter().copied().map(arr).collect::<Vec<_>>(), "radius": round(*size)}})
+            }),
             Operation::Round { part, at, radius } => cmds.push(json!({
                 "command": "solid.fillet",
                 "params": { "body": part, "edges": [arr(*at)], "radius": round(*radius) }
@@ -91,6 +98,10 @@ pub fn emit_cabinet_with(
             // (the horizontal face first: SolidCraft takes the face facing up most first).
             Operation::Chamfer { part, at, bounds } => {
                 let p = list.part(part);
+                if p.is_some_and(|p| p.role == PartRole::Benchtop) {
+                    cmds.extend(mitre_cut(part, *at, *bounds, cmds.len()));
+                    continue;
+                }
                 let (along_t, along_z) = p
                     .map(|p| (bounds.size.get(p.thickness_axis), bounds.size.z))
                     .unwrap_or((bounds.size.y, bounds.size.z));
@@ -117,6 +128,14 @@ pub fn emit_cabinet_with(
                 radius,
                 ..
             } => {
+                // A lower skin may cross only part of an opening. Cut with a rounded tool:
+                // filleting the resulting hole would require corners outside the target body.
+                if *radius > 0.0 && list.part(part).is_some_and(|p|
+                    bounds.min.x < p.bounds.min.x || bounds.max().x > p.bounds.max().x
+                    || bounds.min.y < p.bounds.min.y || bounds.max().y > p.bounds.max().y) {
+                    cmds.extend(rounded_cutout(part, *bounds, *radius, cmds.len()));
+                    continue;
+                }
                 cmds.push(cut_box(bounds.min, bounds.size, std::slice::from_ref(part)));
                 if *radius > 0.0 {
                     let (lo, hi) = (bounds.min, bounds.max());
@@ -168,7 +187,18 @@ pub fn emit_cabinet_with(
         }
         cmds.extend(bore_batches(&list.operations));
     } else {
-        // A leg's plate is drawn at every detail level, so its tips need their holes at every one.
+        // These rebates are visible clearances for stone, rather than hidden machining.
+        for op in &list.operations {
+            if let Operation::Groove { part, bounds } = op
+                && list.part(part).is_some_and(|p| {
+                    matches!(p.role, PartRole::BenchtopSupport | PartRole::EdgeBand)
+                })
+            {
+                cmds.push(cut_box(bounds.min, bounds.size, std::slice::from_ref(part)));
+            }
+        }
+        // Visible through-holes belong to the shape, including the Design export Blender uses.
+        // A leg's plate is drawn at every level too, so its tips still need their holes.
         let plates: Vec<Operation> = list
             .operations
             .iter()
@@ -176,7 +206,8 @@ pub fn emit_cabinet_with(
                 matches!(
                     o,
                     Operation::Bore {
-                        purpose: cabinet_core::part::BorePurpose::LegPlate,
+                        purpose: cabinet_core::part::BorePurpose::LegPlate
+                            | cabinet_core::part::BorePurpose::TapHole,
                         ..
                     }
                 )
@@ -533,7 +564,10 @@ pub fn board_colours(
         } else {
             p.board.as_str()
         };
-        if let Some(colour) = colours.get(board) {
+        let tape_colour = board
+            .strip_prefix("edgeband:")
+            .and_then(|s| s.split(':').next());
+        if let Some(colour) = colours.get(board).map(String::as_str).or(tape_colour) {
             by_colour.entry(colour).or_default().push(&p.name);
         }
     }
@@ -1199,6 +1233,79 @@ fn cut_box(min: Vec3, size: Vec3, targets: &[String]) -> Value {
             "targets": targets,
         }
     })
+}
+
+fn rounded_cutout(part: &str, b: Aabb, r: f64, n: usize) -> Vec<Value> {
+    let (lo, hi) = (b.min, b.max());
+    let name = format!("{part}.Opening{n}");
+    let mut commands = vec![
+        json!({"command":"sketch.create","params":{"name":name,"plane":{
+        "origin":[0,0,lo.z],"x_dir":[1,0,0],"y_dir":[0,1,0]}}}),
+    ];
+    let corners = [
+        (lo.x + r, lo.y + r, -1.0, -1.0),
+        (hi.x - r, lo.y + r, 1.0, -1.0),
+        (hi.x - r, hi.y - r, 1.0, 1.0),
+        (lo.x + r, hi.y - r, -1.0, 1.0),
+    ];
+    for (i, &(x, y, sx, sy)) in corners.iter().enumerate() {
+        let start = if i % 2 == 0 {
+            [x + sx * r, y]
+        } else {
+            [x, y + sy * r]
+        };
+        let end = if i % 2 == 0 {
+            [x, y + sy * r]
+        } else {
+            [x + sx * r, y]
+        };
+        let &(nx, ny, nsx, nsy) = &corners[(i + 1) % 4];
+        let next = if (i + 1) % 2 == 0 {
+            [nx + nsx * r, ny]
+        } else {
+            [nx, ny + nsy * r]
+        };
+        commands.push(
+            json!({"command":"sketch.arc.three_point","params":{"start":start,"end":end,
+            "through":[x+sx*r/std::f64::consts::SQRT_2,y+sy*r/std::f64::consts::SQRT_2]}}),
+        );
+        if (end[0] - next[0]).abs() + (end[1] - next[1]).abs() > 1e-6 {
+            commands.push(json!({"command":"sketch.line","params":{"points":[end,next]}}));
+        }
+    }
+    commands.push(json!({"command":"sketch.finish","params":{}}));
+    commands.push(
+        json!({"command":"solid.extrude","params":{"sketch":name,"profiles":"all",
+        "distance":b.size.z,"direction":"positive","operation":"cut","targets":[part]}}),
+    );
+    commands
+}
+
+/// A finite triangular cut: stone mitres can stop at an apron rather than bevel a whole waterfall.
+fn mitre_cut(part: &str, at: Vec3, b: Aabb, n: usize) -> Vec<Value> {
+    let along = Axis::ALL
+        .into_iter()
+        .find(|&a| at.get(a) > b.min.get(a) + 1e-6 && at.get(a) < b.max().get(a) - 1e-6)
+        .expect("mitre has an edge direction");
+    let [u, v] = along.others();
+    let other = |a| {
+        if (at.get(a) - b.min.get(a)).abs() < 1e-6 {
+            b.max().get(a)
+        } else {
+            b.min.get(a)
+        }
+    };
+    let p = [at.get(u), at.get(v)];
+    let name = format!("{part}.Mitre{n}");
+    vec![
+        json!({"command":"sketch.create", "params":{"name":name,"plane":{
+            "origin":arr(Vec3::default().with(along,b.min.get(along))),
+            "x_dir":arr(Vec3::default().with(u,1.0)), "y_dir":arr(Vec3::default().with(v,1.0))}}}),
+        json!({"command":"sketch.line", "params":{"points":[p,[other(u),p[1]],[p[0],other(v)],p]}}),
+        json!({"command":"sketch.finish","params":{}}),
+        json!({"command":"solid.extrude", "params":{"sketch":name,"profiles":"all","distance":b.size.get(along),
+            "direction":if along == Axis::Y {"negative"} else {"positive"},"operation":"cut","targets":[part]}}),
+    ]
 }
 
 #[cfg(test)]

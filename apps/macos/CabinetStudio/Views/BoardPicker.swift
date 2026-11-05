@@ -52,14 +52,14 @@ struct BoardPicker<Accessory: View>: View {
     }
 
     private var brands: [String] {
-        Array(Set(boards.filter { ($0.kind == "lining") == linings }.map(\.brand))).sorted()
+        Array(Set(boards.filter { ($0.kind == "lining") == linings && $0.kind != "sintered_stone" }.map(\.brand))).sorted()
     }
     private var ranges: [String] {
         // Only this kind's: a lining range offered among boards would find nothing when picked.
-        Array(Set(boards.filter { ($0.kind == "lining") == linings && (brand.isEmpty || $0.brand == brand) }.map(\.range))).sorted()
+        Array(Set(boards.filter { ($0.kind == "lining") == linings && $0.kind != "sintered_stone" && (brand.isEmpty || $0.brand == brand) }.map(\.range))).sorted()
     }
     private var finishList: [String] {
-        let pool = boards.filter { ($0.kind == "lining") == linings && (brand.isEmpty || $0.brand == brand) && (range.isEmpty || $0.range == range) }
+        let pool = boards.filter { ($0.kind == "lining") == linings && $0.kind != "sintered_stone" && (brand.isEmpty || $0.brand == brand) && (range.isEmpty || $0.range == range) }
         let counts = Dictionary(grouping: pool, by: \.finish).mapValues(\.count)
         return counts.keys.sorted { counts[$0]! > counts[$1]! }
     }
@@ -67,6 +67,7 @@ struct BoardPicker<Accessory: View>: View {
     private var groups: [DecorGroup] {
         let shown = boards.filter { b in
             (b.kind == "lining") == linings
+                && b.kind != "sintered_stone"
                 && (brand.isEmpty || b.brand == brand)
                 && (range.isEmpty || b.range == range)
                 && (finishes.isEmpty || finishes.contains(b.finish))

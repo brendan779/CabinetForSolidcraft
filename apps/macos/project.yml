@@ -49,13 +49,13 @@ targets:
         basedOnDependencyAnalysis: false
     settings:
       base:
-        PRODUCT_NAME: Cabinet Studio
+        PRODUCT_NAME: Cabinet Studio OpenAI
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
         PRODUCT_MODULE_NAME: CabinetStudio
-        PRODUCT_BUNDLE_IDENTIFIER: io.github.brendan779.cabinetstudio
+        PRODUCT_BUNDLE_IDENTIFIER: io.github.brendan779.cabinetstudio.openai
         GENERATE_INFOPLIST_FILE: YES
-        INFOPLIST_KEY_CFBundleDisplayName: Cabinet Studio
+        INFOPLIST_KEY_CFBundleDisplayName: Cabinet Studio OpenAI
         INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.graphics-design
         INFOPLIST_KEY_NSHumanReadableCopyright: "MIT OR Apache-2.0"
         MARKETING_VERSION: "0.11.0"

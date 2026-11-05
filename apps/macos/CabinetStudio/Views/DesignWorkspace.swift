@@ -656,7 +656,7 @@ final class ViewportScene {
                 }
                 // A rebate along an edge (a side's toe-kick notch, a front's finger pull): the two
                 // boxes it leaves.
-                let pieces = p.openings.isEmpty ? Self.split(box, by: p.rebate) : Self.around(box, openings: p.openings)
+                let pieces = p.openings.isEmpty ? (p.mitres.isEmpty && p.voids.isEmpty ? Self.split(box, by: p.rebate) : [box]) : Self.around(box, openings: p.openings)
                 let board = project.boardsById[p.board]
                 for piece in pieces {
                     seen.insert(piece.name)
@@ -883,7 +883,7 @@ final class ViewportScene {
         let offset = Self.mid(p) - Self.pivot(p)
         let supplier = supplierHandle(p)
         // The grain and arch are in the mesh: a change of either makes a new one.
-        let meshKey = supplier?.0 ?? "\(p.grain) \(p.arch)"
+        let meshKey = supplier?.0 ?? "\(p.grain) \(p.arch) \(p.mitres) \(p.voids)"
         if let e = root.findEntity(named: p.name) as? ModelEntity,
            shapes[p.name] == [size, offset], meshKeys[p.name] == meshKey,
            handleTints[p.name] == p.board {
@@ -907,7 +907,9 @@ final class ViewportScene {
             child.model?.materials = [Self.handleMaterial(Substring(p.board.dropFirst("handle:".count)), selected: false)]
             e.addChild(child)
         } else {
-            let mesh = p.name.hasSuffix("~bevel") && p.bevel.count == 3
+            let mesh = !p.mitres.isEmpty || !p.voids.isEmpty
+                ? Self.mitreMesh(p, size: size)
+                : p.name.hasSuffix("~bevel") && p.bevel.count == 3
                 ? Self.wedgeMesh(p, size: size, by: offset)
                 : p.arch.count == 3
                 ? Self.archedMesh(p, size: size, by: offset)
@@ -984,6 +986,35 @@ final class ViewportScene {
             for i in 1..<(face.count - 1) {
                 let (j, k) = (UInt32(i), UInt32(i + 1))
                 indices += outward ? [base, base + j, base + k] : [base, base + k, base + j]
+            }
+        }
+        var desc = MeshDescriptor()
+        desc.positions = MeshBuffers.Positions(positions)
+        desc.normals = MeshBuffers.Normals(normals)
+        desc.textureCoordinates = MeshBuffers.TextureCoordinates(uvs)
+        desc.primitives = .triangles(indices)
+        return (try? MeshResource.generate(from: [desc])) ?? .generateBox(size: size)
+    }
+
+    private static func mitreMesh(_ p: PanelBox, size: SIMD3<Float>) -> MeshResource {
+        let pieces = StoneGeometry.pieces(min: [p.x,p.y,p.z], max: [p.x+p.width,p.y+p.depth,p.z+p.height], cuts: p.mitres, voids: p.voids)
+        var positions: [SIMD3<Float>] = [], normals: [SIMD3<Float>] = [], uvs: [SIMD2<Float>] = []
+        var indices: [UInt32] = []
+        let origin = pivot(p)
+        for solid in pieces {
+            for face in solid where face.count >= 3 {
+                let points = face.map { point($0.x,$0.y,$0.z)-origin }
+                let cross = simd_cross(points[1]-points[0],points[2]-points[0])
+                guard simd_length(cross) > 1e-12 else { continue }
+                let n = simd_normalize(cross)
+                let base = UInt32(positions.count)
+                let axis = abs(n.x) > max(abs(n.y),abs(n.z)) ? 0 : abs(n.y) > abs(n.z) ? 1 : 2
+                let plane = [0,1,2].filter { $0 != axis }
+                for c in points {
+                    positions.append(c); normals.append(n)
+                    uvs.append([c[plane[0]],c[plane[1]]]/grainRepeat)
+                }
+                for i in 1..<(points.count-1) { indices += [base,base+UInt32(i),base+UInt32(i+1)] }
             }
         }
         var desc = MeshDescriptor()
@@ -1211,6 +1242,13 @@ final class ViewportScene {
         _ p: PanelBox, board: BoardRecord?, paint: (colour: NSColor?, roughness: Double)?, selected: Bool, hovered: Bool
     ) -> PhysicallyBasedMaterial {
         let generic: NSColor = p.isFront ? Theme.front : (p.role == "Back" ? Theme.carcassBack : Theme.carcass)
+        if p.board.hasPrefix("edgeband:") {
+            var m = PhysicallyBasedMaterial()
+            let code = String(p.board.split(separator: ":")[1])
+            m.baseColor = .init(tint: NSColor(hex: code) ?? generic)
+            m.roughness = .init(floatLiteral: 0.6)
+            return m
+        }
         if p.board.hasPrefix("handle:") {
             return Self.handleMaterial(p.board.dropFirst("handle:".count), selected: selected)
         }
@@ -1219,8 +1257,11 @@ final class ViewportScene {
         }
         let colour = paint?.colour ?? board?.displayColour ?? generic
         var m = PhysicallyBasedMaterial()
-        let tint = selected ? NSColor.white : NSColor(calibratedWhite: 0.72, alpha: 1)
-        let texture: TextureResource? = if let board, board.profileModule > 0 {
+        let tint = selected || board?.kind == "sintered_stone" ? NSColor.white : NSColor(calibratedWhite: 0.72, alpha: 1)
+        let slab = board.flatMap { SlabLibrary.surface($0) }
+        let texture: TextureResource? = if let board, let slab {
+            slabTexture(board.id, slab.imageURL)
+        } else if let board, board.profileModule > 0 {
             profileTexture(board, colour)
         } else if let board, board.grained {
             grainTexture(board.id, colour)
@@ -1238,11 +1279,14 @@ final class ViewportScene {
         } else {
             m.baseColor = .init(tint: selected ? colour : colour.blended(withFraction: 0.35, of: .gray) ?? colour)
         }
-        m.roughness = .init(floatLiteral: Float(paint?.roughness ?? (board?.finish.lowercased().contains("gloss") == true ? 0.2 : 0.65)))
+        if let slab {
+            m.textureCoordinateTransform = .init(scale: [Self.grainRepeat/slab.length, Self.grainRepeat/slab.width])
+        }
+        m.roughness = .init(floatLiteral: slab?.roughness ?? Float(paint?.roughness ?? (board?.finish.lowercased().contains("gloss") == true ? 0.2 : 0.65)))
         // The selected cabinet glows faintly in the accent colour; the panel under the pointer more.
         if selected || hovered {
             m.emissiveColor = .init(color: NSColor(hex: 0xE8845E))
-            m.emissiveIntensity = hovered ? 0.6 : 0.12
+            m.emissiveIntensity = slab != nil ? (hovered ? 0.04 : 0) : (hovered ? 0.6 : 0.12)
         } else {
             // Said outright: a new material that leaves this unset keeps the entity's old glow.
             m.emissiveColor = .init(color: .black)
@@ -1404,6 +1448,19 @@ final class ViewportScene {
             }
         }
         return ctx.makeImage()
+    }
+
+    private func slabTexture(_ id: String, _ url: URL) -> TextureResource? {
+        let key = "slab:" + id
+        if let t = grainTextures[key] { return t }
+        guard !loading.contains(key), let image = NSImage(contentsOf: url)?.cgImage(forProposedRect: nil, context: nil, hints: nil) else { return nil }
+        loading.insert(key)
+        Task {
+            grainTextures[key] = try? await TextureResource(image: image, options: .init(semantic: .color, mipmapsMode: .allocateAndGenerateAll))
+            loading.remove(key)
+            onTextureLoaded?()
+        }
+        return nil
     }
 
     /// The decor's woodgrain texture, or nil while it loads.

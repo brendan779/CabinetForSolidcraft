@@ -181,6 +181,9 @@ const SHELF_BRACKET_SPACING: f64 = 400.0;
 /// between and beside them), overhanging the door faces and, if asked, the stretch's ends.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Benchtop {
+    /// Packer and shadow-line construction beneath a mitred built-up top.
+    #[serde(default)]
+    pub build_up: Box<BuildUp>,
     pub id: String,
     #[serde(default = "Benchtop::default_thickness")]
     pub thickness: f64,
@@ -237,6 +240,39 @@ pub struct Benchtop {
     /// (`unsupported_overhang`, `support_spacing`, `front_clearance`...).
     #[serde(default, skip_serializing_if = "std::collections::BTreeMap::is_empty")]
     pub material_rules: std::collections::BTreeMap<String, f64>,
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(default)]
+pub struct BuildUp {
+    pub shadow_height: f64,
+    /// Back from the cabinet fronts; zero is flush.
+    pub setback: f64,
+    pub strip_width: f64,
+    pub board: String,
+    /// Selected board thickness; zero takes the carcass thickness.
+    pub board_thickness: f64,
+    pub edge_tape: Option<ShadowTape>,
+}
+
+impl Default for BuildUp {
+    fn default() -> Self {
+        Self {
+            shadow_height: 20.0,
+            setback: 0.0,
+            strip_width: 80.0,
+            board: String::new(),
+            board_thickness: 0.0,
+            edge_tape: None,
+        }
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct ShadowTape {
+    pub id: String,
+    pub colour: String,
+    pub thickness: f64,
 }
 
 /// The material a benchtop is unless it says: laminate.
@@ -665,6 +701,7 @@ pub fn build_run(run: &Run) -> Result<Vec<PartList>> {
     }
     for (i, item) in run.items.iter().enumerate() {
         if let RunItem::Benchtop(b) = item {
+            crate::benchtop::validate(b)?;
             let under: Vec<bool> = run
                 .items
                 .iter()
@@ -688,10 +725,15 @@ pub fn build_run(run: &Run) -> Result<Vec<PartList>> {
                 .filter(|(j, _)| matches!(line_of(run, *j), Line::Floor | Line::Both))
                 .map(|(_, (l, u))| (l.clone(), *u))
                 .unzip();
-            let mut top = benchtop(b, &floor, &floor_under, wall_ends(run));
+            let mut top = benchtop(b, &floor, &floor_under, wall_ends(run), run.origin);
             cutouts(b, &mut top, &out);
+            crate::benchtop::lining_openings(&mut top);
+            crate::benchtop::band_shadow_rails(&mut top);
+            crate::benchtop::clear_support_openings(&mut top);
+            crate::benchtop::relieve_returns(&mut top);
             splashback_openings(b, &mut top, &out);
-            round_ends(b, &mut top);
+            round_ends(b, &mut top, wall_ends(run));
+            finish_edges(b, &mut top);
             out[i] = top;
         }
     }
@@ -733,6 +775,7 @@ pub fn build_run(run: &Run) -> Result<Vec<PartList>> {
         }
     }
     one_kick_per_stretch(run, &mut out);
+    crate::seen_back::continuous(run, &mut out)?;
     Ok(out)
 }
 
@@ -1669,6 +1712,7 @@ fn benchtop(
     lists: &[PartList],
     under: &[bool],
     wall_x: (Option<f64>, Option<f64>),
+    origin: Vec3,
 ) -> PartList {
     let mut out = PartList {
         cabinet: b.id.clone(),
@@ -1690,6 +1734,8 @@ fn benchtop(
         }
         open = u;
     }
+    // Gaps join real cabinets but cannot define a top's bounds by themselves.
+    stretches.retain(|stretch| stretch.iter().any(|list| !list.parts.is_empty()));
     if stretches.is_empty() {
         out.warnings
             .push("no base cabinets in the run to put the benchtop on".into());
@@ -1698,8 +1744,15 @@ fn benchtop(
     for (n, stretch) in stretches.iter().enumerate() {
         let parts: Vec<&Part> = stretch.iter().flat_map(|l| &l.parts).collect();
         // An L-corner's second leg comes forward of the doors: it gets a piece of its own.
-        let in_line: Vec<&&Part> = parts.iter().filter(|p| p.bounds.min.y >= -100.0).collect();
-        let leg: Vec<&&Part> = parts.iter().filter(|p| p.bounds.min.y < -100.0).collect();
+        let leg_plane = origin.y - 100.0;
+        let in_line: Vec<&&Part> = parts
+            .iter()
+            .filter(|p| p.bounds.min.y >= leg_plane)
+            .collect();
+        let leg: Vec<&&Part> = parts
+            .iter()
+            .filter(|p| p.bounds.min.y < leg_plane)
+            .collect();
         let lo = |f: fn(&Part) -> f64| in_line.iter().map(|p| f(p)).fold(f64::MAX, f64::min);
         let hi = |f: fn(&Part) -> f64| in_line.iter().map(|p| f(p)).fold(f64::MIN, f64::max);
         // No overhang into a return wall: the top runs to it.
@@ -1708,21 +1761,46 @@ fn benchtop(
             walled_at(lo(|p| p.bounds.min.x), wall_x.0),
             walled_at(hi(|p| p.bounds.max().x), wall_x.1),
         );
-        let x0 = lo(|p| p.bounds.min.x) - if at_left { 0.0 } else { b.side_overhang };
-        let x1 = hi(|p| p.bounds.max().x) + if at_right { 0.0 } else { b.side_overhang };
+        let x0 = lo(|p| p.bounds.min.x)
+            - if at_left {
+                0.0
+            } else if b.waterfall_left {
+                b.thickness
+            } else {
+                b.side_overhang
+            };
+        let x1 = hi(|p| p.bounds.max().x)
+            + if at_right {
+                0.0
+            } else if b.waterfall_right {
+                b.thickness
+            } else {
+                b.side_overhang
+            };
         let y0 = lo(|p| p.bounds.min.y) - b.front_overhang;
         // The cabinets' backs: end panels and fillers carry a scribe allowance.
-        let y1 = in_line
+        let cabinet_back = in_line
             .iter()
             .filter(|p| !matches!(p.role, PartRole::EndPanel | PartRole::Filler))
             .map(|p| p.bounds.max().y)
-            .fold(f64::MIN, f64::max)
+            .fold(f64::MIN, f64::max);
+        let seen_back = in_line.iter().any(|p| p.name.ends_with(".SeenBack"));
+        let y1 = cabinet_back
             + if b.back_overhang > 0.0 {
                 b.back_overhang
+            } else if seen_back {
+                0.0
             } else {
                 -b.back_clearance
             };
-        let z = hi(|p| p.bounds.max().z);
+        let base_top = hi(|p| p.bounds.max().z);
+        let rise = match b.edge {
+            EdgeProfile::MitredApron { depth } if depth >= b.thickness => {
+                depth - b.thickness + b.build_up.shadow_height.max(0.0)
+            }
+            _ => 0.0,
+        };
+        let z = base_top + rise;
         out.parts.push(Part {
             name: format!("{}.{}{}", b.id, PartRole::Benchtop.code(), n + 1),
             role: PartRole::Benchtop,
@@ -1774,48 +1852,49 @@ fn benchtop(
                 },
             });
         }
-        // A mitred apron under the front edge, the top's thickness deep, down to the apron's
-        // depth below the top's upper face.
         if let EdgeProfile::MitredApron { depth } = b.edge {
-            let drop = depth - b.thickness;
-            if drop > 0.0 && b.thickness > b.front_overhang {
-                out.warnings.push(format!(
-                    "the apron reaches back past the door faces: give the top at least {:.0} mm \
-                     front overhang, or shorten the fronts by {drop:.0} mm",
-                    b.thickness
-                ));
-            }
-            if drop > 0.0 {
-                out.parts.push(Part {
-                    name: format!("{}.Apron{}", b.id, n + 1),
-                    role: PartRole::Benchtop,
-                    bounds: Aabb::new(
-                        Vec3::new(x0, y0, z - drop),
-                        Vec3::new(x1 - x0, b.thickness, drop),
+            if depth >= b.thickness {
+                crate::benchtop::build_up(
+                    b,
+                    &mut out,
+                    &(n + 1).to_string(),
+                    Aabb::new(
+                        Vec3::new(x0, y0, z),
+                        Vec3::new(x1 - x0, y1 - y0, b.thickness),
                     ),
-                    thickness_axis: Axis::Y,
-                    grain_axis: Some(Axis::X),
-                    board: b.board.clone(),
-                    edges: EdgeBanding::default(),
-                });
+                    Aabb::new(
+                        Vec3::new(lo(|p| p.bounds.min.x), lo(|p| p.bounds.min.y), base_top),
+                        Vec3::new(
+                            hi(|p| p.bounds.max().x) - lo(|p| p.bounds.min.x),
+                            cabinet_back - lo(|p| p.bounds.min.y),
+                            0.0,
+                        ),
+                    ),
+                    &parts,
+                    (at_left, at_right),
+                );
             } else {
                 out.warnings.push(format!(
-                    "a {depth:.0} mm apron is no deeper than the {:.0} mm top",
-                    b.thickness
+                    "a {depth} mm built-up edge is thinner than its slab"
                 ));
             }
         }
+        crate::benchtop::extend_leg(b, &mut out, n + 1, base_top, &parts);
         // Waterfall ends: from the floor up the stretch's ends to the top's upper face, the
         // depth of the top. Mitred with the top: both pieces are cut to their outer faces.
-        let floor = in_line
-            .iter()
-            .map(|p| p.bounds.min.z)
-            .fold(f64::MAX, f64::min);
-        for (on, side, wx0) in [
-            (b.waterfall_left, "L", x0 - b.thickness),
-            (b.waterfall_right, "R", x1),
+        let floor = origin.z;
+        for (on, side, wx0, at_wall) in [
+            (b.waterfall_left, "L", x0, at_left),
+            (b.waterfall_right, "R", x1 - b.thickness, at_right),
         ] {
             if on {
+                if at_wall {
+                    out.warnings.push(format!(
+                        "{}: {side} waterfall meets a return wall; left out",
+                        b.id
+                    ));
+                    continue;
+                }
                 out.parts.push(Part {
                     name: format!("{}.Waterfall{}{side}", b.id, n + 1),
                     role: PartRole::Benchtop,
@@ -1833,6 +1912,7 @@ fn benchtop(
                 });
             }
         }
+        crate::benchtop::mitre_waterfalls(b, &mut out, n + 1);
         // The material's rules: an overhang needs nothing, an 18 mm substrate, or brackets at
         // the material's spacing; stone also keeps it to a third of the top's depth.
         let overhang = b.back_overhang;
@@ -1852,7 +1932,10 @@ fn benchtop(
                     r.name
                 ));
             } else {
-                let brackets = ((x1 - x0) / r.support_spacing).ceil().max(2.0) as u32;
+                let brackets = ((hi(|p| p.bounds.max().x) - lo(|p| p.bounds.min.x))
+                    / r.support_spacing)
+                    .ceil()
+                    .max(2.0) as u32;
                 out.hardware.push(crate::part::HardwarePlacement {
                     item: "benchtop.support-bracket".into(),
                     description: format!(
@@ -1892,6 +1975,13 @@ fn cutouts(b: &Benchtop, top: &mut PartList, lists: &[PartList]) {
     use crate::part::{BorePurpose, Dir, Operation};
     let rules = b.rules().ok();
     for c in &b.cutouts {
+        if !c.width.is_finite() || !c.depth.is_finite() || c.width <= 0.0 || c.depth <= 0.0 {
+            top.warnings.push(format!(
+                "{:?} cut-out over {} needs positive, finite width and depth; left out",
+                c.kind, c.over
+            ));
+            continue;
+        }
         let Some(cab) = lists.iter().find(|l| l.cabinet == c.over) else {
             top.warnings.push(format!(
                 "{:?} cut-out: no cabinet {} in the run",
@@ -1904,7 +1994,12 @@ fn cutouts(b: &Benchtop, top: &mut PartList, lists: &[PartList]) {
         let Some(piece) = top
             .parts
             .iter()
-            .find(|p| p.bounds.min.x <= mid && mid <= p.bounds.max().x)
+            .find(|p| {
+                p.role == PartRole::Benchtop
+                    && p.thickness_axis == Axis::Z
+                    && p.bounds.min.x <= mid
+                    && mid <= p.bounds.max().x
+            })
             .cloned()
         else {
             top.warnings
@@ -1917,7 +2012,12 @@ fn cutouts(b: &Benchtop, top: &mut PartList, lists: &[PartList]) {
             Vec3::new(mid - c.width / 2.0, y0, pb.min.z),
             Vec3::new(c.width, c.depth, pb.size.z),
         );
-        if bounds.min.x < pb.min.x || bounds.max().x > pb.max().x || bounds.max().y > pb.max().y {
+        if !c.setback.is_finite()
+            || bounds.min.x < pb.min.x
+            || bounds.max().x > pb.max().x
+            || bounds.min.y < pb.min.y
+            || bounds.max().y > pb.max().y
+        {
             top.warnings.push(format!(
                 "{:?} cut-out over {} does not fit the benchtop",
                 c.kind, c.over
@@ -2002,7 +2102,7 @@ fn cutouts(b: &Benchtop, top: &mut PartList, lists: &[PartList]) {
 }
 
 /// Rounds the free corners of each in-line piece's ends.
-fn round_ends(b: &Benchtop, top: &mut PartList) {
+fn round_ends(b: &Benchtop, top: &mut PartList, wall_x: (Option<f64>, Option<f64>)) {
     let r = b.end_radius;
     if r <= 0.0 {
         return;
@@ -2039,11 +2139,11 @@ fn round_ends(b: &Benchtop, top: &mut PartList) {
         if b.back_overhang > 0.0 {
             ys.push(pb.max().y);
         }
-        for (x, waterfall, left) in [
-            (pb.min.x, b.waterfall_left, true),
-            (pb.max().x, b.waterfall_right, false),
+        for (x, waterfall, left, wall) in [
+            (pb.min.x, b.waterfall_left, true, wall_x.0),
+            (pb.max().x, b.waterfall_right, false, wall_x.1),
         ] {
-            if waterfall || leg == Some(left) {
+            if waterfall || leg == Some(left) || wall.is_some_and(|w| (w - x).abs() < 1.0) {
                 continue;
             }
             for &y in &ys {
@@ -2057,7 +2157,70 @@ fn round_ends(b: &Benchtop, top: &mut PartList) {
     }
 }
 
-/// From the left to the right of a cabinet's parts.
+/// Ease the thickness edges; the top-view outline and blank dimensions stay independent.
+fn finish_edges(b: &Benchtop, list: &mut PartList) {
+    // Shop defaults for easing the two sharp arrises; a full bullnose uses the slab thickness.
+    let (size, bevel) = match b.edge {
+        EdgeProfile::PencilRound => (2.0_f64.min(b.thickness / 2.0), false),
+        EdgeProfile::Bullnose => (b.thickness / 2.0, false),
+        EdgeProfile::Bevel => (2.0_f64.min(b.thickness / 2.0), true),
+        _ => return,
+    };
+    for p in list
+        .parts
+        .iter()
+        .filter(|p| p.role == PartRole::Benchtop && p.thickness_axis == Axis::Z)
+    {
+        // The current SolidCraft kernel cannot make a half-thickness fillet around a
+        // rounded plan corner. Keep the outline usable rather than failing the whole job.
+        if b.edge == EdgeProfile::Bullnose
+            && list.operations.iter().any(
+                |op| matches!(op, crate::part::Operation::Round { part, .. } if *part == p.name),
+            )
+        {
+            list.warnings.push(format!(
+                "{}: full bullnose with rounded ends is not supported; thickness edges stay square",
+                p.name
+            ));
+            continue;
+        }
+        let leg = p.name.ends_with("Leg");
+        let left = p.edges.left && (leg || !b.waterfall_left);
+        let right = p.edges.right && (leg || !b.waterfall_right);
+        let full = b.edge == EdgeProfile::Bullnose;
+        if full && ((!leg && (left || right)) || (leg && p.edges.front)) {
+            list.warnings.push(format!("{}: full bullnose is applied to the front only; end thickness edges stay square (kernel limitation)", p.name));
+        }
+        let lo = p.bounds.min;
+        let hi = p.bounds.max();
+        let mid = p.bounds.center();
+        let mut edges = Vec::new();
+        let levels = if bevel { vec![hi.z] } else { vec![hi.z, lo.z] };
+        for z in levels {
+            if p.edges.front && (!full || !leg) {
+                edges.push(Vec3::new(mid.x, lo.y, z));
+            }
+            if p.edges.back {
+                edges.push(Vec3::new(mid.x, hi.y, z));
+            }
+            if left && (!full || leg) {
+                edges.push(Vec3::new(lo.x, mid.y, z));
+            }
+            if right && (!full || leg) {
+                edges.push(Vec3::new(hi.x, mid.y, z));
+            }
+        }
+        if !edges.is_empty() {
+            list.operations.push(crate::part::Operation::EdgeFinish {
+                part: p.name.clone(),
+                edges,
+                size,
+                bevel,
+            });
+        }
+    }
+}
+
 fn span_x(cab: &PartList) -> (f64, f64) {
     let x0 = cab
         .parts
@@ -2452,6 +2615,7 @@ mod tests {
 
     fn top(id: &str, side: f64) -> RunItem {
         RunItem::Benchtop(Benchtop {
+            build_up: Default::default(),
             id: id.into(),
             thickness: 33.0,
             front_overhang: 20.0,
@@ -2537,6 +2701,7 @@ mod tests {
     #[test]
     fn cut_outs_go_through_the_top_over_their_cabinets() {
         let mut bt = Benchtop {
+            build_up: Default::default(),
             id: "BT1".into(),
             thickness: 33.0,
             front_overhang: 20.0,
@@ -2895,7 +3060,8 @@ mod tests {
             bt.part("BT1.Waterfall1L").unwrap().bounds,
             bt.part("BT1.Waterfall1R").unwrap().bounds,
         );
-        assert_eq!((l.max().x, r.min.x), (top.min.x, top.max().x));
+        assert_eq!((l.min.x, r.max().x), (top.min.x, top.max().x));
+        assert_eq!((l.max().x, r.min.x), (0.0, 1200.0));
         assert_eq!((l.min.z, l.max().z), (0.0, top.max().z));
         assert_eq!(l.size.y, top.size.y);
         assert!(bt.part("BT1.Splashback1").is_none());
@@ -3067,7 +3233,10 @@ mod tests {
         let top = bt.part("BT1.Benchtop1").unwrap().bounds;
         let apron = bt.part("BT1.Apron1").unwrap().bounds;
         assert_eq!((apron.min.y, apron.size.y), (top.min.y, 20.0));
-        assert_eq!((apron.min.z, apron.max().z), (top.min.z - 40.0, top.min.z));
+        assert_eq!(
+            (apron.min.z, apron.max().z),
+            (top.max().z - 60.0, top.max().z)
+        );
         assert_eq!(bt.notes, ["Edge profile: mitred apron, 60 mm deep"]);
         // 20 mm overhang takes a 20 mm apron; a 33 mm top's apron would reach the doors.
         assert!(bt.warnings.is_empty(), "{:?}", bt.warnings);
@@ -3835,6 +4004,7 @@ mod tests {
         let lists = tiled(vec![
             cab("B1", CabinetKind::Base),
             RunItem::Benchtop(Benchtop {
+                build_up: Default::default(),
                 id: "T1".into(),
                 ..serde_json::from_str(
                     r#"{"id":"T1","thickness":33,"front_overhang":20,"side_overhang":0}"#,
