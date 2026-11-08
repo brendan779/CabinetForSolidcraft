@@ -92,7 +92,6 @@ fn manifest(
                         "colour": colours.get(board).map(String::as_str).or_else(|| board.strip_prefix("edgeband:").and_then(|s| s.split(':').next())).or_else(||found.map(|b|b.preview_colour.as_str())),
                         "look": image.get("look").unwrap_or_else(|| finishes["finishes"].get(finish).unwrap_or(&finishes["default"])),
                         "stone": image["stone"],
-                        "file": image["file"],
                         "image": image["name"],
                         "pixels": image["pixels"],
                         "normal": image["normal"],
@@ -190,21 +189,10 @@ pub fn write_blender_job(
         .map_err(invalid)
     };
     write("build.json", &json!({ "commands": commands }))?;
-    let mut job = manifest(&lists, walls.as_ref(), Path::new(&catalog_dir), &colours)?;
-    for board in job["boards"]
-        .as_object_mut()
-        .into_iter()
-        .flat_map(|b| b.values_mut())
-    {
-        if let Some(file) = board["file"].as_str().map(str::to_owned) {
-            let source = Path::new(&catalog_dir).join("textures").join(&file);
-            let name = format!("textures/{}.jpg", board["image"].as_str().unwrap_or("slab"));
-            std::fs::create_dir_all(folder.join("textures")).map_err(invalid)?;
-            std::fs::copy(source, folder.join(&name)).map_err(invalid)?;
-            board["file"] = json!(name);
-        }
-    }
-    write("job.json", &job)
+    write(
+        "job.json",
+        &manifest(&lists, walls.as_ref(), Path::new(&catalog_dir), &colours)?,
+    )
 }
 
 #[cfg(test)]

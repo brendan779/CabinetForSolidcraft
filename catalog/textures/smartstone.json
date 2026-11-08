@@ -1,11 +1,10 @@
 {
   "source": "Owner supplied SmartstoneSinteredStone.zip, 2026-11-05; product metadata from the official pages linked in boards/smartstone.json.",
-  "notes": "Images map to the stated physical slab size, independently of pixel aspect. Originals with 16:9 filenames retained in full. JPEG originals copied unchanged; WebP decoded to JPEG for native and Blender compatibility. No relief inferred from veins. Local images; no runtime download.",
+  "notes": "Images map to the stated physical slab size, independently of pixel aspect. Originals with 16:9 filenames retained in full. JPEG originals copied unchanged; WebP decoded to JPEG for native and Blender compatibility. No relief inferred from veins. Local only: the images are the brand's, kept in ~/Library/Application Support/CabinetStudio/decors as <name>.jpg (scripts/import-smartstone.py), never committed; no runtime download.",
   "verified": false,
   "images": {
     "Arabescato Chiaro": {
       "name": "smartstone-arabescato-chiaro",
-      "file": "smartstone/arabescato-chiaro.jpg",
       "pixels": [
         2500,
         1250
@@ -29,7 +28,6 @@
     },
     "Austral Dream": {
       "name": "smartstone-austral-dream",
-      "file": "smartstone/austral-dream.jpg",
       "pixels": [
         1920,
         1080
@@ -53,7 +51,6 @@
     },
     "Bellini Bianco": {
       "name": "smartstone-bellini-bianco",
-      "file": "smartstone/bellini-bianco.jpg",
       "pixels": [
         2500,
         1250
@@ -77,7 +74,6 @@
     },
     "Bianco Angelico": {
       "name": "smartstone-bianco-angelico",
-      "file": "smartstone/bianco-angelico.jpg",
       "pixels": [
         2500,
         1250
@@ -101,7 +97,6 @@
     },
     "Calacatta Bianco": {
       "name": "smartstone-calacatta-bianco",
-      "file": "smartstone/calacatta-bianco.jpg",
       "pixels": [
         2500,
         1250
@@ -125,7 +120,6 @@
     },
     "Calacatta Borghini": {
       "name": "smartstone-calacatta-borghini",
-      "file": "smartstone/calacatta-borghini.jpg",
       "pixels": [
         2500,
         1250
@@ -149,7 +143,6 @@
     },
     "Calacatta Lusso": {
       "name": "smartstone-calacatta-lusso",
-      "file": "smartstone/calacatta-lusso.jpg",
       "pixels": [
         2500,
         1250
@@ -173,7 +166,6 @@
     },
     "Calacatta Oro": {
       "name": "smartstone-calacatta-oro",
-      "file": "smartstone/calacatta-oro.jpg",
       "pixels": [
         2500,
         1250
@@ -197,7 +189,6 @@
     },
     "Calacatta Verde": {
       "name": "smartstone-calacatta-verde",
-      "file": "smartstone/calacatta-verde.jpg",
       "pixels": [
         2500,
         1250
@@ -221,7 +212,6 @@
     },
     "Calacatta Viola": {
       "name": "smartstone-calacatta-viola",
-      "file": "smartstone/calacatta-viola.jpg",
       "pixels": [
         2500,
         1250
@@ -245,7 +235,6 @@
     },
     "Carrara": {
       "name": "smartstone-carrara",
-      "file": "smartstone/carrara.jpg",
       "pixels": [
         2500,
         1250
@@ -269,7 +258,6 @@
     },
     "Grafite Titanio": {
       "name": "smartstone-grafite-titanio",
-      "file": "smartstone/grafite-titanio.jpg",
       "pixels": [
         2500,
         1250
@@ -293,7 +281,6 @@
     },
     "Les Quatre Saisons": {
       "name": "smartstone-les-quatre-saisons",
-      "file": "smartstone/les-quatre-saisons.jpg",
       "pixels": [
         2500,
         1250
@@ -317,7 +304,6 @@
     },
     "Pietra Luna": {
       "name": "smartstone-pietra-luna",
-      "file": "smartstone/pietra-luna.jpg",
       "pixels": [
         2500,
         1333
@@ -341,7 +327,6 @@
     },
     "Pietra Scuro": {
       "name": "smartstone-pietra-scuro",
-      "file": "smartstone/pietra-scuro.jpg",
       "pixels": [
         2500,
         1250
@@ -365,7 +350,6 @@
     },
     "Statuario Grigio": {
       "name": "smartstone-statuario-grigio",
-      "file": "smartstone/statuario-grigio.jpg",
       "pixels": [
         2500,
         1250
@@ -389,7 +373,6 @@
     },
     "Super White": {
       "name": "smartstone-super-white",
-      "file": "smartstone/super-white.jpg",
       "pixels": [
         1920,
         1080
@@ -413,7 +396,6 @@
     },
     "Taj Mahal": {
       "name": "smartstone-taj-mahal",
-      "file": "smartstone/taj-mahal.jpg",
       "pixels": [
         2500,
         1250
@@ -437,7 +419,6 @@
     },
     "Volakas Gold": {
       "name": "smartstone-volakas-gold",
-      "file": "smartstone/volakas-gold.jpg",
       "pixels": [
         2500,
         1250

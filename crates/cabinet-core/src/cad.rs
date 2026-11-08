@@ -4,8 +4,8 @@
 //! face of the cabinet side the part is fixed to (hinges and plates sit at negative X, inside the
 //! cabinet), Y is up, Z points to the front, and the cabinet's front edge is at Z =
 //! [`BLUM_FRONT_PLANE`]. A part's height reference is Y = 0: the hinge's centre line, or the
-//! mounting screw line for runners, or the underside of the drawer base for box sides.
-//! Hinges and plates come as one model;
+//! mounting screw line for runners and the box sides drawn with them. Hinges and plates come as
+//! one model;
 //! runners, profiles and drawer sides as a left and a right one.
 //!
 //! So a model is placed by mapping that frame onto ours: the side's inner face, the cabinet front
@@ -658,13 +658,19 @@ pub fn cad_placements(list: &PartList) -> Vec<CadPlacement> {
             } else {
                 "Runner"
             };
-            let z = if kind == "Runner" {
-                let Some(z) = runner_height(list, h, item, base) else {
-                    continue;
-                };
-                z
+            // A box side is drawn in its runner's frame, so it sits where the runner does.
+            let runner = if kind == "Runner" {
+                Some((h, item))
             } else {
-                base
+                list.hardware
+                    .iter()
+                    .filter(|r| {
+                        r.part == h.part && is_runner(&r.item) && !r.item.contains("drawer-side")
+                    })
+                    .find_map(|r| crate::hardware::item(&r.item).ok().map(|i| (r, i)))
+            };
+            let Some(z) = runner.and_then(|(r, i)| runner_height(list, r, i, base)) else {
+                continue;
             };
             let n = next(kind);
             let x = list

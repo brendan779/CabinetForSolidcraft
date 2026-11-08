@@ -92,7 +92,7 @@ sys.path.insert(0, os.environ['SCENE_SCRIPT_DIR'])
 from build_scene import build
 folder = os.environ['BENCH_CHECK_DIR']
 path = lambda name: os.path.join(folder, name)
-build(path('job.json'), path('job.obj'), path('check.blend'), path('cache'), None)
+build(path('job.json'), path('job.obj'), path('check.blend'), os.environ.get('DECOR_CACHE') or path('cache'), None)
 job = json.load(open(path('job.json')))
 for part in job['parts']:
     if part['role'] != 'Benchtop':
@@ -198,6 +198,15 @@ print('benchtop scene checks passed')
         ])
         .env("BENCH_CHECK_DIR", &dir)
         .env("STONE_PRODUCT", stone.unwrap_or(""))
+        // Slab images live only in the local decors folder.
+        .env(
+            "DECOR_CACHE",
+            if stone.is_some() {
+                std::env::var("HOME").unwrap() + "/Library/Application Support/CabinetStudio/decors"
+            } else {
+                String::new()
+            },
+        )
         .env("BENCH_FALLS", if falls { "1" } else { "0" })
         .env("BENCH_BUILT_UP", if built_up { "1" } else { "0" })
         .env(

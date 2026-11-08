@@ -142,3 +142,24 @@ fn inner_drawers_use_the_same_runner_datum_without_a_drawer_front() {
         }
     }
 }
+
+#[test]
+fn box_sides_are_drawn_in_their_runners_frame() {
+    // A box side's model shares its profile's frame: at the base, it sank into the bottom panel.
+    for system in ["legrabox", "merivobox", "tandembox"] {
+        let mut cab = cabinet_core::Cabinet::new("D01", cabinet_core::CabinetKind::DrawerBank);
+        cab.standard.drawer_system = serde_json::from_value(system.into()).unwrap();
+        let list = build_cabinet(&cab).unwrap();
+        let placed = cad_placements(&list);
+        let sides: Vec<_> = placed
+            .iter()
+            .filter(|p| p.name.contains("BoxSide"))
+            .collect();
+        assert_eq!(sides.len(), 6, "{system}");
+        for side in sides {
+            let runner = side.name.replace("BoxSide", "Runner");
+            let runner = placed.iter().find(|p| p.name == runner).unwrap();
+            assert_eq!(side.origin.z, runner.origin.z, "{system} {}", side.name);
+        }
+    }
+}

@@ -12,11 +12,14 @@ import re
 from zipfile import ZipFile
 from PIL import Image, ImageStat
 
+DECORS = Path.home() / 'Library' / 'Application Support' / 'CabinetStudio' / 'decors'
+
 
 def import_archive(archive, catalog):
     images = {}
     boards = []
-    dest = catalog / 'textures' / 'smartstone'
+    # The brand's images stay on this Mac, beside the other decors: not ours to publish.
+    dest = DECORS
     dest.mkdir(parents=True, exist_ok=True)
     with ZipFile(archive) as z:
         for member in z.namelist():
@@ -29,7 +32,7 @@ def import_archive(archive, catalog):
             decor = slug.replace('-', ' ').title()
             finish = 'Suede' if slug in ['pietra-scuro', 'grafite-titanio'] else 'Matt'
             im = Image.open(io.BytesIO(data)).convert('RGB')
-            filename = f'{slug}.jpg'
+            filename = f'smartstone-{slug}.jpg'
             if Path(member).suffix.lower() == '.jpg':
                 (dest / filename).write_bytes(data)
             else:
@@ -38,7 +41,7 @@ def import_archive(archive, catalog):
             sample.thumbnail((100, 100))
             colour = '#' + ''.join(f'{round(c):02x}' for c in ImageStat.Stat(sample).mean)
             images[decor] = {
-                'name': f'smartstone-{slug}', 'file': f'smartstone/{filename}',
+                'name': f'smartstone-{slug}',
                 'pixels': list(im.size), 'covers': [3200, 1600],
                 'url': None, 'normal': None, 'stone': True,
                 'look': {'roughness': 0.48 if finish == 'Suede' else 0.32, 'bump': 0, 'coat': 0, 'micro_bump': 0.08 if finish == 'Suede' else 0},
