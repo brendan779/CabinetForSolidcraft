@@ -39,9 +39,10 @@ Every refusal is JSON, `{"error": "…"}`, saying what is wrong:
 
 | Status | When |
 |---|---|
+| `400` | The body isn't UTF-8 text |
 | `401` | `ENGINE_TOKEN` is set and the request doesn't carry it |
 | `413` | Body over 2 MB |
-| `422` | Not a run; a number not finite or beyond ±20,000 mm; a cabinet's width, depth or height not in (0, 5000] mm; over 100 items or 12 drawers; an id that isn't 1–32 letters, digits, `.`, `_`, `-`, or one used twice; `tape` not 0–5, `kerf` not 0–10, `trim` not 0–50, a job name over 120 characters |
+| `422` | Not a run; a number not finite or beyond ±20,000 mm; a cabinet's width, depth or height not in (0, 5000] mm; over 100 items, 12 drawers, 20 shelves in a cabinet or niche, or 100 entries in any list; a tile under 50 mm (give mosaic as one sheet-sized tile) or grout over 20 mm; a run that makes over 2,000 parts; an id that isn't 1–32 letters, digits, `.`, `_`, `-`, or one used twice; `tape` not 0–5, `kerf` not 0–10, `trim` not 0–50, a job name over 120 characters |
 | `503` | No build slot free within 20 s (one build per core runs at once), or a build over 60 s |
 
 ## Deploy

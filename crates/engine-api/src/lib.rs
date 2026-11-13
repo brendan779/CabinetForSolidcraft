@@ -41,7 +41,7 @@ pub struct AppState {
     /// When set, `/v1` routes need `Authorization: Bearer <token>`.
     pub token: Option<String>,
     /// Builds running at once: one per core, so a burst queues instead of starving the server.
-    pub builds: tokio::sync::Semaphore,
+    pub builds: Arc<tokio::sync::Semaphore>,
 }
 
 impl AppState {
@@ -50,7 +50,7 @@ impl AppState {
         AppState {
             catalog,
             token: token.filter(|t| !t.is_empty()),
-            builds: tokio::sync::Semaphore::new(cores),
+            builds: Arc::new(tokio::sync::Semaphore::new(cores)),
         }
     }
 }
@@ -108,6 +108,7 @@ pub fn board_name(p: &Part) -> String {
 
 pub fn build(run: &Run, opts: &Options, catalog: Option<&Catalog>) -> Result<Built, String> {
     let lists = build_run(run).map_err(|e| e.to_string())?;
+    validate::parts(lists.iter().map(|l| l.parts.len()).sum())?;
     let clashes = lists
         .iter()
         .flat_map(collisions::check)
@@ -329,11 +330,15 @@ fn parse(
 }
 
 /// Runs `work` on a blocking thread once a build slot is free, within the time limits.
+///
+/// A blocking thread can't be stopped, so the slot goes with the work and is freed only when
+/// the work ends, not when the client hangs up or the timeout answers: hung-up requests can't
+/// pile up more builds than there are cores. The input limits keep every build short.
 async fn on_worker<T: Send + 'static>(
     st: &Arc<AppState>,
     work: impl FnOnce() -> Result<T, String> + Send + 'static,
 ) -> Result<T, Response> {
-    let _permit = tokio::time::timeout(QUEUE_WAIT, st.builds.acquire())
+    let permit = tokio::time::timeout(QUEUE_WAIT, st.builds.clone().acquire_owned())
         .await
         .map_err(|_| {
             error(
@@ -342,7 +347,11 @@ async fn on_worker<T: Send + 'static>(
             )
         })?
         .map_err(|_| error(StatusCode::SERVICE_UNAVAILABLE, "the engine is stopping"))?;
-    match tokio::time::timeout(BUILD_TIMEOUT, tokio::task::spawn_blocking(work)).await {
+    let job = tokio::task::spawn_blocking(move || {
+        let _permit = permit;
+        work()
+    });
+    match tokio::time::timeout(BUILD_TIMEOUT, job).await {
         Err(_) => Err(error(
             StatusCode::SERVICE_UNAVAILABLE,
             "the build took too long",

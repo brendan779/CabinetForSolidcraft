@@ -177,3 +177,46 @@ async fn with_a_token_set_v1_needs_it_and_health_does_not() {
         .unwrap();
     assert_eq!(health.status(), StatusCode::OK);
 }
+
+#[tokio::test]
+async fn a_cabinet_with_thousands_of_shelves_is_refused() {
+    let mut run = sample_value();
+    run["items"][0]["adjustable_shelves"] = serde_json::json!(20000);
+    let (status, msg) = error_of("/v1/build/files", run).await;
+    assert_eq!(status, StatusCode::UNPROCESSABLE_ENTITY);
+    assert!(msg.contains("adjustable_shelves"), "{msg}");
+}
+
+#[tokio::test]
+async fn tiles_too_small_to_lay_one_by_one_are_refused() {
+    let mut run = sample_value();
+    run["items"]
+        .as_array_mut()
+        .unwrap()
+        .push(serde_json::json!({
+            "type": "splashback", "id": "S1", "tile_width": 0.05, "tile_height": 0.05,
+            "grout": 0.0, "pattern": "stack", "colour": "#ffffff", "grout_colour": "#888888",
+            "thickness": 10.0
+        }));
+    let (status, msg) = error_of("/v1/build", run).await;
+    assert_eq!(status, StatusCode::UNPROCESSABLE_ENTITY);
+    assert!(msg.contains("at least 50 mm"), "{msg}");
+}
+
+#[tokio::test]
+async fn every_kind_of_cabinet_with_its_defaults_passes_the_limits() {
+    let items: Vec<_> = cabinet_core::CabinetKind::ALL
+        .iter()
+        .enumerate()
+        .map(|(i, k)| {
+            cabinet_core::RunItem::Cabinet(Box::new(cabinet_core::Cabinet::new(
+                format!("C{i:02}"),
+                *k,
+            )))
+        })
+        .collect();
+    let mut run = sample_run();
+    run.items = items;
+    let (status, body) = post("/v1/build", serde_json::to_string(&run).unwrap()).await;
+    assert_eq!(status, StatusCode::OK, "{}", String::from_utf8_lossy(&body));
+}

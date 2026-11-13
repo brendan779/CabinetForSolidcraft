@@ -60,7 +60,18 @@ fn demo(dir: &str) -> Result<(), String> {
 fn health() -> bool {
     use std::io::{Read, Write};
     let port = std::env::var("PORT").unwrap_or_else(|_| "8080".into());
-    let Ok(mut s) = std::net::TcpStream::connect(format!("127.0.0.1:{port}")) else {
+    // The address `serve` listens on, or loopback when it listens on every address.
+    let host = match std::env::var("BIND")
+        .ok()
+        .and_then(|b| b.parse::<std::net::IpAddr>().ok())
+    {
+        Some(ip) if !ip.is_unspecified() => ip,
+        _ => std::net::IpAddr::from([127, 0, 0, 1]),
+    };
+    let Ok(mut s) = std::net::TcpStream::connect_timeout(
+        &(host, port.parse().unwrap_or(8080)).into(),
+        std::time::Duration::from_secs(2),
+    ) else {
         return false;
     };
     let _ = s.set_read_timeout(Some(std::time::Duration::from_secs(2)));
