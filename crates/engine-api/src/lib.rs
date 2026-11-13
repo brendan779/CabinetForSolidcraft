@@ -6,10 +6,15 @@
 
 use std::io::Write;
 use std::sync::Arc;
+use std::time::Duration;
+
+pub mod validate;
 
 use axum::Router;
-use axum::extract::{DefaultBodyLimit, Query, State};
-use axum::http::{StatusCode, header};
+use axum::extract::rejection::{QueryRejection, StringRejection};
+use axum::extract::{DefaultBodyLimit, Query, Request, State};
+use axum::http::{HeaderMap, StatusCode, header};
+use axum::middleware::{self, Next};
 use axum::response::{IntoResponse, Response};
 use axum::routing::{get, post};
 use cabinet_catalog::Catalog;
@@ -26,10 +31,34 @@ const GENERIC_SHEET: (f64, f64) = (2800.0, 2070.0);
 /// Largest request body: a whole kitchen is a few tens of kB.
 const BODY_LIMIT: usize = 2 * 1024 * 1024;
 
-#[derive(Default)]
+/// How long a build may wait for a free worker, and how long it may then run.
+const QUEUE_WAIT: Duration = Duration::from_secs(20);
+const BUILD_TIMEOUT: Duration = Duration::from_secs(60);
+
 pub struct AppState {
     /// Boards and their sheet sizes. None: every board nests on the generic sheet.
     pub catalog: Option<Catalog>,
+    /// When set, `/v1` routes need `Authorization: Bearer <token>`.
+    pub token: Option<String>,
+    /// Builds running at once: one per core, so a burst queues instead of starving the server.
+    pub builds: tokio::sync::Semaphore,
+}
+
+impl AppState {
+    pub fn new(catalog: Option<Catalog>, token: Option<String>) -> Self {
+        let cores = std::thread::available_parallelism().map_or(2, |n| n.get());
+        AppState {
+            catalog,
+            token: token.filter(|t| !t.is_empty()),
+            builds: tokio::sync::Semaphore::new(cores),
+        }
+    }
+}
+
+impl Default for AppState {
+    fn default() -> Self {
+        AppState::new(None, None)
+    }
 }
 
 /// Build options from the query string.
@@ -279,9 +308,52 @@ fn error(status: StatusCode, msg: impl Into<String>) -> Response {
         .into_response()
 }
 
-/// Reads a run from a JSON body, saying what is wrong in plain words when it isn't one.
-fn parse_run(body: &str) -> Result<Run, String> {
-    serde_json::from_str(body).map_err(|e| format!("not a valid run: {e}"))
+/// Reads and checks a run and its options; every refusal says what is wrong in plain words.
+// The error is the response the handler returns at once: boxing it buys nothing.
+#[allow(clippy::result_large_err)]
+fn parse(
+    body: Result<String, StringRejection>,
+    opts: Result<Query<Options>, QueryRejection>,
+) -> Result<(Run, Options), Response> {
+    let body = body.map_err(|e| error(e.status(), e.body_text()))?;
+    let Query(opts) = opts.map_err(|e| error(StatusCode::UNPROCESSABLE_ENTITY, e.body_text()))?;
+    validate::options(&opts).map_err(|e| error(StatusCode::UNPROCESSABLE_ENTITY, e))?;
+    let run: Run = serde_json::from_str(&body).map_err(|e| {
+        error(
+            StatusCode::UNPROCESSABLE_ENTITY,
+            format!("not a valid run: {e}"),
+        )
+    })?;
+    validate::run(&run).map_err(|e| error(StatusCode::UNPROCESSABLE_ENTITY, e))?;
+    Ok((run, opts))
+}
+
+/// Runs `work` on a blocking thread once a build slot is free, within the time limits.
+async fn on_worker<T: Send + 'static>(
+    st: &Arc<AppState>,
+    work: impl FnOnce() -> Result<T, String> + Send + 'static,
+) -> Result<T, Response> {
+    let _permit = tokio::time::timeout(QUEUE_WAIT, st.builds.acquire())
+        .await
+        .map_err(|_| {
+            error(
+                StatusCode::SERVICE_UNAVAILABLE,
+                "the engine is busy: try again shortly",
+            )
+        })?
+        .map_err(|_| error(StatusCode::SERVICE_UNAVAILABLE, "the engine is stopping"))?;
+    match tokio::time::timeout(BUILD_TIMEOUT, tokio::task::spawn_blocking(work)).await {
+        Err(_) => Err(error(
+            StatusCode::SERVICE_UNAVAILABLE,
+            "the build took too long",
+        )),
+        Ok(Err(e)) => Err(error(
+            StatusCode::INTERNAL_SERVER_ERROR,
+            format!("build failed: {e}"),
+        )),
+        Ok(Ok(Err(e))) => Err(error(StatusCode::UNPROCESSABLE_ENTITY, e)),
+        Ok(Ok(Ok(v))) => Ok(v),
+    }
 }
 
 async fn health() -> &'static str {
@@ -294,36 +366,42 @@ async fn sample() -> axum::Json<Run> {
 
 async fn build_json(
     State(st): State<Arc<AppState>>,
-    Query(opts): Query<Options>,
-    body: String,
+    opts: Result<Query<Options>, QueryRejection>,
+    body: Result<String, StringRejection>,
 ) -> Response {
-    let run = match parse_run(&body) {
-        Ok(r) => r,
-        Err(e) => return error(StatusCode::UNPROCESSABLE_ENTITY, e),
+    let (run, opts) = match parse(body, opts) {
+        Ok(x) => x,
+        Err(e) => return e,
     };
-    match build(&run, &opts, st.catalog.as_ref()) {
-        Ok(b) => axum::Json(b.summary()).into_response(),
-        Err(e) => error(StatusCode::UNPROCESSABLE_ENTITY, e),
+    let state = st.clone();
+    let res = on_worker(&st, move || {
+        let b = build(&run, &opts, state.catalog.as_ref())?;
+        serde_json::to_vec(&b.summary()).map_err(|e| e.to_string())
+    })
+    .await;
+    match res {
+        Ok(json) => ([(header::CONTENT_TYPE, "application/json")], json).into_response(),
+        Err(e) => e,
     }
 }
 
 async fn build_files(
     State(st): State<Arc<AppState>>,
-    Query(opts): Query<Options>,
-    body: String,
+    opts: Result<Query<Options>, QueryRejection>,
+    body: Result<String, StringRejection>,
 ) -> Response {
-    let run = match parse_run(&body) {
-        Ok(r) => r,
-        Err(e) => return error(StatusCode::UNPROCESSABLE_ENTITY, e),
+    let (run, opts) = match parse(body, opts) {
+        Ok(x) => x,
+        Err(e) => return e,
     };
-    // Drawing every PDF is CPU work: keep it off the async workers.
-    let res = tokio::task::spawn_blocking(move || {
-        let b = build(&run, &opts, st.catalog.as_ref())?;
+    let state = st.clone();
+    let res = on_worker(&st, move || {
+        let b = build(&run, &opts, state.catalog.as_ref())?;
         zip(&b.files(&opts.job)).map_err(|e| e.to_string())
     })
     .await;
     match res {
-        Ok(Ok(bytes)) => (
+        Ok(bytes) => (
             [
                 (header::CONTENT_TYPE, "application/zip"),
                 (
@@ -334,20 +412,38 @@ async fn build_files(
             bytes,
         )
             .into_response(),
-        Ok(Err(e)) => error(StatusCode::UNPROCESSABLE_ENTITY, e),
-        Err(e) => error(
-            StatusCode::INTERNAL_SERVER_ERROR,
-            format!("build failed: {e}"),
-        ),
+        Err(e) => e,
     }
 }
 
+/// Checks the shared token when the service has one.
+async fn require_token(
+    State(st): State<Arc<AppState>>,
+    headers: HeaderMap,
+    req: Request,
+    next: Next,
+) -> Response {
+    if let Some(token) = &st.token {
+        let given = headers
+            .get(header::AUTHORIZATION)
+            .and_then(|v| v.to_str().ok())
+            .and_then(|v| v.strip_prefix("Bearer "));
+        if given != Some(token.as_str()) {
+            return error(StatusCode::UNAUTHORIZED, "missing or wrong engine token");
+        }
+    }
+    next.run(req).await
+}
+
 pub fn router(state: Arc<AppState>) -> Router {
-    Router::new()
-        .route("/health", get(health))
+    let v1 = Router::new()
         .route("/v1/sample", get(sample))
         .route("/v1/build", post(build_json))
         .route("/v1/build/files", post(build_files))
+        .layer(middleware::from_fn_with_state(state.clone(), require_token));
+    Router::new()
+        .route("/health", get(health))
+        .merge(v1)
         .layer(DefaultBodyLimit::max(BODY_LIMIT))
         .with_state(state)
 }

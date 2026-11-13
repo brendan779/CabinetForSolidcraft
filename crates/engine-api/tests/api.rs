@@ -78,3 +78,102 @@ async fn health_answers_ok() {
         .unwrap();
     assert_eq!(res.status(), StatusCode::OK);
 }
+
+fn sample_value() -> serde_json::Value {
+    serde_json::to_value(sample_run()).unwrap()
+}
+
+async fn error_of(path: &str, run: serde_json::Value) -> (StatusCode, String) {
+    let (status, body) = post(path, run.to_string()).await;
+    let v: serde_json::Value = serde_json::from_slice(&body).unwrap();
+    (status, v["error"].as_str().unwrap_or("").to_string())
+}
+
+#[tokio::test]
+async fn a_huge_cabinet_is_refused_before_the_engine_runs() {
+    let mut run = sample_value();
+    run["items"][0]["width"] = serde_json::json!(1e300);
+    let (status, msg) = error_of("/v1/build", run).await;
+    assert_eq!(status, StatusCode::UNPROCESSABLE_ENTITY);
+    assert!(msg.contains("width"), "{msg}");
+}
+
+#[tokio::test]
+async fn a_cabinet_wider_than_five_metres_is_refused() {
+    let mut run = sample_value();
+    run["items"][0]["width"] = serde_json::json!(6000.0);
+    let (status, msg) = error_of("/v1/build/files", run).await;
+    assert_eq!(status, StatusCode::UNPROCESSABLE_ENTITY);
+    assert!(msg.contains("at most 5000"), "{msg}");
+}
+
+#[tokio::test]
+async fn ids_that_could_escape_the_zip_folder_are_refused() {
+    let mut run = sample_value();
+    run["items"][0]["id"] = serde_json::json!("../../evil");
+    let (status, msg) = error_of("/v1/build/files", run).await;
+    assert_eq!(status, StatusCode::UNPROCESSABLE_ENTITY);
+    assert!(msg.contains("letters, digits"), "{msg}");
+}
+
+#[tokio::test]
+async fn duplicate_ids_are_refused_on_both_routes() {
+    for path in ["/v1/build", "/v1/build/files"] {
+        let mut run = sample_value();
+        run["items"][1]["id"] = serde_json::json!("B01");
+        let (status, msg) = error_of(path, run).await;
+        assert_eq!(status, StatusCode::UNPROCESSABLE_ENTITY, "{path}");
+        assert!(msg.contains("used twice"), "{path}: {msg}");
+    }
+}
+
+#[tokio::test]
+async fn options_out_of_range_are_refused_as_json() {
+    let run = serde_json::to_string(&sample_run()).unwrap();
+    for q in ["tape=1e9", "kerf=NaN", "trim=-1", "kerf=abc"] {
+        let (status, body) = post(&format!("/v1/build?{q}"), run.clone()).await;
+        assert_eq!(status, StatusCode::UNPROCESSABLE_ENTITY, "{q}");
+        let v: serde_json::Value = serde_json::from_slice(&body).unwrap();
+        assert!(v["error"].is_string(), "{q}");
+    }
+}
+
+#[tokio::test]
+async fn a_body_over_the_limit_gets_a_json_413() {
+    let (status, body) = post("/v1/build", " ".repeat(3 * 1024 * 1024)).await;
+    assert_eq!(status, StatusCode::PAYLOAD_TOO_LARGE);
+    let v: serde_json::Value = serde_json::from_slice(&body).unwrap();
+    assert!(v["error"].is_string());
+}
+
+#[tokio::test]
+async fn with_a_token_set_v1_needs_it_and_health_does_not() {
+    let app = router(Arc::new(AppState::new(None, Some("s3cret".into()))));
+    let run = serde_json::to_string(&sample_run()).unwrap();
+    let denied = app
+        .clone()
+        .oneshot(
+            Request::post("/v1/build")
+                .body(Body::from(run.clone()))
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+    assert_eq!(denied.status(), StatusCode::UNAUTHORIZED);
+    let allowed = app
+        .clone()
+        .oneshot(
+            Request::post("/v1/build")
+                .header("authorization", "Bearer s3cret")
+                .body(Body::from(run))
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+    assert_eq!(allowed.status(), StatusCode::OK);
+    let health = app
+        .oneshot(Request::get("/health").body(Body::empty()).unwrap())
+        .await
+        .unwrap();
+    assert_eq!(health.status(), StatusCode::OK);
+}
