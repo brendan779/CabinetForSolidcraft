@@ -215,7 +215,7 @@ A new pass on benchtops comes first: rid them of errors and bugs, then give them
 3. **Cabinet follow-ups:** PAINT-2, LINING-VIEW, BLENDER-2, MAT-1 (over time). PULL-1 and SEC-12 wait for the owner's pictures.
 4. **The owner's test pile:** about 36 rows are built but marked needs-human, many "not seen on screen". One checklist sheet to work through, to clear or reopen them.
 5. **Waiting on the owner:** PHX-1 (say go), DATA-9 (verify sample rows), BLENDER-4 (brands' permission before a wider release; the repo rule is relaxed), the open questions in the Questions tab.
-6. **Held or after 1.0:** REVIT-HOLD, LIFT-HOLD, LIGHT-HOLD, THEME-1, SEC-2b, GLASS-1, SHOE-2, ROOM-1's rest. PLG-1/2 blocked; PLG-3's weekly check is overdue.
+6. **Held or after 1.0:** REVIT-HOLD, LIFT-HOLD, LIGHT-HOLD, THEME-1, SEC-2b, GLASS-1, SHOE-2, ROOM-1's rest. PLG-1 possible but held, PLG-2 blocked on panels (checked 2026-11-20).
 
 | ID | Status | Size | Task | Done when |
 |---|---|---|---|---|
@@ -397,9 +397,9 @@ The owner's idea: photo-real boards, edge tape and a render button with a choice
 
 | id | status | size | task |
 |---|---|---|---|
-| PLG-1 | blocked (SolidCraft has no plugin runtime yet; check #1221/#4980 weekly) | L | Port the bridge to a `command-plugin` WASM component (same commands via `engine.run`) |
-| PLG-2 | blocked (PLG-1) | L | `panel-plugin` with pins; propose an image-choice widget upstream so pickers can live in SolidCraft |
-| PLG-3 | todo | S | Weekly check: has SolidCraft merged plugin runtime work? Update this row and docs/FEASIBILITY_PLAN.md. Last check 2026-11-02 (again, later that day, on 0.29.0): no runtime merged, but PR #8987 (open, not draft, last touched 2026-10-30) adds a native Wasm command plugin runtime: approved local packages, exact command grants, one Undo step, no installer or custom panel. #1221, draft #4980 and #5586 are open; latest release v0.29.0 |
+| PLG-1 | possible, held (owner 2026-11-16: wait for better plugin support) | L | Port the bridge to a `command-plugin` WASM component. SolidCraft 0.45 runs command plugins: ribbon entries, dialogs from a JSON schema, pictures on dropdown options, files in approved folders, and `storage@0.1` to keep each cabinet's spec in the design. Limits: 256 engine calls a run (one base cabinet is about 94), 30 s, no network, no processes (Blender stays in the app). Plan from MacAirServer's session: docs/PLUGIN_PORT.md on that Mac, uncommitted |
+| PLG-2 | blocked (no plugin panels: RFC 0015 is a draft, panels and exporters are its phase 2, workspaces and viewport overlays phase 3) | L | Inspector, cut list and sheets as SolidCraft panels; image pickers are now possible in dialogs |
+| PLG-3 | todo | S | Weekly check of SolidCraft's plugin docs (docs/plugins.md, docs/plugin-runtime.md, RFC 0015). Last check 2026-11-20 on 0.45.0: command plugins, importers, icons and per-option pictures, plugin data in a design. Not yet: panels, workspaces, viewport overlays, exporters; still 256 engine calls a run |
 
 ## Log
 

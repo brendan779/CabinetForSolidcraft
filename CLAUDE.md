@@ -91,4 +91,4 @@ signalling the app first is caught by the debugger, and the app outlives it.
 - AVENTOS mechanisms are modelled for one side. `vendor::prepare` writes a `__mirror.stl` for the other, as a move can't mirror a STEP: after changing that list, run Prepare again.
 - `file.insert_mesh` takes no `matrix` and ignores one (unlike `file.insert_step`): a mesh lands at the
   origin until `occurrence.move` puts it in place (checked on 0.29).
-- Preferences › Plugins only lists folders. No plugin code runs yet (issue #1221, draft PR #4980).
+- Plugins (checked 2026-11-20, v0.45.0): WebAssembly command plugins and importers run, with schema dialogs, per-option pictures, approved folders and data stored in the design. No panels, workspaces or exporters yet (RFC 0015); 256 engine calls a run. See docs/plugins.md in SolidCraft's repo.
