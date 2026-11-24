@@ -185,7 +185,8 @@ fn end_mitres(list: &mut PartList, name: &str, end: Aabb, left: bool, t: f64, fr
     }
 }
 
-pub(crate) fn mitre_waterfalls(b: &Benchtop, list: &mut PartList, n: usize) {
+/// `cabinets` is the front and back of the cabinets the top stands on, in y.
+pub(crate) fn mitre_waterfalls(b: &Benchtop, list: &mut PartList, n: usize, cabinets: (f64, f64)) {
     let Some(top) = list
         .part(&format!("{}.Benchtop{n}", b.id))
         .map(|p| p.bounds)
@@ -269,6 +270,41 @@ pub(crate) fn mitre_waterfalls(b: &Benchtop, list: &mut PartList, n: usize) {
                     lo.z + strip_h / 2.0,
                 ),
             );
+            // Past the cabinets (the seating overhang) the leg is seen from inside: an inner skin
+            // closes it, mitred to the strip.
+            let face = if left { lo.x + leg } else { hi.x - leg };
+            let skin_x = if left { face - t } else { face };
+            let (y0, y1) = if back {
+                (cabinets.1, hi.y)
+            } else {
+                (lo.y, cabinets.0)
+            };
+            if y1 - y0 <= t + 1e-6 {
+                continue;
+            }
+            let skin = format!("{name}Inner{}", if back { "Back" } else { "Front" });
+            part(
+                list,
+                skin.clone(),
+                Aabb::new(Vec3::new(skin_x, y0, lo.z), Vec3::new(t, y1 - y0, strip_h)),
+                Axis::X,
+                &b.board,
+                PartRole::Benchtop,
+            );
+            list.parts.last_mut().unwrap().grain_axis = Some(Axis::Z);
+            if let Some(p) = list.parts.iter_mut().find(|p| p.name == strip) {
+                (p.edges.left, p.edges.right) = (false, false);
+            }
+            let corner = Aabb::new(Vec3::new(skin_x, y, lo.z), Vec3::new(t, t, strip_h));
+            let mid = lo.z + strip_h / 2.0;
+            let (strip_in, strip_out) = if back {
+                (hi.y - t, hi.y)
+            } else {
+                (lo.y + t, lo.y)
+            };
+            mitre(list, &strip, corner, Vec3::new(face, strip_in, mid));
+            let back_x = if left { face - t } else { face + t };
+            mitre(list, &skin, corner, Vec3::new(back_x, strip_out, mid));
         }
     }
 }

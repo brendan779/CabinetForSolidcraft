@@ -1955,7 +1955,12 @@ fn benchtop(
                 });
             }
         }
-        crate::benchtop::mitre_waterfalls(b, &mut out, n + 1);
+        crate::benchtop::mitre_waterfalls(
+            b,
+            &mut out,
+            n + 1,
+            (lo(|p| p.bounds.min.y), cabinet_back),
+        );
         // The material's rules: an overhang needs nothing, an 18 mm substrate, or brackets at
         // the material's spacing; stone also keeps it to a third of the top's depth.
         let overhang = b.back_overhang;
