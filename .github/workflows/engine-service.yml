@@ -1,0 +1,45 @@
+# The XCabinet engine service on Linux: tests the core crates and the service on every push and
+# pull request, and on main and staging publishes the Docker image to GitHub's container registry.
+name: Engine service
+on:
+  push:
+    branches: [main, staging]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Tools
+        run: |
+          rustup default stable
+          rustup component add rustfmt clippy
+      - name: Format
+        run: cargo fmt -p engine-api -- --check
+      - name: Lint
+        run: cargo clippy -p engine-api --all-targets -- -D warnings
+      - name: Tests
+        run: cargo test -p cabinet-core -p cabinet-catalog -p cabinet-sheets -p engine-api
+  image:
+    needs: test
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ghcr.io/codex-sourcexgroup/xcabinet-engine:${{ github.ref_name }}
+            ghcr.io/codex-sourcexgroup/xcabinet-engine:${{ github.sha }}

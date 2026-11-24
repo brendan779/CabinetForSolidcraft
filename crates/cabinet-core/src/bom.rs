@@ -4,7 +4,7 @@ use crate::cutlist::csv;
 use crate::part::PartList;
 
 /// One line of the bill: an item (with one description) and how many the job needs.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, serde::Serialize)]
 pub struct BomRow {
     /// Hardware id the builder placed (`blum.clip-top-blumotion.110.full`).
     pub item: String,

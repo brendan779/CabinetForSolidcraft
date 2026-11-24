@@ -6,6 +6,7 @@ members = [
     "crates/cabinet-sheets",
     "crates/solidcraft-bridge",
     "crates/cabinet-ffi",
+    "crates/engine-api",
 ]
 
 [workspace.package]

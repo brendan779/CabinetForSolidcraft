@@ -1,0 +1,27 @@
+[package]
+name = "engine-api"
+description = "XCabinet engine service: builds runs of cabinets and returns their production outputs over HTTP."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "xcabinet-engine"
+path = "src/main.rs"
+
+[dependencies]
+cabinet-core.workspace = true
+cabinet-catalog.workspace = true
+cabinet-sheets.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+axum = "0.8"
+tokio = { version = "1", features = ["macros", "rt-multi-thread", "signal"] }
+zip = { version = "2", default-features = false, features = ["deflate"] }
+
+[dev-dependencies]
+tower = { version = "0.5", features = ["util"] }
+http-body-util = "0.1"
+
+[lints]
+workspace = true
