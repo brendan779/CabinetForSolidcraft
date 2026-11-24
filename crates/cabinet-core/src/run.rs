@@ -672,7 +672,13 @@ pub fn build_run(run: &Run) -> Result<Vec<PartList>> {
                 let ends = line_ends(run, i);
                 out.push(filler(f, neighbour(i), at, ends)?);
             }
-            RunItem::EndPanel(e) => out.push(end_panel(e, neighbour(i), at)),
+            RunItem::EndPanel(e) => {
+                let e = EndPanel {
+                    to_floor: end_panel_to_floor(run, i, e),
+                    ..e.clone()
+                };
+                out.push(end_panel(&e, neighbour(i), at))
+            }
             // Built from the rest, below.
             RunItem::Benchtop(b) => out.push(PartList {
                 cabinet: b.id.clone(),
@@ -1560,7 +1566,7 @@ fn one_kick_per_stretch(run: &Run, out: &mut [PartList]) {
                 c.standard.toe_kick == crate::model::ToeKick::LegsAndPlinth && plinth.is_some()
             }
             RunItem::Filler(_) => true,
-            RunItem::EndPanel(e) => !e.to_floor,
+            RunItem::EndPanel(e) => !end_panel_to_floor(run, j, e),
             _ => false,
         };
         let cabinet = matches!(item, RunItem::Cabinet(_)) && joins;
@@ -1674,6 +1680,21 @@ fn one_kick_per_stretch(run: &Run, out: &mut [PartList]) {
             from = to;
         }
     }
+}
+
+/// An end panel between two floor cabinets is never seen at its foot: it stops on the toe kick and
+/// the plinth runs past, rather than leaving a post in the kick.
+fn end_panel_to_floor(run: &Run, i: usize, e: &EndPanel) -> bool {
+    let on_floor = |j: usize| {
+        matches!(line_of(run, j), Line::Floor | Line::Both)
+            && matches!(run.items[j], RunItem::Cabinet(_) | RunItem::Filler(_))
+    };
+    let takes_room = |j: &usize| !matches!(line_of(run, *j), Line::Neither);
+    let before = (0..i).rev().find(takes_room).is_some_and(on_floor);
+    let after = (i + 1..run.items.len())
+        .find(takes_room)
+        .is_some_and(on_floor);
+    e.to_floor && !(before && after)
 }
 
 fn end_panel(e: &EndPanel, c: &Cabinet, at: Vec3) -> PartList {
@@ -2541,6 +2562,38 @@ mod tests {
             scribe: 20.0,
             to_floor: true,
         })
+    }
+
+    /// The owner's wall run: a panel between a drawer bank and a tower left a post in the kick.
+    #[test]
+    fn an_end_panel_between_cabinets_stops_on_the_toe_kick_and_the_plinth_runs_past() {
+        let run = Run {
+            origin: Vec3::default(),
+            items: vec![
+                RunItem::Cabinet(Box::new(Cabinet::new("B01", CabinetKind::DrawerBank))),
+                end("E01"),
+                RunItem::Cabinet(Box::new(Cabinet::new("T01", CabinetKind::Tall))),
+            ],
+        };
+        let lists = build_run(&run).unwrap();
+        let panel = lists[1].parts[0].bounds;
+        assert!(panel.min.z > 0.0, "panel to the floor: {panel:?}");
+        let kicks: Vec<_> = lists
+            .iter()
+            .flat_map(|l| l.by_role(PartRole::Plinth))
+            .filter(|p| p.bounds.min.x < panel.max().x && p.bounds.max().x > panel.min.x)
+            .collect();
+        assert!(!kicks.is_empty(), "no plinth behind the panel");
+        // At a run's end the panel still reaches the floor.
+        let lists = build_run(&Run {
+            origin: Vec3::default(),
+            items: vec![
+                RunItem::Cabinet(Box::new(Cabinet::new("B01", CabinetKind::Base))),
+                end("E01"),
+            ],
+        })
+        .unwrap();
+        assert_eq!(lists[1].parts[0].bounds.min.z, 0.0);
     }
 
     #[test]
