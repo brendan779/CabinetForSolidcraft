@@ -48,6 +48,15 @@ fn part(list: &mut PartList, name: String, b: Aabb, axis: Axis, board: &str, rol
     });
 }
 
+/// How far a waterfall leg reads from its outer face to the cabinets: a built-up top's leg is as
+/// thick as its edge (a slab with drop strips at its front and back), any other is one slab.
+pub(crate) fn waterfall_depth(b: &Benchtop) -> f64 {
+    match b.edge {
+        EdgeProfile::MitredApron { depth } if depth > b.thickness => depth,
+        _ => b.thickness,
+    }
+}
+
 /// The triangular volume removed, with `at` on the corner being cut away.
 fn mitre(list: &mut PartList, name: &str, bounds: Aabb, at: Vec3) {
     list.operations.push(Operation::Chamfer {
@@ -183,38 +192,83 @@ pub(crate) fn mitre_waterfalls(b: &Benchtop, list: &mut PartList, n: usize) {
     else {
         return;
     };
+    let (t, leg) = (b.thickness, waterfall_depth(b));
+    let drop = match b.edge {
+        EdgeProfile::MitredApron { depth } => depth,
+        _ => 0.0,
+    };
+    let back_apron = list.part(&format!("{}.Apron{n}Back", b.id)).is_some();
     for (left, suffix) in [(true, "L"), (false, "R")] {
         let name = format!("{}.Waterfall{n}{suffix}", b.id);
-        if let Some(end) = list.part(&name).map(|p| p.bounds) {
-            if !matches!(b.edge, EdgeProfile::MitredApron { .. }) {
-                top_edge(
-                    list,
-                    &format!("{}.Benchtop{n}", b.id),
-                    top,
-                    if left { 1 } else { 2 },
-                );
+        let Some(end) = list.part(&name).map(|p| p.bounds) else {
+            continue;
+        };
+        if !matches!(b.edge, EdgeProfile::MitredApron { .. }) {
+            top_edge(
+                list,
+                &format!("{}.Benchtop{n}", b.id),
+                top,
+                if left { 1 } else { 2 },
+            );
+        }
+        // A leg thicker than the slab: drop strips under the front and back aprons close it,
+        // each mitred to the slab up its full height.
+        let strips = leg > t + 1e-6;
+        let (lo, hi) = (end.min, end.max());
+        let (outer, inner) = if left { (lo.x, hi.x) } else { (hi.x, lo.x) };
+        let front_drop = if strips { end.size.z } else { drop };
+        end_mitres(list, &name, end, left, t, front_drop);
+        let strip_x = if left { lo.x } else { hi.x - leg };
+        let strip_h = hi.z - drop - lo.z;
+        for (back, on) in [(false, strips), (true, back_apron && drop > 0.0)] {
+            if !on {
+                continue;
             }
-            let drop = match b.edge {
-                EdgeProfile::MitredApron { depth } => depth,
-                _ => 0.0,
+            let y = if back { hi.y - t } else { lo.y };
+            let (h, z) = if strips {
+                (end.size.z, lo.z)
+            } else {
+                (drop, hi.z - drop)
             };
-            end_mitres(list, &name, end, left, b.thickness, drop);
-            if list.part(&format!("{}.Apron{n}Back", b.id)).is_some() && drop > 0.0 {
-                let t = b.thickness;
+            // end_mitres cut the front.
+            if back {
                 mitre(
                     list,
                     &name,
-                    Aabb::new(
-                        Vec3::new(end.min.x, end.max().y - t, end.max().z - drop),
-                        Vec3::new(t, t, drop),
-                    ),
-                    Vec3::new(
-                        if left { end.max().x } else { end.min.x },
-                        end.max().y,
-                        end.max().z - drop / 2.0,
-                    ),
+                    Aabb::new(Vec3::new(lo.x, y, z), Vec3::new(t, t, h)),
+                    Vec3::new(inner, hi.y, z + h / 2.0),
                 );
             }
+            if !strips || strip_h <= 0.0 {
+                continue;
+            }
+            let strip = format!("{name}{}", if back { "Back" } else { "Front" });
+            part(
+                list,
+                strip.clone(),
+                Aabb::new(Vec3::new(strip_x, y, lo.z), Vec3::new(leg, t, strip_h)),
+                Axis::Y,
+                &b.board,
+                PartRole::Benchtop,
+            );
+            let p = list.parts.last_mut().unwrap();
+            p.grain_axis = Some(Axis::Z);
+            // Its end at the cabinets shows past the front overhang.
+            if left {
+                p.edges.right = true;
+            } else {
+                p.edges.left = true;
+            }
+            mitre(
+                list,
+                &strip,
+                Aabb::new(Vec3::new(lo.x, y, lo.z), Vec3::new(t, t, strip_h)),
+                Vec3::new(
+                    outer,
+                    if back { hi.y - t } else { lo.y + t },
+                    lo.z + strip_h / 2.0,
+                ),
+            );
         }
     }
 }
@@ -558,18 +612,19 @@ fn support_frame(
     }
     let inset = b.build_up.setback;
     // A waterfall closes the end: carry the rails into it while retaining the front/rear recess.
+    let into_leg = waterfall_depth(b) - b.thickness;
     let (x0, x1) = (
         frame.min.x
-            + if b.waterfall_left && !walls.0 {
-                0.0
+            - if b.waterfall_left && !walls.0 {
+                into_leg
             } else {
-                inset
+                -inset
             },
         frame.max().x
-            - if b.waterfall_right && !walls.1 {
-                0.0
+            + if b.waterfall_right && !walls.1 {
+                into_leg
             } else {
-                inset
+                -inset
             },
     );
     let (front, back) = (frame.min.y + inset, frame.max().y - inset);

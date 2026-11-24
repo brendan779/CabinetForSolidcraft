@@ -30,14 +30,45 @@ fn build(depth: f64, shadow: f64, setback: f64, falls: bool) -> Vec<cabinet_core
 fn waterfalls_touch_cabinet_ends_instead_of_leaving_the_end_overhang_as_a_gap() {
     let lists = build(60.0, 20.0, 0.0, true);
     let (cab, top) = (&lists[0], &lists[1]);
-    assert_eq!(
-        top.part("BT1.Waterfall1L").unwrap().bounds.max().x,
-        cab.part("B01.LeftSide").unwrap().bounds.min.x
+    let (left, right) = (
+        cab.part("B01.LeftSide").unwrap().bounds.min.x,
+        cab.part("B01.RightSide").unwrap().bounds.max().x,
     );
     assert_eq!(
-        top.part("BT1.Waterfall1R").unwrap().bounds.min.x,
-        cab.part("B01.RightSide").unwrap().bounds.max().x
+        top.part("BT1.Waterfall1LFront").unwrap().bounds.max().x,
+        left
     );
+    assert_eq!(
+        top.part("BT1.Waterfall1RFront").unwrap().bounds.min.x,
+        right
+    );
+}
+
+#[test]
+fn a_built_up_tops_waterfalls_read_as_thick_as_its_edge() {
+    for depth in [40.0, 60.0] {
+        let lists = build(depth, 20.0, 0.0, true);
+        let (cab, top) = (&lists[0], &lists[1]);
+        let (left, right) = (
+            cab.part("B01.LeftSide").unwrap().bounds.min.x,
+            cab.part("B01.RightSide").unwrap().bounds.max().x,
+        );
+        let slab = top.part("BT1.Waterfall1L").unwrap().bounds;
+        assert_eq!(slab.min.x, left - depth, "{depth}");
+        assert_eq!(slab.size.x, 20.0, "{depth}");
+        assert_eq!(
+            top.part("BT1.Waterfall1R").unwrap().bounds.max().x,
+            right + depth
+        );
+        let benchtop = top.part("BT1.Benchtop1").unwrap().bounds;
+        assert_eq!(benchtop.size.x, right - left + 2.0 * depth, "{depth}");
+        // The front strip runs from the floor to the apron's lower edge.
+        let apron = top.part("BT1.Apron1").unwrap().bounds;
+        let strip = top.part("BT1.Waterfall1LFront").unwrap().bounds;
+        assert_eq!(strip.min.z, slab.min.z);
+        assert_eq!(strip.max().z, apron.min.z);
+        assert_eq!(strip.size.x, depth);
+    }
 }
 
 #[test]

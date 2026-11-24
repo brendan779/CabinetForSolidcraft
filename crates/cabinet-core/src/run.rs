@@ -1765,7 +1765,7 @@ fn benchtop(
             - if at_left {
                 0.0
             } else if b.waterfall_left {
-                b.thickness
+                crate::benchtop::waterfall_depth(b)
             } else {
                 b.side_overhang
             };
@@ -1773,7 +1773,7 @@ fn benchtop(
             + if at_right {
                 0.0
             } else if b.waterfall_right {
-                b.thickness
+                crate::benchtop::waterfall_depth(b)
             } else {
                 b.side_overhang
             };
@@ -1881,11 +1881,13 @@ fn benchtop(
         }
         crate::benchtop::extend_leg(b, &mut out, n + 1, base_top, &parts);
         // Waterfall ends: from the floor up the stretch's ends to the top's upper face, the
-        // depth of the top. Mitred with the top: both pieces are cut to their outer faces.
+        // depth of the top. Mitred with the top: both pieces are cut to their outer faces. A
+        // built-up top's leg is as thick as its edge; the slab is at its outer face.
         let floor = origin.z;
-        for (on, side, wx0, at_wall) in [
-            (b.waterfall_left, "L", x0, at_left),
-            (b.waterfall_right, "R", x1 - b.thickness, at_right),
+        let leg = crate::benchtop::waterfall_depth(b);
+        for (on, side, wx0, slab_x, at_wall) in [
+            (b.waterfall_left, "L", x0, x0, at_left),
+            (b.waterfall_right, "R", x1 - leg, x1 - b.thickness, at_right),
         ] {
             if on {
                 if at_wall {
@@ -1896,7 +1898,7 @@ fn benchtop(
                     continue;
                 }
                 // A cabinet beyond the stretch (a shorter one, not under the top) is in the way.
-                let (wx1, wy0, wy1) = (wx0 + b.thickness, y0, y1);
+                let (wx1, wy0, wy1) = (wx0 + leg, y0, y1);
                 let blocker = lists
                     .iter()
                     .filter(|l| !stretch.iter().any(|s| s.cabinet == l.cabinet))
@@ -1919,14 +1921,14 @@ fn benchtop(
                     name: format!("{}.Waterfall{}{side}", b.id, n + 1),
                     role: PartRole::Benchtop,
                     bounds: Aabb::new(
-                        Vec3::new(wx0, y0, floor),
+                        Vec3::new(slab_x, y0, floor),
                         Vec3::new(b.thickness, y1 - y0, z + b.thickness - floor),
                     ),
                     thickness_axis: Axis::X,
                     grain_axis: Some(Axis::Z),
                     board: b.board.clone(),
                     edges: EdgeBanding {
-                        front: true,
+                        front: leg <= b.thickness,
                         ..EdgeBanding::default()
                     },
                 });
