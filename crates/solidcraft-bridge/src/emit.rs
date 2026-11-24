@@ -107,14 +107,17 @@ pub fn emit_cabinet_with(
                     .unwrap_or((bounds.size.y, bounds.size.z));
                 let top = p.is_none_or(|p| (at.z - p.bounds.max().z).abs() < 1e-6);
                 let bottom = p.is_some_and(|p| (at.z - p.bounds.min.z).abs() < 1e-6);
+                if !top && !bottom {
+                    // Up a door's opening side neither face looks up, so which one SolidCraft takes
+                    // first is its own choice (0.45 swapped it, and the 20.8 mm leg ran through an
+                    // 18 mm door). The wedge is cut as drawn instead.
+                    cmds.extend(mitre_cut(part, *at, *bounds, cmds.len()));
+                    continue;
+                }
                 let (d1, d2) = if top {
                     (along_t, along_z)
-                } else if bottom {
-                    (along_z, along_t)
                 } else {
-                    // Up a door's opening side: neither face looks up, and SolidCraft takes the
-                    // one across the door's width first.
-                    (bounds.size.x, along_t)
+                    (along_z, along_t)
                 };
                 cmds.push(json!({
                     "command": "solid.chamfer",

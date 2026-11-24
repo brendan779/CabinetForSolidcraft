@@ -467,8 +467,11 @@ pub(crate) fn extend_leg(b: &Benchtop, list: &mut PartList, n: usize, base: f64,
                 trim(bounds);
                 at.x = bounds.center().x;
             } else if part == &apron && (bounds.min.x - old_side).abs() < 1e-6 {
+                // Now an inside corner: the diagonal runs from the front line's corner with the
+                // return to the hidden corner behind, so the front corner is the one cut away.
                 bounds.min.x = if plus { joint } else { joint - t };
                 at.x = joint;
+                at.y = main.min.y;
             }
         }
     }
@@ -485,13 +488,16 @@ pub(crate) fn extend_leg(b: &Benchtop, list: &mut PartList, n: usize, base: f64,
         ),
         Vec3::new(t, t, depth),
     );
+    // The return keeps the half of the corner that meets its own length (the main fascia's
+    // front line), so the corner cut away is the one behind it. Cutting the front one left the
+    // return's end as a loose wedge, joined to it only along an edge.
     mitre(
         &mut extra,
         &leg_apron,
         join_bounds,
         Vec3::new(
             if plus { joint + t } else { joint - t },
-            main.min.y,
+            main.min.y + t,
             main.max().z - depth / 2.0,
         ),
     );
