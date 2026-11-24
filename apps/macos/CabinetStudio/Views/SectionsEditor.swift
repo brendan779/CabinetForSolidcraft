@@ -495,7 +495,7 @@ struct SectionsEditor: View {
     private func sizeField(_ title: String, value: Double, onSet: @escaping @MainActor @Sendable (Double) -> Void) -> some View {
         HStack(spacing: 4) {
             Text(title).font(.caption).foregroundStyle(.secondary)
-            TextField(title, value: Binding(get: { (value * 10).rounded() / 10 }, set: onSet), format: .number)
+            TextField(title, value: Binding(get: { (value * 10).rounded() / 10 }, set: { onSet($0) }), format: .number)
                 .textFieldStyle(.roundedBorder)
                 .labelsHidden()
                 .frame(width: 64)
