@@ -367,6 +367,8 @@ pub enum BorePurpose {
     HandleScrew,
     /// A tap's hole through a benchtop.
     TapHole,
+    /// A SERVO-DRIVE distance bumper's hole in the back of a drawer front.
+    DistanceBumper,
 }
 
 fn default_biscuit() -> BiscuitSize {

@@ -154,11 +154,22 @@ const LIGHT_PROFILE_END_CLEARANCE: f64 = crate::lighting::STRIP_END_CLEARANCE;
 const LIGHT_PROFILE_MIN_LEFT: f64 = 3.0;
 /// Generic until a supplier's shelf support is catalogued (HAF-3).
 pub(crate) const SHELF_SUPPORT: &str = "shelf-support.5mm";
+
+/// How far above its pin hole's centre a loose shelf sits: on the support's seat, from the
+/// catalog (Häfele's 282.12.405), or a bare pin's radius.
+pub(crate) fn shelf_seat() -> f64 {
+    crate::hardware::item(SHELF_SUPPORT)
+        .and_then(|i| i.param("seat_above_hole"))
+        .unwrap_or(SHELF_PIN_DIAMETER / 2.0)
+}
 /// Our choice, not Blum's: an AVENTOS HF bi-fold's end hinges sit this far in from the fronts'
 /// sides. A door's come from [`HINGE_POSITION`].
 const HINGE_END_OFFSET: f64 = 100.0;
 /// Where a door's end hinges sit, from Blum's configurator.
 const HINGE_POSITION: &str = "blum.clip-top.hinge-position";
+/// Half the height a CLIP top hinge and its mounting plate take up the cabinet side: 57 mm,
+/// measured from Blum's models (71B3550, 71B3750; the plate 175H9100 is 44).
+const HINGE_HALF_HEIGHT: f64 = 28.5;
 
 /// The arm cover cap for a 110° CLIP top hinge (catalogue p.76); other hinges take none here.
 fn cover_cap(hinge: &str) -> Option<&'static str> {
@@ -760,6 +771,9 @@ impl<'a> Builder<'a> {
                 }
             };
             for (item, description, quantity) in rows {
+                if item == "blum.servo-drive.distance-bumper" {
+                    self.bumper_holes(f, quantity);
+                }
                 self.list.hardware.push(HardwarePlacement {
                     item,
                     description,
@@ -791,6 +805,37 @@ impl<'a> Builder<'a> {
                     quantity: 1,
                 }),
                 Err(e) => self.list.warnings.push(e),
+            }
+        }
+    }
+
+    /// The holes a front's distance bumpers press into, in its back: where `cad_placements` draws
+    /// them, 2 at mid height or 4 near the top and bottom, in from the side edges.
+    fn bumper_holes(&mut self, f: &Part, quantity: u32) {
+        let Ok(bumper) = crate::hardware::item("blum.servo-drive.distance-bumper") else {
+            return;
+        };
+        let inset = bumper.param("inset_from_front_edge").unwrap_or(8.0);
+        let (Ok(diameter), Ok(depth)) = (bumper.param("diameter"), bumper.param("hole_depth"))
+        else {
+            return;
+        };
+        let b = f.bounds;
+        let zs = if quantity > 2 {
+            vec![b.min.z + inset, b.max().z - inset]
+        } else {
+            vec![b.center().z]
+        };
+        for z in zs {
+            for x in [b.min.x + inset, b.max().x - inset] {
+                self.list.operations.push(Operation::Bore {
+                    part: f.name.clone(),
+                    at: Vec3::new(x, b.max().y, z),
+                    direction: Dir::new(Axis::Y, false),
+                    diameter,
+                    depth: depth.min(b.size.y - 3.0),
+                    purpose: BorePurpose::DistanceBumper,
+                });
             }
         }
     }
@@ -1309,15 +1354,8 @@ impl<'a> Builder<'a> {
                 .iter()
                 .flat_map(|c| &c.rows)
                 .any(|r| r.inside == SectionInside::Wardrobe);
-            if wardrobe {
-                if columns.len() > 1 {
-                    self.list
-                        .warnings
-                        .push("a wardrobe interior needs the whole cabinet; left out".into());
-                } else {
-                    self.wardrobe();
-                }
-            } else if cab.adjustable_shelves > 0 || cab.inner_drawers > 0 {
+            // A wardrobe interior is built in its own section, with the other insides.
+            if !wardrobe && (cab.adjustable_shelves > 0 || cab.inner_drawers > 0) {
                 self.list
                     .warnings
                     .push("shelves and inner drawers left out: each section sets its own".into());
@@ -1347,13 +1385,15 @@ impl<'a> Builder<'a> {
         }
         let bay = self.bay();
         let z = self.opening_z;
-        let pins = self.shelves_in(
+        let mut pins = self.shelves_in(
             1,
             cab.adjustable_shelves as usize,
             &cab.fixed_shelves,
             &bay,
             z,
         );
+        // The fronts are built: their hinges are known.
+        self.clear_shelves_of_hinges(&mut pins);
         self.shelf_pin_rows(&pins);
     }
 
@@ -1374,16 +1414,11 @@ impl<'a> Builder<'a> {
         let mut loose_z = Vec::new();
         let step = (z1 - z0) / (n + 1) as f64;
         for i in 1..=n {
-            // Snap to the 32 mm grid so a shelf rests on real pin holes: on top of the pins,
-            // a pin's radius above the holes' centres (Blum's configurator, 2026-10-27).
+            // Snap to the 32 mm grid so a shelf rests on real pin holes, on the supports' seats.
             let raw = z0 + step * i as f64;
             let hole = z0 + ((raw - z0) / SYSTEM32_PITCH).round() * SYSTEM32_PITCH;
             let is_fixed = fixed.contains(&(i as u32));
-            let z = if is_fixed {
-                hole
-            } else {
-                hole + SHELF_PIN_DIAMETER / 2.0
-            };
+            let z = if is_fixed { hole } else { hole + shelf_seat() };
             // A fixed shelf fills the width and reaches the back, like a bottom.
             let bounds = if is_fixed {
                 aabb(
@@ -1630,11 +1665,22 @@ impl<'a> Builder<'a> {
         }
         let f = self.drawer_frame_thickness();
         if f <= 0.0 {
-            self.list.warnings.push(
-                "a drawer frame needs fronts that are all drawers, or open sections, and inset in \
-                 one column: left off"
-                    .into(),
-            );
+            // A frame is a job-wide choice: a cabinet with no drawers simply has none.
+            let drawers = match &cab.fronts {
+                FrontLayout::Drawers { .. } => true,
+                FrontLayout::Sections { columns } => columns
+                    .iter()
+                    .flat_map(|c| &c.rows)
+                    .any(|r| matches!(r.front, SectionFront::Drawers { .. })),
+                _ => false,
+            };
+            if drawers {
+                self.list.warnings.push(
+                    "a drawer frame needs fronts that are all drawers, or open sections, and \
+                     inset in one column: left off"
+                        .into(),
+                );
+            }
             return;
         }
         let s = &cab.standard;
@@ -2036,8 +2082,83 @@ impl<'a> Builder<'a> {
             }
         }
         self.bay = None;
-        for pins in std::mem::take(&mut self.pending_pins) {
+        for mut pins in std::mem::take(&mut self.pending_pins) {
+            self.clear_shelves_of_hinges(&mut pins);
             self.shelf_pin_rows(&pins);
+        }
+    }
+
+    /// Moves a loose shelf that would sit where a door's hinge and its plate are to the nearest
+    /// pin holes clear of them: with the door closed the hinge reaches in past the plate.
+    fn clear_shelves_of_hinges(&mut self, pins: &mut PinRows) {
+        let t = self.cab.standard.carcass_thickness;
+        let seat = shelf_seat();
+        let (bay, (z0, z1)) = (pins.bay.clone(), pins.z);
+        let spans: Vec<(f64, f64)> = self
+            .list
+            .hardware
+            .iter()
+            .filter(|h| {
+                (h.item.starts_with("blum.clip-top") || h.item.starts_with("blum.mounting-plate"))
+                    && h.item != HINGE_POSITION
+                    && h.at.x > bay.left - 60.0
+                    && h.at.x < bay.right + 60.0
+            })
+            .map(|h| (h.at.z - HINGE_HALF_HEIGHT, h.at.z + HINGE_HALF_HEIGHT))
+            .collect();
+        if spans.is_empty() {
+            return;
+        }
+        let clear = |hole: f64| {
+            let (a, b) = (hole + seat, hole + seat + t);
+            spans.iter().all(|&(lo, hi)| b <= lo || a >= hi)
+        };
+        for i in 0..pins.loose.len() {
+            let hole = pins.loose[i];
+            if clear(hole) {
+                continue;
+            }
+            let others: Vec<f64> = pins
+                .loose
+                .iter()
+                .enumerate()
+                .filter(|(j, _)| *j != i)
+                .map(|(_, z)| *z)
+                .collect();
+            let fits = |z: f64| {
+                z >= z0 + 2.0 * SYSTEM32_PITCH
+                    && z <= z1 - 2.0 * SYSTEM32_PITCH
+                    && clear(z)
+                    && others.iter().all(|o| (o - z).abs() >= SYSTEM32_PITCH)
+            };
+            let Some(to) = (1..=4)
+                .flat_map(|k| {
+                    [
+                        hole + k as f64 * SYSTEM32_PITCH,
+                        hole - k as f64 * SYSTEM32_PITCH,
+                    ]
+                })
+                .find(|&z| fits(z))
+            else {
+                continue;
+            };
+            let dz = to - hole;
+            pins.loose[i] = to;
+            let mut moved = None;
+            for p in self.list.parts.iter_mut().filter(|p| {
+                p.role == PartRole::Shelf
+                    && (p.bounds.min.z - (hole + seat)).abs() < 1e-6
+                    && p.bounds.min.x >= bay.left - 1e-6
+                    && p.bounds.max().x <= bay.right + 1e-6
+            }) {
+                p.bounds.min.z += dz;
+                moved = Some(p.name.clone());
+            }
+            if let Some(name) = moved {
+                for h in self.list.hardware.iter_mut().filter(|h| h.part == name) {
+                    h.at.z += dz;
+                }
+            }
         }
     }
 
@@ -2140,8 +2261,9 @@ impl<'a> Builder<'a> {
                     counts.shelves += n;
                     self.pending_pins.push(pins);
                 }
-                // Built with the cabinet's shelves: it is the whole cabinet's interior.
-                SectionInside::Wardrobe => {}
+                SectionInside::Wardrobe => {
+                    self.wardrobe_section(&bay, (floor, ceiling), counts, |b, n| panel(b, n));
+                }
                 SectionInside::ShoeShelves { count, angle, lip } if *angle > 0.0 => {
                     self.sloped_shoe_shelves(
                         (*count, *angle, *lip),
@@ -3124,6 +3246,109 @@ impl<'a> Builder<'a> {
             let shelf = self.list.parts.last().cloned().unwrap();
             self.joint_parts(&left, &shelf, Dir::new(Axis::X, true), Axis::Y);
             self.joint_parts(&right, &shelf, Dir::new(Axis::X, false), Axis::Y);
+        }
+    }
+
+    /// A wardrobe interior in one section, from `floor` to `ceiling` (the underside of the shelf or
+    /// top over it): its rail under that, or under a hat shelf when the carcass top is over it,
+    /// and for double hanging a lower shelf with a second rail. Built from the cabinet's height,
+    /// it put a second shelf, of the same name, above a section with a shelf over it.
+    fn wardrobe_section(
+        &mut self,
+        bay: &Bay,
+        (floor, ceiling): (f64, f64),
+        counts: &mut SectionCounts,
+        panel: impl Fn(&Self, &str) -> Option<Part>,
+    ) {
+        let cab = self.cab;
+        let s = &cab.standard;
+        let t = s.carcass_thickness;
+        let (left, right) = (panel(self, &bay.left_panel), panel(self, &bay.right_panel));
+        let under_top = (ceiling - self.opening_z.1).abs() < 1e-6;
+        // Each rail hangs from the shelf over it: the bay's panel holds it under a section shelf.
+        let (upper, holder) = if under_top {
+            let z = ceiling - s.wardrobe_hat_shelf_drop;
+            counts.shelves += 1;
+            self.hanging_shelf(counts.shelves, bay, z, left.as_ref(), right.as_ref());
+            (z, self.name(PartRole::Shelf, Some(counts.shelves)))
+        } else {
+            (ceiling, bay.left_panel.clone())
+        };
+        let mut rails = vec![(upper - s.wardrobe_rail_drop, holder)];
+        if cab.wardrobe == Hanging::Double {
+            let lower = s.wardrobe_double_hang_shelf;
+            if lower < floor + MIN_LOWER_HANGING + s.wardrobe_rail_drop
+                || lower + t > upper - s.wardrobe_rail_drop - MIN_LOWER_HANGING
+            {
+                self.list.warnings.push(format!(
+                    "this section has no room for a lower shelf at {lower:.0} mm; long hanging only"
+                ));
+            } else {
+                counts.shelves += 1;
+                self.hanging_shelf(counts.shelves, bay, lower, left.as_ref(), right.as_ref());
+                let holder = self.name(PartRole::Shelf, Some(counts.shelves));
+                rails.push((lower - s.wardrobe_rail_drop, holder));
+            }
+        }
+        let length = bay.right - bay.left - 2.0;
+        for (z, holder) in rails {
+            let at = Vec3::new((bay.left + bay.right) / 2.0, self.interior_back / 2.0, z);
+            for (item, description, quantity) in [
+                (
+                    "wardrobe-rail.oval",
+                    format!("Wardrobe rail, cut to {length:.0} mm"),
+                    1,
+                ),
+                (
+                    "wardrobe-rail.end-support",
+                    "Wardrobe rail end support".to_string(),
+                    2,
+                ),
+            ] {
+                self.list.hardware.push(HardwarePlacement {
+                    item: item.into(),
+                    description,
+                    at,
+                    part: holder.clone(),
+                    quantity,
+                });
+            }
+        }
+    }
+
+    /// A wardrobe's hat or lower shelf: set back from the doors like a loose shelf, and fixed
+    /// between the bay's panels.
+    fn hanging_shelf(
+        &mut self,
+        n: usize,
+        bay: &Bay,
+        z: f64,
+        left: Option<&Part>,
+        right: Option<&Part>,
+    ) {
+        let t = self.cab.standard.carcass_thickness;
+        let bounds = aabb(
+            bay.left,
+            self.shelf_setback(),
+            z,
+            bay.right,
+            self.interior_back,
+            z + t,
+        );
+        self.add(
+            PartRole::Shelf,
+            Some(n),
+            bounds,
+            Axis::Z,
+            Axis::X,
+            EdgeBanding::front_only(),
+        );
+        let shelf = self.list.parts.last().cloned().unwrap();
+        if let Some(l) = left {
+            self.joint_parts(l, &shelf, Dir::new(Axis::X, true), Axis::Y);
+        }
+        if let Some(r) = right {
+            self.joint_parts(r, &shelf, Dir::new(Axis::X, false), Axis::Y);
         }
     }
 
@@ -6172,7 +6397,7 @@ mod tests {
         // Each shelf's pin holes, a pin's radius under it.
         let shelves: Vec<f64> = list
             .by_role(PartRole::Shelf)
-            .map(|p| p.bounds.min.z - SHELF_PIN_DIAMETER / 2.0)
+            .map(|p| p.bounds.min.z - shelf_seat())
             .collect();
         let pins: Vec<f64> = list
             .operations
@@ -8965,7 +9190,23 @@ mod tests {
 
     #[test]
     fn a_drawer_frame_is_left_off_a_cabinet_with_doors_and_says_so() {
-        let mut cab = Cabinet::new("B01", CabinetKind::Base).sectioned();
+        // A drawer over a door: only all-drawer fronts take the frame.
+        let mut cab = Cabinet::new("B01", CabinetKind::Base);
+        cab.fronts = FrontLayout::Stack {
+            sections: vec![
+                StackSection {
+                    height: 0.0,
+                    kind: SectionKind::Door {
+                        hinge_side: HingeSide::Left,
+                    },
+                },
+                StackSection {
+                    height: 180.0,
+                    kind: SectionKind::Drawers { count: 1 },
+                },
+            ],
+        };
+        let mut cab = cab.sectioned();
         cab.standard.drawer_frame = DrawerFrame::Board;
         let list = build_cabinet(&cab).unwrap();
         assert!(list.part("B01.DrawerFrame").is_none());
@@ -9354,6 +9595,15 @@ mod tests {
                     );
                     old.adjustable_shelves = if room { shelves } else { 0 };
                     if lifting && kind != CabinetKind::Wall {
+                        continue;
+                    }
+                    // A stacked wardrobe's hat shelf took a section shelf's name (two Shelf1s):
+                    // in sections it is numbered after them.
+                    if kind == CabinetKind::Wardrobe && matches!(layout, FrontLayout::Stack { .. })
+                    {
+                        let old = build_cabinet(&old).unwrap();
+                        let shelf1 = old.parts.iter().filter(|p| p.name == "C01.Shelf1").count();
+                        assert_eq!(shelf1, 2, "the old stacked wardrobe's duplicate is gone");
                         continue;
                     }
                     let new = old.clone().sectioned();
@@ -11292,7 +11542,7 @@ mod tests {
             .map(|p| p.z)
             .filter(|z| *z < shelf.min.z)
             .fold(f64::MIN, f64::max);
-        assert!((shelf.min.z - under - SHELF_PIN_DIAMETER / 2.0).abs() < 1e-9);
+        assert!((shelf.min.z - under - shelf_seat()).abs() < 1e-9);
     }
 
     fn lit(profile: &str) -> PartList {

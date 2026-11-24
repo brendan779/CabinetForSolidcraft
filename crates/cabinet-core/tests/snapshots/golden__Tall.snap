@@ -201,7 +201,7 @@ expression: list
         "min": {
           "x": 17.0,
           "y": 2.0,
-          "z": 552.5
+          "z": 554.25
         },
         "size": {
           "x": 566.0,
@@ -228,7 +228,7 @@ expression: list
         "min": {
           "x": 17.0,
           "y": 2.0,
-          "z": 936.5
+          "z": 938.25
         },
         "size": {
           "x": 566.0,
@@ -255,7 +255,7 @@ expression: list
         "min": {
           "x": 17.0,
           "y": 2.0,
-          "z": 1320.5
+          "z": 1322.25
         },
         "size": {
           "x": 566.0,
@@ -282,7 +282,7 @@ expression: list
         "min": {
           "x": 17.0,
           "y": 2.0,
-          "z": 1704.5
+          "z": 1706.25
         },
         "size": {
           "x": 566.0,
@@ -3599,7 +3599,7 @@ expression: list
       "at": {
         "x": 300.0,
         "y": 279.0,
-        "z": 560.5
+        "z": 562.25
       },
       "part": "C01.Shelf1",
       "quantity": 4
@@ -3610,7 +3610,7 @@ expression: list
       "at": {
         "x": 300.0,
         "y": 279.0,
-        "z": 944.5
+        "z": 946.25
       },
       "part": "C01.Shelf2",
       "quantity": 4
@@ -3621,7 +3621,7 @@ expression: list
       "at": {
         "x": 300.0,
         "y": 279.0,
-        "z": 1328.5
+        "z": 1330.25
       },
       "part": "C01.Shelf3",
       "quantity": 4
@@ -3632,7 +3632,7 @@ expression: list
       "at": {
         "x": 300.0,
         "y": 279.0,
-        "z": 1712.5
+        "z": 1714.25
       },
       "part": "C01.Shelf4",
       "quantity": 4

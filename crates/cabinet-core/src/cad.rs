@@ -556,11 +556,11 @@ pub fn cad_placements(list: &PartList) -> Vec<CadPlacement> {
         } else if h.item == crate::build::SHELF_SUPPORT {
             // One row of the hardware list stands for all the shelf's supports: the holes it
             // rests on say where they are. 282.12.405's pin runs down -X from the origin, on the
-            // hole's centre, and its seat is a pin's radius above (as the build's shelf is).
+            // hole's centre, and the shelf is on its seat (`shelf_seat`).
             let Some(shelf) = list.part(&h.part).map(|p| p.bounds) else {
                 continue;
             };
-            let hole_z = shelf.min.z - 2.5;
+            let hole_z = shelf.min.z - crate::build::shelf_seat();
             for op in &list.operations {
                 let Operation::Bore {
                     at,
@@ -673,16 +673,16 @@ pub fn cad_placements(list: &PartList) -> Vec<CadPlacement> {
                 continue;
             };
             let n = next(kind);
-            let x = list
-                .front_box(&h.part)
-                .map_or(h.at.x, |p| p.bounds.center().x);
+            let front = list.front_box(&h.part).map(|p| p.bounds);
+            let x = front.map_or(h.at.x, |b| b.center().x);
             for (suffix, side) in [("L", Side::Left), ("R", Side::Right)] {
-                out.push(place(
-                    format!("{}.{kind}{n}{suffix}", list.cabinet),
-                    side,
-                    x,
-                    z,
-                ));
+                let mut p = place(format!("{}.{kind}{n}{suffix}", list.cabinet), side, x, z);
+                // The box starts behind its own front, as the build lays it out: behind a drawer
+                // frame the sides are set back, and measured from them it ran into the back.
+                if let Some(b) = front {
+                    p.origin.y = b.max().y;
+                }
+                out.push(p);
             }
         } else if h.item == "blum.servo-drive.drive-unit" {
             // WF-2c: Blum's own models, one per drawer. Their frame is the cabinet's own: X
@@ -1319,8 +1319,11 @@ mod tests {
             assert_eq!(c.article, "282.12.405");
             let m = transform(c, true, BLUM_FRONT_PLANE);
             let tip = apply(&m, Vec3::new(-7.4, 0.0, 0.0));
-            let seat = apply(&m, Vec3::new(5.0, 0.0, 2.5));
-            assert_eq!(seat.z - tip.z, 2.5, "upright on both sides");
+            // The model's seat, the top of its pad inside the cabinet (measured: 4.25).
+            let seat_height = crate::build::shelf_seat();
+            assert_eq!(seat_height, 4.25);
+            let seat = apply(&m, Vec3::new(5.0, 0.0, seat_height));
+            assert_eq!(seat.z - tip.z, seat_height, "upright on both sides");
             let inner = list
                 .by_role(if tip.x < cab.width / 2.0 {
                     PartRole::LeftSide

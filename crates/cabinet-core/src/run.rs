@@ -1895,6 +1895,26 @@ fn benchtop(
                     ));
                     continue;
                 }
+                // A cabinet beyond the stretch (a shorter one, not under the top) is in the way.
+                let (wx1, wy0, wy1) = (wx0 + b.thickness, y0, y1);
+                let blocker = lists
+                    .iter()
+                    .filter(|l| !stretch.iter().any(|s| s.cabinet == l.cabinet))
+                    .flat_map(|l| &l.parts)
+                    .find(|p| {
+                        p.bounds.min.x < wx1 - 1e-6
+                            && p.bounds.max().x > wx0 + 1e-6
+                            && p.bounds.min.y < wy1 - 1e-6
+                            && p.bounds.max().y > wy0 + 1e-6
+                            && p.bounds.min.z < z - 1e-6
+                    });
+                if let Some(p) = blocker {
+                    out.warnings.push(format!(
+                        "{}: {side} waterfall would run into {}; left out",
+                        b.id, p.name
+                    ));
+                    continue;
+                }
                 out.parts.push(Part {
                     name: format!("{}.Waterfall{}{side}", b.id, n + 1),
                     role: PartRole::Benchtop,

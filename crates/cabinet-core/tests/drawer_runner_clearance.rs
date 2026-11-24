@@ -163,3 +163,85 @@ fn box_sides_are_drawn_in_their_runners_frame() {
         }
     }
 }
+
+#[test]
+fn behind_a_drawer_frame_the_drawer_hardware_starts_at_the_drawer_front() {
+    use cabinet_core::model::{DrawerFrame, DrawerSystem};
+    for system in [
+        DrawerSystem::Legrabox,
+        DrawerSystem::Merivobox,
+        DrawerSystem::Tandembox,
+    ] {
+        let mut cab = cabinet_core::Cabinet::new("D01", cabinet_core::CabinetKind::DrawerBank);
+        cab.standard.drawer_system = system;
+        cab.standard.drawer_frame = DrawerFrame::Board;
+        let list = build_cabinet(&cab).unwrap();
+        assert!(
+            list.by_role(PartRole::DrawerFrame).next().is_some(),
+            "{system:?}"
+        );
+        for p in cad_placements(&list)
+            .iter()
+            .filter(|p| p.name.contains("Runner") || p.name.contains("BoxSide"))
+        {
+            let as_front = p
+                .name
+                .replace("Runner", "DrawerFront")
+                .replace("BoxSide", "DrawerFront");
+            let n = cabinet_core::part::drawer_number(&as_front).unwrap();
+            let front = list.part(&format!("D01.DrawerFront{n}")).unwrap();
+            assert_eq!(p.origin.y, front.bounds.max().y, "{system:?} {}", p.name);
+        }
+    }
+}
+
+#[test]
+fn every_servo_drive_bumper_has_its_hole_in_the_front() {
+    use cabinet_core::model::{DoorStyle, Opening};
+    for style in [DoorStyle::Slab, DoorStyle::Shaker] {
+        let mut cab = cabinet_core::Cabinet::new("D01", cabinet_core::CabinetKind::DrawerBank);
+        cab.standard.opening = Opening::ServoDrive;
+        cab.standard.door_style = style;
+        let list = build_cabinet(&cab).unwrap();
+        let bumpers: Vec<_> = cad_placements(&list)
+            .into_iter()
+            .filter(|p| p.name.contains("ServoBumper"))
+            .collect();
+        assert!(!bumpers.is_empty(), "{style:?}");
+        for b in &bumpers {
+            let hole = list.operations.iter().find(|op| {
+                matches!(op,
+                Operation::Bore { at, purpose: BorePurpose::DistanceBumper, .. }
+                if (at.x - b.origin.x).abs() < 1e-6 && (at.z - b.origin.z).abs() < 1e-6
+                    && (at.y - b.origin.y).abs() < 1e-6)
+            });
+            let Some(Operation::Bore { part, .. }) = hole else {
+                panic!("{style:?}: no hole for {}", b.name)
+            };
+            let p = list.part(part).unwrap();
+            assert!(
+                p.bounds.min.x <= b.origin.x && b.origin.x <= p.bounds.max().x,
+                "{style:?}: {part}"
+            );
+        }
+    }
+}
+
+#[test]
+fn a_job_wide_drawer_frame_says_nothing_on_cabinets_without_drawers() {
+    use cabinet_core::model::DrawerFrame;
+    for kind in [
+        cabinet_core::CabinetKind::Wall,
+        cabinet_core::CabinetKind::Base,
+    ] {
+        let mut cab = cabinet_core::Cabinet::new("C01", kind);
+        cab.fronts = cabinet_core::model::FrontLayout::DoorPair;
+        cab.standard.drawer_frame = DrawerFrame::Board;
+        let list = build_cabinet(&cab.sectioned()).unwrap();
+        assert!(
+            list.warnings.iter().all(|w| !w.contains("drawer frame")),
+            "{kind:?}: {:?}",
+            list.warnings
+        );
+    }
+}

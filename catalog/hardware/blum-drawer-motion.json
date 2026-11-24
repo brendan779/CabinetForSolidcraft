@@ -1243,14 +1243,16 @@
       "kind": "other",
       "parameters": {
         "diameter": 5,
-        "inset_from_front_edge": 8
+        "inset_from_front_edge": 8,
+        "hole_depth": 10
       },
       "source": {
         "url": "Blum Catalogue and technical manual 2024/2025, p.366 (front assembly: FA/2 apart, 20 +-12 from the centre; 2 pcs to FH 300, 4 from 301) and Blum session output 2026-10-27 (drawer base 600x870x580, LEGRABOX free C, NL 500, SERVO-DRIVE), New-cabinet parts list and measured New-cabinet.STEP (8 mm in from the front's side edges, datum on the front's back face at 582.5, head towards the interior; Blum's fronts stand 2.5 off the carcass)",
         "document_date": "2024/2025",
         "retrieved": "2026-11-01",
         "verified": false
-      }
+      },
+      "note": "hole_depth: its shank's length, 10.03 mm, measured from Blum's model 993.0530; pressed into a Ø5 hole in the front's back"
     },
     {
       "id": "blum.tip-on-blumotion.merivobox",

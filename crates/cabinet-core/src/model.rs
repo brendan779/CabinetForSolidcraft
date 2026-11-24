@@ -467,8 +467,8 @@ impl Cabinet {
                             SectionKind::DoorPair => SectionFront::DoorPair,
                             SectionKind::Niche => SectionFront::Niche,
                         },
-                        // A wardrobe's interior is the whole cabinet's, whatever its fronts.
-                        if wardrobe && i == 0 {
+                        // A wardrobe's hanging goes in its top section, under the carcass top.
+                        if wardrobe && i + 1 == sections.len() {
                             SectionInside::Wardrobe
                         } else {
                             SectionInside::Empty
