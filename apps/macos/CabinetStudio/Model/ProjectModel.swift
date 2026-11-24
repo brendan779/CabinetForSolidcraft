@@ -1004,7 +1004,7 @@ final class ProjectModel {
     @ObservationIgnored private var handleRecordsCache: [HandleRecord]?
     var handleRecords: [HandleRecord] {
         if let c = handleRecordsCache { return c }
-        let records = (try? CabinetStudio.abiHandles()) ?? []
+        let records = CabinetStudio.abiHandles()
         handleRecordsCache = records
         return records
     }

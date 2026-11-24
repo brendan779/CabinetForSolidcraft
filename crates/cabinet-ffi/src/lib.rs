@@ -194,6 +194,8 @@ pub struct BoardRecord {
     pub profile_shape: String,
     pub profile_module: f64,
     pub profile_groove: f64,
+    /// Its decor's picture in the decors folder, `<image>.jpg`; empty when the brand has none.
+    pub image: String,
 }
 
 /// Handles as the viewport draws them (mm): a bar this square, standing this far off the front,
@@ -1405,7 +1407,14 @@ fn summary(list: PartList) -> BuildSummary {
         hardware: list
             .hardware
             .iter()
-            .map(|h| format!("{} — {}", h.item, h.description))
+            // The description names the item; the catalog id is for the bill's Article column.
+            .map(|h| {
+                if h.description.is_empty() {
+                    h.item.clone()
+                } else {
+                    h.description.clone()
+                }
+            })
             .collect(),
         warnings: list.warnings,
     }
@@ -1453,7 +1462,11 @@ pub fn standard_option(cabinet_json: String, field: String) -> Result<String, Co
 #[uniffi::export]
 pub fn cut_list_csv(job: JobItems) -> Result<String, CoreError> {
     let (lists, tape) = cut_lists(&job)?;
-    Ok(to_csv(&cut_list(&lists, "Generic", tape)))
+    let mut cut = cut_list(&lists, "Generic", tape);
+    for r in &mut cut.rows {
+        r.board = board_label(&r.board);
+    }
+    Ok(to_csv(&cut))
 }
 
 /// Every item's part list, and the edge tape thickness of the job's cabinets.
@@ -1507,7 +1520,7 @@ pub fn cut_list_rows(job: JobItems) -> Result<Vec<CutRowRecord>, CoreError> {
                 cabinet: r.cabinet,
                 part: r.part,
                 description: r.description,
-                board: r.board,
+                board: board_label(&r.board),
                 thickness: r.thickness,
                 length: r.length,
                 width: r.width,
@@ -1529,12 +1542,12 @@ pub fn cut_sheet_svg(items: JobItems, part_name: String, job: String) -> Result<
     let part = list
         .part(&part_name)
         .ok_or_else(|| invalid(format!("no part {part_name}")))?;
-    let board = if part.board.is_empty() {
-        "Generic".to_string()
-    } else {
-        part.board.clone()
-    };
-    Ok(cabinet_sheets::part_sheet(&list, part, &board, &job))
+    Ok(cabinet_sheets::part_sheet(
+        &list,
+        part,
+        &board_name(part),
+        &job,
+    ))
 }
 
 /// A 62 mm label per part, each with a QR code of the part's name.
@@ -1548,7 +1561,7 @@ fn board_name(p: &cabinet_core::Part) -> String {
     if p.board.is_empty() {
         "Generic".to_string()
     } else {
-        p.board.clone()
+        board_label(&p.board)
     }
 }
 
@@ -1557,6 +1570,31 @@ fn board_name(p: &cabinet_core::Part) -> String {
 pub fn cut_sheets_pdf(items: JobItems, job: String) -> Result<Vec<u8>, CoreError> {
     let lists: Vec<PartList> = job_lists(&items)?.into_iter().map(|(l, _)| l).collect();
     Ok(cabinet_sheets::pdf::job_pdf(&lists, board_name, &job))
+}
+
+/// Each catalog board's name, by id, from the last catalog `load_boards` read: outputs show the owner
+/// "EGGER Agave Green U645 ST9", not `egger.eurodekor-mf.u645-st9.18`. Ids stay the keys everywhere.
+static BOARD_NAMES: std::sync::RwLock<Option<std::collections::HashMap<String, String>>> =
+    std::sync::RwLock::new(None);
+
+/// A board's name for people, or the id itself when the catalog has no such board.
+fn board_label(id: &str) -> String {
+    BOARD_NAMES
+        .read()
+        .ok()
+        .and_then(|names| names.as_ref()?.get(id).cloned())
+        .unwrap_or_else(|| id.to_string())
+}
+
+/// Copies of `lists` whose parts carry their boards' names, for drawings and sheets only.
+fn named_lists(lists: &[PartList]) -> Vec<PartList> {
+    let mut lists = lists.to_vec();
+    for p in lists.iter_mut().flat_map(|l| l.parts.iter_mut()) {
+        if !p.board.is_empty() {
+            p.board = board_label(&p.board);
+        }
+    }
+    lists
 }
 
 /// The usual Australian sheet for parts without a catalog board (mm).
@@ -1656,7 +1694,9 @@ pub fn nesting_pdf(
         &offcuts(&offcuts_json)?,
     )?;
     Ok(cabinet_sheets::nesting::nesting_pdf(
-        &nesting, &job, &settings,
+        &named_nesting(nesting),
+        &job,
+        &settings,
     ))
 }
 
@@ -1680,8 +1720,18 @@ pub fn nesting_pages(
         &offcuts(&offcuts_json)?,
     )?;
     Ok(cabinet_sheets::nesting::nesting_svgs(
-        &nesting, &job, &settings,
+        &named_nesting(nesting),
+        &job,
+        &settings,
     ))
+}
+
+/// The nesting with each sheet's board by name, for showing.
+fn named_nesting(mut nesting: cabinet_core::nesting::Nesting) -> cabinet_core::nesting::Nesting {
+    for s in &mut nesting.sheets {
+        s.board = board_label(&s.board);
+    }
+    nesting
 }
 
 /// One line of a quote.
@@ -1740,9 +1790,14 @@ fn job_quote_core(
         .iter()
         .filter(|(_, c)| c.is_some())
         .count();
-    Ok(cabinet_core::quote::quote(
-        &nesting, &cut, &bom, cabinets, &prices,
-    ))
+    let mut q = cabinet_core::quote::quote(&nesting, &cut, &bom, cabinets, &prices);
+    // The price list keys lines by board id; people read the board's name.
+    for l in &mut q.lines {
+        if l.key != board_label(&l.key) {
+            l.description = l.description.replacen(&l.key, &board_label(&l.key), 1);
+        }
+    }
+    Ok(q)
 }
 
 /// What the job costs from the shop's price list (JSON, as `cabinet_core::quote::PriceList`).
@@ -1955,14 +2010,20 @@ pub fn customer_quote_pdf(
 #[uniffi::export]
 pub fn benchtops_pdf(items: JobItems, job: String) -> Result<Vec<u8>, CoreError> {
     let lists: Vec<PartList> = job_lists(&items)?.into_iter().map(|(l, _)| l).collect();
-    Ok(cabinet_sheets::benchtops::benchtops_pdf(&lists, &job))
+    Ok(cabinet_sheets::benchtops::benchtops_pdf(
+        &named_lists(&lists),
+        &job,
+    ))
 }
 
 /// An exploded assembly drawing per cabinet with its parts list, as a PDF.
 #[uniffi::export]
 pub fn assembly_pdf(items: JobItems, job: String) -> Result<Vec<u8>, CoreError> {
     let lists: Vec<PartList> = job_lists(&items)?.into_iter().map(|(l, _)| l).collect();
-    Ok(cabinet_sheets::assembly::assembly_pdf(&lists, &job))
+    Ok(cabinet_sheets::assembly::assembly_pdf(
+        &named_lists(&lists),
+        &job,
+    ))
 }
 
 /// The run's lists (not cabinets kept where they were drawn) and its return walls.
@@ -2611,16 +2672,57 @@ pub fn hide_bodies(port: u16, bodies: Vec<String>) -> Result<(), CoreError> {
 pub fn load_boards(catalog_dir: String) -> Result<Vec<BoardRecord>, CoreError> {
     let cat =
         cabinet_catalog::Catalog::load(std::path::Path::new(&catalog_dir)).map_err(invalid)?;
+    if let Ok(mut names) = BOARD_NAMES.write() {
+        *names = Some(
+            cat.boards
+                .iter()
+                .map(|b| {
+                    let mut name = vec![b.brand.as_str(), b.decor.as_str()];
+                    if !b.finish.is_empty() && !b.decor.contains(&b.finish) {
+                        name.push(&b.finish);
+                    }
+                    (b.id.clone(), name.join(" "))
+                })
+                .collect(),
+        );
+    }
     let profiles: Vec<_> = cat
         .boards
         .iter()
         .map(|b| cat.profile_of(b).cloned())
         .collect();
+    // Each brand's decor pictures, as `scripts/fetch_board_images.py` records them.
+    let mut images: std::collections::HashMap<String, serde_json::Value> = Default::default();
+    let image_of = |images: &mut std::collections::HashMap<String, serde_json::Value>,
+                    b: &cabinet_catalog::Board| {
+        let brand = b.brand.to_lowercase().replace(' ', "-");
+        let file = images.entry(brand.clone()).or_insert_with(|| {
+            std::fs::read_to_string(
+                Path::new(&catalog_dir)
+                    .join("textures")
+                    .join(format!("{brand}.json")),
+            )
+            .ok()
+            .and_then(|t| serde_json::from_str(&t).ok())
+            .unwrap_or(serde_json::Value::Null)
+        });
+        file["images"][&b.decor]["name"]
+            .as_str()
+            .unwrap_or_default()
+            .to_string()
+    };
+    let pictures: Vec<String> = cat
+        .boards
+        .iter()
+        .map(|b| image_of(&mut images, b))
+        .collect();
     Ok(cat
         .boards
         .into_iter()
         .zip(profiles)
-        .map(|(b, profile)| BoardRecord {
+        .zip(pictures)
+        .map(|((b, profile), image)| BoardRecord {
+            image,
             profile_shape: profile
                 .as_ref()
                 .and_then(|p| serde_json::to_value(p.shape).ok())
@@ -2705,6 +2807,24 @@ mod tests {
 
     fn catalog() -> String {
         concat!(env!("CARGO_MANIFEST_DIR"), "/../../catalog").to_string()
+    }
+
+    #[test]
+    fn outputs_name_a_catalog_board_rather_than_its_id() {
+        let id = "polytec.commercial.angora-oak-woodmatt.18.mr-mdf";
+        load_boards(catalog()).unwrap();
+        let mut base = Cabinet::new("B01", cabinet_core::CabinetKind::Base);
+        base.standard.front_board = id.into();
+        let job = || JobItems {
+            items_json: vec![serde_json::to_string(&base).unwrap()],
+            placed: Vec::new(),
+        };
+        let rows = cut_list_rows(job()).unwrap();
+        let door = rows.iter().find(|r| r.part == "B01.Door1").unwrap();
+        assert_eq!(door.board, "Polytec Angora Oak Woodmatt");
+        assert!(!cut_list_csv(job()).unwrap().contains(id));
+        let svg = cut_sheet_svg(job(), "B01.Door1".into(), "Job".into()).unwrap();
+        assert!(svg.contains("Polytec Angora Oak Woodmatt") && !svg.contains(id));
     }
 
     fn door_thickness(json: &str) -> f64 {

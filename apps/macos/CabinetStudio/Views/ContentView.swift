@@ -59,7 +59,9 @@ struct ContentView: View {
             }
         }
         .toolbar {
-            ToolbarItem(placement: .principal) {
+            // At the leading edge, after the job's name: centred, it moved sideways whenever the
+            // inspector came or went with the workspace, and the next click missed.
+            ToolbarItem(placement: .navigation) {
                 Picker("Workspace", selection: $project.workspace) {
                     ForEach(Workspace.allCases) { w in
                         Text(w.rawValue).tag(w)

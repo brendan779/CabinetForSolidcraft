@@ -5,91 +5,91 @@ expression: svg
 <svg xmlns="http://www.w3.org/2000/svg" width="297mm" height="210mm" viewBox="0 0 297 210" font-family="Helvetica, Arial, sans-serif">
 <rect width="297" height="210" fill="#fff"/>
 <style>.o{fill:#f6f3ec;stroke:#222;stroke-width:0.35}.t{font-size:3px;fill:#222}.s{font-size:2.4px;fill:#555}.d{stroke:#4a6fa5;stroke-width:0.2;fill:none}.e{stroke:#c0392b;stroke-width:1.1}.o2{font-size:1.7px;fill:#4a6fa5}</style>
-<rect class="o" x="34.00" y="60.57" width="113.50" height="91.43"/>
-<line class="e" x1="34.00" y1="152.00" x2="147.50" y2="152.00"/>
-<line class="d" x1="34.00" y1="159.00" x2="147.50" y2="159.00"/>
-<text class="t" x="90.75" y="163.00" text-anchor="middle">720</text>
-<line class="d" x1="27.00" y1="152.00" x2="27.00" y2="60.57"/>
-<text class="t" x="25.00" y="106.28" text-anchor="middle" transform="rotate(-90 25.00 106.28)">580</text>
-<circle cx="34.00" cy="152.00" r="1" fill="#c0392b"/>
-<rect x="34.00" y="63.09" width="113.50" height="0.95" fill="#9bb7d4" stroke="#222" stroke-width="0.15"/>
-<rect x="34.95" y="138.90" width="0.63" height="10.43" fill="#e8c27a" stroke="#222" stroke-width="0.15"/>
-<rect x="34.95" y="114.84" width="0.63" height="10.43" fill="#e8c27a" stroke="#222" stroke-width="0.15"/>
-<rect x="34.95" y="90.77" width="0.63" height="10.43" fill="#e8c27a" stroke="#222" stroke-width="0.15"/>
-<rect x="34.95" y="66.71" width="0.63" height="10.43" fill="#e8c27a" stroke="#222" stroke-width="0.15"/>
-<circle cx="76.88" cy="146.17" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
-<circle cx="76.88" cy="69.87" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
-<circle cx="81.92" cy="146.17" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
-<circle cx="81.92" cy="69.87" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
-<circle cx="86.97" cy="146.17" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
-<circle cx="86.97" cy="69.87" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
-<circle cx="92.01" cy="146.17" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
-<circle cx="92.01" cy="69.87" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
-<circle cx="97.06" cy="146.17" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
-<circle cx="97.06" cy="69.87" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
-<circle cx="102.10" cy="146.17" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
-<circle cx="102.10" cy="69.87" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
-<circle cx="107.14" cy="146.17" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
-<circle cx="107.14" cy="69.87" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
-<line class="d" x1="76.88" y1="152.00" x2="76.88" y2="153.50"/>
-<text class="o2" x="76.88" y="154.00" transform="rotate(90 76.88 154.00)">272</text>
-<line class="d" x1="81.92" y1="152.00" x2="81.92" y2="153.50"/>
-<text class="o2" x="81.92" y="154.00" transform="rotate(90 81.92 154.00)">304</text>
-<line class="d" x1="86.97" y1="152.00" x2="86.97" y2="153.50"/>
-<text class="o2" x="86.97" y="154.00" transform="rotate(90 86.97 154.00)">336</text>
-<line class="d" x1="92.01" y1="152.00" x2="92.01" y2="153.50"/>
-<text class="o2" x="92.01" y="154.00" transform="rotate(90 92.01 154.00)">368</text>
-<line class="d" x1="97.06" y1="152.00" x2="97.06" y2="153.50"/>
-<text class="o2" x="97.06" y="154.00" transform="rotate(90 97.06 154.00)">400</text>
-<line class="d" x1="102.10" y1="152.00" x2="102.10" y2="153.50"/>
-<text class="o2" x="102.10" y="154.00" transform="rotate(90 102.10 154.00)">432</text>
-<line class="d" x1="107.14" y1="152.00" x2="107.14" y2="153.50"/>
-<text class="o2" x="107.14" y="154.00" transform="rotate(90 107.14 154.00)">464</text>
-<line class="d" x1="32.50" y1="146.17" x2="34.00" y2="146.17"/>
-<text class="o2" x="32.00" y="146.77" text-anchor="end">37</text>
-<line class="d" x1="32.50" y1="69.87" x2="34.00" y2="69.87"/>
-<text class="o2" x="32.00" y="70.47" text-anchor="end">521</text>
-<text class="s" x="34.00" y="58.57">Inside face</text>
-<rect class="o" x="163.50" y="60.57" width="113.50" height="91.43"/>
-<line class="e" x1="277.00" y1="152.00" x2="163.50" y2="152.00"/>
-<line class="d" x1="277.00" y1="159.00" x2="163.50" y2="159.00"/>
-<text class="t" x="220.25" y="163.00" text-anchor="middle">720</text>
-<line class="d" x1="156.50" y1="152.00" x2="156.50" y2="60.57"/>
-<text class="t" x="154.50" y="106.28" text-anchor="middle" transform="rotate(-90 154.50 106.28)">580</text>
-<circle cx="277.00" cy="152.00" r="1" fill="#c0392b"/>
-<circle cx="275.74" cy="132.08" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
-<circle cx="275.74" cy="132.08" r="0.63" fill="none" stroke="#222" stroke-width="0.25"/>
-<circle cx="275.74" cy="108.02" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
-<circle cx="275.74" cy="108.02" r="0.63" fill="none" stroke="#222" stroke-width="0.25"/>
-<circle cx="275.74" cy="83.95" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
-<circle cx="275.74" cy="83.95" r="0.63" fill="none" stroke="#222" stroke-width="0.25"/>
-<circle cx="164.76" cy="148.06" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
-<circle cx="164.76" cy="148.06" r="0.63" fill="none" stroke="#222" stroke-width="0.25"/>
-<circle cx="164.76" cy="140.18" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
-<circle cx="164.76" cy="140.18" r="0.63" fill="none" stroke="#222" stroke-width="0.25"/>
-<circle cx="164.76" cy="75.86" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
-<circle cx="164.76" cy="75.86" r="0.63" fill="none" stroke="#222" stroke-width="0.25"/>
-<circle cx="164.76" cy="67.98" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
-<circle cx="164.76" cy="67.98" r="0.63" fill="none" stroke="#222" stroke-width="0.25"/>
-<line class="d" x1="164.76" y1="152.00" x2="164.76" y2="153.50"/>
-<text class="o2" x="164.76" y="154.00" transform="rotate(90 164.76 154.00)">712</text>
-<line class="d" x1="275.74" y1="152.00" x2="275.74" y2="153.50"/>
-<text class="o2" x="275.74" y="154.00" transform="rotate(90 275.74 154.00)">8</text>
-<line class="d" x1="162.00" y1="148.06" x2="163.50" y2="148.06"/>
-<text class="o2" x="161.50" y="148.66" text-anchor="end">25</text>
-<line class="d" x1="162.00" y1="140.18" x2="163.50" y2="140.18"/>
-<text class="o2" x="161.50" y="140.78" text-anchor="end">75</text>
-<line class="d" x1="162.00" y1="132.08" x2="163.50" y2="132.08"/>
-<text class="o2" x="161.50" y="132.68" text-anchor="end">126.3</text>
-<line class="d" x1="162.00" y1="108.02" x2="163.50" y2="108.02"/>
-<text class="o2" x="161.50" y="108.62" text-anchor="end">279</text>
-<line class="d" x1="162.00" y1="83.95" x2="163.50" y2="83.95"/>
-<text class="o2" x="161.50" y="84.55" text-anchor="end">431.7</text>
-<line class="d" x1="162.00" y1="75.86" x2="163.50" y2="75.86"/>
-<text class="o2" x="161.50" y="76.46" text-anchor="end">483</text>
-<line class="d" x1="162.00" y1="67.98" x2="163.50" y2="67.98"/>
-<text class="o2" x="161.50" y="68.58" text-anchor="end">533</text>
-<text class="s" x="163.50" y="58.57">Outside face, turned over (left and right swap)</text>
+<rect class="o" x="34.00" y="40.28" width="113.50" height="91.43"/>
+<line class="e" x1="34.00" y1="131.72" x2="147.50" y2="131.72"/>
+<line class="d" x1="34.00" y1="138.72" x2="147.50" y2="138.72"/>
+<text class="t" x="90.75" y="142.72" text-anchor="middle">720</text>
+<line class="d" x1="27.00" y1="131.72" x2="27.00" y2="40.28"/>
+<text class="t" x="25.00" y="86.00" text-anchor="middle" transform="rotate(-90 25.00 86.00)">580</text>
+<circle cx="34.00" cy="131.72" r="1" fill="#c0392b"/>
+<rect x="34.00" y="42.81" width="113.50" height="0.95" fill="#9bb7d4" stroke="#222" stroke-width="0.15"/>
+<rect x="34.95" y="118.62" width="0.63" height="10.43" fill="#e8c27a" stroke="#222" stroke-width="0.15"/>
+<rect x="34.95" y="94.55" width="0.63" height="10.43" fill="#e8c27a" stroke="#222" stroke-width="0.15"/>
+<rect x="34.95" y="70.49" width="0.63" height="10.43" fill="#e8c27a" stroke="#222" stroke-width="0.15"/>
+<rect x="34.95" y="46.42" width="0.63" height="10.43" fill="#e8c27a" stroke="#222" stroke-width="0.15"/>
+<circle cx="76.88" cy="125.88" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
+<circle cx="76.88" cy="49.59" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
+<circle cx="81.92" cy="125.88" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
+<circle cx="81.92" cy="49.59" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
+<circle cx="86.97" cy="125.88" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
+<circle cx="86.97" cy="49.59" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
+<circle cx="92.01" cy="125.88" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
+<circle cx="92.01" cy="49.59" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
+<circle cx="97.06" cy="125.88" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
+<circle cx="97.06" cy="49.59" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
+<circle cx="102.10" cy="125.88" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
+<circle cx="102.10" cy="49.59" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
+<circle cx="107.14" cy="125.88" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
+<circle cx="107.14" cy="49.59" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
+<line class="d" x1="76.88" y1="131.72" x2="76.88" y2="133.22"/>
+<text class="o2" x="76.88" y="133.72" transform="rotate(90 76.88 133.72)">272</text>
+<line class="d" x1="81.92" y1="131.72" x2="81.92" y2="133.22"/>
+<text class="o2" x="81.92" y="133.72" transform="rotate(90 81.92 133.72)">304</text>
+<line class="d" x1="86.97" y1="131.72" x2="86.97" y2="133.22"/>
+<text class="o2" x="86.97" y="133.72" transform="rotate(90 86.97 133.72)">336</text>
+<line class="d" x1="92.01" y1="131.72" x2="92.01" y2="133.22"/>
+<text class="o2" x="92.01" y="133.72" transform="rotate(90 92.01 133.72)">368</text>
+<line class="d" x1="97.06" y1="131.72" x2="97.06" y2="133.22"/>
+<text class="o2" x="97.06" y="133.72" transform="rotate(90 97.06 133.72)">400</text>
+<line class="d" x1="102.10" y1="131.72" x2="102.10" y2="133.22"/>
+<text class="o2" x="102.10" y="133.72" transform="rotate(90 102.10 133.72)">432</text>
+<line class="d" x1="107.14" y1="131.72" x2="107.14" y2="133.22"/>
+<text class="o2" x="107.14" y="133.72" transform="rotate(90 107.14 133.72)">464</text>
+<line class="d" x1="32.50" y1="125.88" x2="34.00" y2="125.88"/>
+<text class="o2" x="32.00" y="126.48" text-anchor="end">37</text>
+<line class="d" x1="32.50" y1="49.59" x2="34.00" y2="49.59"/>
+<text class="o2" x="32.00" y="50.19" text-anchor="end">521</text>
+<text class="s" x="34.00" y="38.28">Inside face</text>
+<rect class="o" x="163.50" y="40.28" width="113.50" height="91.43"/>
+<line class="e" x1="277.00" y1="131.72" x2="163.50" y2="131.72"/>
+<line class="d" x1="277.00" y1="138.72" x2="163.50" y2="138.72"/>
+<text class="t" x="220.25" y="142.72" text-anchor="middle">720</text>
+<line class="d" x1="156.50" y1="131.72" x2="156.50" y2="40.28"/>
+<text class="t" x="154.50" y="86.00" text-anchor="middle" transform="rotate(-90 154.50 86.00)">580</text>
+<circle cx="277.00" cy="131.72" r="1" fill="#c0392b"/>
+<circle cx="275.74" cy="111.80" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
+<circle cx="275.74" cy="111.80" r="0.63" fill="none" stroke="#222" stroke-width="0.25"/>
+<circle cx="275.74" cy="87.73" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
+<circle cx="275.74" cy="87.73" r="0.63" fill="none" stroke="#222" stroke-width="0.25"/>
+<circle cx="275.74" cy="63.67" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
+<circle cx="275.74" cy="63.67" r="0.63" fill="none" stroke="#222" stroke-width="0.25"/>
+<circle cx="164.76" cy="127.77" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
+<circle cx="164.76" cy="127.77" r="0.63" fill="none" stroke="#222" stroke-width="0.25"/>
+<circle cx="164.76" cy="119.89" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
+<circle cx="164.76" cy="119.89" r="0.63" fill="none" stroke="#222" stroke-width="0.25"/>
+<circle cx="164.76" cy="55.58" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
+<circle cx="164.76" cy="55.58" r="0.63" fill="none" stroke="#222" stroke-width="0.25"/>
+<circle cx="164.76" cy="47.69" r="0.60" fill="none" stroke="#222" stroke-width="0.25"/>
+<circle cx="164.76" cy="47.69" r="0.63" fill="none" stroke="#222" stroke-width="0.25"/>
+<line class="d" x1="164.76" y1="131.72" x2="164.76" y2="133.22"/>
+<text class="o2" x="164.76" y="133.72" transform="rotate(90 164.76 133.72)">712</text>
+<line class="d" x1="275.74" y1="131.72" x2="275.74" y2="133.22"/>
+<text class="o2" x="275.74" y="133.72" transform="rotate(90 275.74 133.72)">8</text>
+<line class="d" x1="162.00" y1="127.77" x2="163.50" y2="127.77"/>
+<text class="o2" x="161.50" y="128.37" text-anchor="end">25</text>
+<line class="d" x1="162.00" y1="119.89" x2="163.50" y2="119.89"/>
+<text class="o2" x="161.50" y="120.49" text-anchor="end">75</text>
+<line class="d" x1="162.00" y1="111.80" x2="163.50" y2="111.80"/>
+<text class="o2" x="161.50" y="112.40" text-anchor="end">126.3</text>
+<line class="d" x1="162.00" y1="87.73" x2="163.50" y2="87.73"/>
+<text class="o2" x="161.50" y="88.33" text-anchor="end">279</text>
+<line class="d" x1="162.00" y1="63.67" x2="163.50" y2="63.67"/>
+<text class="o2" x="161.50" y="64.27" text-anchor="end">431.7</text>
+<line class="d" x1="162.00" y1="55.58" x2="163.50" y2="55.58"/>
+<text class="o2" x="161.50" y="56.18" text-anchor="end">483</text>
+<line class="d" x1="162.00" y1="47.69" x2="163.50" y2="47.69"/>
+<text class="o2" x="161.50" y="48.29" text-anchor="end">533</text>
+<text class="s" x="163.50" y="38.28">Outside face, turned over (left and right swap)</text>
 <rect x="12" y="168.00" width="273.00" height="30" fill="none" stroke="#222" stroke-width="0.3"/>
 <text class="t" x="15.00" y="175.00">B01.RightSide  —  Right side</text>
 <text class="t" x="15.00" y="182.00">Finished 720 × 580 × 16 mm   Board: Polytec Classic White Matt 16 MR MDF</text>

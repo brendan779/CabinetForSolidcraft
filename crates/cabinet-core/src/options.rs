@@ -250,12 +250,12 @@ pub fn option_groups() -> Vec<OptionGroup> {
                 ),
                 (
                     "movento",
-                    "Wood on MOVENTO",
+                    "MOVENTO",
                     "Wooden boxes on concealed Blum MOVENTO runners, 40–70 kg",
                 ),
                 (
                     "tandem",
-                    "Wood on TANDEM",
+                    "TANDEM",
                     "Wooden boxes on concealed Blum TANDEM runners, 30 kg",
                 ),
             ],

@@ -210,16 +210,17 @@ From a walk through every workspace and inspector tab of the Release build, on a
 
 | ID | Status | Size | Task | Done when |
 |---|---|---|---|---|
-| APP-1 | todo | S | Board names, not catalog ids: the cut list's Board column, the nesting summary, the quote and the hardware list show `egger.eurodekor-mf.u645-st9.18` where the owner reads "Agave Green U645 ST9, 18 mm" | no catalog id on screen or in an exported PDF/CSV (ids may stay in an id column) |
-| APP-2 | todo | S | Cut Sheets opens blank: the first part is highlighted but no sheet is drawn until another part is clicked | the first sheet draws on opening |
-| APP-3 | todo | S | The workspace switcher (Design, Cut List, Cut Sheets, Boards) moves sideways when the workspace changes, so the next click lands on the wrong one | it stays put |
-| APP-4 | todo | S | Inspector chip rows run off the right edge: Width's presets past 900 are cut off | every row fits or scrolls, at the inspector's narrowest width (CLAUDE.md's 420 pt rule) |
-| APP-5 | todo | S | Boards grid: a decor with five thicknesses wraps its chips, "18" broken over two lines (Laminex Alaskan) | chips wrap whole |
-| APP-6 | todo | M | Boards grid and pickers show flat colours, though most decors now have their photo in the decors folder | tiles show a crop of the decor's image, colour where there's none |
-| APP-7 | todo | S | Fittings tab: drawer tiles truncate ("Wood on MOV…"), and its hardware list leads with catalog ids | short titles that fit; names first |
-| APP-8 | todo | S | Front elevation: the run's dimension labels draw on top of each other ("1888" over "600") | every label legible |
-| APP-9 | todo | M | Cut sheets: the drawing sits in the bottom half of the page with the top empty | the sheet fills the page |
-| APP-10 | todo | S | Two compiler warnings: an unneeded `try` (ProjectModel.swift:1007) and a non-Sendable closure (SectionsEditor.swift:498) | the build is warning-free |
+| APP-1 | done (2026-11-24: names from the catalog `load_boards` read; ids stay the keys) | S | Board names, not catalog ids: the cut list's Board column, the nesting summary, the quote and the hardware list show `egger.eurodekor-mf.u645-st9.18` where the owner reads "Agave Green U645 ST9, 18 mm" | no catalog id on screen or in an exported PDF/CSV (ids may stay in an id column) |
+| APP-2 | done (2026-11-24: the sheet view reloaded on every update; the first sheet now shows once WebKit starts, a few seconds) | S | Cut Sheets opens blank: the first part is highlighted but no sheet is drawn until another part is clicked | the first sheet draws on opening |
+| APP-3 | done (2026-11-24: at the leading edge after the job name) | S | The workspace switcher (Design, Cut List, Cut Sheets, Boards) moves sideways when the workspace changes, so the next click lands on the wrong one | it stays put |
+| APP-4 | done (2026-11-24: size presets wrap) | S | Inspector chip rows run off the right edge: Width's presets past 900 are cut off | every row fits or scrolls, at the inspector's narrowest width (CLAUDE.md's 420 pt rule) |
+| APP-5 | done (2026-11-24) | S | Boards grid: a decor with five thicknesses wraps its chips, "18" broken over two lines (Laminex Alaskan) | chips wrap whole |
+| APP-6 | done (2026-11-24: 320 px thumbnails made once, kept in Caches) | M | Boards grid and pickers show flat colours, though most decors now have their photo in the decors folder | tiles show a crop of the decor's image, colour where there's none |
+| APP-7 | done (2026-11-24: MOVENTO, TANDEM; descriptions only) | S | Fittings tab: drawer tiles truncate ("Wood on MOV…"), and its hardware list leads with catalog ids | short titles that fit; names first |
+| APP-8 | done (2026-11-24: the stretch's toe kick made the first cabinet as wide as the stretch) | S | Front elevation: the run's dimension labels draw on top of each other ("1888" over "600") | every label legible |
+| APP-9 | done (2026-11-24: shallow parts centred) | M | Cut sheets: the drawing sits in the bottom half of the page with the top empty | the sheet fills the page |
+| APP-10 | done (2026-11-24: warning-free) | S | Two compiler warnings: an unneeded `try` (ProjectModel.swift:1007) and a non-Sendable closure (SectionsEditor.swift:498) | the build is warning-free |
+| APP-11 | todo | S | Two headless SolidCraft tests fail on 0.45.0, before and after this pass: `mitred_stone_build_up_and_waterfalls_are_closed_solids_with_stock_supports` (35 bodies where 34 were expected) and `a_door_is_bevelled_on_the_edge_chosen_with_a_rail_behind_it` (an opening about 1.2 % short). SolidCraft changed something they measure: find what, then fix the build or the test | the headless tests pass on 0.45 |
 | PAINT-2 | todo | S | (from the next jobs) paint picker on floating shelves, end panels, shaker panels; paint on the cut list | |
 | LINING-VIEW | todo | M | (from the next jobs) linings drawn as a striped picture in the viewport, not their section | |
 

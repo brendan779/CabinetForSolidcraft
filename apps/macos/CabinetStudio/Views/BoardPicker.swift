@@ -172,6 +172,7 @@ struct DecorCard<Accessory: View>: View {
     let onPick: (BoardRecord) -> Void
     @ViewBuilder var accessory: (BoardRecord) -> Accessory
     @State private var chosen: String?
+    @State private var picture: NSImage?
 
     private var board: BoardRecord {
         group.boards.first { $0.id == chosen } ?? group.boards.first { marked.contains($0.id) } ?? group.boards[0]
@@ -186,7 +187,14 @@ struct DecorCard<Accessory: View>: View {
                 RoundedRectangle(cornerRadius: 10)
                     .fill(Color(nsColor: b.displayColour))
                     .overlay {
-                        if b.grained { GrainPattern().clipShape(RoundedRectangle(cornerRadius: 10)) }
+                        // The decor's own picture where this Mac has it; else its colour, grained.
+                        if let picture {
+                            Image(nsImage: picture).resizable().scaledToFill()
+                                .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity)
+                                .clipShape(RoundedRectangle(cornerRadius: 10))
+                        } else if b.grained {
+                            GrainPattern().clipShape(RoundedRectangle(cornerRadius: 10))
+                        }
                         if b.profileModule > 0 {
                             ProfileSwatch(shape: b.profileShape, module: b.profileModule, groove: b.profileGroove)
                                 .clipShape(RoundedRectangle(cornerRadius: 10))
@@ -194,7 +202,7 @@ struct DecorCard<Accessory: View>: View {
                     }
                     .overlay(alignment: .topTrailing) {
                         HStack(spacing: 4) {
-                            if b.colourIsGuessed {
+                            if b.colourIsGuessed && picture == nil {
                                 Image(systemName: "eyedropper.halffull")
                                     .help("Colour guessed from the decor's name: see the brand's swatch")
                             }
@@ -216,6 +224,7 @@ struct DecorCard<Accessory: View>: View {
                     .shadow(color: .black.opacity(0.15), radius: 4, y: 2)
             }
             .buttonStyle(.plain)
+            .task(id: b.image) { picture = await DecorThumbnails.image(b.image) }
             .accessibilityLabel("\(b.decor) \(b.finish), \(Int(b.thickness)) mm\(b.colourIsGuessed ? ", colour approximate" : "")")
             HStack {
                 // A lining is known by its profile; a board by its decor.
@@ -224,10 +233,12 @@ struct DecorCard<Accessory: View>: View {
                 accessory(b)
             }
             Text(b.kind == "lining" ? "\(b.brand) · \(b.decor)" : "\(b.brand) · \(b.finish)").font(.subheadline).foregroundStyle(.secondary).lineLimit(1)
-            HStack(spacing: 4) {
+            // Wrapped whole: squeezed into one row, a decor with many boards broke "18" over two lines.
+            FlowLayout(spacing: 4) {
                 ForEach(group.boards, id: \.id) { t in
                     Button("\(Int(t.thickness))") { withAnimation(.snappy) { chosen = t.id } }
                         .buttonStyle(ChipStyle(selected: t.id == b.id))
+                        .fixedSize()
                         .help("\(Int(t.thickness)) mm \(t.substrate.replacingOccurrences(of: "_", with: " ")) · \(t.sheets.joined(separator: ", "))")
                         .accessibilityLabel("\(Int(t.thickness)) millimetres")
                 }

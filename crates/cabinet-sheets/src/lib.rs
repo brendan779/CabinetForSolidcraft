@@ -330,7 +330,9 @@ pub fn part_sheet(list: &PartList, part: &Part, board: &str, job: &str) -> Strin
     let views = if two_faces { 2.0 } else { 1.0 };
     let view_w = (draw_w - VIEW_GAP * (views - 1.0)) / views;
     let s = (view_w / lu).min(draw_h / lv);
-    let oy = MARGIN + 8.0 + draw_h; // reference corner on the page
+    // The reference corner on the page: a shallow part sits in the middle of the drawing area,
+    // not at its foot under an empty half page.
+    let oy = MARGIN + 8.0 + draw_h - (draw_h - lv * s) / 2.0;
 
     let mut svg = String::new();
     let _ = write!(

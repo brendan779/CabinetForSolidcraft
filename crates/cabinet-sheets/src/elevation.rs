@@ -76,7 +76,13 @@ fn drawing<'a>(lists: &'a [PartList], walls: Option<&Walls>) -> Option<Drawing<'
                 })
         })
         .map(|l| {
-            let ps = || l.parts.iter().filter(|p| drawn(l, p));
+            // A stretch's one toe kick belongs to its first cabinet but runs under the rest: it
+            // would make that cabinet as wide as the stretch.
+            let ps = || {
+                l.parts
+                    .iter()
+                    .filter(|p| drawn(l, p) && p.role != cabinet_core::part::PartRole::Plinth)
+            };
             Item {
                 id: &l.cabinet,
                 x0: ps().map(|p| p.bounds.min.x).fold(f64::MAX, f64::min),
@@ -330,6 +336,23 @@ mod tests {
         let width = Cabinet::new("B1", CabinetKind::Base).width;
         assert!(svg.contains(&format!(">{width:.0}<")));
         assert!(svg.contains(&format!(">{:.0}<", 2.0 * width)));
+    }
+
+    #[test]
+    fn a_cabinet_is_as_wide_as_itself_though_it_carries_the_stretchs_toe_kick() {
+        let (l, _) = lists(None);
+        assert!(
+            l[0].parts
+                .iter()
+                .any(|p| p.role == cabinet_core::part::PartRole::Plinth)
+        );
+        let d = drawing(&l, None).unwrap();
+        let width = Cabinet::new("B1", CabinetKind::Base).width;
+        assert!(
+            (d.items[0].x1 - d.items[0].x0 - width).abs() < 1e-6,
+            "{:?}",
+            (d.items[0].x0, d.items[0].x1)
+        );
     }
 
     #[test]

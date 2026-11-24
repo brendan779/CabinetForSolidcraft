@@ -447,7 +447,6 @@ struct HardwareListView: View {
                     Text(r.article).foregroundStyle(r.brand.isEmpty ? .secondary : .primary)
                 }
                 .width(110)
-                TableColumn("Item") { Text($0.item).monospaced().foregroundStyle(.secondary) }
                 TableColumn("Cabinets", value: \.cabinets).width(120)
             }
             ActionBar {
@@ -493,7 +492,9 @@ struct PartsListView: View {
     @State private var export: (doc: DataDocument, type: UTType, name: String)?
 
     private var rows: [CutRowRecord] {
-        ((try? cutListRows(job: project.jobItems)) ?? []).sorted(using: sort)
+        // Reading the catalog gives the core the boards' names to show.
+        _ = project.boards
+        return ((try? cutListRows(job: project.jobItems)) ?? []).sorted(using: sort)
     }
 
     var body: some View {
@@ -724,6 +725,9 @@ struct CutSheetsView: View {
 struct SVGView: NSViewRepresentable {
     let svg: String
 
+    final class Coordinator { var shown: String? }
+    func makeCoordinator() -> Coordinator { Coordinator() }
+
     func makeNSView(context: Context) -> WKWebView {
         let v = WKWebView()
         v.setValue(false, forKey: "drawsBackground")
@@ -731,6 +735,10 @@ struct SVGView: NSViewRepresentable {
     }
 
     func updateNSView(_ v: WKWebView, context: Context) {
+        // SwiftUI updates this view many times while the workspace opens; reloading on each one
+        // cancelled the load in flight, and the first sheet stayed blank.
+        guard context.coordinator.shown != svg else { return }
+        context.coordinator.shown = svg
         let html = """
         <html><head><meta name="viewport" content="width=device-width"><style>
         body{margin:0;display:flex;align-items:center;justify-content:center;height:100vh;background:transparent}

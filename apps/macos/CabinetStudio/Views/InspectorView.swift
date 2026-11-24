@@ -294,6 +294,50 @@ struct MenuRow<Content: View>: View {
 
 /// A title and its row of chips: on one line where they fit, the chips under the title where the
 /// inspector is narrow (full screen), so neither the title nor a chip's number wraps.
+/// Its subviews left to right at their own size, onto a new line when the row is full.
+struct FlowLayout: Layout {
+    var spacing: CGFloat = 6
+
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        let rows = arrange(width: proposal.width ?? .infinity, subviews)
+        let width = rows.map { $0.width }.max() ?? 0
+        let height = rows.map(\.height).reduce(0, +) + spacing * CGFloat(max(rows.count - 1, 0))
+        return CGSize(width: proposal.width.map { min($0, width) } ?? width, height: height)
+    }
+
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        var y = bounds.minY
+        for row in arrange(width: bounds.width, subviews) {
+            var x = bounds.minX
+            for i in row.items {
+                let size = subviews[i].sizeThatFits(.unspecified)
+                subviews[i].place(at: CGPoint(x: x, y: y), proposal: ProposedViewSize(size))
+                x += size.width + spacing
+            }
+            y += row.height + spacing
+        }
+    }
+
+    private struct Row { var items: [Int] = []; var width: CGFloat = 0; var height: CGFloat = 0 }
+
+    private func arrange(width: CGFloat, _ subviews: Subviews) -> [Row] {
+        var rows = [Row()]
+        for i in subviews.indices {
+            let size = subviews[i].sizeThatFits(.unspecified)
+            let next = rows[rows.count - 1].items.isEmpty ? size.width : rows[rows.count - 1].width + spacing + size.width
+            if next > width, !rows[rows.count - 1].items.isEmpty {
+                rows.append(Row())
+            }
+            var row = rows[rows.count - 1]
+            row.width = row.items.isEmpty ? size.width : row.width + spacing + size.width
+            row.height = max(row.height, size.height)
+            row.items.append(i)
+            rows[rows.count - 1] = row
+        }
+        return rows
+    }
+}
+
 struct ChipRow<Chips: View>: View {
     let title: String
     let reset: (() -> Void)?
@@ -1190,13 +1234,12 @@ struct SizeSection: View {
                     Text(unit.format(value)).monospacedDigit().fontWeight(.medium)
                 }
             }
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 6) {
-                    ForEach(presets, id: \.self) { p in
-                        Button(unit.format(p, suffix: false)) { withAnimation(.snappy) { set(p) } }
-                            .buttonStyle(ChipStyle(selected: abs(p - value) < 0.5))
-                            .accessibilityLabel("\(title) \(unit.format(p))")
-                    }
+            // Wrapped, not scrolled: a hidden scroll left the larger sizes off the edge, unseen.
+            FlowLayout(spacing: 6) {
+                ForEach(presets, id: \.self) { p in
+                    Button(unit.format(p, suffix: false)) { withAnimation(.snappy) { set(p) } }
+                        .buttonStyle(ChipStyle(selected: abs(p - value) < 0.5))
+                        .accessibilityLabel("\(title) \(unit.format(p))")
                 }
             }
         }
