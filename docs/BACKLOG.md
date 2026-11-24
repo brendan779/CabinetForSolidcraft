@@ -204,6 +204,25 @@ committed: they are the brands' copyright. `preview_colour` is an approximation.
 | UI-16 | needs-human (built in 8bfa5ee; not seen on screen here: add an end panel each side and look at the viewport and cut list) | M | Run items in the app: add filler and end panel to the sidebar list (drawn tiles, width/scribe chips), lay out and send the project through `cabinet_core::build_run` (FFI) instead of the Swift layout loop | a run with an end panel each side shows in the viewport, cut list and SolidCraft |
 | UI-17 | needs-human (built in dbc5e9d; not seen on screen here: change the back style for the job, then with "Only B01") | M | Project standard in the app: the construction pickers edit the project standard, with an "Only this cabinet" override switch; save through `cabinet_core::Project` (migrate the old project.json) | changing the back style for the project changes every cabinet without an override |
 
+### App fix pass (2026-11-24)
+
+From a walk through every workspace and inspector tab of the Release build, on a copy of the owner's three-cabinet test job, under lldb: no exceptions. Order: what the owner sees most first.
+
+| ID | Status | Size | Task | Done when |
+|---|---|---|---|---|
+| APP-1 | todo | S | Board names, not catalog ids: the cut list's Board column, the nesting summary, the quote and the hardware list show `egger.eurodekor-mf.u645-st9.18` where the owner reads "Agave Green U645 ST9, 18 mm" | no catalog id on screen or in an exported PDF/CSV (ids may stay in an id column) |
+| APP-2 | todo | S | Cut Sheets opens blank: the first part is highlighted but no sheet is drawn until another part is clicked | the first sheet draws on opening |
+| APP-3 | todo | S | The workspace switcher (Design, Cut List, Cut Sheets, Boards) moves sideways when the workspace changes, so the next click lands on the wrong one | it stays put |
+| APP-4 | todo | S | Inspector chip rows run off the right edge: Width's presets past 900 are cut off | every row fits or scrolls, at the inspector's narrowest width (CLAUDE.md's 420 pt rule) |
+| APP-5 | todo | S | Boards grid: a decor with five thicknesses wraps its chips, "18" broken over two lines (Laminex Alaskan) | chips wrap whole |
+| APP-6 | todo | M | Boards grid and pickers show flat colours, though most decors now have their photo in the decors folder | tiles show a crop of the decor's image, colour where there's none |
+| APP-7 | todo | S | Fittings tab: drawer tiles truncate ("Wood on MOV…"), and its hardware list leads with catalog ids | short titles that fit; names first |
+| APP-8 | todo | S | Front elevation: the run's dimension labels draw on top of each other ("1888" over "600") | every label legible |
+| APP-9 | todo | M | Cut sheets: the drawing sits in the bottom half of the page with the top empty | the sheet fills the page |
+| APP-10 | todo | S | Two compiler warnings: an unneeded `try` (ProjectModel.swift:1007) and a non-Sendable closure (SectionsEditor.swift:498) | the build is warning-free |
+| PAINT-2 | todo | S | (from the next jobs) paint picker on floating shelves, end panels, shaker panels; paint on the cut list | |
+| LINING-VIEW | todo | M | (from the next jobs) linings drawn as a striped picture in the viewport, not their section | |
+
 ### Next jobs (owner 2026-11-03, after 0.11.0)
 
 A new pass on benchtops comes first: rid them of errors and bugs, then give them real products and full slab images. Materials improve over time.
