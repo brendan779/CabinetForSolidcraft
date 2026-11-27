@@ -439,10 +439,19 @@ The owner's idea: photo-real boards, edge tape and a render button with a choice
 
 ## P3 — SolidCraft plugin
 
+The plan: [PLUGIN_PLAN.md](PLUGIN_PLAN.md) (owner 2026-11-27: start it; the interface comes first; boards as text, benchtops simplified, no Blender or Revit).
+
 | id | status | size | task |
 |---|---|---|---|
-| PLG-1 | possible, held (owner 2026-11-16: wait for better plugin support) | L | Port the bridge to a `command-plugin` WASM component. SolidCraft 0.45 runs command plugins: ribbon entries, dialogs from a JSON schema, pictures on dropdown options, files in approved folders, and `storage@0.1` to keep each cabinet's spec in the design. Limits: 256 engine calls a run (one base cabinet is about 94), 30 s, no network, no processes (Blender stays in the app). Plan from MacAirServer's session: docs/PLUGIN_PORT.md on that Mac, uncommitted |
-| PLG-2 | possible in part (0.50: docked panels with forms, tables, lists and buttons; no image widgets, workspaces or overlays) | L | Inspector, cut list and sheets as SolidCraft panels; image pickers are now possible in dialogs |
+| PLG-1 | superseded by PLUG-0 to PLUG-6 (2026-11-27) | L | Port the bridge to a `command-plugin` WASM component |
+| PLG-2 | superseded by PLUG-1 to PLUG-4 (2026-11-27) | L | Inspector, cut list and sheets as SolidCraft panels |
+| PLUG-0 | todo | S | Spike (docs/PLUGIN_PLAN.md): the component builds from the core and makes one base cabinet; measure engine calls per cabinet and `engine.batch` from a plugin, preview time, `forms.open` from the panel, `ui.set-data` from a dialog-run entry, a picture dropdown, design and user storage, `file.insert_mesh` with a folder grant, an export write. Answers go into PLUGIN_PLAN.md | each limit known from a run |
+| PLUG-1 | todo | M | Job setup, Cabinet (add and edit, all types, front presets), Rebuild as a long job, design storage, shop standard, the panel's Job tab | a kitchen run laid out, edited and rebuilt from the plugin alone |
+| PLUG-2 | todo | S | Boards tab: catalogue table with search, Use for carcass, fronts, backs, benchtop; swatches from preview colours | a job's boards chosen from the catalogue |
+| PLUG-3 | todo | M | Run pieces, simplified: benchtop, panels and fillers, splashback (parametric), kick and plinth, handles and legs as meshes or simple shapes | the run complete to the benchtop |
+| PLUG-4 | todo | M | Cut list and Hardware tabs; exports: CSV, cut sheets, DXF, labels, to a granted folder | cut list and sheets out of SolidCraft |
+| PLUG-5 | todo | S | From boxes; import a Cabinet Studio `.cabinetjob` | a room of boxes becomes cabinets; an old job opens |
+| PLUG-6 | todo | S | Icons, help links, agent-tool descriptions, Workshop listing (the owner publishes) | installed from the Workshop on a clean Mac |
 | PLG-3 | todo | S | Weekly check of SolidCraft's plugin docs (docs/plugins.md, docs/plugin-runtime.md, RFC 0015). Last check 2026-11-27 on 0.50.0: see the log. Not yet: plugin workspaces, viewport overlays, a listener refreshing a panel, exporters reading plugin data |
 
 ## Log
