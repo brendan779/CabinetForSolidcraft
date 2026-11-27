@@ -7,7 +7,9 @@ import sys
 import bpy
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from build_scene import MM, slab_uvs, smooth_routed
+from build_scene import MM, build_room, slab_uvs, smooth_routed
+from mathutils import Vector
+import tempfile
 
 
 def exported_groove():
@@ -101,8 +103,30 @@ def a_waterfall_meets_the_top_on_the_same_place_on_the_slab():
     assert at(top, -20, 890) == at(fall, -20, 890), (at(top, -20, 890), at(fall, -20, 890))
 
 
+def the_room_takes_the_chosen_wall_paint_and_tiled_floor():
+    """The export's popup: a wall colour, and tiles cut from a slab photo on a 600 x 300 grid."""
+    image = os.path.join(tempfile.mkdtemp(), "slab.png")
+    img = bpy.data.images.new("slab", 8, 4)
+    img.filepath_raw = image
+    img.file_format = "PNG"
+    img.save()
+    choice = {"wall_colour": "#336699",
+              "floor": {"kind": "tiles", "image": image, "covers": [3200, 1600], "tile": [600, 300], "grout": "#202020"}}
+    build_room({"walls": {}, "parts": [], "cabinets": []}, Vector((0, 0, 0)), Vector((2.4, 0.6, 2.2)), choice)
+    floor = bpy.data.objects["Floor"].data.materials[0]
+    kinds = {n.type for n in floor.node_tree.nodes}
+    assert {"TEX_IMAGE", "TEX_BRICK"} <= kinds, kinds
+    grid = next(n for n in floor.node_tree.nodes if n.type == "TEX_BRICK")
+    assert abs(grid.inputs["Brick Width"].default_value - 0.6) < 1e-6
+    assert grid.offset == 0.5, "a 2:1 tile is laid in half bond"
+    wall = bpy.data.objects["Back wall"].data.materials[0]
+    r, g, b, _ = wall.node_tree.nodes["Principled BSDF"].inputs["Base Color"].default_value
+    assert b > r, (r, g, b)
+
+
 a_routed_face_shades_the_same_at_both_ends_of_a_groove()
 a_real_edge_on_a_routed_face_stays_sharp()
+the_room_takes_the_chosen_wall_paint_and_tiled_floor()
 a_joined_top_starts_a_new_slab_past_its_join()
 a_waterfall_meets_the_top_on_the_same_place_on_the_slab()
 print("scene checks passed")

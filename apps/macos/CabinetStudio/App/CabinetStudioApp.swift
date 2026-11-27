@@ -72,7 +72,7 @@ struct JobCommands: Commands {
             Button("Build in SolidCraft") { Task { await project?.sendToSolidCraft() } }
                 .keyboardShortcut("b", modifiers: [.command, .shift])
                 .disabled(project == nil || project?.isSending == true)
-            Button("Make Blender Scene") { Task { await project?.makeBlenderScene() } }
+            Button("Make Blender Scene…") { project?.showSceneOptions = true }
                 .disabled(project == nil || project?.isMakingScene == true)
             Button("Render to PNG") { Task { await project?.render() } }
                 .keyboardShortcut("r", modifiers: [.command, .shift])

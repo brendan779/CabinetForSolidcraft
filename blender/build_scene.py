@@ -365,6 +365,64 @@ def floor_material():
     return m
 
 
+def concrete_material():
+    """Polished concrete: grey, mottled, a soft sheen."""
+    m, b = principled("Floor polished concrete", (0.32, 0.31, 0.29), 0.35)
+    n = m.node_tree
+    coord = n.nodes.new("ShaderNodeTexCoord")
+    noise = n.nodes.new("ShaderNodeTexNoise")
+    noise.inputs["Scale"].default_value = 3.0
+    noise.inputs["Detail"].default_value = 12
+    ramp = n.nodes.new("ShaderNodeValToRGB")
+    ramp.color_ramp.elements[0].color = (0.22, 0.215, 0.2, 1)
+    ramp.color_ramp.elements[1].color = (0.4, 0.39, 0.37, 1)
+    n.links.new(coord.outputs["Object"], noise.inputs["Vector"])
+    n.links.new(noise.outputs[0], ramp.inputs[0])
+    n.links.new(ramp.outputs[0], b.inputs["Base Color"])
+    return m
+
+
+def tile_material(floor):
+    """Tiles cut from a stone slab: its photograph at the slab's true size across the floor, with
+    grout lines on the tile grid (a half bond for tiles twice as long as wide)."""
+    image = floor.get("image")
+    if not image or not os.path.exists(image):
+        return floor_material()
+    length, width = (v * MM for v in floor.get("covers") or (3200, 1600))
+    tl, tw = (v * MM for v in floor.get("tile") or (600, 600))
+    m, b = principled("Floor tiles", (0.8, 0.8, 0.8), floor.get("roughness", 0.2))
+    n = m.node_tree
+    coord = n.nodes.new("ShaderNodeTexCoord")
+    mapping = n.nodes.new("ShaderNodeMapping")
+    mapping.inputs["Scale"].default_value = (1 / length, 1 / width, 1)
+    n.links.new(coord.outputs["Object"], mapping.inputs["Vector"])
+    tex = n.nodes.new("ShaderNodeTexImage")
+    tex.image = bpy.data.images.load(image, check_existing=True)
+    tex.extension = "REPEAT"
+    n.links.new(mapping.outputs[0], tex.inputs["Vector"])
+    grid = n.nodes.new("ShaderNodeTexBrick")
+    grid.offset = 0.5 if tl >= 2 * tw - 1e-6 else 0.0
+    grid.inputs["Scale"].default_value = 1.0
+    grid.inputs["Brick Width"].default_value = tl
+    grid.inputs["Row Height"].default_value = tw
+    grid.inputs["Mortar Size"].default_value = floor.get("grout_mm", 3) * MM
+    grid.inputs["Mortar Smooth"].default_value = 0.1
+    n.links.new(coord.outputs["Object"], grid.inputs["Vector"])
+    mix = n.nodes.new("ShaderNodeMix")
+    mix.data_type = "RGBA"
+    n.links.new(grid.outputs["Fac"], mix.inputs[0])
+    n.links.new(tex.outputs["Color"], mix.inputs[6])
+    mix.inputs[7].default_value = (*hex_colour(floor.get("grout"), (0.55, 0.54, 0.52)), 1)
+    n.links.new(mix.outputs[2], b.inputs["Base Color"])
+    # The grout sits a touch lower and duller than the tile faces.
+    rough = n.nodes.new("ShaderNodeMapRange")
+    rough.inputs["To Min"].default_value = floor.get("roughness", 0.2)
+    rough.inputs["To Max"].default_value = 0.8
+    n.links.new(grid.outputs["Fac"], rough.inputs["Value"])
+    n.links.new(rough.outputs[0], b.inputs["Roughness"])
+    return m
+
+
 def emitter(name, colour, strength):
     m = bpy.data.materials.new(name)
     m.use_nodes = True
@@ -397,9 +455,11 @@ BENCH_KINDS = {"base", "drawer_bank", "sink", "blind_corner", "corner_base"}
 WALL_KINDS = {"wall", "open_shelf", "corner_wall"}
 
 
-def build_room(job, lo, hi):
+def build_room(job, lo, hi, choice=None):
     """Walls, floor and ceiling round the run, with its lights. Numbers are metres, in the cabinets'
-    frame: X across the front, Y to the back wall, Z up."""
+    frame: X across the front, Y to the back wall, Z up. `choice` is the app's room.json: the walls'
+    paint and the floor (oak boards, polished concrete, or tiles from a slab)."""
+    choice = choice or {}
     room = collection("Room")
     lamps = collection("Lights")
     walls = job.get("walls") or {}
@@ -418,10 +478,14 @@ def build_room(job, lo, hi):
     dist = max((hi.x - lo.x + 0.8) / 2 / math.tan(fov / 2), 2.6)
     y0 = y1 - dist - hi.y - 0.8
     t = 0.1
-    paint, _ = principled("Wall paint", (0.82, 0.8, 0.75), 0.75)
+    paint, _ = principled("Wall paint", hex_colour(choice.get("wall_colour"), (0.82, 0.8, 0.75)), 0.75)
     ceiling, _ = principled("Ceiling paint", (0.86, 0.86, 0.84), 0.85)
     trim, _ = principled("Skirting", (0.84, 0.83, 0.8), 0.4)
-    floor = floor_material()
+    floor_choice = choice.get("floor") or {}
+    floor = {
+        "concrete": concrete_material,
+        "tiles": lambda: tile_material(floor_choice),
+    }.get(floor_choice.get("kind"), floor_material)()
     box("Floor", (x0 - t, y0 - t, -t), (x1 + t, y1 + t, 0), floor, room)
     box("Ceiling", (x0 - t, y0 - t, z1), (x1 + t, y1 + t, z1 + t), ceiling, room)
     box("Back wall", (x0 - t, y1, 0), (x1 + t, y1 + t, z1), paint, room)
@@ -522,7 +586,7 @@ def build_room(job, lo, hi):
     bpy.context.scene.camera = cam
 
 
-def build(job_path, obj_path, blend_path, cache, render):
+def build(job_path, obj_path, blend_path, cache, render, room=None):
     job = json.load(open(job_path))
     for board in job.get("boards", {}).values():
         if board.get("file"):
@@ -583,7 +647,7 @@ def build(job_path, obj_path, blend_path, cache, render):
     pts = [o.matrix_world @ Vector(c) for o in bodies for c in o.bound_box]
     lo = Vector((min(p.x for p in pts), min(p.y for p in pts), min(p.z for p in pts)))
     hi = Vector((max(p.x for p in pts), max(p.y for p in pts), max(p.z for p in pts)))
-    build_room(job, lo, hi)
+    build_room(job, lo, hi, room)
 
     sc = bpy.context.scene
     sc.render.engine = "CYCLES"
@@ -631,7 +695,11 @@ def main():
                     print(f, flush=True)
         return
     render = args[args.index("--render") + 1] if "--render" in args else None
-    build(args[0], args[1], args[2], args[3], render)
+    room = None
+    if "--room" in args:
+        with open(args[args.index("--room") + 1]) as fh:
+            room = json.load(fh)
+    build(args[0], args[1], args[2], args[3], render, room)
 
 
 if __name__ == "__main__":

@@ -775,6 +775,8 @@ final class ProjectModel {
     var detail: DetailLevel = .design
     /// The welcome sheet is up (first run, or Help › Welcome to Cabinet Studio).
     var showWelcome = false
+    /// The Blender scene's choices (walls, floor), asked before each scene is made.
+    var showSceneOptions = false
     var connection: ConnectionState = .unknown
     var status: String = ""
     var isSending = false
@@ -1291,7 +1293,7 @@ final class ProjectModel {
 
     /// Makes the job's scene in Blender: solidcraft-cli builds the cabinets, Blender dresses them in
     /// their boards in a lit kitchen, and the file opens. Beside the job file, once it has one.
-    func makeBlenderScene() async {
+    func makeBlenderScene(_ options: SceneOptions = .saved) async {
         let workspace = NSWorkspace.shared
         func app(_ id: String, _ fallback: String) -> URL {
             workspace.urlForApplication(withBundleIdentifier: id) ?? URL(fileURLWithPath: fallback)
@@ -1343,13 +1345,18 @@ final class ProjectModel {
             return
         }
         status = "Making the scene in Blender. The first use of a decor downloads its image…"
+        // The walls' paint and the floor chosen for this scene.
+        let room = folder.appending(path: "room.json")
+        let roomArgs = options.roomJSON(boardsById).map { data -> [String] in
+            (try? data.write(to: room)) != nil ? ["--room", room.path] : []
+        } ?? []
         let made = await Task.detached { () -> Result<Void, Error> in
             do {
                 try Self.run(blenderTool, ["-b", "--factory-startup", "--python-exit-code", "1",
                                            "-P", script.path, "--",
                                            folder.appending(path: "job.json").path,
                                            folder.appending(path: "job.obj").path,
-                                           blend.path, cache.path])
+                                           blend.path, cache.path] + roomArgs)
                 return .success(())
             } catch {
                 return .failure(error)

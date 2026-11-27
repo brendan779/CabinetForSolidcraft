@@ -75,7 +75,7 @@ struct ContentView: View {
                 ConnectionDot()
                 SolidCraftButton()
                 Button {
-                    Task { await project.makeBlenderScene() }
+                    project.showSceneOptions = true
                 } label: {
                     // An icon: at the window's usual width a title pushes Inspector off the toolbar.
                     Label("Blender", systemImage: project.isMakingScene ? "hourglass" : "camera")
@@ -112,7 +112,21 @@ struct ContentView: View {
                 .transition(.opacity)
             }
         }
+        .overlay {
+            if project.showSceneOptions {
+                ZStack {
+                    Color.black.opacity(0.35)
+                        .ignoresSafeArea()
+                        .onTapGesture { project.showSceneOptions = false }
+                    SceneOptionsCard()
+                        .background(Theme.panel, in: .rect(cornerRadius: 18))
+                        .shadow(color: .black.opacity(0.3), radius: 24, y: 8)
+                }
+                .transition(.opacity)
+            }
+        }
         .animation(.snappy, value: project.showWelcome)
+        .animation(.snappy, value: project.showSceneOptions)
         .onAppear { if !welcomeShown { project.showWelcome = true } }
     }
 }
