@@ -219,8 +219,8 @@ pub fn emit_cabinet_with(
             .collect();
         cmds.extend(bore_batches(&plates));
     }
-    // Legs at every detail level, so a cabinet never floats; hinge and runner stand-ins only with
-    // machining. A stand-in is left out where the supplier's own model is put in (`real`).
+    // Legs and handles at every detail level, so a cabinet never floats and shows how it opens;
+    // hinge and runner stand-ins only with machining. A stand-in is left out where the supplier's own model is put in (`real`).
     let (biscuits, hardware) = {
         let biscuits = if detail == Detail::Design {
             Vec::new()
@@ -230,7 +230,10 @@ pub fn emit_cabinet_with(
         let hardware: Vec<StandIn> = stand_ins(list)
             .into_iter()
             .filter(|s| {
-                detail != Detail::Design || s.name.contains(".Leg") || opening_hardware(&s.item)
+                detail != Detail::Design
+                    || s.name.contains(".Leg")
+                    || s.item.starts_with("handle.")
+                    || opening_hardware(&s.item)
             })
             .filter(|s| !real.contains(&s.name))
             .collect();
@@ -1718,7 +1721,7 @@ mod tests {
         let list = build_cabinet(&Cabinet::new("D01", CabinetKind::DrawerBank)).unwrap();
         let expected: Vec<_> = stand_ins(&list)
             .into_iter()
-            .filter(|s| !s.name.contains(".Leg"))
+            .filter(|s| !s.name.contains(".Leg") && !s.name.contains(".Handle"))
             .collect();
         assert!(!expected.is_empty());
         let named = |cmds: &[Value]| {
@@ -1748,6 +1751,24 @@ mod tests {
             |c| c["command"] == "appearance.assign" && c["params"]["color"] == HARDWARE_COLOUR
         ));
         assert!(named(&emit_cabinet(&list, Detail::Design, None)).is_empty());
+    }
+
+    /// Without supplier models (the SolidCraft plugin has none) a design still shows its handles.
+    #[test]
+    fn design_detail_draws_a_stand_in_handle_where_no_model_replaces_it() {
+        let list = build_cabinet(&Cabinet::new("D01", CabinetKind::DrawerBank)).unwrap();
+        let bodies = |cmds: &[Value]| {
+            cmds.iter()
+                .filter_map(|c| c["params"]["body_name"].as_str())
+                .filter(|n| n.contains(".Handle"))
+                .map(String::from)
+                .collect::<Vec<_>>()
+        };
+        let all = bodies(&emit_cabinet(&list, Detail::Design, None));
+        assert_eq!(all, ["D01.Handle1", "D01.Handle2", "D01.Handle3"]);
+        let real = vec!["D01.Handle2".to_string()];
+        let some = bodies(&emit_cabinet_with(&list, Detail::Design, None, &real));
+        assert_eq!(some, ["D01.Handle1", "D01.Handle3"]);
     }
 
     #[test]

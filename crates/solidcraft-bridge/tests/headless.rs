@@ -466,7 +466,8 @@ fn hinges_and_runners_show_as_one_stand_in_body_each_where_the_core_puts_them() 
                 + names(".Plate")
                 + names(".Runner")
                 + names(".BoxSide")
-                + names(".Leg"),
+                + names(".Leg")
+                + names(".Handle"),
             expected.len(),
             "{id}"
         );

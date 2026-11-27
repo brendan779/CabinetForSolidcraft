@@ -37,6 +37,12 @@ const LEG_PLATE_THICKNESS: f64 = 4.0;
 /// A TIP-ON door unit: a push cylinder on the side opposite the hinges, its tip at the carcass
 /// front, this far in from the side and down from the door's top. Drawn, not ordered (WF-2).
 const TIP_ON_DIAMETER: f64 = 20.0;
+/// A handle where its catalog row gives no size: how far it stands off the front, its bar's
+/// diameter and how far the bar runs past each leg, and a knob's diameter. Drawn, not ordered.
+const HANDLE_STANDOFF: f64 = 32.0;
+const HANDLE_BAR: f64 = 12.0;
+const HANDLE_BAR_END: f64 = 20.0;
+const KNOB_DIAMETER: f64 = 30.0;
 const TIP_ON_LENGTH: f64 = 76.0;
 const TIP_ON_INSET: f64 = 15.0;
 const TIP_ON_DROP: f64 = 100.0;
@@ -123,6 +129,7 @@ pub fn stand_ins(list: &PartList) -> Vec<StandIn> {
     let (mut pushes, mut servos, mut brackets) = (0, 0, 0);
     let mut tracks = 0;
     let mut cams = 0;
+    let mut handles = 0;
     for h in &list.hardware {
         if h.item.starts_with("hafele.minifix15.") {
             let (Ok(row), Some((into, _, _))) = (crate::hardware::item(&h.item), cam_axes(list, h))
@@ -149,6 +156,16 @@ pub fn stand_ins(list: &PartList) -> Vec<StandIn> {
                     height,
                 }],
             });
+        } else if h.item.starts_with("handle.") && h.item != "handle.edge-pull" {
+            // Numbered as `cad_placements` numbers handle models, which replace these.
+            handles += 1;
+            if let Some(shapes) = handle(list, h) {
+                out.push(StandIn {
+                    name: format!("{}.Handle{handles}", list.cabinet),
+                    item: h.item.clone(),
+                    shapes,
+                });
+            }
         } else if h.item.starts_with("blum.tip-on.door") {
             if let Some(shapes) = tip_on_door(list, h) {
                 pushes += 1;
@@ -272,6 +289,87 @@ fn interior(list: &PartList) -> Option<(f64, f64, f64)> {
 
 /// A TIP-ON door unit: on the side opposite the door's hinges (the door's middle without any),
 /// pushing at the carcass front near the door's top.
+/// A handle as its catalog sizes: a bar on a leg at each screw hole, or a knob on its one hole,
+/// standing out of the face the screws come through. Sizes the catalog doesn't give are drawn.
+fn handle(list: &PartList, h: &HardwarePlacement) -> Option<Vec<Shape>> {
+    let holes: Vec<(Vec3, Dir, &str)> = list
+        .operations
+        .iter()
+        .filter_map(|o| match o {
+            Operation::Bore {
+                part,
+                at,
+                direction,
+                purpose: BorePurpose::HandleScrew,
+                ..
+            } if crate::part::front_base(part) == crate::part::front_base(&h.part) => {
+                Some((*at, *direction, part.as_str()))
+            }
+            _ => None,
+        })
+        .collect();
+    let (first, out, part) = *holes.first()?;
+    let last = holes.last()?.0;
+    let row = crate::hardware::item(&h.item).ok();
+    let p = |k: &str| row.and_then(|r| r.param(k).ok());
+    let face = list.part(part).map_or(first.get(out.axis), |f| {
+        if out.sign() > 0.0 {
+            f.bounds.max().get(out.axis)
+        } else {
+            f.bounds.min.get(out.axis)
+        }
+    });
+    let on_face = |v: Vec3| v.with(out.axis, face);
+    let standoff = p("standoff").or(p("projection")).unwrap_or(HANDLE_STANDOFF);
+    let along = [Axis::X, Axis::Y, Axis::Z]
+        .into_iter()
+        .find(|a| *a != out.axis && (last.get(*a) - first.get(*a)).abs() > 1e-6);
+    let Some(axis) = along else {
+        // A knob.
+        let diameter = p("diameter").or(p("width")).unwrap_or(KNOB_DIAMETER);
+        return Some(vec![Shape::Cylinder {
+            base: on_face(first),
+            axis: out,
+            diameter,
+            height: standoff,
+        }]);
+    };
+    let bar = p("bar_diameter").or(p("width")).unwrap_or(HANDLE_BAR);
+    let leg = p("leg_diameter").unwrap_or(bar * 0.8);
+    let centres = (last.get(axis) - first.get(axis)).abs();
+    let end = p("bar_end")
+        .or(p("length").map(|l| (l - centres) / 2.0))
+        .unwrap_or(HANDLE_BAR_END)
+        .max(0.0);
+    // To the bar's centre line, so the legs overlap the bar and join it: a leg ending at the bar's
+    // surface only touches it, and SolidCraft leaves the bar out.
+    let reach = (standoff - bar / 2.0).max(0.0);
+    let mut shapes: Vec<Shape> = [first, last]
+        .into_iter()
+        .map(|at| Shape::Cylinder {
+            base: on_face(at),
+            axis: out,
+            diameter: leg,
+            height: reach,
+        })
+        .collect();
+    let lo = if first.get(axis) < last.get(axis) {
+        first
+    } else {
+        last
+    };
+    let base = on_face(lo)
+        .with(axis, lo.get(axis) - end)
+        .with(out.axis, face + out.sign() * (standoff - bar / 2.0));
+    shapes.push(Shape::Cylinder {
+        base,
+        axis: Dir::new(axis, true),
+        diameter: bar,
+        height: centres + 2.0 * end,
+    });
+    Some(shapes)
+}
+
 fn tip_on_door(list: &PartList, h: &HardwarePlacement) -> Option<Vec<Shape>> {
     let door = list.front_box(&h.part)?;
     let mid = door.bounds.center().x;
@@ -741,6 +839,48 @@ mod tests {
         for p in &plates {
             assert!((p.bounds().max().x - inner).abs() < 1e-6, "{}", p.name);
         }
+    }
+
+    /// The plugin has no supplier models: a handle is drawn at its catalog size on its holes.
+    #[test]
+    fn a_handle_stands_on_its_screw_holes_at_its_catalog_size() {
+        let mut cab = Cabinet::new("B01", CabinetKind::Base);
+        cab.standard.handle_style = "handle.cc128".into();
+        let list = build_cabinet(&cab).unwrap();
+        let handles: Vec<_> = stand_ins(&list)
+            .into_iter()
+            .filter(|s| s.name.contains(".Handle"))
+            .collect();
+        assert!(!handles.is_empty());
+        let h = &handles[0];
+        assert_eq!(h.name, "B01.Handle1");
+        let [
+            legs @ ..,
+            Shape::Cylinder {
+                diameter, height, ..
+            },
+        ] = h.shapes.as_slice()
+        else {
+            panic!("{:?}", h.shapes)
+        };
+        assert_eq!(legs.len(), 2);
+        // cc128: 12 mm bar running 20 mm past each leg, 32 mm off the front.
+        assert_eq!((*diameter, *height), (12.0, 128.0 + 40.0));
+        let door = list
+            .part(
+                &list
+                    .hardware
+                    .iter()
+                    .find(|x| x.item == "handle.cc128")
+                    .unwrap()
+                    .part,
+            )
+            .unwrap();
+        let out = h.bounds();
+        assert!(
+            (door.bounds.min.y - out.min.y - 32.0).abs() < 1e-6,
+            "{out:?}"
+        );
     }
 
     #[test]
