@@ -134,6 +134,7 @@ dependencies = [
  "cabinet-core",
  "insta",
  "qrcode",
+ "serde_json",
 ]
 
 [[package]]
