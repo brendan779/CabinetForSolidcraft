@@ -1,0 +1,1203 @@
+{
+  "source": "Stone Ambassador product listing https://stoneambassador.com.au/zenith-surfaces-vcs/, read and downloaded 2026-11-27 (owner approved).",
+  "notes": "One photo per design from its listing card, rotated to landscape and mapped to the whole 3200 x 1600 slab. Sizes vary from 500 x 760 to 2560 px: the smaller ones are soft close up. Local only: the brand's images live in ~/Library/Application Support/CabinetStudio/decors as <name>.jpg (scripts/import-zenith.py), originals in decors/zenith-originals; never committed.",
+  "verified": false,
+  "images": {
+    "Albus Gris": {
+      "name": "zenith-albus-gris",
+      "pixels": [
+        760,
+        500
+      ],
+      "covers": [
+        3200,
+        1600
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.12,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.0
+      },
+      "original_file": "2024/05/Albus-Gris-WA-Only.webp",
+      "original_sha256": "301d67f27a6e972cc9acb95ba6764a4ad76dd62cf30bb9e45db26bcdb4c352b7",
+      "discontinued": false
+    },
+    "Allure Blue": {
+      "name": "zenith-allure-blue",
+      "pixels": [
+        760,
+        500
+      ],
+      "covers": [
+        3200,
+        1600
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.12,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.0
+      },
+      "original_file": "2024/05/Allure-Blue-img-01.webp",
+      "original_sha256": "0f7154f2c66c2e5dff902d78dcb94464e6fe4bcc95bab828eb185f3eb4e43b2b",
+      "discontinued": false
+    },
+    "Alpine Drift": {
+      "name": "zenith-alpine-drift",
+      "pixels": [
+        760,
+        500
+      ],
+      "covers": [
+        3200,
+        1600
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.12,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.0
+      },
+      "original_file": "2025/08/Alpine_Drift_500x760-1.webp",
+      "original_sha256": "2f238c7b8b3e3c16e5955f52674bc7b87453f49c0d59d20a6de7f466ee92b274",
+      "discontinued": false
+    },
+    "Amina": {
+      "name": "zenith-amina",
+      "pixels": [
+        2560,
+        1685
+      ],
+      "covers": [
+        3200,
+        1600
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.48,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.08
+      },
+      "original_file": "2026/06/22-Zenith-new-colours-with-new-stickers-scaled.webp",
+      "original_sha256": "82270e401c804e00e95a131f0003ecdc89dd9cdf3010f16a68ee344b23a124a3",
+      "discontinued": false
+    },
+    "Bescato Bianco": {
+      "name": "zenith-bescato-bianco",
+      "pixels": [
+        760,
+        500
+      ],
+      "covers": [
+        3200,
+        1600
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.12,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.0
+      },
+      "original_file": "2024/05/Bescato-Bianco-img-01.webp",
+      "original_sha256": "66f0e4e8437d382b7feb0dee6c005fcb7a85e677b13516fb5f18e429023b3d9f",
+      "discontinued": false
+    },
+    "Blanco Bliss": {
+      "name": "zenith-blanco-bliss",
+      "pixels": [
+        760,
+        500
+      ],
+      "covers": [
+        3200,
+        1600
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.12,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.0
+      },
+      "original_file": "2024/05/Blanco-Bliss-WA-Only.webp",
+      "original_sha256": "b2817f1fdf20dea4f4c447d000e80d09e531c420b64007225dd9214d28b455fc",
+      "discontinued": false
+    },
+    "Bluetta": {
+      "name": "zenith-bluetta",
+      "pixels": [
+        760,
+        500
+      ],
+      "covers": [
+        3200,
+        1600
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.12,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.0
+      },
+      "original_file": "2023/02/Bluetta.webp",
+      "original_sha256": "c4f4ef27f05c04365d38d3128975675834e6d77022dec693641c00978065e289",
+      "discontinued": false
+    },
+    "Calacatta Signature": {
+      "name": "zenith-calacatta-signature",
+      "pixels": [
+        760,
+        500
+      ],
+      "covers": [
+        3200,
+        1600
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.12,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.0
+      },
+      "original_file": "2023/02/Calacatta-Signature.webp",
+      "original_sha256": "c7f696186087e350749deb65df16088e33b5360bcf1b6809e5a93c4713ae126e",
+      "discontinued": false
+    },
+    "Carrara Mist": {
+      "name": "zenith-carrara-mist",
+      "pixels": [
+        760,
+        500
+      ],
+      "covers": [
+        3200,
+        1600
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.12,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.0
+      },
+      "original_file": "2023/02/Carrara-Mist.webp",
+      "original_sha256": "1592561b138d63c30dd4cc46e6666870e5b90d9ce189a8c8e945c436f2f83757",
+      "discontinued": false
+    },
+    "Casablanca": {
+      "name": "zenith-casablanca",
+      "pixels": [
+        760,
+        500
+      ],
+      "covers": [
+        3200,
+        1600
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.12,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.0
+      },
+      "original_file": "2023/02/Casablanca.webp",
+      "original_sha256": "4b8fa8a25f5768540b23aa5964194146b6f174e7be3b55b1196671b023b9ce86",
+      "discontinued": false
+    },
+    "Crystal": {
+      "name": "zenith-crystal",
+      "pixels": [
+        760,
+        500
+      ],
+      "covers": [
+        3200,
+        1600
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.12,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.0
+      },
+      "original_file": "2023/02/Crystal.webp",
+      "original_sha256": "36b2c741118683f76c88cdf5e9e862ebbe5ac062aba740b7ea2bc44f59a37674",
+      "discontinued": false
+    },
+    "Dapple White": {
+      "name": "zenith-dapple-white",
+      "pixels": [
+        760,
+        500
+      ],
+      "covers": [
+        3200,
+        1600
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.12,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.0
+      },
+      "original_file": "2023/02/Dapple-White.webp",
+      "original_sha256": "e5a30da849a5c43e6685675846efefa44f0843aa358e0f2d763e10370ce2fb28",
+      "discontinued": false
+    },
+    "Dubai Drift": {
+      "name": "zenith-dubai-drift",
+      "pixels": [
+        2560,
+        1685
+      ],
+      "covers": [
+        3200,
+        1600
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.48,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.08
+      },
+      "original_file": "2026/04/Untitled-2-02-scaled.webp",
+      "original_sha256": "59d1a521b42ae41026bdf79b9e1eca0b23f68575767371549a8c747ad45463db",
+      "discontinued": false
+    },
+    "Dulce De Leche": {
+      "name": "zenith-dulce-de-leche",
+      "pixels": [
+        760,
+        500
+      ],
+      "covers": [
+        3200,
+        1600
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.12,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.0
+      },
+      "original_file": "2025/08/Dulce_de_Leche_500x760.webp",
+      "original_sha256": "eeb155efe1db2c63a5c09f09c7be54fa84ced74b6c2b0a6c29d834211c548b68",
+      "discontinued": false
+    },
+    "Element Grey": {
+      "name": "zenith-element-grey",
+      "pixels": [
+        760,
+        500
+      ],
+      "covers": [
+        3200,
+        1600
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.48,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.08
+      },
+      "original_file": "2023/02/Element-Grey.webp",
+      "original_sha256": "d685f585c9d9b165cfebbe8857bbcd69594639b0142a42566e6e404e6c592bbb",
+      "discontinued": false
+    },
+    "Firtina": {
+      "name": "zenith-firtina",
+      "pixels": [
+        760,
+        500
+      ],
+      "covers": [
+        3200,
+        1600
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.48,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.08
+      },
+      "original_file": "2023/02/firtina.webp",
+      "original_sha256": "33d99f0b55064553d087a7496c7973536cc9557a86ab034ed286e2781a090076",
+      "discontinued": false
+    },
+    "Fossil": {
+      "name": "zenith-fossil",
+      "pixels": [
+        760,
+        500
+      ],
+      "covers": [
+        3200,
+        1600
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.12,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.0
+      },
+      "original_file": "2023/02/Fossil.webp",
+      "original_sha256": "676b826a8a2b414cb753f1d40fbb7ff229b4b654581f8d468301c074ddb07a60",
+      "discontinued": false
+    },
+    "Gracious Grey": {
+      "name": "zenith-gracious-grey",
+      "pixels": [
+        760,
+        500
+      ],
+      "covers": [
+        3200,
+        1600
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.12,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.0
+      },
+      "original_file": "2023/02/Gracious-Grey.webp",
+      "original_sha256": "fb1a467b1002a5b7296f2262c744f6898f1faab38f2118e36b305c9a9227a1cc",
+      "discontinued": false
+    },
+    "Graphene": {
+      "name": "zenith-graphene",
+      "pixels": [
+        760,
+        500
+      ],
+      "covers": [
+        3200,
+        1600
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.12,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.0
+      },
+      "original_file": "2024/05/Graphene-img-01.webp",
+      "original_sha256": "7f3da2675ccb8786309e2a5c25311179d0688ada375f1889c41ef0d2234bd682",
+      "discontinued": false
+    },
+    "Greylac": {
+      "name": "zenith-greylac",
+      "pixels": [
+        760,
+        500
+      ],
+      "covers": [
+        3200,
+        1600
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.12,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.0
+      },
+      "original_file": "2024/05/Greylac-img-01.webp",
+      "original_sha256": "31ed1f941f0df295028f50407e7df85d0c93cd57dee56cde69aca0b6da377630",
+      "discontinued": false
+    },
+    "Kirec": {
+      "name": "zenith-kirec",
+      "pixels": [
+        760,
+        500
+      ],
+      "covers": [
+        3200,
+        1600
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.32,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.0
+      },
+      "original_file": "2023/02/Kirec.webp",
+      "original_sha256": "39728059a9d0974f4815efe8aef3c32156a15e7670d27da35b68922d0532ccee",
+      "discontinued": false
+    },
+    "Lagos Grey": {
+      "name": "zenith-lagos-grey",
+      "pixels": [
+        760,
+        500
+      ],
+      "covers": [
+        3200,
+        1600
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.12,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.0
+      },
+      "original_file": "2023/02/Lagos-Grey.webp",
+      "original_sha256": "33fc36801f5d80790ce1b9c5d9af492b58ea270364b1b3ce75a872e135a2a181",
+      "discontinued": false
+    },
+    "Le Blanc": {
+      "name": "zenith-le-blanc",
+      "pixels": [
+        760,
+        500
+      ],
+      "covers": [
+        3200,
+        1600
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.12,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.0
+      },
+      "original_file": "2025/08/Le_Blanc_500x760-1.webp",
+      "original_sha256": "414f778d8dbf98244cafaaaf8a37762bef0f0b9791763d739b9bcd971c38a2f8",
+      "discontinued": false
+    },
+    "Le Taj": {
+      "name": "zenith-le-taj",
+      "pixels": [
+        760,
+        500
+      ],
+      "covers": [
+        3200,
+        1600
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.12,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.0
+      },
+      "original_file": "2025/08/Le_Taj_500x760-2.webp",
+      "original_sha256": "d08e4aa63dcfa72810a2ae10f4c68e8d6611de4067d893c282b70f090c485654",
+      "discontinued": false
+    },
+    "Leylak": {
+      "name": "zenith-leylak",
+      "pixels": [
+        2560,
+        1685
+      ],
+      "covers": [
+        3200,
+        1600
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.12,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.0
+      },
+      "original_file": "2026/04/Untitled-2-03-scaled.webp",
+      "original_sha256": "382abdf727eb9723f7832e4d919f9e6918ff2690324325f9b73b999dd88853ff",
+      "discontinued": false
+    },
+    "Lumira": {
+      "name": "zenith-lumira",
+      "pixels": [
+        2560,
+        1685
+      ],
+      "covers": [
+        3200,
+        1600
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.12,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.0
+      },
+      "original_file": "2026/04/Untitled-2-08-scaled.webp",
+      "original_sha256": "c57723c655914b4ccb2e5c55087ef1c5bebad5f9d579592c6fb0828d11fc1d7e",
+      "discontinued": false
+    },
+    "Lumira Gold": {
+      "name": "zenith-lumira-gold",
+      "pixels": [
+        2560,
+        1685
+      ],
+      "covers": [
+        3200,
+        1600
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.12,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.0
+      },
+      "original_file": "2026/04/Untitled-2-07-scaled.webp",
+      "original_sha256": "724a7b864f0530798f9cbb99b31824fe66e540592bcad85b491b277f7b2793d3",
+      "discontinued": false
+    },
+    "Marbella": {
+      "name": "zenith-marbella",
+      "pixels": [
+        760,
+        500
+      ],
+      "covers": [
+        3200,
+        1600
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.12,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.0
+      },
+      "original_file": "2023/02/Marbella.webp",
+      "original_sha256": "4bc8c8655b4f7346c5f8d0e2b647d257eb7f71dd1ebbe8e30c52b4211231939a",
+      "discontinued": false
+    },
+    "Marmo Rosa": {
+      "name": "zenith-marmo-rosa",
+      "pixels": [
+        2560,
+        1685
+      ],
+      "covers": [
+        3200,
+        1600
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.12,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.0
+      },
+      "original_file": "2026/04/Untitled-2-09-scaled.webp",
+      "original_sha256": "1872477e391ae00dfd7fae04bbce80e2c2fa63e29338a3b453a7a3f8d30bbc09",
+      "discontinued": false
+    },
+    "Marrakesh": {
+      "name": "zenith-marrakesh",
+      "pixels": [
+        760,
+        500
+      ],
+      "covers": [
+        3200,
+        1600
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.12,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.0
+      },
+      "original_file": "2024/05/Marrakesh-img-01.webp",
+      "original_sha256": "d81d386f2d84d10a00b9fb8a930cf4153e12ff5499babb880aad2ab0d5c3da97",
+      "discontinued": false
+    },
+    "Mero": {
+      "name": "zenith-mero",
+      "pixels": [
+        760,
+        500
+      ],
+      "covers": [
+        3200,
+        1600
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.12,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.0
+      },
+      "original_file": "2023/02/Mero.webp",
+      "original_sha256": "d1dddf367a618e3dd4253904c4bc9076ac77ec98c05192501567530e37dccb9d",
+      "discontinued": false
+    },
+    "Mink Grey": {
+      "name": "zenith-mink-grey",
+      "pixels": [
+        760,
+        500
+      ],
+      "covers": [
+        3200,
+        1600
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.12,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.0
+      },
+      "original_file": "2024/05/mink-grey-img-01.webp",
+      "original_sha256": "90dc9f74b3b41dca209e81892fe7b26b85055fdd987d32210604ddfb8414e179",
+      "discontinued": false
+    },
+    "Mottle Grey": {
+      "name": "zenith-mottle-grey",
+      "pixels": [
+        760,
+        500
+      ],
+      "covers": [
+        3200,
+        1600
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.12,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.0
+      },
+      "original_file": "2023/02/Mottle-Grey.webp",
+      "original_sha256": "2499269d053187b5649ad4a7fa02aff781c3662a5396772a756b1f26d97e31b6",
+      "discontinued": false
+    },
+    "Naica": {
+      "name": "zenith-naica",
+      "pixels": [
+        757,
+        500
+      ],
+      "covers": [
+        3200,
+        1600
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.12,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.0
+      },
+      "original_file": "2025/08/Naica_500x760-e1755217579923.webp",
+      "original_sha256": "e78a068276c583f9ac7fea4f0621b9b3118be389132f3949e0096d2afd3f7f9f",
+      "discontinued": false
+    },
+    "Ottoman Grey": {
+      "name": "zenith-ottoman-grey",
+      "pixels": [
+        865,
+        574
+      ],
+      "covers": [
+        3200,
+        1600
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.12,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.0
+      },
+      "original_file": "2023/02/sample-01-min.webp",
+      "original_sha256": "d74defbcf6ebc049cbb0430bf2a9f1045b7cbfb7286774bcd3612f1ec3605008",
+      "discontinued": false
+    },
+    "Pearl White": {
+      "name": "zenith-pearl-white",
+      "pixels": [
+        760,
+        500
+      ],
+      "covers": [
+        3200,
+        1600
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.12,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.0
+      },
+      "original_file": "2023/02/Pearl-White.webp",
+      "original_sha256": "4d48327c2cabc735b60e4e1fed2cff64f6cab085036e6ffe04fe17b571d0138e",
+      "discontinued": false
+    },
+    "Perla Santana": {
+      "name": "zenith-perla-santana",
+      "pixels": [
+        2560,
+        1685
+      ],
+      "covers": [
+        3200,
+        1600
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.12,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.0
+      },
+      "original_file": "2026/07/Zenith-new-colours-with-new-stickers-scaled.webp",
+      "original_sha256": "6c85ed9e0ade9903bca10c68ff12057b5fc9147e6f082fcf0930651b742dcd7b",
+      "discontinued": false
+    },
+    "Perla Venata": {
+      "name": "zenith-perla-venata",
+      "pixels": [
+        760,
+        500
+      ],
+      "covers": [
+        3200,
+        1600
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.12,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.0
+      },
+      "original_file": "2024/05/Perla-Venata-img-01.webp",
+      "original_sha256": "6bba2e7d4634e324606ec554e22eae7977dabf7fed8d9435ea03eb70526fa173",
+      "discontinued": false
+    },
+    "Raiden": {
+      "name": "zenith-raiden",
+      "pixels": [
+        760,
+        500
+      ],
+      "covers": [
+        3200,
+        1600
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.12,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.0
+      },
+      "original_file": "2023/02/Raiden.webp",
+      "original_sha256": "03e9a746f49d6b85f6b3c4500152d70fa0c23d63c51ce05647860364be5c6945",
+      "discontinued": false
+    },
+    "Rosé": {
+      "name": "zenith-rose",
+      "pixels": [
+        760,
+        500
+      ],
+      "covers": [
+        3200,
+        1600
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.12,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.0
+      },
+      "original_file": "2025/08/rose-updated-460.png",
+      "original_sha256": "e6bbb1e7fb5551eff775845ba9aa866f01be9ba5424a2874a8fde1a1684e6763",
+      "discontinued": false
+    },
+    "Sahara Swirl": {
+      "name": "zenith-sahara-swirl",
+      "pixels": [
+        2560,
+        1685
+      ],
+      "covers": [
+        3200,
+        1600
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.12,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.0
+      },
+      "original_file": "2026/04/Untitled-2-05-scaled.webp",
+      "original_sha256": "ec21eb72727ae481b16482746b6a221c2fe0c83aecc230c080a5f5758732e71a",
+      "discontinued": false
+    },
+    "Sarva White": {
+      "name": "zenith-sarva-white",
+      "pixels": [
+        2560,
+        1685
+      ],
+      "covers": [
+        3200,
+        1600
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.12,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.0
+      },
+      "original_file": "2026/04/Untitled-2-04-scaled.webp",
+      "original_sha256": "8acb0c5994beff8e82a9e3249caa064a17d610672356efab39041aabf2b55aef",
+      "discontinued": false
+    },
+    "Savannah": {
+      "name": "zenith-savannah",
+      "pixels": [
+        760,
+        500
+      ],
+      "covers": [
+        3200,
+        1600
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.12,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.0
+      },
+      "original_file": "2023/02/Savannah-Polished.webp",
+      "original_sha256": "fc8d546fcb96f41319b29138358059cbca011a2b3a6d8ae3a1aabe6aff473af0",
+      "discontinued": false
+    },
+    "Sparkling White": {
+      "name": "zenith-sparkling-white",
+      "pixels": [
+        760,
+        500
+      ],
+      "covers": [
+        3200,
+        1600
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.12,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.0
+      },
+      "original_file": "2023/02/Sparkling-White.webp",
+      "original_sha256": "7ef5021074e9834d1abd100923dcb4930452c7769c1ae97a021555793d87dd71",
+      "discontinued": false
+    },
+    "Suave": {
+      "name": "zenith-suave",
+      "pixels": [
+        760,
+        500
+      ],
+      "covers": [
+        3200,
+        1600
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.12,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.0
+      },
+      "original_file": "2025/08/Suave_500x760.webp",
+      "original_sha256": "756f9bab2da017ed8158f10c84fd2ee193a70a3e22c9400664bdcc8b7f4e03a2",
+      "discontinued": false
+    },
+    "Sugar Rush": {
+      "name": "zenith-sugar-rush",
+      "pixels": [
+        760,
+        500
+      ],
+      "covers": [
+        3200,
+        1600
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.12,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.0
+      },
+      "original_file": "2023/02/Sugar-Rush.webp",
+      "original_sha256": "ab0fe59c0bbc434cd9712957694325adff1fa05845c05c00d2e33b76e1ec1c1c",
+      "discontinued": false
+    },
+    "Valour": {
+      "name": "zenith-valour",
+      "pixels": [
+        760,
+        500
+      ],
+      "covers": [
+        3200,
+        1600
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.48,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.08
+      },
+      "original_file": "2023/02/Valour.webp",
+      "original_sha256": "6b97a3e5242f7552d4e1b5bab4d09844d3ad500645d7c789b07c0ed9a20ed8bf",
+      "discontinued": false
+    },
+    "Vanilla Sky": {
+      "name": "zenith-vanilla-sky",
+      "pixels": [
+        760,
+        500
+      ],
+      "covers": [
+        3200,
+        1600
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.12,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.0
+      },
+      "original_file": "2024/05/Vanilla-Sky-img-01.webp",
+      "original_sha256": "9d43af81a2380e3778fde7f58eca67efd0ac9ae0a50744e4ba01b502fc0b1953",
+      "discontinued": false
+    },
+    "Whisper White": {
+      "name": "zenith-whisper-white",
+      "pixels": [
+        760,
+        500
+      ],
+      "covers": [
+        3200,
+        1600
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.12,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.0
+      },
+      "original_file": "2024/05/Whisper-White-img-01.webp",
+      "original_sha256": "87caf6ad70e12b5fbd8678be7c114ae1147e7757a7e166a66467ef0dfb5a646e",
+      "discontinued": false
+    },
+    "White Burst": {
+      "name": "zenith-white-burst",
+      "pixels": [
+        760,
+        500
+      ],
+      "covers": [
+        3200,
+        1600
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.12,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.0
+      },
+      "original_file": "2023/02/White-Burst.webp",
+      "original_sha256": "c583132fcfcd075a437d9452508785b0a61d69fb2c05d601b62fc9a9a72b5e14",
+      "discontinued": false
+    },
+    "White Truffle": {
+      "name": "zenith-white-truffle",
+      "pixels": [
+        760,
+        500
+      ],
+      "covers": [
+        3200,
+        1600
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.12,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.0
+      },
+      "original_file": "2023/02/White-Truffle.webp",
+      "original_sha256": "09cf22b78e8a8cee957a93f8925878cfa0df4739a8cdb5d2067270062b1c6e24",
+      "discontinued": false
+    },
+    "Zayan": {
+      "name": "zenith-zayan",
+      "pixels": [
+        760,
+        500
+      ],
+      "covers": [
+        3200,
+        1600
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.12,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.0
+      },
+      "original_file": "2023/02/ZAyan.webp",
+      "original_sha256": "24bfbcb9f76c94e57f348299ba97f0500261f29a7fccccd47154f3ee3f9c8569",
+      "discontinued": false
+    }
+  }
+}

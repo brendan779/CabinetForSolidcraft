@@ -624,6 +624,33 @@ mod tests {
         }
     }
 
+    /// BENCH-18: every stone slab has its photo listed where the app and the Blender export look
+    /// for it: `textures/<brand>.json`, by decor, covering a stated size.
+    #[test]
+    fn every_stone_slab_lists_its_photo_under_its_brand() {
+        let cat = Catalog::load(&repo_catalog()).unwrap();
+        let slabs: Vec<&Board> = cat
+            .boards
+            .iter()
+            .filter(|b| b.kind == BoardKind::SinteredStone)
+            .collect();
+        assert!(slabs.iter().any(|b| b.brand == "Zenith Surfaces"));
+        for b in slabs {
+            let file = format!("{}.json", b.brand.to_lowercase().replace(' ', "-"));
+            let text = std::fs::read_to_string(repo_catalog().join("textures").join(&file))
+                .unwrap_or_else(|_| panic!("{}: no textures/{file}", b.id));
+            let images: serde_json::Value = serde_json::from_str(&text).unwrap();
+            let image = &images["images"][&b.decor];
+            assert!(image["name"].is_string(), "{}: no photo", b.id);
+            assert_eq!(
+                image["covers"].as_array().map(Vec::len),
+                Some(2),
+                "{}",
+                b.id
+            );
+        }
+    }
+
     /// SURR-1: every Surround lining board names a profile the catalog has.
     #[test]
     fn surround_linings_have_their_profiles() {

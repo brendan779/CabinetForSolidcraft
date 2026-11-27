@@ -1001,6 +1001,11 @@ final class ViewportScene {
         var positions: [SIMD3<Float>] = [], normals: [SIMD3<Float>] = [], uvs: [SIMD2<Float>] = []
         var indices: [UInt32] = []
         let origin = pivot(p)
+        // Texture coordinates from the part's corner, not its centre: a slab's photograph wraps at
+        // zero, which put a seam across the middle of every top.
+        let corner = pieces.flatMap { $0.flatMap { $0 } }.reduce(SIMD3<Float>(repeating: .greatestFiniteMagnitude)) {
+            simd_min($0, point($1.x,$1.y,$1.z)-origin)
+        }
         for solid in pieces {
             for face in solid where face.count >= 3 {
                 let points = face.map { point($0.x,$0.y,$0.z)-origin }
@@ -1012,7 +1017,8 @@ final class ViewportScene {
                 let plane = [0,1,2].filter { $0 != axis }
                 for c in points {
                     positions.append(c); normals.append(n)
-                    uvs.append([c[plane[0]],c[plane[1]]]/grainRepeat)
+                    let u = c - corner
+                    uvs.append([u[plane[0]],u[plane[1]]]/grainRepeat)
                 }
                 for i in 1..<(points.count-1) { indices += [base,base+UInt32(i),base+UInt32(i+1)] }
             }

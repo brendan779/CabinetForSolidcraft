@@ -6,6 +6,11 @@ struct StoneProductControls: View {
     @State private var search = ""
     let cab: CabinetDoc
     private var selected: BoardRecord? { project.boardsById[cab.stoneProductID] }
+    private var slabs: [BoardRecord] {
+        project.boards.filter { $0.kind == "sintered_stone" && (search.isEmpty
+            || "\($0.brand) \($0.range) \($0.decor) \($0.finish)".localizedCaseInsensitiveContains(search)) }
+    }
+    private var brands: [String] { Array(Set(slabs.map(\.brand))).sorted() }
     var body: some View {
         Button { picking = true } label: {
             HStack {
@@ -21,23 +26,26 @@ struct StoneProductControls: View {
                 Text("Stone slabs").font(.headline)
                 TextField("Search stone", text: $search).textFieldStyle(.roundedBorder)
                 ScrollView {
-                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 170))], spacing: 12) {
-                        ForEach(project.boards.filter { $0.kind == "sintered_stone" && (search.isEmpty || "\($0.decor) \($0.finish)".localizedCaseInsensitiveContains(search)) }, id: \.id) { board in
-                            Button {
-                                var c = cab
-                                c.setStoneProduct(board)
-                                project.selected = c
-                                picking = false
-                            } label: {
-                                VStack(alignment: .leading, spacing: 4) {
-                                    if let surface = SlabLibrary.surface(board), let image = NSImage(contentsOf: surface.imageURL) {
-                                        Image(nsImage: image).resizable().scaledToFit().frame(height: 85)
+                    LazyVStack(alignment: .leading, spacing: 14, pinnedViews: .sectionHeaders) {
+                        ForEach(brands, id: \.self) { brand in
+                            Section {
+                                LazyVGrid(columns: [GridItem(.adaptive(minimum: 170))], spacing: 12) {
+                                    ForEach(slabs.filter { $0.brand == brand }, id: \.id) { board in
+                                        Button {
+                                            var c = cab
+                                            c.setStoneProduct(board)
+                                            project.selected = c
+                                            picking = false
+                                        } label: {
+                                            SlabTile(board: board)
+                                        }.buttonStyle(TileStyle(selected: selected?.id == board.id))
                                     }
-                                    Text(board.decor).font(.headline)
-                                    Text("\(board.finish) · 3200 × 1600 × 20 mm").font(.caption).foregroundStyle(.secondary)
-                                    if board.range.contains("discontinued") { Text("Discontinued").font(.caption).foregroundStyle(Theme.warning) }
-                                }.frame(maxWidth: .infinity, alignment: .leading).padding(8)
-                            }.buttonStyle(TileStyle(selected: selected?.id == board.id))
+                                }
+                            } header: {
+                                Text(brand).font(.subheadline.weight(.semibold)).foregroundStyle(.secondary)
+                                    .frame(maxWidth: .infinity, alignment: .leading).padding(.vertical, 4)
+                                    .background(Theme.overlay)
+                            }
                         }
                     }
                 }
@@ -45,6 +53,30 @@ struct StoneProductControls: View {
                     var c = cab; c.setStoneProduct(nil); project.selected = c; picking = false
                 }.buttonStyle(.borderless)
             }.padding(14).frame(width: 630, height: 550)
+        }
+    }
+}
+
+/// One slab in the picker: a small picture of its photograph, its name, finish and size.
+private struct SlabTile: View {
+    let board: BoardRecord
+    @State private var thumbnail: NSImage?
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Group {
+                if let thumbnail {
+                    Image(nsImage: thumbnail).resizable().scaledToFill()
+                } else {
+                    Color(nsColor: NSColor(hex: board.previewColour) ?? .gray)
+                }
+            }.frame(height: 85).frame(maxWidth: .infinity).clipped()
+            Text(board.decor).font(.headline)
+            Text("\(board.finish) · \(board.sheets.first ?? "") × \(Int(board.thickness)) mm").font(.caption).foregroundStyle(.secondary)
+            if board.range.contains("discontinued") { Text("Discontinued").font(.caption).foregroundStyle(Theme.warning) }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading).padding(8)
+        .task(id: board.id) {
+            if let surface = SlabLibrary.surface(board) { thumbnail = await DecorThumbnails.image(surface.imageName) }
         }
     }
 }
