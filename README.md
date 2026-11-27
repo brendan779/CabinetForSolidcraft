@@ -18,6 +18,46 @@ unzip it and move Cabinet Studio to Applications. It needs macOS 15 or later and
 the first time, Control-click it and choose Open. The app can open SolidCraft for you: click the red
 light beside the SolidCraft button.
 
+On first run the app downloads its **material packs** (below): the full-size photographs of every
+board decor and stone slab. The status bar shows the progress. The app works while they download;
+a decor without its picture shows in its colour until the picture arrives.
+
+## A quick tour
+
+1. **Start a job.** Open Cabinet Studio and click Get Started. A job is a run of cabinets along a
+   wall, or an island. Save it like any document (⌘S).
+2. **Add cabinets.** Click **+** in the sidebar (or File › New Cabinet) and pick a kind: base, wall,
+   tall, drawer bank, sink, corner… Each one is listed in the sidebar and stands in the run bar
+   along the bottom of the Design workspace, in order along the wall. Drag them in the sidebar to
+   reorder; File › New Run Item adds fillers, end panels, splashbacks, shelves and cornices. Already
+   drew boxes in SolidCraft? Select them there and choose **Make Cabinets from Selected Boxes** from
+   the SolidCraft button's menu.
+3. **Shape each cabinet in the inspector** on the right. Every option is a picture:
+   - **Cabinet:** size, carcass board, top, bottom, back and toe kick.
+   - **Fronts:** doors and drawers, split into sections; front style, board, handles and grain.
+   - **Fittings:** hinges, drawer systems, shelves and legs (Blum, Häfele, ABI).
+   - **Build:** how the panels join: biscuits, screws, dowels, confirmat, cam locks or DOMINO.
+   - **Benchtop:** the top over the run: stone slab or laminate, edge profile, overhangs,
+     waterfall ends, sink and cooktop cut-outs, and where long tops join.
+   Use **Whole job** at the top of the inspector to change every cabinet at once.
+4. **Check it in 3D.** The Design workspace draws the job with its real boards, fronts open or
+   shut, in section, or with the hardware showing.
+5. **Get the parts.** Switch workspace along the top (⌘1–4):
+   - **Cut List:** every part with its edge tape (CSV or PDF), the parts nested on sheets with
+     offcuts you can keep for the next job, the hardware order, the quote (costing and customer
+     PDFs), and the elevation, exported as PDF, DXF or the whole job as STEP.
+   - **Cut Sheets:** a dimensioned drawing of each part with every hole and groove, as PDF or DXF
+     for a panel saw or CNC router, plus labels, assembly drawings and benchtop sheets.
+   - **Boards:** every board and decor in the catalog; "Use for" puts one on the selected cabinet.
+6. **Build it in SolidCraft.** Click **SolidCraft** in the toolbar (or SolidCraft › Build in
+   SolidCraft). Each cabinet becomes a component of named solid panels in its board colours, with the
+   suppliers' hardware models. The button's menu sets the detail: plain panels, or manufacturing
+   detail with every bore, groove and biscuit slot.
+7. **Render it.** Click the **Blender** button (or SolidCraft › Make Blender Scene…). Choose the
+   walls' paint and the floor (oak boards, polished concrete, floor tiles, or tiles cut from a
+   stone slab, with the grout colour), and the app builds a lit kitchen in Blender with every board's
+   decor on its part, grain the right way.
+
 ## What works today
 
 - **Cabinets:** frameless base, wall, tall, drawer bank, open shelf, sink, blind corner, L-corner,
@@ -43,14 +83,43 @@ light beside the SolidCraft button.
 - **Paint:** primed boards take a paint or your own colour, and a finish from matt to gloss.
 - **Build in SolidCraft:** each cabinet becomes a component of named panels in your board colours,
   with supplier hardware models. Manufacturing detail cuts every bore, groove and biscuit slot.
-- **Blender scenes:** the camera button beside SolidCraft builds the job with `solidcraft-cli` and makes
-  a Blender scene: board decors with bump maps, on each part by its name and grain, in a lit kitchen.
-  It needs SolidCraft and Blender in Applications. Images come from each brand's site when first used.
+- **Benchtops:** stone slabs (Zenith Surfaces and Dekton, from each brand's slab photo) and laminate
+  tops (Polytec and Laminex). Edge profiles, build-ups, overhangs, mitred waterfall ends with their
+  inner skin, joins placed clear of cut-outs when a top is longer than its slab, and sinks from ABI
+  Interiors' range with their cut-outs. Splashbacks in stone or tile.
+- **Blender scenes:** the Blender button builds the job with `solidcraft-cli` and makes a scene: board
+  decors and stone with bump maps, on each part by its name and grain, a slab's veins running on
+  across joins and waterfalls, in a lit kitchen. A popup picks the walls' paint and the floor,
+  including floor tile products laid as a seamless grid with grout. Needs SolidCraft and Blender in
+  Applications.
 - **Outputs:** cut list with edge tape and CSV, parts nested on sheets, hardware order, quote, cut
   sheets per part as PDF or DXF, labels, assembly drawings and the job as STEP.
 
-**On hold:** benchtops, lift-up and bi-fold fronts, and lighting. Their code is kept, but they are not
-ready to use.
+**On hold:** lift-up and bi-fold fronts, lighting, natural stone benchtops and the Revit export. Their
+code is kept, but they are not ready to use.
+
+## Material packs
+
+The photographs of each brand's decors and slabs are large (hundreds of megabytes in all), so they
+aren't in the app. They come as **material packs**: one zip per brand, published as the assets of the
+[`material-packs` release](https://github.com/brendan779/CabinetForSolidcraft/releases/tag/material-packs)
+with an index, `packs.json`. On first run, and whenever the index lists a newer version, Cabinet
+Studio downloads the packs it doesn't have, checks each one's SHA-256, and installs the pictures at
+full size in `~/Library/Application Support/CabinetStudio/decors`.
+
+A pack is a plain zip with a fixed layout: a `pack.json` manifest naming every file and its checksum,
+the brand's `catalog/textures` file saying how each picture maps onto a sheet, optional
+`catalog/boards` records, and `images/`. Anything else, or a file whose checksum doesn't match, and
+the whole pack is refused before anything is written. The format is in
+[docs/material-packs.md](docs/material-packs.md); `scripts/make_material_packs.py` builds the
+official ones. The format is the one a user's own pack will use: importing a pack you made, for a
+brand that isn't here, is planned, so manufacturers' materials can be shared without waiting on this
+repository.
+
+Floor tiles for the Blender scene are made from photos of a tile's faces with
+`scripts/make_floor_tiles.py`: a seamless grid, each tile a face at random, with a bump map and a
+grout mask. They're listed in `catalog/floors/`.
+
 
 ![Built in SolidCraft](docs/images/first-run.png)
 
