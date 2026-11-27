@@ -1938,6 +1938,25 @@ fn benchtop(
                     ));
                     continue;
                 }
+                // A filler against the leg stops short of the cabinets' back: behind it a slot
+                // stays open between the leg and the cabinet. The leg already closes the end.
+                let end_x = if side == "L" { wx0 + leg } else { wx0 };
+                if let Some(f) = in_line.iter().find(|p| {
+                    p.role == PartRole::Filler
+                        && (if side == "L" {
+                            p.bounds.min.x
+                        } else {
+                            p.bounds.max().x
+                        } - end_x)
+                            .abs()
+                            < 1.0
+                }) {
+                    out.warnings.push(format!(
+                        "{}: {side} waterfall meets filler {}, which leaves a gap behind it; take the filler out",
+                        b.id,
+                        f.name.split('.').next().unwrap_or(&f.name)
+                    ));
+                }
                 out.parts.push(Part {
                     name: format!("{}.Waterfall{}{side}", b.id, n + 1),
                     role: PartRole::Benchtop,
