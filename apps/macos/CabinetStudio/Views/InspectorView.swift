@@ -625,6 +625,19 @@ struct PieceSection: View {
                                           systemImage: t["kind"] as? String == "sink" ? "drop" : "flame")
                                 }
                             }
+                            // Catalog sinks: each names its product, which sizes the cut-out and draws the sink.
+                            Divider()
+                            Menu {
+                                let sinks = ProjectModel.catalogSinks
+                                ForEach(sinks.indices, id: \.self) { i in
+                                    let t = sinks[i]
+                                    Button(t["name"] as? String ?? "Sink") {
+                                        withAnimation(.snappy) { var c = cab; c.setCutout(over: base.id, template: t); project.selected = c }
+                                    }
+                                }
+                            } label: {
+                                Label("Sinks from the catalog", systemImage: "drop")
+                            }
                         } label: {
                             Label(cab.cutoutName(over: base.id) ?? "None",
                                   systemImage: kind == nil ? "circle.dashed" : kind == "sink" ? "drop" : "flame")

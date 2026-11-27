@@ -23,6 +23,8 @@ pub enum HardwareKind {
     Connector,
     ShelfSupport,
     Lighting,
+    /// A kitchen sink: its cut-out sizes and its model (BENCH-15a).
+    Sink,
     Other,
 }
 

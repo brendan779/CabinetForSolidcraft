@@ -863,6 +863,14 @@ pub fn default_appliances_json() -> String {
     serde_json::to_string(&cabinet_core::run::Appliance::defaults()).unwrap_or_else(|_| "[]".into())
 }
 
+/// The catalog's sinks (BENCH-15a), as appliances a cut-out can be: each names its product, which
+/// sizes its cut-out and draws it.
+#[uniffi::export]
+pub fn catalog_sinks_json() -> String {
+    serde_json::to_string(&cabinet_core::run::Appliance::catalog_sinks())
+        .unwrap_or_else(|_| "[]".into())
+}
+
 #[uniffi::export]
 pub fn build(cabinet_json: String) -> Result<BuildSummary, CoreError> {
     let cab = parse(&cabinet_json)?;

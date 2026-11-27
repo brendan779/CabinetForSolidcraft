@@ -1051,6 +1051,10 @@ final class ProjectModel {
     // MARK: Appliance library
 
     /// The job's sink and cooktop templates, each the core's `Appliance` as a dictionary.
+    /// The catalog's sinks as cut-out templates (BENCH-15a), read once.
+    static let catalogSinks: [[String: Any]] =
+        (try? JSONSerialization.jsonObject(with: Data(catalogSinksJson().utf8))) as? [[String: Any]] ?? []
+
     var appliances: [[String: Any]] {
         get { (try? JSONSerialization.jsonObject(with: Data(appliancesJson.utf8))) as? [[String: Any]] ?? [] }
         set {

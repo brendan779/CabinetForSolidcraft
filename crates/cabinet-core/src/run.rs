@@ -469,6 +469,9 @@ pub struct Cutout {
     /// How a sink sits in the top (cooktops sit on it).
     #[serde(default)]
     pub mount: SinkMount,
+    /// The catalog sink it is for (BENCH-15a): its data sets the cut-out, and its model is drawn.
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub product: String,
     /// A sink's tap hole: its diameter (0: none; unset: ours), and its centre behind the cut-out.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub tap_hole: Option<f64>,
@@ -490,6 +493,7 @@ impl Cutout {
             mount: SinkMount::default(),
             tap_hole: None,
             tap_hole_behind: Self::default_tap_hole_behind(),
+            product: String::new(),
         }
     }
 
@@ -531,6 +535,9 @@ pub struct Appliance {
     pub tap_hole: Option<f64>,
     #[serde(default = "Cutout::default_tap_hole_behind")]
     pub tap_hole_behind: f64,
+    /// The catalog sink it is (BENCH-15a), whose data sets its cut-out.
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub product: String,
 }
 
 impl Appliance {
@@ -548,6 +555,7 @@ impl Appliance {
             mount: SinkMount::Undermount,
             tap_hole: None,
             tap_hole_behind: Cutout::default_tap_hole_behind(),
+            product: String::new(),
         };
         vec![
             make("Undermount sink 760", CutoutKind::Sink, 760.0, 440.0, 10.0),
@@ -569,7 +577,44 @@ impl Appliance {
             mount: self.mount,
             tap_hole: self.tap_hole,
             tap_hole_behind: self.tap_hole_behind,
+            product: self.product.clone(),
         }
+    }
+
+    /// Every catalog sink as an appliance to pick: undermounted, its cut-out the bowls' opening,
+    /// and on the top too where its maker prints the body under the flange.
+    pub fn catalog_sinks() -> Vec<Appliance> {
+        let mut out = Vec::new();
+        for h in crate::hardware::items()
+            .iter()
+            .filter(|h| h.kind == cabinet_catalog::HardwareKind::Sink)
+        {
+            let p = &h.parameters;
+            for (mount, key, suffix) in [
+                (SinkMount::Undermount, "under", ""),
+                (SinkMount::TopMount, "top", ", top mount"),
+            ] {
+                let (Some(l), Some(w)) = (
+                    p.get(&format!("{key}_length")),
+                    p.get(&format!("{key}_width")),
+                ) else {
+                    continue;
+                };
+                out.push(Appliance {
+                    name: format!("{} {}{suffix}", h.brand, h.variant),
+                    kind: CutoutKind::Sink,
+                    width: *l,
+                    depth: *w,
+                    corner_radius: p.get(&format!("{key}_radius")).copied().unwrap_or(0.0),
+                    setback: Cutout::default_setback(),
+                    mount,
+                    tap_hole: None,
+                    tap_hole_behind: Cutout::default_tap_hole_behind(),
+                    product: h.id.clone(),
+                });
+            }
+        }
+        out
     }
 }
 
@@ -2041,11 +2086,52 @@ fn benchtop(
     out
 }
 
+/// A cut-out for a catalog sink takes its size from the sink's data: the bowls' opening when it is
+/// undermounted, the body under its flange when it sits on the top. A sink with no body size to
+/// cut for is undermounted, with a warning.
+fn sized(c: &Cutout, warnings: &mut Vec<String>) -> Cutout {
+    let mut c = c.clone();
+    if c.product.is_empty() {
+        return c;
+    }
+    let Ok(item) = crate::hardware::item(&c.product) else {
+        warnings.push(format!(
+            "cut-out over {}: no sink {} in the catalog",
+            c.over, c.product
+        ));
+        return c;
+    };
+    let p = &item.parameters;
+    if c.mount == SinkMount::TopMount && !p.contains_key("top_length") {
+        warnings.push(format!(
+            "{} {}: the maker prints no size to top-mount it; undermounted",
+            item.brand, item.variant
+        ));
+        c.mount = SinkMount::Undermount;
+    }
+    let key = match c.mount {
+        SinkMount::Undermount => "under",
+        SinkMount::TopMount => "top",
+    };
+    let get = |k: &str| p.get(&format!("{key}_{k}")).copied();
+    if let (Some(l), Some(w)) = (get("length"), get("width")) {
+        c.width = l;
+        c.depth = w;
+        c.corner_radius = get("radius").unwrap_or(0.0);
+    }
+    c.kind = CutoutKind::Sink;
+    if c.name.is_empty() {
+        c.name = format!("{} {}", item.brand, item.variant);
+    }
+    c
+}
+
 /// Cuts each cut-out through the benchtop piece over its cabinet, and a tap hole behind a sink.
 fn cutouts(b: &Benchtop, top: &mut PartList, lists: &[PartList]) {
     use crate::part::{BorePurpose, Dir, Operation};
     let rules = b.rules().ok();
     for c in &b.cutouts {
+        let c = &sized(c, &mut top.warnings);
         if !c.width.is_finite() || !c.depth.is_finite() || c.width <= 0.0 || c.depth <= 0.0 {
             top.warnings.push(format!(
                 "{:?} cut-out over {} needs positive, finite width and depth; left out",
@@ -2122,6 +2208,20 @@ fn cutouts(b: &Benchtop, top: &mut PartList, lists: &[PartList]) {
             radius,
             note,
         });
+        // The sink itself, its rim's top under the top or on it.
+        if let Ok(item) = crate::hardware::item(&c.product) {
+            let z = match c.mount {
+                SinkMount::Undermount => pb.min.z,
+                SinkMount::TopMount => pb.max().z,
+            };
+            top.hardware.push(crate::part::HardwarePlacement {
+                item: item.id.clone(),
+                description: format!("{} {}", item.brand, item.variant),
+                at: Vec3::new(mid, y0 + c.depth / 2.0, z),
+                part: piece.name.clone(),
+                quantity: 1,
+            });
+        }
         let tap = c.tap_hole_diameter();
         // The material's clearances, as notes: the fabricator may still cut it.
         if let Some(r) = &rules {

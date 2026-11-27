@@ -1,0 +1,406 @@
+{
+  "brand": "ABI Interiors",
+  "website": "https://www.abiinteriors.com.au",
+  "notes": "ABI kitchen sinks (BENCH-15a), from the BIM library downloads: size, the bowls' opening at the rim (undermount cut-out) and, for granite sinks, the body under the flange (top-mount cut-out), all from the spec drawings; models re-oriented from the IFC, rim top at Z = 0. A sink without top_length is undermount only here: ABI prints no body size to cut for. Not verified by a person.",
+  "items": [
+    {
+      "id": "sink.abi.vienna-double-sink-760mm",
+      "brand": "ABI Interiors",
+      "article": "ABI-SINK-VIENNA-DOUBLE-SINK-760MM",
+      "family": "ABI Vienna",
+      "variant": "Vienna Double Sink 760mm",
+      "kind": "sink",
+      "parameters": {
+        "length": 760,
+        "width": 450,
+        "depth": 210,
+        "bowls": 2,
+        "under_length": 710,
+        "under_width": 400,
+        "under_radius": 5,
+        "top_length": 738,
+        "top_width": 428,
+        "top_radius": 0,
+        "sku": 15290
+      },
+      "source": {
+        "url": "ABI Interiors Vienna Double Sink 760mm (https://www.abiinteriors.co.nz/product/vienna-double-sink-760mm-white-granite-overflow/); finishes as listed (product.txt of the BIMobject download); sizes and the opening from ABI's spec drawing VIENNA_Double_Sink_Spec_UKNZ-01.jpg (\"dimensions are nominal measurements only\"); the cut-outs are read from it, not printed as such; model from the product's IFC by scripts/import-abi-sinks.py",
+        "document_date": "2026-10-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "sink.abi.vienna-single-sink-630mm",
+      "brand": "ABI Interiors",
+      "article": "ABI-SINK-VIENNA-SINGLE-SINK-630MM",
+      "family": "ABI Vienna",
+      "variant": "Vienna Single Sink 630mm",
+      "kind": "sink",
+      "parameters": {
+        "length": 630,
+        "width": 460,
+        "depth": 235,
+        "bowls": 1,
+        "under_length": 580,
+        "under_width": 410,
+        "under_radius": 0,
+        "top_length": 590,
+        "top_width": 420,
+        "top_radius": 0,
+        "sku": 15288
+      },
+      "source": {
+        "url": "ABI Interiors Vienna Single Sink 630mm (https://www.abiinteriors.co.nz/product/vienna-single-sink-630mm-white-granite-overflow/); finishes as listed (product.txt of the BIMobject download); sizes and the opening from ABI's spec drawing Vienna_Single_Sink_Spec_UKNZ.jpg (\"dimensions are nominal measurements only\"); the cut-outs are read from it, not printed as such; model from the product's IFC by scripts/import-abi-sinks.py",
+        "document_date": "2026-10-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "sink.abi.vienna-round-sink-450mm",
+      "brand": "ABI Interiors",
+      "article": "ABI-SINK-VIENNA-ROUND-SINK-450MM",
+      "family": "ABI Vienna",
+      "variant": "Vienna Round Sink 450mm",
+      "kind": "sink",
+      "parameters": {
+        "length": 450,
+        "width": 450,
+        "depth": 190,
+        "bowls": 1,
+        "under_length": 375,
+        "under_width": 375,
+        "under_radius": 187.5,
+        "top_length": 400,
+        "top_width": 400,
+        "top_radius": 187.5,
+        "sku": 15289
+      },
+      "source": {
+        "url": "ABI Interiors Vienna Round Sink 450mm (https://www.abiinteriors.co.nz/product/vienna-round-sink-450mm-white-granite-overflow/); finishes as listed (product.txt of the BIMobject download); sizes and the opening from ABI's spec drawing Vienna_Round_Sink_Spec_UKNZ-01.jpg (\"dimensions are nominal measurements only\"); the cut-outs are read from it, not printed as such; model from the product's IFC by scripts/import-abi-sinks.py",
+        "document_date": "2026-10-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "sink.abi.vera-double-sink-790mm",
+      "brand": "ABI Interiors",
+      "article": "ABI-SINK-VERA-DOUBLE-SINK-790MM",
+      "family": "ABI Vera",
+      "variant": "Vera Double Sink 790mm",
+      "kind": "sink",
+      "parameters": {
+        "length": 790,
+        "width": 450,
+        "depth": 240,
+        "bowls": 2,
+        "under_length": 730,
+        "under_width": 390,
+        "under_radius": 0,
+        "top_length": 766,
+        "top_width": 426,
+        "top_radius": 0,
+        "sku": 12884
+      },
+      "source": {
+        "url": "ABI Interiors Vera Double Sink 790mm (https://www.abiinteriors.co.nz/product/vera-double-sink-790mm-black-granite/); finishes as listed (product.txt of the BIMobject download); sizes and the opening from ABI's spec drawing Vera_Double_Sink_No_Overflow_SPEC-01.jpg (\"dimensions are nominal measurements only\"); the cut-outs are read from it, not printed as such; model from the product's IFC by scripts/import-abi-sinks.py",
+        "document_date": "2026-10-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "sink.abi.vera-single-sink-560mm",
+      "brand": "ABI Interiors",
+      "article": "ABI-SINK-VERA-SINGLE-SINK-560MM",
+      "family": "ABI Vera",
+      "variant": "Vera Single Sink 560mm",
+      "kind": "sink",
+      "parameters": {
+        "length": 560,
+        "width": 430,
+        "depth": 220,
+        "bowls": 1,
+        "under_length": 500,
+        "under_width": 370,
+        "under_radius": 25,
+        "top_length": 520,
+        "top_width": 390,
+        "top_radius": 0,
+        "sku": 12885
+      },
+      "source": {
+        "url": "ABI Interiors Vera Single Sink 560mm (https://www.abiinteriors.co.nz/product/vera-single-sink-560mm-black-granite/); finishes as listed (product.txt of the BIMobject download); sizes and the opening from ABI's spec drawing Vera_Single_Overflow__SPEC-01.jpg (\"dimensions are nominal measurements only\"); the cut-outs are read from it, not printed as such; model from the product's IFC by scripts/import-abi-sinks.py",
+        "document_date": "2026-10-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "sink.abi.vera-round-sink-420mm",
+      "brand": "ABI Interiors",
+      "article": "ABI-SINK-VERA-ROUND-SINK-420MM",
+      "family": "ABI Vera",
+      "variant": "Vera Round Sink 420mm",
+      "kind": "sink",
+      "parameters": {
+        "length": 420,
+        "width": 420,
+        "depth": 220,
+        "bowls": 1,
+        "under_length": 360,
+        "under_width": 360,
+        "under_radius": 180,
+        "sku": 12861
+      },
+      "source": {
+        "url": "ABI Interiors Vera Round Sink 420mm (https://www.abiinteriors.com.au/product/vera-round-sink-420mm-black-granite/); finishes Matte Black (product.txt of the BIMobject download); sizes and the opening from ABI's spec drawing VeraRoundSink_SPEC-01.jpg (\"dimensions are nominal measurements only\"); the cut-outs are read from it, not printed as such; model from the product's IFC by scripts/import-abi-sinks.py",
+        "document_date": "2026-10-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "sink.abi.vita-double-kitchen-sink-760mm",
+      "brand": "ABI Interiors",
+      "article": "ABI-SINK-VITA-DOUBLE-KITCHEN-SINK-760MM",
+      "family": "ABI Vita",
+      "variant": "Vita Double Kitchen Sink 760mm",
+      "kind": "sink",
+      "parameters": {
+        "length": 760,
+        "width": 450,
+        "depth": 200,
+        "bowls": 2,
+        "under_length": 710,
+        "under_width": 400,
+        "under_radius": 10,
+        "sku": 10350
+      },
+      "source": {
+        "url": "ABI Interiors Vita Double Kitchen Sink 760mm (https://www.abiinteriors.com.au/product/vita-double-kitchen-sink-760mm/); finishes Brushed Brass, Brushed Copper, Brushed Gunmetal, Stainless Steel, Antique Aurum, Antique Bronze, Antique Slate, Antique Steel (product.txt of the BIMobject download); sizes and the opening from ABI's spec drawing Vita Kitchen Sink_SPEC-01.jpg (\"dimensions are nominal measurements only\"); the cut-outs are read from it, not printed as such; model from the product's IFC by scripts/import-abi-sinks.py",
+        "document_date": "2026-10-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "sink.abi.zalo-double-kitchen-sink-855mm",
+      "brand": "ABI Interiors",
+      "article": "ABI-SINK-ZALO-DOUBLE-KITCHEN-SINK-855MM",
+      "family": "ABI Zalo",
+      "variant": "Zalo Double Kitchen Sink 855mm",
+      "kind": "sink",
+      "parameters": {
+        "length": 855,
+        "width": 450,
+        "depth": 200,
+        "bowls": 2,
+        "under_length": 805,
+        "under_width": 400,
+        "under_radius": 10,
+        "sku": 10290
+      },
+      "source": {
+        "url": "ABI Interiors Zalo Double Kitchen Sink 855mm (https://www.abiinteriors.com.au/product/zalo-double-kitchen-sink-855mm/); finishes Brushed Brass, Brushed Copper, Brushed Gunmetal, Stainless Steel (product.txt of the BIMobject download); sizes and the opening from ABI's spec drawing Zalo_Kitchen_Sink_SPEC-01.jpg (\"dimensions are nominal measurements only\"); the cut-outs are read from it, not printed as such; model from the product's IFC by scripts/import-abi-sinks.py",
+        "document_date": "2026-10-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "sink.abi.ontario-double-kitchen-sink-1180mm",
+      "brand": "ABI Interiors",
+      "article": "ABI-SINK-ONTARIO-DOUBLE-KITCHEN-SINK-1180MM",
+      "family": "ABI Ontario",
+      "variant": "Ontario Double Kitchen Sink 1180mm",
+      "kind": "sink",
+      "parameters": {
+        "length": 1180,
+        "width": 450,
+        "depth": 200,
+        "bowls": 2,
+        "under_length": 1130,
+        "under_width": 400,
+        "under_radius": 10,
+        "sku": 10447
+      },
+      "source": {
+        "url": "ABI Interiors Ontario Double Kitchen Sink 1180mm (https://www.abiinteriors.com.au/product/ontario-double-kitchen-sink/); finishes Brushed Brass, Brushed Copper, Brushed Gunmetal, Stainless Steel (product.txt of the BIMobject download); sizes and the opening from ABI's spec drawing Ontario_Sink_SPEC-01.jpg (\"dimensions are nominal measurements only\"); the cut-outs are read from it, not printed as such; model from the product's IFC by scripts/import-abi-sinks.py",
+        "document_date": "2026-10-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "sink.abi.seba-single-sink-550mm",
+      "brand": "ABI Interiors",
+      "article": "ABI-SINK-SEBA-SINGLE-SINK-550MM",
+      "family": "ABI Seba",
+      "variant": "Seba Single Sink 550mm",
+      "kind": "sink",
+      "parameters": {
+        "length": 550,
+        "width": 450,
+        "depth": 200,
+        "bowls": 1,
+        "under_length": 500,
+        "under_width": 400,
+        "under_radius": 10,
+        "sku": 17266
+      },
+      "source": {
+        "url": "ABI Interiors Seba Single Sink 550mm (https://www.abiinteriors.com.au/product/seba-single-sink-550mm-antique-aurum/); finishes Brushed Brass, Brushed Copper, Brushed Gunmetal, Stainless Steel, Antique Bronze, Antique Slate, Antique Steel (product.txt of the BIMobject download); sizes and the opening from ABI's spec drawing Seba_Kitchen_Sink_SPEC-01.jpg (\"dimensions are nominal measurements only\"); the cut-outs are read from it, not printed as such; model from the product's IFC by scripts/import-abi-sinks.py",
+        "document_date": "2026-10-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "sink.abi.seba-single-sink-550mm-deep",
+      "brand": "ABI Interiors",
+      "article": "ABI-SINK-SEBA-SINGLE-SINK-550MM-DEEP",
+      "family": "ABI Seba",
+      "variant": "Seba Single Sink 550mm (Deep)",
+      "kind": "sink",
+      "parameters": {
+        "length": 550,
+        "width": 450,
+        "depth": 250,
+        "bowls": 1,
+        "under_length": 500,
+        "under_width": 400,
+        "under_radius": 10,
+        "sku": 11948
+      },
+      "source": {
+        "url": "ABI Interiors Seba Single Sink 550mm (Deep) (https://www.abiinteriors.com.au/product/seba-single-sink-550mm-deep/); finishes Brushed Brass, Brushed Copper, Brushed Gunmetal, Stainless Steel (product.txt of the BIMobject download); sizes and the opening from ABI's spec drawing SEBA_Single_Kitchen_Sink_Deep_Spec-01.jpg (\"dimensions are nominal measurements only\"); the cut-outs are read from it, not printed as such; model from the product's IFC by scripts/import-abi-sinks.py",
+        "document_date": "2026-10-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "sink.abi.sola-outdoor-single-sink-550mm",
+      "brand": "ABI Interiors",
+      "article": "ABI-SINK-SOLA-OUTDOOR-SINGLE-SINK-550MM",
+      "family": "ABI Sola",
+      "variant": "Sola Outdoor Single Sink 550mm",
+      "kind": "sink",
+      "parameters": {
+        "length": 550,
+        "width": 450,
+        "depth": 200,
+        "bowls": 1,
+        "under_length": 500,
+        "under_width": 400,
+        "under_radius": 10,
+        "sku": 17885
+      },
+      "source": {
+        "url": "ABI Interiors Sola Outdoor Single Sink 550mm (https://www.abiinteriors.com.au/product/sola-outdoor-single-sink-550mm-antique-aurum/); finishes Brushed Brass, Brushed Copper, Brushed Gunmetal, Stainless Steel, Antique Aurum, Antique Bronze, Antique Slate, Antique Steel (product.txt of the BIMobject download); sizes and the opening from ABI's spec drawing SOLA_Kitchen_Sink_SPEC-01.jpg (\"dimensions are nominal measurements only\"); the cut-outs are read from it, not printed as such; model from the product's IFC by scripts/import-abi-sinks.py",
+        "document_date": "2026-10-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "sink.abi.sola-small-outdoor-sink",
+      "brand": "ABI Interiors",
+      "article": "ABI-SINK-SOLA-SMALL-OUTDOOR-SINK",
+      "family": "ABI Sola",
+      "variant": "Sola Small Outdoor Sink",
+      "kind": "sink",
+      "parameters": {
+        "length": 220,
+        "width": 440,
+        "depth": 205,
+        "bowls": 1,
+        "under_length": 180,
+        "under_width": 400,
+        "under_radius": 10,
+        "sku": 18283
+      },
+      "source": {
+        "url": "ABI Interiors Sola Small Outdoor Sink (https://www.abiinteriors.com.au/product/sola-small-outdoor-sink-brushed-brass/); finishes Brushed Brass, Brushed Copper, Brushed Gunmetal, Stainless Steel (product.txt of the BIMobject download); sizes and the opening from ABI's spec drawing Sola_Small_Outdoor_Sink_SPEC.jpg (\"dimensions are nominal measurements only\"); the cut-outs are read from it, not printed as such; model from the product's IFC by scripts/import-abi-sinks.py",
+        "document_date": "2026-10-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "sink.abi.ohelu-single-kitchen-sink-380mm",
+      "brand": "ABI Interiors",
+      "article": "ABI-SINK-OHELU-SINGLE-KITCHEN-SINK-380MM",
+      "family": "ABI Ohelu",
+      "variant": "Ohelu Single Kitchen Sink 380mm",
+      "kind": "sink",
+      "parameters": {
+        "length": 380,
+        "width": 440,
+        "depth": 200,
+        "bowls": 1,
+        "under_length": 340,
+        "under_width": 400,
+        "under_radius": 10,
+        "sku": 10353
+      },
+      "source": {
+        "url": "ABI Interiors Ohelu Single Kitchen Sink 380mm (https://www.abiinteriors.com.au/product/ohelu-single-kitchen-sink-380mm/); finishes Brushed Brass, Brushed Copper, Brushed Gunmetal, Stainless Steel (product.txt of the BIMobject download); sizes and the opening from ABI's spec drawing Ohelu_Sink_Spec-01.jpg (\"dimensions are nominal measurements only\"); the cut-outs are read from it, not printed as such; model from the product's IFC by scripts/import-abi-sinks.py",
+        "document_date": "2026-10-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "sink.abi.vari-single-sink-750mm",
+      "brand": "ABI Interiors",
+      "article": "ABI-SINK-VARI-SINGLE-SINK-750MM",
+      "family": "ABI Vari",
+      "variant": "Vari Single Sink 750mm",
+      "kind": "sink",
+      "parameters": {
+        "length": 750,
+        "width": 450,
+        "depth": 200,
+        "bowls": 1,
+        "under_length": 700,
+        "under_width": 400,
+        "under_radius": 10,
+        "sku": 12362
+      },
+      "source": {
+        "url": "ABI Interiors Vari Single Sink 750mm (https://www.abiinteriors.com.au/product/vari-single-sink-750mm-brushed-brass-w-rack/); finishes Brushed Brass, Brushed Copper, Brushed Gunmetal, Stainless Steel (product.txt of the BIMobject download); sizes and the opening from ABI's spec drawing Vari_Sink_Spec-01.jpg (\"dimensions are nominal measurements only\"); the cut-outs are read from it, not printed as such; model from the product's IFC by scripts/import-abi-sinks.py",
+        "document_date": "2026-10-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "sink.abi.jai-single-kitchen-sink-880mm",
+      "brand": "ABI Interiors",
+      "article": "ABI-SINK-JAI-SINGLE-KITCHEN-SINK-880MM",
+      "family": "ABI Jai",
+      "variant": "Jai Single Kitchen Sink 880mm",
+      "kind": "sink",
+      "parameters": {
+        "length": 880,
+        "width": 450,
+        "depth": 200,
+        "bowls": 1,
+        "under_length": 830,
+        "under_width": 400,
+        "under_radius": 10,
+        "sku": 10446
+      },
+      "source": {
+        "url": "ABI Interiors Jai Single Kitchen Sink 880mm (https://www.abiinteriors.com.au/product/jai-single-kitchen-sink-880mm/); finishes Brushed Brass, Brushed Copper, Brushed Gunmetal, Stainless Steel (product.txt of the BIMobject download); sizes and the opening from ABI's spec drawing Jai_Single_Kitchen_Sink_880mm_-_Brushed_Gunmetal_-_Specifications_1.gif (\"dimensions are nominal measurements only\"); the cut-outs are read from it, not printed as such; model from the product's IFC by scripts/import-abi-sinks.py",
+        "document_date": "2026-10-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    }
+  ]
+}

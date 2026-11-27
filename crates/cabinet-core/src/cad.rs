@@ -286,12 +286,24 @@ pub fn cad_placements(list: &PartList) -> Vec<CadPlacement> {
     let left = list.by_role(PartRole::LeftSide).next();
     let right = list.by_role(PartRole::RightSide).next();
     let (Some(left), Some(right)) = (left, right) else {
-        // A floating shelf has no sides, but may have a light under it.
+        // A floating shelf has no sides, but may have a light under it; a benchtop may carry a
+        // sink, its model's origin the rim's top at the cut-out's middle.
         for h in &list.hardware {
             if h.item.starts_with("hafele.loox5.profile.")
                 && let Ok(item) = crate::hardware::item(&h.item)
             {
                 out.extend(light_profile(list, h, item, &mut next));
+            } else if let Ok(item) = crate::hardware::item(&h.item)
+                && item.kind == cabinet_catalog::HardwareKind::Sink
+            {
+                out.push(CadPlacement {
+                    name: format!("{}.Sink{}", list.cabinet, next("sink")),
+                    item: item.id.clone(),
+                    article: item.article.clone(),
+                    side: Side::Left,
+                    origin: h.at,
+                    frame: Frame::Upright,
+                });
             }
         }
         return out;
