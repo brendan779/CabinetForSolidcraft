@@ -185,8 +185,7 @@ fn end_mitres(list: &mut PartList, name: &str, end: Aabb, left: bool, t: f64, fr
     }
 }
 
-/// `cabinets` is the front and back of the cabinets the top stands on, in y.
-pub(crate) fn mitre_waterfalls(b: &Benchtop, list: &mut PartList, n: usize, cabinets: (f64, f64)) {
+pub(crate) fn mitre_waterfalls(b: &Benchtop, list: &mut PartList, n: usize) {
     let Some(top) = list
         .part(&format!("{}.Benchtop{n}", b.id))
         .map(|p| p.bounds)
@@ -270,40 +269,45 @@ pub(crate) fn mitre_waterfalls(b: &Benchtop, list: &mut PartList, n: usize, cabi
                     lo.z + strip_h / 2.0,
                 ),
             );
-            // Past the cabinets (the seating overhang) the leg is seen from inside: an inner skin
-            // closes it, mitred to the strip.
-            let face = if left { lo.x + leg } else { hi.x - leg };
-            let skin_x = if left { face - t } else { face };
-            let (y0, y1) = if back {
-                (cabinets.1, hi.y)
-            } else {
-                (lo.y, cabinets.0)
-            };
-            if y1 - y0 <= t + 1e-6 {
-                continue;
-            }
-            let skin = format!("{name}Inner{}", if back { "Back" } else { "Front" });
-            part(
-                list,
-                skin.clone(),
-                Aabb::new(Vec3::new(skin_x, y0, lo.z), Vec3::new(t, y1 - y0, strip_h)),
-                Axis::X,
-                &b.board,
-                PartRole::Benchtop,
-            );
-            list.parts.last_mut().unwrap().grain_axis = Some(Axis::Z);
-            if let Some(p) = list.parts.iter_mut().find(|p| p.name == strip) {
-                (p.edges.left, p.edges.right) = (false, false);
-            }
+        }
+        // The cabinets stand on legs behind a recessed kick, and a seating overhang leaves the
+        // leg open behind them: an inner skin the leg's full depth closes it from every side,
+        // mitred to each strip.
+        if !strips || strip_h <= 0.0 {
+            continue;
+        }
+        let face = if left { lo.x + leg } else { hi.x - leg };
+        let skin_x = if left { face - t } else { face };
+        let skin = format!("{name}Inner");
+        part(
+            list,
+            skin.clone(),
+            Aabb::new(
+                Vec3::new(skin_x, lo.y, lo.z),
+                Vec3::new(t, hi.y - lo.y, strip_h),
+            ),
+            Axis::X,
+            &b.board,
+            PartRole::Benchtop,
+        );
+        list.parts.last_mut().unwrap().grain_axis = Some(Axis::Z);
+        let mid = lo.z + strip_h / 2.0;
+        let back_x = if left { face - t } else { face + t };
+        for (back, y) in [(false, lo.y), (true, hi.y - t)] {
+            let strip = format!("{name}{}", if back { "Back" } else { "Front" });
             let corner = Aabb::new(Vec3::new(skin_x, y, lo.z), Vec3::new(t, t, strip_h));
-            let mid = lo.z + strip_h / 2.0;
             let (strip_in, strip_out) = if back {
                 (hi.y - t, hi.y)
             } else {
                 (lo.y + t, lo.y)
             };
+            if let Some(p) = list.parts.iter_mut().find(|p| p.name == strip) {
+                (p.edges.left, p.edges.right) = (false, false);
+            } else {
+                // No back strip: the skin stops at the back of the leg, square.
+                continue;
+            }
             mitre(list, &strip, corner, Vec3::new(face, strip_in, mid));
-            let back_x = if left { face - t } else { face + t };
             mitre(list, &skin, corner, Vec3::new(back_x, strip_out, mid));
         }
     }
@@ -648,19 +652,18 @@ fn support_frame(
     }
     let inset = b.build_up.setback;
     // A waterfall closes the end: carry the rails into it while retaining the front/rear recess.
-    let into_leg = waterfall_depth(b) - b.thickness;
     let (x0, x1) = (
         frame.min.x
-            - if b.waterfall_left && !walls.0 {
-                into_leg
+            + if b.waterfall_left && !walls.0 {
+                0.0
             } else {
-                -inset
+                inset
             },
         frame.max().x
-            + if b.waterfall_right && !walls.1 {
-                into_leg
+            - if b.waterfall_right && !walls.1 {
+                0.0
             } else {
-                -inset
+                inset
             },
     );
     let (front, back) = (frame.min.y + inset, frame.max().y - inset);

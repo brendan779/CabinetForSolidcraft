@@ -275,9 +275,10 @@ fn both_corner_hands_have_return_supports_and_stone_joints_without_overlapping_m
     }
 }
 
-/// The owner's island: past the cabinets, under the seating overhang, the leg was open inside.
+/// The owner's island and K2: under the seating overhang and through the recessed kick, the leg
+/// was open inside.
 #[test]
-fn a_hollow_waterfall_leg_is_closed_inside_past_the_cabinets() {
+fn a_hollow_waterfall_leg_is_closed_inside_its_full_depth() {
     let mut b: Benchtop = serde_json::from_str(
         r#"{"id":"BT1","thickness":20,"side_overhang":18,"back_overhang":300}"#,
     )
@@ -295,20 +296,24 @@ fn a_hollow_waterfall_leg_is_closed_inside_past_the_cabinets() {
     .unwrap();
     let (cab, top) = (&lists[0], &lists[1]);
     let side = cab.part("B01.LeftSide").unwrap().bounds;
-    let skin = top.part("BT1.Waterfall1LInnerBack").unwrap().bounds;
+    let skin = top.part("BT1.Waterfall1LInner").unwrap().bounds;
     let back = top.part("BT1.Waterfall1LBack").unwrap().bounds;
-    // In line with the cabinet's side, from the cabinets' back to the back of the leg.
+    let front = top.part("BT1.Waterfall1LFront").unwrap().bounds;
+    // In line with the cabinet's side, the leg's full depth, floor to apron.
     assert_eq!(skin.max().x, side.min.x);
-    assert!(skin.min.y <= side.max().y + 1e-6);
-    assert_eq!(skin.max().y, back.max().y);
+    assert_eq!((skin.min.y, skin.max().y), (front.min.y, back.max().y));
     assert_eq!((skin.min.z, skin.max().z), (back.min.z, back.max().z));
-    let right = top.part("BT1.Waterfall1RInnerBack").unwrap().bounds;
+    let right = top.part("BT1.Waterfall1RInner").unwrap().bounds;
     assert_eq!(
         right.min.x,
         cab.part("B01.RightSide").unwrap().bounds.max().x
     );
     // Mitred to the strip, both ways.
-    for name in ["BT1.Waterfall1LInnerBack", "BT1.Waterfall1LBack"] {
+    for name in [
+        "BT1.Waterfall1LInner",
+        "BT1.Waterfall1LBack",
+        "BT1.Waterfall1LFront",
+    ] {
         assert!(
             top.operations
                 .iter()

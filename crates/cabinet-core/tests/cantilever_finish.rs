@@ -181,14 +181,15 @@ fn waterfall_rails_reach_the_stone_despite_the_shadow_recess() {
     let list = lists.last().unwrap();
     for rail in ["BT1.ShadowRail1", "BT1.ShadowRail1Back"] {
         let p = list.part(rail).unwrap();
-        assert_eq!(
-            p.bounds.min.x - 1.0,
-            list.part("BT1.Waterfall1L").unwrap().bounds.max().x
-        );
-        assert_eq!(
-            p.bounds.max().x + 1.0,
-            list.part("BT1.Waterfall1R").unwrap().bounds.min.x
-        );
+        // A hollow leg's stone in line with the cabinets is its inner skin.
+        let stone = |side: &str| {
+            list.part(&format!("BT1.Waterfall1{side}Inner"))
+                .or_else(|| list.part(&format!("BT1.Waterfall1{side}")))
+                .unwrap()
+                .bounds
+        };
+        assert_eq!(p.bounds.min.x - 1.0, stone("L").max().x);
+        assert_eq!(p.bounds.max().x + 1.0, stone("R").min.x);
     }
     assert_eq!(list.part("BT1.ShadowBand1").unwrap().bounds.min.y, -8.0);
 }

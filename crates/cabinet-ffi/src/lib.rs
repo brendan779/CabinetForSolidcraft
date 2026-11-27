@@ -869,26 +869,24 @@ pub fn build(cabinet_json: String) -> Result<BuildSummary, CoreError> {
     Ok(summary(build_cabinet(&cab).map_err(invalid)?))
 }
 
-/// A thickness-edge finish as corner cuts the view clips the slab with, in the mitres' layout
+/// A rounded or bevelled edge as corner cuts the view clips the part with, in the mitres' layout
 /// (box, then the corner it takes off): a bevel is one; a round is a fan of cuts tangent to its
-/// arc, close enough to read as round at a few millimetres.
+/// arc, more for a bigger radius. `edge` is a point on the edge: inside the part along the edge,
+/// on a face in the other two axes. Thickness-edge finishes and rounded plan corners both use it.
 fn edge_finish_cuts(
     part: cabinet_core::geom::Aabb,
     edge: cabinet_core::geom::Vec3,
     size: f64,
     bevel: bool,
 ) -> Vec<f64> {
-    use cabinet_core::geom::{Axis, Vec3};
+    use cabinet_core::geom::Axis;
     let (lo, hi, eps) = (part.min, part.max(), 1e-6);
-    // The edge runs along the axis where its point is inside the part; it sits on a face in the
-    // other two.
-    let Some(along) = [Axis::X, Axis::Y]
-        .into_iter()
-        .find(|&a| edge.get(a) > lo.get(a) + eps && edge.get(a) < hi.get(a) - eps)
-    else {
+    let index = |a: Axis| Axis::ALL.iter().position(|&b| b == a).unwrap();
+    let inside = |a: Axis| edge.get(a) > lo.get(a) + eps && edge.get(a) < hi.get(a) - eps;
+    let Some(along) = Axis::ALL.into_iter().find(|&a| inside(a)) else {
         return Vec::new();
     };
-    let across = if along == Axis::X { Axis::Y } else { Axis::X };
+    let cross: Vec<Axis> = Axis::ALL.into_iter().filter(|&a| a != along).collect();
     let inward = |a: Axis| {
         if (edge.get(a) - lo.get(a)).abs() < eps {
             1.0
@@ -896,14 +894,14 @@ fn edge_finish_cuts(
             -1.0
         }
     };
-    let (du, dz) = (inward(across), inward(Axis::Z));
-    // Legs along the face across and down the thickness, for each cut.
+    // Legs along the two faces, for each cut.
     let legs: Vec<(f64, f64)> = if bevel {
         vec![(size, size)]
     } else {
-        (1..6)
+        let n = (size / 6.0).round().clamp(5.0, 15.0) as usize;
+        (1..=n)
             .map(|k| {
-                let a = (k as f64 * 15.0).to_radians();
+                let a = (k as f64 * 90.0 / (n + 1) as f64).to_radians();
                 (
                     size * (1.0 - (1.0 - a.sin()) / a.cos()),
                     size * (1.0 - (1.0 - a.cos()) / a.sin()),
@@ -913,22 +911,17 @@ fn edge_finish_cuts(
     };
     let mut out = Vec::new();
     for (u, w) in legs {
-        let far = |a: Axis, d: f64, leg: f64| edge.get(a) + d * leg;
-        let pick = |a: Axis, d: f64, leg: f64| {
-            let (x, y) = (edge.get(a), far(a, d, leg));
-            (x.min(y), x.max(y))
-        };
-        let (u0, u1) = pick(across, du, u);
-        let (z0, z1) = pick(Axis::Z, dz, w);
-        let (a0, a1) = (lo.get(along), hi.get(along));
-        let (min, max) = if along == Axis::X {
-            (Vec3::new(a0, u0, z0), Vec3::new(a1, u1, z1))
-        } else {
-            (Vec3::new(u0, a0, z0), Vec3::new(u1, a1, z1))
-        };
-        out.extend([
-            min.x, min.y, min.z, max.x, max.y, max.z, edge.x, edge.y, edge.z,
-        ]);
+        let (mut min, mut max) = ([0.0; 3], [0.0; 3]);
+        min[index(along)] = lo.get(along);
+        max[index(along)] = hi.get(along);
+        for (a, leg) in [(cross[0], u), (cross[1], w)] {
+            let (x, y) = (edge.get(a), edge.get(a) + inward(a) * leg);
+            min[index(a)] = x.min(y);
+            max[index(a)] = x.max(y);
+        }
+        out.extend(min);
+        out.extend(max);
+        out.extend([edge.x, edge.y, edge.z]);
     }
     out
 }
@@ -1065,6 +1058,9 @@ fn summary(list: PartList) -> BuildSummary {
                                     .flat_map(|e| edge_finish_cuts(p.bounds, *e, *size, *bevel))
                                     .collect(),
                             ),
+                            Operation::Round { part, at, radius } if *part == p.name => {
+                                Some(edge_finish_cuts(p.bounds, *at, *radius, false))
+                            }
                             _ => None,
                         })
                         .flatten()
@@ -2913,6 +2909,14 @@ mod tests {
         // The 45-degree tangent cuts both legs at r(2 - root 2).
         let mid = &round[18..27];
         assert!((mid[4] + 20.0 - 10.0 * (2.0 - 2f64.sqrt())).abs() < 1e-9);
+        // A rounded plan corner runs up the thickness; a big radius gets more facets.
+        let corner = edge_finish_cuts(top, Vec3::new(0.0, -20.0, 880.0), 100.0, false);
+        assert_eq!(corner.len(), 15 * 9);
+        assert!(
+            corner
+                .chunks(9)
+                .all(|c| c[2] == 870.0 && c[5] == 890.0 && c[0] == 0.0 && c[1] == -20.0)
+        );
         // A lower arris at the left end runs along y and cuts upwards and inwards.
         let end = edge_finish_cuts(top, Vec3::new(0.0, 290.0, 870.0), 2.0, true);
         assert_eq!(
