@@ -471,11 +471,133 @@ pub fn option_groups() -> Vec<OptionGroup> {
     ]
 }
 
+/// A size the construction standard holds, shown as a row of usual values under the picker
+/// `after` (the app's chips, the plugin's number fields). Where it applies is [`applies`].
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct Measurement {
+    /// The field of `ConstructionStandard` it sets, in millimetres.
+    pub field: String,
+    pub title: String,
+    /// The usual values, offered as quick picks.
+    pub presets: Vec<f64>,
+    /// The option group it belongs under.
+    pub after: String,
+}
+
+/// The sizes under the pickers, in the order the app shows them.
+pub fn measurements() -> Vec<Measurement> {
+    let m = |field: &str, title: &str, presets: &[f64], after: &str| Measurement {
+        field: field.into(),
+        title: title.into(),
+        presets: presets.to_vec(),
+        after: after.into(),
+    };
+    vec![
+        m(
+            "toe_kick_height",
+            "Plinth height",
+            &[100.0, 125.0, 150.0, 180.0, 200.0],
+            "toe_kick",
+        ),
+        m(
+            "toe_kick_setback",
+            "Plinth setback",
+            &[25.0, 50.0, 75.0, 100.0],
+            "toe_kick",
+        ),
+        // Blum's configurator's gaps: between fronts (half at each side), top and bottom.
+        m("front_gap", "Front gap", &[2.0, 3.0, 4.0], "overlay"),
+        m("top_gap", "Top gap", &[0.0, 2.0, 3.0], "overlay"),
+        m("bottom_gap", "Bottom gap", &[0.0, 2.0], "overlay"),
+        m(
+            "edge_pull_clearance",
+            "Clearance over pull",
+            &[2.0, 3.0, 5.0],
+            "handle_place",
+        ),
+        m(
+            "finger_pull_height",
+            "Notch height",
+            &[15.0, 20.0, 25.0, 30.0, 40.0],
+            "handle_place",
+        ),
+        m(
+            "finger_pull_depth",
+            "Notch depth",
+            &[6.0, 8.0, 10.0, 12.0],
+            "handle_place",
+        ),
+        m(
+            "finger_pull_gap",
+            "Finger gap",
+            &[0.0, 5.0, 10.0, 15.0, 20.0],
+            "handle_place",
+        ),
+        m(
+            "sharknose_gap",
+            "Finger gap",
+            &[10.0, 15.0, 20.0, 25.0, 30.0],
+            "sharknose_angle",
+        ),
+        m(
+            "drawer_frame_thickness",
+            "Rail thickness",
+            &[16.0, 18.0],
+            "drawer_frame",
+        ),
+        m(
+            "drawer_frame_overlap",
+            "Rail behind front",
+            &[0.0, 10.0, 15.0, 25.0, 40.0],
+            "drawer_frame",
+        ),
+        m(
+            "shaker_frame_width",
+            "Frame",
+            &[50.0, 60.0, 70.0, 80.0, 90.0],
+            "door_style",
+        ),
+        m(
+            "shaker_panel_thickness",
+            "Panel",
+            &[6.0, 9.0, 12.0],
+            "door_style",
+        ),
+        m(
+            "shaker_groove_depth",
+            "Groove",
+            &[8.0, 10.0, 12.0],
+            "door_style",
+        ),
+        m(
+            "shaker_slab_below",
+            "Slab below",
+            &[150.0, 200.0, 250.0, 300.0],
+            "door_style",
+        ),
+        m(
+            "wardrobe_hat_shelf_drop",
+            "Hat shelf drop",
+            &[250.0, 300.0, 350.0, 400.0],
+            "wardrobe",
+        ),
+        m(
+            "wardrobe_rail_drop",
+            "Rail drop",
+            &[50.0, 60.0, 70.0, 80.0],
+            "wardrobe",
+        ),
+    ]
+}
+
 /// Whether the picker for `field` means anything under `s`: the size of a fixing only with that
 /// fixing, handle pickers only with handles, leg fixing only on legs, drawer side height only for
 /// steel-sided drawers. The app hides the others.
 pub fn applies(field: &str, s: &crate::model::ConstructionStandard) -> bool {
-    use crate::model::{DrawerSystem, FixingRecipe, HandleRange, Opening, ToeKick};
+    use crate::model::{
+        DoorOverlay, DoorStyle, DrawerFrame, DrawerSystem, FixingRecipe, HandlePlace, HandleRange,
+        Opening, ToeKick,
+    };
     match field {
         "biscuit" => matches!(
             s.fixings,
@@ -492,6 +614,24 @@ pub fn applies(field: &str, s: &crate::model::ConstructionStandard) -> bool {
                 && !s.is_sharknose()
         }
         "leg_fixing" => s.toe_kick == ToeKick::LegsAndPlinth,
+        // The sizes under the pickers (`measurements`).
+        "toe_kick_height" | "toe_kick_setback" => s.toe_kick != ToeKick::None,
+        "front_gap" | "top_gap" | "bottom_gap" => s.overlay != DoorOverlay::Inset,
+        "edge_pull_clearance" => {
+            s.opening == Opening::Handles && s.handle_place == HandlePlace::EdgePull
+        }
+        "finger_pull_height" | "finger_pull_depth" | "finger_pull_gap" => {
+            s.opening == Opening::Handles && s.handle_place == HandlePlace::FingerPull
+        }
+        "sharknose_gap" => s.is_sharknose(),
+        // A sharknose stack has rails behind its fronts, framed or not.
+        "drawer_frame_thickness" | "drawer_frame_overlap" => {
+            s.drawer_frame == DrawerFrame::Board || s.is_sharknose()
+        }
+        "shaker_frame_width"
+        | "shaker_panel_thickness"
+        | "shaker_groove_depth"
+        | "shaker_slab_below" => matches!(s.door_style, DoorStyle::Shaker | DoorStyle::GlassFrame),
         "drawer_sides" => matches!(
             s.drawer_system,
             DrawerSystem::Legrabox | DrawerSystem::Merivobox | DrawerSystem::Tandembox
@@ -504,6 +644,27 @@ pub fn applies(field: &str, s: &crate::model::ConstructionStandard) -> bool {
 mod tests {
     use super::*;
     use crate::ConstructionStandard;
+
+    /// The SolidCraft plugin's Job setup lost Cabinet Studio's size rows (owner, 2026-11-27): the
+    /// rows are the core's now, each a real number field of the standard.
+    #[test]
+    fn every_measurement_is_a_number_of_the_standard_shown_where_it_means_something() {
+        let s = serde_json::to_value(ConstructionStandard::default()).unwrap();
+        for m in measurements() {
+            assert!(
+                s[&m.field].is_number(),
+                "{} is not a number of the standard",
+                m.field
+            );
+            assert!(!m.presets.is_empty(), "{}", m.field);
+        }
+        let mut s = ConstructionStandard::default();
+        s.handle_place = crate::model::HandlePlace::Sharknose;
+        assert!(applies("sharknose_gap", &s) && applies("drawer_frame_thickness", &s));
+        assert!(!applies("finger_pull_height", &s) && !applies("shaker_frame_width", &s));
+        s.door_style = crate::model::DoorStyle::Shaker;
+        assert!(!applies("sharknose_gap", &s) && applies("shaker_frame_width", &s));
+    }
 
     #[test]
     fn a_sharknose_front_asks_for_its_bevel_and_no_handle_size() {
