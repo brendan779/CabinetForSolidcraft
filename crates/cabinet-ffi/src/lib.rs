@@ -869,6 +869,70 @@ pub fn build(cabinet_json: String) -> Result<BuildSummary, CoreError> {
     Ok(summary(build_cabinet(&cab).map_err(invalid)?))
 }
 
+/// A thickness-edge finish as corner cuts the view clips the slab with, in the mitres' layout
+/// (box, then the corner it takes off): a bevel is one; a round is a fan of cuts tangent to its
+/// arc, close enough to read as round at a few millimetres.
+fn edge_finish_cuts(
+    part: cabinet_core::geom::Aabb,
+    edge: cabinet_core::geom::Vec3,
+    size: f64,
+    bevel: bool,
+) -> Vec<f64> {
+    use cabinet_core::geom::{Axis, Vec3};
+    let (lo, hi, eps) = (part.min, part.max(), 1e-6);
+    // The edge runs along the axis where its point is inside the part; it sits on a face in the
+    // other two.
+    let Some(along) = [Axis::X, Axis::Y]
+        .into_iter()
+        .find(|&a| edge.get(a) > lo.get(a) + eps && edge.get(a) < hi.get(a) - eps)
+    else {
+        return Vec::new();
+    };
+    let across = if along == Axis::X { Axis::Y } else { Axis::X };
+    let inward = |a: Axis| {
+        if (edge.get(a) - lo.get(a)).abs() < eps {
+            1.0
+        } else {
+            -1.0
+        }
+    };
+    let (du, dz) = (inward(across), inward(Axis::Z));
+    // Legs along the face across and down the thickness, for each cut.
+    let legs: Vec<(f64, f64)> = if bevel {
+        vec![(size, size)]
+    } else {
+        (1..6)
+            .map(|k| {
+                let a = (k as f64 * 15.0).to_radians();
+                (
+                    size * (1.0 - (1.0 - a.sin()) / a.cos()),
+                    size * (1.0 - (1.0 - a.cos()) / a.sin()),
+                )
+            })
+            .collect()
+    };
+    let mut out = Vec::new();
+    for (u, w) in legs {
+        let far = |a: Axis, d: f64, leg: f64| edge.get(a) + d * leg;
+        let pick = |a: Axis, d: f64, leg: f64| {
+            let (x, y) = (edge.get(a), far(a, d, leg));
+            (x.min(y), x.max(y))
+        };
+        let (u0, u1) = pick(across, du, u);
+        let (z0, z1) = pick(Axis::Z, dz, w);
+        let (a0, a1) = (lo.get(along), hi.get(along));
+        let (min, max) = if along == Axis::X {
+            (Vec3::new(a0, u0, z0), Vec3::new(a1, u1, z1))
+        } else {
+            (Vec3::new(u0, a0, z0), Vec3::new(u1, a1, z1))
+        };
+        out.extend([
+            min.x, min.y, min.z, max.x, max.y, max.z, edge.x, edge.y, edge.z,
+        ]);
+    }
+    out
+}
+
 fn summary(list: PartList) -> BuildSummary {
     use cabinet_core::part::{BorePurpose, Operation};
     // A door, or a shaker door's members (`B01.Door1Stile1`...), by the door's name.
@@ -990,6 +1054,17 @@ fn summary(list: PartList) -> BuildSummary {
                                     at.z,
                                 ])
                             }
+                            Operation::EdgeFinish {
+                                part,
+                                edges,
+                                size,
+                                bevel,
+                            } if *part == p.name => Some(
+                                edges
+                                    .iter()
+                                    .flat_map(|e| edge_finish_cuts(p.bounds, *e, *size, *bevel))
+                                    .collect(),
+                            ),
                             _ => None,
                         })
                         .flatten()
@@ -2807,6 +2882,43 @@ mod tests {
 
     fn catalog() -> String {
         concat!(env!("CARGO_MANIFEST_DIR"), "/../../catalog").to_string()
+    }
+
+    /// BENCH-17: the view drew pencil round, bullnose and bevel edges square.
+    #[test]
+    fn edge_finishes_reach_the_view_as_corner_cuts() {
+        use cabinet_core::geom::{Aabb, Vec3};
+        let top = Aabb::new(Vec3::new(0.0, -20.0, 870.0), Vec3::new(1000.0, 620.0, 20.0));
+        // The upper front arris: along x, at the front face and the top.
+        let front = Vec3::new(500.0, -20.0, 890.0);
+        let bevel = edge_finish_cuts(top, front, 2.0, true);
+        assert_eq!(
+            bevel,
+            vec![0.0, -20.0, 888.0, 1000.0, -18.0, 890.0, 500.0, -20.0, 890.0]
+        );
+        let round = edge_finish_cuts(top, front, 10.0, false);
+        assert_eq!(round.len(), 5 * 9);
+        for cut in round.chunks(9) {
+            // Each takes off the arris, from inside the slab, no deeper than the radius.
+            assert_eq!(&cut[6..], &[500.0, -20.0, 890.0]);
+            assert!(
+                cut[1] == -20.0 && cut[4] > -20.0 && cut[4] <= -10.0,
+                "{cut:?}"
+            );
+            assert!(
+                cut[5] == 890.0 && cut[2] < 890.0 && cut[2] >= 880.0,
+                "{cut:?}"
+            );
+        }
+        // The 45-degree tangent cuts both legs at r(2 - root 2).
+        let mid = &round[18..27];
+        assert!((mid[4] + 20.0 - 10.0 * (2.0 - 2f64.sqrt())).abs() < 1e-9);
+        // A lower arris at the left end runs along y and cuts upwards and inwards.
+        let end = edge_finish_cuts(top, Vec3::new(0.0, 290.0, 870.0), 2.0, true);
+        assert_eq!(
+            end,
+            vec![0.0, -20.0, 870.0, 2.0, 600.0, 872.0, 0.0, 290.0, 870.0]
+        );
     }
 
     #[test]

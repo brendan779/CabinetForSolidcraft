@@ -33,6 +33,18 @@ import simd
             for f in solid { for i in 1..<(f.count-1) { area += simd_cross(f[i]-f[0],f[i+1]-f[0])/2 } }
             precondition(simd_length(area)<0.001, "Open lower skin mesh")
         }
+        // A rounded arris (BENCH-17) comes from the core as a fan of cuts tangent to its arc:
+        // R10 along 100 mm takes off close to (1 - pi/4) r^2 per mm, never more.
+        var fan: [Double] = []
+        for k in 1...5 {
+            let a = Double(k) * 15 * .pi / 180, r = 10.0
+            let u = r * (1 - (1 - sin(a)) / cos(a)), w = r * (1 - (1 - cos(a)) / sin(a))
+            fan += [0, 0, 60 - w, 100, u, 60, 50, 0, 60]
+        }
+        let rounded = StoneGeometry.pieces(min: [0,0,0], max: [100,20,60], cuts: fan)
+        let taken = 120000 - rounded.map(StoneGeometry.volume).reduce(0,+)
+        let arc = (1 - Double.pi / 4) * 100 * 100
+        precondition(taken <= arc + 0.01 && taken > arc * 0.97, "Rounded arris took \(taken), arc \(arc)")
         print("Stone preview geometry passed")
     }
 }
