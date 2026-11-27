@@ -1010,10 +1010,14 @@ fn summary(list: PartList) -> BuildSummary {
             let (hinged, hinge_x, hinge_y) = hinge(&door_of(p)).unwrap_or_default();
             let shown = list.visible_bounds(p);
             PanelBox {
+                // Support clearances, and the holes cut through a top or a splashback (sinks,
+                // cooktops, niches, power points), square-cornered.
                 voids: if matches!(
                     p.role,
                     cabinet_core::part::PartRole::BenchtopSupport
                         | cabinet_core::part::PartRole::EdgeBand
+                        | cabinet_core::part::PartRole::Benchtop
+                        | cabinet_core::part::PartRole::Splashback
                 ) {
                     list.operations
                         .iter()
