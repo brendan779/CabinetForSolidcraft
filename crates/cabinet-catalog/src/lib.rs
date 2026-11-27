@@ -10,6 +10,7 @@ use std::path::Path;
 use serde::{Deserialize, Serialize};
 
 pub mod hardware;
+#[cfg(feature = "packs")]
 pub mod packs;
 pub use hardware::{DrillHole, HardwareFile, HardwareItem, HardwareKind, Table};
 

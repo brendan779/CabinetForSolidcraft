@@ -18,6 +18,6 @@ uniffi = { version = "0.32", features = ["cli"] }
 serde_json.workspace = true
 thiserror.workspace = true
 cabinet-core.workspace = true
-cabinet-catalog.workspace = true
+cabinet-catalog = { workspace = true, features = ["packs"] }
 cabinet-sheets.workspace = true
 solidcraft-bridge.workspace = true

@@ -25,7 +25,7 @@ zip = { version = "9", default-features = false, features = ["deflate-flate2"] }
 flate2 = { version = "1", default-features = false, features = ["rust_backend"] }
 sha2 = "0.10"
 cabinet-core = { path = "crates/cabinet-core" }
-cabinet-catalog = { path = "crates/cabinet-catalog" }
+cabinet-catalog = { path = "crates/cabinet-catalog", default-features = false }
 cabinet-sheets = { path = "crates/cabinet-sheets" }
 solidcraft-bridge = { path = "crates/solidcraft-bridge" }
 
