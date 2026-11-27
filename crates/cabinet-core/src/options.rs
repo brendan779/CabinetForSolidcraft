@@ -658,8 +658,10 @@ mod tests {
             );
             assert!(!m.presets.is_empty(), "{}", m.field);
         }
-        let mut s = ConstructionStandard::default();
-        s.handle_place = crate::model::HandlePlace::Sharknose;
+        let mut s = ConstructionStandard {
+            handle_place: crate::model::HandlePlace::Sharknose,
+            ..Default::default()
+        };
         assert!(applies("sharknose_gap", &s) && applies("drawer_frame_thickness", &s));
         assert!(!applies("finger_pull_height", &s) && !applies("shaker_frame_width", &s));
         s.door_style = crate::model::DoorStyle::Shaker;
