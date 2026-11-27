@@ -680,8 +680,30 @@ pub fn hardware_inserts(cabinet: &str, models: &[crate::vendor::VendorInstance])
     let mut cmds =
         vec![json!({ "command": "component.activate", "params": { "component": cabinet } })];
     let mut seen = std::collections::BTreeMap::<&str, usize>::new();
+    // Each file is read once a cabinet: a model placed again is a copy of the first, which
+    // SolidCraft 0.50 does in a moment where an import takes seconds (a cabinet's four legs were
+    // most of its build). The copies share the first's definition, so one colour does for all.
+    let mut first =
+        std::collections::BTreeMap::<&std::path::Path, (String, Vec<f64>, usize)>::new();
     for m in models {
         let matrix: Vec<f64> = m.transform.iter().map(|v| round(*v)).collect();
+        if let Some((component, placed, count)) = first.get_mut(m.step.as_path()) {
+            *count += 1;
+            cmds.push(json!({
+                "command": "occurrence.copy",
+                "params": { "component": component }
+            }));
+            // A move composes with the placement the copy starts from: undo that one first.
+            let relative: Vec<f64> = compose(&matrix, &invert(placed))
+                .iter()
+                .map(|v| round(*v))
+                .collect();
+            cmds.push(json!({
+                "command": "occurrence.move",
+                "params": { "occurrence": format!("{component}:{count}"), "matrix": relative }
+            }));
+            continue;
+        }
         // A model of several files shares one placement's name, but each mesh needs its own to be
         // moved by: the second would otherwise stay at the origin.
         let n = seen.entry(&m.name).or_default();
@@ -711,12 +733,39 @@ pub fn hardware_inserts(cabinet: &str, models: &[crate::vendor::VendorInstance])
         } else {
             cmds.push(json!({
                 "command": "file.insert_step",
-                "params": { "path": m.step, "name": m.name, "matrix": matrix }
+                "params": { "path": m.step, "name": name, "matrix": matrix }
             }));
         }
+        first.insert(m.step.as_path(), (name, matrix, 1));
     }
     cmds.push(json!({ "command": "component.activate", "params": { "component": "root" } }));
     cmds
+}
+
+/// A rigid row-major 3 × 4 placement's inverse: the rotation transposed, the translation taken
+/// back through it.
+fn invert(m: &[f64]) -> Vec<f64> {
+    let r = |i: usize, j: usize| m[i * 4 + j];
+    let mut out = vec![0.0; 12];
+    for i in 0..3 {
+        for j in 0..3 {
+            out[i * 4 + j] = r(j, i);
+        }
+        out[i * 4 + 3] = -(0..3).map(|k| r(k, i) * r(k, 3)).sum::<f64>();
+    }
+    out
+}
+
+/// `a` after `b`, both rigid row-major 3 × 4 placements.
+fn compose(a: &[f64], b: &[f64]) -> Vec<f64> {
+    let mut out = vec![0.0; 12];
+    for i in 0..3 {
+        for j in 0..4 {
+            out[i * 4 + j] = (0..3).map(|k| a[i * 4 + k] * b[k * 4 + j]).sum::<f64>()
+                + if j == 3 { a[i * 4 + 3] } else { 0.0 };
+        }
+    }
+    out
 }
 
 /// A catalog finish on a model whose file carries no colour: the look the app's view draws.
@@ -1505,6 +1554,51 @@ mod tests {
         assert_eq!(ins[1]["command"], "file.insert_step");
         assert_eq!(ins[1]["params"]["name"], "B01.Hinge1");
         assert_eq!(ins[2]["params"]["component"], "root");
+    }
+
+    /// SolidCraft 0.50 takes seconds to import a supplier file: a cabinet's four legs were most of
+    /// its build. A file placed again is copied from the first, and moved to its own place.
+    #[test]
+    fn a_model_placed_again_is_a_copy_moved_to_its_own_place() {
+        let leg = |name: &str, t: [f64; 12]| crate::vendor::VendorInstance {
+            name: name.into(),
+            item: "hafele.axilo.leg".into(),
+            article: "637.76.355".into(),
+            step: "/cad/637.76.355.stp".into(),
+            stl: "/cad/mesh/637.76.355.stl".into(),
+            transform: t,
+        };
+        let a = [
+            0.0, -1.0, 0.0, 40.0, 1.0, 0.0, 0.0, 60.0, 0.0, 0.0, 1.0, 0.0,
+        ];
+        let b = [
+            1.0, 0.0, 0.0, 560.0, 0.0, 1.0, 0.0, 60.0, 0.0, 0.0, 1.0, 0.0,
+        ];
+        let ins = hardware_inserts("B01", &[leg("B01.Leg1", a), leg("B01.Leg2", b)]);
+        let commands: Vec<_> = ins.iter().map(|c| c["command"].as_str().unwrap()).collect();
+        assert_eq!(
+            commands,
+            [
+                "component.activate",
+                "file.insert_step",
+                "occurrence.copy",
+                "occurrence.move",
+                "component.activate"
+            ]
+        );
+        assert_eq!(ins[2]["params"]["component"], "B01.Leg1");
+        assert_eq!(ins[3]["params"]["occurrence"], "B01.Leg1:2");
+        // SolidCraft composes the move with the placement copied: it lands the copy at b.
+        let m: Vec<f64> = ins[3]["params"]["matrix"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(|v| v.as_f64().unwrap())
+            .collect();
+        let landed = compose(&m, &a);
+        for (x, y) in landed.iter().zip(b) {
+            assert!((x - y).abs() < 1e-6, "{landed:?}");
+        }
     }
 
     /// The owner's Design-level builds had no handles at all: only Manufacturing put models in.

@@ -28,13 +28,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         cmds.extend(emit_cabinet(&list, Detail::Design, None));
         let found = vendor::resolve(&cad_placements(&list), &models);
         println!("{}: {} supplier models", c.id, found.len());
-        cmds.push(json!({"command": "component.activate", "params": {"component": c.id}}));
-        for i in found {
-            cmds.push(json!({"command": "file.insert_step", "params": {
-                "path": i.step, "name": i.name, "matrix": i.transform }}));
-        }
-        cmds.push(json!({"command": "component.activate", "params": {"component": "root"}}));
+        // As the app sends them: each file read once a cabinet, placed again by copies.
+        cmds.extend(solidcraft_bridge::hardware_inserts(&c.id, &found));
     }
+    cmds.push(json!({"command": "component.list", "params": {}}));
     std::fs::write(
         out,
         serde_json::to_string_pretty(&json!({ "commands": cmds }))?,
