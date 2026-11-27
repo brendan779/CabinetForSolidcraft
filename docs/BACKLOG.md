@@ -447,6 +447,7 @@ The owner's idea: photo-real boards, edge tape and a render button with a choice
 
 ## Log
 
+- 2026-11-27 — Blender scene floor: Beaumont Tiles' Pompeii Travertine Crema (Microtec textured, 600 x 600), from the owner's 10 face photos. `scripts/make_floor_tiles.py` lays a seamless 6 x 6 grid with 3 mm joints, each tile a face at random and a random quarter turn, and writes a colour, a 16-bit height (bump) and a grout mask into the decors folder; `catalog/floors/floors.json` lists it. The popup's "Floor tiles" picks it, with the grout colour. Pictures are local only; not in a material pack yet.
 - 2026-11-02 — Owner's post-1.0 idea logged as RENDER-1 to RENDER-7. Nothing built. Upscaling test on Rubra Oak noted under RENDER-3.
 - 2026-11-02 — BLUM-7c: AVENTOS mechanism holes for HK top, HK-S, HK-XS and HF, bracket pilots for the stay lifts. Read from drawings, so `verified: false`; HK top's 36 and HK-S's 74 are taken from the top panel's underside, our reading.
 - 2026-11-02 — BLUM-7d: HK-XS's cups and plates along the top. Shoe shelves run to 8 for a 2400 high cabinet; the room warning now counts the gap between parallel shelves, not the slope.

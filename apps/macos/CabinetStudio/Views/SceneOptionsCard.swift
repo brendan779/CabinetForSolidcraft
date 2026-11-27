@@ -2,7 +2,7 @@ import SwiftUI
 
 /// The room the Blender scene is made in: the walls' paint, and the floor. Kept between scenes.
 struct SceneOptions: Codable, Equatable {
-    enum Floor: String, Codable, CaseIterable { case boards, concrete, tiles }
+    enum Floor: String, Codable, CaseIterable { case boards, concrete, tiles, product }
     var wallColour = "#EBE8E1"
     var floor = Floor.boards
     /// The stone product the tiles are cut from (a board id).
@@ -10,6 +10,22 @@ struct SceneOptions: Codable, Equatable {
     var tileLength = 600.0
     var tileWidth = 600.0
     var grout = "#8A8782"
+    /// A tile product's floor (catalog/floors), by id.
+    var floorProduct = ""
+
+    init() {}
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        let d = SceneOptions()
+        wallColour = try c.decodeIfPresent(String.self, forKey: .wallColour) ?? d.wallColour
+        floor = (try? c.decodeIfPresent(Floor.self, forKey: .floor)) ?? d.floor
+        tileStone = try c.decodeIfPresent(String.self, forKey: .tileStone) ?? d.tileStone
+        tileLength = try c.decodeIfPresent(Double.self, forKey: .tileLength) ?? d.tileLength
+        tileWidth = try c.decodeIfPresent(Double.self, forKey: .tileWidth) ?? d.tileWidth
+        grout = try c.decodeIfPresent(String.self, forKey: .grout) ?? d.grout
+        floorProduct = try c.decodeIfPresent(String.self, forKey: .floorProduct) ?? d.floorProduct
+    }
 
     static let key = "sceneOptions"
     static var saved: SceneOptions {
@@ -39,6 +55,16 @@ struct SceneOptions: Codable, Equatable {
             floor["tile"] = [tileLength, tileWidth]
             floor["grout"] = grout
             floor["grout_mm"] = 3
+        }
+        if self.floor == .product, let product = FloorProduct.all.first(where: { $0.id == floorProduct }) {
+            floor["colour"] = product.url(product.colour, "jpg").path
+            floor["height"] = product.url(product.height, "png").path
+            floor["grout"] = product.url(product.grout, "png").path
+            floor["covers"] = product.covers
+            floor["roughness"] = product.roughness
+            floor["bump"] = product.bump
+            floor["bump_mm"] = product.bumpMM
+            floor["grout_colour"] = grout
         }
         return try? JSONSerialization.data(withJSONObject: ["wall_colour": wallColour, "floor": floor], options: [.sortedKeys])
     }
@@ -78,11 +104,36 @@ struct SceneOptionsCard: View {
                 }
             }
             section("Floor") {
-                HStack(spacing: 10) {
+                HStack(spacing: 8) {
                     floorTile(.boards, "Oak boards") { FloorPreview.boards }
                     floorTile(.concrete, "Polished concrete") { FloorPreview.concrete }
-                    floorTile(.tiles, "Stone tiles") { StoneThumb(board: project.boardsById[options.tileStone]) }
+                    floorTile(.product, "Floor tiles") { ProductThumb(product: products.first { $0.id == options.floorProduct } ?? products.first) }
+                    floorTile(.tiles, "Cut from a slab") { StoneThumb(board: project.boardsById[options.tileStone]) }
                 }
+            }
+            if options.floor == .product {
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 4), spacing: 8) {
+                    ForEach(products) { product in
+                        Button {
+                            options.floorProduct = product.id
+                        } label: {
+                            VStack(alignment: .leading, spacing: 3) {
+                                ProductThumb(product: product)
+                                    .frame(maxWidth: .infinity)
+                                    .frame(height: 54)
+                                    .clipShape(RoundedRectangle(cornerRadius: 4))
+                                Text(product.name).font(.caption).lineLimit(1)
+                                Text("\(product.brand) · \(product.sizeLabel)").font(.caption2).foregroundStyle(.secondary).lineLimit(1)
+                            }
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(4)
+                        }
+                        .buttonStyle(TileStyle(selected: options.floorProduct == product.id))
+                        .disabled(!product.installed)
+                        .help(product.installed ? "\(product.brand) \(product.name), \(product.finish)" : "Its pictures aren't on this Mac")
+                    }
+                }
+                groutPicker
             }
             if options.floor == .tiles {
                 TextField("Search stone", text: $search).textFieldStyle(.roundedBorder)
@@ -120,13 +171,7 @@ struct SceneOptionsCard: View {
                         }
                     }
                 }
-                section("Grout") {
-                    HStack(spacing: 8) {
-                        ForEach(SceneOptions.grouts, id: \.0) { grout in
-                            swatch(grout.1, grout.0, selected: options.grout == grout.1) { options.grout = grout.1 }
-                        }
-                    }
-                }
+                groutPicker
             }
             HStack {
                 Spacer()
@@ -138,12 +183,28 @@ struct SceneOptionsCard: View {
                     Task { await project.makeBlenderScene(options) }
                 }
                 .keyboardShortcut(.defaultAction)
-                .disabled(options.floor == .tiles && project.boardsById[options.tileStone] == nil)
+                .disabled(options.floor == .tiles && project.boardsById[options.tileStone] == nil
+                          || options.floor == .product && !products.contains { $0.id == options.floorProduct && $0.installed })
             }
         }
         .padding(24)
         .frame(width: 560)
         .animation(.snappy, value: options)
+        .onAppear {
+            if options.floorProduct.isEmpty, let first = products.first(where: \.installed) { options.floorProduct = first.id }
+        }
+    }
+
+    private var products: [FloorProduct] { FloorProduct.all }
+
+    private var groutPicker: some View {
+        section("Grout") {
+            HStack(spacing: 8) {
+                ForEach(SceneOptions.grouts, id: \.0) { grout in
+                    swatch(grout.1, grout.0, selected: options.grout == grout.1) { options.grout = grout.1 }
+                }
+            }
+        }
     }
 
     private func section(_ title: String, @ViewBuilder _ content: () -> some View) -> some View {
@@ -169,9 +230,13 @@ struct SceneOptionsCard: View {
             options.floor = kind
         } label: {
             VStack(spacing: 5) {
-                picture().frame(width: 150, height: 70).clipShape(RoundedRectangle(cornerRadius: 6))
-                Text(title).font(.caption)
+                // The picture fills the space given; a photo's own width mustn't size the tile.
+                Color.clear.frame(maxWidth: .infinity).frame(height: 70)
+                    .overlay { picture() }
+                    .clipShape(RoundedRectangle(cornerRadius: 6))
+                Text(title).font(.caption).lineLimit(1)
             }
+            .frame(maxWidth: .infinity)
             .padding(6)
         }
         .buttonStyle(TileStyle(selected: options.floor == kind))
@@ -194,6 +259,69 @@ private struct StoneThumb: View {
         .task(id: board?.id) {
             guard let board, let surface = SlabLibrary.surface(board) else { image = nil; return }
             image = await DecorThumbnails.image(surface.imageName)
+        }
+    }
+}
+
+/// A tile product's floor picture, small; its colour until the picture is loaded.
+private struct ProductThumb: View {
+    let product: FloorProduct?
+    @State private var image: NSImage?
+    var body: some View {
+        Group {
+            if let image {
+                Image(nsImage: image).resizable().scaledToFill()
+            } else {
+                Color(nsColor: product.flatMap { NSColor(hex: $0.previewColour) } ?? .darkGray)
+            }
+        }
+        .clipped()
+        .task(id: product?.id) {
+            image = if let product { await DecorThumbnails.image(product.colour) } else { nil }
+        }
+    }
+}
+
+/// A tile product's floor for the Blender scene (catalog/floors/floors.json): a seamless picture of a
+/// grid of its tiles with grout, made by scripts/make_floor_tiles.py, kept with the decors.
+struct FloorProduct: Identifiable, Equatable {
+    let id, brand, name, finish: String
+    let tile: [Double]
+    let covers: [Double]
+    let colour, height, grout: String
+    let roughness, bump, bumpMM: Double
+    let previewColour: String
+
+    var sizeLabel: String { tile.map { String(Int($0)) }.joined(separator: " × ") }
+
+    func url(_ name: String, _ ext: String) -> URL {
+        FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+            .appending(path: "CabinetStudio/decors/\(name).\(ext)")
+    }
+
+    var installed: Bool { FileManager.default.fileExists(atPath: url(colour, "jpg").path) }
+
+    @MainActor static var all: [FloorProduct] {
+        guard let catalog = Preferences.catalogDir else { return [] }
+        if loaded != catalog.path { loaded = catalog.path; cached = load(catalog.appending(path: "floors/floors.json")) }
+        return cached
+    }
+    @MainActor private static var loaded = ""
+    @MainActor private static var cached: [FloorProduct] = []
+
+    static func load(_ file: URL) -> [FloorProduct] {
+        guard let data = try? Data(contentsOf: file),
+              let root = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any],
+              let floors = root["floors"] as? [[String: Any]] else { return [] }
+        return floors.compactMap { f in
+            guard let id = f["id"] as? String, let name = f["name"] as? String,
+                  let colour = f["colour"] as? String, let height = f["height"] as? String, let grout = f["grout"] as? String,
+                  let tile = f["tile"] as? [Double], let covers = f["covers"] as? [Double], covers.count == 2 else { return nil }
+            let look = f["look"] as? [String: Double] ?? [:]
+            return FloorProduct(id: id, brand: f["brand"] as? String ?? "", name: name, finish: f["finish"] as? String ?? "",
+                                tile: tile, covers: covers, colour: colour, height: height, grout: grout,
+                                roughness: look["roughness"] ?? 0.6, bump: look["bump"] ?? 1, bumpMM: look["bump_mm"] ?? 2.5,
+                                previewColour: f["preview_colour"] as? String ?? "#c8c4bc")
         }
     }
 }

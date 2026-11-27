@@ -654,6 +654,43 @@ mod tests {
         }
     }
 
+    /// The Blender scene's tile floors: each picture is a whole grid of tiles and joints, so it
+    /// repeats without a seam only when it covers exactly that; each names its source and is
+    /// left unverified.
+    #[test]
+    fn every_tile_floor_covers_a_whole_grid_of_tiles_and_joints() {
+        let text = std::fs::read_to_string(repo_catalog().join("floors/floors.json")).unwrap();
+        let doc: serde_json::Value = serde_json::from_str(&text).unwrap();
+        let floors = doc["floors"].as_array().unwrap();
+        assert!(!floors.is_empty());
+        for f in floors {
+            let id = f["id"].as_str().unwrap();
+            let grid = f["grid"].as_f64().unwrap();
+            let grout = f["grout_mm"].as_f64().unwrap();
+            for axis in 0..2 {
+                let tile = f["tile"][axis].as_f64().unwrap();
+                let covers = f["covers"][axis].as_f64().unwrap();
+                assert!(
+                    (covers - grid * (tile + grout)).abs() < 1e-6,
+                    "{id}: covers {covers}"
+                );
+            }
+            for key in ["colour", "height", "grout"] {
+                assert!(
+                    f[key].as_str().is_some_and(|n| n.starts_with("floor-")),
+                    "{id}: {key}"
+                );
+            }
+            assert!(
+                f["source"]["url"]
+                    .as_str()
+                    .is_some_and(|u| u.starts_with("https://")),
+                "{id}"
+            );
+            assert_eq!(f["source"]["verified"], false, "{id}");
+        }
+    }
+
     /// BENCH-18d: laminate tops are products of their own kind, at the thicknesses made, from
     /// both brands; a decor also sold as cabinet board keeps its board.
     #[test]

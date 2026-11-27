@@ -124,9 +124,40 @@ def the_room_takes_the_chosen_wall_paint_and_tiled_floor():
     assert b > r, (r, g, b)
 
 
+def a_tile_product_floor_repeats_its_grid_with_grout_and_relief():
+    """A catalog/floors product: its colour picture at the grid's true size, grout from its mask in
+    the colour chosen, and a bump from its height map."""
+    for ob in list(bpy.data.objects):
+        bpy.data.objects.remove(ob)
+    folder = tempfile.mkdtemp()
+    paths = {}
+    for key in ("colour", "height", "grout"):
+        paths[key] = os.path.join(folder, f"{key}.png")
+        img = bpy.data.images.new(key, 4, 4)
+        img.filepath_raw = paths[key]
+        img.file_format = "PNG"
+        img.save()
+    choice = {"floor": {"kind": "product", **paths, "covers": [3618, 3618], "roughness": 0.62,
+                        "bump": 0.9, "bump_mm": 0.6, "grout_colour": "#E8E6E0"}}
+    build_room({"walls": {}, "parts": [], "cabinets": []}, Vector((0, 0, 0)), Vector((2.4, 0.6, 2.2)), choice)
+    floor = bpy.data.objects["Floor"].data.materials[0]
+    nodes = floor.node_tree.nodes
+    assert sum(n.type == "TEX_IMAGE" for n in nodes) == 3
+    mapping = next(n for n in nodes if n.type == "MAPPING")
+    assert abs(mapping.inputs["Scale"].default_value[0] - 1 / 3.618) < 1e-6
+    bump = next(n for n in nodes if n.type == "BUMP")
+    assert abs(bump.inputs["Distance"].default_value - 0.0006) < 1e-9
+    assert bump.outputs["Normal"].links, "the relief reaches the surface"
+    height = next(n for n in nodes if n.type == "TEX_IMAGE" and n.image.filepath.endswith("height.png"))
+    assert height.image.colorspace_settings.name == "Non-Color"
+    mix = next(n for n in nodes if n.type == "MIX")
+    assert mix.inputs[7].default_value[0] > 0.7, "the grout is the white chosen"
+
+
 a_routed_face_shades_the_same_at_both_ends_of_a_groove()
 a_real_edge_on_a_routed_face_stays_sharp()
 the_room_takes_the_chosen_wall_paint_and_tiled_floor()
+a_tile_product_floor_repeats_its_grid_with_grout_and_relief()
 a_joined_top_starts_a_new_slab_past_its_join()
 a_waterfall_meets_the_top_on_the_same_place_on_the_slab()
 print("scene checks passed")

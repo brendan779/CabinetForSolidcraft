@@ -423,6 +423,58 @@ def tile_material(floor):
     return m
 
 
+def tiled_floor_material(floor):
+    """A tile product's floor (catalog/floors): a seamless picture of a grid of its tiles, laid at its
+    true size, the joints from its grout mask in the grout colour chosen, and the faces' relief from
+    its height map, the joints lower."""
+    colour, height, mask = (floor.get(k) for k in ("colour", "height", "grout"))
+    if not colour or not os.path.exists(colour):
+        return floor_material()
+    length, width = (v * MM for v in floor.get("covers") or (3618, 3618))
+    rough = floor.get("roughness", 0.6)
+    m, b = principled("Floor tiles", (0.8, 0.8, 0.8), rough)
+    n = m.node_tree
+    coord = n.nodes.new("ShaderNodeTexCoord")
+    mapping = n.nodes.new("ShaderNodeMapping")
+    mapping.inputs["Scale"].default_value = (1 / length, 1 / width, 1)
+    n.links.new(coord.outputs["Object"], mapping.inputs["Vector"])
+
+    def picture(path, data):
+        tex = n.nodes.new("ShaderNodeTexImage")
+        tex.image = bpy.data.images.load(path, check_existing=True)
+        if data:
+            tex.image.colorspace_settings.name = "Non-Color"
+        tex.extension = "REPEAT"
+        n.links.new(mapping.outputs[0], tex.inputs["Vector"])
+        return tex
+
+    face = picture(colour, False)
+    base = face.outputs["Color"]
+    if mask and os.path.exists(mask):
+        joints = picture(mask, True)
+        mix = n.nodes.new("ShaderNodeMix")
+        mix.data_type = "RGBA"
+        n.links.new(joints.outputs["Color"], mix.inputs[0])
+        n.links.new(base, mix.inputs[6])
+        mix.inputs[7].default_value = (*hex_colour(floor.get("grout_colour"), (0.55, 0.54, 0.52)), 1)
+        base = mix.outputs[2]
+        # Grout is duller than the faces.
+        dull = n.nodes.new("ShaderNodeMapRange")
+        dull.inputs["To Min"].default_value = rough
+        dull.inputs["To Max"].default_value = 0.85
+        n.links.new(joints.outputs["Color"], dull.inputs["Value"])
+        n.links.new(dull.outputs[0], b.inputs["Roughness"])
+    n.links.new(base, b.inputs["Base Color"])
+    if height and os.path.exists(height):
+        relief = picture(height, True)
+        bump = n.nodes.new("ShaderNodeBump")
+        bump.inputs["Strength"].default_value = floor.get("bump", 1.0)
+        bump.inputs["Distance"].default_value = floor.get("bump_mm", 2.5) * MM
+        n.links.new(relief.outputs["Color"], bump.inputs["Height"])
+        n.links.new(bump.outputs["Normal"], b.inputs["Normal"])
+    return m
+
+
 def emitter(name, colour, strength):
     m = bpy.data.materials.new(name)
     m.use_nodes = True
@@ -458,7 +510,7 @@ WALL_KINDS = {"wall", "open_shelf", "corner_wall"}
 def build_room(job, lo, hi, choice=None):
     """Walls, floor and ceiling round the run, with its lights. Numbers are metres, in the cabinets'
     frame: X across the front, Y to the back wall, Z up. `choice` is the app's room.json: the walls'
-    paint and the floor (oak boards, polished concrete, or tiles from a slab)."""
+    paint and the floor (oak boards, polished concrete, tiles from a slab, or a tile product)."""
     choice = choice or {}
     room = collection("Room")
     lamps = collection("Lights")
@@ -485,6 +537,7 @@ def build_room(job, lo, hi, choice=None):
     floor = {
         "concrete": concrete_material,
         "tiles": lambda: tile_material(floor_choice),
+        "product": lambda: tiled_floor_material(floor_choice),
     }.get(floor_choice.get("kind"), floor_material)()
     box("Floor", (x0 - t, y0 - t, -t), (x1 + t, y1 + t, 0), floor, room)
     box("Ceiling", (x0 - t, y0 - t, z1), (x1 + t, y1 + t, z1 + t), ceiling, room)

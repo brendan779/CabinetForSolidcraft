@@ -1,0 +1,30 @@
+{
+  "source": "Tiled floors for the Blender scene, each made by scripts/make_floor_tiles.py from photographs of the tile's faces: a seamless grid with grout, each tile a face at random, and a bump map from the faces' detail.",
+  "notes": "The pictures stay on this Mac in ~/Library/Application Support/CabinetStudio/decors as <name>.jpg / .png: colour, height (16-bit) and grout mask. Roughness and bump are our visual estimates, not supplier figures.",
+  "verified": false,
+  "floors": [
+    {
+      "id": "beaumont.pompeii-travertine-crema",
+      "brand": "Beaumont Tiles",
+      "name": "Pompeii Travertine Crema",
+      "finish": "Microtec textured",
+      "code": "1245446",
+      "tile": [600, 600],
+      "grid": 6,
+      "grout_mm": 3,
+      "covers": [3618, 3618],
+      "colour": "floor-beaumont-pompeii-travertine-crema-colour",
+      "height": "floor-beaumont-pompeii-travertine-crema-height",
+      "grout": "floor-beaumont-pompeii-travertine-crema-grout",
+      "look": { "roughness": 0.62, "bump": 1.0, "bump_mm": 2.5 },
+      "preview_colour": "#d9cfbf",
+      "source": {
+        "url": "https://beaumont-tiles.com.au/products/1245446-pompeii-travertine-crema-microtec-textured-tile",
+        "document_date": "live product page, 2026-11-27",
+        "retrieved": "2026-11-27",
+        "faces": "10 face photographs from the product page, supplied by the owner",
+        "verified": false
+      }
+    }
+  ]
+}
