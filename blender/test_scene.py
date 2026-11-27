@@ -138,7 +138,7 @@ def a_tile_product_floor_repeats_its_grid_with_grout_and_relief():
         img.file_format = "PNG"
         img.save()
     choice = {"floor": {"kind": "product", **paths, "covers": [3618, 3618], "roughness": 0.62,
-                        "bump": 0.9, "bump_mm": 0.6, "grout_colour": "#E8E6E0"}}
+                        "bump": 0.9, "bump_mm": 0.6, "brightness": 0.8, "grout_colour": "#E8E6E0"}}
     build_room({"walls": {}, "parts": [], "cabinets": []}, Vector((0, 0, 0)), Vector((2.4, 0.6, 2.2)), choice)
     floor = bpy.data.objects["Floor"].data.materials[0]
     nodes = floor.node_tree.nodes
@@ -150,6 +150,8 @@ def a_tile_product_floor_repeats_its_grid_with_grout_and_relief():
     assert bump.outputs["Normal"].links, "the relief reaches the surface"
     height = next(n for n in nodes if n.type == "TEX_IMAGE" and n.image.filepath.endswith("height.png"))
     assert height.image.colorspace_settings.name == "Non-Color"
+    tone = next(n for n in nodes if n.type == "HUE_SAT")
+    assert abs(tone.inputs["Value"].default_value - 0.8) < 1e-6, "the photo is toned down"
     mix = next(n for n in nodes if n.type == "MIX")
     assert mix.inputs[7].default_value[0] > 0.7, "the grout is the white chosen"
 

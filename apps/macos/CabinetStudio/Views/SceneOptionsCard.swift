@@ -64,6 +64,7 @@ struct SceneOptions: Codable, Equatable {
             floor["roughness"] = product.roughness
             floor["bump"] = product.bump
             floor["bump_mm"] = product.bumpMM
+            floor["brightness"] = product.brightness
             floor["grout_colour"] = grout
         }
         return try? JSONSerialization.data(withJSONObject: ["wall_colour": wallColour, "floor": floor], options: [.sortedKeys])
@@ -289,7 +290,7 @@ struct FloorProduct: Identifiable, Equatable {
     let tile: [Double]
     let covers: [Double]
     let colour, height, grout: String
-    let roughness, bump, bumpMM: Double
+    let roughness, bump, bumpMM, brightness: Double
     let previewColour: String
 
     var sizeLabel: String { tile.map { String(Int($0)) }.joined(separator: " × ") }
@@ -320,7 +321,7 @@ struct FloorProduct: Identifiable, Equatable {
             let look = f["look"] as? [String: Double] ?? [:]
             return FloorProduct(id: id, brand: f["brand"] as? String ?? "", name: name, finish: f["finish"] as? String ?? "",
                                 tile: tile, covers: covers, colour: colour, height: height, grout: grout,
-                                roughness: look["roughness"] ?? 0.6, bump: look["bump"] ?? 1, bumpMM: look["bump_mm"] ?? 2.5,
+                                roughness: look["roughness"] ?? 0.6, bump: look["bump"] ?? 1, bumpMM: look["bump_mm"] ?? 2.5, brightness: look["brightness"] ?? 1,
                                 previewColour: f["preview_colour"] as? String ?? "#c8c4bc")
         }
     }

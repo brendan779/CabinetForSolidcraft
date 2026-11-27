@@ -450,6 +450,12 @@ def tiled_floor_material(floor):
 
     face = picture(colour, False)
     base = face.outputs["Color"]
+    # Product photos are exposed bright; this brings the faces to a stone's own lightness.
+    if floor.get("brightness", 1.0) != 1.0:
+        tone = n.nodes.new("ShaderNodeHueSaturation")
+        tone.inputs["Value"].default_value = floor["brightness"]
+        n.links.new(base, tone.inputs["Color"])
+        base = tone.outputs["Color"]
     if mask and os.path.exists(mask):
         joints = picture(mask, True)
         mix = n.nodes.new("ShaderNodeMix")
