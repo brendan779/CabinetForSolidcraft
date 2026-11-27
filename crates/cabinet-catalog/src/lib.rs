@@ -9,6 +9,8 @@ use std::path::Path;
 
 use serde::{Deserialize, Serialize};
 
+#[cfg(any(feature = "embedded", test))]
+pub mod embedded;
 pub mod hardware;
 #[cfg(feature = "packs")]
 pub mod packs;
