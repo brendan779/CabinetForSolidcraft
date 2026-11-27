@@ -439,13 +439,13 @@ The owner's idea: photo-real boards, edge tape and a render button with a choice
 
 ## P3 — SolidCraft plugin
 
-The plan: [PLUGIN_PLAN.md](PLUGIN_PLAN.md) (owner 2026-11-27: start it; the interface comes first; boards as text, benchtops simplified, no Blender or Revit).
+The plugin lives in its own repo, [CabinetStudioPlugin](https://github.com/brendan779/CabinetStudioPlugin) (owner 2026-11-27), with its plan in docs/PLAN.md. It pins this repo's `cabinet-core` and `solidcraft-bridge` by commit, so cabinet rules stay here. Owner's brief: the interface comes first; boards as text, benchtops simplified, no Blender or Revit.
 
 | id | status | size | task |
 |---|---|---|---|
 | PLG-1 | superseded by PLUG-0 to PLUG-6 (2026-11-27) | L | Port the bridge to a `command-plugin` WASM component |
 | PLG-2 | superseded by PLUG-1 to PLUG-4 (2026-11-27) | L | Inspector, cut list and sheets as SolidCraft panels |
-| PLUG-0 | todo | S | Spike (docs/PLUGIN_PLAN.md): the component builds from the core and makes one base cabinet; measure engine calls per cabinet and `engine.batch` from a plugin, preview time, `forms.open` from the panel, `ui.set-data` from a dialog-run entry, a picture dropdown, design and user storage, `file.insert_mesh` with a folder grant, an export write. Answers go into PLUGIN_PLAN.md | each limit known from a run |
+| PLUG-0 | done (2026-11-27: 12 headless cases pass; four checks wait for the owner to install it in SolidCraft, see the plugin's docs/PLAN.md) | S | Spike: the component builds from the core and makes one base cabinet; measure engine calls per cabinet and `engine.batch` from a plugin, preview time, `forms.open` from the panel, `ui.set-data` from a dialog-run entry, a picture dropdown, design and user storage, `file.insert_mesh` with a folder grant, an export write. Answers in the plugin repo's docs/PLAN.md | each limit known from a run |
 | PLUG-1 | todo | M | Job setup, Cabinet (add and edit, all types, front presets), Rebuild as a long job, design storage, shop standard, the panel's Job tab | a kitchen run laid out, edited and rebuilt from the plugin alone |
 | PLUG-2 | todo | S | Boards tab: catalogue table with search, Use for carcass, fronts, backs, benchtop; swatches from preview colours | a job's boards chosen from the catalogue |
 | PLUG-3 | todo | M | Run pieces, simplified: benchtop, panels and fillers, splashback (parametric), kick and plinth, handles and legs as meshes or simple shapes | the run complete to the benchtop |
@@ -456,6 +456,7 @@ The plan: [PLUGIN_PLAN.md](PLUGIN_PLAN.md) (owner 2026-11-27: start it; the inte
 
 ## Log
 
+- 2026-11-27 — PLUG-0 done in the new CabinetStudioPlugin repo. The core builds as a SolidCraft plugin once material packs are a `cabinet-catalog` feature (off in the core, on in cabinet-ffi). Plugins have no `engine.batch`: a cabinet at Design detail is 17–57 engine calls, a base at Manufacturing 197, against 256 a run, so whole-job rebuilds are long jobs. Storage, editing, exports and a supplier mesh from a granted folder work headless; `plugin.preview` isn't in 0.50.
 - 2026-11-27 — PLG-3 on 0.50.0: docked panels (forms, tables, lists, buttons, tabs, progress; up to 8 a plugin, 1 MiB data each, refreshed by an entry's `ui.set-data`, not yet by a `design.changed` listener), exporters (bytes back, the app writes them; read-only commands), long jobs (`"job": true`: 10 min, at least 1,048,576 engine calls, progress row and Cancel), design revision tokens and change listeners, themes and background shaders, `plugin check`/`plugin test`. Ordinary runs keep 256 engine calls unless the user raises Max plugin host calls. Plugins are agent tools. On the Workshop, tomasdjo's Woodwork 0.5.0 (MIT, TomasDJo/solidcraft-woodwork) is a cabinet plugin in Rust: cabinets, sink base, corners, joinery, worktop, A3 drawings, cut list PDF/CSV/DXF with nesting; generic materials, no supplier hardware data or panels yet.
 - 2026-11-27 — Blender scene floor: Beaumont Tiles' Pompeii Travertine Crema (Microtec textured, 600 x 600), from the owner's 10 face photos. `scripts/make_floor_tiles.py` lays a seamless 6 x 6 grid with 3 mm joints, each tile a face at random and a random quarter turn, and writes a colour, a 16-bit height (bump) and a grout mask into the decors folder; `catalog/floors/floors.json` lists it. The popup's "Floor tiles" picks it, with the grout colour. Its pictures are published as the `beaumont-tiles` material pack (owner's go-ahead, 2026-11-27).
 - 2026-11-02 — Owner's post-1.0 idea logged as RENDER-1 to RENDER-7. Nothing built. Upscaling test on Rubra Oak noted under RENDER-3.
