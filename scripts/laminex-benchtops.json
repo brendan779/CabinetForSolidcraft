@@ -1,0 +1,950 @@
+{
+ "source": "Laminex Made to Measure Benchtops colour range, https://www.laminex.com.au/brands/laminex/product-ranges/made-to-measure/benchtops-colour-range (read 2026-11-27): group, decor, product page slug, finish in the page URL, product code. Thicknesses from the Laminex National Availability Guide (October 2025), Made-to-Measure Benchtops: \"ALL OPTIONS AVAILABLE ON PARTICLEBOARD MR IN 20, 25, 33 OR 38MM THICKNESS.\"",
+ "colours": [
+  {
+   "group": "Whites & Neutrals",
+   "decor": "Black",
+   "slug": "black",
+   "finish": "Natural",
+   "code": "AU1001525"
+  },
+  {
+   "group": "Whites & Neutrals",
+   "decor": "Coolum Sand",
+   "slug": "coolum-sand",
+   "finish": "Natural",
+   "code": "AU1007170"
+  },
+  {
+   "group": "Whites & Neutrals",
+   "decor": "Super White",
+   "slug": "super-white",
+   "finish": "Natural",
+   "code": "AU1001758"
+  },
+  {
+   "group": "Whites & Neutrals",
+   "decor": "Polar White",
+   "slug": "polar-white",
+   "finish": "Natural",
+   "code": "AU1001694"
+  },
+  {
+   "group": "Whites & Neutrals",
+   "decor": "Calm White",
+   "slug": "calm-white",
+   "finish": "Natural",
+   "code": "AU1003376"
+  },
+  {
+   "group": "Whites & Neutrals",
+   "decor": "Chalk White",
+   "slug": "chalk-white",
+   "finish": "AbsoluteGrain",
+   "code": "AU1007358"
+  },
+  {
+   "group": "Whites & Neutrals",
+   "decor": "White Linen",
+   "slug": "white-linen",
+   "finish": "Natural",
+   "code": "AU1003377"
+  },
+  {
+   "group": "Whites & Neutrals",
+   "decor": "White",
+   "slug": "white",
+   "finish": "Natural",
+   "code": "AU1007244"
+  },
+  {
+   "group": "Whites & Neutrals",
+   "decor": "Ghostgum",
+   "slug": "ghostgum",
+   "finish": "Natural",
+   "code": "AU1001606"
+  },
+  {
+   "group": "Whites & Neutrals",
+   "decor": "Parchment",
+   "slug": "parchment",
+   "finish": "Natural",
+   "code": "AU1001680"
+  },
+  {
+   "group": "Whites & Neutrals",
+   "decor": "Ash White",
+   "slug": "ash-white",
+   "finish": "Natural",
+   "code": "AU1001490"
+  },
+  {
+   "group": "Whites & Neutrals",
+   "decor": "Rocky Bay",
+   "slug": "rocky-bay",
+   "finish": "Natural",
+   "code": "AU1007177"
+  },
+  {
+   "group": "Whites & Neutrals",
+   "decor": "Surf",
+   "slug": "surf",
+   "finish": "Natural",
+   "code": "AU1003632"
+  },
+  {
+   "group": "Whites & Neutrals",
+   "decor": "Alabaster",
+   "slug": "alabaster",
+   "finish": "Natural",
+   "code": "AU1001464"
+  },
+  {
+   "group": "Whites & Neutrals",
+   "decor": "New Antique White",
+   "slug": "new-antique-white",
+   "finish": "Natural",
+   "code": "AU1001654"
+  },
+  {
+   "group": "Whites & Neutrals",
+   "decor": "Moleskin",
+   "slug": "moleskin",
+   "finish": "Natural",
+   "code": "AU1001645"
+  },
+  {
+   "group": "Whites & Neutrals",
+   "decor": "French Cream",
+   "slug": "french-cream",
+   "finish": "Natural",
+   "code": "AU1003392"
+  },
+  {
+   "group": "Whites & Neutrals",
+   "decor": "Porcelain Blush",
+   "slug": "porcelain-blush",
+   "finish": "Natural",
+   "code": "AU1004796"
+  },
+  {
+   "group": "Whites & Neutrals",
+   "decor": "Pumice",
+   "slug": "pumice",
+   "finish": "Natural",
+   "code": "AU1001698"
+  },
+  {
+   "group": "Whites & Neutrals",
+   "decor": "Raw Cotton",
+   "slug": "raw-cotton",
+   "finish": "Natural",
+   "code": "AU1003631"
+  },
+  {
+   "group": "Whites & Neutrals",
+   "decor": "Alpaca",
+   "slug": "alpaca",
+   "finish": "Natural",
+   "code": "AU1001474"
+  },
+  {
+   "group": "Whites & Neutrals",
+   "decor": "Aries",
+   "slug": "aries",
+   "finish": "AbsoluteGrain",
+   "code": "AU1007365"
+  },
+  {
+   "group": "Whites & Neutrals",
+   "decor": "Alpine Mist",
+   "slug": "alpine-mist",
+   "finish": "Natural",
+   "code": "AU1003379"
+  },
+  {
+   "group": "Whites & Neutrals",
+   "decor": "Paper Bark",
+   "slug": "paper-bark",
+   "finish": "Natural",
+   "code": "AU1001678"
+  },
+  {
+   "group": "Whites & Neutrals",
+   "decor": "Chamois",
+   "slug": "chamois",
+   "finish": "Natural",
+   "code": "AU1001552"
+  },
+  {
+   "group": "Whites & Neutrals",
+   "decor": "Sarsen Grey",
+   "slug": "sarsen-grey",
+   "finish": "Natural",
+   "code": "AU1001720"
+  },
+  {
+   "group": "Whites & Neutrals",
+   "decor": "Oyster Grey",
+   "slug": "oyster-grey",
+   "finish": "AbsoluteGrain",
+   "code": "AU1007348"
+  },
+  {
+   "group": "Whites & Neutrals",
+   "decor": "Pearl Grey",
+   "slug": "pearl-grey",
+   "finish": "Natural",
+   "code": "AU1001684"
+  },
+  {
+   "group": "Whites & Neutrals",
+   "decor": "Fox",
+   "slug": "fox-teakwood",
+   "finish": "Natural",
+   "code": "AU1002878"
+  },
+  {
+   "group": "Whites & Neutrals",
+   "decor": "Pewter",
+   "slug": "pewter",
+   "finish": "Natural",
+   "code": "AU1001689"
+  },
+  {
+   "group": "Whites & Neutrals",
+   "decor": "Tornado",
+   "slug": "tornado",
+   "finish": "Natural",
+   "code": "AU1001765"
+  },
+  {
+   "group": "Whites & Neutrals",
+   "decor": "Lava Grey",
+   "slug": "lava-grey",
+   "finish": "Natural",
+   "code": "AU1002874"
+  },
+  {
+   "group": "Whites & Neutrals",
+   "decor": "Gunmetal",
+   "slug": "gunmetal",
+   "finish": "Natural",
+   "code": "AU1001612"
+  },
+  {
+   "group": "Whites & Neutrals",
+   "decor": "Stormcloud",
+   "slug": "stormcloud",
+   "finish": "Natural",
+   "code": "AU1003635"
+  },
+  {
+   "group": "Whites & Neutrals",
+   "decor": "Charcoal",
+   "slug": "charcoal",
+   "finish": "Natural",
+   "code": "AU1001554"
+  },
+  {
+   "group": "Whites & Neutrals",
+   "decor": "Terril",
+   "slug": "terril",
+   "finish": "Natural",
+   "code": "AU1003373"
+  },
+  {
+   "group": "Accents",
+   "decor": "Daintree",
+   "slug": "daintree",
+   "finish": "Natural",
+   "code": "AU1007171"
+  },
+  {
+   "group": "Accents",
+   "decor": "Platypus",
+   "slug": "platypus",
+   "finish": "Natural",
+   "code": "AU1007176"
+  },
+  {
+   "group": "Accents",
+   "decor": "Fresh Spring",
+   "slug": "fresh-spring",
+   "finish": "Natural",
+   "code": "AU1001602"
+  },
+  {
+   "group": "Accents",
+   "decor": "Just Blue",
+   "slug": "just-blue",
+   "finish": "Natural",
+   "code": "AU1003400"
+  },
+  {
+   "group": "Accents",
+   "decor": "Portsea",
+   "slug": "portsea",
+   "finish": "Natural",
+   "code": "AU1005240"
+  },
+  {
+   "group": "Accents",
+   "decor": "Denim",
+   "slug": "denim",
+   "finish": "Natural",
+   "code": "AU1003658"
+  },
+  {
+   "group": "Accents",
+   "decor": "Macedon Mist",
+   "slug": "macedon-mist",
+   "finish": "Natural",
+   "code": "AU1007174"
+  },
+  {
+   "group": "Accents",
+   "decor": "Steel Blue",
+   "slug": "steel-blue",
+   "finish": "Natural",
+   "code": "AU1001746"
+  },
+  {
+   "group": "Accents",
+   "decor": "Bluestone",
+   "slug": "bluestone",
+   "finish": "Natural",
+   "code": "AU1007169"
+  },
+  {
+   "group": "Accents",
+   "decor": "Spinifex",
+   "slug": "spinifex",
+   "finish": "Natural",
+   "code": "AU1002877"
+  },
+  {
+   "group": "Accents",
+   "decor": "Gumnut",
+   "slug": "gumnut",
+   "finish": "Natural",
+   "code": "AU1007173"
+  },
+  {
+   "group": "Accents",
+   "decor": "Bayleaf",
+   "slug": "bayleaf",
+   "finish": "AbsoluteGrain",
+   "code": "AU1007364"
+  },
+  {
+   "group": "Accents",
+   "decor": "Winter Sky",
+   "slug": "winter-sky",
+   "finish": "Natural",
+   "code": "AU1003394"
+  },
+  {
+   "group": "Accents",
+   "decor": "Eucalypt",
+   "slug": "eucalypt",
+   "finish": "Natural",
+   "code": "AU1007172"
+  },
+  {
+   "group": "Accents",
+   "decor": "Olivine",
+   "slug": "olivine",
+   "finish": "Natural",
+   "code": "AU1005032"
+  },
+  {
+   "group": "Accents",
+   "decor": "Baye",
+   "slug": "baye",
+   "finish": "Natural",
+   "code": "AU1001508"
+  },
+  {
+   "group": "Accents",
+   "decor": "Peruvian Clay",
+   "slug": "peruvian-clay",
+   "finish": "Natural",
+   "code": "AU1001686"
+  },
+  {
+   "group": "Accents",
+   "decor": "Outback Clay",
+   "slug": "outback-clay",
+   "finish": "Natural",
+   "code": "AU1007175"
+  },
+  {
+   "group": "Accents",
+   "decor": "Fossil",
+   "slug": "fossil",
+   "finish": "Natural",
+   "code": "AU1001599"
+  },
+  {
+   "group": "Accents",
+   "decor": "Battalion",
+   "slug": "battalion",
+   "finish": "Natural",
+   "code": "AU1001503"
+  },
+  {
+   "group": "Accents",
+   "decor": "Kalamata",
+   "slug": "kalamata",
+   "finish": "Natural",
+   "code": "AU1005031"
+  },
+  {
+   "group": "Accents",
+   "decor": "Golden Wattle",
+   "slug": "golden-wattle",
+   "finish": "Natural",
+   "code": "AU1005236"
+  },
+  {
+   "group": "Accents",
+   "decor": "Coastal Sunrise",
+   "slug": "coastal-sunrise",
+   "finish": "Natural",
+   "code": "AU1005235"
+  },
+  {
+   "group": "Accents",
+   "decor": "Pale Honey",
+   "slug": "pale-honey",
+   "finish": "Natural",
+   "code": "AU1005033"
+  },
+  {
+   "group": "Accents",
+   "decor": "Burnt Ochre",
+   "slug": "burnt-ochre",
+   "finish": "Natural",
+   "code": "AU1005034"
+  },
+  {
+   "group": "Accents",
+   "decor": "Moroccan Clay",
+   "slug": "moroccan-clay",
+   "finish": "Natural",
+   "code": "AU1004800"
+  },
+  {
+   "group": "Minerals",
+   "decor": "Jordan Stone",
+   "slug": "jordan-stone",
+   "finish": "Natural",
+   "code": "AU1001624"
+  },
+  {
+   "group": "Minerals",
+   "decor": "Greystone",
+   "slug": "greystone",
+   "finish": "Natural",
+   "code": "AU1006816"
+  },
+  {
+   "group": "Minerals",
+   "decor": "Calacatta Majore TrueScale",
+   "slug": "calacatta-majore-truescale",
+   "finish": "Natural",
+   "code": "AU1005257"
+  },
+  {
+   "group": "Minerals",
+   "decor": "Luxe Elba TrueScale",
+   "slug": "luxe-elba-truescale",
+   "finish": "Natural",
+   "code": "AU1005281"
+  },
+  {
+   "group": "Minerals",
+   "decor": "Marmo Grigio TrueScale",
+   "slug": "marmo-grigio-truescale",
+   "finish": "Natural",
+   "code": "AU1005283"
+  },
+  {
+   "group": "Minerals",
+   "decor": "Premio Carrara TrueScale",
+   "slug": "premio-carrara-truescale",
+   "finish": "Natural",
+   "code": "AU1005282"
+  },
+  {
+   "group": "Minerals",
+   "decor": "Carrara Delicata",
+   "slug": "carrara-delicata",
+   "finish": "Natural",
+   "code": "AU1005040"
+  },
+  {
+   "group": "Minerals",
+   "decor": "Carrara Marble",
+   "slug": "carrara-marble",
+   "finish": "Natural",
+   "code": "AU1003640"
+  },
+  {
+   "group": "Minerals",
+   "decor": "Carrara Bianco",
+   "slug": "carrara-bianco",
+   "finish": "Natural",
+   "code": "AU1001548"
+  },
+  {
+   "group": "Minerals",
+   "decor": "Avenza Bianco",
+   "slug": "avenza-bianco",
+   "finish": "Natural",
+   "code": "AU1003531"
+  },
+  {
+   "group": "Minerals",
+   "decor": "Catalana Marble",
+   "slug": "catalana-marble",
+   "finish": "Natural",
+   "code": "AU1003668"
+  },
+  {
+   "group": "Minerals",
+   "decor": "Marmor Torino",
+   "slug": "marmor-torino",
+   "finish": "Natural",
+   "code": "AU1005037"
+  },
+  {
+   "group": "Minerals",
+   "decor": "Grigio Grafite",
+   "slug": "grigio-grafite",
+   "finish": "Natural",
+   "code": "AU1001610"
+  },
+  {
+   "group": "Minerals",
+   "decor": "Ferro Grafite",
+   "slug": "ferro-grafite",
+   "finish": "Natural",
+   "code": "AU1002872"
+  },
+  {
+   "group": "Minerals",
+   "decor": "Andalucian Marble",
+   "slug": "andalucian-marble",
+   "finish": "Natural",
+   "code": "AU1003664"
+  },
+  {
+   "group": "Minerals",
+   "decor": "Black Marble",
+   "slug": "black-marble",
+   "finish": "Natural",
+   "code": "AU1001518"
+  },
+  {
+   "group": "Minerals",
+   "decor": "Nero Grafite",
+   "slug": "nero-grafite",
+   "finish": "Natural",
+   "code": "AU1003410"
+  },
+  {
+   "group": "Minerals",
+   "decor": "White Valencia",
+   "slug": "white-valencia",
+   "finish": "Natural",
+   "code": "AU1001773"
+  },
+  {
+   "group": "Minerals",
+   "decor": "Pure Mineralstone II",
+   "slug": "pure-mineralstone-ii",
+   "finish": "Natural",
+   "code": "AU1001700"
+  },
+  {
+   "group": "Minerals",
+   "decor": "Pearl Concrete",
+   "slug": "pearl-concrete",
+   "finish": "Natural",
+   "code": "AU1005038"
+  },
+  {
+   "group": "Minerals",
+   "decor": "Natural Quartz",
+   "slug": "natural-quartz",
+   "finish": "Natural",
+   "code": "AU1001650"
+  },
+  {
+   "group": "Minerals",
+   "decor": "Sand Pebble",
+   "slug": "sand-pebble",
+   "finish": "Natural",
+   "code": "AU1001717"
+  },
+  {
+   "group": "Minerals",
+   "decor": "Kashmir Granite",
+   "slug": "kashmir-granite",
+   "finish": "Natural",
+   "code": "AU1001629"
+  },
+  {
+   "group": "Minerals",
+   "decor": "Fresh Snow",
+   "slug": "fresh-snow",
+   "finish": "Natural",
+   "code": "AU1002849"
+  },
+  {
+   "group": "Minerals",
+   "decor": "Pietra Cloud",
+   "slug": "pietra-cloud",
+   "finish": "Natural",
+   "code": "AU1005042"
+  },
+  {
+   "group": "Minerals",
+   "decor": "Terrazzino Perlato",
+   "slug": "terrazzino-perlato",
+   "finish": "Natural",
+   "code": "AU1005039"
+  },
+  {
+   "group": "Minerals",
+   "decor": "Figured Limestone",
+   "slug": "figured-limestone",
+   "finish": "Natural",
+   "code": "AU1005041"
+  },
+  {
+   "group": "Minerals",
+   "decor": "Neo Cloud",
+   "slug": "neo-cloud",
+   "finish": "Natural",
+   "code": "AU1003634"
+  },
+  {
+   "group": "Minerals",
+   "decor": "Elemental Ash",
+   "slug": "elemental-ash",
+   "finish": "Natural",
+   "code": "AU1003375"
+  },
+  {
+   "group": "Minerals",
+   "decor": "Raw Zinc",
+   "slug": "raw-zinc",
+   "finish": "Natural",
+   "code": "AU1003387"
+  },
+  {
+   "group": "Minerals",
+   "decor": "Tumbled Terrazzo",
+   "slug": "tumbled-terrazzo",
+   "finish": "Natural",
+   "code": "AU1005043"
+  },
+  {
+   "group": "Minerals",
+   "decor": "Limed Concrete",
+   "slug": "limed-concrete",
+   "finish": "Natural",
+   "code": "AU1003383"
+  },
+  {
+   "group": "Minerals",
+   "decor": "Manhattan Concrete",
+   "slug": "manhattan-concrete",
+   "finish": "Natural",
+   "code": "AU1005044"
+  },
+  {
+   "group": "Minerals",
+   "decor": "Basalt",
+   "slug": "basalt",
+   "finish": "Natural",
+   "code": "AU1001500"
+  },
+  {
+   "group": "Minerals",
+   "decor": "Urban Pezzato",
+   "slug": "urban-pezzato",
+   "finish": "Natural",
+   "code": "AU1003749"
+  },
+  {
+   "group": "Minerals",
+   "decor": "Raw Nickel",
+   "slug": "raw-nickel",
+   "finish": "Natural",
+   "code": "AU1003385"
+  },
+  {
+   "group": "Woodgrains",
+   "decor": "Bleached Elm",
+   "slug": "bleached-elm",
+   "finish": "Natural",
+   "code": "AU1003667"
+  },
+  {
+   "group": "Woodgrains",
+   "decor": "Milkwood",
+   "slug": "milkwood",
+   "finish": "Natural",
+   "code": "AU1001641"
+  },
+  {
+   "group": "Woodgrains",
+   "decor": "White Painted Wood",
+   "slug": "white-painted-wood",
+   "finish": "Natural",
+   "code": "AU1003791"
+  },
+  {
+   "group": "Woodgrains",
+   "decor": "Alaskan",
+   "slug": "alaskan",
+   "finish": "Natural",
+   "code": "AU1001468"
+  },
+  {
+   "group": "Woodgrains",
+   "decor": "Oyster Linea",
+   "slug": "oyster-linea",
+   "finish": "Natural",
+   "code": "AU1001676"
+  },
+  {
+   "group": "Woodgrains",
+   "decor": "Lustrous Elm",
+   "slug": "lustrous-elm",
+   "finish": "Natural",
+   "code": "AU1001634"
+  },
+  {
+   "group": "Woodgrains",
+   "decor": "Blackened Elm",
+   "slug": "blackened-elm",
+   "finish": "Natural",
+   "code": "AU1001529"
+  },
+  {
+   "group": "Woodgrains",
+   "decor": "Smoked Birchply",
+   "slug": "smoked-birchply",
+   "finish": "Natural",
+   "code": "AU1002880"
+  },
+  {
+   "group": "Woodgrains",
+   "decor": "Blackened Legno",
+   "slug": "blackened-legno",
+   "finish": "Natural",
+   "code": "AU1002873"
+  },
+  {
+   "group": "Woodgrains",
+   "decor": "Burnished Wood",
+   "slug": "burnished-wood",
+   "finish": "Natural",
+   "code": "AU1001541"
+  },
+  {
+   "group": "Woodgrains",
+   "decor": "Black Birchply",
+   "slug": "black-birchply",
+   "finish": "Natural",
+   "code": "AU1003725"
+  },
+  {
+   "group": "Woodgrains",
+   "decor": "Smoky Sapelle",
+   "slug": "smoky-sapelle",
+   "finish": "Natural",
+   "code": "AU1001738"
+  },
+  {
+   "group": "Woodgrains",
+   "decor": "Jarrah Legno",
+   "slug": "jarrah-legno",
+   "finish": "Natural",
+   "code": "AU1003371"
+  },
+  {
+   "group": "Woodgrains",
+   "decor": "Milano Walnut",
+   "slug": "milano-walnut",
+   "finish": "Natural",
+   "code": "AU1001640"
+  },
+  {
+   "group": "Woodgrains",
+   "decor": "Aged Walnut",
+   "slug": "aged-walnut",
+   "finish": "Natural",
+   "code": "AU1003663"
+  },
+  {
+   "group": "Woodgrains",
+   "decor": "Natural Teak",
+   "slug": "natural-teak",
+   "finish": "Natural",
+   "code": "AU1003401"
+  },
+  {
+   "group": "Woodgrains",
+   "decor": "Danish Walnut",
+   "slug": "danish-walnut",
+   "finish": "Natural",
+   "code": "AU1005036"
+  },
+  {
+   "group": "Woodgrains",
+   "decor": "Oiled Legno",
+   "slug": "oiled-legno",
+   "finish": "Natural",
+   "code": "AU1003669"
+  },
+  {
+   "group": "Woodgrains",
+   "decor": "Jericho",
+   "slug": "jericho",
+   "finish": "Natural",
+   "code": "AU1001622"
+  },
+  {
+   "group": "Woodgrains",
+   "decor": "Delana Oak",
+   "slug": "delana-oak",
+   "finish": "Natural",
+   "code": "AU1003532"
+  },
+  {
+   "group": "Woodgrains",
+   "decor": "Avignon Walnut",
+   "slug": "avignon-walnut",
+   "finish": "Natural",
+   "code": "AU1001497"
+  },
+  {
+   "group": "Woodgrains",
+   "decor": "Natural Walnut",
+   "slug": "natural-walnut",
+   "finish": "Natural",
+   "code": "AU1001651"
+  },
+  {
+   "group": "Woodgrains",
+   "decor": "Rural Oak",
+   "slug": "rural-oak",
+   "finish": "Natural",
+   "code": "AU1001713"
+  },
+  {
+   "group": "Woodgrains",
+   "decor": "Select Beech",
+   "slug": "select-beech",
+   "finish": "Natural",
+   "code": "AU1001727"
+  },
+  {
+   "group": "Woodgrains",
+   "decor": "Rock Maple",
+   "slug": "rock-maple",
+   "finish": "Natural",
+   "code": "AU1001711"
+  },
+  {
+   "group": "Woodgrains",
+   "decor": "Honey Elm",
+   "slug": "honey-elm",
+   "finish": "Natural",
+   "code": "AU1001615"
+  },
+  {
+   "group": "Woodgrains",
+   "decor": "Elegant Oak",
+   "slug": "elegant-oak",
+   "finish": "Natural",
+   "code": "AU1001589"
+  },
+  {
+   "group": "Woodgrains",
+   "decor": "Young Beech",
+   "slug": "young-beech",
+   "finish": "Natural",
+   "code": "AU1001780"
+  },
+  {
+   "group": "Woodgrains",
+   "decor": "Curly Birch",
+   "slug": "curly-birch",
+   "finish": "Natural",
+   "code": "AU1001570"
+  },
+  {
+   "group": "Woodgrains",
+   "decor": "Dansk Maple",
+   "slug": "dansk-maple",
+   "finish": "Natural",
+   "code": "AU1001572"
+  },
+  {
+   "group": "Woodgrains",
+   "decor": "Planked Urban Oak",
+   "slug": "planked-urban-oak",
+   "finish": "Natural",
+   "code": "AU1003409"
+  },
+  {
+   "group": "Woodgrains",
+   "decor": "Classic Oak",
+   "slug": "classic-oak",
+   "finish": "Natural",
+   "code": "AU1001563"
+  },
+  {
+   "group": "Woodgrains",
+   "decor": "Calm Oak",
+   "slug": "calm-oak",
+   "finish": "Natural",
+   "code": "AU1005233"
+  },
+  {
+   "group": "Woodgrains",
+   "decor": "Aged Ash",
+   "slug": "aged-ash",
+   "finish": "Natural",
+   "code": "AU1003662"
+  },
+  {
+   "group": "Woodgrains",
+   "decor": "Natural Ash",
+   "slug": "natural-ash",
+   "finish": "Natural",
+   "code": "AU1003370"
+  },
+  {
+   "group": "Woodgrains",
+   "decor": "Raw Birchply",
+   "slug": "raw-birchply",
+   "finish": "Natural",
+   "code": "AU1002879"
+  },
+  {
+   "group": "Woodgrains",
+   "decor": "Seasoned Oak",
+   "slug": "seasoned-oak",
+   "finish": "Natural",
+   "code": "AU1001724"
+  }
+ ]
+}

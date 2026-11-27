@@ -1,0 +1,1410 @@
+{
+  "source": "Cosentino full-slab photographs (each colour page's \"detailed view of the full slab\"), 2200 px, downloaded 2026-11-27 with the owner's go-ahead.",
+  "notes": "Each photo maps to its colour's largest slab format. Local only: the brand's images live in ~/Library/Application Support/CabinetStudio/decors as <name>.jpg (scripts/import-dekton.py), originals in decors/dekton-originals; never committed.",
+  "verified": false,
+  "images": {
+    "Adia": {
+      "name": "dekton-adia",
+      "pixels": [
+        2200,
+        990
+      ],
+      "covers": [
+        3270,
+        1470
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.42,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.03
+      },
+      "original_file": "PIT-fullslab.jpg",
+      "original_sha256": "e56d87ad3c88942a91d460fed4a417258757e67fc9097e8c4efb53bd6be2c77c",
+      "discontinued": false
+    },
+    "Aeris": {
+      "name": "dekton-aeris",
+      "pixels": [
+        2200,
+        1008
+      ],
+      "covers": [
+        3360,
+        1670
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.42,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.03
+      },
+      "original_file": "IKC-fullslab.jpg",
+      "original_sha256": "51cbf46135c3144819973b52f7c1a54ab99b220f990e16d669c8e5fdfb3f5f98",
+      "discontinued": false
+    },
+    "Akara": {
+      "name": "dekton-akara",
+      "pixels": [
+        2200,
+        1087
+      ],
+      "covers": [
+        3360,
+        1670
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.42,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.03
+      },
+      "original_file": "KCK-fullslab.jpg",
+      "original_sha256": "27092cbb3aa0c0726298dc251655a0fbce3aeaf3b289ec91083e25b1e78d24df",
+      "discontinued": false
+    },
+    "Albarium": {
+      "name": "dekton-albarium",
+      "pixels": [
+        2200,
+        1008
+      ],
+      "covers": [
+        3270,
+        1470
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.42,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.03
+      },
+      "original_file": "RLM-fullslab.jpg",
+      "original_sha256": "1b3139f9fc9b4b54afbf609271243a7d118cf90fd77189a82ca49cc378d42619",
+      "discontinued": false
+    },
+    "Arga": {
+      "name": "dekton-arga",
+      "pixels": [
+        2200,
+        971
+      ],
+      "covers": [
+        3360,
+        1670
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.1,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.0
+      },
+      "original_file": "RGC-fullslab.jpg",
+      "original_sha256": "6ab89d400f591b163b0dcca0c0169992d42e270a01529e2d18585fbffe659319",
+      "discontinued": false
+    },
+    "Argentium": {
+      "name": "dekton-argentium",
+      "pixels": [
+        2200,
+        988
+      ],
+      "covers": [
+        3270,
+        1470
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.42,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.03
+      },
+      "original_file": "NMK-fullslab.jpg",
+      "original_sha256": "c77d6cfb3d46bbaf20b2808ab3bb359901c9487e5904bf9eb1e4096f81e8e077",
+      "discontinued": false
+    },
+    "Aura": {
+      "name": "dekton-aura",
+      "pixels": [
+        2200,
+        1007
+      ],
+      "covers": [
+        3270,
+        1470
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.42,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.03
+      },
+      "original_file": "AKC-fullslab.jpg",
+      "original_sha256": "9c31a8a78bd64bbe37697fdac64c0679b678ab6c94376feabdc97f1b1d0d7169",
+      "discontinued": false
+    },
+    "Ava": {
+      "name": "dekton-ava",
+      "pixels": [
+        2200,
+        990
+      ],
+      "covers": [
+        3270,
+        1470
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.42,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.03
+      },
+      "original_file": "VTP-fullslab.jpg",
+      "original_sha256": "98bacfbb61a42ee625b5047ed15dd7c3177279630161c021667b1781a881b717",
+      "discontinued": false
+    },
+    "Awake": {
+      "name": "dekton-awake",
+      "pixels": [
+        2200,
+        1008
+      ],
+      "covers": [
+        3360,
+        1670
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.1,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.0
+      },
+      "original_file": "DSV-fullslab.jpg",
+      "original_sha256": "726514c894492f8c32515866caa5e20453a85fc28b1faab35e1d241157358416",
+      "discontinued": false
+    },
+    "Bergen": {
+      "name": "dekton-bergen",
+      "pixels": [
+        2200,
+        983
+      ],
+      "covers": [
+        3360,
+        1670
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.1,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.0
+      },
+      "original_file": "BEK-fullslab.jpg",
+      "original_sha256": "bce0057341d9e12a081f6261bad06f2c6d648e5a6c8d9a7994b949263426e446",
+      "discontinued": false
+    },
+    "Borealis": {
+      "name": "dekton-borealis",
+      "pixels": [
+        2200,
+        990
+      ],
+      "covers": [
+        3360,
+        1670
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.1,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.0
+      },
+      "original_file": "BOK-fullslab.jpg",
+      "original_sha256": "ad53907558178361e1f299f2ba7e7146b13fd46c2b0a871ddd09cf709ec919db",
+      "discontinued": false
+    },
+    "Bromo": {
+      "name": "dekton-bromo",
+      "pixels": [
+        2200,
+        993
+      ],
+      "covers": [
+        3220,
+        1450
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.42,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.03
+      },
+      "original_file": "BRM-fullslab.jpg",
+      "original_sha256": "19dc45da1ec225a679ffba1ba4f32428ee06cfb90ce92ffa8e96207bda182ca8",
+      "discontinued": false
+    },
+    "Danae": {
+      "name": "dekton-danae",
+      "pixels": [
+        2200,
+        1066
+      ],
+      "covers": [
+        3270,
+        1470
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.42,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.03
+      },
+      "original_file": "KAC-fullslab.jpg",
+      "original_sha256": "2dd570bdc2a772fc4eea97af83637509928ea22183772e597e17d4b82d5fdc90",
+      "discontinued": false
+    },
+    "Domoos": {
+      "name": "dekton-domoos",
+      "pixels": [
+        2200,
+        1066
+      ],
+      "covers": [
+        3220,
+        1450
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.42,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.03
+      },
+      "original_file": "OMD-fullslab.jpg",
+      "original_sha256": "80d05f1c07ffbb952d7be01410b18201bc6ed31ec947346d68803a0b163c1c46",
+      "discontinued": false
+    },
+    "Entzo22": {
+      "name": "dekton-entzo22",
+      "pixels": [
+        2200,
+        1007
+      ],
+      "covers": [
+        3360,
+        1670
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.42,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.03
+      },
+      "original_file": "EKC-fullslab.jpg",
+      "original_sha256": "8e9e40b1333ff25b60cd463c70854eb71a5b7dcc92e741b5d2a3ce150029166a",
+      "discontinued": false
+    },
+    "Eter": {
+      "name": "dekton-eter",
+      "pixels": [
+        2200,
+        1008
+      ],
+      "covers": [
+        3220,
+        1450
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.42,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.03
+      },
+      "original_file": "BDK-fullslab.jpg",
+      "original_sha256": "a91fc02b11e1a2c5c667a83ff08929183584ed0586718850901b662e77ccc58d",
+      "discontinued": false
+    },
+    "Evok": {
+      "name": "dekton-evok",
+      "pixels": [
+        2200,
+        1003
+      ],
+      "covers": [
+        3360,
+        1670
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.42,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.03
+      },
+      "original_file": "PWK-fullslab.jpg",
+      "original_sha256": "a0f8815d25a19ca1c93a50c5279fe6bcb7c1e1fe0c1253880ac5dbb7be7de3a4",
+      "discontinued": false
+    },
+    "Grafite": {
+      "name": "dekton-grafite",
+      "pixels": [
+        2200,
+        994
+      ],
+      "covers": [
+        3220,
+        1450
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.42,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.03
+      },
+      "original_file": "P5C-fullslab.jpg",
+      "original_sha256": "dd1cf20ddad9d7946bb48edb830e092a6b8f9c1d65141b2d6ebac90198d41513",
+      "discontinued": false
+    },
+    "Grekk": {
+      "name": "dekton-grekk",
+      "pixels": [
+        2200,
+        1087
+      ],
+      "covers": [
+        3360,
+        1670
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.42,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.03
+      },
+      "original_file": "KTA-fullslab.jpg",
+      "original_sha256": "6af118bc149d5f2e5c28d1ee6febc01288c7ebfdc23d667a7f55a8241f294caa",
+      "discontinued": false
+    },
+    "Grigio": {
+      "name": "dekton-grigio",
+      "pixels": [
+        2200,
+        980
+      ],
+      "covers": [
+        3270,
+        1470
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.42,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.03
+      },
+      "original_file": "GCK-fullslab.jpg",
+      "original_sha256": "81c3fb846231fe12c78afd5a59c981bd774c36e87fc707c9b53d749ac7a1e7a2",
+      "discontinued": false
+    },
+    "Helena": {
+      "name": "dekton-helena",
+      "pixels": [
+        2200,
+        1008
+      ],
+      "covers": [
+        3360,
+        1670
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.1,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.0
+      },
+      "original_file": "HCK-fullslab.jpg",
+      "original_sha256": "15f74f3c1cf7632eb0b42f142f15c78c56b0f56bfe8fee41f66ba27f818caf36",
+      "discontinued": false
+    },
+    "Kedar": {
+      "name": "dekton-kedar",
+      "pixels": [
+        2200,
+        963
+      ],
+      "covers": [
+        3220,
+        1450
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.42,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.03
+      },
+      "original_file": "NRL-fullslab.jpg",
+      "original_sha256": "9515376da536880cb37ce824f7e07deb60885ef765d7b92aec0111e16d5cacdf",
+      "discontinued": false
+    },
+    "Keena": {
+      "name": "dekton-keena",
+      "pixels": [
+        2200,
+        977
+      ],
+      "covers": [
+        3360,
+        1670
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.42,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.03
+      },
+      "original_file": "WMK-fullslab.jpg",
+      "original_sha256": "0a826ee52f7d1de10fb91485ddb380a8b298e30b7b5ece4f2d1238173a0ccb23",
+      "discontinued": false
+    },
+    "Kelya": {
+      "name": "dekton-kelya",
+      "pixels": [
+        2200,
+        996
+      ],
+      "covers": [
+        3320,
+        1660
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.42,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.03
+      },
+      "original_file": "DKL-fullslab.jpg",
+      "original_sha256": "29c318f25d9d63e8fbc46d3dd56746d10f7c11224ca30130cec080ab69951d2a",
+      "discontinued": false
+    },
+    "Khalo": {
+      "name": "dekton-khalo",
+      "pixels": [
+        2200,
+        1008
+      ],
+      "covers": [
+        3360,
+        1670
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.1,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.0
+      },
+      "original_file": "HLC-fullslab.jpg",
+      "original_sha256": "cd7bf16f7f33ee048db4f2a20bcb626e183241e95ca0e9d92a979ab7af8fb5f3",
+      "discontinued": false
+    },
+    "Kira": {
+      "name": "dekton-kira",
+      "pixels": [
+        2200,
+        1008
+      ],
+      "covers": [
+        3220,
+        1450
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.42,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.03
+      },
+      "original_file": "PU4-fullslab.jpg",
+      "original_sha256": "1520733d8cfa2205e12db72cf9605b0ba14ebae535f68ea0bcb20a7a92de4b88",
+      "discontinued": false
+    },
+    "Kobuk": {
+      "name": "dekton-kobuk",
+      "pixels": [
+        2200,
+        998
+      ],
+      "covers": [
+        3320,
+        1660
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.38,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.0
+      },
+      "original_file": "RHN-fullslab.jpg",
+      "original_sha256": "15eac5435ac691bc41b1a10b944d8983979524147ac23f6cc51087a2a30938a0",
+      "discontinued": false
+    },
+    "Kovik": {
+      "name": "dekton-kovik",
+      "pixels": [
+        2200,
+        1008
+      ],
+      "covers": [
+        3220,
+        1450
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.42,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.03
+      },
+      "original_file": "SVA-fullslab.jpg",
+      "original_sha256": "a3a6d4be7dcca79e2ff03131939bf9f417a84b7d9370514f42e24343c235aad3",
+      "discontinued": false
+    },
+    "Kreta": {
+      "name": "dekton-kreta",
+      "pixels": [
+        2200,
+        995
+      ],
+      "covers": [
+        3320,
+        1660
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.42,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.03
+      },
+      "original_file": "KRE-fullslab.jpg",
+      "original_sha256": "405f7762f718bae5f82ab28c3a818ed7ac568f8ecd906b4c5f87000ce18172c6",
+      "discontinued": false
+    },
+    "Laos": {
+      "name": "dekton-laos",
+      "pixels": [
+        2200,
+        982
+      ],
+      "covers": [
+        3220,
+        1450
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.42,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.03
+      },
+      "original_file": "LOS-fullslab.jpg",
+      "original_sha256": "982c5a4599d231bbb6a6b9189a33a8f871d37eacf1f424cbb7cb5c1b4e4c88f7",
+      "discontinued": false
+    },
+    "Laurent": {
+      "name": "dekton-laurent",
+      "pixels": [
+        2200,
+        953
+      ],
+      "covers": [
+        3320,
+        1660
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.42,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.03
+      },
+      "original_file": "PTL-fullslab.jpg",
+      "original_sha256": "1bf3249c508514435c76852d950e66a694144890a8250b207def40d39373ba96",
+      "discontinued": false
+    },
+    "Lucid": {
+      "name": "dekton-lucid",
+      "pixels": [
+        2200,
+        1003
+      ],
+      "covers": [
+        3360,
+        1670
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.1,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.0
+      },
+      "original_file": "RBL-fullslab.jpg",
+      "original_sha256": "fc255c0bc3d23c18efe6cb749dbb2c710ed1b39f086fa9fdc2ab722685555b31",
+      "discontinued": false
+    },
+    "Lunar": {
+      "name": "dekton-lunar",
+      "pixels": [
+        2200,
+        1017
+      ],
+      "covers": [
+        3270,
+        1470
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.42,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.03
+      },
+      "original_file": "UKC-fullslab.jpg",
+      "original_sha256": "d42ae27bfa50bed3252e6bf317de17c7b6cc1b86813b6c206836f94bf48093c0",
+      "discontinued": false
+    },
+    "Marina": {
+      "name": "dekton-marina",
+      "pixels": [
+        2200,
+        974
+      ],
+      "covers": [
+        3360,
+        1670
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.38,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.0
+      },
+      "original_file": "RMR-fullslab.jpg",
+      "original_sha256": "edc966511e95fcca853df1a0baa36a4a8dcf40591029f23ddd8f77141e36e518",
+      "discontinued": false
+    },
+    "Marmorio": {
+      "name": "dekton-marmorio",
+      "pixels": [
+        2200,
+        1109
+      ],
+      "covers": [
+        3360,
+        1670
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.42,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.03
+      },
+      "original_file": "RCK-fullslab.jpg",
+      "original_sha256": "fa61b0bc8f4d5e3eeb5ba091266cf4c6f28afa409fb154cfae9b270389b24205",
+      "discontinued": false
+    },
+    "Moone": {
+      "name": "dekton-moone",
+      "pixels": [
+        2200,
+        1066
+      ],
+      "covers": [
+        3270,
+        1470
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.42,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.03
+      },
+      "original_file": "MKC-fullslab.jpg",
+      "original_sha256": "03b0640b271e25487bb44040d3db16f1323d76f6a569a1167017aef382459a16",
+      "discontinued": false
+    },
+    "Morpheus": {
+      "name": "dekton-morpheus",
+      "pixels": [
+        2200,
+        1008
+      ],
+      "covers": [
+        3360,
+        1670
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.38,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.0
+      },
+      "original_file": "MSC-fullslab.jpg",
+      "original_sha256": "31bcb513898e9d95901a1bd04ecc66957870c77c870d9de607e635aba6aed4e9",
+      "discontinued": false
+    },
+    "Nacre": {
+      "name": "dekton-nacre",
+      "pixels": [
+        2200,
+        1008
+      ],
+      "covers": [
+        3270,
+        1470
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.38,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.0
+      },
+      "original_file": "CKC-fullslab.jpg",
+      "original_sha256": "a5137ab4f9e7a372d185259a9b0dd9709cab7287b7b40b3125c17b4d90a348d9",
+      "discontinued": false
+    },
+    "Nara": {
+      "name": "dekton-nara",
+      "pixels": [
+        2200,
+        990
+      ],
+      "covers": [
+        3360,
+        1670
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.38,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.0
+      },
+      "original_file": "NAK-fullslab.jpg",
+      "original_sha256": "67ee9aa99f01318d4732fb347e6623949617720d5295ae29e20cf1a9921a399c",
+      "discontinued": false
+    },
+    "Nebbia": {
+      "name": "dekton-nebbia",
+      "pixels": [
+        2200,
+        1003
+      ],
+      "covers": [
+        3270,
+        1470
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.42,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.03
+      },
+      "original_file": "ECK-fullslab.jpg",
+      "original_sha256": "b3f1831d21e1507ba912c384dec8dc27141bc7aa65c932102aee85876b6a6e78",
+      "discontinued": false
+    },
+    "Nebu": {
+      "name": "dekton-nebu",
+      "pixels": [
+        2200,
+        990
+      ],
+      "covers": [
+        3270,
+        1470
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.42,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.03
+      },
+      "original_file": "WCP-fullslab.jpg",
+      "original_sha256": "e93246b25a6ffdb5b4d64686f1802009a2381a7b6549d73ed92d4c77f54bb858",
+      "discontinued": false
+    },
+    "Neural": {
+      "name": "dekton-neural",
+      "pixels": [
+        2200,
+        1021
+      ],
+      "covers": [
+        3360,
+        1670
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.38,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.0
+      },
+      "original_file": "VGL-fullslab.jpg",
+      "original_sha256": "289ffbec2731fad5bf1f88c4a9d11ff3a97b3cec10fa8285da7278b6bdfd4d4d",
+      "discontinued": false
+    },
+    "Nordal": {
+      "name": "dekton-nordal",
+      "pixels": [
+        2200,
+        1102
+      ],
+      "covers": [
+        3360,
+        1670
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.38,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.0
+      },
+      "original_file": "NOK-fullslab.jpg",
+      "original_sha256": "56e8f30b01f88a4ffad49dc3fa4fb3b60bef635afb2113909c00ff51a46c08a3",
+      "discontinued": false
+    },
+    "Polar": {
+      "name": "dekton-polar",
+      "pixels": [
+        2200,
+        990
+      ],
+      "covers": [
+        3280,
+        1480
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.42,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.03
+      },
+      "original_file": "CPO-fullslab.jpg",
+      "original_sha256": "73431ad5eeade64f208b16aa0e6068bac1ae80901ee0741862bffac25e74e842",
+      "discontinued": false
+    },
+    "Portum": {
+      "name": "dekton-portum",
+      "pixels": [
+        2200,
+        966
+      ],
+      "covers": [
+        3280,
+        1480
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.38,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.0
+      },
+      "original_file": "PKC-fullslab.jpg",
+      "original_sha256": "aa864b98e80af712d9aceda6c0193e2520022815886dafbe31b4ba77d071afc5",
+      "discontinued": false
+    },
+    "Rem": {
+      "name": "dekton-rem",
+      "pixels": [
+        2200,
+        990
+      ],
+      "covers": [
+        3360,
+        1670
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.38,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.0
+      },
+      "original_file": "RKC-fullslab.jpg",
+      "original_sha256": "8bfe52950d350d676f4e32f76bc447f7542d18eca9b30a1ca5480ddebc6cf42d",
+      "discontinued": false
+    },
+    "Reverie": {
+      "name": "dekton-reverie",
+      "pixels": [
+        2200,
+        1008
+      ],
+      "covers": [
+        3360,
+        1670
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.38,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.0
+      },
+      "original_file": "RRK-fullslab.jpg",
+      "original_sha256": "0e6d9779729a172c0a94de588ce0b6cae603a649a51d0d7035fd8010fd8adc87",
+      "discontinued": false
+    },
+    "Sabbia": {
+      "name": "dekton-sabbia",
+      "pixels": [
+        2200,
+        991
+      ],
+      "covers": [
+        3360,
+        1670
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.42,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.03
+      },
+      "original_file": "ICK-fullslab.jpg",
+      "original_sha256": "897465929b322d6cee04b178d285518ffc4f638f491ce32d7dcebdfe2c991452",
+      "discontinued": false
+    },
+    "Salina": {
+      "name": "dekton-salina",
+      "pixels": [
+        2200,
+        969
+      ],
+      "covers": [
+        3360,
+        1670
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.1,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.0
+      },
+      "original_file": "AAI-fullslab.jpg",
+      "original_sha256": "24835695d88705d545859cad67ef2541ec84e05be6c0b0d39ac82966c12e0a8b",
+      "discontinued": false
+    },
+    "Sandik": {
+      "name": "dekton-sandik",
+      "pixels": [
+        2200,
+        990
+      ],
+      "covers": [
+        3360,
+        1670
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.38,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.0
+      },
+      "original_file": "MRL-fullslab.jpg",
+      "original_sha256": "101dd1535888889044d1f1dff3cb076fd562fdc34afd010fa8ae78d3227c4b4c",
+      "discontinued": false
+    },
+    "Sirius": {
+      "name": "dekton-sirius",
+      "pixels": [
+        2200,
+        2200
+      ],
+      "covers": [
+        3220,
+        1450
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.42,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.03
+      },
+      "original_file": "RS5-fullslab.jpg",
+      "original_sha256": "69c02320f4f276cee5a4282f76f949142d16f06a97b6cf9954e815e6ffc4ca0b",
+      "discontinued": false
+    },
+    "Soke": {
+      "name": "dekton-soke",
+      "pixels": [
+        2200,
+        977
+      ],
+      "covers": [
+        3220,
+        1450
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.42,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.03
+      },
+      "original_file": "CV5-fullslab.jpg",
+      "original_sha256": "bc6b72dfe38e1dacb0f9abacbf987a9eff20b2703e2f4ce4cfab3c8156e68294",
+      "discontinued": false
+    },
+    "Somnia": {
+      "name": "dekton-somnia",
+      "pixels": [
+        2200,
+        980
+      ],
+      "covers": [
+        3320,
+        1660
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.42,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.03
+      },
+      "original_file": "BMT-fullslab.jpg",
+      "original_sha256": "49cac69db6446321ceb28c626fba8d4b46e58e78800a02d00da19a0ca8a2ec04",
+      "discontinued": false
+    },
+    "Taga": {
+      "name": "dekton-taga",
+      "pixels": [
+        2200,
+        1003
+      ],
+      "covers": [
+        3360,
+        1670
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.1,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.0
+      },
+      "original_file": "GKC-fullslab.jpg",
+      "original_sha256": "db0d465b92cea4cdf02cd40ebcf514e17fd6f71a8336b9aed9a55b242b1e1017",
+      "discontinued": false
+    },
+    "Talma": {
+      "name": "dekton-talma",
+      "pixels": [
+        2200,
+        1087
+      ],
+      "covers": [
+        3320,
+        1660
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.42,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.03
+      },
+      "original_file": "KRW-fullslab.jpg",
+      "original_sha256": "1dcf2160482052e0f8235e7fae831d3059a6a2922839ef0af8f93b092b87c2f8",
+      "discontinued": false
+    },
+    "Thala": {
+      "name": "dekton-thala",
+      "pixels": [
+        2200,
+        990
+      ],
+      "covers": [
+        3360,
+        1670
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.42,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.03
+      },
+      "original_file": "DVK-fullslab.jpg",
+      "original_sha256": "47e9182dfb3f384e11fa54e21a349d9e342886be0e14675005a1220e6a7f8939",
+      "discontinued": false
+    },
+    "Trance": {
+      "name": "dekton-trance",
+      "pixels": [
+        2200,
+        985
+      ],
+      "covers": [
+        3360,
+        1670
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.1,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.0
+      },
+      "original_file": "MCA-fullslab.jpg",
+      "original_sha256": "f688165c0313dab5a7221989762f9f5594f7685f05ccb941183b5d685bb2dde0",
+      "discontinued": false
+    },
+    "Trevi": {
+      "name": "dekton-trevi",
+      "pixels": [
+        2200,
+        990
+      ],
+      "covers": [
+        3280,
+        1480
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.42,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.03
+      },
+      "original_file": "TVG-fullslab.jpg",
+      "original_sha256": "c245016ee5dfb6a38b2211b0192841f183b026f03fd0cddf9a1b389e6ff7de26",
+      "discontinued": false
+    },
+    "Umber": {
+      "name": "dekton-umber",
+      "pixels": [
+        2200,
+        986
+      ],
+      "covers": [
+        3220,
+        1450
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.42,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.03
+      },
+      "original_file": "T2A-fullslab.jpg",
+      "original_sha256": "edb97334ae5db8a2ea684910c1f339322e4afe13459dc3f3ee6665af7d192aa5",
+      "discontinued": false
+    },
+    "Zenith": {
+      "name": "dekton-zenith",
+      "pixels": [
+        2200,
+        2200
+      ],
+      "covers": [
+        3280,
+        1480
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.42,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.03
+      },
+      "original_file": "ZKC-fullslab.jpg",
+      "original_sha256": "9f249702ebedacc7b2f63c7f76d12950add7dcd53475c3255162932bd7fa3641",
+      "discontinued": false
+    },
+    "Zira": {
+      "name": "dekton-zira",
+      "pixels": [
+        2200,
+        990
+      ],
+      "covers": [
+        3270,
+        1470
+      ],
+      "url": null,
+      "normal": null,
+      "stone": true,
+      "look": {
+        "roughness": 0.42,
+        "bump": 0,
+        "coat": 0,
+        "micro_bump": 0.03
+      },
+      "original_file": "BQK-fullslab.jpg",
+      "original_sha256": "bc0aa7d97f89e572e23d0d3f87d131b1615b599fea04393f2f8368db9b1c3c1a",
+      "discontinued": false
+    }
+  }
+}

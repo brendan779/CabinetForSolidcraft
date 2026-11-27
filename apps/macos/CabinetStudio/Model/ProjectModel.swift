@@ -220,11 +220,16 @@ struct CabinetDoc: Identifiable, Hashable, Codable {
     }
     var supportBoard: String { buildUp["board"] as? String ?? "" }
     var stoneProductID: String { object["board"] as? String ?? "" }
+    /// The material whose rules (overhangs, supports, clearances) a benchtop product takes: laminate
+    /// tops and Dekton have their own; other stone is taken as porcelain until a supplier gives its.
+    static func stoneMaterial(_ board: BoardRecord) -> String {
+        board.kind == "laminate_top" ? "laminate" : board.brand == "Dekton" ? "dekton" : "porcelain"
+    }
     mutating func setStoneProduct(_ board: BoardRecord?) {
         update { $0["board"] = board?.id ?? "" }
         if let board {
             setNumber("thickness", board.thickness)
-            material = "porcelain"
+            material = Self.stoneMaterial(board)
             if edgeProfile == "mitred_apron" && apronDepth < board.thickness { apronDepth = board.thickness }
         }
     }

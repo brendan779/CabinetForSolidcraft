@@ -1263,7 +1263,7 @@ final class ViewportScene {
         }
         let colour = paint?.colour ?? board?.displayColour ?? generic
         var m = PhysicallyBasedMaterial()
-        let tint = selected || board?.kind == "sintered_stone" ? NSColor.white : NSColor(calibratedWhite: 0.72, alpha: 1)
+        let tint = selected || ["sintered_stone", "laminate_top"].contains(board?.kind ?? "") ? NSColor.white : NSColor(calibratedWhite: 0.72, alpha: 1)
         let slab = board.flatMap { SlabLibrary.surface($0) }
         let texture: TextureResource? = if let board, let slab {
             slabTexture(board.id, slab.imageURL)
@@ -1286,7 +1286,10 @@ final class ViewportScene {
             m.baseColor = .init(tint: selected ? colour : colour.blended(withFraction: 0.35, of: .gray) ?? colour)
         }
         if let slab {
-            m.textureCoordinateTransform = .init(scale: [Self.grainRepeat/slab.length, Self.grainRepeat/slab.width])
+            // A portrait photo turns a quarter: the sheet's length runs up it.
+            m.textureCoordinateTransform = slab.portrait
+                ? .init(scale: [Self.grainRepeat/slab.width, Self.grainRepeat/slab.length], rotation: .pi / 2)
+                : .init(scale: [Self.grainRepeat/slab.length, Self.grainRepeat/slab.width])
         }
         m.roughness = .init(floatLiteral: slab?.roughness ?? Float(paint?.roughness ?? (board?.finish.lowercased().contains("gloss") == true ? 0.2 : 0.65)))
         // The selected cabinet glows faintly in the accent colour; the panel under the pointer more.

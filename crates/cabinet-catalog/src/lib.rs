@@ -66,6 +66,8 @@ pub enum Substrate {
 pub enum BoardKind {
     /// A sintered stone slab for benchtops, kept out of cabinet board pickers.
     SinteredStone,
+    /// A laminate benchtop made to order on a substrate, kept out of cabinet board pickers.
+    LaminateTop,
     /// Low pressure melamine on a substrate.
     Melamine,
     /// High pressure laminate sheet (not a board).
@@ -649,6 +651,27 @@ mod tests {
                 b.id
             );
         }
+    }
+
+    /// BENCH-18d: laminate tops are products of their own kind, at the thicknesses made, from
+    /// both brands; a decor also sold as cabinet board keeps its board.
+    #[test]
+    fn laminate_tops_load_for_both_brands() {
+        let cat = Catalog::load(&repo_catalog()).unwrap();
+        let tops: Vec<&Board> = cat
+            .boards
+            .iter()
+            .filter(|b| b.kind == BoardKind::LaminateTop)
+            .collect();
+        for brand in ["Polytec", "Laminex"] {
+            assert!(tops.iter().any(|b| b.brand == brand), "{brand}");
+        }
+        assert!(tops.iter().all(|b| [21.0, 33.0].contains(&b.thickness)));
+        let oak = cat.board("polytec.benchtop.prime-oak-woodmatt.33").unwrap();
+        assert!(oak.range.contains("tight form"), "{}", oak.range);
+        assert!(cat.boards.iter().any(|b| b.decor == "Prime Oak"
+            && b.brand == "Polytec"
+            && b.kind != BoardKind::LaminateTop));
     }
 
     /// SURR-1: every Surround lining board names a profile the catalog has.

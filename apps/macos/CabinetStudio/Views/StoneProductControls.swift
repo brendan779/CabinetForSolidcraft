@@ -6,15 +6,18 @@ struct StoneProductControls: View {
     @State private var search = ""
     let cab: CabinetDoc
     private var selected: BoardRecord? { project.boardsById[cab.stoneProductID] }
+    /// A laminate top picks from laminate tops; any other material from stone slabs.
+    private var laminate: Bool { cab.material == "laminate" }
+    private var kind: String { laminate ? "laminate_top" : "sintered_stone" }
     private var slabs: [BoardRecord] {
-        project.boards.filter { $0.kind == "sintered_stone" && (search.isEmpty
+        project.boards.filter { $0.kind == kind && (search.isEmpty
             || "\($0.brand) \($0.range) \($0.decor) \($0.finish)".localizedCaseInsensitiveContains(search)) }
     }
     private var brands: [String] { Array(Set(slabs.map(\.brand))).sorted() }
     var body: some View {
         Button { picking = true } label: {
             HStack {
-                Text(selected.map { "\($0.brand) · \($0.decor) · \($0.finish)" } ?? "Choose stone product")
+                Text(selected.map { "\($0.brand) · \($0.decor) · \($0.finish)" } ?? (laminate ? "Choose laminate top" : "Choose stone product"))
                     .lineLimit(2)
                 Spacer()
                 Image(systemName: "chevron.right")
@@ -23,8 +26,8 @@ struct StoneProductControls: View {
         .buttonStyle(TileStyle(selected: picking))
         .popover(isPresented: $picking, arrowEdge: .leading) {
             VStack(alignment: .leading, spacing: 10) {
-                Text("Stone slabs").font(.headline)
-                TextField("Search stone", text: $search).textFieldStyle(.roundedBorder)
+                Text(laminate ? "Laminate tops" : "Stone slabs").font(.headline)
+                TextField(laminate ? "Search colour, finish or profile" : "Search stone", text: $search).textFieldStyle(.roundedBorder)
                 ScrollView {
                     LazyVStack(alignment: .leading, spacing: 14, pinnedViews: .sectionHeaders) {
                         ForEach(brands, id: \.self) { brand in

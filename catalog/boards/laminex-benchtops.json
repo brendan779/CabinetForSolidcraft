@@ -1,0 +1,3383 @@
+{
+  "brand": "Laminex",
+  "website": "https://www.laminex.com.au/brands/laminex/product-ranges/made-to-measure/benchtops",
+  "notes": "Laminex Made to Measure laminate benchtops: the colour range page's decors, each at 33 mm; the National Availability Guide (October 2025) gives \"ALL OPTIONS AVAILABLE ON PARTICLEBOARD MR IN 20, 25, 33 OR 38MM THICKNESS\", and per colour the edges (self edged, 1 or 2 mm edging, rolled 3, 8 or 10 mm, half or full bullnose) and finishes: see the guide. Length: not stated; 3600 is our assumption. Kind laminate_top keeps them out of cabinet board pickers. No prices inferred.",
+  "boards": [
+    {
+      "id": "laminex.benchtop.aged-ash-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Woodgrains",
+      "decor": "Aged Ash",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/aged-ash/Natural/p/AU1003662",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.aged-walnut-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Woodgrains",
+      "decor": "Aged Walnut",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/aged-walnut/Natural/p/AU1003663",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.alabaster-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Whites & Neutrals",
+      "decor": "Alabaster",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/alabaster/Natural/p/AU1001464",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.alaskan-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Woodgrains",
+      "decor": "Alaskan",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/alaskan/Natural/p/AU1001468",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.alpaca-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Whites & Neutrals",
+      "decor": "Alpaca",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/alpaca/Natural/p/AU1001474",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.alpine-mist-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Whites & Neutrals",
+      "decor": "Alpine Mist",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/alpine-mist/Natural/p/AU1003379",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.andalucian-marble-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Minerals",
+      "decor": "Andalucian Marble",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/andalucian-marble/Natural/p/AU1003664",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.aries-absolutegrain.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Whites & Neutrals",
+      "decor": "Aries",
+      "finish": "AbsoluteGrain",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/aries/AbsoluteGrain/p/AU1007365",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.ash-white-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Whites & Neutrals",
+      "decor": "Ash White",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/ash-white/Natural/p/AU1001490",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.avenza-bianco-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Minerals",
+      "decor": "Avenza Bianco",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/avenza-bianco/Natural/p/AU1003531",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.avignon-walnut-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Woodgrains",
+      "decor": "Avignon Walnut",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/avignon-walnut/Natural/p/AU1001497",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.basalt-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Minerals",
+      "decor": "Basalt",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/basalt/Natural/p/AU1001500",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.battalion-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Accents",
+      "decor": "Battalion",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/battalion/Natural/p/AU1001503",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.baye-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Accents",
+      "decor": "Baye",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/baye/Natural/p/AU1001508",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.bayleaf-absolutegrain.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Accents",
+      "decor": "Bayleaf",
+      "finish": "AbsoluteGrain",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/bayleaf/AbsoluteGrain/p/AU1007364",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.black-birchply-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Woodgrains",
+      "decor": "Black Birchply",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/black-birchply/Natural/p/AU1003725",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.black-marble-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Minerals",
+      "decor": "Black Marble",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/black-marble/Natural/p/AU1001518",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.black-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Whites & Neutrals",
+      "decor": "Black",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/black/Natural/p/AU1001525",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.blackened-elm-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Woodgrains",
+      "decor": "Blackened Elm",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/blackened-elm/Natural/p/AU1001529",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.blackened-legno-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Woodgrains",
+      "decor": "Blackened Legno",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/blackened-legno/Natural/p/AU1002873",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.bleached-elm-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Woodgrains",
+      "decor": "Bleached Elm",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/bleached-elm/Natural/p/AU1003667",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.bluestone-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Accents",
+      "decor": "Bluestone",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/bluestone/Natural/p/AU1007169",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.burnished-wood-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Woodgrains",
+      "decor": "Burnished Wood",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/burnished-wood/Natural/p/AU1001541",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.burnt-ochre-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Accents",
+      "decor": "Burnt Ochre",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/burnt-ochre/Natural/p/AU1005034",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.calacatta-majore-truescale-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Minerals",
+      "decor": "Calacatta Majore TrueScale",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/calacatta-majore-truescale/Natural/p/AU1005257",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.calm-oak-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Woodgrains",
+      "decor": "Calm Oak",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/calm-oak/Natural/p/AU1005233",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.calm-white-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Whites & Neutrals",
+      "decor": "Calm White",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/calm-white/Natural/p/AU1003376",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.carrara-bianco-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Minerals",
+      "decor": "Carrara Bianco",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/carrara-bianco/Natural/p/AU1001548",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.carrara-delicata-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Minerals",
+      "decor": "Carrara Delicata",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/carrara-delicata/Natural/p/AU1005040",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.carrara-marble-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Minerals",
+      "decor": "Carrara Marble",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/carrara-marble/Natural/p/AU1003640",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.catalana-marble-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Minerals",
+      "decor": "Catalana Marble",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/catalana-marble/Natural/p/AU1003668",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.chalk-white-absolutegrain.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Whites & Neutrals",
+      "decor": "Chalk White",
+      "finish": "AbsoluteGrain",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/chalk-white/AbsoluteGrain/p/AU1007358",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.chamois-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Whites & Neutrals",
+      "decor": "Chamois",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/chamois/Natural/p/AU1001552",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.charcoal-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Whites & Neutrals",
+      "decor": "Charcoal",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/charcoal/Natural/p/AU1001554",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.classic-oak-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Woodgrains",
+      "decor": "Classic Oak",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/classic-oak/Natural/p/AU1001563",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.coastal-sunrise-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Accents",
+      "decor": "Coastal Sunrise",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/coastal-sunrise/Natural/p/AU1005235",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.coolum-sand-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Whites & Neutrals",
+      "decor": "Coolum Sand",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/coolum-sand/Natural/p/AU1007170",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.curly-birch-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Woodgrains",
+      "decor": "Curly Birch",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/curly-birch/Natural/p/AU1001570",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.daintree-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Accents",
+      "decor": "Daintree",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/daintree/Natural/p/AU1007171",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.danish-walnut-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Woodgrains",
+      "decor": "Danish Walnut",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/danish-walnut/Natural/p/AU1005036",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.dansk-maple-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Woodgrains",
+      "decor": "Dansk Maple",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/dansk-maple/Natural/p/AU1001572",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.delana-oak-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Woodgrains",
+      "decor": "Delana Oak",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/delana-oak/Natural/p/AU1003532",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.denim-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Accents",
+      "decor": "Denim",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/denim/Natural/p/AU1003658",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.elegant-oak-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Woodgrains",
+      "decor": "Elegant Oak",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/elegant-oak/Natural/p/AU1001589",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.elemental-ash-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Minerals",
+      "decor": "Elemental Ash",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/elemental-ash/Natural/p/AU1003375",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.eucalypt-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Accents",
+      "decor": "Eucalypt",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/eucalypt/Natural/p/AU1007172",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.ferro-grafite-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Minerals",
+      "decor": "Ferro Grafite",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/ferro-grafite/Natural/p/AU1002872",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.figured-limestone-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Minerals",
+      "decor": "Figured Limestone",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/figured-limestone/Natural/p/AU1005041",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.fossil-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Accents",
+      "decor": "Fossil",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/fossil/Natural/p/AU1001599",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.fox-teakwood-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Whites & Neutrals",
+      "decor": "Fox",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/fox-teakwood/Natural/p/AU1002878",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.french-cream-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Whites & Neutrals",
+      "decor": "French Cream",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/french-cream/Natural/p/AU1003392",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.fresh-snow-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Minerals",
+      "decor": "Fresh Snow",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/fresh-snow/Natural/p/AU1002849",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.fresh-spring-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Accents",
+      "decor": "Fresh Spring",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/fresh-spring/Natural/p/AU1001602",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.ghostgum-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Whites & Neutrals",
+      "decor": "Ghostgum",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/ghostgum/Natural/p/AU1001606",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.golden-wattle-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Accents",
+      "decor": "Golden Wattle",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/golden-wattle/Natural/p/AU1005236",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.greystone-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Minerals",
+      "decor": "Greystone",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/greystone/Natural/p/AU1006816",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.grigio-grafite-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Minerals",
+      "decor": "Grigio Grafite",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/grigio-grafite/Natural/p/AU1001610",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.gumnut-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Accents",
+      "decor": "Gumnut",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/gumnut/Natural/p/AU1007173",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.gunmetal-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Whites & Neutrals",
+      "decor": "Gunmetal",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/gunmetal/Natural/p/AU1001612",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.honey-elm-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Woodgrains",
+      "decor": "Honey Elm",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/honey-elm/Natural/p/AU1001615",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.jarrah-legno-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Woodgrains",
+      "decor": "Jarrah Legno",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/jarrah-legno/Natural/p/AU1003371",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.jericho-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Woodgrains",
+      "decor": "Jericho",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/jericho/Natural/p/AU1001622",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.jordan-stone-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Minerals",
+      "decor": "Jordan Stone",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/jordan-stone/Natural/p/AU1001624",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.just-blue-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Accents",
+      "decor": "Just Blue",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/just-blue/Natural/p/AU1003400",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.kalamata-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Accents",
+      "decor": "Kalamata",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/kalamata/Natural/p/AU1005031",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.kashmir-granite-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Minerals",
+      "decor": "Kashmir Granite",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/kashmir-granite/Natural/p/AU1001629",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.lava-grey-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Whites & Neutrals",
+      "decor": "Lava Grey",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/lava-grey/Natural/p/AU1002874",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.limed-concrete-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Minerals",
+      "decor": "Limed Concrete",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/limed-concrete/Natural/p/AU1003383",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.lustrous-elm-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Woodgrains",
+      "decor": "Lustrous Elm",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/lustrous-elm/Natural/p/AU1001634",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.luxe-elba-truescale-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Minerals",
+      "decor": "Luxe Elba TrueScale",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/luxe-elba-truescale/Natural/p/AU1005281",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.macedon-mist-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Accents",
+      "decor": "Macedon Mist",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/macedon-mist/Natural/p/AU1007174",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.manhattan-concrete-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Minerals",
+      "decor": "Manhattan Concrete",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/manhattan-concrete/Natural/p/AU1005044",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.marmo-grigio-truescale-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Minerals",
+      "decor": "Marmo Grigio TrueScale",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/marmo-grigio-truescale/Natural/p/AU1005283",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.marmor-torino-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Minerals",
+      "decor": "Marmor Torino",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/marmor-torino/Natural/p/AU1005037",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.milano-walnut-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Woodgrains",
+      "decor": "Milano Walnut",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/milano-walnut/Natural/p/AU1001640",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.milkwood-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Woodgrains",
+      "decor": "Milkwood",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/milkwood/Natural/p/AU1001641",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.moleskin-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Whites & Neutrals",
+      "decor": "Moleskin",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/moleskin/Natural/p/AU1001645",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.moroccan-clay-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Accents",
+      "decor": "Moroccan Clay",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/moroccan-clay/Natural/p/AU1004800",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.natural-ash-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Woodgrains",
+      "decor": "Natural Ash",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/natural-ash/Natural/p/AU1003370",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.natural-quartz-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Minerals",
+      "decor": "Natural Quartz",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/natural-quartz/Natural/p/AU1001650",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.natural-teak-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Woodgrains",
+      "decor": "Natural Teak",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/natural-teak/Natural/p/AU1003401",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.natural-walnut-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Woodgrains",
+      "decor": "Natural Walnut",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/natural-walnut/Natural/p/AU1001651",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.neo-cloud-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Minerals",
+      "decor": "Neo Cloud",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/neo-cloud/Natural/p/AU1003634",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.nero-grafite-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Minerals",
+      "decor": "Nero Grafite",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/nero-grafite/Natural/p/AU1003410",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.new-antique-white-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Whites & Neutrals",
+      "decor": "New Antique White",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/new-antique-white/Natural/p/AU1001654",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.oiled-legno-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Woodgrains",
+      "decor": "Oiled Legno",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/oiled-legno/Natural/p/AU1003669",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.olivine-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Accents",
+      "decor": "Olivine",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/olivine/Natural/p/AU1005032",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.outback-clay-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Accents",
+      "decor": "Outback Clay",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/outback-clay/Natural/p/AU1007175",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.oyster-grey-absolutegrain.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Whites & Neutrals",
+      "decor": "Oyster Grey",
+      "finish": "AbsoluteGrain",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/oyster-grey/AbsoluteGrain/p/AU1007348",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.oyster-linea-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Woodgrains",
+      "decor": "Oyster Linea",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/oyster-linea/Natural/p/AU1001676",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.pale-honey-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Accents",
+      "decor": "Pale Honey",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/pale-honey/Natural/p/AU1005033",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.paper-bark-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Whites & Neutrals",
+      "decor": "Paper Bark",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/paper-bark/Natural/p/AU1001678",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.parchment-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Whites & Neutrals",
+      "decor": "Parchment",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/parchment/Natural/p/AU1001680",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.pearl-concrete-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Minerals",
+      "decor": "Pearl Concrete",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/pearl-concrete/Natural/p/AU1005038",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.pearl-grey-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Whites & Neutrals",
+      "decor": "Pearl Grey",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/pearl-grey/Natural/p/AU1001684",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.peruvian-clay-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Accents",
+      "decor": "Peruvian Clay",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/peruvian-clay/Natural/p/AU1001686",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.pewter-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Whites & Neutrals",
+      "decor": "Pewter",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/pewter/Natural/p/AU1001689",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.pietra-cloud-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Minerals",
+      "decor": "Pietra Cloud",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/pietra-cloud/Natural/p/AU1005042",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.planked-urban-oak-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Woodgrains",
+      "decor": "Planked Urban Oak",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/planked-urban-oak/Natural/p/AU1003409",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.platypus-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Accents",
+      "decor": "Platypus",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/platypus/Natural/p/AU1007176",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.polar-white-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Whites & Neutrals",
+      "decor": "Polar White",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/polar-white/Natural/p/AU1001694",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.porcelain-blush-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Whites & Neutrals",
+      "decor": "Porcelain Blush",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/porcelain-blush/Natural/p/AU1004796",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.portsea-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Accents",
+      "decor": "Portsea",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/portsea/Natural/p/AU1005240",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.premio-carrara-truescale-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Minerals",
+      "decor": "Premio Carrara TrueScale",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/premio-carrara-truescale/Natural/p/AU1005282",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.pumice-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Whites & Neutrals",
+      "decor": "Pumice",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/pumice/Natural/p/AU1001698",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.pure-mineralstone-ii-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Minerals",
+      "decor": "Pure Mineralstone II",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/pure-mineralstone-ii/Natural/p/AU1001700",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.raw-birchply-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Woodgrains",
+      "decor": "Raw Birchply",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/raw-birchply/Natural/p/AU1002879",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.raw-cotton-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Whites & Neutrals",
+      "decor": "Raw Cotton",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/raw-cotton/Natural/p/AU1003631",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.raw-nickel-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Minerals",
+      "decor": "Raw Nickel",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/raw-nickel/Natural/p/AU1003385",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.raw-zinc-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Minerals",
+      "decor": "Raw Zinc",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/raw-zinc/Natural/p/AU1003387",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.rock-maple-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Woodgrains",
+      "decor": "Rock Maple",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/rock-maple/Natural/p/AU1001711",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.rocky-bay-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Whites & Neutrals",
+      "decor": "Rocky Bay",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/rocky-bay/Natural/p/AU1007177",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.rural-oak-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Woodgrains",
+      "decor": "Rural Oak",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/rural-oak/Natural/p/AU1001713",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.sand-pebble-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Minerals",
+      "decor": "Sand Pebble",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/sand-pebble/Natural/p/AU1001717",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.sarsen-grey-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Whites & Neutrals",
+      "decor": "Sarsen Grey",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/sarsen-grey/Natural/p/AU1001720",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.seasoned-oak-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Woodgrains",
+      "decor": "Seasoned Oak",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/seasoned-oak/Natural/p/AU1001724",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.select-beech-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Woodgrains",
+      "decor": "Select Beech",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/select-beech/Natural/p/AU1001727",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.smoked-birchply-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Woodgrains",
+      "decor": "Smoked Birchply",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/smoked-birchply/Natural/p/AU1002880",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.smoky-sapelle-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Woodgrains",
+      "decor": "Smoky Sapelle",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/smoky-sapelle/Natural/p/AU1001738",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.spinifex-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Accents",
+      "decor": "Spinifex",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/spinifex/Natural/p/AU1002877",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.steel-blue-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Accents",
+      "decor": "Steel Blue",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/steel-blue/Natural/p/AU1001746",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.stormcloud-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Whites & Neutrals",
+      "decor": "Stormcloud",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/stormcloud/Natural/p/AU1003635",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.super-white-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Whites & Neutrals",
+      "decor": "Super White",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/super-white/Natural/p/AU1001758",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.surf-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Whites & Neutrals",
+      "decor": "Surf",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/surf/Natural/p/AU1003632",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.terrazzino-perlato-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Minerals",
+      "decor": "Terrazzino Perlato",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/terrazzino-perlato/Natural/p/AU1005039",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.terril-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Whites & Neutrals",
+      "decor": "Terril",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/terril/Natural/p/AU1003373",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.tornado-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Whites & Neutrals",
+      "decor": "Tornado",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/tornado/Natural/p/AU1001765",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.tumbled-terrazzo-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Minerals",
+      "decor": "Tumbled Terrazzo",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/tumbled-terrazzo/Natural/p/AU1005043",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.urban-pezzato-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Minerals",
+      "decor": "Urban Pezzato",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/urban-pezzato/Natural/p/AU1003749",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.white-linen-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Whites & Neutrals",
+      "decor": "White Linen",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/white-linen/Natural/p/AU1003377",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.white-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Whites & Neutrals",
+      "decor": "White",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/white/Natural/p/AU1007244",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.white-painted-wood-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Woodgrains",
+      "decor": "White Painted Wood",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/white-painted-wood/Natural/p/AU1003791",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.white-valencia-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Minerals",
+      "decor": "White Valencia",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/white-valencia/Natural/p/AU1001773",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.winter-sky-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Accents",
+      "decor": "Winter Sky",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": false,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/winter-sky/Natural/p/AU1003394",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "laminex.benchtop.young-beech-natural.33",
+      "brand": "Laminex",
+      "range": "Made to Measure benchtops: Woodgrains",
+      "decor": "Young Beech",
+      "finish": "Natural",
+      "kind": "laminate_top",
+      "substrate": "moisture_resistant_particleboard",
+      "thickness": 33,
+      "sheets": [
+        {
+          "length": 3600,
+          "width": 1200
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#b8b2a8",
+      "source": {
+        "url": "https://www.laminex.com.au/products/young-beech/Natural/p/AU1001780",
+        "document_date": "Made to Measure Benchtops colour range, live page checked 2026-11-27; National Availability Guide, October 2025",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    }
+  ],
+  "edge_tapes": []
+}

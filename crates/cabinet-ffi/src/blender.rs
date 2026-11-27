@@ -79,7 +79,11 @@ fn manifest(
                 let sheet = found.and_then(|f| {
                     cat.boards
                         .iter()
-                        .filter(|b| b.brand == f.brand && b.decor == f.decor)
+                        .filter(|b| {
+                            b.brand == f.brand
+                                && b.decor == f.decor
+                                && b.kind != cabinet_catalog::BoardKind::LaminateTop
+                        })
                         .flat_map(|b| &b.sheets)
                         .max_by(|x, y| x.length.total_cmp(&y.length))
                 });

@@ -1330,7 +1330,10 @@ struct MaterialSection: View {
                 Menu {
                     ForEach(materials, id: \.id) { m in
                         Button {
-                            withAnimation(.snappy) { var c = cab; if m.id != "porcelain" { c.setStoneProduct(nil) }; c.material = m.id; project.selected = c }
+                            withAnimation(.snappy) { var c = cab
+                                // A product keeps only its own material's rules.
+                                if let b = project.boardsById[c.stoneProductID], CabinetDoc.stoneMaterial(b) != m.id { c.setStoneProduct(nil) }
+                                c.material = m.id; project.selected = c }
                         } label: {
                             Text(m.label)
                             Text(m.description)

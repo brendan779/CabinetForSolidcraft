@@ -1,0 +1,3250 @@
+{
+  "brand": "Dekton",
+  "website": "https://www.cosentino.com/en-au/colours/",
+  "notes": "Dekton by Cosentino, ultra-compact surface. The Australian range as shown on cosentino.com/en-au, 2026-11-27: each colour at 12 and 20 mm (8 and 4 mm, for cladding, left out), in every slab format its page lists. Grip+ (non-slip, for floors) is not a benchtop finish. Kind sintered_stone is our slab kind for benchtop pickers. Render roughness is our visual estimate. No prices inferred.",
+  "boards": [
+    {
+      "id": "dekton.amazonik.kedar.12",
+      "brand": "Dekton",
+      "range": "Amazonik",
+      "decor": "Kedar",
+      "finish": "Matte",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 12,
+      "sheets": [
+        {
+          "length": 3210,
+          "width": 1440
+        },
+        {
+          "length": 3220,
+          "width": 1450
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#a68f72",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/kedar/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.amazonik.kedar.20",
+      "brand": "Dekton",
+      "range": "Amazonik",
+      "decor": "Kedar",
+      "finish": "Matte",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 20,
+      "sheets": [
+        {
+          "length": 3210,
+          "width": 1440
+        },
+        {
+          "length": 3220,
+          "width": 1450
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#a68f72",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/kedar/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.amazonik.zira.12",
+      "brand": "Dekton",
+      "range": "Amazonik",
+      "decor": "Zira",
+      "finish": "Matte",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 12,
+      "sheets": [
+        {
+          "length": 3270,
+          "width": 1470
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#c9c1b4",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/zira/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.amazonik.zira.20",
+      "brand": "Dekton",
+      "range": "Amazonik",
+      "decor": "Zira",
+      "finish": "Matte",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 20,
+      "sheets": [
+        {
+          "length": 3270,
+          "width": 1470
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#c9c1b4",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/zira/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.artik-nodes.borealis.12",
+      "brand": "Dekton",
+      "range": "Artik Nodes",
+      "decor": "Borealis",
+      "finish": "Polished",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 12,
+      "sheets": [
+        {
+          "length": 3360,
+          "width": 1670
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#d9d5cd",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/borealis/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.artik-nodes.borealis.20",
+      "brand": "Dekton",
+      "range": "Artik Nodes",
+      "decor": "Borealis",
+      "finish": "Polished",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 20,
+      "sheets": [
+        {
+          "length": 3360,
+          "width": 1670
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#d9d5cd",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/borealis/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.artik-nodes.kobuk.12",
+      "brand": "Dekton",
+      "range": "Artik Nodes",
+      "decor": "Kobuk",
+      "finish": "Velvet",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 12,
+      "sheets": [
+        {
+          "length": 3320,
+          "width": 1660
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#706960",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/kobuk/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.artik-nodes.kobuk.20",
+      "brand": "Dekton",
+      "range": "Artik Nodes",
+      "decor": "Kobuk",
+      "finish": "Velvet",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 20,
+      "sheets": [
+        {
+          "length": 3320,
+          "width": 1660
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#706960",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/kobuk/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.artik-nodes.nordal.12",
+      "brand": "Dekton",
+      "range": "Artik Nodes",
+      "decor": "Nordal",
+      "finish": "Velvet",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 12,
+      "sheets": [
+        {
+          "length": 3360,
+          "width": 1670
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#b9bab2",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/nordal/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.artik-nodes.nordal.20",
+      "brand": "Dekton",
+      "range": "Artik Nodes",
+      "decor": "Nordal",
+      "finish": "Velvet",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 20,
+      "sheets": [
+        {
+          "length": 3360,
+          "width": 1670
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#b9bab2",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/nordal/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.dk-industrial.kreta.12",
+      "brand": "Dekton",
+      "range": "DK Industrial",
+      "decor": "Kreta",
+      "finish": "Matte",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 12,
+      "sheets": [
+        {
+          "length": 3320,
+          "width": 1660
+        },
+        {
+          "length": 3220,
+          "width": 1450
+        },
+        {
+          "length": 3210,
+          "width": 1440
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#a9a6a1",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/kreta/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.dk-industrial.kreta.20",
+      "brand": "Dekton",
+      "range": "DK Industrial",
+      "decor": "Kreta",
+      "finish": "Matte",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 20,
+      "sheets": [
+        {
+          "length": 3320,
+          "width": 1660
+        },
+        {
+          "length": 3220,
+          "width": 1450
+        },
+        {
+          "length": 3210,
+          "width": 1440
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#a9a6a1",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/kreta/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.dk-industrial.laos.12",
+      "brand": "Dekton",
+      "range": "DK Industrial",
+      "decor": "Laos",
+      "finish": "Matte",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 12,
+      "sheets": [
+        {
+          "length": 3220,
+          "width": 1450
+        },
+        {
+          "length": 3210,
+          "width": 1440
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#4f4e4c",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/laos/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.dk-industrial.laos.20",
+      "brand": "Dekton",
+      "range": "DK Industrial",
+      "decor": "Laos",
+      "finish": "Matte",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 20,
+      "sheets": [
+        {
+          "length": 3220,
+          "width": 1450
+        },
+        {
+          "length": 3210,
+          "width": 1440
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#4f4e4c",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/laos/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.dk-industrial.lunar.12",
+      "brand": "Dekton",
+      "range": "DK Industrial",
+      "decor": "Lunar",
+      "finish": "Matte",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 12,
+      "sheets": [
+        {
+          "length": 3270,
+          "width": 1470
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#dedbd0",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/lunar/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.dk-industrial.lunar.20",
+      "brand": "Dekton",
+      "range": "DK Industrial",
+      "decor": "Lunar",
+      "finish": "Matte",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 20,
+      "sheets": [
+        {
+          "length": 3270,
+          "width": 1470
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#dedbd0",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/lunar/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.dk-industrial.soke.12",
+      "brand": "Dekton",
+      "range": "DK Industrial",
+      "decor": "Soke",
+      "finish": "Matte",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 12,
+      "sheets": [
+        {
+          "length": 3210,
+          "width": 1440
+        },
+        {
+          "length": 3220,
+          "width": 1450
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#a3a19b",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/soke/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.dk-industrial.soke.20",
+      "brand": "Dekton",
+      "range": "DK Industrial",
+      "decor": "Soke",
+      "finish": "Matte",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 20,
+      "sheets": [
+        {
+          "length": 3210,
+          "width": 1440
+        },
+        {
+          "length": 3220,
+          "width": 1450
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#a3a19b",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/soke/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.dk-natural.aeris.12",
+      "brand": "Dekton",
+      "range": "DK Natural",
+      "decor": "Aeris",
+      "finish": "Matte",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 12,
+      "sheets": [
+        {
+          "length": 3360,
+          "width": 1670
+        },
+        {
+          "length": 3270,
+          "width": 1470
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#dbdcce",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/aeris/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.dk-natural.aeris.20",
+      "brand": "Dekton",
+      "range": "DK Natural",
+      "decor": "Aeris",
+      "finish": "Matte",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 20,
+      "sheets": [
+        {
+          "length": 3360,
+          "width": 1670
+        },
+        {
+          "length": 3270,
+          "width": 1470
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#dbdcce",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/aeris/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.dk-natural.aura.12",
+      "brand": "Dekton",
+      "range": "DK Natural",
+      "decor": "Aura",
+      "finish": "Matte",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 12,
+      "sheets": [
+        {
+          "length": 3270,
+          "width": 1470
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#fafaf9",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/aura/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.dk-natural.aura.20",
+      "brand": "Dekton",
+      "range": "DK Natural",
+      "decor": "Aura",
+      "finish": "Matte",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 20,
+      "sheets": [
+        {
+          "length": 3270,
+          "width": 1470
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#fafaf9",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/aura/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.dk-natural.bromo.12",
+      "brand": "Dekton",
+      "range": "DK Natural",
+      "decor": "Bromo",
+      "finish": "Matte",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 12,
+      "sheets": [
+        {
+          "length": 3220,
+          "width": 1450
+        },
+        {
+          "length": 3210,
+          "width": 1440
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#424242",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/bromo/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.dk-natural.bromo.20",
+      "brand": "Dekton",
+      "range": "DK Natural",
+      "decor": "Bromo",
+      "finish": "Matte",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 20,
+      "sheets": [
+        {
+          "length": 3220,
+          "width": 1450
+        },
+        {
+          "length": 3210,
+          "width": 1440
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#424242",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/bromo/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.dk-natural.danae.12",
+      "brand": "Dekton",
+      "range": "DK Natural",
+      "decor": "Danae",
+      "finish": "Matte",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 12,
+      "sheets": [
+        {
+          "length": 3270,
+          "width": 1470
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#cdc1b3",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/danae/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.dk-natural.danae.20",
+      "brand": "Dekton",
+      "range": "DK Natural",
+      "decor": "Danae",
+      "finish": "Matte",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 20,
+      "sheets": [
+        {
+          "length": 3270,
+          "width": 1470
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#cdc1b3",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/danae/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.dk-natural.entzo22.12",
+      "brand": "Dekton",
+      "range": "DK Natural",
+      "decor": "Entzo22",
+      "finish": "Matte",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 12,
+      "sheets": [
+        {
+          "length": 3360,
+          "width": 1670
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#f9f9f6",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/entzo22/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.dk-natural.entzo22.20",
+      "brand": "Dekton",
+      "range": "DK Natural",
+      "decor": "Entzo22",
+      "finish": "Matte",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 20,
+      "sheets": [
+        {
+          "length": 3360,
+          "width": 1670
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#f9f9f6",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/entzo22/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.dk-natural.eter.12",
+      "brand": "Dekton",
+      "range": "DK Natural",
+      "decor": "Eter",
+      "finish": "Matte",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 12,
+      "sheets": [
+        {
+          "length": 3210,
+          "width": 1440
+        },
+        {
+          "length": 3220,
+          "width": 1450
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#3c3c3c",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/eter/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.dk-natural.eter.20",
+      "brand": "Dekton",
+      "range": "DK Natural",
+      "decor": "Eter",
+      "finish": "Matte",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 20,
+      "sheets": [
+        {
+          "length": 3210,
+          "width": 1440
+        },
+        {
+          "length": 3220,
+          "width": 1450
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#3c3c3c",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/eter/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.dk-natural.kelya.12",
+      "brand": "Dekton",
+      "range": "DK Natural",
+      "decor": "Kelya",
+      "finish": "Matte",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 12,
+      "sheets": [
+        {
+          "length": 3320,
+          "width": 1660
+        },
+        {
+          "length": 3000,
+          "width": 1000
+        },
+        {
+          "length": 3210,
+          "width": 1440
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#232220",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/kelya/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.dk-natural.kelya.20",
+      "brand": "Dekton",
+      "range": "DK Natural",
+      "decor": "Kelya",
+      "finish": "Matte",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 20,
+      "sheets": [
+        {
+          "length": 3320,
+          "width": 1660
+        },
+        {
+          "length": 3000,
+          "width": 1000
+        },
+        {
+          "length": 3210,
+          "width": 1440
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#232220",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/kelya/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.dk-natural.kira.12",
+      "brand": "Dekton",
+      "range": "DK Natural",
+      "decor": "Kira",
+      "finish": "Matte",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 12,
+      "sheets": [
+        {
+          "length": 3220,
+          "width": 1450
+        },
+        {
+          "length": 3210,
+          "width": 1440
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#6d665d",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/kira/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.dk-natural.kira.20",
+      "brand": "Dekton",
+      "range": "DK Natural",
+      "decor": "Kira",
+      "finish": "Matte",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 20,
+      "sheets": [
+        {
+          "length": 3220,
+          "width": 1450
+        },
+        {
+          "length": 3210,
+          "width": 1440
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#6d665d",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/kira/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.dk-natural.kovik.12",
+      "brand": "Dekton",
+      "range": "DK Natural",
+      "decor": "Kovik",
+      "finish": "Matte",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 12,
+      "sheets": [
+        {
+          "length": 3210,
+          "width": 1440
+        },
+        {
+          "length": 3220,
+          "width": 1450
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#bec0ba",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/kovik/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.dk-natural.kovik.20",
+      "brand": "Dekton",
+      "range": "DK Natural",
+      "decor": "Kovik",
+      "finish": "Matte",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 20,
+      "sheets": [
+        {
+          "length": 3210,
+          "width": 1440
+        },
+        {
+          "length": 3220,
+          "width": 1450
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#bec0ba",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/kovik/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.dk-natural.laurent.12",
+      "brand": "Dekton",
+      "range": "DK Natural",
+      "decor": "Laurent",
+      "finish": "Matte",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 12,
+      "sheets": [
+        {
+          "length": 3320,
+          "width": 1660
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#292826",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/laurent/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.dk-natural.laurent.20",
+      "brand": "Dekton",
+      "range": "DK Natural",
+      "decor": "Laurent",
+      "finish": "Matte",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 20,
+      "sheets": [
+        {
+          "length": 3320,
+          "width": 1660
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#292826",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/laurent/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.dk-natural.nara.12",
+      "brand": "Dekton",
+      "range": "DK Natural",
+      "decor": "Nara",
+      "finish": "Velvet",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 12,
+      "sheets": [
+        {
+          "length": 3360,
+          "width": 1670
+        },
+        {
+          "length": 3260,
+          "width": 1460
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#ddddcf",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/nara/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.dk-natural.nara.20",
+      "brand": "Dekton",
+      "range": "DK Natural",
+      "decor": "Nara",
+      "finish": "Velvet",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 20,
+      "sheets": [
+        {
+          "length": 3360,
+          "width": 1670
+        },
+        {
+          "length": 3260,
+          "width": 1460
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#ddddcf",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/nara/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.dk-natural.portum.12",
+      "brand": "Dekton",
+      "range": "DK Natural",
+      "decor": "Portum",
+      "finish": "Velvet",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 12,
+      "sheets": [
+        {
+          "length": 3280,
+          "width": 1480
+        },
+        {
+          "length": 3270,
+          "width": 1470
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#cccdc7",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/portum/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.dk-natural.portum.20",
+      "brand": "Dekton",
+      "range": "DK Natural",
+      "decor": "Portum",
+      "finish": "Velvet",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 20,
+      "sheets": [
+        {
+          "length": 3280,
+          "width": 1480
+        },
+        {
+          "length": 3270,
+          "width": 1470
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#cccdc7",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/portum/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.dk-natural.rem.12",
+      "brand": "Dekton",
+      "range": "DK Natural",
+      "decor": "Rem",
+      "finish": "Velvet",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 12,
+      "sheets": [
+        {
+          "length": 3360,
+          "width": 1670
+        },
+        {
+          "length": 3260,
+          "width": 1460
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#ecece4",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/rem/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.dk-natural.rem.20",
+      "brand": "Dekton",
+      "range": "DK Natural",
+      "decor": "Rem",
+      "finish": "Velvet",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 20,
+      "sheets": [
+        {
+          "length": 3360,
+          "width": 1670
+        },
+        {
+          "length": 3260,
+          "width": 1460
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#ecece4",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/rem/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.dk-solid.domoos.12",
+      "brand": "Dekton",
+      "range": "DK Solid",
+      "decor": "Domoos",
+      "finish": "Matte",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 12,
+      "sheets": [
+        {
+          "length": 3210,
+          "width": 1440
+        },
+        {
+          "length": 3220,
+          "width": 1450
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#262626",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/domoos/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.dk-solid.domoos.20",
+      "brand": "Dekton",
+      "range": "DK Solid",
+      "decor": "Domoos",
+      "finish": "Matte",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 20,
+      "sheets": [
+        {
+          "length": 3210,
+          "width": 1440
+        },
+        {
+          "length": 3220,
+          "width": 1450
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#262626",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/domoos/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.dk-solid.moone.12",
+      "brand": "Dekton",
+      "range": "DK Solid",
+      "decor": "Moone",
+      "finish": "Matte",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 12,
+      "sheets": [
+        {
+          "length": 3270,
+          "width": 1470
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#f1efe3",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/moone/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.dk-solid.moone.20",
+      "brand": "Dekton",
+      "range": "DK Solid",
+      "decor": "Moone",
+      "finish": "Matte",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 20,
+      "sheets": [
+        {
+          "length": 3270,
+          "width": 1470
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#f1efe3",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/moone/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.dk-solid.sirius.12",
+      "brand": "Dekton",
+      "range": "DK Solid",
+      "decor": "Sirius",
+      "finish": "Matte",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 12,
+      "sheets": [
+        {
+          "length": 3220,
+          "width": 1450
+        },
+        {
+          "length": 3210,
+          "width": 1440
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#272726",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/sirius/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.dk-solid.sirius.20",
+      "brand": "Dekton",
+      "range": "DK Solid",
+      "decor": "Sirius",
+      "finish": "Matte",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 20,
+      "sheets": [
+        {
+          "length": 3220,
+          "width": 1450
+        },
+        {
+          "length": 3210,
+          "width": 1440
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#272726",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/sirius/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.dk-solid.zenith.12",
+      "brand": "Dekton",
+      "range": "DK Solid",
+      "decor": "Zenith",
+      "finish": "Matte",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 12,
+      "sheets": [
+        {
+          "length": 3270,
+          "width": 1470
+        },
+        {
+          "length": 3280,
+          "width": 1480
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#efefe8",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/zenith/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.dk-solid.zenith.20",
+      "brand": "Dekton",
+      "range": "DK Solid",
+      "decor": "Zenith",
+      "finish": "Matte",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 20,
+      "sheets": [
+        {
+          "length": 3270,
+          "width": 1470
+        },
+        {
+          "length": 3280,
+          "width": 1480
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#efefe8",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/zenith/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.kraftizen.albarium.12",
+      "brand": "Dekton",
+      "range": "Kraftizen",
+      "decor": "Albarium",
+      "finish": "Matte",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 12,
+      "sheets": [
+        {
+          "length": 3270,
+          "width": 1470
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#d5d3c7",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/albarium/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.kraftizen.albarium.20",
+      "brand": "Dekton",
+      "range": "Kraftizen",
+      "decor": "Albarium",
+      "finish": "Matte",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 20,
+      "sheets": [
+        {
+          "length": 3270,
+          "width": 1470
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#d5d3c7",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/albarium/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.kraftizen.argentium.12",
+      "brand": "Dekton",
+      "range": "Kraftizen",
+      "decor": "Argentium",
+      "finish": "Matte",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 12,
+      "sheets": [
+        {
+          "length": 3270,
+          "width": 1470
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#c5c3b6",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/argentium/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.kraftizen.argentium.20",
+      "brand": "Dekton",
+      "range": "Kraftizen",
+      "decor": "Argentium",
+      "finish": "Matte",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 20,
+      "sheets": [
+        {
+          "length": 3270,
+          "width": 1470
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#c5c3b6",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/argentium/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.kraftizen.nacre.12",
+      "brand": "Dekton",
+      "range": "Kraftizen",
+      "decor": "Nacre",
+      "finish": "Velvet",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 12,
+      "sheets": [
+        {
+          "length": 3260,
+          "width": 1460
+        },
+        {
+          "length": 3270,
+          "width": 1470
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#dfd5c1",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/nacre/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.kraftizen.nacre.20",
+      "brand": "Dekton",
+      "range": "Kraftizen",
+      "decor": "Nacre",
+      "finish": "Velvet",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 20,
+      "sheets": [
+        {
+          "length": 3260,
+          "width": 1460
+        },
+        {
+          "length": 3270,
+          "width": 1470
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#dfd5c1",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/nacre/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.kraftizen.umber.12",
+      "brand": "Dekton",
+      "range": "Kraftizen",
+      "decor": "Umber",
+      "finish": "Matte",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 12,
+      "sheets": [
+        {
+          "length": 3210,
+          "width": 1440
+        },
+        {
+          "length": 3220,
+          "width": 1450
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#ae7f69",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/umber/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.kraftizen.umber.20",
+      "brand": "Dekton",
+      "range": "Kraftizen",
+      "decor": "Umber",
+      "finish": "Matte",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 20,
+      "sheets": [
+        {
+          "length": 3210,
+          "width": 1440
+        },
+        {
+          "length": 3220,
+          "width": 1450
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#ae7f69",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/umber/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.nomak.akara.12",
+      "brand": "Dekton",
+      "range": "Nomak",
+      "decor": "Akara",
+      "finish": "Matte",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 12,
+      "sheets": [
+        {
+          "length": 3360,
+          "width": 1670
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#ddd3c7",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/akara/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.nomak.akara.20",
+      "brand": "Dekton",
+      "range": "Nomak",
+      "decor": "Akara",
+      "finish": "Matte",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 20,
+      "sheets": [
+        {
+          "length": 3360,
+          "width": 1670
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#ddd3c7",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/akara/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.nomak.evok.12",
+      "brand": "Dekton",
+      "range": "Nomak",
+      "decor": "Evok",
+      "finish": "Matte",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 12,
+      "sheets": [
+        {
+          "length": 3360,
+          "width": 1670
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#e4e5e0",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/evok/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.nomak.evok.20",
+      "brand": "Dekton",
+      "range": "Nomak",
+      "decor": "Evok",
+      "finish": "Matte",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 20,
+      "sheets": [
+        {
+          "length": 3360,
+          "width": 1670
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#e4e5e0",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/evok/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.nomak.grekk.12",
+      "brand": "Dekton",
+      "range": "Nomak",
+      "decor": "Grekk",
+      "finish": "Matte",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 12,
+      "sheets": [
+        {
+          "length": 3360,
+          "width": 1670
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#bcb7ab",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/grekk/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.nomak.grekk.20",
+      "brand": "Dekton",
+      "range": "Nomak",
+      "decor": "Grekk",
+      "finish": "Matte",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 20,
+      "sheets": [
+        {
+          "length": 3360,
+          "width": 1670
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#bcb7ab",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/grekk/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.nomak.keena.12",
+      "brand": "Dekton",
+      "range": "Nomak",
+      "decor": "Keena",
+      "finish": "Matte",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 12,
+      "sheets": [
+        {
+          "length": 3360,
+          "width": 1670
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#f0f0ed",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/keena/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.nomak.keena.20",
+      "brand": "Dekton",
+      "range": "Nomak",
+      "decor": "Keena",
+      "finish": "Matte",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 20,
+      "sheets": [
+        {
+          "length": 3360,
+          "width": 1670
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#f0f0ed",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/keena/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.nomak.talma.12",
+      "brand": "Dekton",
+      "range": "Nomak",
+      "decor": "Talma",
+      "finish": "Matte",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 12,
+      "sheets": [
+        {
+          "length": 3320,
+          "width": 1660
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#554639",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/talma/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.nomak.talma.20",
+      "brand": "Dekton",
+      "range": "Nomak",
+      "decor": "Talma",
+      "finish": "Matte",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 20,
+      "sheets": [
+        {
+          "length": 3320,
+          "width": 1660
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#554639",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/talma/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.nomak.thala.12",
+      "brand": "Dekton",
+      "range": "Nomak",
+      "decor": "Thala",
+      "finish": "Matte",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 12,
+      "sheets": [
+        {
+          "length": 3360,
+          "width": 1670
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#eeefe9",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/thala/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.nomak.thala.20",
+      "brand": "Dekton",
+      "range": "Nomak",
+      "decor": "Thala",
+      "finish": "Matte",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 20,
+      "sheets": [
+        {
+          "length": 3360,
+          "width": 1670
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#eeefe9",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/thala/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.onirika.awake.12",
+      "brand": "Dekton",
+      "range": "Onirika",
+      "decor": "Awake",
+      "finish": "Polished",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 12,
+      "sheets": [
+        {
+          "length": 3360,
+          "width": 1670
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#d8d7cf",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/awake/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.onirika.awake.20",
+      "brand": "Dekton",
+      "range": "Onirika",
+      "decor": "Awake",
+      "finish": "Polished",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 20,
+      "sheets": [
+        {
+          "length": 3360,
+          "width": 1670
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#d8d7cf",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/awake/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.onirika.lucid.12",
+      "brand": "Dekton",
+      "range": "Onirika",
+      "decor": "Lucid",
+      "finish": "Polished",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 12,
+      "sheets": [
+        {
+          "length": 3360,
+          "width": 1670
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#e2e3db",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/lucid/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.onirika.lucid.20",
+      "brand": "Dekton",
+      "range": "Onirika",
+      "decor": "Lucid",
+      "finish": "Polished",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 20,
+      "sheets": [
+        {
+          "length": 3360,
+          "width": 1670
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#e2e3db",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/lucid/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.onirika.morpheus.12",
+      "brand": "Dekton",
+      "range": "Onirika",
+      "decor": "Morpheus",
+      "finish": "Velvet",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 12,
+      "sheets": [
+        {
+          "length": 3360,
+          "width": 1670
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#e1e1dd",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/morpheus/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.onirika.morpheus.20",
+      "brand": "Dekton",
+      "range": "Onirika",
+      "decor": "Morpheus",
+      "finish": "Velvet",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 20,
+      "sheets": [
+        {
+          "length": 3360,
+          "width": 1670
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#e1e1dd",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/morpheus/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.onirika.neural.12",
+      "brand": "Dekton",
+      "range": "Onirika",
+      "decor": "Neural",
+      "finish": "Velvet",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 12,
+      "sheets": [
+        {
+          "length": 3360,
+          "width": 1670
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#f0f0ec",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/neural/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.onirika.neural.20",
+      "brand": "Dekton",
+      "range": "Onirika",
+      "decor": "Neural",
+      "finish": "Velvet",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 20,
+      "sheets": [
+        {
+          "length": 3360,
+          "width": 1670
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#f0f0ec",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/neural/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.onirika.reverie.12",
+      "brand": "Dekton",
+      "range": "Onirika",
+      "decor": "Reverie",
+      "finish": "Velvet",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 12,
+      "sheets": [
+        {
+          "length": 3360,
+          "width": 1670
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#d8d7cf",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/reverie/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.onirika.reverie.20",
+      "brand": "Dekton",
+      "range": "Onirika",
+      "decor": "Reverie",
+      "finish": "Velvet",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 20,
+      "sheets": [
+        {
+          "length": 3360,
+          "width": 1670
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#d8d7cf",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/reverie/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.onirika.somnia.12",
+      "brand": "Dekton",
+      "range": "Onirika",
+      "decor": "Somnia",
+      "finish": "Matte",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 12,
+      "sheets": [
+        {
+          "length": 3320,
+          "width": 1660
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#222321",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/somnia/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.onirika.somnia.20",
+      "brand": "Dekton",
+      "range": "Onirika",
+      "decor": "Somnia",
+      "finish": "Matte",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 20,
+      "sheets": [
+        {
+          "length": 3320,
+          "width": 1660
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#222321",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/somnia/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.onirika.trance.12",
+      "brand": "Dekton",
+      "range": "Onirika",
+      "decor": "Trance",
+      "finish": "Polished",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 12,
+      "sheets": [
+        {
+          "length": 3360,
+          "width": 1670
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#d1d2ce",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/trance/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.onirika.trance.20",
+      "brand": "Dekton",
+      "range": "Onirika",
+      "decor": "Trance",
+      "finish": "Polished",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 20,
+      "sheets": [
+        {
+          "length": 3360,
+          "width": 1670
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#d1d2ce",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/trance/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.pietra-edition.adia.12",
+      "brand": "Dekton",
+      "range": "Pietra Edition",
+      "decor": "Adia",
+      "finish": "Matte",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 12,
+      "sheets": [
+        {
+          "length": 3270,
+          "width": 1470
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#bab3a1",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/adia/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.pietra-edition.adia.20",
+      "brand": "Dekton",
+      "range": "Pietra Edition",
+      "decor": "Adia",
+      "finish": "Matte",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 20,
+      "sheets": [
+        {
+          "length": 3270,
+          "width": 1470
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#bab3a1",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/adia/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.pietra-edition.ava.12",
+      "brand": "Dekton",
+      "range": "Pietra Edition",
+      "decor": "Ava",
+      "finish": "Matte",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 12,
+      "sheets": [
+        {
+          "length": 3270,
+          "width": 1470
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#cbc7b5",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/ava/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.pietra-edition.ava.20",
+      "brand": "Dekton",
+      "range": "Pietra Edition",
+      "decor": "Ava",
+      "finish": "Matte",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 20,
+      "sheets": [
+        {
+          "length": 3270,
+          "width": 1470
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#cbc7b5",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/ava/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.pietra-edition.nebu.12",
+      "brand": "Dekton",
+      "range": "Pietra Edition",
+      "decor": "Nebu",
+      "finish": "Matte",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 12,
+      "sheets": [
+        {
+          "length": 3270,
+          "width": 1470
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#c5beab",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/nebu/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.pietra-edition.nebu.20",
+      "brand": "Dekton",
+      "range": "Pietra Edition",
+      "decor": "Nebu",
+      "finish": "Matte",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 20,
+      "sheets": [
+        {
+          "length": 3270,
+          "width": 1470
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#c5beab",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/nebu/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.pietra-edition.polar.12",
+      "brand": "Dekton",
+      "range": "Pietra Edition",
+      "decor": "Polar",
+      "finish": "Matte",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 12,
+      "sheets": [
+        {
+          "length": 3280,
+          "width": 1480
+        },
+        {
+          "length": 3270,
+          "width": 1470
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#d0d1cc",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/polar/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.pietra-edition.polar.20",
+      "brand": "Dekton",
+      "range": "Pietra Edition",
+      "decor": "Polar",
+      "finish": "Matte",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 20,
+      "sheets": [
+        {
+          "length": 3280,
+          "width": 1480
+        },
+        {
+          "length": 3270,
+          "width": 1470
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#d0d1cc",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/polar/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.pietra-edition.sandik.12",
+      "brand": "Dekton",
+      "range": "Pietra Edition",
+      "decor": "Sandik",
+      "finish": "Velvet",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 12,
+      "sheets": [
+        {
+          "length": 3360,
+          "width": 1670
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#d5d7d2",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/sandik/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.pietra-edition.sandik.20",
+      "brand": "Dekton",
+      "range": "Pietra Edition",
+      "decor": "Sandik",
+      "finish": "Velvet",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 20,
+      "sheets": [
+        {
+          "length": 3360,
+          "width": 1670
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#d5d7d2",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/sandik/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.pietra-edition.trevi.12",
+      "brand": "Dekton",
+      "range": "Pietra Edition",
+      "decor": "Trevi",
+      "finish": "Matte",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 12,
+      "sheets": [
+        {
+          "length": 3280,
+          "width": 1480
+        },
+        {
+          "length": 3270,
+          "width": 1470
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#bdbeb9",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/trevi/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.pietra-edition.trevi.20",
+      "brand": "Dekton",
+      "range": "Pietra Edition",
+      "decor": "Trevi",
+      "finish": "Matte",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 20,
+      "sheets": [
+        {
+          "length": 3280,
+          "width": 1480
+        },
+        {
+          "length": 3270,
+          "width": 1470
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#bdbeb9",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/trevi/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.pietra-kode.grafite.12",
+      "brand": "Dekton",
+      "range": "Pietra Kode",
+      "decor": "Grafite",
+      "finish": "Matte",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 12,
+      "sheets": [
+        {
+          "length": 3210,
+          "width": 1440
+        },
+        {
+          "length": 3220,
+          "width": 1450
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#6b6a66",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/grafite/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.pietra-kode.grafite.20",
+      "brand": "Dekton",
+      "range": "Pietra Kode",
+      "decor": "Grafite",
+      "finish": "Matte",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 20,
+      "sheets": [
+        {
+          "length": 3210,
+          "width": 1440
+        },
+        {
+          "length": 3220,
+          "width": 1450
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#6b6a66",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/grafite/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.pietra-kode.grigio.12",
+      "brand": "Dekton",
+      "range": "Pietra Kode",
+      "decor": "Grigio",
+      "finish": "Matte",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 12,
+      "sheets": [
+        {
+          "length": 3270,
+          "width": 1470
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#a49e93",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/grigio/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.pietra-kode.grigio.20",
+      "brand": "Dekton",
+      "range": "Pietra Kode",
+      "decor": "Grigio",
+      "finish": "Matte",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 20,
+      "sheets": [
+        {
+          "length": 3270,
+          "width": 1470
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#a49e93",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/grigio/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.pietra-kode.marmorio.12",
+      "brand": "Dekton",
+      "range": "Pietra Kode",
+      "decor": "Marmorio",
+      "finish": "Matte",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 12,
+      "sheets": [
+        {
+          "length": 3360,
+          "width": 1670
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#cdcaba",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/marmorio/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.pietra-kode.marmorio.20",
+      "brand": "Dekton",
+      "range": "Pietra Kode",
+      "decor": "Marmorio",
+      "finish": "Matte",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 20,
+      "sheets": [
+        {
+          "length": 3360,
+          "width": 1670
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#cdcaba",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/marmorio/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.pietra-kode.nebbia.12",
+      "brand": "Dekton",
+      "range": "Pietra Kode",
+      "decor": "Nebbia",
+      "finish": "Matte",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 12,
+      "sheets": [
+        {
+          "length": 3270,
+          "width": 1470
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#cbc7be",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/nebbia/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.pietra-kode.nebbia.20",
+      "brand": "Dekton",
+      "range": "Pietra Kode",
+      "decor": "Nebbia",
+      "finish": "Matte",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 20,
+      "sheets": [
+        {
+          "length": 3270,
+          "width": 1470
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#cbc7be",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/nebbia/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.pietra-kode.sabbia.12",
+      "brand": "Dekton",
+      "range": "Pietra Kode",
+      "decor": "Sabbia",
+      "finish": "Matte",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 12,
+      "sheets": [
+        {
+          "length": 3360,
+          "width": 1670
+        },
+        {
+          "length": 3270,
+          "width": 1470
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#cbcbbf",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/sabbia/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.pietra-kode.sabbia.20",
+      "brand": "Dekton",
+      "range": "Pietra Kode",
+      "decor": "Sabbia",
+      "finish": "Matte",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 20,
+      "sheets": [
+        {
+          "length": 3360,
+          "width": 1670
+        },
+        {
+          "length": 3270,
+          "width": 1470
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#cbcbbf",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/sabbia/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.silverkoast.marina.12",
+      "brand": "Dekton",
+      "range": "Silverkoast",
+      "decor": "Marina",
+      "finish": "Velvet",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 12,
+      "sheets": [
+        {
+          "length": 3360,
+          "width": 1670
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#eff0ed",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/marina/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.silverkoast.marina.20",
+      "brand": "Dekton",
+      "range": "Silverkoast",
+      "decor": "Marina",
+      "finish": "Velvet",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 20,
+      "sheets": [
+        {
+          "length": 3360,
+          "width": 1670
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#eff0ed",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/marina/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.silverkoast.salina.12",
+      "brand": "Dekton",
+      "range": "Silverkoast",
+      "decor": "Salina",
+      "finish": "Polished",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 12,
+      "sheets": [
+        {
+          "length": 3360,
+          "width": 1670
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#eaecea",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/salina/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.silverkoast.salina.20",
+      "brand": "Dekton",
+      "range": "Silverkoast",
+      "decor": "Salina",
+      "finish": "Polished",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 20,
+      "sheets": [
+        {
+          "length": 3360,
+          "width": 1670
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#eaecea",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/salina/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.stonika.arga.12",
+      "brand": "Dekton",
+      "range": "Stonika",
+      "decor": "Arga",
+      "finish": "Polished",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 12,
+      "sheets": [
+        {
+          "length": 3360,
+          "width": 1670
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#d2caba",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/arga/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.stonika.arga.20",
+      "brand": "Dekton",
+      "range": "Stonika",
+      "decor": "Arga",
+      "finish": "Polished",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 20,
+      "sheets": [
+        {
+          "length": 3360,
+          "width": 1670
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#d2caba",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/arga/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.stonika.bergen.12",
+      "brand": "Dekton",
+      "range": "Stonika",
+      "decor": "Bergen",
+      "finish": "Polished",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 12,
+      "sheets": [
+        {
+          "length": 3360,
+          "width": 1670
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#cfcfcb",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/bergen/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.stonika.bergen.20",
+      "brand": "Dekton",
+      "range": "Stonika",
+      "decor": "Bergen",
+      "finish": "Polished",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 20,
+      "sheets": [
+        {
+          "length": 3360,
+          "width": 1670
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#cfcfcb",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/bergen/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.stonika.helena.12",
+      "brand": "Dekton",
+      "range": "Stonika",
+      "decor": "Helena",
+      "finish": "Polished",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 12,
+      "sheets": [
+        {
+          "length": 3360,
+          "width": 1670
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#e2e3dd",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/helena/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.stonika.helena.20",
+      "brand": "Dekton",
+      "range": "Stonika",
+      "decor": "Helena",
+      "finish": "Polished",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 20,
+      "sheets": [
+        {
+          "length": 3360,
+          "width": 1670
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#e2e3dd",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/helena/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.stonika.khalo.12",
+      "brand": "Dekton",
+      "range": "Stonika",
+      "decor": "Khalo",
+      "finish": "Polished",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 12,
+      "sheets": [
+        {
+          "length": 3360,
+          "width": 1670
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#a6997e",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/khalo/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.stonika.khalo.20",
+      "brand": "Dekton",
+      "range": "Stonika",
+      "decor": "Khalo",
+      "finish": "Polished",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 20,
+      "sheets": [
+        {
+          "length": 3360,
+          "width": 1670
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#a6997e",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/khalo/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.stonika.taga.12",
+      "brand": "Dekton",
+      "range": "Stonika",
+      "decor": "Taga",
+      "finish": "Polished",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 12,
+      "sheets": [
+        {
+          "length": 3360,
+          "width": 1670
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#c7c5ba",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/taga/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    },
+    {
+      "id": "dekton.stonika.taga.20",
+      "brand": "Dekton",
+      "range": "Stonika",
+      "decor": "Taga",
+      "finish": "Polished",
+      "kind": "sintered_stone",
+      "substrate": "other",
+      "thickness": 20,
+      "sheets": [
+        {
+          "length": 3360,
+          "width": 1670
+        }
+      ],
+      "grained": true,
+      "double_sided": false,
+      "preview_colour": "#c7c5ba",
+      "source": {
+        "url": "https://www.cosentino.com/en-au/colours/dekton/taga/",
+        "document_date": "live product page, checked 2026-11-27",
+        "retrieved": "2026-11-27",
+        "verified": false
+      }
+    }
+  ],
+  "edge_tapes": []
+}
