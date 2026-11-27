@@ -42,6 +42,10 @@ whose checksum doesn't match. Images are stored, not recompressed, at the size t
 - A textures file's records name their pictures (`name`, and `normal` for a normal map) without the
   extension: each must be in `images/`.
 
+A pack may also hold pictures alone, with no textures file: the tile floors' packs
+(`beaumont-tiles`) carry each floor's colour, height and grout pictures, whose records
+(`catalog/floors`) ship with the app.
+
 ## Installing
 
 `install_material_pack` (cabinet-ffi) checks the whole pack before writing anything, then puts the

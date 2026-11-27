@@ -118,7 +118,8 @@ repository.
 
 Floor tiles for the Blender scene are made from photos of a tile's faces with
 `scripts/make_floor_tiles.py`: a seamless grid, each tile a face at random, with a bump map and a
-grout mask. They're listed in `catalog/floors/`.
+grout mask. They're listed in `catalog/floors/`, and their pictures come as a pack of their own
+(Beaumont Tiles' is `beaumont-tiles`).
 
 
 ![Built in SolidCraft](docs/images/first-run.png)

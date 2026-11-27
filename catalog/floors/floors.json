@@ -1,6 +1,6 @@
 {
   "source": "Tiled floors for the Blender scene, each made by scripts/make_floor_tiles.py from photographs of the tile's faces: a seamless grid with grout, each tile a face at random, and a bump map from the faces' detail.",
-  "notes": "The pictures stay on this Mac in ~/Library/Application Support/CabinetStudio/decors as <name>.jpg / .png: colour, height (16-bit) and grout mask. Roughness, bump and brightness (a factor on the photos, which suppliers expose bright) are our visual estimates, not supplier figures.",
+  "notes": "The pictures (colour, 16-bit height and grout mask) come in a material pack per brand, e.g. beaumont-tiles, built by scripts/make_material_packs.py, and install into ~/Library/Application Support/CabinetStudio/decors as <name>.jpg / .png. Roughness, bump and brightness (a factor on the photos, which suppliers expose bright) are our visual estimates, not supplier figures.",
   "verified": false,
   "floors": [
     {
