@@ -7,6 +7,8 @@ struct CabinetStudioApp: App {
         // bar out at zero width, its constraints become unsatisfiable and the app crashes when the
         // toolbar changes (switching to Cut Sheets did it).
         NSWindow.allowsAutomaticWindowTabbing = false
+        // The decor and slab pictures: downloaded once, and again when GitHub has newer ones.
+        Task { @MainActor in await MaterialPacks.shared.updateIfNeeded() }
     }
 
     var body: some Scene {

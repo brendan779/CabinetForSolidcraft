@@ -863,6 +863,47 @@ pub fn default_appliances_json() -> String {
     serde_json::to_string(&cabinet_core::run::Appliance::defaults()).unwrap_or_else(|_| "[]".into())
 }
 
+/// A material pack as installed (docs/material-packs.md).
+#[derive(uniffi::Record)]
+pub struct InstalledPack {
+    pub id: String,
+    pub name: String,
+    pub version: String,
+    pub images: u32,
+}
+
+impl From<cabinet_catalog::packs::Installed> for InstalledPack {
+    fn from(p: cabinet_catalog::packs::Installed) -> Self {
+        Self {
+            id: p.id,
+            name: p.name,
+            version: p.version,
+            images: p.images as u32,
+        }
+    }
+}
+
+/// Checks a material pack and installs it into `app_dir` (`.../Application Support/CabinetStudio`):
+/// nothing is written unless the whole pack is sound.
+#[uniffi::export]
+pub fn install_material_pack(
+    zip_path: String,
+    app_dir: String,
+) -> Result<InstalledPack, CoreError> {
+    cabinet_catalog::packs::install_pack(Path::new(&zip_path), Path::new(&app_dir))
+        .map(Into::into)
+        .map_err(invalid)
+}
+
+/// The material packs installed in `app_dir`.
+#[uniffi::export]
+pub fn installed_material_packs(app_dir: String) -> Vec<InstalledPack> {
+    cabinet_catalog::packs::installed(Path::new(&app_dir))
+        .into_values()
+        .map(Into::into)
+        .collect()
+}
+
 /// The catalog's sinks (BENCH-15a), as appliances a cut-out can be: each names its product, which
 /// sizes its cut-out and draws it.
 #[uniffi::export]

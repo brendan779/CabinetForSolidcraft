@@ -232,6 +232,12 @@ struct StatusBar: View {
                     .lineLimit(1)
             }
             Spacer()
+            if let note = MaterialPacks.shared.message {
+                if let f = MaterialPacks.shared.fraction {
+                    ProgressView(value: f).frame(width: 80)
+                }
+                Text(note).lineLimit(1).truncationMode(.tail)
+            }
             Text("Run \(unit.format(project.runLength))").monospacedDigit()
         }
         .font(.callout)
