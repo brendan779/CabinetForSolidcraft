@@ -2221,6 +2221,25 @@ fn cutouts(b: &Benchtop, top: &mut PartList, lists: &[PartList]) {
                 part: piece.name.clone(),
                 quantity: 1,
             });
+            // An undermount sink's outside, under the top: none of its cabinet's boards may be in it.
+            if let (SinkMount::Undermount, Ok(l), Ok(w), Ok(d)) = (
+                c.mount,
+                item.param("length"),
+                item.param("width"),
+                item.param("depth"),
+            ) {
+                let body = Aabb::new(
+                    Vec3::new(mid - l / 2.0, y0 + c.depth / 2.0 - w / 2.0, z - d),
+                    Vec3::new(l, w, d),
+                );
+                for p in cab.parts.iter().filter(|p| p.bounds.overlaps(&body)) {
+                    let back = p.bounds.max().y - body.min.y;
+                    top.warnings.push(format!(
+                        "the {} over {} runs into {}: set it {back:.0} mm further back",
+                        item.variant, c.over, p.name
+                    ));
+                }
+            }
         }
         let tap = c.tap_hole_diameter();
         // The material's clearances, as notes: the fabricator may still cut it.

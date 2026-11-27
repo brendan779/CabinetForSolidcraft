@@ -156,7 +156,14 @@ def board_material(board_id, board, cache):
         base = texture(maps[0], False)
         landscape = base.image.size[0] > base.image.size[1]
         aspect = min(base.image.size) / max(base.image.size)
-        n.links.new(base.outputs[0], b.inputs["Base Color"])
+        colour = base.outputs[0]
+        if board.get("brightness", 1.0) != 1.0:
+            # A decor photographed brighter than the board reads in a room.
+            tone = n.nodes.new("ShaderNodeHueSaturation")
+            tone.inputs["Value"].default_value = board["brightness"]
+            n.links.new(colour, tone.inputs["Color"])
+            colour = tone.outputs["Color"]
+        n.links.new(colour, b.inputs["Base Color"])
         if board.get("stone"):
             # Veins carry colour only. Suede has a restrained, sub-millimetre surface texture.
             strength = look.get("micro_bump", 0)

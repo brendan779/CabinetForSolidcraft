@@ -93,19 +93,19 @@ expression: list
         "min": {
           "x": 16.0,
           "y": 0.0,
-          "z": 854.0
+          "z": 810.0
         },
         "size": {
           "x": 868.0,
-          "y": 100.0,
-          "z": 16.0
+          "y": 16.0,
+          "z": 60.0
         }
       },
-      "thickness_axis": "Z",
+      "thickness_axis": "Y",
       "grain_axis": "X",
       "board": "",
       "edges": {
-        "front": true,
+        "front": false,
         "back": false,
         "top": false,
         "bottom": false,
@@ -732,8 +732,8 @@ expression: list
       "part": "C01.LeftSide",
       "at": {
         "x": 0.0,
-        "y": 25.0,
-        "z": 862.0
+        "y": 8.0,
+        "z": 825.0
       },
       "direction": {
         "axis": "X",
@@ -748,8 +748,8 @@ expression: list
       "part": "C01.LeftSide",
       "at": {
         "x": 0.0,
-        "y": 25.0,
-        "z": 862.0
+        "y": 8.0,
+        "z": 825.0
       },
       "direction": {
         "axis": "X",
@@ -764,8 +764,8 @@ expression: list
       "part": "C01.FrontRail",
       "at": {
         "x": 16.0,
-        "y": 25.0,
-        "z": 862.0
+        "y": 8.0,
+        "z": 825.0
       },
       "direction": {
         "axis": "X",
@@ -780,8 +780,8 @@ expression: list
       "part": "C01.LeftSide",
       "at": {
         "x": 0.0,
-        "y": 75.0,
-        "z": 862.0
+        "y": 8.0,
+        "z": 855.0
       },
       "direction": {
         "axis": "X",
@@ -796,8 +796,8 @@ expression: list
       "part": "C01.LeftSide",
       "at": {
         "x": 0.0,
-        "y": 75.0,
-        "z": 862.0
+        "y": 8.0,
+        "z": 855.0
       },
       "direction": {
         "axis": "X",
@@ -812,8 +812,8 @@ expression: list
       "part": "C01.FrontRail",
       "at": {
         "x": 16.0,
-        "y": 75.0,
-        "z": 862.0
+        "y": 8.0,
+        "z": 855.0
       },
       "direction": {
         "axis": "X",
@@ -828,8 +828,8 @@ expression: list
       "part": "C01.RightSide",
       "at": {
         "x": 900.0,
-        "y": 25.0,
-        "z": 862.0
+        "y": 8.0,
+        "z": 825.0
       },
       "direction": {
         "axis": "X",
@@ -844,8 +844,8 @@ expression: list
       "part": "C01.RightSide",
       "at": {
         "x": 900.0,
-        "y": 25.0,
-        "z": 862.0
+        "y": 8.0,
+        "z": 825.0
       },
       "direction": {
         "axis": "X",
@@ -860,8 +860,8 @@ expression: list
       "part": "C01.FrontRail",
       "at": {
         "x": 884.0,
-        "y": 25.0,
-        "z": 862.0
+        "y": 8.0,
+        "z": 825.0
       },
       "direction": {
         "axis": "X",
@@ -876,8 +876,8 @@ expression: list
       "part": "C01.RightSide",
       "at": {
         "x": 900.0,
-        "y": 75.0,
-        "z": 862.0
+        "y": 8.0,
+        "z": 855.0
       },
       "direction": {
         "axis": "X",
@@ -892,8 +892,8 @@ expression: list
       "part": "C01.RightSide",
       "at": {
         "x": 900.0,
-        "y": 75.0,
-        "z": 862.0
+        "y": 8.0,
+        "z": 855.0
       },
       "direction": {
         "axis": "X",
@@ -908,8 +908,8 @@ expression: list
       "part": "C01.FrontRail",
       "at": {
         "x": 884.0,
-        "y": 75.0,
-        "z": 862.0
+        "y": 8.0,
+        "z": 855.0
       },
       "direction": {
         "axis": "X",

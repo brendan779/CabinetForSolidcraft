@@ -54,10 +54,23 @@ const BACK_INSET: f64 = 16.0;
 const MIN_BLIND_DOOR: f64 = 250.0;
 /// The narrowest door either leg of an L-corner may be left with beside the other leg.
 const MIN_CORNER_DOOR: f64 = 250.0;
+/// How the carcass is closed at the top: a sink cabinet always by a rail, as its sink hangs where
+/// a top would be.
+fn top_joint(cab: &Cabinet) -> TopJoint {
+    if cab.kind == CabinetKind::Sink {
+        TopJoint::Rails
+    } else {
+        cab.standard.top_joint
+    }
+}
+
 /// A sink cabinet's pipe cut-out in the back: how high it reaches above the bottom panel, and how
 /// far it stays in from the sides (room for the back's fixings and stiffness). Wastes and stop
 /// valves sit low, under about 400 mm.
 const SINK_CUTOUT_HEIGHT: f64 = 400.0;
+/// A sink cabinet's front rail on edge: our height, low enough to clear the top hinge at its usual
+/// 80 mm under the door's top edge.
+const SINK_RAIL_HEIGHT: f64 = 60.0;
 const SINK_CUTOUT_SIDE_MARGIN: f64 = 50.0;
 /// Doors taller than this (mm) get a TIP-ON unit near each end so they open square.
 const TALL_DOOR: f64 = 1200.0;
@@ -1030,7 +1043,8 @@ impl<'a> Builder<'a> {
 
         let no_bottom = cab.niche_at_the_floor();
         let bottom_under = s.bottom_joint == BottomJoint::UnderSides && !notch && !no_bottom;
-        let top_over = s.top_joint == TopJoint::OverSides;
+        let top_joint = top_joint(cab);
+        let top_over = top_joint == TopJoint::OverSides;
         let side_z0 = if notch {
             0.0
         } else if bottom_under {
@@ -1079,16 +1093,34 @@ impl<'a> Builder<'a> {
             );
         }
 
-        match s.top_joint {
+        if top_joint != s.top_joint {
+            self.list.warnings.push(
+                "a sink cabinet has a front rail, not a top: the sink hangs where the top would be"
+                    .into(),
+            );
+        }
+        match top_joint {
             TopJoint::Rails => {
                 let rw = s.rail_width.min(back_y0 / 2.0);
+                // A sink's bowl hangs from the benchtop's underside just behind the carcass front,
+                // where a flat rail would be: a sink cabinet's rail stands on edge at the front.
+                let (bounds, thick) = if cab.kind == CabinetKind::Sink {
+                    let rh = rw.min(SINK_RAIL_HEIGHT);
+                    (aabb(t, 0.0, h - rh, w - t, t, h), Axis::Y)
+                } else {
+                    (aabb(t, 0.0, h - t, w - t, rw, h), Axis::Z)
+                };
                 self.add(
                     PartRole::FrontRail,
                     None,
-                    aabb(t, 0.0, h - t, w - t, rw, h),
-                    Axis::Z,
+                    bounds,
+                    thick,
                     Axis::X,
-                    EdgeBanding::front_only(),
+                    if thick == Axis::Z {
+                        EdgeBanding::front_only()
+                    } else {
+                        EdgeBanding::default()
+                    },
                 );
                 // A sink bowl and its plumbing take the back rail's place.
                 if cab.kind != CabinetKind::Sink {
@@ -1137,7 +1169,7 @@ impl<'a> Builder<'a> {
         match s.back {
             BackStyle::InsetGroove => {
                 let z0 = if no_bottom { 0.0 } else { kick + t - groove };
-                let z1 = if s.top_joint == TopJoint::Rails {
+                let z1 = if top_joint == TopJoint::Rails {
                     h
                 } else {
                     h - t + groove
@@ -1174,7 +1206,7 @@ impl<'a> Builder<'a> {
                         bounds: aabb(t, back_y0, kick + t - groove, w - t, back_y0 + bt, kick + t),
                     });
                 }
-                if s.top_joint != TopJoint::Rails {
+                if top_joint != TopJoint::Rails {
                     let top = self.name(PartRole::Top, None);
                     self.list.operations.push(Operation::Groove {
                         part: top,
@@ -1225,11 +1257,16 @@ impl<'a> Builder<'a> {
             self.joint(PartRole::LeftSide, PartRole::Bottom, px, Axis::Y);
             self.joint(PartRole::RightSide, PartRole::Bottom, nx, Axis::Y);
         }
-        match s.top_joint {
+        match top_joint {
             TopJoint::Rails => {
                 for rail in [PartRole::FrontRail, PartRole::BackRail] {
-                    self.joint(PartRole::LeftSide, rail, px, Axis::Y);
-                    self.joint(PartRole::RightSide, rail, nx, Axis::Y);
+                    // A rail on edge is joined up its height.
+                    let along = match self.part(rail) {
+                        Some(p) if p.thickness_axis == Axis::Y => Axis::Z,
+                        _ => Axis::Y,
+                    };
+                    self.joint(PartRole::LeftSide, rail, px, along);
+                    self.joint(PartRole::RightSide, rail, nx, along);
                 }
             }
             TopJoint::BetweenSides => {

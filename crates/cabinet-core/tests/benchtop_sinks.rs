@@ -109,3 +109,64 @@ fn a_sink_with_no_body_size_to_cut_is_undermounted_with_a_warning() {
         list.warnings
     );
 }
+
+#[test]
+fn an_undermount_sink_hangs_clear_of_its_cabinets_boards() {
+    use cabinet_core::geom::Aabb;
+    for a in Appliance::catalog_sinks() {
+        if a.mount != cabinet_core::run::SinkMount::Undermount {
+            continue;
+        }
+        let item = cabinet_core::hardware::item(&a.product).unwrap();
+        let (l, w, d) = (
+            item.param("length").unwrap(),
+            item.param("width").unwrap(),
+            item.param("depth").unwrap(),
+        );
+        let mut sink = Cabinet::new("S01", CabinetKind::Sink);
+        sink.width = (l + 100.0).max(900.0);
+        let top: Benchtop = serde_json::from_value(serde_json::json!({"id": "BT1", "thickness": 20,
+            "cutouts": [{"over": "S01", "kind": "sink", "width": 1, "depth": 1, "product": a.product}]}))
+        .unwrap();
+        let lists = build_run(&Run {
+            origin: Vec3::default(),
+            items: vec![RunItem::Cabinet(Box::new(sink)), RunItem::Benchtop(top)],
+        })
+        .unwrap();
+        let at = lists[1]
+            .hardware
+            .iter()
+            .find(|h| h.item == a.product)
+            .unwrap()
+            .at;
+        // The bowl's outside, less a millimetre all round for the rounding of the drawing.
+        let body = Aabb::new(
+            Vec3::new(at.x - l / 2.0 + 1.0, at.y - w / 2.0 + 1.0, at.z - d),
+            Vec3::new(l - 2.0, w - 2.0, d - 1.0),
+        );
+        // A sink whose rim reaches over the carcass front says how far back it must go.
+        let warned = lists[1].warnings.iter().any(|w| w.contains("further back"));
+        for p in &lists[0].parts {
+            assert!(
+                !body.overlaps(&p.bounds) || (warned && p.name == "S01.FrontRail"),
+                "{}: {} is inside the sink",
+                a.product,
+                p.name
+            );
+        }
+    }
+}
+
+#[test]
+fn a_sink_cabinet_set_to_take_a_top_gets_its_rail_and_says_so() {
+    let mut sink = Cabinet::new("S01", CabinetKind::Sink);
+    sink.standard.top_joint = cabinet_core::model::TopJoint::OverSides;
+    let list = cabinet_core::build_cabinet(&sink).unwrap();
+    assert!(list.part("S01.Top").is_none());
+    assert!(list.part("S01.FrontRail").is_some());
+    assert!(
+        list.warnings
+            .iter()
+            .any(|w| w.contains("front rail, not a top"))
+    );
+}

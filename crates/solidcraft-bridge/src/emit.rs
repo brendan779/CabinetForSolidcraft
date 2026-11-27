@@ -662,6 +662,8 @@ pub fn models_for(
             detail != Detail::Design
                 || p.item.starts_with("handle.")
                 || p.item.starts_with("hafele.loox5.")
+                // A sink is part of the look: the render and the design build both show it.
+                || p.item.starts_with("sink.")
                 || opening_hardware(&p.item)
         })
         .cloned()
@@ -1633,6 +1635,38 @@ mod tests {
         let full = names(Detail::Manufacturing);
         assert!(full.iter().any(|n| n.contains("Handle")));
         assert!(full.iter().any(|n| n.contains("Hinge")));
+    }
+
+    /// The owner's render of a sink cabinet had the cut-out but no sink.
+    #[test]
+    fn a_catalog_sink_goes_in_at_design_detail() {
+        use crate::vendor::VendorModel;
+        use cabinet_core::geom::Vec3;
+        use cabinet_core::run::{Benchtop, Run, RunItem, build_run};
+        let sink = Cabinet::new("S01", CabinetKind::Sink);
+        let top: Benchtop = serde_json::from_value(json!({"id": "BT1", "thickness": 20,
+            "cutouts": [{"over": "S01", "kind": "sink", "width": 1, "depth": 1,
+            "product": "sink.abi.seba-single-sink-550mm"}]}))
+        .unwrap();
+        let lists = build_run(&Run {
+            origin: Vec3::default(),
+            items: vec![RunItem::Cabinet(Box::new(sink)), RunItem::Benchtop(top)],
+        })
+        .unwrap();
+        let placements = cabinet_core::cad::cad_placements(&lists[1]);
+        let article = "ABI-SINK-SEBA-SINGLE-SINK-550MM";
+        let index = [VendorModel {
+            article: article.into(),
+            step: format!("/cad/{article}.stl").into(),
+            stl: format!("/cad/{article}.stl").into(),
+            min: [0.0; 3],
+            max: [1.0; 3],
+        }];
+        let names: Vec<_> = models_for(Detail::Design, &placements, &index)
+            .into_iter()
+            .map(|m| m.name)
+            .collect();
+        assert_eq!(names, ["BT1.Sink1"]);
     }
 
     #[test]
