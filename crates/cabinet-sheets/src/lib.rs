@@ -58,6 +58,8 @@ pub enum Feature {
     },
     /// A corner of the outline rounded right through: `(u, v)` is the corner.
     Round { u: f64, v: f64, radius: f64 },
+    /// Where a stone top longer than its slab is joined: the line its pieces meet on.
+    Join { u0: f64, v0: f64, u1: f64, v1: f64 },
     /// The top edge cut to an arch: the part keeps what is under the circle about `(cu, cv)`.
     /// `up_u`: up (the cabinet's Z) runs along u, else along v.
     Arch {
@@ -103,7 +105,10 @@ impl Feature {
         match self {
             Feature::FaceBore { face, .. } => Some(*face),
             Feature::Rect { face, .. } => *face,
-            Feature::EdgeBore { .. } | Feature::Round { .. } | Feature::Arch { .. } => None,
+            Feature::EdgeBore { .. }
+            | Feature::Round { .. }
+            | Feature::Arch { .. }
+            | Feature::Join { .. } => None,
         }
     }
 }
@@ -230,6 +235,13 @@ pub fn features(list: &PartList, part: &Part) -> Vec<Feature> {
                 part: name, bounds, ..
             } if *name == part.name => {
                 out.push(rect(part, bounds.min, bounds.size, "mortise"));
+            }
+            Operation::SlabJoin { part: name, at } if *name == part.name => {
+                // Across the top, front to back.
+                let b = part.bounds;
+                let (u0, v0) = to_uv(part, Vec3::new(at.x, b.min.y, at.z));
+                let (u1, v1) = to_uv(part, Vec3::new(at.x, b.max().y, at.z));
+                out.push(Feature::Join { u0, v0, u1, v1 });
             }
             Operation::Arch {
                 part: name,
@@ -725,6 +737,19 @@ fn face_view(
                     holes.push((format!("{tag}arched top R{}", fmt(*radius)), a.0, a.1));
                 }
             }
+            Feature::Join { u0, v0, u1, v1 } => {
+                let _ = writeln!(
+                    svg,
+                    r##"<line x1="{:.2}" y1="{:.2}" x2="{:.2}" y2="{:.2}" stroke="#c0392b" stroke-width="0.4" stroke-dasharray="3 2"/>"##,
+                    x(*u0),
+                    y(*v0),
+                    x(*u1),
+                    y(*v1)
+                );
+                if tag != "out " {
+                    holes.push((format!("{tag}slab join"), *u0, *v0));
+                }
+            }
             Feature::Round { u, v, radius } => {
                 // The corner cut away, the paper showing through, up to the arc.
                 let du = if *u < view.lu / 2.0 { 1.0 } else { -1.0 };
@@ -1076,7 +1101,7 @@ mod tests {
                     | Feature::EdgeBore { u, v, .. }
                     | Feature::Rect { u, v, .. }
                     | Feature::Round { u, v, .. } => (u, v),
-                    Feature::Arch { .. } => continue,
+                    Feature::Arch { .. } | Feature::Join { .. } => continue,
                 };
                 assert!(
                     (-1e-6..=lu + 1e-6).contains(&u) && (-1e-6..=lv + 1e-6).contains(&v),

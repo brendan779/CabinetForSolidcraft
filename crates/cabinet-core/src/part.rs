@@ -311,6 +311,9 @@ pub enum Operation {
     /// A corner of the part's face rounded to `radius`, right through the thickness: `at` is the
     /// corner (its coordinate along the thickness is the part's middle).
     Round { part: String, at: Vec3, radius: f64 },
+    /// A stone top longer than its slab is made in pieces: joined across the part (along y) at
+    /// `at.x`, `at` being on the joint's line in the top's middle.
+    SlabJoin { part: String, at: Vec3 },
     /// The top edge of a front cut to a circular arch, right through the thickness: the part
     /// keeps what lies under the circle of `radius` about `centre` (the centre's coordinate
     /// along the thickness is the part's middle); nothing below the centre is cut.

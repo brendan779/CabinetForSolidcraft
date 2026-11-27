@@ -464,7 +464,9 @@ fn offset_operations(list: &mut PartList, o: Vec3) {
                     *at = *at + o;
                 }
             }
-            Operation::Bore { at, .. } | Operation::Round { at, .. } => *at = *at + o,
+            Operation::Bore { at, .. }
+            | Operation::Round { at, .. }
+            | Operation::SlabJoin { at, .. } => *at = *at + o,
             Operation::Arch { centre, .. } => *centre = *centre + o,
             Operation::Chamfer { at, bounds, .. } => {
                 *at = *at + o;
@@ -6382,6 +6384,7 @@ mod tests {
             | Operation::Chamfer { part, .. }
             | Operation::Mortise { part, .. }
             | Operation::Round { part, .. }
+            | Operation::SlabJoin { part, .. }
             | Operation::Arch { part, .. }
             | Operation::EdgeFinish { part, .. } => *part == shelf.name,
         }));

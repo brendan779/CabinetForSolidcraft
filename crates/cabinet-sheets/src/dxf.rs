@@ -331,6 +331,10 @@ pub fn part_dxfs(list: &PartList, part: &Part) -> Vec<DxfFile> {
                             d.rect(&layer, x0, v, w, h);
                         }
                     }
+                    // Where the pieces of a joined top meet: each is cut to it.
+                    Feature::Join { u0, v0, u1, v1 } if i == 0 => {
+                        d.line("JOIN", (x(u0), v0), (x(u1), v1));
+                    }
                     Feature::EdgeBore {
                         u,
                         v,

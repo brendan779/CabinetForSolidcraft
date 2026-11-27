@@ -202,9 +202,54 @@ def board_material(board_id, board, cache):
     return m, landscape, aspect
 
 
+def slab_uvs(obj, part, sheet, landscape):
+    """BENCH-19: a stone piece mapped from where the maker cuts it on the slab (the manifest's
+    `slab`: `s` along the slab's length, `t` across it, each axis, sign and origin in mm), so veins
+    run on from the top down its waterfalls and aprons. A joined top is split at each join, and
+    the piece past it starts a new slab."""
+    m = part["slab"]
+    axis_of = {"x": 0, "y": 1, "z": 2}
+    world = obj.matrix_world
+    if m["breaks"]:
+        # Split the faces at each join so each side can take its own slab.
+        local = world.inverted()
+        bm = bmesh.new()
+        bm.from_mesh(obj.data)
+        for x in m["breaks"]:
+            co = local @ Vector((x * MM, 0, 0))
+            no = (local.to_3x3() @ Vector((1, 0, 0))).normalized()
+            bmesh.ops.bisect_plane(bm, geom=bm.verts[:] + bm.edges[:] + bm.faces[:], plane_co=co, plane_no=no)
+        bm.to_mesh(obj.data)
+        bm.free()
+    me = obj.data
+    layer = me.uv_layers.new(name="panel")
+    length, width = sheet[0], sheet[1]
+    breaks = sorted(m["breaks"])
+
+    def coord(spec, p, origin=None):
+        a, sign, o = spec
+        return sign * (p[axis_of[a]] - (o if origin is None else origin))
+
+    for poly in me.polygons:
+        # Which piece the face is on: by its centre, past which joins.
+        c = world @ poly.center / MM
+        origin = None
+        for x in breaks:
+            if c[0] > x + 1e-6:
+                origin = x
+        for li in poly.loop_indices:
+            p = world @ me.vertices[me.loops[li].vertex_index].co / MM
+            s = coord(m["s"], p, origin if m["s"][0] == "x" else None)
+            t = coord(m["t"], p)
+            u, v = t / width, s / length
+            layer.data[li].uv = (v, -u) if landscape else (u, v)
+
+
 def add_uvs(obj, part, sheet, landscape, aspect, seed, stone=False):
     """Each face mapped by its plane, the sheet's length along the part's grain, from its own place
     on the sheet, at the sheet's true size."""
+    if stone and part.get("slab"):
+        return slab_uvs(obj, part, sheet, landscape)
     me = obj.data
     layer = me.uv_layers.new(name="panel")
     axis_of = {"x": 0, "y": 1, "z": 2}

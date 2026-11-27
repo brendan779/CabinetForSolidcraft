@@ -740,6 +740,7 @@ fn a_benchtop_with_cut_outs_builds() {
                 end_radius: 60.0,
                 material: "laminate".into(),
                 material_rules: Default::default(),
+                slab: [0.0; 2],
                 cutouts: vec![sink, cutout("B01", CutoutKind::Cooktop, 560.0, 490.0)],
             }),
         ],

@@ -46,6 +46,10 @@ fn line(list: &PartList, p: &Part) -> String {
             } else {
                 format!("upper and lower edges R{size}")
             }),
+            Operation::SlabJoin { part, at } if *part == p.name => Some(format!(
+                "slab join {:.0} mm from the left end",
+                at.x - p.bounds.min.x
+            )),
             Operation::Cutout {
                 part,
                 bounds,
@@ -294,6 +298,7 @@ mod tests {
                     end_radius: 100.0,
                     material: "laminate".into(),
                     material_rules: Default::default(),
+                    slab: [0.0; 2],
                 }),
             ],
         };

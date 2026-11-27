@@ -43,7 +43,7 @@ fn transform(
                 *at = point(*at);
                 *direction = dir(*direction);
             }
-            Operation::Round { at, .. } => *at = point(*at),
+            Operation::Round { at, .. } | Operation::SlabJoin { at, .. } => *at = point(*at),
             Operation::Chamfer { at, bounds, .. } => {
                 *at = point(*at);
                 *bounds = boxed(*bounds);
@@ -150,6 +150,7 @@ pub fn rename(list: &mut PartList, f: impl Fn(&str) -> String) {
             | Operation::Chamfer { part, .. }
             | Operation::Mortise { part, .. }
             | Operation::Round { part, .. }
+            | Operation::SlabJoin { part, .. }
             | Operation::Arch { part, .. } => *part = f(part),
             Operation::BiscuitSlot { parts, .. } => {
                 for p in parts {
@@ -187,6 +188,7 @@ pub fn open_end(list: &mut PartList, side: &str, end: f64) {
         | Operation::Cutout { part, .. }
         | Operation::Chamfer { part, .. }
         | Operation::Round { part, .. }
+        | Operation::SlabJoin { part, .. }
         | Operation::Arch { part, .. } => part != side,
         Operation::Mortise { part, bounds, .. } => part != side && !touches(bounds),
     });

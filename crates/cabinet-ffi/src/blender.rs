@@ -22,6 +22,73 @@ fn board_of<'a>(list: &'a PartList, p: &'a cabinet_core::Part) -> &'a str {
     &p.board
 }
 
+/// BENCH-19: where each piece of a stone top comes from on its slab, so the veins run on as the
+/// maker cuts them: a left waterfall rises into the top, the top runs on into a right waterfall,
+/// the front apron hangs off the top's front edge and the back apron off its back, and a piece past
+/// a join starts a new slab. For each part: `s` along the slab's length and `t` across it, each
+/// `[axis, sign, origin]` (mm along it from `origin`, `sign` −1 running the other way), and
+/// `breaks`: past x, `s` starts again at that x.
+fn slab_maps(list: &PartList) -> HashMap<String, Value> {
+    use cabinet_core::part::Operation;
+    let mut out = HashMap::new();
+    let id = &list.cabinet;
+    let tops = list.parts.iter().filter(|p| {
+        p.role == PartRole::Benchtop
+            && p.name
+                .strip_prefix(&format!("{id}.Benchtop"))
+                .is_some_and(|n| !n.is_empty() && n.chars().all(|c| c.is_ascii_digit()))
+    });
+    for top in tops {
+        let n = &top.name[format!("{id}.Benchtop").len()..];
+        let part = |suffix: &str| list.part(&format!("{id}.{suffix}"));
+        let (lo, hi) = (top.bounds.min, top.bounds.max());
+        let lead = part(&format!("Waterfall{n}L")).map_or(0.0, |w| w.bounds.size.z);
+        let front = part(&format!("Apron{n}")).map_or(0.0, |a| a.bounds.size.z);
+        let mut breaks: Vec<f64> = list
+            .operations
+            .iter()
+            .filter_map(|o| match o {
+                Operation::SlabJoin { part, at } if *part == top.name => Some(at.x),
+                _ => None,
+            })
+            .collect();
+        breaks.sort_by(f64::total_cmp);
+        let s_origin = lo.x - lead;
+        let t_origin = lo.y - front;
+        let along = json!({"s": ["x", 1, s_origin], "t": ["y", 1, t_origin], "breaks": breaks});
+        out.insert(top.name.clone(), along.clone());
+        let z_top = hi.z;
+        if let Some(a) = part(&format!("Apron{n}")) {
+            let depth = a.bounds.size.z;
+            out.insert(
+                a.name.clone(),
+                json!({"s": ["x", 1, s_origin], "t": ["z", 1, z_top - depth], "breaks": breaks}),
+            );
+        }
+        if let Some(a) = part(&format!("Apron{n}Back")) {
+            out.insert(
+                a.name.clone(),
+                json!({"s": ["x", 1, s_origin], "t": ["z", -1, z_top + (hi.y - t_origin)], "breaks": breaks}),
+            );
+        }
+        if let Some(w) = part(&format!("Waterfall{n}L")) {
+            out.insert(
+                w.name.clone(),
+                json!({"s": ["z", 1, w.bounds.min.z], "t": ["y", 1, t_origin], "breaks": []}),
+            );
+        }
+        if let Some(w) = part(&format!("Waterfall{n}R")) {
+            // The top's length on its last slab, then on down the drop.
+            let last = breaks.last().copied().unwrap_or(s_origin);
+            out.insert(
+                w.name.clone(),
+                json!({"s": ["z", -1, z_top + (hi.x - last)], "t": ["y", 1, t_origin], "breaks": []}),
+            );
+        }
+    }
+    out
+}
+
 /// The manifest: every part with its board and grain, what each board looks like, and the room.
 fn manifest(
     lists: &[(PartList, Option<Cabinet>)],
@@ -41,6 +108,7 @@ fn manifest(
     let job = job_paints(lists);
     for (list, cab) in lists {
         let paints = cab_paints(&job, cab.as_ref().map(|c| &c.standard.paints));
+        let slabs = slab_maps(list);
         for p in &list.parts {
             let board = board_of(list, p);
             let (lo, hi) = (p.bounds.min, p.bounds.max());
@@ -64,6 +132,7 @@ fn manifest(
                 "thickness": axis(p.thickness_axis),
                 "min": [lo.x, lo.y, lo.z],
                 "max": [hi.x, hi.y, hi.z],
+                "slab": slabs.get(&p.name),
             }));
             if !board.is_empty() && !boards.contains_key(board) {
                 let found = cat.board(board);

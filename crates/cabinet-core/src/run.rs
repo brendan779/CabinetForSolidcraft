@@ -236,6 +236,10 @@ pub struct Benchtop {
     /// whose catalog rules set overhang supports and cut-out clearances (BENCH-7).
     #[serde(default = "Benchtop::default_material")]
     pub material: String,
+    /// The chosen product's slab, length and width (0: none chosen): a top longer than it is
+    /// joined (BENCH-19).
+    #[serde(default, skip_serializing_if = "is_zero_slab")]
+    pub slab: [f64; 2],
     /// The material's rules changed for this benchtop, by parameter name
     /// (`unsupported_overhang`, `support_spacing`, `front_clearance`...).
     #[serde(default, skip_serializing_if = "std::collections::BTreeMap::is_empty")]
@@ -337,6 +341,10 @@ impl Benchtop {
             electrical_edge: p("electrical_edge")?,
         })
     }
+}
+
+fn is_zero_slab(s: &[f64; 2]) -> bool {
+    s[0] <= 0.0
 }
 
 fn is_zero(v: &f64) -> bool {
@@ -740,6 +748,7 @@ pub fn build_run(run: &Run) -> Result<Vec<PartList>> {
             splashback_openings(b, &mut top, &out);
             round_ends(b, &mut top, wall_ends(run));
             finish_edges(b, &mut top);
+            crate::benchtop::slab_joins(b, &mut top, &floor);
             out[i] = top;
         }
     }
@@ -2728,6 +2737,7 @@ mod tests {
             end_radius: 0.0,
             material: "laminate".into(),
             material_rules: Default::default(),
+            slab: [0.0; 2],
         })
     }
 
@@ -2813,6 +2823,7 @@ mod tests {
             end_radius: 0.0,
             material: "laminate".into(),
             material_rules: Default::default(),
+            slab: [0.0; 2],
             cutouts: vec![
                 Cutout::new("S01", CutoutKind::Sink, 760.0, 440.0),
                 // 80 from the front and 50 behind on a 618 deep top: at most 488 deep.

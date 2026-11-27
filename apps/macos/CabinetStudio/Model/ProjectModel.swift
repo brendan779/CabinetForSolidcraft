@@ -222,11 +222,22 @@ struct CabinetDoc: Identifiable, Hashable, Codable {
     var stoneProductID: String { object["board"] as? String ?? "" }
     /// The material whose rules (overhangs, supports, clearances) a benchtop product takes: laminate
     /// tops and Dekton have their own; other stone is taken as porcelain until a supplier gives its.
+    /// "3200 × 1600" as the catalog lists a sheet.
+    static func sheetSize(_ s: String) -> [Double]? {
+        let n = s.split(separator: "×").compactMap { Double($0.trimmingCharacters(in: .whitespaces)) }
+        return n.count == 2 ? n : nil
+    }
     static func stoneMaterial(_ board: BoardRecord) -> String {
         board.kind == "laminate_top" ? "laminate" : board.brand == "Dekton" ? "dekton" : "porcelain"
     }
     mutating func setStoneProduct(_ board: BoardRecord?) {
         update { $0["board"] = board?.id ?? "" }
+        // The product's largest slab: a top longer than it is joined (BENCH-19). Laminate tops
+        // are made to measure and leave it out.
+        let slab = board.flatMap { b in
+            b.kind == "sintered_stone" ? b.sheets.compactMap(Self.sheetSize).max { $0[0] < $1[0] } : nil
+        }
+        update { $0["slab"] = slab ?? [0.0, 0.0] }
         if let board {
             setNumber("thickness", board.thickness)
             material = Self.stoneMaterial(board)

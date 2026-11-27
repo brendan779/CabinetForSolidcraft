@@ -1078,3 +1078,107 @@ fn cantilever_lining(
         }
     }
 }
+
+/// How far a slab joint keeps from a sink or cooktop cut-out: our choice until a fabricator gives
+/// theirs (a joint through the thin strip beside a cut-out breaks).
+const JOIN_CLEAR_OF_CUTOUT: f64 = 100.0;
+
+/// BENCH-19: a stone top longer than its slab is made in pieces. Its joins go over a cabinet
+/// joint, clear of cut-outs, each piece at most a slab long. A waterfall is cut from the slab its
+/// end of the top comes from, so its drop counts against that piece's length.
+pub(crate) fn slab_joins(b: &Benchtop, list: &mut PartList, floor: &[PartList]) {
+    let slab = b.slab[0];
+    if slab <= 0.0 {
+        return;
+    }
+    // Cabinet joints along the run, in x.
+    let mut joints: Vec<f64> = floor
+        .iter()
+        .filter(|l| l.parts.iter().any(|p| p.role != PartRole::Benchtop))
+        .flat_map(|l| {
+            let lo = l
+                .parts
+                .iter()
+                .map(|p| p.bounds.min.x)
+                .fold(f64::MAX, f64::min);
+            let hi = l
+                .parts
+                .iter()
+                .map(|p| p.bounds.max().x)
+                .fold(f64::MIN, f64::max);
+            [lo, hi]
+        })
+        .collect();
+    joints.sort_by(f64::total_cmp);
+    joints.dedup_by(|a, b| (*a - *b).abs() < 1.0);
+    let tops: Vec<(String, Aabb)> = list
+        .parts
+        .iter()
+        .filter(|p| {
+            p.role == PartRole::Benchtop
+                && p.name
+                    .strip_prefix(&format!("{}.Benchtop", b.id))
+                    .is_some_and(|n| !n.is_empty() && n.chars().all(|c| c.is_ascii_digit()))
+        })
+        .map(|p| (p.name.clone(), p.bounds))
+        .collect();
+    for (name, top) in tops {
+        let n = &name[format!("{}.Benchtop", b.id).len()..];
+        let drop = |side: &str| {
+            list.part(&format!("{}.Waterfall{n}{side}", b.id))
+                .map_or(0.0, |w| w.bounds.size.z)
+        };
+        let (lead, tail) = (drop("L"), drop("R"));
+        let (x0, x1) = (top.min.x, top.max().x);
+        if lead + (x1 - x0) + tail <= slab + 1e-6 {
+            continue;
+        }
+        let cut: Vec<(f64, f64)> = list
+            .operations
+            .iter()
+            .filter_map(|o| match o {
+                Operation::Cutout { part, bounds, .. } if *part == name => Some((
+                    bounds.min.x - JOIN_CLEAR_OF_CUTOUT,
+                    bounds.max().x + JOIN_CLEAR_OF_CUTOUT,
+                )),
+                _ => None,
+            })
+            .collect();
+        let fits =
+            |x: f64| x > x0 + 1.0 && x < x1 - 1.0 && cut.iter().all(|(a, z)| x <= *a || x >= *z);
+        let mut start = x0;
+        let mut used = lead;
+        let mut joins = Vec::new();
+        while used + (x1 - start) + tail > slab + 1e-6 {
+            let reach = start + slab - used;
+            let Some(&at) = joints
+                .iter()
+                .rev()
+                .find(|&&j| j <= reach && j > start + 1.0 && fits(j))
+            else {
+                list.warnings.push(format!(
+                    "{name}: longer than its {slab:.0} mm slab, with no cabinet joint clear of the cut-outs to join it at"
+                ));
+                break;
+            };
+            joins.push(at);
+            start = at;
+            used = 0.0;
+        }
+        // The last piece carries the right waterfall: it has to fit too.
+        let c = top.center();
+        for at in &joins {
+            list.operations.push(Operation::SlabJoin {
+                part: name.clone(),
+                at: Vec3::new(*at, c.y, c.z),
+            });
+        }
+        if !joins.is_empty() {
+            let at: Vec<String> = joins.iter().map(|x| format!("{:.0}", x - x0)).collect();
+            list.notes.push(format!(
+                "{name}: longer than its {slab:.0} mm slab; joined {} mm from its left end",
+                at.join(" and ")
+            ));
+        }
+    }
+}
