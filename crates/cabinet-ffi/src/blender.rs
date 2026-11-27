@@ -166,6 +166,7 @@ fn manifest(
                         "look": image.get("look").unwrap_or_else(|| finishes["finishes"].get(finish).unwrap_or(&finishes["default"])),
                         // A photo shot brighter than the board looks in a room: the render tones it down.
                         "brightness": image.get("brightness").cloned().unwrap_or(json!(1.0)),
+                        "saturation": image.get("saturation").cloned().unwrap_or(json!(1.0)),
                         "stone": image["stone"],
                         "image": image["name"],
                         "pixels": image["pixels"],
@@ -440,18 +441,21 @@ mod tests {
         assert_eq!(board["sheet"][0], 3600.0);
     }
 
-    /// The owner found Delana Oak too bright in a render: its photo is toned down, others aren't.
+    /// The owner found Delana Oak too bright and warm in a render, against Laminex's sample card:
+    /// its photo is toned down and greyed, others are left as they are.
     #[test]
     fn a_decor_photographed_bright_is_toned_down_and_others_kept() {
         let (m, _) = written(job("laminex.decorated-mdf.delana-oak-natural.18.mdf-mr-e0"));
+        let delana = &m["boards"]["laminex.decorated-mdf.delana-oak-natural.18.mdf-mr-e0"];
         assert_eq!(
-            m["boards"]["laminex.decorated-mdf.delana-oak-natural.18.mdf-mr-e0"]["brightness"],
-            0.65
+            (delana["brightness"].as_f64(), delana["saturation"].as_f64()),
+            (Some(0.7), Some(0.5))
         );
         let (m, _) = written(job("polytec.commercial.angora-oak-woodmatt.18.mr-mdf"));
+        let angora = &m["boards"]["polytec.commercial.angora-oak-woodmatt.18.mr-mdf"];
         assert_eq!(
-            m["boards"]["polytec.commercial.angora-oak-woodmatt.18.mr-mdf"]["brightness"],
-            1.0
+            (angora["brightness"].as_f64(), angora["saturation"].as_f64()),
+            (Some(1.0), Some(1.0))
         );
     }
 

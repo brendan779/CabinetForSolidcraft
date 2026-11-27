@@ -157,10 +157,11 @@ def board_material(board_id, board, cache):
         landscape = base.image.size[0] > base.image.size[1]
         aspect = min(base.image.size) / max(base.image.size)
         colour = base.outputs[0]
-        if board.get("brightness", 1.0) != 1.0:
-            # A decor photographed brighter than the board reads in a room.
+        if board.get("brightness", 1.0) != 1.0 or board.get("saturation", 1.0) != 1.0:
+            # A decor photographed brighter, or warmer, than the board reads in a room.
             tone = n.nodes.new("ShaderNodeHueSaturation")
-            tone.inputs["Value"].default_value = board["brightness"]
+            tone.inputs["Value"].default_value = board.get("brightness", 1.0)
+            tone.inputs["Saturation"].default_value = board.get("saturation", 1.0)
             n.links.new(colour, tone.inputs["Color"])
             colour = tone.outputs["Color"]
         n.links.new(colour, b.inputs["Base Color"])
