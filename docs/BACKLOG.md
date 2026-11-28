@@ -50,6 +50,17 @@ Then, from the rest of the backlog, in this order (each row's detail is under it
 
 Not listed: the SolidCraft plugin rows (shelved), face-frame construction (P2-1), and checks the owner chose not to do (SC-2, SC-3, UI-12 to UI-14, OUT-4).
 
+## Next aim, after the polish: Cabinet Studio on Windows
+
+Set by the owner on 2026-11-28: once the build is polished, port the Swift app to Rust so it runs
+on Windows. The cabinet rules are already Rust (`cabinet-core`, `cabinet-catalog`,
+`cabinet-sheets`, `solidcraft-bridge`); what's Swift is the interface, the 3D viewport
+(RealityKit), the PDF previews and the file handling. Plan it with the owner before starting.
+
+| id | status | size | task | done when |
+|---|---|---|---|---|
+| WIN-1 | todo: discuss first | M | Plan the Windows port: the Rust UI toolkit (egui, as SolidCraft uses; or iced, Slint, Tauri), the 3D viewport (wgpu), what moves from Swift into the core first so both apps share it, whether macOS also moves to the Rust app, installers and updates, and SolidCraft's control port on Windows | a written plan and milestones the owner agrees, here |
+
 ## P0 — Foundations
 
 | id | status | size | task | done when |
