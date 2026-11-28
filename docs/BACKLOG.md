@@ -19,6 +19,16 @@ Priorities: **P0** blocks most other work · **P1** MVP · **P2** commercial par
 
 ---
 
+## Week of 30 November 2026: the owner's objectives
+
+Set by the owner on 2026-11-28, in this order. Work these before anything else.
+
+| id | status | size | task | done when |
+|---|---|---|---|---|
+| BENCH-15e | todo | M | Sink mixer taps: choose a tap (ABI Interiors' models, likely in `vendor-cad/abi-bim` with the sinks) and position it: on the sink's tap hole or the benchtop behind it, left, centre or right. The tap hole follows the tap. Drawn in the viewport and Blender | a chosen tap sits where it's placed, its hole cut under it, in the app and the render |
+| SURR-3 | needs-human: **discuss before starting** (owner will send photos of examples) | L | Curved open shelves and curved cabinet ends. Needs curved parts, which the part model (boxes with Round and Arch operations) doesn't have. To settle with the owner first: how each is built (bent ply or laminated MDF, kerfed board, stacked rings, solid timber), radius and which ends, how edges and shelves meet the curve, and how it reaches the cut list, cut sheets and CNC | agreed construction written here, then built |
+| CAB-V1 | todo | M | Verify and tune the cabinet types against SolidCraft and the cut lists, starting with the L-corner cabinets' doors (bi-fold and diagonal): hinge positions, gaps, door sizes, how they clear each other and the neighbours. Then the other types one by one, each fault fixed with a test | each type checked on screen and in SolidCraft, the faults fixed |
+
 ## P0 — Foundations
 
 | id | status | size | task | done when |
