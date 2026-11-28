@@ -36,6 +36,30 @@ enum LengthUnit: String, CaseIterable, Identifiable {
             return suffix ? "\(s)″" : s
         }
     }
+
+    /// Typed text as millimetres: "2400" or "2400 mm"; inches as "94.5", "94 1/2" or "1/2″".
+    func parse(_ text: String) -> Double? {
+        let t = text.lowercased().replacingOccurrences(of: "mm", with: "")
+            .replacingOccurrences(of: "″", with: "").replacingOccurrences(of: "\"", with: "")
+            .replacingOccurrences(of: "in", with: "").trimmingCharacters(in: .whitespaces)
+        switch self {
+        case .millimetres:
+            return Double(t)
+        case .inches:
+            var total = 0.0
+            for part in t.split(separator: " ") {
+                if let slash = part.firstIndex(of: "/") {
+                    guard let n = Double(part[..<slash]), let d = Double(part[part.index(after: slash)...]), d != 0
+                    else { return nil }
+                    total += n / d
+                } else {
+                    guard let v = Double(part) else { return nil }
+                    total += v
+                }
+            }
+            return t.isEmpty ? nil : total * 25.4
+        }
+    }
 }
 
 /// Settings kept in user defaults, read where they are used.

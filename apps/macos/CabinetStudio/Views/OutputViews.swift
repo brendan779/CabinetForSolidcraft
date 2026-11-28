@@ -132,21 +132,16 @@ struct NestingView: View {
     @AppStorage("nestingKerf") private var kerf = 4.4
     @AppStorage("nestingTrim") private var trim = 10.0
     @AppStorage("nestingRouter") private var router = false
-    @AppStorage("nestingUseOffcuts") private var useOffcuts = true
-    @ObservedObject private var inventory = OffcutStore.shared
     @State private var page = 0
     @State private var export: DataDocument?
-
-    private var offcuts: String { useOffcuts ? inventory.json : "" }
 
     private var pages: [String] {
         guard let dir = Preferences.catalogDir?.path else { return [] }
         return (try? nestingPages(items: project.jobItems, catalogDir: dir, job: project.jobName,
-                                  kerf: kerf, trim: trim, router: router, offcutsJson: offcuts)) ?? []
+                                  kerf: kerf, trim: trim, router: router, offcutsJson: "")) ?? []
     }
 
     var body: some View {
-        let stockUsed = useOffcuts ? inventory.json : nil
         let pages = self.pages
         VStack(spacing: 0) {
             Group {
@@ -186,14 +181,6 @@ struct NestingView: View {
                     Stepper("Trim \(Int(trim))", value: $trim, in: 0...25, step: 1)
                         .help("Taken off every new sheet's edges before the first cut, mm")
                     Spacer(minLength: 0)
-                    Menu("Offcuts (\(inventory.count))") {
-                        Toggle("Nest on Kept Offcuts First", isOn: $useOffcuts)
-                        Button("Keep This Job's Offcuts") { keepOffcuts(using: stockUsed) }
-                        Divider()
-                        Button("Forget Kept Offcuts", role: .destructive) { forget() }
-                    }
-                    .fixedSize()
-                    .help("Offcuts kept from earlier jobs: nest on them first, and after cutting this job keep its leftovers (the kept offcuts it used are taken off)")
                 }
             }
             .padding(.horizontal, 12)
@@ -215,28 +202,10 @@ struct NestingView: View {
         do {
             export = DataDocument(data: try nestingPdf(items: project.jobItems, catalogDir: dir,
                                                       job: project.jobName, kerf: kerf, trim: trim, router: router,
-                                                      offcutsJson: offcuts))
+                                                      offcutsJson: ""))
         } catch {
             project.lastError = "Could not nest the parts: \(error)"
         }
-    }
-
-    /// After cutting this job: its leftovers join the store, the kept offcuts it used leave it.
-    private func keepOffcuts(using stock: String?) {
-        guard let dir = Preferences.catalogDir?.path else { return }
-        do {
-            let kept = try nestingKeptOffcuts(items: project.jobItems, catalogDir: dir, kerf: kerf,
-                                              trim: trim, router: router, offcutsJson: stock ?? "")
-            try inventory.keep(kept, using: stock)
-            project.status = "Keeping \(inventory.count) offcuts"
-        } catch {
-            project.lastError = "Could not keep the offcuts: \(error.localizedDescription)"
-        }
-    }
-
-    private func forget() {
-        do { try inventory.clear() }
-        catch { project.lastError = "Could not clear the offcuts: \(error.localizedDescription)" }
     }
 }
 
@@ -266,20 +235,20 @@ enum PriceStore {
 /// What the job costs: board by the sheets the nesting opens, edge tape, hardware and labour from
 /// the shop's prices, which are typed in here against each line.
 struct QuoteView: View {
-    @ObservedObject private var inventory = OffcutStore.shared
     @Environment(ProjectModel.self) private var project
     @AppStorage("nestingKerf") private var kerf = 4.4
     @AppStorage("nestingTrim") private var trim = 10.0
     @AppStorage("nestingRouter") private var router = false
-    @AppStorage("nestingUseOffcuts") private var useOffcuts = true
     @State private var prices = PriceStore.load()
     @State private var export: DataDocument?
+    /// The costing and the customer's quote save under different names, so one doesn't replace the other.
+    @State private var exportName = ""
     @State private var showingRates = false
 
     private var quote: QuoteRecord? {
         guard let dir = Preferences.catalogDir?.path else { return nil }
         return try? jobQuote(items: project.jobItems, catalogDir: dir, kerf: kerf, trim: trim, router: router,
-                             offcutsJson: useOffcuts ? inventory.json : "",
+                             offcutsJson: "",
                              pricesJson: PriceStore.json(prices))
     }
 
@@ -333,7 +302,7 @@ struct QuoteView: View {
         }
         .fileExporter(isPresented: Binding(get: { export != nil }, set: { if !$0 { export = nil } }),
                       document: export, contentType: .pdf,
-                      defaultFilename: "\(project.jobName) quote") { result in
+                      defaultFilename: exportName) { result in
             if case .success(let url) = result { project.status = "Saved \(url.lastPathComponent)" }
         }
     }
@@ -391,13 +360,15 @@ struct QuoteView: View {
 
     private func makePdf(customer: Bool) {
         guard let dir = Preferences.catalogDir?.path else { return }
-        let offcuts = useOffcuts ? inventory.json : ""
+        // Offcuts are kept by hand from the nesting summary, not tracked (owner, 0.15.0 checks).
+        let offcuts = ""
         do {
             let data = customer
                 ? try customerQuotePdf(items: project.jobItems, catalogDir: dir, job: project.jobName,
                                        kerf: kerf, trim: trim, router: router, offcutsJson: offcuts, pricesJson: PriceStore.json(prices))
                 : try quotePdf(items: project.jobItems, catalogDir: dir, job: project.jobName,
                                kerf: kerf, trim: trim, router: router, offcutsJson: offcuts, pricesJson: PriceStore.json(prices))
+            exportName = "\(project.jobName) \(customer ? "customer quote" : "costing")"
             export = DataDocument(data: data)
         } catch {
             project.lastError = "Could not make the quote: \(error)"
@@ -522,9 +493,8 @@ struct PartsListView: View {
             let kerf = d.object(forKey: "nestingKerf") as? Double ?? 4.4
             let trim = d.object(forKey: "nestingTrim") as? Double ?? 10
             let router = d.object(forKey: "nestingRouter") as? Bool ?? false
-            let use = d.object(forKey: "nestingUseOffcuts") as? Bool ?? true
             let data = try nestingPdf(items: project.jobItems, catalogDir: dir, job: project.jobName,
-                                      kerf: kerf, trim: trim, router: router, offcutsJson: use ? OffcutStore.shared.json : "")
+                                      kerf: kerf, trim: trim, router: router, offcutsJson: "")
             export = (DataDocument(data: data), .pdf, "\(project.jobName) nesting")
         } catch {
             project.lastError = "Could not nest the parts: \(error)"
@@ -555,6 +525,11 @@ struct TextDocument: FileDocument {
 /// Bytes to save through a file exporter, typed by the exporter's content type.
 struct DataDocument: FileDocument {
     static var readableContentTypes: [UTType] { [.data] }
+    /// Every type the app exports: the save panel adds a type's extension only when the document
+    /// declares it, and with `.data` alone files were saved with none (owner, 0.15.0 checks).
+    static var writableContentTypes: [UTType] {
+        [.pdf, .commaSeparatedText] + ["dxf", "step"].compactMap { UTType(filenameExtension: $0) } + [.data]
+    }
     var data: Data
     init(data: Data) { self.data = data }
     init(configuration: ReadConfiguration) throws {

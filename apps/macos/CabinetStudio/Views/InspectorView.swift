@@ -1241,11 +1241,12 @@ struct SizeSection: View {
             HStack {
                 Text(title).foregroundStyle(.secondary)
                 Spacer()
-                Stepper(value: Binding(get: { value }, set: { v in
+                // Typed for a size no chip has (owner, 0.15.0: a 3000 mm shelf took holding the arrow).
+                SizeField(mm: value, unit: unit, range: 100...6000, set: set)
+                Stepper("", value: Binding(get: { value }, set: { v in
                     var c = cab; c[keyPath: size] = v; project.selected = c
-                }), in: 100...3000, step: 1) {
-                    Text(unit.format(value)).monospacedDigit().fontWeight(.medium)
-                }
+                }), in: 100...6000, step: 1)
+                .labelsHidden()
             }
             // Wrapped, not scrolled: a hidden scroll left the larger sizes off the edge, unseen.
             FlowLayout(spacing: 6) {
@@ -2252,5 +2253,41 @@ struct TileStyle: ButtonStyle {
             .contentShape(RoundedRectangle(cornerRadius: 9))
             .scaleEffect(configuration.isPressed ? 0.97 : 1)
             .animation(.snappy(duration: 0.15), value: configuration.isPressed)
+    }
+}
+
+/// A size you can type: shown in the chosen unit, applied on Return or when the field loses focus,
+/// so a cabinet isn't rebuilt at every keystroke. Out of range or unreadable text puts the size back.
+struct SizeField: View {
+    let mm: Double
+    let unit: LengthUnit
+    let range: ClosedRange<Double>
+    let set: (Double) -> Void
+    @State private var text = ""
+    @FocusState private var focused: Bool
+
+    var body: some View {
+        HStack(spacing: 3) {
+            TextField("", text: $text)
+                .textFieldStyle(.roundedBorder)
+                .multilineTextAlignment(.trailing)
+                .monospacedDigit()
+                .frame(width: 64)
+                .focused($focused)
+                .onSubmit(commit)
+                .accessibilityLabel("Size in \(unit.title.lowercased())")
+            Text(unit == .millimetres ? "mm" : "″").foregroundStyle(.secondary)
+        }
+        .onAppear { text = unit.format(mm, suffix: false) }
+        .onChange(of: mm) { if !focused { text = unit.format(mm, suffix: false) } }
+        .onChange(of: focused) { if !focused { commit() } }
+    }
+
+    private func commit() {
+        if let v = unit.parse(text), range.contains(v), abs(v - mm) >= 0.05 {
+            withAnimation(.snappy) { set(v) }
+        } else {
+            text = unit.format(mm, suffix: false)
+        }
     }
 }

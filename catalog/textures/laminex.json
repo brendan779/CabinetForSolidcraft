@@ -333,8 +333,8 @@
   "Delana Oak": {
    "name": "laminex-delana-oak",
    "url": null,
-   "brightness": 0.7,
-   "saturation": 0.5,
+   "brightness": 0.8,
+   "saturation": 1.15,
    "pixels": [
     2048,
     2048

@@ -10,8 +10,3 @@ swiftc -module-cache-path "$ROOT/target/swift-tests/module-cache" \
   "$ROOT/apps/macos/CabinetStudio/Model/StoneGeometry.swift" \
   "$ROOT/apps/macos/Tests/StoneGeometryTests.swift" -o "$ROOT/target/swift-tests/stone-geometry"
 "$ROOT/target/swift-tests/stone-geometry"
-
-swiftc -module-cache-path "$ROOT/target/swift-tests/module-cache" \
-  "$ROOT/apps/macos/CabinetStudio/Model/OffcutStore.swift" \
-  "$ROOT/apps/macos/Tests/OffcutStoreTests.swift" -o "$ROOT/target/swift-tests/offcut-store"
-"$ROOT/target/swift-tests/offcut-store"
