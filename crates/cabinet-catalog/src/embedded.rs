@@ -73,7 +73,11 @@ mod tests {
     fn every_board_and_tape_file_is_built_in() {
         let root = concat!(env!("CARGO_MANIFEST_DIR"), "/../../catalog");
         for sub in ["boards", "edge-tape"] {
-            for e in std::fs::read_dir(format!("{root}/{sub}")).unwrap() {
+            // `edge-tape` has no files yet, and git keeps no empty folder: a fresh clone lacks it.
+            let Ok(dir) = std::fs::read_dir(format!("{root}/{sub}")) else {
+                continue;
+            };
+            for e in dir {
                 let name = e.unwrap().file_name().into_string().unwrap();
                 if name.ends_with(".json") {
                     let key = format!("{sub}/{name}");
