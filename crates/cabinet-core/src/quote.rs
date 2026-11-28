@@ -100,6 +100,9 @@ pub struct Quote {
     pub total: f64,
     /// What has no price yet: the quote is short by these.
     pub missing: Vec<String>,
+    /// Parts missing stock. Their board cost is excluded from the total.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub unplaced: Vec<String>,
 }
 
 /// The quote for a job: its nesting (board), cut list (edge tape, parts), hardware bill and the
@@ -221,6 +224,7 @@ pub fn quote(
         tax: round2(tax),
         total: round2(cost + markup + tax),
         missing,
+        unplaced: nesting.unplaced.clone(),
     }
 }
 

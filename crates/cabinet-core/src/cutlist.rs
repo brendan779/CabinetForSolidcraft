@@ -67,8 +67,16 @@ pub struct CutList {
 /// The cut list for some part lists. `default_board` names parts with no board of their own;
 /// `tape` is the edge tape thickness taken off cut sizes.
 pub fn cut_list(lists: &[PartList], default_board: &str, tape: f64) -> CutList {
+    cut_list_with_tapes(lists.iter().map(|list| (list, tape)), default_board)
+}
+
+/// Builds one job cut list while keeping each cabinet's construction standard.
+pub fn cut_list_with_tapes<'a>(
+    lists: impl IntoIterator<Item = (&'a PartList, f64)>,
+    default_board: &str,
+) -> CutList {
     let mut rows = Vec::new();
-    for list in lists {
+    for (list, tape) in lists {
         let mut mine: Vec<CutRow> = list
             .parts
             .iter()

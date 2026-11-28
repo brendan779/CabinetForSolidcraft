@@ -126,26 +126,6 @@ struct ElevationView: View {
     }
 }
 
-/// Offcuts kept from earlier jobs, as the core's JSON, in Application Support/CabinetStudio.
-enum OffcutStore {
-    static var url: URL {
-        FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
-            .appending(path: "CabinetStudio/offcuts.json")
-    }
-
-    static func load() -> String { (try? String(contentsOf: url, encoding: .utf8)) ?? "" }
-
-    static func save(_ json: String) throws {
-        try FileManager.default.createDirectory(at: url.deletingLastPathComponent(),
-                                                withIntermediateDirectories: true)
-        try json.write(to: url, atomically: true, encoding: .utf8)
-    }
-
-    static func count(_ json: String) -> Int {
-        ((try? JSONSerialization.jsonObject(with: Data(json.utf8))) as? [Any])?.count ?? 0
-    }
-}
-
 /// The parts nested on stock sheets for the panel saw: a summary page, then each sheet to scale.
 struct NestingView: View {
     @Environment(ProjectModel.self) private var project
@@ -153,11 +133,11 @@ struct NestingView: View {
     @AppStorage("nestingTrim") private var trim = 10.0
     @AppStorage("nestingRouter") private var router = false
     @AppStorage("nestingUseOffcuts") private var useOffcuts = true
-    @State private var stored = OffcutStore.load()
+    @ObservedObject private var inventory = OffcutStore.shared
     @State private var page = 0
     @State private var export: DataDocument?
 
-    private var offcuts: String { useOffcuts ? stored : "" }
+    private var offcuts: String { useOffcuts ? inventory.json : "" }
 
     private var pages: [String] {
         guard let dir = Preferences.catalogDir?.path else { return [] }
@@ -166,6 +146,7 @@ struct NestingView: View {
     }
 
     var body: some View {
+        let stockUsed = useOffcuts ? inventory.json : nil
         let pages = self.pages
         VStack(spacing: 0) {
             Group {
@@ -205,9 +186,9 @@ struct NestingView: View {
                     Stepper("Trim \(Int(trim))", value: $trim, in: 0...25, step: 1)
                         .help("Taken off every new sheet's edges before the first cut, mm")
                     Spacer(minLength: 0)
-                    Menu("Offcuts (\(OffcutStore.count(stored)))") {
+                    Menu("Offcuts (\(inventory.count))") {
                         Toggle("Nest on Kept Offcuts First", isOn: $useOffcuts)
-                        Button("Keep This Job's Offcuts") { keepOffcuts() }
+                        Button("Keep This Job's Offcuts") { keepOffcuts(using: stockUsed) }
                         Divider()
                         Button("Forget Kept Offcuts", role: .destructive) { forget() }
                     }
@@ -241,31 +222,21 @@ struct NestingView: View {
     }
 
     /// After cutting this job: its leftovers join the store, the kept offcuts it used leave it.
-    private func keepOffcuts() {
+    private func keepOffcuts(using stock: String?) {
         guard let dir = Preferences.catalogDir?.path else { return }
         do {
             let kept = try nestingKeptOffcuts(items: project.jobItems, catalogDir: dir, kerf: kerf,
-                                              trim: trim, router: router, offcutsJson: offcuts)
-            // Offcuts not offered to this nesting stay as they were.
-            let json = useOffcuts ? kept : merge(stored, kept)
-            try OffcutStore.save(json)
-            stored = json
-            project.status = "Keeping \(OffcutStore.count(json)) offcuts"
+                                              trim: trim, router: router, offcutsJson: stock ?? "")
+            try inventory.keep(kept, using: stock)
+            project.status = "Keeping \(inventory.count) offcuts"
         } catch {
-            project.lastError = "Could not keep the offcuts: \(error)"
+            project.lastError = "Could not keep the offcuts: \(error.localizedDescription)"
         }
     }
 
     private func forget() {
-        try? OffcutStore.save("")
-        stored = ""
-    }
-
-    private func merge(_ a: String, _ b: String) -> String {
-        let parse = { (s: String) in ((try? JSONSerialization.jsonObject(with: Data(s.utf8))) as? [Any]) ?? [] }
-        let all = parse(a) + parse(b)
-        let data = (try? JSONSerialization.data(withJSONObject: all)) ?? Data("[]".utf8)
-        return String(decoding: data, as: UTF8.self)
+        do { try inventory.clear() }
+        catch { project.lastError = "Could not clear the offcuts: \(error.localizedDescription)" }
     }
 }
 
@@ -295,6 +266,7 @@ enum PriceStore {
 /// What the job costs: board by the sheets the nesting opens, edge tape, hardware and labour from
 /// the shop's prices, which are typed in here against each line.
 struct QuoteView: View {
+    @ObservedObject private var inventory = OffcutStore.shared
     @Environment(ProjectModel.self) private var project
     @AppStorage("nestingKerf") private var kerf = 4.4
     @AppStorage("nestingTrim") private var trim = 10.0
@@ -307,7 +279,7 @@ struct QuoteView: View {
     private var quote: QuoteRecord? {
         guard let dir = Preferences.catalogDir?.path else { return nil }
         return try? jobQuote(items: project.jobItems, catalogDir: dir, kerf: kerf, trim: trim, router: router,
-                             offcutsJson: useOffcuts ? OffcutStore.load() : "",
+                             offcutsJson: useOffcuts ? inventory.json : "",
                              pricesJson: PriceStore.json(prices))
     }
 
@@ -326,6 +298,17 @@ struct QuoteView: View {
                 }
                 .width(80)
                 TableColumn("Total") { Text(String(format: "%.2f", $0.total)).monospacedDigit() }.width(80)
+            }
+            if let q, !q.unplaced.isEmpty {
+                DisclosureGroup("Draft quote · unplaced parts excluded (\(q.unplaced.count))") {
+                    ScrollView {
+                        VStack(alignment: .leading) {
+                            ForEach(Array(q.unplaced.enumerated()), id: \.offset) { _, part in Text(part) }
+                        }.frame(maxWidth: .infinity, alignment: .leading)
+                    }.frame(maxHeight: 90)
+                }
+                .foregroundStyle(Theme.warning)
+                .padding(.horizontal, 12)
             }
             ActionBar {
                 if let q {
@@ -408,7 +391,7 @@ struct QuoteView: View {
 
     private func makePdf(customer: Bool) {
         guard let dir = Preferences.catalogDir?.path else { return }
-        let offcuts = useOffcuts ? OffcutStore.load() : ""
+        let offcuts = useOffcuts ? inventory.json : ""
         do {
             let data = customer
                 ? try customerQuotePdf(items: project.jobItems, catalogDir: dir, job: project.jobName,
@@ -541,7 +524,7 @@ struct PartsListView: View {
             let router = d.object(forKey: "nestingRouter") as? Bool ?? false
             let use = d.object(forKey: "nestingUseOffcuts") as? Bool ?? true
             let data = try nestingPdf(items: project.jobItems, catalogDir: dir, job: project.jobName,
-                                      kerf: kerf, trim: trim, router: router, offcutsJson: use ? OffcutStore.load() : "")
+                                      kerf: kerf, trim: trim, router: router, offcutsJson: use ? OffcutStore.shared.json : "")
             export = (DataDocument(data: data), .pdf, "\(project.jobName) nesting")
         } catch {
             project.lastError = "Could not nest the parts: \(error)"

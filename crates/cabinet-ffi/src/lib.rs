@@ -2,7 +2,7 @@
 //! stored in SolidCraft designs), results as small typed records the SwiftUI views draw directly.
 
 use cabinet_core::cad::cad_placements;
-use cabinet_core::cutlist::{cut_list, to_csv};
+use cabinet_core::cutlist::{CutList, cut_list_with_tapes, to_csv};
 use cabinet_core::model::BoardSlot;
 use cabinet_core::project::Piece;
 use cabinet_core::run::Walls;
@@ -1585,27 +1585,44 @@ pub fn standard_option(cabinet_json: String, field: String) -> Result<String, Co
 
 #[uniffi::export]
 pub fn cut_list_csv(job: JobItems) -> Result<String, CoreError> {
-    let (lists, tape) = cut_lists(&job)?;
-    let mut cut = cut_list(&lists, "Generic", tape);
+    let mut cut = job_cut_list(&job_lists(&job)?, &job.placed);
     for r in &mut cut.rows {
         r.board = board_label(&r.board);
     }
     Ok(to_csv(&cut))
 }
 
-/// Every item's part list, and the edge tape thickness of the job's cabinets.
-fn cut_lists(job: &JobItems) -> Result<(Vec<PartList>, f64), CoreError> {
-    let mut tape = 1.0;
-    let lists = job_lists(job)?
-        .into_iter()
-        .map(|(l, c)| {
-            if let Some(c) = c {
-                tape = c.standard.edge_band_thickness;
-            }
-            l
+/// Run pieces inherit the nearest run cabinet's standard, as they do for their board.
+fn job_cut_list(built: &[(PartList, Option<Cabinet>)], placed: &[String]) -> CutList {
+    let in_run = |list: &PartList| !placed.contains(&list.cabinet);
+    let run_cabinets: Vec<_> = built
+        .iter()
+        .filter(|(list, _)| in_run(list))
+        .enumerate()
+        .filter_map(|(index, (_, cabinet))| {
+            Some((index, cabinet.as_ref()?.standard.edge_band_thickness))
         })
         .collect();
-    Ok((lists, tape))
+    let mut run_index = 0usize;
+    let lists = built.iter().map(|(list, cabinet)| {
+        let tape = cabinet
+            .as_ref()
+            .map(|c| c.standard.edge_band_thickness)
+            .unwrap_or_else(|| {
+                run_cabinets
+                    .iter()
+                    .min_by_key(|(index, _)| index.abs_diff(run_index))
+                    .map_or_else(
+                        || ConstructionStandard::default().edge_band_thickness,
+                        |(_, tape)| *tape,
+                    )
+            });
+        if in_run(list) {
+            run_index += 1;
+        }
+        (list, tape)
+    });
+    cut_list_with_tapes(lists, "Generic")
 }
 
 #[derive(uniffi::Record)]
@@ -1626,8 +1643,7 @@ pub struct CutRowRecord {
 
 #[uniffi::export]
 pub fn cut_list_rows(job: JobItems) -> Result<Vec<CutRowRecord>, CoreError> {
-    let (lists, tape) = cut_lists(&job)?;
-    Ok(cut_list(&lists, "Generic", tape)
+    Ok(job_cut_list(&job_lists(&job)?, &job.placed)
         .rows
         .into_iter()
         .map(|r| {
@@ -1741,9 +1757,8 @@ fn job_nesting(
     CoreError,
 > {
     use cabinet_core::nesting::{Settings, Stock, nest_with_offcuts};
-    let (lists, tape) = cut_lists(items)?;
+    let cut = job_cut_list(&job_lists(items)?, &items.placed);
     let cat = cabinet_catalog::Catalog::load(std::path::Path::new(catalog_dir)).map_err(invalid)?;
-    let rows = cut_list(&lists, "Generic", tape).rows;
     let settings = Settings {
         kerf,
         trim,
@@ -1751,7 +1766,7 @@ fn job_nesting(
         ..Settings::default()
     };
     let nesting = nest_with_offcuts(
-        &rows,
+        &cut.rows,
         |board, _| match cat.board(board) {
             Some(b) => b
                 .sheets
@@ -1881,6 +1896,7 @@ pub struct QuoteRecord {
     pub tax: f64,
     pub total: f64,
     pub missing: Vec<String>,
+    pub unplaced: Vec<String>,
 }
 
 fn job_quote_core(
@@ -1907,13 +1923,11 @@ fn job_quote_core(
         router,
         &offcuts(offcuts_json)?,
     )?;
-    let (lists, tape) = cut_lists(items)?;
-    let cut = cut_list(&lists, "Generic", tape);
+    let built = job_lists(items)?;
+    let cut = job_cut_list(&built, &items.placed);
+    let cabinets = built.iter().filter(|(_, c)| c.is_some()).count();
+    let lists: Vec<_> = built.into_iter().map(|(list, _)| list).collect();
     let bom = cabinet_core::bom::hardware_bom(&lists);
-    let cabinets = job_lists(items)?
-        .iter()
-        .filter(|(_, c)| c.is_some())
-        .count();
     let mut q = cabinet_core::quote::quote(&nesting, &cut, &bom, cabinets, &prices);
     // The price list keys lines by board id; people read the board's name.
     for l in &mut q.lines {
@@ -1967,6 +1981,7 @@ pub fn job_quote(
         tax: q.tax,
         total: q.total,
         missing: q.missing,
+        unplaced: q.unplaced,
     })
 }
 
@@ -2012,7 +2027,14 @@ pub fn quote_pdf(
         ("Cost", q.cost),
         ("Markup", q.markup),
         ("Tax", q.tax),
-        ("Total", q.total),
+        (
+            if q.unplaced.is_empty() {
+                "Total"
+            } else {
+                "Partial total"
+            },
+            q.total,
+        ),
     ] {
         rows.push(vec![
             format!("{label} ({})", q.currency),
@@ -2035,8 +2057,17 @@ pub fn quote_pdf(
             "#".into(),
         ]);
     }
+    rows.extend(
+        q.unplaced
+            .iter()
+            .map(|part| vec![format!("No stock for {part}")]),
+    );
     Ok(cabinet_sheets::pdf::table_pdf(
-        "Quote",
+        if q.unplaced.is_empty() {
+            "Quote"
+        } else {
+            "Draft quote - material excluded"
+        },
         &job,
         &["Description", "Qty#", "Unit", "Price#", "Total#"],
         &[150.0, 25.0, 20.0, 35.0, 37.0],
@@ -2087,8 +2118,7 @@ pub fn customer_quote_pdf(
         .filter_map(|(_, c)| c.as_ref().map(|c| c.id.clone()))
         .collect();
     let lists: Vec<PartList> = built.iter().map(|(l, _)| l.clone()).collect();
-    let (_, tape) = cut_lists(&items)?;
-    let cut = cut_list(&lists, "Generic", tape);
+    let cut = job_cut_list(&built, &items.placed);
     let shares = cabinet_core::quote::per_cabinet(&nesting, &cut, &lists, &ids, &prices);
     let describe = |id: &str| {
         built
@@ -2112,7 +2142,16 @@ pub fn customer_quote_pdf(
         .collect();
     rows.push(vec![String::new(), String::new()]);
     rows.push(vec![
-        format!("Total ({}, including {:.2} tax)", q.currency, q.tax),
+        format!(
+            "{} ({}, including {:.2} tax)",
+            if q.unplaced.is_empty() {
+                "Total"
+            } else {
+                "Partial total"
+            },
+            q.currency,
+            q.tax
+        ),
         format!("{:.2}#", q.total),
     ]);
     if !q.missing.is_empty() {
@@ -2121,8 +2160,17 @@ pub fn customer_quote_pdf(
             "#".into(),
         ]);
     }
+    rows.extend(
+        q.unplaced
+            .iter()
+            .map(|part| vec![format!("No stock for {part}")]),
+    );
     Ok(cabinet_sheets::pdf::table_pdf(
-        "Quote",
+        if q.unplaced.is_empty() {
+            "Quote"
+        } else {
+            "Draft quote - material excluded"
+        },
         &job,
         &["Item", "Price#"],
         &[220.0, 47.0],
@@ -3161,6 +3209,112 @@ mod tests {
         assert_eq!(csv.lines().count(), rows.len() + 1);
         let pdf = hardware_bom_pdf(job(&items), catalog(), "Sample".into()).unwrap();
         assert!(pdf.starts_with(b"%PDF"));
+    }
+
+    fn cabinet_with_tape(id: &str, tape: f64) -> String {
+        let mut cab = parse(&new_cabinet(id.into(), "base".into()).unwrap()).unwrap();
+        cab.standard.edge_band_thickness = tape;
+        serde_json::to_string(&cab).unwrap()
+    }
+
+    #[test]
+    fn run_pieces_take_tape_from_the_nearest_cabinet_in_the_run() {
+        let items = [
+            cabinet_with_tape("A01", 0.5),
+            cabinet_with_tape("P01", 3.0),
+            r#"{"type":"end_panel","id":"E01"}"#.into(),
+            r#"{"type":"end_panel","id":"E02"}"#.into(),
+            cabinet_with_tape("B01", 2.0),
+        ];
+        let mut job = job(&items);
+        job.placed.push("P01".into());
+        let rows = cut_list_rows(job).unwrap();
+        for (id, tape) in [("E01", 0.5), ("E02", 2.0)] {
+            let row = rows.iter().find(|row| row.cabinet == id).unwrap();
+            assert_eq!(
+                (row.length - row.cut_length, row.width - row.cut_width),
+                (tape, tape)
+            );
+        }
+    }
+
+    #[test]
+    fn mixed_tape_door_dimensions_survive_reordering_in_csv_and_nesting() {
+        let a = cabinet_with_tape("A01", 0.5);
+        let b = cabinet_with_tape("B01", 2.0);
+        for items in [[a.clone(), b.clone()], [b, a]] {
+            let csv = cut_list_csv(job(&items)).unwrap();
+            let (nested, _) = job_nesting(&job(&items), &catalog(), 4.4, 10.0, false, &[]).unwrap();
+            for (name, size) in [("A01.Door1", (717., 597.)), ("B01.Door1", (714., 594.))] {
+                let row = csv
+                    .lines()
+                    .find(|line| line.split(',').nth(1) == Some(name))
+                    .unwrap();
+                let fields: Vec<_> = row.split(',').collect();
+                assert_eq!(
+                    (
+                        fields[7].parse::<f64>().unwrap(),
+                        fields[8].parse::<f64>().unwrap()
+                    ),
+                    size
+                );
+                let p = nested
+                    .sheets
+                    .iter()
+                    .flat_map(|s| &s.placements)
+                    .find(|p| p.part == name)
+                    .unwrap();
+                let actual = if p.turned {
+                    (p.rect.width, p.rect.length)
+                } else {
+                    (p.rect.length, p.rect.width)
+                };
+                assert_eq!(actual, size);
+            }
+        }
+    }
+
+    #[test]
+    fn an_unplaced_shelf_marks_a_fully_priced_job_as_draft_in_both_pdfs() {
+        for (width, fits) in [(2200, true), (3000, false)] {
+            let items = [
+                new_cabinet("B01".into(), "base".into()).unwrap(),
+                serde_json::json!({"type":"floating_shelf", "id":"S01", "width":width}).to_string(),
+            ];
+            let mut prices = serde_json::json!({"boards":{"Generic":50}, "hardware":{}, "labour_per_hour":60, "edge_tape_per_m":1});
+            for row in hardware_bom(job(&items), catalog()).unwrap() {
+                prices["hardware"][row.item] = 5.into();
+            }
+            let q = job_quote(
+                job(&items),
+                catalog(),
+                4.4,
+                10.,
+                false,
+                String::new(),
+                prices.to_string(),
+            )
+            .unwrap();
+            assert!(q.missing.is_empty());
+            assert_eq!(q.unplaced.is_empty(), fits);
+            for make_pdf in [quote_pdf, customer_quote_pdf] {
+                let pdf = make_pdf(
+                    job(&items),
+                    catalog(),
+                    "Review".into(),
+                    4.4,
+                    10.,
+                    false,
+                    String::new(),
+                    prices.to_string(),
+                )
+                .unwrap();
+                let text = String::from_utf8_lossy(&pdf);
+                assert_eq!(text.contains("Draft quote - material excluded"), !fits);
+                assert_eq!(text.contains("Partial total"), !fits);
+                assert_eq!(text.contains("No stock for S01"), !fits);
+            }
+        }
     }
 
     #[test]
