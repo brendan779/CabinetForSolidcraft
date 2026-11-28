@@ -55,10 +55,13 @@ Not listed: the SolidCraft plugin rows (shelved), face-frame construction (P2-1)
 Set by the owner on 2026-11-28: once the build is polished, port the Swift app to Rust so it runs
 on Windows. The cabinet rules are already Rust (`cabinet-core`, `cabinet-catalog`,
 `cabinet-sheets`, `solidcraft-bridge`); what's Swift is the interface, the 3D viewport
-(RealityKit), the PDF previews and the file handling. Plan it with the owner before starting.
+(RealityKit), the PDF previews and the file handling. Plan it with the owner before starting. Before the port: hardware packs (PACK-6) and default
+prices in packs (PACK-7), owner 2026-11-28.
 
 | id | status | size | task | done when |
 |---|---|---|---|---|
+| PACK-6 | todo: before WIN-1; plan with the owner first (more complex than it looks) | L | Hardware in material packs that users can make themselves, as boards' colours already are (PACK-1 to PACK-5): supplier CAD models, legs, drawer systems, hinges and the rest, with each item's settings (holes and drilling patterns, deductions, sizes). Today these live in `catalog/hardware` and `vendor-cad/`, partly as constants in the core; a pack needs a format for an item's data and models, validation of the drilling a user supplies (a wrong hole spoils a cut sheet), and the builder reading an installed pack's hardware like the bundled catalogue's | a user's own pack adds a hinge or drawer system that builds, drills and lists like a bundled one |
+| PACK-7 | todo: before WIN-1, with PACK-6 | M | Default prices for hardware and boards, carried in the boards and vendor-cad packs (a supplier's or the pack maker's list prices, with their source and date), filling the Quote tab where the shop has set no price. The shop's own prices always win, as ABI's handle list prices do now | a new user's quote is priced from the packs' defaults, and a shop price overrides one |
 | WIN-1 | todo: discuss first | M | Plan the Windows port: the Rust UI toolkit (egui, as SolidCraft uses; or iced, Slint, Tauri), the 3D viewport (wgpu), what moves from Swift into the core first so both apps share it, whether macOS also moves to the Rust app, installers and updates, and SolidCraft's control port on Windows | a written plan and milestones the owner agrees, here |
 
 ## P0 — Foundations
